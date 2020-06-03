@@ -15,6 +15,14 @@ interface ConstructorOptions {
   taskRunnerFactory: TaskRunnerFactory;
 }
 
+export interface RegistryAlertType
+  extends Pick<
+    AlertType,
+    'name' | 'actionGroups' | 'defaultActionGroupId' | 'actionVariables' | 'producer'
+  > {
+  id: string;
+}
+
 export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly alertTypes: Map<string, AlertType> = new Map();
@@ -66,15 +74,22 @@ export class AlertTypeRegistry {
     return this.alertTypes.get(id)!;
   }
 
-  public list() {
-    return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => ({
-      id: alertTypeId,
-      name: alertType.name,
-      actionGroups: alertType.actionGroups,
-      defaultActionGroupId: alertType.defaultActionGroupId,
-      actionVariables: alertType.actionVariables,
-      producer: alertType.producer,
-    }));
+  public list(): Set<RegistryAlertType> {
+    return new Set(
+      Array.from(this.alertTypes).map(
+        ([id, { name, actionGroups, defaultActionGroupId, actionVariables, producer }]: [
+          string,
+          AlertType
+        ]) => ({
+          id,
+          name,
+          actionGroups,
+          defaultActionGroupId,
+          actionVariables,
+          producer,
+        })
+      )
+    );
   }
 }
 

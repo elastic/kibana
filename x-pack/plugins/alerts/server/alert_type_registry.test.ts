@@ -177,7 +177,7 @@ describe('list()', () => {
   test('should return empty when nothing is registered', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     const result = registry.list();
-    expect(result).toMatchInlineSnapshot(`Array []`);
+    expect(result).toMatchInlineSnapshot(`Set {}`);
   });
 
   test('should return registered types', () => {
@@ -197,7 +197,7 @@ describe('list()', () => {
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
-      Array [
+      Set {
         Object {
           "actionGroups": Array [
             Object {
@@ -214,7 +214,7 @@ describe('list()', () => {
           "name": "Test",
           "producer": "alerting",
         },
-      ]
+      }
     `);
   });
 

@@ -26,7 +26,7 @@ export interface FixtureStartDeps {
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
     features.registerFeature({
-      id: 'alerts',
+      id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       privileges: {
@@ -36,8 +36,22 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             all: ['alert'],
             read: [],
           },
+          alerting: {
+            all: [
+              'test.always-firing',
+              'test.cumulative-firing',
+              'test.never-firing',
+              'test.failing',
+              'test.authorization',
+              'test.validation',
+              'test.onlyContextVariables',
+              'test.onlyStateVariables',
+            ],
+            globally: {
+              all: ['test.noop'],
+            },
+          },
           ui: [],
-          api: ['alerting-read', 'alerting-all'],
         },
         read: {
           app: ['alerts', 'kibana'],
@@ -45,8 +59,22 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             all: [],
             read: ['alert'],
           },
+          alerting: {
+            read: [
+              'test.always-firing',
+              'test.cumulative-firing',
+              'test.never-firing',
+              'test.failing',
+              'test.authorization',
+              'test.validation',
+              'test.onlyContextVariables',
+              'test.onlyStateVariables',
+            ],
+            globally: {
+              read: ['test.noop'],
+            },
+          },
           ui: [],
-          api: ['alerting-read'],
         },
       },
     });

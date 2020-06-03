@@ -50,9 +50,6 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
       validate: {
         query: querySchema,
       },
-      options: {
-        tags: ['access:alerting-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

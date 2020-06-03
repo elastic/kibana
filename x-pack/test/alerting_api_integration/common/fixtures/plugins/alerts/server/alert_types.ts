@@ -22,7 +22,7 @@ export function defineAlertTypes(
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
@@ -82,7 +82,7 @@ export function defineAlertTypes(
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor(alertExecutorOptions: AlertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
@@ -90,7 +90,7 @@ export function defineAlertTypes(
 
       const runCount = (state.runCount || 0) + 1;
 
-      times(runCount, (index) => {
+      times(runCount, index => {
         services
           .alertInstanceFactory(`instance-${index}`)
           .replaceState({ instanceStateValue: true })
@@ -111,7 +111,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor({ services, params, state }: AlertExecutorOptions) {
       await services.callCluster('index', {
@@ -138,7 +138,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor({ services, params, state }: AlertExecutorOptions) {
       await services.callCluster('index', {
@@ -164,7 +164,7 @@ export function defineAlertTypes(
       },
     ],
     defaultActionGroupId: 'default',
-    producer: 'alerting',
+    producer: 'alertsFixture',
     validate: {
       params: schema.object({
         callClusterAuthorizationIndex: schema.string(),
@@ -247,7 +247,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     validate: {
       params: schema.object({
@@ -260,7 +260,7 @@ export function defineAlertTypes(
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor({ services, params, state }: AlertExecutorOptions) {},
   };
@@ -268,7 +268,7 @@ export function defineAlertTypes(
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
@@ -279,7 +279,7 @@ export function defineAlertTypes(
     id: 'test.onlyStateVariables',
     name: 'Test: Only State Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     actionVariables: {
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],

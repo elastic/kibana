@@ -252,7 +252,7 @@ export class AlertUtils {
       throttle: '30s',
       tags: [],
       alertTypeId: 'test.failing',
-      consumer: 'bar',
+      consumer: 'alertsFixture',
       params: {
         index: ES_TEST_INDEX_NAME,
         reference,
@@ -265,6 +265,14 @@ export class AlertUtils {
     }
     return response;
   }
+}
+
+export function getUnauthorizedErrorMessage(
+  operation: string,
+  alertType: string,
+  consumer: string
+) {
+  return `Unauthorized to ${operation} a "${alertType}" alert for "${consumer}"`;
 }
 
 function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
@@ -284,7 +292,7 @@ instanceStateValue: {{state.instanceStateValue}}
     throttle: '1m',
     tags: ['tag-A', 'tag-B'],
     alertTypeId: 'test.always-firing',
-    consumer: 'bar',
+    consumer: 'alertsFixture',
     params: {
       index: ES_TEST_INDEX_NAME,
       reference,

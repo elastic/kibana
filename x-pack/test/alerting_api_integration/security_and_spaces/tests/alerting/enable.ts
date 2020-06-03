@@ -13,6 +13,7 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
+  getUnauthorizedErrorMessage,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,11 +53,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
@@ -115,11 +116,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
@@ -167,12 +168,6 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.body).to.eql({

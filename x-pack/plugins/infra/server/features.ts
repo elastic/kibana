@@ -5,6 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/types';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types.ts';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types.ts';
 
 export const METRICS_FEATURE = {
   id: 'infrastructure',
@@ -20,10 +23,19 @@ export const METRICS_FEATURE = {
     all: {
       app: ['infra', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+      api: ['infra', 'actions-read', 'actions-all'],
       savedObject: {
         all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
         read: ['index-pattern'],
+      },
+      alerting: {
+        globally: {
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+          ],
+        },
       },
       ui: [
         'show',
@@ -40,10 +52,19 @@ export const METRICS_FEATURE = {
     read: {
       app: ['infra', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+      api: ['infra', 'actions-read', 'actions-all'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
         read: ['infrastructure-ui-source', 'index-pattern'],
+      },
+      alerting: {
+        globally: {
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+          ],
+        },
       },
       ui: [
         'show',

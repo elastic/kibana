@@ -29,7 +29,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           state: [],
           context: [],
         },
-        producer: 'alerting',
+        producer: 'alertsFixture',
       });
     });
 

@@ -5,7 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { getUrlPrefix, ObjectRemover, getTestAlertData } from '../../../common/lib';
+import {
+  getUrlPrefix,
+  ObjectRemover,
+  getTestAlertData,
+  getUnauthorizedErrorMessage,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../scenarios';
 
@@ -37,11 +42,11 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               break;
             case 'global_read at space1':
@@ -72,12 +77,6 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'global_read at space1':
             case 'superuser at space1':
               expect(response.body).to.eql({
@@ -99,13 +98,6 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':

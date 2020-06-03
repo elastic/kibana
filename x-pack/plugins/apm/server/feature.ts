@@ -5,11 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertType } from '../common/alert_types';
 
 export const APM_FEATURE = {
   id: 'apm',
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
-    defaultMessage: 'APM',
+    defaultMessage: 'APM'
   }),
   order: 900,
   icon: 'apmApp',
@@ -20,18 +21,14 @@ export const APM_FEATURE = {
   privileges: {
     all: {
       app: ['apm', 'kibana'],
-      api: [
-        'apm',
-        'apm_write',
-        'actions-read',
-        'actions-all',
-        'alerting-read',
-        'alerting-all',
-      ],
+      api: ['apm', 'apm_write', 'actions-read', 'actions-all'],
       catalogue: ['apm'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
-        read: [],
+        read: []
+      },
+      alerting: {
+        all: Object.values(AlertType)
       },
       ui: [
         'show',
@@ -41,22 +38,19 @@ export const APM_FEATURE = {
         'alerting:save',
         'actions:save',
         'alerting:delete',
-        'actions:delete',
-      ],
+        'actions:delete'
+      ]
     },
     read: {
       app: ['apm', 'kibana'],
-      api: [
-        'apm',
-        'actions-read',
-        'actions-all',
-        'alerting-read',
-        'alerting-all',
-      ],
+      api: ['apm', 'actions-read', 'actions-all'],
       catalogue: ['apm'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
-        read: [],
+        read: []
+      },
+      alerting: {
+        all: Object.values(AlertType)
       },
       ui: [
         'show',
@@ -65,8 +59,8 @@ export const APM_FEATURE = {
         'alerting:save',
         'actions:save',
         'alerting:delete',
-        'actions:delete',
-      ],
-    },
-  },
+        'actions:delete'
+      ]
+    }
+  }
 };

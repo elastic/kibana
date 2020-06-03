@@ -6,15 +6,17 @@
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'kibana/server';
-import { AlertsClient, CreateOptions } from './alerts_client';
+import { AlertsClient, CreateOptions, UpdateOptions, FindOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { TaskStatus } from '../../task_manager/server';
-import { IntervalSchedule } from './types';
+import { IntervalSchedule, PartialAlert } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock } from '../../actions/server/mocks';
+import { SecurityPluginSetup } from '../../../plugins/security/server';
+import { securityMock } from '../../../plugins/security/server/mocks';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -35,6 +37,15 @@ const alertsClientParams = {
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
 };
+
+function mockAuthorization() {
+  const authorization = securityMock.createSetup().authz;
+  // typescript is havingtrouble inferring jest's automocking
+  (authorization.actions.alerting.get as jest.MockedFunction<
+    typeof authorization.actions.alerting.get
+  >).mockImplementation((type, app, operation) => `${type}${app ? `/${app}` : ``}/${operation}`);
+  return authorization;
+}
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -123,6 +134,185 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       async executor() {},
       producer: 'alerting',
+    });
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    function tryToExecuteOperation(options: CreateOptions): Promise<unknown> {
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              actionTypeId: 'test',
+            },
+            references: [],
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: '123',
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          createdAt: '2019-02-12T21:01:22.479Z',
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      });
+      taskManager.schedule.mockResolvedValueOnce({
+        id: 'task-123',
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          scheduledTaskId: 'task-123',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      });
+
+      return alertsClientWithAuthorization.create(options);
+    }
+
+    test('create when user is authorised to create this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/create',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/create',
+            authorized: true,
+          },
+        ],
+      });
+
+      const data = getMockData({
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+      });
+
+      await tryToExecuteOperation({ data });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'create'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'create');
+    });
+
+    test('create when user is authorised to create this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/create',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/create',
+            authorized: false,
+          },
+        ],
+      });
+
+      const data = getMockData({
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+      });
+
+      await tryToExecuteOperation({ data });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'create'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'create');
+    });
+
+    test('throws when user is not authorised to create this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/create',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/create',
+            authorized: false,
+          },
+        ],
+      });
+
+      const data = getMockData({
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+      });
+
+      await expect(tryToExecuteOperation({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to create a "myType" alert for "myApp"]`
+      );
     });
   });
 
@@ -922,8 +1112,9 @@ describe('enable()', () => {
     id: '1',
     type: 'alert',
     attributes: {
+      consumer: 'myApp',
       schedule: { interval: '10s' },
-      alertTypeId: '2',
+      alertTypeId: 'myType',
       enabled: false,
     },
     version: '123',
@@ -952,6 +1143,117 @@ describe('enable()', () => {
     });
   });
 
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingAlert);
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
+      alertsClientParams.createAPIKey.mockResolvedValue({
+        apiKeysEnabled: false,
+      });
+      taskManager.schedule.mockResolvedValue({
+        id: 'task-123',
+        scheduledAt: new Date(),
+        attempts: 0,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        state: {},
+        params: {},
+        taskType: '',
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      });
+    });
+
+    test('enable when user is authorised to enable this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/enable',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/enable',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.enable({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'enable'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'enable');
+    });
+
+    test('enable when user is authorised to enable this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/enable',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/enable',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.enable({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'enable'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'enable');
+    });
+
+    test('throws when user is not authorised to enable this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/enable',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/enable',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(alertsClientWithAuthorization.enable({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to enable a "myType" alert for "myApp"]`
+      );
+    });
+  });
+
   test('enables an alert', async () => {
     await alertsClient.enable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -965,7 +1267,8 @@ describe('enable()', () => {
       '1',
       {
         schedule: { interval: '10s' },
-        alertTypeId: '2',
+        alertTypeId: 'myType',
+        consumer: 'myApp',
         enabled: true,
         updatedBy: 'elastic',
         apiKey: null,
@@ -976,7 +1279,7 @@ describe('enable()', () => {
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
-      taskType: `alerting:2`,
+      taskType: `alerting:myType`,
       params: {
         alertId: '1',
         spaceId: 'default',
@@ -1038,7 +1341,8 @@ describe('enable()', () => {
       '1',
       {
         schedule: { interval: '10s' },
-        alertTypeId: '2',
+        alertTypeId: 'myType',
+        consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -1124,8 +1428,9 @@ describe('disable()', () => {
     id: '1',
     type: 'alert',
     attributes: {
+      consumer: 'myApp',
       schedule: { interval: '10s' },
-      alertTypeId: '2',
+      alertTypeId: 'myType',
       enabled: true,
       scheduledTaskId: 'task-123',
     },
@@ -1146,6 +1451,117 @@ describe('disable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
   });
 
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingAlert);
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
+      alertsClientParams.createAPIKey.mockResolvedValue({
+        apiKeysEnabled: false,
+      });
+      taskManager.schedule.mockResolvedValue({
+        id: 'task-123',
+        scheduledAt: new Date(),
+        attempts: 0,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        state: {},
+        params: {},
+        taskType: '',
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      });
+    });
+
+    test('disables when user is authorised to disable this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/disable',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/disable',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.disable({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'disable'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'disable');
+    });
+
+    test('disables when user is authorised to disable this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/disable',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/disable',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.disable({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'disable'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'disable');
+    });
+
+    test('throws when user is not authorised to disable this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/disable',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/disable',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(alertsClientWithAuthorization.disable({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to disable a "myType" alert for "myApp"]`
+      );
+    });
+  });
+
   test('disables an alert', async () => {
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -1156,8 +1572,9 @@ describe('disable()', () => {
       'alert',
       '1',
       {
+        consumer: 'myApp',
         schedule: { interval: '10s' },
-        alertTypeId: '2',
+        alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
         enabled: false,
@@ -1184,8 +1601,9 @@ describe('disable()', () => {
       'alert',
       '1',
       {
+        consumer: 'myApp',
         schedule: { interval: '10s' },
-        alertTypeId: '2',
+        alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
         enabled: false,
@@ -1279,6 +1697,109 @@ describe('muteAll()', () => {
       updatedBy: 'elastic',
     });
   });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          muteAll: false,
+        },
+        references: [],
+      });
+    });
+
+    test('mutes when user is authorised to muteAll this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/muteAll',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/muteAll',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.muteAll({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'muteAll'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'muteAll');
+    });
+
+    test('mutes when user is authorised to muteAll this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/muteAll',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/muteAll',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.muteAll({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'muteAll'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'muteAll');
+    });
+
+    test('throws when user is not authorised to muteAll this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/muteAll',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/muteAll',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(alertsClientWithAuthorization.muteAll({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to muteAll a "myType" alert for "myApp"]`
+      );
+    });
+  });
 });
 
 describe('unmuteAll()', () => {
@@ -1298,6 +1819,117 @@ describe('unmuteAll()', () => {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
+    });
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          muteAll: true,
+        },
+        references: [],
+      });
+    });
+
+    test('unmutes when user is authorised to unmuteAll this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/unmuteAll',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/unmuteAll',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.unmuteAll({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'unmuteAll'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'unmuteAll'
+      );
+    });
+
+    test('unmutes when user is authorised to unmuteAll this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/unmuteAll',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/unmuteAll',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.unmuteAll({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'unmuteAll'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'unmuteAll'
+      );
+    });
+
+    test('throws when user is not authorised to unmuteAll this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/unmuteAll',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/unmuteAll',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(alertsClientWithAuthorization.unmuteAll({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to unmuteAll a "myType" alert for "myApp"]`
+      );
     });
   });
 });
@@ -1369,6 +2001,119 @@ describe('muteInstance()', () => {
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          muteAll: true,
+        },
+        references: [],
+      });
+    });
+
+    test('mutes instance when user is authorised to mute an instance on this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/muteInstance',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/muteInstance',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.muteInstance({ alertId: '1', alertInstanceId: '2' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'muteInstance'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'muteInstance'
+      );
+    });
+
+    test('mutes instance when user is authorised to mute an instance on this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/muteInstance',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/muteInstance',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.muteInstance({ alertId: '1', alertInstanceId: '2' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'muteInstance'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'muteInstance'
+      );
+    });
+
+    test('throws when user is not authorised to mute an instance on this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/muteInstance',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/muteInstance',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(
+        alertsClientWithAuthorization.muteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to muteInstance a "myType" alert for "myApp"]`
+      );
+    });
+  });
 });
 
 describe('unmuteInstance()', () => {
@@ -1437,6 +2182,119 @@ describe('unmuteInstance()', () => {
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          muteAll: true,
+        },
+        references: [],
+      });
+    });
+
+    test('unmutes instance when user is authorised to unmutes an instance on this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/unmuteInstance',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/unmuteInstance',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'unmuteInstance'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'unmuteInstance'
+      );
+    });
+
+    test('unmutes instance when user is authorised to unmutes an instance on this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/unmuteInstance',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/unmuteInstance',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'unmuteInstance'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'unmuteInstance'
+      );
+    });
+
+    test('throws when user is not authorised to unmutes an instance on this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/unmuteInstance',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/unmuteInstance',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(
+        alertsClientWithAuthorization.unmuteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to unmuteInstance a "myType" alert for "myApp"]`
+      );
+    });
   });
 });
 
@@ -1529,6 +2387,121 @@ describe('get()', () => {
     await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Reference action_0 not found"`
     );
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    function tryToExecuteOperation(): Promise<unknown> {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      });
+      return alertsClientWithAuthorization.get({ id: '1' });
+    }
+
+    test('gets when user is authorised to get this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/get',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/get',
+            authorized: true,
+          },
+        ],
+      });
+
+      await tryToExecuteOperation();
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', undefined, 'get');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'get');
+    });
+
+    test('gets when user is authorised to get this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/get',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/get',
+            authorized: false,
+          },
+        ],
+      });
+
+      await tryToExecuteOperation();
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', undefined, 'get');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'get');
+    });
+
+    test('throws when user is not authorised to get this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/get',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/get',
+            authorized: false,
+          },
+        ],
+      });
+
+      await expect(tryToExecuteOperation()).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
+      );
+    });
   });
 });
 
@@ -1644,10 +2617,137 @@ describe('getAlertState()', () => {
     expect(taskManager.get).toHaveBeenCalledTimes(1);
     expect(taskManager.get).toHaveBeenCalledWith(scheduledTaskId);
   });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    function tryToExecuteOperation(): Promise<unknown> {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      });
+      return alertsClientWithAuthorization.getAlertState({ id: '1' });
+    }
+
+    test('gets AlertState when user is authorised to get this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/get',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/get',
+            authorized: true,
+          },
+        ],
+      });
+
+      await tryToExecuteOperation();
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', undefined, 'get');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'get');
+    });
+
+    test('gets AlertState when user is authorised to get this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/get',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/get',
+            authorized: false,
+          },
+        ],
+      });
+
+      await tryToExecuteOperation();
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', undefined, 'get');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'get');
+    });
+
+    test('throws when user is not authorised to get this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/get',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/get',
+            authorized: false,
+          },
+        ],
+      });
+
+      await expect(tryToExecuteOperation()).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
+      );
+    });
+  });
 });
 
 describe('find()', () => {
   test('calls saved objects client with given params', async () => {
+    alertTypeRegistry.list.mockReturnValue(
+      new Set([
+        {
+          actionGroups: [],
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          id: 'myType',
+          name: 'myType',
+          producer: 'myApp',
+        },
+      ])
+    );
     const alertsClient = new AlertsClient(alertsClientParams);
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -1658,7 +2758,7 @@ describe('find()', () => {
           id: '1',
           type: 'alert',
           attributes: {
-            alertTypeId: '123',
+            alertTypeId: 'myType',
             schedule: { interval: '10s' },
             params: {
               bar: true,
@@ -1697,7 +2797,7 @@ describe('find()', () => {
                 },
               },
             ],
-            "alertTypeId": "123",
+            "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
             "params": Object {
@@ -1716,12 +2816,200 @@ describe('find()', () => {
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    Object {
-                                                                                                                      "type": "alert",
-                                                                                                                    },
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        Object {
+          "filter": "alert.attributes.alertTypeId:(myType)",
+          "type": "alert",
+        },
+      ]
+    `);
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    function mockAlertSavedObject(alertTypeId: string) {
+      return {
+        id: uuid.v4(),
+        type: 'alert',
+        attributes: {
+          alertTypeId,
+          schedule: { interval: '10s' },
+          params: {},
+          actions: [],
+        },
+        references: [],
+      };
+    }
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+
+      const myType = {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        id: 'myType',
+        name: 'myType',
+        producer: 'myApp',
+      };
+      const anUnauthorizedType = {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        id: 'anUnauthorizedType',
+        name: 'anUnauthorizedType',
+        producer: 'anUnauthorizedApp',
+      };
+      const setOfAlertTypes = new Set([anUnauthorizedType, myType]);
+      alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+    });
+
+    function tryToExecuteOperation(
+      options?: FindOptions,
+      savedObjects: Array<ReturnType<typeof mockAlertSavedObject>> = [
+        mockAlertSavedObject('myType'),
+      ]
+    ): Promise<unknown> {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: savedObjects,
+      });
+      return alertsClientWithAuthorization.find({ options });
+    }
+
+    test('includes types that a user is authorised to find under their producer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/find',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/find',
+            authorized: true,
+          },
+          {
+            privilege: 'anUnauthorizedType/find',
+            authorized: false,
+          },
+          {
+            privilege: 'anUnauthorizedType/anUnauthorizedApp/find',
+            authorized: false,
+          },
+        ],
+      });
+
+      await tryToExecuteOperation();
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter).toMatchInlineSnapshot(
+        `"alert.attributes.alertTypeId:(myType)"`
+      );
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', undefined, 'find');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'find');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'anUnauthorizedType',
+        undefined,
+        'find'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'anUnauthorizedType',
+        'anUnauthorizedApp',
+        'find'
+      );
+    });
+
+    test('includes types that a user is authorised to get globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/find',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/find',
+            authorized: false,
+          },
+          {
+            privilege: 'anUnauthorizedType/find',
+            authorized: false,
+          },
+          {
+            privilege: 'anUnauthorizedType/anUnauthorizedApp/find',
+            authorized: false,
+          },
+        ],
+      });
+
+      await tryToExecuteOperation();
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter).toMatchInlineSnapshot(
+        `"alert.attributes.alertTypeId:(myType)"`
+      );
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', undefined, 'find');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'find');
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'anUnauthorizedType',
+        undefined,
+        'find'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'anUnauthorizedType',
+        'anUnauthorizedApp',
+        'find'
+      );
+    });
+
+    test('throws if a result contains a type the user is not authorised to find', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/find',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/find',
+            authorized: true,
+          },
+          {
+            privilege: 'anUnauthorizedType/find',
+            authorized: false,
+          },
+          {
+            privilege: 'anUnauthorizedType/anUnauthorizedApp/find',
+            authorized: false,
+          },
+        ],
+      });
+
+      await expect(
+        tryToExecuteOperation({}, [
+          mockAlertSavedObject('myType'),
+          mockAlertSavedObject('anUnauthorizedType'),
+        ])
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to find "anUnauthorizedType" alerts]`);
+    });
   });
 });
 
@@ -1731,7 +3019,8 @@ describe('delete()', () => {
     id: '1',
     type: 'alert',
     attributes: {
-      alertTypeId: '123',
+      alertTypeId: 'myType',
+      consumer: 'myApp',
       schedule: { interval: '10s' },
       params: {
         bar: true,
@@ -1860,6 +3149,97 @@ describe('delete()', () => {
       `"TM Fail"`
     );
   });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    test('deletes when user is authorised to delete this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/delete',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/delete',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.delete({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'delete'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'delete');
+    });
+
+    test('deletes when user is authorised to delete this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/delete',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/delete',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.delete({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'delete'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'delete');
+    });
+
+    test('throws when user is not authorised to delete this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/delete',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/delete',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(alertsClientWithAuthorization.delete({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to delete a "myType" alert for "myApp"]`
+      );
+    });
+  });
 });
 
 describe('update()', () => {
@@ -1869,7 +3249,8 @@ describe('update()', () => {
     type: 'alert',
     attributes: {
       enabled: true,
-      alertTypeId: '123',
+      alertTypeId: 'myType',
+      consumer: 'myApp',
       scheduledTaskId: 'task-123',
     },
     references: [],
@@ -2067,9 +3448,10 @@ describe('update()', () => {
             },
           },
         ],
-        "alertTypeId": "123",
+        "alertTypeId": "myType",
         "apiKey": null,
         "apiKeyOwner": null,
+        "consumer": "myApp",
         "enabled": true,
         "name": "abc",
         "params": Object {
@@ -2222,9 +3604,10 @@ describe('update()', () => {
             },
           },
         ],
-        "alertTypeId": "123",
+        "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
         "apiKeyOwner": "elastic",
+        "consumer": "myApp",
         "enabled": true,
         "name": "abc",
         "params": Object {
@@ -2371,9 +3754,10 @@ describe('update()', () => {
             },
           },
         ],
-        "alertTypeId": "123",
+        "alertTypeId": "myType",
         "apiKey": null,
         "apiKeyOwner": null,
+        "consumer": "myApp",
         "enabled": false,
         "name": "abc",
         "params": Object {
@@ -2857,6 +4241,206 @@ describe('update()', () => {
       );
     });
   });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    function tryToExecuteOperation(options: UpdateOptions): Promise<PartialAlert> {
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              alertTypeId: 'myType',
+              consumer: 'myApp',
+              actionTypeId: 'test',
+            },
+            references: [],
+          },
+          {
+            id: '2',
+            type: 'action',
+            attributes: {
+              actionTypeId: 'test2',
+            },
+            references: [],
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'action_1',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'action_2',
+              actionTypeId: 'test2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'action_1',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'action_2',
+            type: 'action',
+            id: '2',
+          },
+        ],
+      });
+      return alertsClientWithAuthorization.update(options);
+    }
+
+    test('updates when user is authorised to update this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/update',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/update',
+            authorized: true,
+          },
+        ],
+      });
+
+      const data = getMockData({
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+      });
+
+      await tryToExecuteOperation({
+        id: '1',
+        data,
+      });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'update'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'update');
+    });
+
+    test('updates when user is authorised to update this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/update',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/update',
+            authorized: false,
+          },
+        ],
+      });
+
+      const data = getMockData({
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+      });
+
+      await tryToExecuteOperation({
+        id: '1',
+        data,
+      });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'update'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith('myType', 'myApp', 'update');
+    });
+
+    test('throws when user is not authorised to update this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/update',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/update',
+            authorized: false,
+          },
+        ],
+      });
+
+      const data = getMockData({
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+      });
+
+      await expect(
+        tryToExecuteOperation({
+          id: '1',
+          data,
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to update a "myType" alert for "myApp"]`
+      );
+    });
+  });
 });
 
 describe('updateApiKey()', () => {
@@ -2866,7 +4450,8 @@ describe('updateApiKey()', () => {
     type: 'alert',
     attributes: {
       schedule: { interval: '10s' },
-      alertTypeId: '2',
+      alertTypeId: 'myType',
+      consumer: 'myApp',
       enabled: true,
     },
     version: '123',
@@ -2901,7 +4486,8 @@ describe('updateApiKey()', () => {
       '1',
       {
         schedule: { interval: '10s' },
-        alertTypeId: '2',
+        alertTypeId: 'myType',
+        consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -2925,7 +4511,8 @@ describe('updateApiKey()', () => {
       '1',
       {
         schedule: { interval: '10s' },
-        alertTypeId: '2',
+        alertTypeId: 'myType',
+        consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -2964,5 +4551,206 @@ describe('updateApiKey()', () => {
       `"Fail"`
     );
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    test('updates when user is authorised to updateApiKey this type of alert type for the specified consumer', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/updateApiKey',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/updateApiKey',
+            authorized: true,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.updateApiKey({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'updateApiKey'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'updateApiKey'
+      );
+    });
+
+    test('updates when user is authorised to updateApiKey this type of alert type globally', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/updateApiKey',
+            authorized: true,
+          },
+          {
+            privilege: 'myType/myApp/updateApiKey',
+            authorized: false,
+          },
+        ],
+      });
+
+      await alertsClientWithAuthorization.updateApiKey({ id: '1' });
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        undefined,
+        'updateApiKey'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'updateApiKey'
+      );
+    });
+
+    test('throws when user is not authorised to updateApiKey this type of alert at all', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myType/updateApiKey',
+            authorized: false,
+          },
+          {
+            privilege: 'myType/myApp/updateApiKey',
+            authorized: false,
+          },
+        ],
+      });
+
+      expect(alertsClientWithAuthorization.updateApiKey({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to updateApiKey a "myType" alert for "myApp"]`
+      );
+    });
+  });
+});
+
+describe('listAlertTypes', () => {
+  let alertsClient: AlertsClient;
+  const alertingAlertType = {
+    actionGroups: [],
+    actionVariables: undefined,
+    defaultActionGroupId: 'default',
+    id: 'alertingAlertType',
+    name: 'alertingAlertType',
+    producer: 'alerting',
+  };
+  const myAppAlertType = {
+    actionGroups: [],
+    actionVariables: undefined,
+    defaultActionGroupId: 'default',
+    id: 'myAppAlertType',
+    name: 'myAppAlertType',
+    producer: 'myApp',
+  };
+  const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+  });
+
+  test('should return a list of AlertTypes that exist in the registry', async () => {
+    alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+    expect(await alertsClient.listAlertTypes()).toEqual(setOfAlertTypes);
+  });
+
+  describe('authorization', () => {
+    let authorization: jest.Mocked<SecurityPluginSetup['authz']>;
+    let alertsClientWithAuthorization: AlertsClient;
+    let checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >>;
+
+    beforeEach(() => {
+      authorization = mockAuthorization();
+      alertsClientWithAuthorization = new AlertsClient({
+        authorization,
+        ...alertsClientParams,
+      });
+      checkPrivileges = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    });
+
+    test('should return a list of AlertTypes that exist in the registry only if the user is authorised to get them', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        username: '',
+        privileges: [
+          {
+            privilege: 'myAppAlertType/get',
+            authorized: false,
+          },
+          {
+            privilege: 'myAppAlertType/alerting/get',
+            authorized: false,
+          },
+          {
+            privilege: 'alertingAlertType/get',
+            authorized: true,
+          },
+          {
+            privilege: 'alertingAlertType/alerting/get',
+            authorized: true,
+          },
+        ],
+      });
+
+      alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+
+      expect(await alertsClientWithAuthorization.listAlertTypes()).toEqual(
+        new Set([alertingAlertType])
+      );
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myAppAlertType',
+        'myApp',
+        'get'
+      );
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myAppAlertType',
+        undefined,
+        'get'
+      );
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'alertingAlertType',
+        'alerting',
+        'get'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'alertingAlertType',
+        undefined,
+        'get'
+      );
+    });
   });
 });
