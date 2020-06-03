@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  NUMBER_OF_SIGNALS,
-  OPEN_CLOSE_SIGNALS_BTN,
-  SELECTED_SIGNALS,
-  SHOWING_SIGNALS,
-  SIGNALS,
+  NUMBER_OF_ALERTS,
+  OPEN_CLOSE_ALERTS_BTN,
+  SELECTED_ALERTS,
+  SHOWING_ALERTS,
+  ALERTS,
 } from '../screens/detections';
 
 import {
-  closeFirstSignal,
-  closeSignals,
-  goToClosedSignals,
-  goToOpenedSignals,
-  openFirstSignal,
-  openSignals,
-  selectNumberOfSignals,
-  waitForSignalsPanelToBeLoaded,
-  waitForSignals,
-  waitForSignalsToBeLoaded,
+  closeFirstAlert,
+  closeAlerts,
+  goToClosedAlerts,
+  goToOpenedAlerts,
+  openFirstAlert,
+  openAlerts,
+  selectNumberOfAlerts,
+  waitForAlertsPanelToBeLoaded,
+  waitForAlerts,
+  waitForAlertsToBeLoaded,
 } from '../tasks/detections';
 import { esArchiverLoad } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -29,179 +29,176 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { DETECTIONS } from '../urls/navigation';
 
 describe('Detections', () => {
-  context('Closing signals', () => {
+  context('Closing alerts', () => {
     beforeEach(() => {
-      esArchiverLoad('signals');
+      esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS);
     });
 
-    it('Closes and opens signals', () => {
-      waitForSignalsPanelToBeLoaded();
-      waitForSignalsToBeLoaded();
+    it('Closes and opens alerts', () => {
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_SIGNALS)
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
-        .then((numberOfSignals) => {
-          cy.get(SHOWING_SIGNALS).should('have.text', `Showing ${numberOfSignals} signals`);
+        .then((numberOfAlerts) => {
+          cy.get(SHOWING_ALERTS).should('have.text', `Showing ${numberOfAlerts} alerts`);
 
-          const numberOfSignalsToBeClosed = 3;
-          selectNumberOfSignals(numberOfSignalsToBeClosed);
+          const numberOfAlertsToBeClosed = 3;
+          selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
-          cy.get(SELECTED_SIGNALS).should(
+          cy.get(SELECTED_ALERTS).should(
             'have.text',
-            `Selected ${numberOfSignalsToBeClosed} signals`
+            `Selected ${numberOfAlertsToBeClosed} alerts`
           );
 
-          closeSignals();
-          waitForSignals();
+          closeAlerts();
+          waitForAlerts();
           cy.reload();
-          waitForSignals();
+          waitForAlerts();
 
-          const expectedNumberOfSignalsAfterClosing = +numberOfSignals - numberOfSignalsToBeClosed;
-          cy.get(NUMBER_OF_SIGNALS).should(
+          const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
+          cy.get(NUMBER_OF_ALERTS).should(
             'have.text',
-            expectedNumberOfSignalsAfterClosing.toString()
+            expectedNumberOfAlertsAfterClosing.toString()
           );
 
-          cy.get(SHOWING_SIGNALS).should(
+          cy.get(SHOWING_ALERTS).should(
             'have.text',
-            `Showing ${expectedNumberOfSignalsAfterClosing.toString()} signals`
+            `Showing ${expectedNumberOfAlertsAfterClosing.toString()} alerts`
           );
 
-          goToClosedSignals();
-          waitForSignals();
+          goToClosedAlerts();
+          waitForAlerts();
 
-          cy.get(NUMBER_OF_SIGNALS).should('have.text', numberOfSignalsToBeClosed.toString());
-          cy.get(SHOWING_SIGNALS).should(
+          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeClosed.toString());
+          cy.get(SHOWING_ALERTS).should(
             'have.text',
-            `Showing ${numberOfSignalsToBeClosed.toString()} signals`
+            `Showing ${numberOfAlertsToBeClosed.toString()} alerts`
           );
-          cy.get(SIGNALS).should('have.length', numberOfSignalsToBeClosed);
+          cy.get(ALERTS).should('have.length', numberOfAlertsToBeClosed);
 
-          const numberOfSignalsToBeOpened = 1;
-          selectNumberOfSignals(numberOfSignalsToBeOpened);
+          const numberOfAlertsToBeOpened = 1;
+          selectNumberOfAlerts(numberOfAlertsToBeOpened);
 
-          cy.get(SELECTED_SIGNALS).should(
-            'have.text',
-            `Selected ${numberOfSignalsToBeOpened} signal`
-          );
+          cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeOpened} alert`);
 
-          openSignals();
-          waitForSignals();
+          openAlerts();
+          waitForAlerts();
           cy.reload();
-          waitForSignalsToBeLoaded();
-          waitForSignals();
-          goToClosedSignals();
-          waitForSignals();
+          waitForAlertsToBeLoaded();
+          waitForAlerts();
+          goToClosedAlerts();
+          waitForAlerts();
 
-          const expectedNumberOfClosedSignalsAfterOpened = 2;
-          cy.get(NUMBER_OF_SIGNALS).should(
+          const expectedNumberOfClosedAlertsAfterOpened = 2;
+          cy.get(NUMBER_OF_ALERTS).should(
             'have.text',
-            expectedNumberOfClosedSignalsAfterOpened.toString()
+            expectedNumberOfClosedAlertsAfterOpened.toString()
           );
-          cy.get(SHOWING_SIGNALS).should(
+          cy.get(SHOWING_ALERTS).should(
             'have.text',
-            `Showing ${expectedNumberOfClosedSignalsAfterOpened.toString()} signals`
+            `Showing ${expectedNumberOfClosedAlertsAfterOpened.toString()} alerts`
           );
-          cy.get(SIGNALS).should('have.length', expectedNumberOfClosedSignalsAfterOpened);
+          cy.get(ALERTS).should('have.length', expectedNumberOfClosedAlertsAfterOpened);
 
-          goToOpenedSignals();
-          waitForSignals();
+          goToOpenedAlerts();
+          waitForAlerts();
 
-          const expectedNumberOfOpenedSignals =
-            +numberOfSignals - expectedNumberOfClosedSignalsAfterOpened;
-          cy.get(SHOWING_SIGNALS).should(
+          const expectedNumberOfOpenedAlerts =
+            +numberOfAlerts - expectedNumberOfClosedAlertsAfterOpened;
+          cy.get(SHOWING_ALERTS).should(
             'have.text',
-            `Showing ${expectedNumberOfOpenedSignals.toString()} signals`
+            `Showing ${expectedNumberOfOpenedAlerts.toString()} alerts`
           );
 
           cy.get('[data-test-subj="server-side-event-count"]').should(
             'have.text',
-            expectedNumberOfOpenedSignals.toString()
+            expectedNumberOfOpenedAlerts.toString()
           );
         });
     });
 
-    it('Closes one signal when more than one opened signals are selected', () => {
-      waitForSignalsToBeLoaded();
+    it('Closes one alert when more than one opened alerts are selected', () => {
+      waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_SIGNALS)
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
-        .then((numberOfSignals) => {
-          const numberOfSignalsToBeClosed = 1;
-          const numberOfSignalsToBeSelected = 3;
+        .then((numberOfAlerts) => {
+          const numberOfAlertsToBeClosed = 1;
+          const numberOfAlertsToBeSelected = 3;
 
-          cy.get(OPEN_CLOSE_SIGNALS_BTN).should('have.attr', 'disabled');
-          selectNumberOfSignals(numberOfSignalsToBeSelected);
-          cy.get(OPEN_CLOSE_SIGNALS_BTN).should('not.have.attr', 'disabled');
+          cy.get(OPEN_CLOSE_ALERTS_BTN).should('have.attr', 'disabled');
+          selectNumberOfAlerts(numberOfAlertsToBeSelected);
+          cy.get(OPEN_CLOSE_ALERTS_BTN).should('not.have.attr', 'disabled');
 
-          closeFirstSignal();
+          closeFirstAlert();
           cy.reload();
-          waitForSignalsToBeLoaded();
-          waitForSignals();
+          waitForAlertsToBeLoaded();
+          waitForAlerts();
 
-          const expectedNumberOfSignals = +numberOfSignals - numberOfSignalsToBeClosed;
-          cy.get(NUMBER_OF_SIGNALS).invoke('text').should('eq', expectedNumberOfSignals.toString());
-          cy.get(SHOWING_SIGNALS)
+          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
+          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS)
             .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfSignals.toString()} signals`);
+            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
 
-          goToClosedSignals();
-          waitForSignals();
+          goToClosedAlerts();
+          waitForAlerts();
 
-          cy.get(NUMBER_OF_SIGNALS)
+          cy.get(NUMBER_OF_ALERTS)
             .invoke('text')
-            .should('eql', numberOfSignalsToBeClosed.toString());
-          cy.get(SHOWING_SIGNALS)
+            .should('eql', numberOfAlertsToBeClosed.toString());
+          cy.get(SHOWING_ALERTS)
             .invoke('text')
-            .should('eql', `Showing ${numberOfSignalsToBeClosed.toString()} signal`);
-          cy.get(SIGNALS).should('have.length', numberOfSignalsToBeClosed);
+            .should('eql', `Showing ${numberOfAlertsToBeClosed.toString()} alert`);
+          cy.get(ALERTS).should('have.length', numberOfAlertsToBeClosed);
         });
     });
   });
-  context('Opening signals', () => {
+  context('Opening alerts', () => {
     beforeEach(() => {
-      esArchiverLoad('closed_signals');
+      esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS);
     });
 
-    it('Open one signal when more than one closed signals are selected', () => {
-      waitForSignals();
-      goToClosedSignals();
-      waitForSignalsToBeLoaded();
+    it('Open one alert when more than one closed alerts are selected', () => {
+      waitForAlerts();
+      goToClosedAlerts();
+      waitForAlertsToBeLoaded();
 
-      cy.get(NUMBER_OF_SIGNALS)
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
-        .then((numberOfSignals) => {
-          const numberOfSignalsToBeOpened = 1;
-          const numberOfSignalsToBeSelected = 3;
+        .then((numberOfAlerts) => {
+          const numberOfAlertsToBeOpened = 1;
+          const numberOfAlertsToBeSelected = 3;
 
-          cy.get(OPEN_CLOSE_SIGNALS_BTN).should('have.attr', 'disabled');
-          selectNumberOfSignals(numberOfSignalsToBeSelected);
-          cy.get(OPEN_CLOSE_SIGNALS_BTN).should('not.have.attr', 'disabled');
+          cy.get(OPEN_CLOSE_ALERTS_BTN).should('have.attr', 'disabled');
+          selectNumberOfAlerts(numberOfAlertsToBeSelected);
+          cy.get(OPEN_CLOSE_ALERTS_BTN).should('not.have.attr', 'disabled');
 
-          openFirstSignal();
+          openFirstAlert();
           cy.reload();
-          goToClosedSignals();
-          waitForSignalsToBeLoaded();
-          waitForSignals();
+          goToClosedAlerts();
+          waitForAlertsToBeLoaded();
+          waitForAlerts();
 
-          const expectedNumberOfSignals = +numberOfSignals - numberOfSignalsToBeOpened;
-          cy.get(NUMBER_OF_SIGNALS).invoke('text').should('eq', expectedNumberOfSignals.toString());
-          cy.get(SHOWING_SIGNALS)
+          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
+          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS)
             .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfSignals.toString()} signals`);
+            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
 
-          goToOpenedSignals();
-          waitForSignals();
+          goToOpenedAlerts();
+          waitForAlerts();
 
-          cy.get(NUMBER_OF_SIGNALS)
+          cy.get(NUMBER_OF_ALERTS)
             .invoke('text')
-            .should('eql', numberOfSignalsToBeOpened.toString());
-          cy.get(SHOWING_SIGNALS)
+            .should('eql', numberOfAlertsToBeOpened.toString());
+          cy.get(SHOWING_ALERTS)
             .invoke('text')
-            .should('eql', `Showing ${numberOfSignalsToBeOpened.toString()} signal`);
-          cy.get(SIGNALS).should('have.length', numberOfSignalsToBeOpened);
+            .should('eql', `Showing ${numberOfAlertsToBeOpened.toString()} alert`);
+          cy.get(ALERTS).should('have.length', numberOfAlertsToBeOpened);
         });
     });
   });
