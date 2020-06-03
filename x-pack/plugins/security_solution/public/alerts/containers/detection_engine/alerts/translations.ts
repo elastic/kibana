@@ -7,28 +7,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALERT_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.alerts.errorFetchingAlertsDescription',
+  'xpack.securitySolution.containers.detectionEngine.alerts.errorFetchingAlertsDescription',
   {
     defaultMessage: 'Failed to query alerts',
   }
 );
 
 export const PRIVILEGE_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.alerts.errorFetchingAlertsDescription',
+  'xpack.securitySolution.containers.detectionEngine.alerts.errorFetchingAlertsDescription',
   {
     defaultMessage: 'Failed to query alerts',
   }
 );
 
 export const SIGNAL_GET_NAME_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.alerts.errorGetAlertDescription',
+  'xpack.securitySolution.containers.detectionEngine.alerts.errorGetAlertDescription',
   {
     defaultMessage: 'Failed to get signal index name',
   }
 );
 
 export const SIGNAL_POST_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.alerts.errorPostAlertDescription',
+  'xpack.securitySolution.containers.detectionEngine.alerts.errorPostAlertDescription',
   {
     defaultMessage: 'Failed to create signal index',
   }

@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             error: {
               message:
-                'To create a rule, the index must exist first. Index .security_solution-signals-default does not exist',
+                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
               status_code: 400,
             },
             rule_id: 'rule-1',

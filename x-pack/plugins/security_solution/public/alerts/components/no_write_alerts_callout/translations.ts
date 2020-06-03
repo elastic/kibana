@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const NO_WRITE_ALERTS_CALLOUT_TITLE = i18n.translate(
-  'xpack.siem.detectionEngine.noWriteAlertsCallOutTitle',
+  'xpack.securitySolution.detectionEngine.noWriteAlertsCallOutTitle',
   {
     defaultMessage: 'Alerts index permissions required',
   }
 );
 
 export const NO_WRITE_ALERTS_CALLOUT_MSG = i18n.translate(
-  'xpack.siem.detectionEngine.noWriteAlertsCallOutMsg',
+  'xpack.securitySolution.detectionEngine.noWriteAlertsCallOutMsg',
   {
     defaultMessage:
       'You are currently missing the required permissions to update alerts. Please contact your administrator for further assistance.',
@@ -22,7 +22,7 @@ export const NO_WRITE_ALERTS_CALLOUT_MSG = i18n.translate(
 );
 
 export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.siem.detectionEngine.dismissNoWriteAlertButton',
+  'xpack.securitySolution.detectionEngine.dismissNoWriteAlertButton',
   {
     defaultMessage: 'Dismiss',
   }
