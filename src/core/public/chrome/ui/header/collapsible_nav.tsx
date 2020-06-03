@@ -150,18 +150,8 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
-                onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                onClick: () => {
                   closeNav();
-                  if (
-                    event.isDefaultPrevented() ||
-                    event.altKey ||
-                    event.metaKey ||
-                    event.ctrlKey
-                  ) {
-                    return;
-                  }
-                  event.preventDefault();
-                  navigateToApp('home');
                 },
               },
             ]}
