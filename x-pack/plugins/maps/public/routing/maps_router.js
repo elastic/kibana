@@ -13,13 +13,18 @@ import { MapsCreateEditView } from './routes/create_edit';
 import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
+import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 
-export function renderApp(context, { appBasePath, element, history }) {
-  render(<App history={history} appBasePath={appBasePath} />, element);
+export async function renderApp(context, { appBasePath, element, history }) {
+  const { hits = [] } = await getMapsSavedObjectLoader().find();
+  const hasSavedMaps = !!hits.length;
+
+  render(<App history={history} appBasePath={appBasePath} hasSavedMaps={hasSavedMaps} />, element);
+
   return () => unmountComponentAtNode(element);
 }
 
-const App = ({ history, appBasePath }) => {
+const App = ({ history, appBasePath, hasSavedMaps }) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
   const store = getStore();
 
@@ -31,9 +36,16 @@ const App = ({ history, appBasePath }) => {
           <Switch>
             <Route
               path={`/map/:savedMapId`}
-              render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
+              render={() =>
+                hasSavedMaps ? (
+                  <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />
+                ) : (
+                  <Redirect to={`/map`} />
+                )
+              }
             />
             <Route
+              exact
               path={`/map`}
               render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
             />

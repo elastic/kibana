@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { GisMap } from '../../../connected_components/gis_map';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../../../reducers/ui';
@@ -31,10 +30,10 @@ import {
   updateGlobalState,
   useGlobalStateSyncing,
 } from '../../state_syncing/global_sync';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { useAppStateSyncing } from '../../state_syncing/app_sync';
 import { getStoreSyncSubscription } from '../../store_operations';
+import { MapsRoot } from '../../page_elements/maps_root';
 
 export const MapsCreateEditView = class extends React.Component {
   visibleSubscription = null;
@@ -267,13 +266,6 @@ export const MapsCreateEditView = class extends React.Component {
     });
   };
 
-  addFilters = (newFilters) => {
-    newFilters.forEach((filter) => {
-      filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
-    });
-    this.updateFiltersAndDispatch([...this.state.filters, ...newFilters]);
-  };
-
   onRefreshChange = ({ isPaused, refreshInterval }) => {
     const { refreshConfig } = this.state;
     this.setState({
@@ -357,7 +349,7 @@ export const MapsCreateEditView = class extends React.Component {
     });
   }
 
-  render() {
+  _renderTopNav() {
     const {
       query,
       time,
@@ -365,49 +357,52 @@ export const MapsCreateEditView = class extends React.Component {
       savedMap,
       initialLayerListConfig,
       isVisible,
-      isFullScreen,
       indexPatterns,
       isSaveDisabled,
     } = this.state;
+
     const initialized = !!query && !!time && !!refreshConfig;
+    return initialized ? (
+      <MapsTopNavMenu
+        savedMap={savedMap}
+        query={query}
+        onQueryChange={this.onQueryChange}
+        time={time}
+        refreshConfig={refreshConfig}
+        setRefreshConfig={(newConfig, callback) => {
+          this.setState(
+            {
+              refreshConfig: newConfig,
+            },
+            callback
+          );
+        }}
+        initialLayerListConfig={initialLayerListConfig}
+        isVisible={isVisible}
+        indexPatterns={indexPatterns}
+        updateFiltersAndDispatch={this.updateFiltersAndDispatch}
+        onQuerySaved={(query) => {
+          this.setState({ savedQuery: query });
+          this.appStateManager.setQueryAndFilters({ savedQuery: query });
+          this.updateStateFromSavedQuery(query);
+        }}
+        onSavedQueryUpdated={(query) => {
+          this.setState({ savedQuery: { ...query } });
+          this.appStateManager.setQueryAndFilters({ savedQuery: query });
+          this.updateStateFromSavedQuery(query);
+        }}
+        isSaveDisabled={isSaveDisabled}
+      />
+    ) : null;
+  }
+
+  render() {
+    const { isFullScreen, filters } = this.state;
     return (
       <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
-        {initialized ? (
-          <MapsTopNavMenu
-            savedMap={savedMap}
-            query={query}
-            onQueryChange={this.onQueryChange}
-            time={time}
-            refreshConfig={refreshConfig}
-            setRefreshConfig={(newConfig, callback) => {
-              this.setState(
-                {
-                  refreshConfig: newConfig,
-                },
-                callback
-              );
-            }}
-            initialLayerListConfig={initialLayerListConfig}
-            isVisible={isVisible}
-            indexPatterns={indexPatterns}
-            updateFiltersAndDispatch={this.updateFiltersAndDispatch}
-            onQuerySaved={(query) => {
-              this.setState({ savedQuery: query });
-              this.appStateManager.setQueryAndFilters({ savedQuery: query });
-              this.updateStateFromSavedQuery(query);
-            }}
-            onSavedQueryUpdated={(query) => {
-              this.setState({ savedQuery: { ...query } });
-              this.appStateManager.setQueryAndFilters({ savedQuery: query });
-              this.updateStateFromSavedQuery(query);
-            }}
-            isSaveDisabled={isSaveDisabled}
-          />
-        ) : null}
+        {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <div id="react-maps-root">
-          <GisMap addFilters={this.addFilters} />
-        </div>
+        <MapsRoot filters={filters} />
       </div>
     );
   }
