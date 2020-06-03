@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function DashboardAddPanelProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export function DashboardAddPanelProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -37,7 +39,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
     }
 
-    async clickAddNewEmbeddableLink(type) {
+    async clickAddNewEmbeddableLink(type: string) {
       await testSubjects.click('createNew');
       await testSubjects.click(`createNew-${type}`);
       await testSubjects.missingOrFail(`createNew-${type}`);
@@ -48,7 +50,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('savedObjectFinderFilterButton');
     }
 
-    async toggleFilter(type) {
+    async toggleFilter(type: string) {
       log.debug(`DashboardAddPanel.addToFilter(${type})`);
       await this.waitForListLoading();
       await this.toggleFilterPopover();
@@ -59,7 +61,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const itemList = await testSubjects.find('savedObjectFinderItemList');
-      const embeddableList = [];
+      const embeddableList: string[] = [];
       await retry.try(async () => {
         const embeddableRows = await itemList.findAllByCssSelector('li');
         for (let i = 0; i < embeddableRows.length; i++) {
@@ -108,11 +110,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async ensureAddPanelIsShowing() {
       log.debug('DashboardAddPanel.ensureAddPanelIsShowing');
-      const isOpen = await this.isAddPanelOpen();
+      let isOpen = await this.isAddPanelOpen();
       if (!isOpen) {
         await retry.try(async () => {
           await this.clickOpenAddPanel();
-          const isOpen = await this.isAddPanelOpen();
+          isOpen = await this.isAddPanelOpen();
           if (!isOpen) {
             throw new Error('Add panel still not open, trying again.');
           }
@@ -130,7 +132,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await flyout.ensureClosed('dashboardAddPanel');
     }
 
-    async addEveryVisualization(filter) {
+    async addEveryVisualization(filter: string) {
       log.debug('DashboardAddPanel.addEveryVisualization');
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter('visualization');
@@ -138,16 +140,16 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
       let morePages = true;
-      const vizList = [];
+      const vizList: string[][] = [];
       while (morePages) {
         vizList.push(await this.addEveryEmbeddableOnCurrentPage());
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
-      return vizList.reduce((acc, vizList) => [...acc, ...vizList], []);
+      return vizList.reduce((acc, list) => [...acc, ...list], []);
     }
 
-    async addEverySavedSearch(filter) {
+    async addEverySavedSearch(filter: string) {
       log.debug('DashboardAddPanel.addEverySavedSearch');
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter('search');
@@ -161,20 +163,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
-      return searchList.reduce((acc, searchList) => [...acc, ...searchList], []);
+      return searchList.reduce((acc, list) => [...acc, ...list], []);
     }
 
-    async addSavedSearch(searchName) {
+    async addSavedSearch(searchName: string) {
       return this.addEmbeddable(searchName, 'search');
     }
 
-    async addSavedSearches(searches) {
+    async addSavedSearches(searches: string[]) {
       for (const name of searches) {
         await this.addSavedSearch(name);
       }
     }
 
-    async addVisualizations(visualizations) {
+    async addVisualizations(visualizations: string[]) {
       log.debug('DashboardAddPanel.addVisualizations');
       const vizList = [];
       for (const vizName of visualizations) {
@@ -184,11 +186,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       return vizList;
     }
 
-    async addVisualization(vizName) {
+    async addVisualization(vizName: string) {
       return this.addEmbeddable(vizName, 'visualization');
     }
 
-    async addEmbeddable(embeddableName, embeddableType) {
+    async addEmbeddable(embeddableName: string, embeddableType: string) {
       log.debug(
         `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
       );
@@ -201,14 +203,14 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       return embeddableName;
     }
 
-    async filterEmbeddableNames(name) {
+    async filterEmbeddableNames(name: string) {
       // The search input field may be disabled while the table is loading so wait for it
       await this.waitForListLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await this.waitForListLoading();
     }
 
-    async panelAddLinkExists(name) {
+    async panelAddLinkExists(name: string) {
       log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${name}"`);

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function DashboardVisualizationProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export function DashboardVisualizationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const find = getService('find');
   const retry = getService('retry');
@@ -34,7 +36,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   ]);
 
   return new (class DashboardVisualizations {
-    async createAndAddTSVBVisualization(name) {
+    async createAndAddTSVBVisualization(name: string) {
       log.debug(`createAndAddTSVBVisualization(${name})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
@@ -46,7 +48,15 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
 
-    async createSavedSearch({ name, query, fields }) {
+    async createSavedSearch({
+      name,
+      query,
+      fields,
+    }: {
+      name: string;
+      query?: string;
+      fields?: string[];
+    }) {
       log.debug(`createSavedSearch(${name})`);
       await PageObjects.header.clickDiscover();
 
@@ -68,7 +78,15 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await testSubjects.exists('saveSearchSuccess');
     }
 
-    async createAndAddSavedSearch({ name, query, fields }) {
+    async createAndAddSavedSearch({
+      name,
+      query,
+      fields,
+    }: {
+      name: string;
+      query?: string;
+      fields?: string[];
+    }) {
       log.debug(`createAndAddSavedSearch(${name})`);
       await this.createSavedSearch({ name, query, fields });
 
@@ -106,7 +124,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       }
     }
 
-    async createAndAddMarkdown({ name, markdown }) {
+    async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
