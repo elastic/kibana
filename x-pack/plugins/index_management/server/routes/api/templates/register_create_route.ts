@@ -25,7 +25,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       } = template;
 
       if (!isLegacy) {
-        return res.badRequest({ body: 'Only index template version 1 can be created.' });
+        return res.badRequest({ body: 'Only legacy index templates can be created.' });
       }
 
       const serializedTemplate = serializeLegacyTemplate(template);
