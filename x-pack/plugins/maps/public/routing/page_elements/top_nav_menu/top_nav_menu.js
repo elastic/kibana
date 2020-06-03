@@ -26,36 +26,33 @@ import { updateBreadcrumbs } from '../breadcrumbs';
 /**
  * @return {null}
  */
-export function MapsTopNavMenu(props) {
+export function MapsTopNavMenu({
+  savedMap,
+  query,
+  onQueryChange,
+  onQuerySaved,
+  onSavedQueryUpdated,
+  savedQuery,
+  time,
+  refreshConfig,
+  setRefreshConfig,
+  setRefreshStoreConfig,
+  initialLayerListConfig,
+  isVisible,
+  indexPatterns,
+  updateFiltersAndDispatch,
+  isSaveDisabled,
+  closeFlyout,
+  enableFullScreen,
+  openMapSettings,
+  syncSavedMap,
+  inspectorAdapters,
+}) {
   const { TopNavMenu } = getNavigation().ui;
-  const {
-    savedMap,
-    query,
-    onQueryChange,
-    onQuerySaved,
-    onSavedQueryUpdated,
-    savedQuery,
-    time,
-    refreshConfig,
-    setRefreshConfig,
-    setRefreshStoreConfig,
-    initialLayerListConfig,
-    isVisible,
-    indexPatterns,
-    updateFiltersAndDispatch,
-    isSaveDisabled,
-    closeFlyout,
-    enableFullScreen,
-    openMapSettings,
-    syncSavedMap,
-    inspectorAdapters,
-  } = props;
   const { filterManager } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
   const onClearSavedQuery = () => {
-    // setSavedQuery(null);
-    // TODO: Update saved query in state
-    // delete $state.savedQuery;
+    onQuerySaved(undefined);
     onQueryChange({
       filters: filterManager.getGlobalFilters(),
       query: {
@@ -67,48 +64,53 @@ export function MapsTopNavMenu(props) {
 
   // Nav settings
   const [isOpenSettingsDisabled, setIsOpenSettingsDisabled] = useState(false);
+  const config = getTopNavConfig(
+    savedMap,
+    initialLayerListConfig,
+    isOpenSettingsDisabled,
+    setIsOpenSettingsDisabled,
+    isSaveDisabled,
+    closeFlyout,
+    enableFullScreen,
+    openMapSettings,
+    syncSavedMap,
+    inspectorAdapters
+  );
+
+  const submitQuery = function ({ dateRange, query }) {
+    onQueryChange({
+      query,
+      time: dateRange,
+      refresh: true,
+    });
+  };
+
+  const onRefreshChange = function ({ isPaused, refreshInterval }) {
+    setRefreshConfig(
+      {
+        isPaused,
+        interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+      },
+      () => setRefreshStoreConfig(refreshConfig)
+    );
+    // TODO: Global sync state
+    // syncAppAndGlobalState();
+  };
 
   return isVisible ? (
     <TopNavMenu
       appName="maps"
-      config={topNavConfig(
-        savedMap,
-        initialLayerListConfig,
-        isOpenSettingsDisabled,
-        setIsOpenSettingsDisabled,
-        isSaveDisabled,
-        closeFlyout,
-        enableFullScreen,
-        openMapSettings,
-        syncSavedMap,
-        inspectorAdapters
-      )}
+      config={config}
       indexPatterns={indexPatterns || []}
       filters={filterManager.getFilters()}
       query={query}
-      onQuerySubmit={function ({ dateRange, query }) {
-        onQueryChange({
-          query,
-          time: dateRange,
-          refresh: true,
-        });
-      }}
+      onQuerySubmit={submitQuery}
       onFiltersUpdated={updateFiltersAndDispatch}
       dateRangeFrom={time.from}
       dateRangeTo={time.to}
       isRefreshPaused={refreshConfig.isPaused}
       refreshInterval={refreshConfig.interval}
-      onRefreshChange={function ({ isPaused, refreshInterval }) {
-        setRefreshConfig(
-          {
-            isPaused,
-            interval: refreshInterval ? refreshInterval : refreshConfig.interval,
-          },
-          () => setRefreshStoreConfig(refreshConfig)
-        );
-        // TODO: Global sync state
-        // syncAppAndGlobalState();
-      }}
+      onRefreshChange={onRefreshChange}
       showSearchBar={true}
       showFilterBar={true}
       showDatePicker={true}
@@ -121,7 +123,7 @@ export function MapsTopNavMenu(props) {
   ) : null;
 }
 
-function topNavConfig(
+function getTopNavConfig(
   savedMap,
   initialLayerListConfig,
   isOpenSettingsDisabled,

@@ -392,6 +392,7 @@ export const MapsCreateEditView = class extends React.Component {
           this.updateStateFromSavedQuery(query);
         }}
         isSaveDisabled={isSaveDisabled}
+        syncAppAndGlobalState={this.syncAppAndGlobalState}
       />
     ) : null;
   }
