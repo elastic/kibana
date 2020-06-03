@@ -5,19 +5,11 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LogEntryColumnContent } from './log_entry_column';
-import {
-  euiStyled,
-  ActionMenu,
-  Section,
-  SectionTitle,
-  SectionLinks,
-  SectionLink,
-} from '../../../../../observability/public';
+import { euiStyled } from '../../../../../observability/public';
 
 interface LogEntryActionsColumnProps {
   isHovered: boolean;
@@ -78,29 +70,27 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     </ButtonWrapper>
   );
 
+  const items = [
+    <EuiContextMenuItem key="log_details" onClick={handleClickViewDetails}>
+      {LOG_DETAILS_LABEL}
+    </EuiContextMenuItem>,
+  ];
+
+  if (onViewLogInContext !== undefined) {
+    items.push(
+      <EuiContextMenuItem key="view_in_context" onClick={handleClickViewInContext}>
+        {LOG_VIEW_IN_CONTEXT_LABEL}
+      </EuiContextMenuItem>
+    );
+  }
+
   return (
     <ActionsColumnContent>
       {isHovered || isMenuOpen ? (
         <AbsoluteWrapper>
-          <ActionMenu closePopover={onCloseMenu} isOpen={isMenuOpen} button={button}>
-            <Section>
-              <SectionTitle>
-                <FormattedMessage
-                  id="xpack.infra.logs.logEntryActionsMenuTitle"
-                  defaultMessage="Log line details"
-                />
-              </SectionTitle>
-              <SectionLinks>
-                <SectionLink label={LOG_DETAILS_LABEL} onClick={handleClickViewDetails} />
-                {onViewLogInContext !== undefined ? (
-                  <SectionLink
-                    label={LOG_VIEW_IN_CONTEXT_LABEL}
-                    onClick={handleClickViewInContext}
-                  />
-                ) : null}
-              </SectionLinks>
-            </Section>
-          </ActionMenu>
+          <EuiPopover closePopover={onCloseMenu} isOpen={isMenuOpen} button={button}>
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
         </AbsoluteWrapper>
       ) : null}
     </ActionsColumnContent>
