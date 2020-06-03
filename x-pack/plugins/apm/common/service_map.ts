@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import { ILicense } from '../../licensing/public';
+import { ILicense } from '../../licensing/common/types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

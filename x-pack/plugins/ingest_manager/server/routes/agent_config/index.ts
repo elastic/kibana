@@ -20,6 +20,7 @@ import {
   updateAgentConfigHandler,
   deleteAgentConfigsHandler,
   getFullAgentConfig,
+  downloadFullAgentConfig,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -81,5 +82,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getFullAgentConfig
+  );
+
+  // Download one full agent config
+  router.get(
+    {
+      path: AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
+      validate: GetFullAgentConfigRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    downloadFullAgentConfig
   );
 };
