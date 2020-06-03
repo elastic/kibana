@@ -341,9 +341,18 @@ exports[`SavedObjectsTable should render normally 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <RedirectCrossAppLinks
+  <RedirectAppLinks
     application={
       Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
         "capabilities": Object {
           "catalogue": Object {},
           "management": Object {},
@@ -489,6 +498,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       totalItemCount={4}
     />
-  </RedirectCrossAppLinks>
+  </RedirectAppLinks>
 </EuiPageContent>
 `;
