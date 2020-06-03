@@ -7,9 +7,3 @@
 import { GlobalSearchTestPluginStart } from './plugin';
 
 export type GlobalSearchTestApi = GlobalSearchTestPluginStart;
-
-declare global {
-  interface Window {
-    __globalSearchTestApi: GlobalSearchTestApi;
-  }
-}

@@ -10,14 +10,14 @@ import { Plugin, CoreSetup, CoreStart, AppMountParameters } from 'kibana/public'
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
-  NavigableGlobalSearchResult,
+  GlobalSearchResult,
 } from '../../../../../plugins/global_search/public';
 import { createResult } from '../common/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchTestPluginSetup {}
 export interface GlobalSearchTestPluginStart {
-  findAll: (term: string) => Promise<NavigableGlobalSearchResult[]>;
+  findAll: (term: string) => Promise<GlobalSearchResult[]>;
 }
 
 export interface GlobalSearchTestPluginSetupDeps {
@@ -69,8 +69,11 @@ export class GlobalSearchTestPlugin
     return {};
   }
 
-  public start({}: CoreStart, { globalSearch }: GlobalSearchTestPluginStartDeps) {
-    const contract: GlobalSearchTestPluginStart = {
+  public start(
+    {}: CoreStart,
+    { globalSearch }: GlobalSearchTestPluginStartDeps
+  ): GlobalSearchTestPluginStart {
+    return {
       findAll: (term) =>
         globalSearch
           .find(term, {})
@@ -82,9 +85,5 @@ export class GlobalSearchTestPlugin
           )
           .toPromise(),
     };
-
-    window.__globalSearchTestApi = contract;
-
-    return contract;
   }
 }

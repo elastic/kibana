@@ -6,16 +6,18 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { NavigableGlobalSearchResult } from '../../../../plugins/global_search/public/services/types';
-import '../../plugins/global_search_test/public/types';
+import { GlobalSearchResult } from '../../../../plugins/global_search/common/types';
+import { GlobalSearchTestApi } from '../../plugins/global_search_test/public/types';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  const findResultsWithAPI = async (t: string): Promise<NavigableGlobalSearchResult[]> => {
+  const findResultsWithAPI = async (t: string): Promise<GlobalSearchResult[]> => {
     return browser.executeAsync(async (term: string, cb: Function) => {
-      window.__globalSearchTestApi.findAll(term).then((results) => {
+      const { start } = window.__coreProvider;
+      const globalSearchTestApi: GlobalSearchTestApi = start.plugins.globalSearchTest;
+      globalSearchTestApi.findAll(term).then((results) => {
         cb(results);
       });
     }, t) as any; // executeAsync signature is broken. return type should be inferred from the cb param.
