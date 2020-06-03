@@ -45,8 +45,13 @@ export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void 
         value={value}
         onChange={setValue}
         setOptions={{ fontSize: '14px' }}
+        data-test-subj={'dashboardEmbeddableByValueInputEditor'}
       />
-      <EuiButton onClick={() => props.onSubmit(JSON.parse(value))} disabled={!isValid}>
+      <EuiButton
+        onClick={() => props.onSubmit(JSON.parse(value))}
+        disabled={!isValid}
+        data-test-subj={'dashboardEmbeddableByValueInputSubmit'}
+      >
         Update Input
       </EuiButton>
     </>
