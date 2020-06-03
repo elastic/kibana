@@ -44,7 +44,7 @@ export type FilterAggConfigTerm = FilterAggProps<'term', { value: string }>;
 /** Filter range agg */
 export type FilterAggConfigRange = FilterAggProps<
   'range',
-  { gt?: number; lt?: number; lte?: number; gte?: number }
+  { from?: number; to?: number; includeFrom?: boolean; includeTo?: boolean }
 >;
 /** Filter exists agg */
 export type FilterAggConfigExists = FilterAggProps<'exists', undefined>;

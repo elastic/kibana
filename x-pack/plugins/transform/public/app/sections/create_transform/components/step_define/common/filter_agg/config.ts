@@ -108,15 +108,34 @@ export function getFilterAggTypeConfig(
           if (fieldName === undefined || !this.filterAggConfig) {
             throw new Error(`Config ${FILTERS.RANGE} is not completed`);
           }
+
+          const { from, includeFrom, to, includeTo } = this.filterAggConfig;
+          const result: any = {};
+
+          if (from) {
+            result[includeFrom ? 'gte' : 'gt'] = from;
+          }
+          if (to) {
+            result[includeTo ? 'lte' : 'lt'] = to;
+          }
+
           return {
-            [fieldName]: this.filterAggConfig,
+            [fieldName]: result,
           };
         },
         isValid() {
-          return (
-            this.filterAggConfig &&
-            Object.values(this.filterAggConfig).filter((v) => v !== undefined).length > 0
-          );
+          if (
+            typeof this.filterAggConfig !== 'object' ||
+            Object.values(this.filterAggConfig).filter((v) => v !== undefined).length < 1
+          ) {
+            return false;
+          }
+
+          if (this.filterAggConfig.from !== undefined && this.filterAggConfig.to !== undefined) {
+            return this.filterAggConfig.from <= this.filterAggConfig.to;
+          }
+
+          return true;
         },
       } as FilterAggConfigRange['aggTypeConfig'];
     case FILTERS.EXISTS:
