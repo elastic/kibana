@@ -25,7 +25,7 @@ export const apiKeysManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.management.apiKeysTitle', {
         defaultMessage: 'API Keys',
       }),
-      async mount({ basePath, element, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs }) {
         setBreadcrumbs([
           {
             text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
