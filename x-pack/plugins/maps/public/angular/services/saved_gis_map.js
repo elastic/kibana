@@ -87,7 +87,7 @@ export function createSavedGisMapClass(services) {
       return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
     }
 
-    syncWithStore(state) {
+    syncWithStore = (state) => {
       const layerList = getLayerListRaw(state);
       const layerListConfigOnly = copyPersistentState(layerList);
       this.layerListJSON = JSON.stringify(layerListConfigOnly);
@@ -108,7 +108,7 @@ export function createSavedGisMapClass(services) {
       });
 
       this.bounds = formatEnvelopeAsPolygon(getMapExtent(state));
-    }
+    };
   }
   return SavedGisMap;
 }
