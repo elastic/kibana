@@ -74,11 +74,11 @@ export function getFilterAggConfig(
  */
 export function getFilterAggTypeConfig(
   filterAggType: FilterAggConfigUnion['filterAgg'] | FilterAggType,
-  config?: { [key: string]: any }
+  esConfig?: { [key: string]: any }
 ): FilterAggConfigUnion['aggTypeConfig'] | FilterAggConfigBase['aggTypeConfig'] {
   switch (filterAggType) {
     case FILTERS.TERM:
-      const value = typeof config === 'object' ? Object.values(config)[0] : undefined;
+      const value = typeof esConfig === 'object' ? Object.values(esConfig)[0] : undefined;
 
       return {
         FilterAggFormComponent: FilterTermForm,
@@ -101,9 +101,19 @@ export function getFilterAggTypeConfig(
         },
       } as FilterAggConfigTerm['aggTypeConfig'];
     case FILTERS.RANGE:
+      const esFilterRange = typeof esConfig === 'object' ? Object.values(esConfig)[0] : undefined;
+
       return {
         FilterAggFormComponent: FilterRangeForm,
-        filterAggConfig: typeof config === 'object' ? Object.values(config)[0] : undefined,
+        filterAggConfig:
+          typeof esFilterRange === 'object'
+            ? {
+                from: esFilterRange.gte ?? esFilterRange.gt,
+                to: esFilterRange.lte ?? esFilterRange.lt,
+                includeFrom: esFilterRange.gte !== undefined,
+                includeTo: esFilterRange.lts !== undefined,
+              }
+            : undefined,
         getEsAggConfig(fieldName) {
           if (fieldName === undefined || !this.filterAggConfig) {
             throw new Error(`Config ${FILTERS.RANGE} is not completed`);
