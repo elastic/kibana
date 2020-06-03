@@ -49,6 +49,7 @@ export interface SessionStorageCookieOptions<T> {
   isSecure: boolean;
   /**
    * Defines SameSite attribute of the Set-Cookie Header.
+   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
    */
   sameSite?: 'Strict' | 'Lax' | 'None' | false;
 }

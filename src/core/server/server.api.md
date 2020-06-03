@@ -2428,6 +2428,7 @@ export interface SessionStorageCookieOptions<T> {
     encryptionKey: string;
     isSecure: boolean;
     name: string;
+    sameSite?: 'Strict' | 'Lax' | 'None' | false;
     validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 }
 
