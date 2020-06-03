@@ -39,4 +39,7 @@ export const GetFullAgentConfigRequestSchema = {
   params: schema.object({
     agentConfigId: schema.string(),
   }),
+  query: schema.object({
+    download: schema.maybe(schema.boolean()),
+  }),
 };
