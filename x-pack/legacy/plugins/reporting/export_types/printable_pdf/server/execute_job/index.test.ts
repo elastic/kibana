@@ -57,8 +57,10 @@ beforeEach(async () => {
   mockReporting = await createMockReportingCore(mockReportingConfig);
 
   const mockElasticsearch = {
-    dataClient: {
-      asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+    legacy: {
+      client: {
+        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+      },
     },
   };
   const mockGetElasticsearch = jest.fn();

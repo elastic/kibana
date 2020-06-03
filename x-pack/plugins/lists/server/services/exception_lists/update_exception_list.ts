@@ -15,12 +15,12 @@ import {
   ListIdOrUndefined,
   MetaOrUndefined,
   NameOrUndefined,
+  NamespaceType,
   TagsOrUndefined,
   _TagsOrUndefined,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
-import { NamespaceType } from './types';
 import { getExceptionList } from './get_exception_list';
 
 interface UpdateExceptionListOptions {
@@ -69,6 +69,6 @@ export const updateExceptionList = async ({
         updated_by: user,
       }
     );
-    return transformSavedObjectUpdateToExceptionList({ exceptionList, savedObject });
+    return transformSavedObjectUpdateToExceptionList({ exceptionList, namespaceType, savedObject });
   }
 };

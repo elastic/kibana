@@ -25,15 +25,12 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
-import { initialPolicyListState } from '../../endpoint_policy/store/policy_list/reducer';
 import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
-import { initialPolicyDetailsState } from '../../endpoint_policy/store/policy_details/reducer';
 import { initialHostListState } from '../../endpoint_hosts/store/reducer';
-
-const policyList = initialPolicyListState();
-const alertList = initialAlertListState();
-const policyDetails = initialPolicyDetailsState();
-const hostList = initialHostListState();
+import { mockManagementState } from '../../management/store/reducer';
+import { AlertListState } from '../../../common/endpoint_alerts/types';
+import { HostState } from '../../endpoint_hosts/types';
+import { ManagementState } from '../../management/types';
 
 export const mockGlobalState: State = {
   app: {
@@ -235,8 +232,11 @@ export const mockGlobalState: State = {
       },
     },
   },
-  alertList,
-  hostList,
-  policyList,
-  policyDetails,
+  /**
+   * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
+   * they are cast to mutable versions here.
+   */
+  alertList: initialAlertListState as AlertListState,
+  hostList: initialHostListState as HostState,
+  management: mockManagementState as ManagementState,
 };

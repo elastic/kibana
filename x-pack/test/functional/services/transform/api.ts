@@ -54,7 +54,10 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
-      expect(statsResponse.transforms).to.have.length(1);
+      expect(statsResponse.transforms).to.have.length(
+        1,
+        `Expected transform stats to contain exactly 1 object (got '${statsResponse.transforms.length}')`
+      );
       return statsResponse.transforms[0];
     },
 
