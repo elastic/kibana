@@ -21,7 +21,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { makeESBbox, makeGeotileGridDsl } from '../../../elasticsearch_geo_utils';
+import { makeGeotileGridDsl } from '../../../elasticsearch_geo_utils';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -264,12 +264,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   _buildGeotileGridDsl(precision, bounds) {
     return makeGeotileGridDsl(this._descriptor.geoField, bounds, precision);
-    const esBbox = makeESBbox(bounds);
-    return {
-      field: this._descriptor.geoField,
-      bounds: esBbox,
-      precision,
-    };
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {

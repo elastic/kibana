@@ -43,16 +43,12 @@ export function getFieldsWithGeoTileAgg(fields) {
 }
 
 export function supportsGeoTileAgg(field) {
-  if (!field || !field.aggregatable || indexPatterns.isNestedField(field)) {
-    return false;
-  }
-  if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    return true;
-  } else if (field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE && field.aggregatable && getIsGoldPlus()) {
-    return true;
-  } else {
-    return false;
-  }
+  return (
+    field &&
+    field.aggregatable &&
+    !indexPatterns.isNestedField(field) &&
+    getAggregatableGeoFieldTypes().includes(field.type)
+  );
 }
 
 // Returns filtered fields list containing only fields that exist in _source.

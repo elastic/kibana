@@ -656,7 +656,7 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [180, -90], top_left: [-180, 90] });
+    expect(bbox).toEqual({ bottom_right: [180, -89], top_left: [-180, 89] });
   });
 
   it('Should swap West->East orientation to East->West orientation when crossing dateline (West extension)', () => {
@@ -666,7 +666,7 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [20, -90], top_left: [170, 90] });
+    expect(bbox).toEqual({ bottom_right: [20, -89], top_left: [170, 89] });
   });
 
   it('Should swap West->East orientation to East->West orientation when crossing dateline (West extension) (overrated)', () => {
@@ -676,7 +676,7 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [20, -90], top_left: [170, 90] });
+    expect(bbox).toEqual({ bottom_right: [20, -89], top_left: [170, 89] });
   });
 
   it('Should swap West->East orientation to East->West orientation when crossing dateline (east extension)', () => {
@@ -686,7 +686,7 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [-170, -90], top_left: [175, 90] });
+    expect(bbox).toEqual({ bottom_right: [-170, -89], top_left: [175, 89] });
   });
 
   it('Should preserve West->East orientation when _not_ crossing dateline', () => {
@@ -696,7 +696,7 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [170, -90], top_left: [20, 90] });
+    expect(bbox).toEqual({ bottom_right: [170, -89], top_left: [20, 89] });
   });
 
   it('Should preserve West->East orientation when _not_ crossing dateline _and_ snap longitudes (west extension)', () => {
@@ -706,7 +706,7 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [175, -90], top_left: [170, 90] });
+    expect(bbox).toEqual({ bottom_right: [175, -89], top_left: [170, 89] });
   });
 
   it('Should preserve West->East orientation when _not_ crossing dateline _and_ snap longitudes (east extension)', () => {
@@ -716,6 +716,6 @@ describe('makeESBbox', () => {
       minLat: -100,
       maxLat: 100,
     });
-    expect(bbox).toEqual({ bottom_right: [-170, -90], top_left: [-175, 90] });
+    expect(bbox).toEqual({ bottom_right: [-170, -89], top_left: [-175, 89] });
   });
 });

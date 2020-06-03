@@ -88,7 +88,7 @@ describe('Gold+ licensing', () => {
       require('./kibana_services').getIsGoldPlus = () => true;
     });
     describe('getAggregatableGeoFieldTypes', () => {
-      test('Should add geo_shape fields', () => {
+      test('Should add geo_shape field', () => {
         const aggregatableGeoFieldTypes = getAggregatableGeoFieldTypes();
         expect(aggregatableGeoFieldTypes).toEqual([
           ES_GEO_FIELD_TYPE.GEO_POINT,
