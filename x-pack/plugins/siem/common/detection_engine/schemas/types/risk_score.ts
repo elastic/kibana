@@ -18,9 +18,14 @@ export const RiskScore: RiskScoreC = new t.Type<number, number, unknown>(
   'RiskScore',
   t.number.is,
   (input, context): Either<t.Errors, number> => {
-    return typeof input === 'number' && Number.isSafeInteger(input) && input >= 0 && input <= 100
-      ? t.success(input)
-      : t.failure(input, context);
+    // TODO: This is only for backwards compatibility with the UI. Once the UI is fixed to not send strings then this can be just a number again.
+    const converted = typeof input === 'string' ? parseInt(input, 10) : input;
+    return typeof converted === 'number' &&
+      Number.isSafeInteger(converted) &&
+      converted >= 0 &&
+      converted <= 100
+      ? t.success(converted)
+      : t.failure(converted, context);
   },
   t.identity
 );
