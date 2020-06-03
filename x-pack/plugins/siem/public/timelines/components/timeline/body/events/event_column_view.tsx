@@ -13,7 +13,9 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   EuiContextMenuItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { TimelineNonEcsData, Ecs } from '../../../../../graphql/types';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -91,6 +93,21 @@ export const EventColumnView = React.memo<Props>(
       getManageTimelineById,
       timelineId,
     ]);
+    const [isPopoverOpen, setPopover] = useState(false);
+
+    const onButtonClick = useCallback(() => {
+      setPopover(!isPopoverOpen);
+    }, [isPopoverOpen]);
+
+    const closePopover = useCallback(() => {
+      setPopover(false);
+    }, []);
+
+    const onClickCb = useCallback((cb: () => void) => {
+      cb();
+      closePopover();
+    }, []);
+
     const additionalActions = useMemo<JSX.Element[]>(() => {
       const grouped = timelineActions.reduce(
         (
@@ -131,7 +148,7 @@ export const EventColumnView = React.memo<Props>(
                 data-test-subj={action.dataTestSubj}
                 disabled={action.isActionDisabled ?? false}
                 icon={action.iconType}
-                onClick={() => action.onClick({ eventId: id, ecsData })}
+                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData }))}
               >
                 {action.content}
               </EuiContextMenuItem>,
@@ -145,7 +162,12 @@ export const EventColumnView = React.memo<Props>(
         ? [
             ...grouped.icon,
             <EventsTdContent key="actions-context-menu" textAlign="center">
-              <ActionsContextMenu items={grouped.contextMenu} />
+              <ActionsContextMenu
+                items={grouped.contextMenu}
+                isPopoverOpen={isPopoverOpen}
+                onButtonClick={onButtonClick}
+                closePopover={closePopover}
+              />
             </EventsTdContent>,
           ]
         : grouped.icon;
@@ -214,18 +236,23 @@ export const EventColumnView = React.memo<Props>(
     );
   }
 );
-const ActionsContextMenu = ({ items }: { items: JSX.Element[] }) => {
-  const [isPopoverOpen, setPopover] = useState(false);
+const ContextMenuPanel = styled(EuiContextMenuPanel)`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+`;
 
-  const onButtonClick = useCallback(() => {
-    setPopover(!isPopoverOpen);
-  }, [isPopoverOpen]);
-
-  const closePopover = useCallback(() => {
-    setPopover(false);
-  }, []);
-
-  const button = <EuiButtonIcon size="s" iconType="boxesHorizontal" onClick={onButtonClick} />;
+ContextMenuPanel.displayName = 'ContextMenuPanel';
+const ActionsContextMenu = ({
+  items,
+  isPopoverOpen,
+  onButtonClick,
+  closePopover,
+}: {
+  items: JSX.Element[];
+}) => {
+  const button = useMemo(
+    () => <EuiButtonIcon size="s" iconType="boxesHorizontal" onClick={onButtonClick} />,
+    [onButtonClick]
+  );
 
   return (
     <EuiPopover
@@ -236,7 +263,7 @@ const ActionsContextMenu = ({ items }: { items: JSX.Element[] }) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} />
+      <ContextMenuPanel items={items} />
     </EuiPopover>
   );
 };
