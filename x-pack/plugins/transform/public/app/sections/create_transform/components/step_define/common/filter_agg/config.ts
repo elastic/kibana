@@ -110,7 +110,9 @@ export function getFilterAggTypeConfig(
           }
 
           const { from, includeFrom, to, includeTo } = this.filterAggConfig;
-          const result: any = {};
+          const result = {} as ReturnType<
+            FilterAggConfigRange['aggTypeConfig']['getEsAggConfig']
+          >[0];
 
           if (from) {
             result[includeFrom ? 'gte' : 'gt'] = from;

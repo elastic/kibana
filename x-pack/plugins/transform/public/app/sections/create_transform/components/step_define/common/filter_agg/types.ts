@@ -19,35 +19,40 @@ type FilterAggForm<T> = FC<{
   selectedField?: string;
 }>;
 
-interface FilterAggTypeConfig<U> {
+interface FilterAggTypeConfig<U, R> {
   /** Form component */
   FilterAggFormComponent?: U extends undefined ? undefined : FilterAggForm<U>;
   /** Filter agg type configuration*/
   filterAggConfig?: U extends undefined ? undefined : U;
   /** Converts UI agg config form to ES agg request object */
-  getEsAggConfig: (field?: string) => { [key: string]: any };
+  getEsAggConfig: (field?: string) => R;
   isValid?: () => boolean;
   /** Provides aggregation name generated based on the configuration */
   getAggName?: () => string | undefined;
 }
 
 /** Filter agg type definition */
-interface FilterAggProps<K extends FilterAggType, U> {
+interface FilterAggProps<K extends FilterAggType, U, R = { [key: string]: any }> {
   /** Filter aggregation type */
   filterAgg: K;
   /** Definition of the filter agg config */
-  aggTypeConfig: FilterAggTypeConfig<U>;
+  aggTypeConfig: FilterAggTypeConfig<U, R>;
 }
 
 /** Filter term agg */
-export type FilterAggConfigTerm = FilterAggProps<'term', { value: string }>;
+export type FilterAggConfigTerm = FilterAggProps<
+  'term',
+  { value: string },
+  { [field: string]: string }
+>;
 /** Filter range agg */
 export type FilterAggConfigRange = FilterAggProps<
   'range',
-  { from?: number; to?: number; includeFrom?: boolean; includeTo?: boolean }
+  { from?: number; to?: number; includeFrom?: boolean; includeTo?: boolean },
+  { [field: string]: { [key in 'gt' | 'gte' | 'lt' | 'lte']: number } }
 >;
 /** Filter exists agg */
-export type FilterAggConfigExists = FilterAggProps<'exists', undefined>;
+export type FilterAggConfigExists = FilterAggProps<'exists', undefined, { field: string }>;
 /** Filter bool agg */
 export type FilterAggConfigBool = FilterAggProps<'bool', string>;
 
