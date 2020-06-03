@@ -6,7 +6,7 @@
 
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { TemplateDeserialized } from '../../../common';
-import { nextTick } from './index';
+import { nextTick } from '../helpers';
 
 interface MappingField {
   name: string;
