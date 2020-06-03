@@ -9,7 +9,5 @@ export const CLONE_ROLES_PATH = `/clone`;
 export const USERS_PATH = `../users`;
 export const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
 
-  `../roles/edit/${encodeURIComponent(roleName)}`;
-
 export const getEditRoleMappingHref = (roleMappingName: string) =>
   `${EDIT_ROLES_PATH}/${encodeURIComponent(roleMappingName)}`;
