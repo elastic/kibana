@@ -17,6 +17,6 @@ export const PAGE_BADGE_TOOLTIP = i18n.translate(
   'xpack.siem.detectionEngine.headerPage.pageBadgeTooltip',
   {
     defaultMessage:
-      'Detections is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
+      'Alerts is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
   }
 );
