@@ -14,9 +14,9 @@ kibanaPipeline(timeoutMinutes: 240) {
 //        kibanaCoverage.runTests()
 //        handleIngestion(TIME_STAMP)
         if (params.NOTIFY_ON_FAILURE) {
-          kibanaPipeline.bash(''''
-            echo "### params.NOTIFY_ON_FAILURE: true"
-          ''', '### Handle Notify on Failure')
+          kibanaPipeline.bash("""
+            echo '### params.NOTIFY_ON_FAILURE: true'
+          """, '### Handle Notify on Failure')
         }
 
       }
