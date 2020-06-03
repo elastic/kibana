@@ -91,6 +91,7 @@ export class HeatmapStyle extends AbstractStyle {
         MAX_RANGE,
         GRADIENT_INTERVALS
       );
+      // TODO handle null
       mbMap.setPaintProperty(layerId, 'heatmap-color', [
         'interpolate',
         ['linear'],

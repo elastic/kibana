@@ -18,17 +18,17 @@ export const wmsLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Maps from OGC Standard WMS',
   }),
   icon: 'grid',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: WMSSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
