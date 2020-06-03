@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import { useResolverTheme } from './defs';
+import { useResolverTheme } from './assets';
 
 /**
  * Controls for zooming, panning, and centering in Resolver
@@ -141,7 +141,7 @@ const GraphControlsComponent = React.memo(
             className="zoom-slider"
             data-test-subj="zoom-slider"
             min={0}
-            max={1}
+            max={0.8}
             step={0.01}
             value={scalingFactor}
             onChange={handleZoomAmountChange}

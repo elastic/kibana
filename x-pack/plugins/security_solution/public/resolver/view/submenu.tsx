@@ -44,6 +44,10 @@ interface ResolverSubmenuOption {
 
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
+const OptionListItem = styled.div`
+  width: 175px;
+`;
+
 const OptionList = React.memo(
   ({
     subMenuOptions,
@@ -81,7 +85,7 @@ const OptionList = React.memo(
           listProps={{ showIcons: true, bordered: true }}
           isLoading={isLoading}
         >
-          {(list) => list}
+          {(list) => <OptionListItem>{list}</OptionListItem>}
         </EuiSelectable>
       ),
       [isLoading, options]
@@ -98,7 +102,7 @@ OptionList.displayName = 'OptionList';
  */
 const NodeSubMenuComponents = React.memo(
   ({
-    buttonColor,
+    buttonBorderColor,
     menuTitle,
     menuAction,
     optionsWithActions,
@@ -107,7 +111,8 @@ const NodeSubMenuComponents = React.memo(
     menuTitle: string;
     className?: string;
     menuAction: () => unknown;
-    buttonColor: ButtonColor;
+    buttonBorderColor: ButtonColor;
+    buttonFill: string;
   } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
@@ -143,7 +148,12 @@ const NodeSubMenuComponents = React.memo(
        */
       return (
         <div className={className}>
-          <EuiButton onClick={handleMenuActionClick} color={buttonColor} size="s" tabIndex={-1}>
+          <EuiButton
+            onClick={handleMenuActionClick}
+            color={buttonBorderColor}
+            size="s"
+            tabIndex={-1}
+          >
             {menuTitle}
           </EuiButton>
         </div>
@@ -159,7 +169,7 @@ const NodeSubMenuComponents = React.memo(
         onClick={
           typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
         }
-        color={buttonColor}
+        color={buttonBorderColor}
         size="s"
         iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
         iconSide="right"
@@ -196,17 +206,23 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   display: flex;
   flex-flow: column;
 
-  .euiButton {
-    background-color: transparent;
-    border-color: ${(props) => props.buttonColor};
+  & .euiButton {
+    background-color: ${(props) => props.buttonFill};
+    border-color: ${(props) => props.buttonBorderColor};
     border-style: solid;
     border-width: 1px;
-    width: 100%;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: ${(props) => props.buttonFill};
+    }
   }
 
-  .euiPopover__anchor {
+  & .euiPopover__anchor {
     display: flex;
-    width: 100%;
+  }
+
   }
 
   &.is-open .euiButton {

@@ -7,8 +7,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3, distance, angle } from '../lib/vector2';
-import { Vector2, Matrix3 } from '../types';
-import { useResolverTheme } from './defs';
+import { Vector2, Matrix3, EdgeLineMetadata } from '../types';
+import { useResolverTheme } from './assets';
 
 interface ElapsedTimeProps {
   readonly scaledTypeSize: number;
@@ -36,7 +36,7 @@ const StyledElapsedTime = styled.div<ElapsedTimeProps>`
 const EdgeLineComponent = React.memo(
   ({
     className,
-    elapsedTime,
+    edgeLineMetadata,
     startPosition,
     endPosition,
     projectionMatrix,
@@ -48,7 +48,7 @@ const EdgeLineComponent = React.memo(
     /**
      * Time elapsed betweeen process nodes
      */
-    elapsedTime?: string;
+    edgeLineMetadata?: EdgeLineMetadata;
     /**
      * The postion of first point in the line segment. In 'world' coordinates.
      */
@@ -70,6 +70,7 @@ const EdgeLineComponent = React.memo(
     const screenEnd = applyMatrix3(endPosition, projectionMatrix);
     const [magFactorX] = projectionMatrix;
     const { colorMap } = useResolverTheme();
+    const elapsedTime = edgeLineMetadata?.elapsedTime;
 
     /**
      * We render the line using a short, long, `div` element. The length of this `div`
@@ -98,10 +99,11 @@ const EdgeLineComponent = React.memo(
        */
       transform: `translateY(-50%) rotateZ(${angle(screenStart, screenEnd)}rad)`,
     };
+    const showElapsedTime = elapsedTime && magFactorX >= 0.75 && magFactorX <= 2.25;
 
     return (
       <div role="presentation" className={className} style={style}>
-        {elapsedTime && (
+        {showElapsedTime && (
           <StyledElapsedTime
             backgroundColor={colorMap.resolverEdge}
             scaledTypeSize={scaledTypeSize}

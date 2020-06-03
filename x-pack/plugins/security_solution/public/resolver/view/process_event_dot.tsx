@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, useResolverTheme, NodeStyleMap } from './defs';
+import { SymbolIds, useResolverTheme, NodeStyleMap } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -286,6 +286,8 @@ const ProcessEventDotComponents = React.memo(
     const markerPositionYOffset = -markerBaseSize / 2 + 3; // + 3 to align nodes centrally on edge
     const markerPositionXOffset = -markerBaseSize / 2;
 
+    const markerActionsBaseYOffsetPct = 30;
+    const markerActionsYOffsetPct = markerActionsBaseYOffsetPct + 7 * magFactorX;
     /**
      * An element that should be animated when the node is clicked.
      */
@@ -301,7 +303,7 @@ const ProcessEventDotComponents = React.memo(
         | null;
     } = React.createRef();
     const { colorMap, nodeAssets } = useResolverTheme();
-    const { cubeSymbol, descriptionText, isLabelFilled, labelButtonFill } = nodeAssets[
+    const { backingFill, cubeSymbol, descriptionText, isLabelFilled, labelButtonFill } = nodeAssets[
       nodeType(event)
     ];
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
@@ -429,6 +431,7 @@ const ProcessEventDotComponents = React.memo(
             <g>
               <use
                 xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                fill={backingFill} // Only visible on hover
                 x={-11.35}
                 y={-8.35}
                 width={markerSize * 1.5}
@@ -464,13 +467,13 @@ const ProcessEventDotComponents = React.memo(
               display: 'flex',
               flexFlow: 'column',
               left: '25%',
-              top: '30%',
+              top: `${markerActionsYOffsetPct}%`,
               position: 'absolute',
-              width: '50%',
+              width: 'auto',
               color: colorMap.full,
               fontSize: `${scaledTypeSize}px`,
               lineHeight: '140%',
-              backgroundColor: colorMap.resolverBackground,
+              backgroundColor: 'transparent',
               padding: '.25rem',
             }}
           >
@@ -483,7 +486,7 @@ const ProcessEventDotComponents = React.memo(
                 lineHeight: '1',
                 fontWeight: 'bold',
                 fontSize: '0.8rem',
-                width: '100%',
+                width: 'fit-content',
                 margin: '0',
                 textAlign: 'left',
                 padding: '0',
@@ -492,18 +495,26 @@ const ProcessEventDotComponents = React.memo(
             >
               {descriptionText}
             </div>
-            <EuiButton fill={isLabelFilled} color={labelButtonFill} size="s">
+            <EuiButton
+              color={labelButtonFill}
+              data-test-subject="nodeLabel"
+              fill={isLabelFilled}
+              id={labelId}
+              size="s"
+              tabIndex={-1}
+            >
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
                   {eventModel.eventName(event)}
                 </span>
               </span>
             </EuiButton>
-            {magFactorX >= 2 && (
+            {magFactorX >= 1.3 && (
               <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false} className="related-dropdown">
                   <NodeSubMenu
-                    buttonColor={labelButtonFill}
+                    buttonBorderColor={labelButtonFill}
+                    buttonFill={colorMap.resolverBackground}
                     menuTitle={subMenuAssets.relatedEvents.title}
                     optionsWithActions={relatedEventStatusOrOptions}
                     menuAction={handleRelatedEventRequest}
@@ -511,7 +522,8 @@ const ProcessEventDotComponents = React.memo(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NodeSubMenu
-                    buttonColor={labelButtonFill}
+                    buttonBorderColor={labelButtonFill}
+                    buttonFill={colorMap.resolverBackground}
                     menuTitle={subMenuAssets.relatedAlerts.title}
                     menuAction={handleRelatedAlertsRequest}
                   />
@@ -549,16 +561,24 @@ export const ProcessEventDot = styled(ProcessEventDotComponents)`
   & .backing {
     stroke-dasharray: 500;
     stroke-dashoffset: 500;
+    fill-opacity: 0;
   }
+  &:hover:not([aria-current]) .backing {
+    transition-property: fill-opacity;
+    transition-duration: 0.25s;
+    fill-opacity: 0.06;
+  }
+
   &[aria-current] .backing {
     transition-property: stroke-dashoffset;
     transition-duration: 1s;
     stroke-dashoffset: 0;
   }
 
-  & .related-dropdown {
-    width: 4.5em;
+  & .euiButton {
+    width: fit-content;
   }
+
   & .euiSelectableList-bordered {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;

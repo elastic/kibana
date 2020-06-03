@@ -15,8 +15,11 @@ import {
   Matrix3,
   AdjacentProcessMap,
   Vector2,
+  RelatedEventData,
+  RelatedEventDataEntryWithStats,
+  EdgeLineMetadata,
 } from '../../types';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverEvent, EndpointEvent } from '../../../../common/endpoint/types';
 import { eventTimestamp } from '../../../../common/endpoint/models/event';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
 import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
@@ -27,7 +30,7 @@ import {
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';
-import { getRelativeTimeDifference } from '../../lib/dates';
+import { getRelativeTimeDifference } from '../../lib/date';
 
 const unit = 100;
 const distanceBetweenNodesInUnits = 2;
@@ -155,8 +158,8 @@ function processEdgeLineSegments(
   positions: ProcessPositions
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
-  let elapsedTime: string = '';
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
+    const edgeLineMetadata: EdgeLineMetadata = {};
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -178,7 +181,7 @@ function processEdgeLineSegments(
     const parentTime = eventTimestamp(parent);
     const processTime = eventTimestamp(process);
     if (parentTime && processTime) {
-      elapsedTime = getRelativeTimeDifference(parentTime, processTime);
+      edgeLineMetadata.elapsedTime = getRelativeTimeDifference(parentTime, processTime);
     }
 
     /**
@@ -199,7 +202,7 @@ function processEdgeLineSegments(
     const lineFromProcessToMidwayLine: EdgeLineSegment = [
       [position[0], midwayY],
       position,
-      elapsedTime,
+      edgeLineMetadata,
     ];
 
     const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
@@ -207,7 +210,7 @@ function processEdgeLineSegments(
 
     if (metadata.isOnlyChild) {
       // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
-      edgeLineSegments.push([parentPosition, position, elapsedTime]);
+      edgeLineSegments.push([parentPosition, position, edgeLineMetadata]);
     } else if (isFirstChild) {
       /**
        * If the parent has multiple children, we draw the 'midway' line, and the line from the
@@ -490,12 +493,12 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
 
     for (const edgeLineSegment of edgeLineSegments) {
       // const transformedSegment = [];
-      const [startPoint, endPoint, elapsedTime] = edgeLineSegment;
+      const [startPoint, endPoint, edgeLineMetadata] = edgeLineSegment;
       const transformedSegment: EdgeLineSegment = [
         applyMatrix3(startPoint, isometricTransformMatrix),
         applyMatrix3(endPoint, isometricTransformMatrix),
-        elapsedTime,
       ];
+      if (edgeLineMetadata) transformedSegment.push(edgeLineMetadata);
 
       transformedEdgeLineSegments.push(transformedSegment);
     }

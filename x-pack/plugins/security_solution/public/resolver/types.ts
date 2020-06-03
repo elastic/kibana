@@ -241,10 +241,18 @@ export type ProcessWidths = Map<ResolverEvent, number>;
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
 export type ProcessPositions = Map<ResolverEvent, Vector2>;
+
 /**
- * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
+ * Values shared between two vertices joined by an edge line.
  */
-export type EdgeLineSegment = [Vector2, Vector2, string?];
+export interface EdgeLineMetadata {
+  elapsedTime?: string;
+}
+
+/**
+ * A tuple of 2 vector2 points and optional EdgeLineMetadata forming a polyline. Used to connect process nodes in the graph and display relevant information.
+ */
+export type EdgeLineSegment = [Vector2, Vector2, EdgeLineMetadata?];
 
 /**
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.

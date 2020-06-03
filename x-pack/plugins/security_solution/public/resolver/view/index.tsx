@@ -15,7 +15,7 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions, useResolverTheme } from './defs';
+import { SymbolDefinitions, useResolverTheme } from './assets';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -88,9 +88,9 @@ export const Resolver = styled(
             tabIndex={0}
             aria-activedescendant={activeDescendantId || undefined}
           >
-            {edgeLineSegments.map(([startPosition, endPosition, elapsedTime], index) => (
+            {edgeLineSegments.map(([startPosition, endPosition, edgeLineMetadata], index) => (
               <EdgeLine
-                elapsedTime={elapsedTime}
+                edgeLineMetadata={edgeLineMetadata}
                 key={index}
                 startPosition={startPosition}
                 endPosition={endPosition}
