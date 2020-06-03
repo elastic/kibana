@@ -172,7 +172,9 @@ export const buildExpression = (
 
                     xAccessor: [layer.xAccessor],
                     yScaleType: [
-                      getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
+                      ScaleType.Linear,
+                      // getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
+                      // 'linear',
                     ],
                     xScaleType: [
                       getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),

@@ -21,7 +21,9 @@ export function prependDatasourceExpression(
   >,
   frameState: EditorFrameState
 ): Ast | null {
-  const datasourceExpressions: Array<[string, Ast | string]> = [];
+  const datasourceExpressions: Array<[string, Ast]> = [];
+
+  const { prejoin, join, postjoin, timeRangeOverrides } = frameState.pipeline;
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
     const state = datasourceStates[datasourceId].state;
@@ -31,7 +33,15 @@ export function prependDatasourceExpression(
       const result = datasource.toExpression(state, layerId);
       const resultAst = typeof result === 'string' ? fromExpression(result) : result;
 
-      const hasTimeShift = frameState.pipeline.timeRangeOverrides[layerId];
+      const hasTimeShift = timeRangeOverrides[layerId];
+
+      const prejoinChain: ExpressionFunctionAST[] = [];
+
+      if (prejoin[layerId]) {
+        prejoin[layerId].forEach((j) => {
+          prejoinChain.push(j.expression);
+        });
+      }
 
       if (resultAst) {
         if (hasTimeShift) {
@@ -48,11 +58,18 @@ export function prependDatasourceExpression(
                   },
                 },
                 ...resultAst.chain,
+                ...prejoinChain,
               ],
             },
           ]);
         } else {
-          datasourceExpressions.push([layerId, resultAst]);
+          datasourceExpressions.push([
+            layerId,
+            {
+              type: 'expression',
+              chain: [...resultAst.chain, ...prejoinChain],
+            },
+          ]);
         }
       }
     });
@@ -61,20 +78,12 @@ export function prependDatasourceExpression(
   if (datasourceExpressions.length === 0 || visualizationExpression === null) {
     return null;
   }
-  const parsedDatasourceExpressions: Array<[
-    string,
-    Ast
-  ]> = datasourceExpressions.map(([layerId, expr]) => [
-    layerId,
-    typeof expr === 'string' ? fromExpression(expr) : expr,
-  ]);
-
   const datafetchExpression: ExpressionFunctionAST = {
     type: 'function',
     function: 'lens_merge_tables',
     arguments: {
-      layerIds: parsedDatasourceExpressions.map(([id]) => id),
-      tables: parsedDatasourceExpressions.map(([id, expr]) => expr),
+      layerIds: datasourceExpressions.map(([id]) => id),
+      tables: datasourceExpressions.map(([id, expr]) => expr),
     },
   };
 
@@ -83,9 +92,38 @@ export function prependDatasourceExpression(
       ? fromExpression(visualizationExpression)
       : visualizationExpression;
 
+  const postjoinChain: ExpressionFunctionAST[] = [];
+  if (postjoin.length) {
+    postjoin.forEach((j) => {
+      postjoinChain.push(j.expression);
+    });
+  }
+
+  if (join) {
+    return {
+      type: 'expression',
+      chain: [
+        datafetchExpression,
+        {
+          type: 'function',
+          function: 'lens_join',
+          arguments: {
+            joinType: [join.joinType],
+            leftLayerId: [join.leftLayerId],
+            rightLayerId: [join.rightLayerId],
+            leftColumnId: join.leftColumnId ? [join.leftColumnId] : [],
+            rightColumnId: join.rightColumnId ? [join.rightColumnId] : [],
+          },
+        },
+        ...postjoinChain,
+        ...parsedVisualizationExpression.chain,
+      ],
+    };
+  }
+
   return {
     type: 'expression',
-    chain: [datafetchExpression, ...parsedVisualizationExpression.chain],
+    chain: [datafetchExpression, ...postjoinChain, ...parsedVisualizationExpression.chain],
   };
 }
 

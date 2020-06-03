@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { EditorFrameProps } from './index';
 import { Document } from '../../persistence/saved_object_store';
 
@@ -16,7 +17,7 @@ export interface PreviewState {
 }
 
 export type TimeRangeOverride = 'default' | 'none' | 'allBefore' | 'previous';
-export type JoinType = 'full' | 'left_outer' | 'right_outer' | 'inner' | 'repeat';
+export type JoinType = 'full' | 'left_outer' | 'right_outer' | 'inner' | 'cross';
 
 export interface JoinState {
   joinType: JoinType;
@@ -26,11 +27,21 @@ export interface JoinState {
   rightColumnId?: string;
 }
 
+interface PipelineOperation {
+  type: string;
+  label: string;
+  layerId: string;
+  inputColumns?: Array<{ from: string; to: string; }>;
+  addedColumnId?: string;
+  hiddenColumns?: string[];
+  expression: ExpressionFunctionAST;
+}
+
 export interface PipelineState {
   /** Operations are per Layer ID: Sequence of operation  */
-  prejoin: Record<string, unknown[]>;
+  prejoin: Record<string, PipelineOperation[]>;
   join?: JoinState;
-  postjoin: unknown[];
+  postjoin: PipelineOperation[];
   /** Allows each layer to use a different time range  */
   timeRangeOverrides: Record<string, TimeRangeOverride>;
 }

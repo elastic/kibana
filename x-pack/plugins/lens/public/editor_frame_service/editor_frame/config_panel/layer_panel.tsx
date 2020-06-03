@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFormRow,
   EuiTabbedContent,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -86,6 +87,8 @@ export function LayerPanel(
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
+
+  const datasourceColumns = datasourcePublicAPI.getTableSpec().map(({ columnId }) => columnId);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -172,15 +175,53 @@ export function LayerPanel(
                       content: (
                         <>
                           <EuiSpacer size="s" />
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              core: props.core,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                            }}
-                          />
+
+                          {props.frameState.pipeline.join ? (
+                            <>
+                              <EuiSelect
+                                options={datasourceColumns
+                                  .map((id) => ({
+                                    text: datasourcePublicAPI.getOperationForColumnId(id)?.label,
+                                    value: id,
+                                  }))
+                                  .concat(
+                                    props.frameState.pipeline.postjoin
+                                      .filter((p) => p.addedColumnId)
+                                      .map((p) => ({
+                                        text: p.label,
+                                        value: p.addedColumnId!,
+                                      }))
+                                  )}
+                                value={accessor}
+                                onChange={(e) => {
+                                  const previous = activeVisualization.removeDimension({
+                                    layerId,
+                                    columnId: accessor,
+                                    prevState: props.visualizationState,
+                                  });
+
+                                  props.updateVisualization(
+                                    activeVisualization.setDimension({
+                                      layerId,
+                                      groupId: group.groupId,
+                                      columnId: e.target.value,
+                                      prevState: previous,
+                                    })
+                                  );
+                                }}
+                              />
+                            </>
+                          ) : (
+                            <NativeRenderer
+                              render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                              nativeProps={{
+                                ...layerDatasourceConfigProps,
+                                core: props.core,
+                                columnId: accessor,
+                                filterOperations: group.filterOperations,
+                              }}
+                            />
+                          )}
                         </>
                       ),
                     },
@@ -238,32 +279,45 @@ export function LayerPanel(
                         accessor={accessor}
                         groupId={group.groupId}
                         trigger={
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
-                              togglePopover: () => {
-                                if (popoverState.isOpen) {
-                                  setPopoverState({
-                                    isOpen: false,
-                                    openId: null,
-                                    addingToGroupId: null,
-                                    tabId: null,
-                                  });
-                                } else {
-                                  setPopoverState({
-                                    isOpen: true,
-                                    openId: accessor,
-                                    addingToGroupId: null, // not set for existing dimension
-                                    tabId: 'datasource',
-                                  });
-                                }
-                              },
-                            }}
-                          />
+                          datasourcePublicAPI
+                            .getTableSpec()
+                            .map(({ columnId }) => columnId)
+                            .includes(accessor) ? (
+                            <NativeRenderer
+                              render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                              nativeProps={{
+                                ...layerDatasourceConfigProps,
+                                columnId: accessor,
+                                filterOperations: group.filterOperations,
+                                suggestedPriority: group.suggestedPriority,
+                                togglePopover: () => {
+                                  if (popoverState.isOpen) {
+                                    setPopoverState({
+                                      isOpen: false,
+                                      openId: null,
+                                      addingToGroupId: null,
+                                      tabId: null,
+                                    });
+                                  } else {
+                                    setPopoverState({
+                                      isOpen: true,
+                                      openId: accessor,
+                                      addingToGroupId: null, // not set for existing dimension
+                                      tabId: 'datasource',
+                                    });
+                                  }
+                                },
+                              }}
+                            />
+                          ) : (
+                            <>
+                              {
+                                props.frameState.pipeline.postjoin.find(
+                                  ({ addedColumnId }) => addedColumnId === accessor
+                                )?.label
+                              }
+                            </>
+                          )
                         }
                         panel={
                           <EuiTabbedContent
@@ -296,11 +350,14 @@ export function LayerPanel(
                           trackUiEvent('indexpattern_dimension_removed');
                           props.updateAll(
                             datasourceId,
-                            layerDatasource.removeColumn({
-                              layerId,
-                              columnId: accessor,
-                              prevState: layerDatasourceState,
-                            }),
+                            // If pipeline is active, only remove from vis
+                            props.frameState.pipeline.join
+                              ? layerDatasourceState
+                              : layerDatasource.removeColumn({
+                                  layerId,
+                                  columnId: accessor,
+                                  prevState: layerDatasourceState,
+                                }),
                             activeVisualization.removeDimension({
                               layerId,
                               columnId: accessor,
@@ -387,33 +444,91 @@ export function LayerPanel(
                         </div>
                       }
                       panel={
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: newId,
-                            filterOperations: group.filterOperations,
-                            suggestedPriority: group.suggestedPriority,
+                        <EuiTabbedContent
+                          tabs={[
+                            {
+                              id: 'datasource',
+                              name: i18n.translate('xpack.lens.editorFrame.quickFunctionsLabel', {
+                                defaultMessage: 'Quick functions',
+                              }),
+                              content: (
+                                <>
+                                  <EuiSpacer size="s" />
 
-                            setState: (newState: unknown) => {
-                              props.updateAll(
-                                datasourceId,
-                                newState,
-                                activeVisualization.setDimension({
-                                  layerId,
-                                  groupId: group.groupId,
-                                  columnId: newId,
-                                  prevState: props.visualizationState,
-                                })
-                              );
-                              setPopoverState({
-                                isOpen: true,
-                                openId: newId,
-                                addingToGroupId: null, // clear now that dimension exists
-                                tabId: popoverState.tabId ?? 'datasource',
-                              });
+                                  {props.frameState.pipeline.join ? (
+                                    <>
+                                      <EuiSelect
+                                        options={datasourceColumns
+                                          .map((id) => ({
+                                            text: datasourcePublicAPI.getOperationForColumnId(id)
+                                              ?.label,
+                                            value: id,
+                                          }))
+                                          .concat(
+                                            props.frameState.pipeline.postjoin
+                                              .filter((p) => p.addedColumnId)
+                                              .map((p) => ({
+                                                text: p.label,
+                                                value: p.addedColumnId!,
+                                              }))
+                                          )}
+                                        value={newId}
+                                        onChange={(e) => {
+                                          props.updateVisualization(
+                                            activeVisualization.setDimension({
+                                              layerId,
+                                              groupId: group.groupId,
+                                              columnId: e.target.value,
+                                              prevState: props.visualizationState,
+                                            })
+                                          );
+                                        }}
+                                      />
+                                    </>
+                                  ) : (
+                                    <NativeRenderer
+                                      render={
+                                        props.datasourceMap[datasourceId].renderDimensionEditor
+                                      }
+                                      nativeProps={{
+                                        ...layerDatasourceConfigProps,
+                                        core: props.core,
+                                        columnId: newId,
+                                        filterOperations: group.filterOperations,
+                                        suggestedPriority: group.suggestedPriority,
+
+                                        setState: (newState: unknown) => {
+                                          props.updateAll(
+                                            datasourceId,
+                                            newState,
+                                            activeVisualization.setDimension({
+                                              layerId,
+                                              groupId: group.groupId,
+                                              columnId: newId,
+                                              prevState: props.visualizationState,
+                                            })
+                                          );
+                                          setPopoverState({
+                                            isOpen: true,
+                                            openId: newId,
+                                            addingToGroupId: null, // clear now that dimension exists
+                                            tabId: popoverState.tabId ?? 'datasource',
+                                          });
+                                        },
+                                      }}
+                                    />
+                                  )}
+                                </>
+                              ),
                             },
+                          ]}
+                          // initialSelectedTab={'datasource'}
+                          size="s"
+                          onTabClick={(tab) => {
+                            setPopoverState({
+                              ...popoverState,
+                              tabId: tab.id as typeof popoverState['tabId'],
+                            });
                           }}
                         />
                       }

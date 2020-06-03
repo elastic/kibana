@@ -23,6 +23,7 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiSelect,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -70,7 +71,6 @@ export function PipelineModal(
     activeVisualization: Visualization;
   }
 ) {
-  const dragDropContext = useContext(DragContext);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isOpen: false,
     layerId: null,
@@ -83,13 +83,16 @@ export function PipelineModal(
     layerId: id,
     datasourceId: publicAPI.datasourceId,
     columns: publicAPI.getTableSpec().map(({ columnId }) => columnId),
+    operations: publicAPI
+      .getTableSpec()
+      .map(({ columnId }) => publicAPI.getOperationForColumnId(columnId)!),
   }));
 
   const usedLayers = props.activeVisualization.getLayerIds(props.visualizationState);
 
   const layerPanels = (
     <EuiFlexGroup direction="row">
-      {layers.map(({ layerId, datasourceId, columns }, index) => {
+      {layers.map(({ layerId, datasourceId, columns, operations }, index) => {
         const usedColumns = props.activeVisualization
           .getConfiguration({
             state: props.visualizationState,
@@ -104,8 +107,8 @@ export function PipelineModal(
               <EuiText>Layer {String.fromCharCode(index + 65)}</EuiText>
 
               {!usedLayers.includes(layerId) ? (
-                <EuiText>
-                  <EuiIcon type="eye" /> Not used in visualization
+                <EuiText size="s">
+                  <EuiIcon type="eyeClosed" /> Not used in visualization
                 </EuiText>
               ) : null}
 
@@ -130,35 +133,28 @@ export function PipelineModal(
                 </EuiFormRow>
               ) : null}
 
-              {columns.map((c) => (
+              {columns.map((c, i) => (
                 <div className="lnsLayerPanel__dimension" key={c}>
-                  <div className="lnsDimensionPopover__trigger">
-                    <NativeRenderer
-                      render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                      nativeProps={{
-                        layerId,
-                        columnId: c,
-                        state: props.datasourceStates[datasourceId].state,
-                        filterOperations: (o) => true,
-                        togglePopover: () => {
-                          if (popoverState.isOpen) {
-                            setPopoverState({
-                              isOpen: false,
-                              layerId: null,
-                              columnId: null,
-                            });
-                          } else {
-                            setPopoverState({
-                              isOpen: true,
-                              layerId,
-                              columnId: c,
-                            });
-                          }
-                        },
-                        dragDropContext,
-                      }}
-                    />
-                  </div>
+                  <EuiLink
+                    className="lnsDimensionPopover__trigger"
+                    onClick={() => {
+                      if (popoverState.isOpen) {
+                        setPopoverState({
+                          isOpen: false,
+                          layerId: null,
+                          columnId: null,
+                        });
+                      } else {
+                        setPopoverState({
+                          isOpen: true,
+                          layerId,
+                          columnId: c,
+                        });
+                      }
+                    }}
+                  >
+                    {operations[i].label}
+                  </EuiLink>
 
                   <EuiButtonIcon
                     data-test-subj="indexPattern-dimensionPopover-remove"
@@ -208,8 +204,8 @@ export function PipelineModal(
                   />
 
                   {!usedColumns.includes(c) ? (
-                    <EuiText>
-                      <EuiIcon type="eye" /> Not used in visualization
+                    <EuiText size="s">
+                      <EuiIcon type="eyeClosed" /> Not used in visualization
                     </EuiText>
                   ) : null}
                 </div>
@@ -254,6 +250,8 @@ export function PipelineModal(
       })}
     </EuiFlexGroup>
   );
+
+  const { prejoin, join, postjoin } = props.frameState.pipeline;
 
   return (
     <div className="lnsDataPanel__modal">
@@ -310,7 +308,7 @@ export function PipelineModal(
         <>
           <EuiText size="s">Join nodes</EuiText>
           <EuiSpacer size="s" />
-          {props.frameState.pipeline.join ? (
+          {join ? (
             <>
               <EuiFormRow
                 label={i18n.translate('xpack.pipeline_builder.joinNode.joinTypeLabel', {
@@ -318,7 +316,7 @@ export function PipelineModal(
                 })}
               >
                 <EuiSelect
-                  value={props.frameState.pipeline.join.joinType}
+                  value={join.joinType}
                   options={[
                     { value: 'full', text: 'Full join' },
                     { value: 'left_outer', text: 'Left outer join' },
@@ -332,7 +330,7 @@ export function PipelineModal(
                       newState: {
                         ...props.frameState.pipeline,
                         join: {
-                          ...props.frameState.pipeline.join,
+                          ...join,
                           joinType: e.target.value as JoinType,
                         },
                       },
@@ -340,7 +338,7 @@ export function PipelineModal(
                   }}
                 />
               </EuiFormRow>
-              {props.frameState.pipeline.join.joinType !== 'full' ? (
+              {join.joinType !== 'full' ? (
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
                     <EuiFormRow
@@ -348,20 +346,22 @@ export function PipelineModal(
                         defaultMessage: 'Column from A',
                       })}
                     >
-                      <ColumnSelect
-                        value={props.frameState.pipeline.join?.leftColumnId}
-                        columnIds={layers[0].columns}
-                        datasource={props.datasourceMap.indexpattern}
-                        layerId={layers[0].layerId}
-                        datasourceState={props.datasourceStates.indexpattern.state}
-                        onChange={(id) => {
+                      <EuiSelect
+                        value={join?.leftColumnId}
+                        options={[{ text: '' }].concat(
+                          layers[0].columns.map((id, pos) => ({
+                            text: layers[0].operations[pos].label,
+                            value: id,
+                          }))
+                        )}
+                        onChange={(e) => {
                           props.dispatch({
                             type: 'SET_PIPELINE',
                             newState: {
                               ...props.frameState.pipeline,
                               join: {
-                                ...props.frameState.pipeline.join,
-                                leftColumnId: id,
+                                ...join,
+                                leftColumnId: e.target.value,
                               },
                             },
                           });
@@ -375,20 +375,22 @@ export function PipelineModal(
                         defaultMessage: 'Column from B',
                       })}
                     >
-                      <ColumnSelect
-                        value={props.frameState.pipeline.join?.rightColumnId}
-                        columnIds={layers[0].columns}
-                        datasource={props.datasourceMap.indexpattern}
-                        layerId={layers[0].layerId}
-                        datasourceState={props.datasourceStates.indexpattern.state}
-                        onChange={(id) => {
+                      <EuiSelect
+                        value={join?.rightColumnId}
+                        options={[{ text: '' }].concat(
+                          layers[1].columns.map((id, pos) => ({
+                            text: layers[1].operations[pos].label,
+                            value: id,
+                          }))
+                        )}
+                        onChange={(e) => {
                           props.dispatch({
                             type: 'SET_PIPELINE',
                             newState: {
                               ...props.frameState.pipeline,
                               join: {
-                                ...props.frameState.pipeline.join,
-                                rightColumnId: id,
+                                ...join,
+                                rightColumnId: e.target.value,
                               },
                             },
                           });
@@ -403,15 +405,28 @@ export function PipelineModal(
             <EuiButton
               onClick={() => {
                 props.dispatch({
-                  type: 'SET_PIPELINE',
-                  newState: {
-                    ...props.frameState.pipeline,
-                    join: {
-                      joinType: 'full',
-                      leftLayerId: layers[0].layerId,
-                      rightLayerId: layers[1].layerId,
+                  type: 'UPDATE_STATE',
+                  subType: 'ADD_JOIN',
+                  updater: (state) => ({
+                    ...state,
+                    pipeline: {
+                      ...state.pipeline,
+                      join: {
+                        joinType: 'full',
+                        leftLayerId: layers[0].layerId,
+                        rightLayerId: layers[1].layerId,
+                      },
                     },
-                  },
+                    // Remove the right layer from the visualization...
+                    // this is basically a hack
+                    visualization: {
+                      ...state.visualization,
+                      state: props.activeVisualization.removeLayer(
+                        state.visualization.state,
+                        layers[1].layerId
+                      ),
+                    },
+                  }),
                 });
               }}
             >
@@ -421,7 +436,369 @@ export function PipelineModal(
         </>
       ) : null}
 
-      <EuiText size="s">Manipulation</EuiText>
+      {join ? (
+        <>
+          <EuiText size="s">Table transformation</EuiText>
+
+          {postjoin.length ? (
+            <>
+              {postjoin.map((j, i) => {
+                // const mappings = j.expression.arguments.
+                return (
+                  <>
+                    <EuiPanel>
+                      <EuiText>Calculated math column</EuiText>
+
+                      {(j.inputColumns ?? []).map(({ from, to }, index) => {
+                        return (
+                          <>
+                            <EuiFlexGroup direction="row">
+                              <EuiFlexItem>
+                                <EuiFormRow label="Input column">
+                                  <EuiSelect
+                                    value={from}
+                                    options={layers[0].columns
+                                      // .filter(
+                                      //   (id, pos) => layers[0].operations[pos].dataType === 'number'
+                                      // )
+                                      .map((id, pos) => ({
+                                        text: layers[0].operations[pos].label,
+                                        value: id,
+                                      }))
+                                      .concat(
+                                        layers[1].columns
+                                          // .filter(
+                                          //   (id, pos) =>
+                                          //     layers[1].operations[pos].dataType === 'number'
+                                          // )
+                                          .map((id, pos) => ({
+                                            text: layers[1].operations[pos].label,
+                                            value: id,
+                                          }))
+                                      )}
+                                    onChange={(e) => {
+                                      const newInputColumns = j.inputColumns?.map((c, i2) =>
+                                        i2 === index ? { from: e.target.value, to } : c
+                                      );
+                                      const mapping: Record<string, string> = {};
+                                      newInputColumns?.forEach((c) => (mapping[c.to] = c.from));
+                                      const newOp = {
+                                        ...j,
+                                        inputColumns: newInputColumns,
+                                        expression: {
+                                          ...j.expression,
+                                          arguments: {
+                                            ...j.expression.arguments,
+                                            inputMapping: [JSON.stringify(mapping)],
+                                          },
+                                        },
+                                      };
+                                      props.dispatch({
+                                        type: 'SET_PIPELINE',
+                                        newState: {
+                                          ...props.frameState.pipeline,
+                                          postjoin: postjoin.map((p, pos) =>
+                                            pos === i ? newOp : p
+                                          ),
+                                        },
+                                      });
+                                    }}
+                                  />
+                                </EuiFormRow>
+                              </EuiFlexItem>
+
+                              <EuiFlexItem>
+                                <EuiFormRow label="New name">
+                                  <EuiFieldText
+                                    value={to}
+                                    onChange={(e) => {
+                                      const newInputColumns = j.inputColumns?.map((c, i2) =>
+                                        i2 === index ? { to: e.target.value, from } : c
+                                      );
+                                      const mapping: Record<string, string> = {};
+                                      newInputColumns?.forEach((c) => (mapping[c.to] = c.from));
+                                      const newOp = {
+                                        ...j,
+                                        inputColumns: newInputColumns,
+                                        expression: {
+                                          ...j.expression,
+                                          arguments: {
+                                            ...j.expression.arguments,
+                                            inputMapping: [JSON.stringify(mapping)],
+                                          },
+                                        },
+                                      };
+                                      props.dispatch({
+                                        type: 'SET_PIPELINE',
+                                        newState: {
+                                          ...props.frameState.pipeline,
+                                          postjoin: postjoin.map((p, pos) =>
+                                            pos === i ? newOp : p
+                                          ),
+                                        },
+                                      });
+                                    }}
+                                  />
+                                </EuiFormRow>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </>
+                        );
+                      })}
+
+                      <EuiButton
+                        onClick={() => {
+                          const newOp = { ...j, inputColumns: [...(j.inputColumns ?? []), {}] };
+                          props.dispatch({
+                            type: 'SET_PIPELINE',
+                            newState: {
+                              ...props.frameState.pipeline,
+                              postjoin: postjoin.map((p, pos) => (pos === i ? newOp : p)),
+                            },
+                          });
+                        }}
+                      >
+                        <EuiIcon type="plusInCircle" />
+                        Add input parameter
+                      </EuiButton>
+
+                      <EuiFormRow label="TinyMath expression">
+                        <EuiFieldText
+                          value={j.expression.arguments.expression[0]?.arguments?.expression[0]}
+                          onChange={(e) => {
+                            const newOp = {
+                              ...j,
+                              expression: {
+                                ...j.expression,
+                                arguments: {
+                                  ...j.expression.arguments,
+                                  expression: [
+                                    {
+                                      ...j.expression.arguments.expression[0],
+                                      chain: [
+                                        {
+                                          ...j.expression.arguments.expression[0].chain[0],
+                                          arguments: {
+                                            ...j.expression.arguments.expression[0].chain[0]
+                                              .arguments,
+                                            expression: [e.target.value],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              },
+                            };
+                            props.dispatch({
+                              type: 'SET_PIPELINE',
+                              newState: {
+                                ...props.frameState.pipeline,
+                                postjoin: postjoin.map((p, pos) => (pos === i ? newOp : p)),
+                              },
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+
+                      {/*
+                      <EuiFormRow label="Operation">
+                        <EuiSelect
+                          options={[
+                            {
+                              text: 'Add',
+                              value: 'add',
+                            },
+                            {
+                              text: 'Subtract',
+                              value: 'subtract',
+                            },
+                            {
+                              text: 'Divide',
+                              value: 'divide',
+                            },
+                            {
+                              text: 'Multiply',
+                              value: 'multiply',
+                            },
+                          ]}
+                          value={
+                            j.expression.arguments.operation
+                              ? j.expression.arguments.operation[0]
+                              : ''
+                          }
+                          onChange={(e) => {
+                            props.dispatch({
+                              type: 'SET_PIPELINE',
+                              newState: {
+                                ...props.frameState.pipeline,
+                                postjoin: postjoin.map((p, pos) =>
+                                  pos === i
+                                    ? {
+                                        ...j,
+                                        expression: {
+                                          ...j.expression,
+                                          arguments: {
+                                            ...j.expression.arguments,
+                                            operation: [e.target.value],
+                                          },
+                                        },
+                                      }
+                                    : p
+                                ),
+                              },
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+
+                      <EuiFormRow label="Left side">
+                        <EuiSelect
+                          value={
+                            j.expression.arguments?.left
+                              ? j.expression.arguments.left[0]
+                              : undefined
+                          }
+                          options={layers[0].columns
+                            .filter((id, pos) => layers[0].operations[pos].dataType === 'number')
+                            .map((id, pos) => ({
+                              text: layers[0].operations[pos].label,
+                              value: id,
+                            }))
+                            .concat(
+                              layers[1].columns
+                                .filter(
+                                  (id, pos) => layers[1].operations[pos].dataType === 'number'
+                                )
+                                .map((id, pos) => ({
+                                  text: layers[1].operations[pos].label,
+                                  value: id,
+                                }))
+                            )}
+                          onChange={(e) => {
+                            props.dispatch({
+                              type: 'SET_PIPELINE',
+                              newState: {
+                                ...props.frameState.pipeline,
+                                postjoin: postjoin.map((p, pos) =>
+                                  pos === i
+                                    ? {
+                                        ...j,
+                                        expression: {
+                                          ...j.expression,
+                                          arguments: {
+                                            ...j.expression.arguments,
+                                            left: [e.target.value],
+                                          },
+                                        },
+                                      }
+                                    : p
+                                ),
+                              },
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+
+                      <EuiFormRow label="Right side">
+                        <EuiSelect
+                          value={
+                            j.expression.arguments?.right
+                              ? j.expression.arguments.right[0]
+                              : undefined
+                          }
+                          options={layers[0].columns
+                            .filter((id, pos) => layers[0].operations[pos].dataType === 'number')
+                            .map((id, pos) => ({
+                              text: layers[0].operations[pos].label,
+                              value: id,
+                            }))
+                            .concat(
+                              layers[1].columns
+                                .filter(
+                                  (id, pos) => layers[1].operations[pos].dataType === 'number'
+                                )
+                                .map((id, pos) => ({
+                                  text: layers[1].operations[pos].label,
+                                  value: id,
+                                }))
+                            )}
+                          onChange={(e) => {
+                            props.dispatch({
+                              type: 'SET_PIPELINE',
+                              newState: {
+                                ...props.frameState.pipeline,
+                                postjoin: postjoin.map((p, pos) =>
+                                  pos === i
+                                    ? {
+                                        ...j,
+                                        expression: {
+                                          ...j.expression,
+                                          arguments: {
+                                            ...j.expression.arguments,
+                                            right: [e.target.value],
+                                          },
+                                        },
+                                      }
+                                    : p
+                                ),
+                              },
+                            });
+                          }}
+                        />
+                        </EuiFormRow>*/}
+                    </EuiPanel>
+                  </>
+                );
+              })}
+            </>
+          ) : null}
+
+          <EuiButton
+            onClick={() => {
+              props.dispatch({
+                type: 'SET_PIPELINE',
+                newState: {
+                  ...props.frameState.pipeline,
+                  postjoin: [
+                    ...postjoin,
+                    {
+                      type: 'math',
+                      label: 'Math',
+                      addedColumnId: 'math',
+                      layerId: layers[0].layerId,
+                      inputColumns: [],
+                      expression: {
+                        type: 'function',
+                        function: 'lens_multi_map',
+                        arguments: {
+                          layerId: [layers[0].layerId],
+                          inputMapping: ['{}'],
+                          outputId: ['math'],
+                          expression: [
+                            {
+                              type: 'expression',
+                              chain: [
+                                {
+                                  type: 'function',
+                                  function: 'math',
+                                  arguments: { expression: [''] },
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              });
+            }}
+          >
+            Add new transformation
+          </EuiButton>
+        </>
+      ) : null}
 
       {popoverState.isOpen ? (
         <EuiOverlayMask>
@@ -443,8 +820,6 @@ export function PipelineModal(
                   columnId: popoverState.columnId as string,
                   layerId: popoverState.layerId as string,
                   state: props.datasourceStates.indexpattern.state,
-                  // filterOperations: group.filterOperations,
-                  // suggestedPriority: group.suggestedPriority,
                   filterOperations: (o) => true,
 
                   setState: (newState: unknown) => {
@@ -462,12 +837,6 @@ export function PipelineModal(
                         };
                       },
                     });
-
-                    // setPopoverState({
-                    //   isOpen: false,
-                    //   layerId: null,
-                    //   columnId: null,
-                    // });
                   },
                 }}
               />
@@ -476,38 +845,5 @@ export function PipelineModal(
         </EuiOverlayMask>
       ) : null}
     </div>
-  );
-}
-
-function ColumnSelect(props: {
-  value?: string;
-  columnIds: string[];
-  onChange: (id: string) => void;
-  datasource: Datasource;
-  datasourceState: unknown;
-  layerId: string;
-}) {
-  const dragDropContext = useContext(DragContext);
-  return (
-    <EuiSuperSelect
-      valueOfSelected={props.value}
-      options={props.columnIds.map((c) => ({
-        value: c,
-        inputDisplay: (
-          <NativeRenderer
-            render={props.datasource.renderDimensionTrigger}
-            nativeProps={{
-              layerId: props.layerId,
-              columnId: c,
-              state: props.datasourceState,
-              filterOperations: (o) => true,
-              togglePopover: () => {},
-              dragDropContext,
-            }}
-          />
-        ),
-      }))}
-      onChange={props.onChange}
-    />
   );
 }

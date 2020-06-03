@@ -163,6 +163,9 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getConfiguration(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    if (!layer) {
+      return { groups: [] };
+    }
     return {
       groups: [
         {
