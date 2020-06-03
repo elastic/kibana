@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "3KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -51,7 +51,7 @@
   "type": "doc",
   "value": {
     "id": "3aVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -99,7 +99,7 @@
   "type": "doc",
   "value": {
     "id": "3qVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -145,7 +145,7 @@
   "type": "doc",
   "value": {
     "id": "36VN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -194,7 +194,7 @@
   "type": "doc",
   "value": {
     "id": "4KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -241,7 +241,7 @@
   "type": "doc",
   "value": {
     "id": "4aVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -288,7 +288,7 @@
   "type": "doc",
   "value": {
     "id": "4qVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -336,7 +336,7 @@
   "type": "doc",
   "value": {
     "id": "46VN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -383,7 +383,7 @@
   "type": "doc",
   "value": {
     "id": "5KVN2G8BYQH1gtPUuYk7",
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
