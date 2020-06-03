@@ -17,7 +17,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
-    loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./metrics_ui'));
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
