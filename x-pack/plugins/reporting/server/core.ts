@@ -31,7 +31,7 @@ export interface ReportingInternalSetup {
   licensing: LicensingPluginSetup;
   basePath: BasePath['get'];
   router: IRouter;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 interface ReportingInternalStart {

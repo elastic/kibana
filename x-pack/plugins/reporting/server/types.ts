@@ -158,7 +158,7 @@ export type ScreenshotsObservableFn = ({
 
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
