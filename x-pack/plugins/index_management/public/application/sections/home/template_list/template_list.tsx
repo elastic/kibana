@@ -7,6 +7,7 @@
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ScopedHistory } from 'kibana/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
@@ -144,6 +145,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           reload={reload}
           editTemplate={editTemplate}
           cloneTemplate={cloneTemplate}
+          history={history as ScopedHistory}
         />
       </Fragment>
     );

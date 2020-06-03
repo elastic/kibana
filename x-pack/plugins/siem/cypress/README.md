@@ -176,16 +176,16 @@ The current archives can be found in `x-pack/test/siem_cypress/es_archives/`.
     - siem-kibana
     - siem-es
     - jessie
-- closed_signals
-  - Set of data with 108 closed signals linked to "Signals test" custom rule.
+- closed_alerts
+  - Set of data with 108 closed alerts linked to "Alerts test" custom rule.
 - custome_rules
   - Set if data with just 4 custom activated rules. 
 - empty_kibana
   - Empty kibana board.
 - prebuilt_rules_loaded
   - Elastic prebuilt loaded rules and deactivated. 
-- signals
-  - Set of data with 108 opened signals linked to "Signals test" custom rule.
+- alerts
+  - Set of data with 108 opened alerts linked to "Alerts test" custom rule.
 
 ### How to generate a new archive
 

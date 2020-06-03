@@ -20,7 +20,7 @@ interface Props {
   disableNextButton: boolean;
   nextButtonText: string;
   closeFlyout: () => void;
-  hasLayerSelected: boolean;
+  hasPreviewLayers: boolean;
   isLoading: boolean;
 }
 
@@ -30,14 +30,14 @@ export const FlyoutFooter = ({
   disableNextButton,
   nextButtonText,
   closeFlyout,
-  hasLayerSelected,
+  hasPreviewLayers,
   isLoading,
 }: Props) => {
   const nextButton = showNextButton ? (
     <EuiButton
       data-test-subj="importFileButton"
-      disabled={!hasLayerSelected || disableNextButton || isLoading}
-      isLoading={hasLayerSelected && isLoading}
+      disabled={disableNextButton || !hasPreviewLayers || isLoading}
+      isLoading={isLoading}
       iconSide="right"
       iconType={'sortRight'}
       onClick={onClick}
