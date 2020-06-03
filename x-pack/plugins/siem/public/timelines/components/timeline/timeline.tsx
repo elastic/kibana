@@ -26,6 +26,7 @@ import {
   OnDataProviderEdited,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from './events';
 import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
@@ -180,7 +181,6 @@ export const TimelineComponent: React.FC<Props> = ({
         <TimelineHeaderContainer data-test-subj="timelineHeader">
           <TimelineHeader
             browserFields={browserFields}
-            id={id}
             indexPattern={indexPattern}
             dataProviders={dataProviders}
             filterManager={filterManager}
@@ -191,6 +191,7 @@ export const TimelineComponent: React.FC<Props> = ({
             onToggleDataProviderType={onToggleDataProviderType}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            timelineId={id}
             timelineType={timelineType}
           />
         </TimelineHeaderContainer>

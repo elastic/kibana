@@ -630,7 +630,6 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
             },
           }
         }
-        id="foo"
         indexPattern={
           Object {
             "fields": Array [
@@ -726,8 +725,11 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         onDataProviderRemoved={[MockFunction]}
         onToggleDataProviderEnabled={[MockFunction]}
         onToggleDataProviderExcluded={[MockFunction]}
+        onToggleDataProviderType={[MockFunction]}
         show={true}
         showCallOutUnauthorizedMsg={false}
+        timelineId="foo"
+        timelineType="default"
       />
     </TimelineHeaderContainer>
   </Styled(EuiFlyoutHeader)>

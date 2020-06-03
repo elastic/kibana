@@ -12,7 +12,9 @@ import {
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
+
 import { OnDataProviderEdited } from '../events';
 import { DataProviderType, QueryOperator, EXISTS_OPERATOR } from './data_provider';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
@@ -42,6 +44,7 @@ interface OwnProps {
   operator: QueryOperator;
   providerId: string;
   timelineId?: string;
+  timelineType?: TimelineType;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
@@ -73,6 +76,7 @@ interface GetProviderActionsProps {
   operator: QueryOperator;
   providerId: string;
   timelineId?: string;
+  timelineType?: TimelineType;
   toggleEnabled: () => void;
   toggleExcluded: () => void;
   toggleType: () => void;
@@ -93,6 +97,7 @@ export const getProviderActions = ({
   onFilterForFieldPresent,
   providerId,
   timelineId,
+  timelineType,
   toggleEnabled,
   toggleExcluded,
   toggleType,
@@ -132,11 +137,12 @@ export const getProviderActions = ({
       },
       {
         className: CONVERT_TO_FIELD_CLASS_NAME,
-        disabled: isLoading,
+        disabled:
+          isLoading || (type === DataProviderType.default && timelineType === TimelineType.default),
         icon: 'logstashFilter',
         name:
           type === DataProviderType.template
-            ? i18n.CONVERT_TO_STATIC_FIELD
+            ? i18n.CONVERT_TO_FIELD
             : i18n.CONVERT_TO_TEMPLATE_FIELD,
         onClick: toggleType,
       },
@@ -186,6 +192,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       operator,
       providerId,
       timelineId,
+      timelineType,
       toggleEnabledProvider,
       toggleExcludedProvider,
       toggleTypeProvider,
@@ -206,6 +213,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       operator,
       providerId,
       timelineId,
+      timelineType,
       toggleEnabled: toggleEnabledProvider,
       toggleExcluded: toggleExcludedProvider,
       toggleType: toggleTypeProvider,

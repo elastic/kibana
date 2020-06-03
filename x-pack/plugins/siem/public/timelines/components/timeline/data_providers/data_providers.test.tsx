@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
@@ -24,12 +25,14 @@ describe('DataProviders', () => {
       const wrapper = shallow(
         <DataProviders
           browserFields={{}}
-          id="foo"
+          timelineId="foo"
+          timelineType={TimelineType.default}
           dataProviders={mockDataProviders}
           onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
+          onToggleDataProviderType={jest.fn()}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -42,12 +45,14 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
+            timelineId="foo"
+            timelineType={TimelineType.default}
             dataProviders={dataProviders}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
           />
         </TestProviders>
       );
@@ -60,12 +65,14 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
+            timelineId="foo"
+            timelineType={TimelineType.default}
             dataProviders={mockDataProviders}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
           />
         </TestProviders>
       );

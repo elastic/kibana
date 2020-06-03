@@ -13,7 +13,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={false}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={true}
@@ -66,7 +76,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -119,7 +139,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -172,7 +202,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -225,7 +265,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -278,7 +328,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -331,7 +391,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -384,7 +454,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -437,7 +517,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -490,7 +580,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}
@@ -543,7 +643,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       <styled.div
         hideBadge={true}
       >
-        <AddFieldBadge />
+        <Memo(AddDataProviderPopoverComponent)
+          Button={
+            Object {
+              "$$typeof": Symbol(react.memo),
+              "compare": null,
+              "displayName": "AddFieldBadge",
+              "type": [Function],
+            }
+          }
+          timelineId="foo"
+        />
       </styled.div>
       <styled.div
         hideBadge={false}

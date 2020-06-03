@@ -10,6 +10,7 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
+  DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
@@ -143,6 +144,12 @@ export const updateDataProviderKqlQuery = actionCreator<{
   kqlQuery: string;
   providerId: string;
 }>('PROVIDER_EDIT_KQL_QUERY');
+
+export const updateDataProviderType = actionCreator<{
+  id: string;
+  type: DataProviderType;
+  providerId: string;
+}>('UPDATE_PROVIDER_TYPE');
 
 export const updateHighlightedDropAndProviderId = actionCreator<{
   id: string;

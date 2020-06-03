@@ -7,7 +7,7 @@
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
-import { DataProvider, QueryOperator } from './data_providers/data_provider';
+import { DataProvider, DataProviderType, QueryOperator } from './data_providers/data_provider';
 
 /** Invoked when a user clicks the close button to remove a data provider */
 export type OnDataProviderRemoved = (providerId: string, andProviderId?: string) => void;

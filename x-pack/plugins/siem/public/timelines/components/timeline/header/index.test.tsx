@@ -32,15 +32,16 @@ describe('Header', () => {
           browserFields={{}}
           dataProviders={mockDataProviders}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          id="foo"
+          timelineId="foo"
+          timelineType={TimelineType.default}
           indexPattern={indexPattern}
           onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
+          onToggleDataProviderType={jest.fn()}
           show={true}
           showCallOutUnauthorizedMsg={false}
-          timelineType={TimelineType.default}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -53,15 +54,16 @@ describe('Header', () => {
             browserFields={{}}
             dataProviders={mockDataProviders}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            id="foo"
+            timelineId="foo"
+            timelineType={TimelineType.default}
             indexPattern={indexPattern}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={false}
-            timelineType={TimelineType.default}
           />
         </TestProviders>
       );
@@ -76,15 +78,16 @@ describe('Header', () => {
             browserFields={{}}
             dataProviders={mockDataProviders}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            id="foo"
+            timelineId="foo"
+            timelineType={TimelineType.default}
             indexPattern={indexPattern}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
             show={false}
             showCallOutUnauthorizedMsg={false}
-            timelineType={TimelineType.default}
           />
         </TestProviders>
       );
@@ -99,15 +102,16 @@ describe('Header', () => {
             browserFields={{}}
             dataProviders={mockDataProviders}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            id="foo"
+            timelineId="foo"
+            timelineType={TimelineType.default}
             indexPattern={indexPattern}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={true}
-            timelineType={TimelineType.default}
           />
         </TestProviders>
       );

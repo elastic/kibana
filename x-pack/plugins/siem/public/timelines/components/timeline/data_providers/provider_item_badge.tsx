@@ -8,6 +8,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 
 import { OnDataProviderEdited } from '../events';
@@ -30,11 +31,12 @@ interface ProviderItemBadgeProps {
   providerId: string;
   register?: DataProvidersAnd;
   timelineId?: string;
+  timelineType?: TimelineType;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   val: string | number;
-  type: DataProviderType;
+  type?: DataProviderType;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -51,11 +53,12 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     providerId,
     register,
     timelineId,
+    timelineType,
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
     val,
-    type,
+    type = DataProviderType.default,
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -138,6 +141,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
             operator={operator}
             providerId={providerId}
             timelineId={timelineId}
+            timelineType={timelineType}
             toggleEnabledProvider={onToggleEnabledProvider}
             toggleExcludedProvider={onToggleExcludedProvider}
             toggleTypeProvider={onToggleTypeProvider}

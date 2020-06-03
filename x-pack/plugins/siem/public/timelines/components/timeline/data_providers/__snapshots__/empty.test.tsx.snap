@@ -37,6 +37,16 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
     >
       query
     </Text>
+    <Text
+      color="subdued"
+      size="s"
+    >
+      or click
+    </Text>
+    <Memo(AddDataProviderPopoverComponent)
+      Button={[Function]}
+      timelineId="test"
+    />
   </NoWrap>
 </EmptyContainer>
 `;

@@ -4,44 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiContextMenu, EuiFlexItem, EuiPopover, EuiIcon } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useState } from 'react';
+import { EuiContextMenu, EuiFlexItem, EuiPopover, EuiIcon } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
+import { useWithSource } from '../../../../common/containers/source';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline } from './helpers';
-import { DataProvider, DataProviderType } from './data_provider';
+import { DataProviderType } from './data_provider';
+import { timelineSelectors } from '../../../store/timeline';
 
 const AddDataProviderPopoverComponent: React.FC<{
-  dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
   timelineId: string;
-  browserFields: BrowserFields;
-  timelineType: TimelineType;
-}> = ({ dataProviders, indexPattern, timelineId, browserFields, timelineType }) => {
+  Button: React.ComponentType<{ onClick: () => void }>;
+}> = ({ Button, timelineId }) => {
   const dispatch = useDispatch();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
+  const { dataProviders, timelineType } = timelineById[timelineId] ?? {};
+  const { indexPattern, browserFields } = useWithSource('default');
 
-  if (!indexPattern) return <></>;
+  const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
+    setIsAddFilterPopoverOpen,
+  ]);
 
-  const button = (
-    <EuiButtonEmpty
-      size="xs"
-      onClick={() => setIsAddFilterPopoverOpen(true)}
-      data-test-subj="addFilter"
-      className="globalFilterBar__addButton"
-    >
-      {'+ '}
-      <FormattedMessage
-        id="data.filter.filterBar.addFilterButtonLabel"
-        defaultMessage="Add filter"
-      />
-    </EuiButtonEmpty>
+  const handleClosePopover = useCallback(() => setIsAddFilterPopoverOpen(false), [
+    setIsAddFilterPopoverOpen,
+  ]);
+
+  const handleDataProviderEdited = useCallback(
+    ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
+      addContentToTimeline({
+        dataProviders,
+        destination: {
+          droppableId: `droppableId.timelineProviders.${timelineId}.group.${dataProviders.length}`,
+          index: 0,
+        },
+        dispatch,
+        onAddedToTimeline: handleClosePopover,
+        providerToAdd: {
+          id: providerId,
+          name: value,
+          enabled: true,
+          excluded,
+          kqlQuery: '',
+          type,
+          queryMatch: {
+            displayField: undefined,
+            displayValue: undefined,
+            field,
+            value,
+            operator,
+          },
+          and: [],
+        },
+        timelineId,
+      });
+    },
+    [timelineId, dataProviders]
   );
+
+  if (!indexPattern || !browserFields) return <></>;
 
   const panels = [
     {
@@ -69,45 +93,8 @@ const AddDataProviderPopoverComponent: React.FC<{
           browserFields={browserFields}
           field=""
           isExcluded={false}
-          onDataProviderEdited={({
-            andProviderId,
-            excluded,
-            field,
-            id,
-            operator,
-            providerId,
-            value,
-            type,
-          }) => {
-            addContentToTimeline({
-              dataProviders,
-              destination: {
-                droppableId: `droppableId.timelineProviders.${timelineId}.group.${dataProviders.length}`,
-                index: 0,
-              },
-              dispatch,
-              onAddedToTimeline: () => setIsAddFilterPopoverOpen(false),
-              providerToAdd: {
-                id,
-                name,
-                enabled: true,
-                excluded,
-                kqlQuery: '',
-                type,
-                queryMatch: {
-                  displayField: undefined,
-                  displayValue: undefined,
-                  field,
-                  value,
-                  operator,
-                },
-                and: [],
-              },
-              timelineId,
-            });
-          }}
+          onDataProviderEdited={handleDataProviderEdited}
           operator=":"
-          providerId="providerId"
           timelineId={timelineId}
           value=""
           type={DataProviderType.default}
@@ -123,45 +110,8 @@ const AddDataProviderPopoverComponent: React.FC<{
           browserFields={browserFields}
           field=""
           isExcluded={false}
-          onDataProviderEdited={({
-            andProviderId,
-            excluded,
-            field,
-            id,
-            operator,
-            providerId,
-            value,
-            type,
-          }) => {
-            addContentToTimeline({
-              dataProviders,
-              destination: {
-                droppableId: `droppableId.timelineProviders.${timelineId}.group.${dataProviders.length}`,
-                index: 0,
-              },
-              dispatch,
-              onAddedToTimeline: () => setIsAddFilterPopoverOpen(false),
-              providerToAdd: {
-                id,
-                name,
-                enabled: true,
-                excluded,
-                kqlQuery: '',
-                type,
-                queryMatch: {
-                  displayField: undefined,
-                  displayValue: undefined,
-                  field,
-                  value,
-                  operator,
-                },
-                and: [],
-              },
-              timelineId,
-            });
-          }}
+          onDataProviderEdited={handleDataProviderEdited}
           operator=":"
-          providerId="providerId"
           timelineId={timelineId}
           value=""
           type={DataProviderType.template}
@@ -174,9 +124,9 @@ const AddDataProviderPopoverComponent: React.FC<{
     <EuiFlexItem grow={false}>
       <EuiPopover
         id="addFilterPopover"
-        button={button}
+        button={<Button onClick={handleOpenPopover} />}
         isOpen={isAddFilterPopoverOpen}
-        closePopover={() => setIsAddFilterPopoverOpen(false)}
+        closePopover={handleClosePopover}
         anchorPosition="downLeft"
         withTitle
         panelPaddingSize="none"

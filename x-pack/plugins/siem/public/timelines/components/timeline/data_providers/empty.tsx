@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../and_or_badge';
+import { AddDataProviderPopover } from './add_data_provider_popover';
 
 import * as i18n from './translations';
 
@@ -73,11 +74,12 @@ const NoWrap = styled.div`
 NoWrap.displayName = 'NoWrap';
 interface Props {
   showSmallMsg?: boolean;
+  timelineId: string;
 }
 /**
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
-export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
+export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) => (
   <EmptyContainer
     className="timeline-drop-area-empty"
     data-test-subj="empty"
@@ -104,6 +106,10 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
           <Text color="subdued" size="s">
             {i18n.QUERY}
           </Text>
+          <Text color="subdued" size="s">
+            {i18n.OR_CLICK}
+          </Text>
+          <AddDataProviderPopover timelineId={timelineId} Button={AddDataProviderPopoverButton} />
         </NoWrap>
       </>
     )}
@@ -112,3 +118,14 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
 ));
 
 Empty.displayName = 'Empty';
+
+const AddDataProviderPopoverButton = ({ onClick }: { onClick: () => void }) => (
+  <EuiButtonEmpty
+    size="xs"
+    onClick={onClick}
+    data-test-subj="addFilter"
+    className="globalFilterBar__addButton"
+  >
+    <Text size="s">{i18n.ADD_FILTER}</Text>
+  </EuiButtonEmpty>
+);

@@ -50,18 +50,23 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
+      const timelineResultsType = searchResults[0]?.timelineType;
       const actions: ActionTimelineToShow[] = ['duplicate'];
 
       if (onDeleteSelected != null && deleteTimelines != null) {
         actions.unshift('delete');
       }
 
-      if (timelineType === TimelineType.template) {
-        actions.unshift('createFromTemplate');
+      if (timelineResultsType === TimelineType.template) {
+        actions.unshift('createTimelineFromTemplate');
+      }
+
+      if (timelineResultsType !== TimelineType.template) {
+        actions.unshift('createTemplateFromTimeline');
       }
 
       return actions.filter((action) => !hideActions.includes(action));
-    }, [onDeleteSelected, deleteTimelines, hideActions]);
+    }, [onDeleteSelected, deleteTimelines, hideActions, searchResults]);
 
     return (
       <>

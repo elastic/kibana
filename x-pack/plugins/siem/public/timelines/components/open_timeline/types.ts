@@ -82,7 +82,7 @@ export type OnOpenTimeline = ({
   timelineType,
 }: {
   duplicate: boolean;
-  timelineId?: string;
+  timelineId: string;
   timelineType?: TimelineTypeLiteral;
 }) => void;
 

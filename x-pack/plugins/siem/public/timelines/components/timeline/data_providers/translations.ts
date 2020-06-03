@@ -29,6 +29,14 @@ export const DROP_ANYTHING = i18n.translate('xpack.siem.dataProviders.dropAnythi
   defaultMessage: 'Drop anything',
 });
 
+export const OR_CLICK = i18n.translate('xpack.siem.dataProviders.orClick', {
+  defaultMessage: 'or click',
+});
+
+export const ADD_FILTER = i18n.translate('xpack.siem.dataProviders.addFilter', {
+  defaultMessage: 'Add filter',
+});
+
 export const EDIT = i18n.translate('xpack.siem.dataProviders.edit', {
   defaultMessage: 'Edit',
 });

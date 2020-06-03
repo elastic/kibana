@@ -8,6 +8,7 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import {
@@ -29,7 +30,8 @@ import { Providers } from './providers';
 
 interface Props {
   browserFields: BrowserFields;
-  id: string;
+  timelineId: string;
+  timelineType: TimelineType;
   dataProviders: DataProvider[];
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -93,8 +95,9 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
 export const DataProviders = React.memo<Props>(
   ({
     browserFields,
-    id,
     dataProviders,
+    timelineId,
+    timelineType,
     onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
@@ -113,8 +116,9 @@ export const DataProviders = React.memo<Props>(
                 {dataProviders != null && dataProviders.length ? (
                   <Providers
                     browserFields={browserFields}
-                    id={id}
                     dataProviders={dataProviders}
+                    timelineId={timelineId}
+                    timelineType={timelineType}
                     onDataProviderEdited={onDataProviderEdited}
                     onDataProviderRemoved={onDataProviderRemoved}
                     onToggleDataProviderEnabled={onToggleDataProviderEnabled}
@@ -122,8 +126,11 @@ export const DataProviders = React.memo<Props>(
                     onToggleDataProviderType={onToggleDataProviderType}
                   />
                 ) : (
-                  <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(id)}>
-                    <Empty />
+                  <DroppableWrapper
+                    isDropDisabled={isLoading}
+                    droppableId={getDroppableId(timelineId)}
+                  >
+                    <Empty timelineId={timelineId} />
                   </DroppableWrapper>
                 )}
               </>

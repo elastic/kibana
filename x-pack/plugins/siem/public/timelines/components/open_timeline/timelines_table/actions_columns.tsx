@@ -105,7 +105,7 @@ export const getActionsColumns = ({
 
   return [
     {
-      width: '40px',
+      width: '80px',
       actions: [
         actionTimelineToShow.includes('createTimelineFromTemplate')
           ? createTimelineFromTemplate

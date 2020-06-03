@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, startsWith, endsWith } from 'lodash/fp';
 import {
   EuiButton,
   EuiComboBox,
@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
@@ -57,7 +57,7 @@ interface Props {
   isExcluded: boolean;
   onDataProviderEdited: OnDataProviderEdited;
   operator: QueryOperator;
-  providerId: string;
+  providerId?: string;
   timelineId: string;
   value: string | number;
   type?: DataProvider['type'];
@@ -149,6 +149,40 @@ export const StatefulEditDataProvider = React.memo<Props>(
       window.onscroll = () => noop;
     };
 
+    const handleSave = useCallback(() => {
+      onDataProviderEdited({
+        andProviderId,
+        excluded: getExcludedFromSelection(updatedOperator),
+        field: updatedField.length > 0 ? updatedField[0].label : '',
+        id: timelineId,
+        operator: getQueryOperatorFromSelection(updatedOperator),
+        providerId:
+          providerId ??
+          `${timelineId}-${
+            updatedField.length > 0 ? updatedField[0].label : 'template-field-blank'
+          }-${updatedValue}`,
+        value: updatedValue,
+        type,
+      });
+    }, [
+      onDataProviderEdited,
+      andProviderId,
+      updatedOperator,
+      updatedField,
+      timelineId,
+      providerId,
+      updatedValue,
+      type,
+    ]);
+
+    const isValueFieldInvalid = useMemo(
+      () =>
+        type !== DataProviderType.template &&
+        (startsWith('{', sanatizeValue(updatedValue)) ||
+          endsWith('}', sanatizeValue(updatedValue))),
+      [type, updatedValue]
+    );
+
     useEffect(() => {
       disableScrolling();
       focusInput();
@@ -212,6 +246,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   onChange={onValueChange}
                   placeholder={i18n.VALUE}
                   value={sanatizeValue(updatedValue)}
+                  isInvalid={isValueFieldInvalid}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -235,20 +270,9 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       browserFields,
                       selectedField: updatedField,
                       selectedOperator: updatedOperator,
-                    })
+                    }) || isValueFieldInvalid
                   }
-                  onClick={() => {
-                    onDataProviderEdited({
-                      andProviderId,
-                      excluded: getExcludedFromSelection(updatedOperator),
-                      field: updatedField.length > 0 ? updatedField[0].label : '',
-                      id: timelineId,
-                      operator: getQueryOperatorFromSelection(updatedOperator),
-                      providerId,
-                      value: updatedValue,
-                      type,
-                    });
-                  }}
+                  onClick={handleSave}
                   size="s"
                 >
                   {i18n.SAVE}

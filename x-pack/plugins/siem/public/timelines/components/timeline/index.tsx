@@ -106,12 +106,11 @@ const StatefulTimelineComponent = React.memo<Props>(
     );
 
     const onToggleDataProviderType: OnToggleDataProviderType = useCallback(
-      ({ providerId, type, andProviderId }) =>
+      ({ providerId, type }) =>
         updateDataProviderType!({
           id,
           type,
           providerId,
-          andProviderId,
         }),
       [id]
     );
@@ -281,6 +280,7 @@ const mapDispatchToProps = {
   updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
   updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
   updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateDataProviderType: timelineActions.updateDataProviderType,
   updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,

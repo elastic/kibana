@@ -118,22 +118,23 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
+      const timelineResultsType = searchResults[0]?.timelineType;
       const timelineActions = ['duplicate', 'export', 'selectable'];
 
       if (onDeleteSelected != null && deleteTimelines != null) {
         timelineActions.unshift('delete');
       }
 
-      if (timelineType === TimelineType.template) {
+      if (timelineResultsType === TimelineType.template) {
         timelineActions.unshift('createTimelineFromTemplate');
       }
 
-      if (timelineType !== TimelineType.template) {
+      if (timelineResultsType !== TimelineType.template) {
         timelineActions.unshift('createTemplateFromTimeline');
       }
 
       return timelineActions as ActionTimelineToShow[];
-    }, [onDeleteSelected, deleteTimelines]);
+    }, [onDeleteSelected, deleteTimelines, searchResults]);
 
     return (
       <>

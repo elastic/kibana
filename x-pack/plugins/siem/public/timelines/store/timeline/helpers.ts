@@ -13,6 +13,7 @@ import {
   DataProvider,
   QueryOperator,
   QueryMatch,
+  DataProviderType,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 
@@ -1014,6 +1015,41 @@ export const updateTimelineProviderKqlQuery = ({
       ...timeline,
       dataProviders: timeline.dataProviders.map((provider) =>
         provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
+      ),
+    },
+  };
+};
+
+interface UpdateTimelineProviderTypeParams {
+  id: string;
+  providerId: string;
+  type: DataProviderType;
+  timelineById: TimelineById;
+}
+
+export const updateTimelineProviderType = ({
+  id,
+  providerId,
+  type,
+  timelineById,
+}: UpdateTimelineProviderTypeParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: timeline.dataProviders.map((provider) =>
+        provider.id === providerId
+          ? {
+              ...provider,
+              type,
+              name: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+              queryMatch: {
+                ...provider.queryMatch,
+                value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+              },
+            }
+          : provider
       ),
     },
   };

@@ -123,12 +123,19 @@ WithSource.displayName = 'WithSource';
 export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
   indicesExist || isUndefined(indicesExist);
 
-export const useWithSource = (sourceId: string, indices: string[]) => {
+export const useWithSource = (sourceId: string, indexToAdd?: string[]) => {
+  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [loading, updateLoading] = useState(false);
   const [indicesExist, setIndicesExist] = useState<boolean | undefined | null>(undefined);
   const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
   const [indexPattern, setIndexPattern] = useState<IIndexPattern | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
+  const defaultIndex = useMemo<string[]>(() => {
+    if (indexToAdd != null && !isEmpty(indexToAdd)) {
+      return [...configIndex, ...indexToAdd];
+    }
+    return configIndex;
+  }, [configIndex, indexToAdd]);
 
   const apolloClient = useApolloClient();
   async function fetchSource(signal: AbortSignal) {
@@ -140,7 +147,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
           fetchPolicy: 'cache-first',
           variables: {
             sourceId,
-            defaultIndex: indices,
+            defaultIndex,
           },
           context: {
             fetchOptions: {
@@ -154,10 +161,10 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
             updateErrorMessage(null);
             setIndicesExist(get('data.source.status.indicesExist', result));
             setBrowserFields(
-              getBrowserFields(indices.join(), get('data.source.status.indexFields', result))
+              getBrowserFields(defaultIndex.join(), get('data.source.status.indexFields', result))
             );
             setIndexPattern(
-              getIndexFields(indices.join(), get('data.source.status.indexFields', result))
+              getIndexFields(defaultIndex.join(), get('data.source.status.indexFields', result))
             );
           },
           (error) => {
@@ -173,7 +180,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
     const signal = abortCtrl.signal;
     fetchSource(signal);
     return () => abortCtrl.abort();
-  }, [apolloClient, sourceId, indices]);
+  }, [apolloClient, sourceId, defaultIndex]);
 
   return { indicesExist, browserFields, indexPattern, loading, errorMessage };
 };

@@ -11,6 +11,8 @@ import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-bea
 import styled, { css } from 'styled-components';
 
 import { AndOrBadge, AddFieldBadge } from '../and_or_badge';
+import { AddDataProviderPopover } from './add_data_provider_popover';
+import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDroppableId,
@@ -33,7 +35,8 @@ export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
 interface Props {
   browserFields: BrowserFields;
-  id: string;
+  timelineId: string;
+  timelineType: TimelineType;
   dataProviders: DataProvider[];
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -115,7 +118,8 @@ TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 export const Providers = React.memo<Props>(
   ({
     browserFields,
-    id,
+    timelineId,
+    timelineType,
     dataProviders,
     onDataProviderEdited,
     onDataProviderRemoved,
@@ -135,7 +139,7 @@ export const Providers = React.memo<Props>(
           <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
             <OrFlexItem grow={false}>
               <AndOrBadgeContainer hideBadge={groupIndex !== 0}>
-                <AddFieldBadge />
+                <AddDataProviderPopover timelineId={timelineId} Button={AddFieldBadge} />
               </AndOrBadgeContainer>
               <AndOrBadgeContainer hideBadge={groupIndex === 0}>
                 <AndOrBadge type="or" />
@@ -146,7 +150,7 @@ export const Providers = React.memo<Props>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <Droppable
-                droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId: id })}
+                droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId })}
                 direction="horizontal"
               >
                 {(droppableProvided) => (
@@ -166,7 +170,7 @@ export const Providers = React.memo<Props>(
                         draggableId={getTimelineProviderDraggableId({
                           dataProviderId: dataProvider.id,
                           groupIndex,
-                          timelineId: id,
+                          timelineId,
                         })}
                         index={index}
                         key={dataProvider.id}
@@ -207,7 +211,8 @@ export const Providers = React.memo<Props>(
                                   }
                                   register={dataProvider}
                                   providerId={index > 0 ? group[0].id : dataProvider.id}
-                                  timelineId={id}
+                                  timelineId={timelineId}
+                                  timelineType={timelineType}
                                   toggleEnabledProvider={() =>
                                     index > 0
                                       ? onToggleDataProviderEnabled({

@@ -10,7 +10,6 @@ import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
 import { DataProviders } from '../data_providers';
-import { AddDataProviderPopover } from '../data_providers/add_data_provider_popover';
 import { DataProvider } from '../data_providers/data_provider';
 import {
   OnDataProviderEdited,
@@ -29,7 +28,6 @@ interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   filterManager: FilterManager;
-  id: string;
   indexPattern: IIndexPattern;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -38,12 +36,12 @@ interface Props {
   onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
+  timelineId: string;
   timelineType: TimelineType;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
   browserFields,
-  id,
   indexPattern,
   dataProviders,
   filterManager,
@@ -54,6 +52,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
+  timelineId,
   timelineType,
 }) => (
   <>
@@ -70,20 +69,14 @@ const TimelineHeaderComponent: React.FC<Props> = ({
       <>
         <DataProviders
           browserFields={browserFields}
-          id={id}
+          timelineId={timelineId}
+          timelineType={timelineType}
           dataProviders={dataProviders}
           onDataProviderEdited={onDataProviderEdited}
           onDataProviderRemoved={onDataProviderRemoved}
           onToggleDataProviderEnabled={onToggleDataProviderEnabled}
           onToggleDataProviderExcluded={onToggleDataProviderExcluded}
           onToggleDataProviderType={onToggleDataProviderType}
-        />
-        <AddDataProviderPopover
-          browserFields={browserFields}
-          dataProviders={dataProviders}
-          timelineId={id}
-          indexPattern={indexPattern}
-          timelineType={timelineType}
         />
       </>
     )}
@@ -92,7 +85,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
       browserFields={browserFields}
       filterManager={filterManager}
       indexPattern={indexPattern}
-      timelineId={id}
+      timelineId={timelineId}
     />
   </>
 );
@@ -101,7 +94,6 @@ export const TimelineHeader = React.memo(
   TimelineHeaderComponent,
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
@@ -112,5 +104,6 @@ export const TimelineHeader = React.memo(
     prevProps.onToggleDataProviderType === nextProps.onToggleDataProviderType &&
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
+    prevProps.timelineId === nextProps.timelineId &&
     prevProps.timelineType === nextProps.timelineType
 );
