@@ -163,11 +163,11 @@ describe('TopN', () => {
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'raw'`, () => {
-      expect(wrapper.find('[data-test-subj="signals-histogram-panel"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(false);
     });
   });
 
-  describe('signals view', () => {
+  describe('alerts view', () => {
     let toggleTopN: () => void;
     let wrapper: ReactWrapper;
 
@@ -176,7 +176,7 @@ describe('TopN', () => {
       wrapper = mount(
         <TestProviders>
           <TopN
-            defaultView="signal"
+            defaultView="alert"
             field={field}
             filters={[]}
             from={1586824307695}
@@ -195,7 +195,7 @@ describe('TopN', () => {
     });
 
     test(`it renders SignalsByCategory when defaultView is 'signal'`, () => {
-      expect(wrapper.find('[data-test-subj="signals-histogram-panel"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(true);
     });
 
     test(`it does NOT render EventsByDataset when defaultView is 'signal'`, () => {
@@ -242,7 +242,7 @@ describe('TopN', () => {
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'all'`, () => {
-      expect(wrapper.find('[data-test-subj="signals-histogram-panel"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(false);
     });
   });
 });
