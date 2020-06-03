@@ -20,12 +20,8 @@ describe('AndOrBadge', () => {
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('AND');
-    expect(wrapper.find('.topAndOrBadgeAntenna[data-test-subj="and-or-badge-bar"]')).toHaveLength(
-      1
-    );
-    expect(
-      wrapper.find('.bottomAndOrBadgeAntenna[data-test-subj="and-or-badge-bar"]')
-    ).toHaveLength(1);
+    expect(wrapper.find('EuiFlexItem[data-test-subj="andOrBadgeBarTop"]')).toHaveLength(1);
+    expect(wrapper.find('EuiFlexItem[data-test-subj="andOrBadgeBarBottom"]')).toHaveLength(1);
   });
 
   test('it renders "and" when "type" is "and"', () => {

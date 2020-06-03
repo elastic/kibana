@@ -89,13 +89,13 @@ export const AndOrBadge = React.memo<{ type: AndOr; includeAntennas?: boolean }>
       >
         <AndOrBadgeAntenna
           className="topAndOrBadgeAntenna"
-          data-test-subj="and-or-badge-bar"
+          data-test-subj="andOrBadgeBarTop"
           grow={1}
         />
         <EuiFlexItemWrapper grow={false}>{getBadge()}</EuiFlexItemWrapper>
         <AndOrBadgeAntenna
           className="bottomAndOrBadgeAntenna"
-          data-test-subj="and-or-badge-bar"
+          data-test-subj="andOrBadgeBarBottom"
           grow={1}
         />
       </EuiFlexGroup>
