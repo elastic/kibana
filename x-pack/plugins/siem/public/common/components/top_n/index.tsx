@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { GlobalTime } from '../../containers/global_time';
@@ -17,10 +17,10 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
-import { useTimelineTypeContext } from '../../../timelines/components/timeline/timeline_context';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 /** The currently active timeline always has this Redux ID */
 export const ACTIVE_TIMELINE_REDUX_ID = 'timeline-1';
@@ -94,16 +94,23 @@ const StatefulTopNComponent: React.FC<Props> = ({
   const kibana = useKibana();
 
   //  Regarding data from useTimelineTypeContext:
-  //  * `documentType` (e.g. 'signals') may only be populated in some views,
-  //    e.g. the `Signals` view on the `Detections` page.
+  //  * `documentType` (e.g. 'alerts') may only be populated in some views,
+  //    e.g. the `Alerts` view on the `Detections` page.
   //  * `id` (`timelineId`) may only be populated when we are rendered in the
   //    context of the active timeline.
-  //  * `indexToAdd`, which enables the signals index to be appended to
+  //  * `indexToAdd`, which enables the alerts index to be appended to
   //    the `indexPattern` returned by `WithSource`, may only be populated when
   //    this component is rendered in the context of the active timeline. This
-  //    behavior enables the 'All events' view by appending the signals index
+  //    behavior enables the 'All events' view by appending the alerts index
   //    to the index pattern.
-  const { documentType, id: timelineId, indexToAdd } = useTimelineTypeContext();
+  const { isManagedTimeline, getManageTimelineById } = useManageTimeline();
+  const { documentType, id: timelineId, indexToAdd } = useMemo(
+    () =>
+      isManagedTimeline(ACTIVE_TIMELINE_REDUX_ID)
+        ? getManageTimelineById(ACTIVE_TIMELINE_REDUX_ID)
+        : { documentType: null, id: null, indexToAdd: null },
+    [getManageTimelineById]
+  );
 
   const options = getOptions(
     timelineId === ACTIVE_TIMELINE_REDUX_ID ? activeTimelineEventType : undefined
@@ -135,7 +142,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
               }
               data-test-subj="top-n"
               defaultView={
-                documentType?.toLocaleLowerCase() === 'signals' ? 'signal' : options[0].value
+                documentType?.toLocaleLowerCase() === 'alerts' ? 'alert' : options[0].value
               }
               deleteQuery={timelineId === ACTIVE_TIMELINE_REDUX_ID ? undefined : deleteQuery}
               field={field}

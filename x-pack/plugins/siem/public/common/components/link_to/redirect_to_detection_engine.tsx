@@ -7,12 +7,10 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { DetectionEngineTab } from '../../../alerts/pages/detection_engine/types';
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
 
 export type DetectionEngineComponentProps = RouteComponentProps<{
-  tabName: DetectionEngineTab;
   detailName: string;
   search: string;
 }>;
@@ -20,14 +18,9 @@ export type DetectionEngineComponentProps = RouteComponentProps<{
 export const DETECTION_ENGINE_PAGE_NAME = 'detections';
 
 export const RedirectToDetectionEnginePage = ({
-  match: {
-    params: { tabName },
-  },
   location: { search },
 }: DetectionEngineComponentProps) => {
-  const defaultSelectedTab = DetectionEngineTab.signals;
-  const selectedTab = tabName ? tabName : defaultSelectedTab;
-  const to = `/${DETECTION_ENGINE_PAGE_NAME}/${selectedTab}${search}`;
+  const to = `/${DETECTION_ENGINE_PAGE_NAME}${search}`;
 
   return <RedirectWrapper to={to} />;
 };
@@ -66,8 +59,6 @@ const baseDetectionEngineUrl = `#/link-to/${DETECTION_ENGINE_PAGE_NAME}`;
 
 export const getDetectionEngineUrl = (search?: string) =>
   `${baseDetectionEngineUrl}${appendSearch(search)}`;
-export const getDetectionEngineAlertUrl = (search?: string) =>
-  `${baseDetectionEngineUrl}/${DetectionEngineTab.alerts}${appendSearch(search)}`;
 export const getDetectionEngineTabUrl = (tabPath: string) => `${baseDetectionEngineUrl}/${tabPath}`;
 export const getRulesUrl = () => `${baseDetectionEngineUrl}/rules`;
 export const getCreateRuleUrl = () => `${baseDetectionEngineUrl}/rules/create`;
