@@ -12,20 +12,20 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
-import { signalsHeaders } from '../../../alerts/components/signals/default_config';
-import { alertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
+import { alertsHeaders } from '../../../alerts/components/alerts_table/default_config';
+import { alertsHeaders as externalAlertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
 import { defaultHeaders as eventsDefaultHeaders } from '../../../common/components/events_viewer/default_headers';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
-import { useTimelineTypeContext } from '../timeline/timeline_context';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
 
 import * as i18n from './translations';
+import { useManageTimeline } from '../manage_timeline';
 
 const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
@@ -96,25 +96,30 @@ const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBro
 CountRow.displayName = 'CountRow';
 
 const TitleRow = React.memo<{
+  id: string;
   isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
-}>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => {
-  const timelineTypeContext = useTimelineTypeContext();
+}>(({ id, isEventViewer, onOutsideClick, onUpdateColumns }) => {
+  const { getManageTimelineById } = useManageTimeline();
+  const documentType = useMemo(() => getManageTimelineById(id).documentType, [
+    getManageTimelineById,
+    id,
+  ]);
   const handleResetColumns = useCallback(() => {
     let resetDefaultHeaders = defaultHeaders;
     if (isEventViewer) {
-      if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'alerts') {
+      if (documentType.toLocaleLowerCase() === 'externalAlerts') {
+        resetDefaultHeaders = externalAlertsHeaders;
+      } else if (documentType.toLocaleLowerCase() === 'alerts') {
         resetDefaultHeaders = alertsHeaders;
-      } else if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'signals') {
-        resetDefaultHeaders = signalsHeaders;
       } else {
         resetDefaultHeaders = eventsDefaultHeaders;
       }
     }
     onUpdateColumns(resetDefaultHeaders);
     onOutsideClick();
-  }, [isEventViewer, onOutsideClick, onUpdateColumns, timelineTypeContext]);
+  }, [isEventViewer, onOutsideClick, onUpdateColumns, documentType]);
 
   return (
     <EuiFlexGroup
@@ -153,6 +158,7 @@ export const Header = React.memo<Props>(
   }) => (
     <HeaderContainer>
       <TitleRow
+        id={timelineId}
         isEventViewer={isEventViewer}
         onUpdateColumns={onUpdateColumns}
         onOutsideClick={onOutsideClick}

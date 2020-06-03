@@ -17,6 +17,7 @@ import {
   LOAD_MORE,
   LOCAL_EVENTS_COUNT,
 } from '../screens/hosts/events';
+import { HEADERS_GROUP } from '../screens/timeline';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -25,6 +26,7 @@ import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
   closeModal,
+  dragAndDropColumn,
   openEventsViewerFieldsBrowser,
   opensInspectQueryModal,
   resetFields,
@@ -148,6 +150,30 @@ describe('Events Viewer', () => {
       cy.get(LOAD_MORE).click({ force: true });
 
       cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('not.equal', defaultNumberOfLoadedEvents);
+    });
+  });
+
+  context.skip('Events columns', () => {
+    before(() => {
+      loginAndWaitForPage(HOSTS_PAGE);
+      openEvents();
+      waitsForEventsToBeLoaded();
+    });
+
+    afterEach(() => {
+      openEventsViewerFieldsBrowser();
+      resetFields();
+    });
+
+    it('re-orders columns via drag and drop', () => {
+      const originalColumnOrder =
+        '@timestampmessagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+      const expectedOrderAfterDragAndDrop =
+        'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+
+      cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
+      dragAndDropColumn({ column: 0, newPosition: 1 });
+      cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
     });
   });
 });

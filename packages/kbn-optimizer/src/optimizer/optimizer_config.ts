@@ -152,7 +152,7 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              entry: './public/entry_point',
+              entry: './public/index',
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
