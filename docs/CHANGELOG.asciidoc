@@ -106,6 +106,33 @@ There are no changes in this release.
 == {kib} 6.8.9
 
 [float]
+[[security-update-6.8.9]]
+=== Security updates
+* In 6.7.0 to 6.8.8, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with 
+privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This 
+could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7012.
++
+By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
++
+For all other installations, you must upgrade to 6.8.9. If you are unable to upgrade, disable the Upgrade Assistant in your kibana.yml file:
+
+** In 6.7.0 and 6.7.1, set `upgrade_assistant.enabled:false`
+** In 6.7.2 and later, set `xpack.upgrade_assistant_enabled:false`
+
+* In 6.8.9 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create 
+TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This 
+could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7013.
++
+By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
++
+For all other installations, you must upgrade to 6.8.9. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
+
+* In 6.7.0 to 6.8.8, {kib} contains a privilege escalation flaw. An attacker with privileges to generate API keys and authentication
+tokens is able to generate authentication tokens with elevated privileges, CVE-2020-7014.
++
+You must upgrade to 6.8.9. If you are unable to upgrade, set ‘xpack.security.authc.api_key.enabled:false’ in your elasticsearch.yml file to disable API keys.
+
+[float]
 [[enhancement-6.8.9]]
 === Enhancement
 Security::
