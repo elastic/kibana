@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiLoadingContent } from '@elastic/eui';
 import { getLayerWizards, LayerWizard } from '../../../classes/layers/layer_wizard_registry';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 interface State {
   layerWizards: LayerWizard[];
+  hasLoadedWizards: boolean;
 }
 
 export class LayerWizardSelect extends Component<Props, State> {
@@ -22,6 +24,7 @@ export class LayerWizardSelect extends Component<Props, State> {
 
   state = {
     layerWizards: [],
+    hasLoadedWizards: false,
   };
 
   componentDidMount() {
@@ -36,11 +39,18 @@ export class LayerWizardSelect extends Component<Props, State> {
   async _loadLayerWizards() {
     const layerWizards = await getLayerWizards();
     if (this._isMounted) {
-      this.setState({ layerWizards });
+      this.setState({ layerWizards, hasLoadedWizards: true });
     }
   }
 
   render() {
+    if (!this.state.hasLoadedWizards) {
+      return (
+        <div>
+          <EuiCard title={''} description={<EuiLoadingContent lines={2} />} layout="horizontal" />
+        </div>
+      );
+    }
     return this.state.layerWizards.map((layerWizard: LayerWizard) => {
       const icon = layerWizard.icon ? <EuiIcon type={layerWizard.icon} size="l" /> : undefined;
 

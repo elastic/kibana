@@ -11,7 +11,22 @@ import { getIndexPatternService, getUiSettings } from '../../../../kibana_servic
 
 const SIEM_DEFAULT_INDEX = 'siem:defaultIndex';
 
-export async function getSecurityIndexPatterns(): IndexPattern[] {
+let indexPatterns: IndexPattern[];
+let indexPatternsPromise: Promse<IndexPattern[]>;
+
+export async function getSecurityIndexPatterns(): Promise<IndexPattern[]> {
+  if (indexPatterns) {
+    return indexPatterns;
+  }
+
+  if (!indexPatternsPromise) {
+    indexPatternsPromise = loadSecurityIndexPatterns();
+  }
+
+  return indexPatternsPromise;
+}
+
+async function loadSecurityIndexPatterns(): Promise<IndexPattern[]> {
   const securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
   const indexPatternCache = await getIndexPatternService().getCache();
   const promises = indexPatternCache
