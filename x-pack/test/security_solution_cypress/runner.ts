@@ -23,7 +23,7 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
     await procs.run('cypress', {
       cmd: 'yarn',
       args: ['cypress:run'],
-      cwd: resolve(__dirname, '../../plugins/siem'),
+      cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
         CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
