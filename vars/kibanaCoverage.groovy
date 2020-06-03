@@ -20,7 +20,6 @@ def sendSlackMsg(Map params = [:]) {
     context: slackNotifications.getDefaultContext(),
   ] + params
 
-  print params
 
   def title = "${slackNotifications.getStatusIcon()} ${config.title}"
 
@@ -35,7 +34,8 @@ def sendSlackMsg(Map params = [:]) {
     iconEmoji: config.icon,
     color: config.color,
     message: config.message,
-    blocks: blocks
+    blocks: blocks,
+    timestamp: config.timestamp
   )
 }
 
