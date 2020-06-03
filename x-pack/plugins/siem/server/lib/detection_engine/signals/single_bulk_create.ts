@@ -6,7 +6,7 @@
 
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
