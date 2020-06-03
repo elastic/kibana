@@ -7,7 +7,7 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
-import { parseDuration } from '../../../../../alerting/server';
+import { parseDuration } from '../../../../../alerts/server';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
 
 export const generateId = (

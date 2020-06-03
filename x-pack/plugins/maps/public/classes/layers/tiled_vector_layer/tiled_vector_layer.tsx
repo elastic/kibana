@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
@@ -56,7 +56,7 @@ export class TiledVectorLayer extends VectorLayer {
     onLoadError,
     dataFilters,
   }: DataRequestContext) {
-    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
+    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
     const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
@@ -73,12 +73,12 @@ export class TiledVectorLayer extends VectorLayer {
       return null;
     }
 
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
+    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
       const templateWithMeta = await this._source.getUrlTemplateWithMeta();
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, templateWithMeta, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
   }
 
