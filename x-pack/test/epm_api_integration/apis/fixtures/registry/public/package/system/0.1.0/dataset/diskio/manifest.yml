@@ -1,0 +1,7 @@
+title: System diskio metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  title: System diskio metrics
+  description: Collect System diskio metrics

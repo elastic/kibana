@@ -1,0 +1,58 @@
+- name: system.auth
+  type: group
+  fields:
+  - name: ssh
+    type: group
+    fields:
+    - name: method
+      type: keyword
+      description: |
+        The SSH authentication method. Can be one of "password" or "publickey".
+    - name: signature
+      type: keyword
+      description: |
+        The signature of the client public key.
+    - name: dropped_ip
+      type: ip
+      description: |
+        The client IP from SSH connections that are open and immediately dropped.
+    - name: event
+      type: keyword
+      description: |
+        The SSH event as found in the logs (Accepted, Invalid, Failed, etc.)
+    - name: geoip
+      type: group
+  - name: sudo
+    type: group
+    fields:
+    - name: error
+      type: keyword
+      description: |
+        The error message in case the sudo command failed.
+    - name: tty
+      type: keyword
+      description: |
+        The TTY where the sudo command is executed.
+    - name: pwd
+      type: keyword
+      description: |
+        The current directory where the sudo command is executed.
+    - name: user
+      type: keyword
+      description: |
+        The target user to which the sudo command is switching.
+    - name: command
+      type: keyword
+      description: |
+        The command executed via sudo.
+  - name: useradd
+    type: group
+    fields:
+    - name: home
+      type: keyword
+      description: The home folder for the new user.
+    - name: shell
+      type: keyword
+      description: The default shell for the new user.
+  - name: groupadd
+    type: group

@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Container Memory stats [Metrics System] ECS",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"13\",\"params\":{\"customLabel\":\"Usage\",\"field\":\"system.process.cgroup.memory.mem.usage.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"14\",\"params\":{\"customLabel\":\"Max usage\",\"field\":\"system.process.cgroup.memory.mem.usage.max.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"1\",\"params\":{\"customLabel\":\"Page faults\",\"field\":\"system.process.cgroup.memory.stats.page_faults\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"customLabel\":\"Pages in memory\",\"field\":\"system.process.cgroup.memory.stats.pages_in\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"customLabel\":\"Pages out of memory\",\"field\":\"system.process.cgroup.memory.stats.pages_out\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"4\",\"params\":{\"customLabel\":\"Container ID\",\"field\":\"system.process.cgroup.id\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":50},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"5\",\"params\":{\"customLabel\":\"Inactive files\",\"field\":\"system.process.cgroup.memory.stats.inactive_file.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"6\",\"params\":{\"customLabel\":\"# Major page faults\",\"field\":\"system.process.cgroup.memory.stats.major_page_faults\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"8\",\"params\":{\"customLabel\":\"Process name\",\"field\":\"process.name\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"12\",\"params\":{\"customLabel\":\"Failures\",\"field\":\"system.process.cgroup.memory.mem.failures\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"10\",\"params\":{\"customLabel\":\"TCP buffers\",\"field\":\"system.process.cgroup.memory.kmem_tcp.usage.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"11\",\"params\":{\"customLabel\":\"Huge pages\",\"field\":\"system.process.cgroup.memory.stats.rss_huge.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"7\",\"params\":{\"customLabel\":\"Swap caches\",\"field\":\"system.process.cgroup.memory.stats.rss.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"15\",\"params\":{\"customLabel\":\"Swap usage\",\"field\":\"system.process.cgroup.memory.stats.swap.bytes\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"16\",\"params\":{\"customLabel\":\"Block I/O\",\"field\":\"system.process.cgroup.blkio.total.ios\"},\"schema\":\"metric\",\"type\":\"avg\"}],\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"title\":\"Container Memory stats [Metrics System] ECS\",\"type\":\"table\"}"
+  },
+  "id": "Container-Memory-stats-ecs",
+  "references": [
+    {
+      "id": "metrics-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization"
+}

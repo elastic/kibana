@@ -1,0 +1,48 @@
+{
+  "attributes": {
+    "description": "SSH dashboard for the System integration in Logs",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"1\",\"w\":48,\"x\":0,\"y\":16},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"2\",\"w\":48,\"x\":0,\"y\":4},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"3\",\"w\":24,\"x\":0,\"y\":28},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"mapBounds\":{\"bottom_right\":{\"lat\":10.31491928581316,\"lon\":74.53125},\"top_left\":{\"lat\":60.50052541051131,\"lon\":-27.94921875}},\"mapCenter\":[39.774769485295465,23.203125],\"mapCollar\":{\"bottom_right\":{\"lat\":-14.777884999999998,\"lon\":125.771485},\"top_left\":{\"lat\":85.593335,\"lon\":-79.189455},\"zoom\":3},\"mapZoom\":3},\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":24,\"x\":24,\"y\":28},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"columns\":[\"system.auth.ssh.event\",\"system.auth.ssh.method\",\"user.name\",\"source.ip\",\"source.geo.country_iso_code\"],\"sort\":[\"@timestamp\",\"desc\"]},\"gridData\":{\"h\":12,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":44},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":4,\"i\":\"6\",\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"6\",\"panelRefName\":\"panel_5\",\"version\":\"7.3.0\"}]",
+    "timeRestore": false,
+    "title": "[Logs System] SSH login attempts ECS",
+    "version": 1
+  },
+  "id": "5517a150-f9ce-11e6-8115-a7c18106d86a-ecs",
+  "references": [
+    {
+      "id": "d16bb400-f9cc-11e6-8115-a7c18106d86a-ecs",
+      "name": "panel_0",
+      "type": "visualization"
+    },
+    {
+      "id": "78b74f30-f9cd-11e6-8115-a7c18106d86a-ecs",
+      "name": "panel_1",
+      "type": "visualization"
+    },
+    {
+      "id": "341ffe70-f9ce-11e6-8115-a7c18106d86a-ecs",
+      "name": "panel_2",
+      "type": "visualization"
+    },
+    {
+      "id": "3cec3eb0-f9d3-11e6-8a3e-2b904044ea1d-ecs",
+      "name": "panel_3",
+      "type": "visualization"
+    },
+    {
+      "id": "62439dc0-f9c9-11e6-a747-6121780e0414-ecs",
+      "name": "panel_4",
+      "type": "search"
+    },
+    {
+      "id": "327417e0-8462-11e7-bab8-bd2f0fb42c54-ecs",
+      "name": "panel_5",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard"
+}

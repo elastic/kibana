@@ -1,0 +1,121 @@
+{
+    "description": "Pipeline for parsing system authorisation/secure logs",
+    "processors": [
+        {
+            "grok": {
+                "field": "message",
+                "ignore_missing": true,
+                "pattern_definitions" : {
+                    "GREEDYMULTILINE" : "(.|\n)*",
+                    "TIMESTAMP": "(?:%{TIMESTAMP_ISO8601}|%{SYSLOGTIMESTAMP})"
+                },
+                "patterns": [
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: %{DATA:system.auth.ssh.event} %{DATA:system.auth.ssh.method} for (invalid user )?%{DATA:user.name} from %{IPORHOST:source.ip} port %{NUMBER:source.port:long} ssh2(: %{GREEDYDATA:system.auth.ssh.signature})?",
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: %{DATA:system.auth.ssh.event} user %{DATA:user.name} from %{IPORHOST:source.ip}",
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: Did not receive identification string from %{IPORHOST:system.auth.ssh.dropped_ip}",
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: \\s*%{DATA:user.name} :( %{DATA:system.auth.sudo.error} ;)? TTY=%{DATA:system.auth.sudo.tty} ; PWD=%{DATA:system.auth.sudo.pwd} ; USER=%{DATA:system.auth.sudo.user} ; COMMAND=%{GREEDYDATA:system.auth.sudo.command}",
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: new group: name=%{DATA:group.name}, GID=%{NUMBER:group.id}",
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: new user: name=%{DATA:user.name}, UID=%{NUMBER:user.id}, GID=%{NUMBER:group.id}, home=%{DATA:system.auth.useradd.home}, shell=%{DATA:system.auth.useradd.shell}$",
+                    "%{TIMESTAMP:system.auth.timestamp} %{SYSLOGHOST:host.hostname}? %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: %{GREEDYMULTILINE:system.auth.message}"
+                ]
+            }
+        },
+        {
+            "remove": {
+                "field": "message"
+            }
+        },
+        {
+            "rename": {
+                "field": "system.auth.message",
+                "target_field": "message",
+                "ignore_missing": true
+            }
+        },
+        {
+            "set": {
+                "field": "source.ip",
+                "value": "{{system.auth.ssh.dropped_ip}}",
+                "if": "ctx.containsKey('system') && ctx.system.containsKey('auth') && ctx.system.auth.containsKey('ssh') && ctx.system.auth.ssh.containsKey('dropped_ip')"
+            }
+        },
+        {
+            "date": {
+                "if": "ctx.event.timezone == null",
+                "field": "system.auth.timestamp",
+                "target_field": "@timestamp",
+                "formats": [
+                    "MMM  d HH:mm:ss",
+                    "MMM dd HH:mm:ss",
+                    "ISO8601"
+                ],
+                "on_failure": [{"append": {"field": "error.message", "value": "{{ _ingest.on_failure_message }}"}}]
+            }
+        },
+        {
+            "date": {
+                "if": "ctx.event.timezone != null",
+                "field": "system.auth.timestamp",
+                "target_field": "@timestamp",
+                "formats": [
+                    "MMM  d HH:mm:ss",
+                    "MMM dd HH:mm:ss",
+                    "ISO8601"
+                ],
+                "timezone": "{{ event.timezone }}",
+                "on_failure": [{"append": {"field": "error.message", "value": "{{ _ingest.on_failure_message }}"}}]
+            }
+        },
+        {
+            "remove": {
+                "field": "system.auth.timestamp"
+            }
+        },
+        {
+            "geoip": {
+                "field": "source.ip",
+                "target_field": "source.geo",
+                "ignore_failure": true
+            }
+        },
+        {
+            "geoip": {
+                "database_file": "GeoLite2-ASN.mmdb",
+                "field": "source.ip",
+                "target_field": "source.as",
+                "properties": [
+                    "asn",
+                    "organization_name"
+                ],
+                "ignore_missing": true
+            }
+        },
+        {
+            "rename": {
+                "field": "source.as.asn",
+                "target_field": "source.as.number",
+                "ignore_missing": true
+            }
+        },
+        {
+            "rename": {
+                "field": "source.as.organization_name",
+                "target_field": "source.as.organization.name",
+                "ignore_missing": true
+            }
+        },
+        {
+            "script": {
+                "lang": "painless",
+                "ignore_failure": true,
+                "source": "if (ctx.system.auth.ssh.event == \"Accepted\") {                  if (!ctx.containsKey(\"event\")) {                    ctx.event = [:];                  }                  ctx.event.type = \"authentication_success\";                  ctx.event.category = \"authentication\";                  ctx.event.action = \"ssh_login\";                  ctx.event.outcome = \"success\";                } else if (ctx.system.auth.ssh.event == \"Invalid\" || ctx.system.auth.ssh.event == \"Failed\") {                  if (!ctx.containsKey(\"event\")) {                    ctx.event = [:];                  }                  ctx.event.type = \"authentication_failure\";                  ctx.event.category = \"authentication\";                  ctx.event.action = \"ssh_login\";                  ctx.event.outcome = \"failure\";                }"
+            }
+        }
+    ],
+    "on_failure" : [{
+        "set" : {
+            "field" : "error.message",
+            "value" : "{{ _ingest.on_failure_message }}"
+        }
+    }]
+}

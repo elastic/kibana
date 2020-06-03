@@ -1,0 +1,201 @@
+- name: mysql.galera_status
+  type: group
+  release: beta
+  fields:
+  - name: apply
+    type: group
+    fields:
+    - name: oooe
+      type: double
+      description: |
+        How often applier started write-set applying out-of-order (parallelization efficiency).
+    - name: oool
+      type: double
+      description: |
+        How often write-set was so slow to apply that write-set with higher seqno's were applied earlier. Values closer to 0 refer to a greater gap between slow and fast write-sets.
+    - name: window
+      type: double
+      description: |
+        Average distance between highest and lowest concurrently applied seqno.
+  - name: cert
+    type: group
+    fields:
+    - name: deps_distance
+      type: double
+      description: |
+        Average distance between highest and lowest seqno value that can be possibly applied in parallel (potential degree of parallelization).
+    - name: index_size
+      type: long
+      description: |
+        The number of entries in the certification index.
+    - name: interval
+      type: double
+      description: |
+        Average number of transactions received while a transaction replicates.
+  - name: cluster
+    type: group
+    fields:
+    - name: conf_id
+      type: long
+      description: |
+        Total number of cluster membership changes happened.
+    - name: size
+      type: long
+      description: |
+        Current number of members in the cluster.
+    - name: status
+      type: keyword
+      description: |
+        Status of this cluster component. That is, whether the node is part of a PRIMARY or NON_PRIMARY component.
+  - name: commit
+    type: group
+    fields:
+    - name: oooe
+      type: double
+      description: |
+        How often a transaction was committed out of order.
+    - name: window
+      type: long
+      description: |
+        Average distance between highest and lowest concurrently committed seqno.
+  - name: connected
+    type: keyword
+    description: |
+      If the value is OFF, the node has not yet connected to any of the cluster components. This may be due to misconfiguration. Check the error log for proper diagnostics.
+  - name: evs
+    type: group
+    fields:
+    - name: evict
+      type: keyword
+      description: |
+        Lists the UUID's of all nodes evicted from the cluster. Evicted nodes cannot rejoin the cluster until you restart their mysqld processes.
+    - name: state
+      type: keyword
+      description: |
+        Shows the internal state of the EVS Protocol.
+  - name: flow_ctl
+    type: group
+    fields:
+    - name: paused
+      type: double
+      description: |
+        The fraction of time since the last FLUSH STATUS command that replication was paused due to flow control. In other words, how much the slave lag is slowing down the cluster.
+    - name: paused_ns
+      type: long
+      description: |
+        The total time spent in a paused state measured in nanoseconds.
+    - name: recv
+      type: long
+      description: |
+        Returns the number of FC_PAUSE events the node has received, including those the node has sent. Unlike most status variables, the counter for this one does not reset every time you run the query.
+    - name: sent
+      type: long
+      description: |
+        Returns the number of FC_PAUSE events the node has sent. Unlike most status variables, the counter for this one does not reset every time you run the query.
+  - name: last_committed
+    type: long
+    description: |
+      The sequence number, or seqno, of the last committed transaction.
+  - name: local
+    type: group
+    fields:
+    - name: bf_aborts
+      type: long
+      description: |
+        Total number of local transactions that were aborted by slave transactions while in execution.
+    - name: cert_failures
+      type: long
+      description: |
+        Total number of local transactions that failed certification test.
+    - name: commits
+      type: long
+      description: |
+        Total number of local transactions committed.
+    - name: recv
+      type: group
+      fields:
+      - name: queue
+        type: long
+        description: |
+          Current (instantaneous) length of the recv queue.
+      - name: queue_avg
+        type: double
+        description: |
+          Recv queue length averaged over interval since the last FLUSH STATUS command. Values considerably larger than 0.0 mean that the node cannot apply write-sets as fast as they are received and will generate a lot of replication throttling.
+      - name: queue_max
+        type: long
+        description: |
+          The maximum length of the recv queue since the last FLUSH STATUS command.
+      - name: queue_min
+        type: long
+        description: |
+          The minimum length of the recv queue since the last FLUSH STATUS command.
+    - name: replays
+      type: long
+      description: |
+        Total number of transaction replays due to asymmetric lock granularity.
+    - name: send
+      type: group
+      fields:
+      - name: queue
+        type: long
+        description: |
+          Current (instantaneous) length of the send queue.
+      - name: queue_avg
+        type: double
+        description: |
+          Send queue length averaged over time since the last FLUSH STATUS command. Values considerably larger than 0.0 indicate replication throttling or network throughput issue.
+      - name: queue_max
+        type: long
+        description: |
+          The maximum length of the send queue since the last FLUSH STATUS command.
+      - name: queue_min
+        type: long
+        description: |
+          The minimum length of the send queue since the last FLUSH STATUS command.
+    - name: state
+      type: keyword
+      description: |
+        Internal Galera Cluster FSM state number.
+  - name: ready
+    type: keyword
+    description: |
+      Whether the server is ready to accept queries.
+  - name: received
+    type: group
+    fields:
+    - name: count
+      type: long
+      description: |
+        Total number of write-sets received from other nodes.
+    - name: bytes
+      type: long
+      description: |
+        Total size of write-sets received from other nodes.
+  - name: repl
+    type: group
+    fields:
+    - name: data_bytes
+      type: long
+      description: |
+        Total size of data replicated.
+    - name: keys
+      type: long
+      description: |
+        Total number of keys replicated.
+    - name: keys_bytes
+      type: long
+      description: |
+        Total size of keys replicated.
+    - name: other_bytes
+      type: long
+      description: |
+        Total size of other bits replicated.
+    - name: count
+      type: long
+      description: |
+        Total number of write-sets replicated (sent to other nodes).
+    - name: bytes
+      type: long
+      description: |
+        Total size of write-sets replicated.

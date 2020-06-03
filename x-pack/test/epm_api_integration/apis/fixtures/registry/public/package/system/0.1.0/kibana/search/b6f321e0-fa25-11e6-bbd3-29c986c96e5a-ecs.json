@@ -1,0 +1,32 @@
+{
+  "attributes": {
+    "columns": [
+      "user.name",
+      "system.auth.sudo.user",
+      "system.auth.sudo.pwd",
+      "system.auth.sudo.command"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"system.auth.sudo:*\"}}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Sudo commands [Logs System] ECS",
+    "version": 1
+  },
+  "id": "b6f321e0-fa25-11e6-bbd3-29c986c96e5a-ecs",
+  "references": [
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

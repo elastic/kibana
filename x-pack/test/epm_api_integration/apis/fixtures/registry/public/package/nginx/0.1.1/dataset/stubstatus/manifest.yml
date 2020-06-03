@@ -1,0 +1,22 @@
+title: Nginx stubstatus metrics
+type: metrics
+release: beta
+streams:
+- input: nginx/metrics
+  vars:
+  - name: period
+    type: text
+    title: Period
+    multi: false
+    required: true
+    show_user: true
+    default: 10s
+  - name: server_status_path
+    type: text
+    title: Server Status Path
+    multi: false
+    required: true
+    show_user: false
+    default: /nginx_status
+  title: Nginx stub status metrics
+  description: Collect Nginx stub status metrics

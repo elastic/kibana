@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Network Traffic [Metrics MySQL] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"metrics-*\",\"default_timefield\":\"@timestamp\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"legend_position\":\"bottom\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(0,98,177,1)\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"2b1c2390-f1f7-11e7-a752-236fe3270d99\",\"label\":\"Received bytes\",\"line_width\":1,\"metrics\":[{\"field\":\"mysql.status.bytes.received\",\"id\":\"2b1c2391-f1f7-11e7-a752-236fe3270d99\",\"type\":\"max\"},{\"field\":\"2b1c2391-f1f7-11e7-a752-236fe3270d99\",\"id\":\"2b1c2392-f1f7-11e7-a752-236fe3270d99\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"field\":\"2b1c2392-f1f7-11e7-a752-236fe3270d99\",\"id\":\"788d3c90-6310-11ea-99e6-b5eed31db613\",\"type\":\"positive_only\",\"unit\":\"\"},{\"id\":\"88f8e160-6310-11ea-99e6-b5eed31db613\",\"script\":\"params.received != null \\u0026\\u0026 params.received \\u003e 0 ? params.received * -1 : null\",\"type\":\"calculation\",\"variables\":[{\"field\":\"788d3c90-6310-11ea-99e6-b5eed31db613\",\"id\":\"8beb4660-6310-11ea-99e6-b5eed31db613\",\"name\":\"received\"}]}],\"point_size\":\"0\",\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"label\":\"Sent bytes\",\"line_width\":1,\"metrics\":[{\"field\":\"mysql.status.bytes.sent\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"max\"},{\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"id\":\"23cfda50-f1f7-11e7-a752-236fe3270d99\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"field\":\"23cfda50-f1f7-11e7-a752-236fe3270d99\",\"id\":\"ad26a900-6310-11ea-99e6-b5eed31db613\",\"type\":\"positive_only\",\"unit\":\"\"}],\"point_size\":\"0\",\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Network Traffic [Metrics MySQL] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "c8661020-6310-11ea-a83e-25b8612d00cc",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [],
+  "type": "visualization"
+}

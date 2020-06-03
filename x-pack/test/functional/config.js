@@ -6,9 +6,6 @@
 
 import { resolve } from 'path';
 
-import { defineDockerServersConfig } from '@kbn/test';
-import { first, tap } from 'rxjs/operators';
-
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -70,30 +67,6 @@ export default async function({ readConfigFile }) {
 
     servers: kibanaFunctionalConfig.get('servers'),
 
-    dockerServers: defineDockerServersConfig(
-      process.env.FLEET_PACKAGE_REGISTRY_PORT
-        ? {
-            helloWorld: {
-              image: 'docker.elastic.co/package-registry/package-registry:master',
-              portInContainer: 8080,
-              port: process.env.FLEET_PACKAGE_REGISTRY_PORT,
-              waitForLogLine: 'package manifests loaded into memory',
-              async waitFor(server, logLine$) {
-                await logLine$
-                  .pipe(
-                    first(line => line.includes('Package registry started')),
-                    tap(line => {
-                      console.log(`waitFor found log line "${line}"`);
-                      console.log('marking server ready', server);
-                    })
-                  )
-                  .toPromise();
-              },
-            },
-          }
-        : {}
-    ),
-
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
@@ -114,8 +87,6 @@ export default async function({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
-        `--xpack.ingestManager.enabled=true`,
-        `--xpack.ingestManager.epm.registryUrl=http://localhost:${process.env.FLEET_PACKAGE_REGISTRY_PORT}`,
       ],
     },
     uiSettings: {

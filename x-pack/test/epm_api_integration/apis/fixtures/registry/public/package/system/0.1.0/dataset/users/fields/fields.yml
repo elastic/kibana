@@ -1,0 +1,44 @@
+- name: system.users
+  type: group
+  release: beta
+  fields:
+  - name: id
+    type: keyword
+    description: |
+      The ID of the session
+  - name: seat
+    type: keyword
+    description: |
+      An associated logind seat
+  - name: path
+    type: keyword
+    description: |
+      The DBus object path of the session
+  - name: type
+    type: keyword
+    description: |
+      The type of the user session
+  - name: service
+    type: keyword
+    description: |
+      A session associated with the service
+  - name: remote
+    type: boolean
+    description: |
+      A bool indicating a remote session
+  - name: state
+    type: keyword
+    description: |
+      The current state of the session
+  - name: scope
+    type: keyword
+    description: |
+      The associated systemd scope
+  - name: leader
+    type: long
+    description: |
+      The root PID of the session
+  - name: remote_host
+    type: keyword
+    description: |
+      A remote host address for the session

@@ -1,0 +1,43 @@
+format_version: 1.0.0
+name: system
+title: System
+version: 0.1.0
+license: basic
+description: System Integration
+type: integration
+categories:
+- logs
+- metrics
+release: beta
+removable: false
+screenshots:
+- src: /img/kibana-system.png
+  title: kibana system
+  size: 1220x852
+  type: image/png
+- src: /img/metricbeat_system_dashboard.png
+  title: metricbeat system dashboard
+  size: 2097x1933
+  type: image/png
+- src: /img/metricbeat-services-host.png
+  title: metricbeat services host
+  size: 5006x2260
+  type: image/png
+icons:
+- src: /img/system.svg
+  title: system
+  size: 1000x1000
+  type: image/svg+xml
+datasources:
+- name: system
+  title: System logs and metrics
+  description: Collect logs and metrics from System instances
+  inputs:
+  - type: logs
+    title: Collect logs from System instances
+    description: Collecting System auth and syslog logs
+  - type: system/metrics
+    title: Collect metrics from System instances
+    description: Collecting System core, cpu, diskio, entropy, filesystem, fsstat,
+      load, memory, network, network_summary, process, process_summary, raid, service,
+      socket, socket_summary, uptime and users metrics

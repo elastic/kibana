@@ -1,0 +1,92 @@
+- name: system.socket.summary
+  title: Socket summary
+  type: group
+  release: ga
+  fields:
+  - name: all
+    type: group
+    fields:
+    - name: count
+      type: integer
+      description: |
+        All open connections
+    - name: listening
+      type: integer
+      description: |
+        All listening ports
+  - name: tcp
+    type: group
+    fields:
+    - name: memory
+      type: integer
+      format: bytes
+      description: "Memory used by TCP sockets in bytes, based on number of allocated
+        pages and system page size. Corresponds to limits set in /proc/sys/net/ipv4/tcp_mem.
+        Only available on Linux. \n"
+    - name: all
+      type: group
+      fields:
+      - name: orphan
+        type: integer
+        description: |
+          A count of all orphaned tcp sockets. Only available on Linux.
+      - name: count
+        type: integer
+        description: |
+          All open TCP connections
+      - name: listening
+        type: integer
+        description: |
+          All TCP listening ports
+      - name: established
+        type: integer
+        description: |
+          Number of established TCP connections
+      - name: close_wait
+        type: integer
+        description: |
+          Number of TCP connections in _close_wait_ state
+      - name: time_wait
+        type: integer
+        description: |
+          Number of TCP connections in _time_wait_ state
+      - name: syn_sent
+        type: integer
+        description: |
+          Number of TCP connections in _syn_sent_ state
+      - name: syn_recv
+        type: integer
+        description: |
+          Number of TCP connections in _syn_recv_ state
+      - name: fin_wait1
+        type: integer
+        description: |
+          Number of TCP connections in _fin_wait1_ state
+      - name: fin_wait2
+        type: integer
+        description: |
+          Number of TCP connections in _fin_wait2_ state
+      - name: last_ack
+        type: integer
+        description: |
+          Number of TCP connections in _last_ack_ state
+      - name: closing
+        type: integer
+        description: |
+          Number of TCP connections in _closing_ state
+  - name: udp
+    type: group
+    fields:
+    - name: memory
+      type: integer
+      format: bytes
+      description: "Memory used by UDP sockets in bytes, based on number of allocated
+        pages and system page size. Corresponds to limits set in /proc/sys/net/ipv4/udp_mem.
+        Only available on Linux. \n"
+    - name: all
+      type: group
+      fields:
+      - name: count
+        type: integer
+        description: |
+          All open UDP connections

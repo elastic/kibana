@@ -1,0 +1,81 @@
+{
+  "attributes": {
+    "description": "Overview of MySQL server",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"embeddableConfig\":{\"title\":\"Open Tables, Files, Streams\"},\"gridData\":{\"h\":15,\"i\":\"14\",\"w\":24,\"x\":24,\"y\":38},\"panelIndex\":\"14\",\"panelRefName\":\"panel_0\",\"title\":\"Open Tables, Files, Streams\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Rate of Questions\"},\"gridData\":{\"h\":12,\"i\":\"050b110b-0b4d-404a-86c0-fa97f7eed2a0\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"050b110b-0b4d-404a-86c0-fa97f7eed2a0\",\"panelRefName\":\"panel_1\",\"title\":\"Rate of Questions\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Rate of SELECT statements\"},\"gridData\":{\"h\":12,\"i\":\"988a61d7-ac3e-481e-a6ae-aa75aaa32a3a\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"988a61d7-ac3e-481e-a6ae-aa75aaa32a3a\",\"panelRefName\":\"panel_2\",\"title\":\"Rate of SELECT statements\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Rate of INSERT, UPDATE, DELETE\"},\"gridData\":{\"h\":12,\"i\":\"a1f8fa38-a62f-4e05-adde-e995dae9ad83\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"a1f8fa38-a62f-4e05-adde-e995dae9ad83\",\"panelRefName\":\"panel_3\",\"title\":\"Rate of INSERT, UPDATE, DELETE\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Connected Threads\"},\"gridData\":{\"h\":12,\"i\":\"d126fb61-605f-43af-b5d5-3fa3c128f726\",\"w\":6,\"x\":0,\"y\":12},\"panelIndex\":\"d126fb61-605f-43af-b5d5-3fa3c128f726\",\"panelRefName\":\"panel_4\",\"title\":\"Connected Threads\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Connections\"},\"gridData\":{\"h\":12,\"i\":\"59586d96-3abd-48a3-a258-cfd620826ec2\",\"w\":14,\"x\":6,\"y\":12},\"panelIndex\":\"59586d96-3abd-48a3-a258-cfd620826ec2\",\"panelRefName\":\"panel_5\",\"title\":\"Connections\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Aborted Connections Rate\"},\"gridData\":{\"h\":12,\"i\":\"dd0cf202-fe22-4daf-8f25-09c64d412bf3\",\"w\":14,\"x\":20,\"y\":12},\"panelIndex\":\"dd0cf202-fe22-4daf-8f25-09c64d412bf3\",\"panelRefName\":\"panel_6\",\"title\":\"Aborted Connections Rate\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Thread Activity\"},\"gridData\":{\"h\":12,\"i\":\"ead16a55-a2d3-49ae-a09b-a0b03560e9a0\",\"w\":14,\"x\":34,\"y\":12},\"panelIndex\":\"ead16a55-a2d3-49ae-a09b-a0b03560e9a0\",\"panelRefName\":\"panel_7\",\"title\":\"Thread Activity\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Buffer Pool Pages\"},\"gridData\":{\"h\":14,\"i\":\"24fc2926-610d-4910-8f3e-eb63ca69788c\",\"w\":15,\"x\":0,\"y\":24},\"panelIndex\":\"24fc2926-610d-4910-8f3e-eb63ca69788c\",\"panelRefName\":\"panel_8\",\"title\":\"Buffer Pool Pages\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Buffer Pool Utilization\"},\"gridData\":{\"h\":14,\"i\":\"33c10c95-be67-492e-afb5-863f375cffc2\",\"w\":16,\"x\":15,\"y\":24},\"panelIndex\":\"33c10c95-be67-492e-afb5-863f375cffc2\",\"panelRefName\":\"panel_9\",\"title\":\"Buffer Pool Utilization\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Network Traffic\"},\"gridData\":{\"h\":15,\"i\":\"3cd58868-0d03-4715-9ecc-9fba3cde47c1\",\"w\":24,\"x\":0,\"y\":38},\"panelIndex\":\"3cd58868-0d03-4715-9ecc-9fba3cde47c1\",\"panelRefName\":\"panel_10\",\"title\":\"Network Traffic\",\"version\":\"7.3.1\"},{\"embeddableConfig\":{\"title\":\"Buffer Pool Efficiency\"},\"gridData\":{\"h\":14,\"i\":\"d35d7c5e-8832-40e2-8c77-953ad320c853\",\"w\":17,\"x\":31,\"y\":24},\"panelIndex\":\"d35d7c5e-8832-40e2-8c77-953ad320c853\",\"panelRefName\":\"panel_11\",\"title\":\"Buffer Pool Efficiency\",\"version\":\"7.3.1\"}]",
+    "timeRestore": false,
+    "title": "[Metrics MySQL] Database Overview",
+    "version": 1
+  },
+  "id": "57b3fb50-6309-11ea-a83e-25b8612d00cc",
+  "migrationVersion": {
+    "dashboard": "7.3.0"
+  },
+  "references": [
+    {
+      "id": "aaa326b0-f1f5-11e7-85ab-594b1652e0d1-ecs",
+      "name": "panel_0",
+      "type": "visualization"
+    },
+    {
+      "id": "4fa69a10-630b-11ea-a83e-25b8612d00cc",
+      "name": "panel_1",
+      "type": "visualization"
+    },
+    {
+      "id": "7ea77d30-630a-11ea-a83e-25b8612d00cc",
+      "name": "panel_2",
+      "type": "visualization"
+    },
+    {
+      "id": "779ee920-6309-11ea-a83e-25b8612d00cc",
+      "name": "panel_3",
+      "type": "visualization"
+    },
+    {
+      "id": "fc6b5a40-630d-11ea-a83e-25b8612d00cc",
+      "name": "panel_4",
+      "type": "visualization"
+    },
+    {
+      "id": "493e8460-630d-11ea-a83e-25b8612d00cc",
+      "name": "panel_5",
+      "type": "visualization"
+    },
+    {
+      "id": "bf60bc10-639b-11ea-a83e-25b8612d00cc",
+      "name": "panel_6",
+      "type": "visualization"
+    },
+    {
+      "id": "822df290-630f-11ea-a83e-25b8612d00cc",
+      "name": "panel_7",
+      "type": "visualization"
+    },
+    {
+      "id": "98c7bca0-63a2-11ea-a83e-25b8612d00cc",
+      "name": "panel_8",
+      "type": "visualization"
+    },
+    {
+      "id": "96d46630-63a4-11ea-a83e-25b8612d00cc",
+      "name": "panel_9",
+      "type": "visualization"
+    },
+    {
+      "id": "c8661020-6310-11ea-a83e-25b8612d00cc",
+      "name": "panel_10",
+      "type": "visualization"
+    },
+    {
+      "id": "a1e00160-63a4-11ea-a83e-25b8612d00cc",
+      "name": "panel_11",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard"
+}

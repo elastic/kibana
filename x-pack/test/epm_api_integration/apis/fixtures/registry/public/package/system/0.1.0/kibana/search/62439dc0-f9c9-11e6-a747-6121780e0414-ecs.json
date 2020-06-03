@@ -1,0 +1,33 @@
+{
+  "attributes": {
+    "columns": [
+      "system.auth.ssh.event",
+      "system.auth.ssh.method",
+      "user.name",
+      "source.ip",
+      "source.geo.country_iso_code"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"stream.dataset:system.auth AND system.auth.ssh.event:*\"}}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "SSH login attempts [Logs System] ECS",
+    "version": 1
+  },
+  "id": "62439dc0-f9c9-11e6-a747-6121780e0414-ecs",
+  "references": [
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

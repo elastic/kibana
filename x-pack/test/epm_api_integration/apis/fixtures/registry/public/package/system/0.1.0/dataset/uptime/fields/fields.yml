@@ -1,0 +1,9 @@
+- name: system.uptime
+  type: group
+  release: ga
+  fields:
+  - name: duration.ms
+    type: long
+    format: duration
+    description: |
+      The OS uptime in milliseconds.

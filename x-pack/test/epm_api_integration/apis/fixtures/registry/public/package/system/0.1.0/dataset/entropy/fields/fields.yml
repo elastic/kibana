@@ -1,0 +1,13 @@
+- name: system.entropy
+  type: group
+  release: ga
+  fields:
+  - name: available_bits
+    type: long
+    description: |
+      The available bits of entropy
+  - name: pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of available entropy, relative to the pool size of 4096

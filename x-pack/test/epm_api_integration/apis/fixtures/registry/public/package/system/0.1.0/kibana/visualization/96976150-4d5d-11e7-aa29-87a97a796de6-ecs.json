@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Packetloss [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"background_color_rules\":[{\"id\":\"6ba9b1f0-4d5d-11e7-aa29-87a97a796de6\"}],\"id\":\"6984af10-4d5d-11e7-aa29-87a97a796de6\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"6984af11-4d5d-11e7-aa29-87a97a796de6\",\"label\":\"In Packetloss\",\"line_width\":1,\"metrics\":[{\"field\":\"system.network.in.dropped\",\"id\":\"6984af12-4d5d-11e7-aa29-87a97a796de6\",\"type\":\"max\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"ac2e6b30-4d5d-11e7-aa29-87a97a796de6\",\"label\":\"Out Packetloss\",\"line_width\":1,\"metrics\":[{\"field\":\"system.network.out.dropped\",\"id\":\"ac2e6b31-4d5d-11e7-aa29-87a97a796de6\",\"type\":\"max\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"metric\"},\"title\":\"Packetloss [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "96976150-4d5d-11e7-aa29-87a97a796de6-ecs",
+  "references": [],
+  "type": "visualization"
+}

@@ -1,0 +1,13 @@
+{
+    "index_patterns": [
+        "events-*-*"
+    ],
+    "priority": 0,
+    "data_stream": {
+        "timestamp_field": "@timestamp"
+    },
+    "composed_of": [
+        "events-mappings",
+        "events-settings"
+    ]
+}

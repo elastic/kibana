@@ -1,0 +1,51 @@
+format_version: 1.0.0
+name: nginx
+title: Nginx
+version: 0.1.0
+license: basic
+description: Nginx Integration
+type: integration
+categories:
+- logs
+- metrics
+release: beta
+removable: true
+requirement:
+  kibana:
+    versions: '>=7.3.0 <8.0.0'
+  elasticsearch:
+    versions: '>7.0.1'
+screenshots:
+- src: /img/kibana-nginx.png
+  title: kibana nginx
+  size: 1218x1266
+  type: image/png
+- src: /img/metricbeat-nginx.png
+  title: metricbeat nginx
+  size: 2560x2100
+  type: image/png
+icons:
+- src: /img/logo_nginx.svg
+  title: logo nginx
+  size: 32x32
+  type: image/svg+xml
+datasources:
+- name: nginx
+  title: Nginx logs and metrics
+  description: Collect logs and metrics from Nginx instances
+  inputs:
+  - type: logs
+    title: Collect logs from Nginx instances
+    description: Collecting Nginx access, error and ingress controller logs
+  - type: nginx/metrics
+    vars:
+    - name: hosts
+      type: text
+      title: Hosts
+      multi: true
+      required: true
+      show_user: true
+      default:
+      - http://127.0.0.1
+    title: Collect metrics from Nginx instances
+    description: Collecting Nginx stub status metrics

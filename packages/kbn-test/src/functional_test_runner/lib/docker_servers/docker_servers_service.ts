@@ -68,16 +68,19 @@ export class DockerServersService {
   }
 
   private async dockerRun(server: DockerServer) {
+    const { args } = server;
     try {
       this.log.info(`[docker:${server.name}] running image "${server.image}"`);
 
-      const res = await execa('docker', [
+      const dockerArgs = [
         'run',
         '-dit',
+        args || [],
         '-p',
         `${server.port}:${server.portInContainer}`,
         server.image,
-      ]);
+      ].flat();
+      const res = await execa('docker', dockerArgs);
 
       return res.stdout.trim();
     } catch (error) {
@@ -117,8 +120,12 @@ export class DockerServersService {
     lifecycle.cleanup.add(() => {
       try {
         execa.sync('docker', ['kill', containerId]);
+        execa.sync('docker', ['rm', containerId]);
       } catch (error) {
-        if (error.message.includes(`Container ${containerId} is not running`)) {
+        if (
+          error.message.includes(`Container ${containerId} is not running`) ||
+          error.message.includes(`No such container: ${containerId}`)
+        ) {
           return;
         }
 

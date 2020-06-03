@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Interfaces by Incoming traffic [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"bar_color_rules\":[{\"id\":\"44596d40-4d60-11e7-9a4c-ed99bbcaa42b\"}],\"id\":\"42ceae90-4d60-11e7-9a4c-ed99bbcaa42b\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"42ced5a0-4d60-11e7-9a4c-ed99bbcaa42b\",\"label\":\"Interfaces by Incoming traffic\",\"line_width\":1,\"metrics\":[{\"field\":\"system.network.in.bytes\",\"id\":\"42ced5a1-4d60-11e7-9a4c-ed99bbcaa42b\",\"type\":\"avg\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"system.network.name\",\"terms_order_by\":\"42ced5a1-4d60-11e7-9a4c-ed99bbcaa42b\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"top_n\"},\"title\":\"Interfaces by Incoming traffic [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "99381c80-4d60-11e7-9a4c-ed99bbcaa42b-ecs",
+  "references": [],
+  "type": "visualization"
+}

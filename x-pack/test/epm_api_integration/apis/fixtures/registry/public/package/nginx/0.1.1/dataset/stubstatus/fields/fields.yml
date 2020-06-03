@@ -1,0 +1,44 @@
+- name: nginx.stubstatus
+  type: group
+  release: ga
+  fields:
+  - name: hostname
+    type: keyword
+    description: |
+      Nginx hostname.
+  - name: active
+    type: long
+    description: |
+      The current number of active client connections including Waiting connections.
+  - name: accepts
+    type: long
+    description: |
+      The total number of accepted client connections.
+  - name: handled
+    type: long
+    description: |
+      The total number of handled client connections.
+  - name: dropped
+    type: long
+    description: |
+      The total number of dropped client connections.
+  - name: requests
+    type: long
+    description: |
+      The total number of client requests.
+  - name: current
+    type: long
+    description: |
+      The current number of client requests.
+  - name: reading
+    type: long
+    description: |
+      The current number of connections where Nginx is reading the request header.
+  - name: writing
+    type: long
+    description: |
+      The current number of connections where Nginx is writing the response back to the client.
+  - name: waiting
+    type: long
+    description: |
+      The current number of idle client connections waiting for a request.

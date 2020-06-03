@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "description": "Overview of system metrics",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":4,\"i\":\"9\",\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"9\",\"panelRefName\":\"panel_0\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":8,\"i\":\"11\",\"w\":8,\"x\":0,\"y\":4},\"panelIndex\":\"11\",\"panelRefName\":\"panel_1\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":20,\"i\":\"12\",\"w\":24,\"x\":24,\"y\":12},\"panelIndex\":\"12\",\"panelRefName\":\"panel_2\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"13\",\"w\":24,\"x\":0,\"y\":12},\"panelIndex\":\"13\",\"panelRefName\":\"panel_3\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0% - 15%\":\"rgb(247,252,245)\",\"15% - 30%\":\"rgb(199,233,192)\",\"30% - 45%\":\"rgb(116,196,118)\",\"45% - 60%\":\"rgb(35,139,69)\"}}},\"gridData\":{\"h\":24,\"i\":\"14\",\"w\":48,\"x\":0,\"y\":32},\"panelIndex\":\"14\",\"panelRefName\":\"panel_4\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":8,\"i\":\"16\",\"w\":8,\"x\":32,\"y\":4},\"panelIndex\":\"16\",\"panelRefName\":\"panel_5\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"17\",\"w\":8,\"x\":40,\"y\":4},\"panelIndex\":\"17\",\"panelRefName\":\"panel_6\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"18\",\"w\":8,\"x\":24,\"y\":4},\"panelIndex\":\"18\",\"panelRefName\":\"panel_7\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"19\",\"w\":8,\"x\":16,\"y\":4},\"panelIndex\":\"19\",\"panelRefName\":\"panel_8\",\"version\":\"7.6.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"20\",\"w\":8,\"x\":8,\"y\":4},\"panelIndex\":\"20\",\"panelRefName\":\"panel_9\",\"version\":\"7.6.0\"}]",
+    "timeRestore": false,
+    "title": "[Metrics System] Overview ECS",
+    "version": 1
+  },
+  "id": "Metrics-system-overview-ecs",
+  "references": [
+    {
+      "id": "System-Navigation-ecs",
+      "name": "panel_0",
+      "type": "visualization"
+    },
+    {
+      "id": "c6f2ffd0-4d17-11e7-a196-69b9a7a020a9-ecs",
+      "name": "panel_1",
+      "type": "visualization"
+    },
+    {
+      "id": "fe064790-1b1f-11e7-bec4-a5e9ec5cab8b-ecs",
+      "name": "panel_2",
+      "type": "visualization"
+    },
+    {
+      "id": "855899e0-1b1c-11e7-b09e-037021c4f8df-ecs",
+      "name": "panel_3",
+      "type": "visualization"
+    },
+    {
+      "id": "7cdb1330-4d1a-11e7-a196-69b9a7a020a9-ecs",
+      "name": "panel_4",
+      "type": "visualization"
+    },
+    {
+      "id": "522ee670-1b92-11e7-bec4-a5e9ec5cab8b-ecs",
+      "name": "panel_5",
+      "type": "visualization"
+    },
+    {
+      "id": "1aae9140-1b93-11e7-8ada-3df93aab833e-ecs",
+      "name": "panel_6",
+      "type": "visualization"
+    },
+    {
+      "id": "825fdb80-4d1d-11e7-b5f2-2b7c1895bf32-ecs",
+      "name": "panel_7",
+      "type": "visualization"
+    },
+    {
+      "id": "d3166e80-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+      "name": "panel_8",
+      "type": "visualization"
+    },
+    {
+      "id": "83e12df0-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+      "name": "panel_9",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard"
+}

@@ -61,6 +61,9 @@ const dockerServerSchema = () =>
       portInContainer: Joi.number().required(),
       waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
       waitFor: Joi.func().optional(),
+      args: Joi.array()
+        .items(Joi.string())
+        .optional(),
     })
     .default();
 

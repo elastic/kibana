@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Disk used [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"logs-*\",\"default_timefield\":\"@timestamp\",\"filter\":\"\",\"gauge_color_rules\":[{\"gauge\":\"rgba(104,188,0,1)\",\"id\":\"51921d10-4d1d-11e7-b5f2-2b7c1895bf32\",\"operator\":\"gte\",\"value\":0},{\"gauge\":\"rgba(251,158,0,1)\",\"id\":\"f26de750-4d54-11e7-b5f2-2b7c1895bf32\",\"operator\":\"gte\",\"value\":0.7},{\"gauge\":\"rgba(211,49,21,1)\",\"id\":\"fa31d190-4d54-11e7-b5f2-2b7c1895bf32\",\"operator\":\"gte\",\"value\":0.85}],\"gauge_inner_width\":10,\"gauge_max\":\"1\",\"gauge_style\":\"half\",\"gauge_width\":10,\"id\":\"4e4dc780-4d1d-11e7-b5f2-2b7c1895bf32\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"4e4dee90-4d1d-11e7-b5f2-2b7c1895bf32\",\"label\":\"Disk used\",\"line_width\":1,\"metrics\":[{\"agg_with\":\"avg\",\"field\":\"system.fsstat.total_size.used\",\"id\":\"4e4dee91-4d1d-11e7-b5f2-2b7c1895bf32\",\"order\":\"desc\",\"order_by\":\"@timestamp\",\"size\":1,\"type\":\"top_hit\"},{\"agg_with\":\"avg\",\"field\":\"system.fsstat.total_size.total\",\"id\":\"57c96ee0-4d54-11e7-b5f2-2b7c1895bf32\",\"order\":\"desc\",\"order_by\":\"@timestamp\",\"size\":1,\"type\":\"top_hit\"},{\"id\":\"6304cca0-4d54-11e7-b5f2-2b7c1895bf32\",\"script\":\"params.used/params.total \",\"type\":\"math\",\"variables\":[{\"field\":\"4e4dee91-4d1d-11e7-b5f2-2b7c1895bf32\",\"id\":\"6da10430-4d54-11e7-b5f2-2b7c1895bf32\",\"name\":\"used\"},{\"field\":\"57c96ee0-4d54-11e7-b5f2-2b7c1895bf32\",\"id\":\"73b8c510-4d54-11e7-b5f2-2b7c1895bf32\",\"name\":\"total\"}]}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"time_range_mode\":\"entire_time_range\",\"type\":\"gauge\"},\"title\":\"Disk used [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "825fdb80-4d1d-11e7-b5f2-2b7c1895bf32-ecs",
+  "references": [],
+  "type": "visualization"
+}

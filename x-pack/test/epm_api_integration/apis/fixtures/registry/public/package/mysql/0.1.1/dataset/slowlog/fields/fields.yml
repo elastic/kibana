@@ -1,0 +1,180 @@
+- name: mysql.slowlog
+  type: group
+  fields:
+  - name: lock_time.sec
+    type: float
+    description: |
+      The amount of time the query waited for the lock to be available. The value is in seconds, as a floating point number.
+  - name: rows_sent
+    type: long
+    description: |
+      The number of rows returned by the query.
+  - name: rows_examined
+    type: long
+    description: |
+      The number of rows scanned by the query.
+  - name: rows_affected
+    type: long
+    description: |
+      The number of rows modified by the query.
+  - name: bytes_sent
+    type: long
+    format: bytes
+    description: |
+      The number of bytes sent to client.
+  - name: bytes_received
+    type: long
+    format: bytes
+    description: |
+      The number of bytes received from client.
+  - name: query
+    type: keyword
+    description: |
+      The slow query.
+  - name: schema
+    type: keyword
+    description: |
+      The schema where the slow query was executed.
+  - name: current_user
+    type: keyword
+    description: |
+      Current authenticated user, used to determine access privileges. Can differ from the value for user.
+  - name: last_errno
+    type: keyword
+    description: |
+      Last SQL error seen.
+  - name: killed
+    type: keyword
+    description: |
+      Code of the reason if the query was killed.
+  - name: query_cache_hit
+    type: boolean
+    description: |
+      Whether the query cache was hit.
+  - name: tmp_table
+    type: boolean
+    description: |
+      Whether a temporary table was used to resolve the query.
+  - name: tmp_table_on_disk
+    type: boolean
+    description: |
+      Whether the query needed temporary tables on disk.
+  - name: tmp_tables
+    type: long
+    description: |
+      Number of temporary tables created for this query
+  - name: tmp_disk_tables
+    type: long
+    description: |
+      Number of temporary tables created on disk for this query.
+  - name: tmp_table_sizes
+    type: long
+    format: bytes
+    description: Size of temporary tables created for this query.
+  - name: filesort
+    type: boolean
+    description: |
+      Whether filesort optimization was used.
+  - name: filesort_on_disk
+    type: boolean
+    description: |
+      Whether filesort optimization was used and it needed temporary tables on disk.
+  - name: priority_queue
+    type: boolean
+    description: |
+      Whether a priority queue was used for filesort.
+  - name: full_scan
+    type: boolean
+    description: |
+      Whether a full table scan was needed for the slow query.
+  - name: full_join
+    type: boolean
+    description: |
+      Whether a full join was needed for the slow query (no indexes were used for joins).
+  - name: merge_passes
+    type: long
+    description: |
+      Number of merge passes executed for the query.
+  - name: sort_merge_passes
+    type: long
+    description: |
+      Number of merge passes that the sort algorithm has had to do.
+  - name: sort_range_count
+    type: long
+    description: "Number of sorts that were done using ranges. \n"
+  - name: sort_rows
+    type: long
+    description: |
+      Number of sorted rows.
+  - name: sort_scan_count
+    type: long
+    description: |
+      Number of sorts that were done by scanning the table.
+  - name: log_slow_rate_type
+    type: keyword
+    description: |
+      Type of slow log rate limit, it can be `session` if the rate limit is applied per session, or `query` if it applies per query.
+  - name: log_slow_rate_limit
+    type: keyword
+    description: |
+      Slow log rate limit, a value of 100 means that one in a hundred queries or sessions are being logged.
+  - name: read_first
+    type: long
+    description: |
+      The number of times the first entry in an index was read.
+  - name: read_last
+    type: long
+    description: |
+      The number of times the last key in an index was read.
+  - name: read_key
+    type: long
+    description: |
+      The number of requests to read a row based on a key.
+  - name: read_next
+    type: long
+    description: |
+      The number of requests to read the next row in key order.
+  - name: read_prev
+    type: long
+    description: |
+      The number of requests to read the previous row in key order.
+  - name: read_rnd
+    type: long
+    description: "The number of requests to read a row based on a fixed position.
+      \n"
+  - name: read_rnd_next
+    type: long
+    description: |
+      The number of requests to read the next row in the data file.
+  - name: innodb
+    type: group
+    fields:
+    - name: trx_id
+      type: keyword
+      description: |
+        Transaction ID
+    - name: io_r_ops
+      type: long
+      description: |
+        Number of page read operations.
+    - name: io_r_bytes
+      type: long
+      format: bytes
+      description: |
+        Bytes read during page read operations.
+    - name: io_r_wait.sec
+      type: long
+      description: |
+        How long it took to read all needed data from storage.
+    - name: rec_lock_wait.sec
+      type: long
+      description: |
+        How long the query waited for locks.
+    - name: queue_wait.sec
+      type: long
+      description: |
+        How long the query waited to enter the InnoDB queue and to be executed once in the queue.
+    - name: pages_distinct
+      type: long
+      description: |
+        Approximated count of pages accessed to execute the query.

@@ -1,0 +1,7 @@
+- name: nginx.error
+  type: group
+  fields:
+  - name: connection_id
+    type: long
+    description: |
+      Connection identifier.

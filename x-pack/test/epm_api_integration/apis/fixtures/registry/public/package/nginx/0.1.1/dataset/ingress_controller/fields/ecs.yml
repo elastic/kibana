@@ -1,0 +1,133 @@
+- name: http
+  title: HTTP
+  group: 2
+  type: group
+  fields:
+  - name: request.method
+    level: extended
+    type: keyword
+    description: |-
+      HTTP request method.
+      The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".
+    ignore_above: 1024
+  - name: request.referrer
+    level: extended
+    type: keyword
+    description: Referrer for this HTTP request.
+    ignore_above: 1024
+  - name: response.body.bytes
+    level: extended
+    type: long
+    format: bytes
+    description: Size in bytes of the response body.
+  - name: response.status_code
+    level: extended
+    type: long
+    format: string
+    description: HTTP response status code.
+  - name: version
+    level: extended
+    type: keyword
+    description: HTTP version.
+    ignore_above: 1024
+- name: source
+  title: Source
+  group: 2
+  type: group
+  fields:
+  - name: geo.city_name
+    level: core
+    type: keyword
+    description: City name.
+    ignore_above: 1024
+  - name: geo.continent_name
+    level: core
+    type: keyword
+    description: Name of the continent.
+    ignore_above: 1024
+  - name: geo.country_iso_code
+    level: core
+    type: keyword
+    description: Country ISO code.
+    ignore_above: 1024
+  - name: geo.location
+    level: core
+    type: geo_point
+    description: Longitude and latitude.
+  - name: geo.region_iso_code
+    level: core
+    type: keyword
+    description: Region ISO code.
+    ignore_above: 1024
+  - name: geo.region_name
+    level: core
+    type: keyword
+    description: Region name.
+    ignore_above: 1024
+- name: url
+  title: URL
+  group: 2
+  type: group
+  fields:
+  - name: original
+    level: extended
+    type: keyword
+    description: |-
+      Unmodified original url as seen in the event source.
+      Note that in network monitoring, the observed URL may be a full URL, whereas in access logs, the URL is often just represented as a path.
+      This field is meant to represent the URL as it was observed, complete or not.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+- name: user
+  title: User
+  group: 2
+  type: group
+  fields:
+  - name: name
+    level: core
+    type: keyword
+    description: Short name or login of the user.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+- name: user_agent
+  title: User agent
+  group: 2
+  type: group
+  fields:
+  - name: device.name
+    level: extended
+    type: keyword
+    description: Name of the device.
+    ignore_above: 1024
+  - name: name
+    level: extended
+    type: keyword
+    description: Name of the user agent.
+    ignore_above: 1024
+  - name: original
+    level: extended
+    type: keyword
+    description: Unparsed user_agent string.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+  - name: os.name
+    level: extended
+    type: keyword
+    description: Operating system name, without the version.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false

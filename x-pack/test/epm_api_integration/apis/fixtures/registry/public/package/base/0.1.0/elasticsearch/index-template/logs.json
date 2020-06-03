@@ -1,0 +1,10 @@
+{
+  "index_patterns": [
+      "logs-*-*"
+  ],
+  "priority": 0,
+  "composed_of": [
+      "logs-mappings",
+      "logs-settings"
+  ]
+}

@@ -1,0 +1,23 @@
+title: Nginx error logs
+type: logs
+release: beta
+streams:
+- input: logs
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/nginx/error.log*
+    os:
+      darwin:
+        default:
+        - /usr/local/var/log/nginx/error.log*
+      windows:
+        default:
+        - c:/programdata/nginx/logs/error.log*
+  title: Nginx error logs
+  description: Collect Nginx error logs

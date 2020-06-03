@@ -1,0 +1,71 @@
+{
+    "description": "Pipeline for parsing Syslog messages.",
+    "processors": [
+        {
+            "grok": {
+                "field": "message",
+                "patterns": [
+                    "%{SYSLOGTIMESTAMP:system.syslog.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: %{GREEDYMULTILINE:system.syslog.message}",
+                    "%{SYSLOGTIMESTAMP:system.syslog.timestamp} %{GREEDYMULTILINE:system.syslog.message}",
+                    "%{TIMESTAMP_ISO8601:system.syslog.timestamp} %{SYSLOGHOST:host.hostname} %{DATA:process.name}(?:\\[%{POSINT:process.pid:long}\\])?: %{GREEDYMULTILINE:system.syslog.message}"
+                ],
+                "pattern_definitions" : {
+                    "GREEDYMULTILINE" : "(.|\n)*"
+                },
+                "ignore_missing": true
+            }
+        },
+        {
+            "remove": {
+                "field": "message"
+            }
+        },
+        {
+            "rename": {
+                "field": "system.syslog.message",
+                "target_field": "message",
+                "ignore_missing": true
+            }
+        },
+        {
+            "date": {
+                "if": "ctx.event.timezone == null",
+                "field": "system.syslog.timestamp",
+                "target_field": "@timestamp",
+                "formats": [
+                    "MMM  d HH:mm:ss",
+                    "MMM dd HH:mm:ss",
+                    "MMM d HH:mm:ss",
+                    "ISO8601"
+                ],
+                "on_failure": [{"append": {"field": "error.message", "value": "{{ _ingest.on_failure_message }}"}}]
+            }
+        },
+        {
+            "date": {
+                "if": "ctx.event.timezone != null",
+                "field": "system.syslog.timestamp",
+                "target_field": "@timestamp",
+                "formats": [
+                    "MMM  d HH:mm:ss",
+                    "MMM dd HH:mm:ss",
+                    "MMM d HH:mm:ss",
+                    "ISO8601"
+                ],
+                "timezone": "{{ event.timezone }}",
+                "on_failure": [{"append": {"field": "error.message", "value": "{{ _ingest.on_failure_message }}"}}]
+            }
+        },
+        {
+            "remove": {
+                "field": "system.syslog.timestamp"
+            }
+        }
+    ],
+    "on_failure" : [{
+        "set" : {
+            "field" : "error.message",
+            "value" : "{{ _ingest.on_failure_message }}"
+        }
+    }]
+}

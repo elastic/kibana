@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Memory Usage Gauge [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":\"\",\"gauge_color_rules\":[{\"gauge\":\"rgba(104,188,0,1)\",\"id\":\"a0d522e0-1b91-11e7-bec4-a5e9ec5cab8b\",\"operator\":\"gte\",\"value\":0},{\"gauge\":\"rgba(254,146,0,1)\",\"id\":\"b45ad8f0-1b91-11e7-bec4-a5e9ec5cab8b\",\"operator\":\"gte\",\"value\":0.7},{\"gauge\":\"rgba(211,49,21,1)\",\"id\":\"c06e9550-1b91-11e7-bec4-a5e9ec5cab8b\",\"operator\":\"gte\",\"value\":0.85}],\"gauge_inner_width\":10,\"gauge_max\":\"1\",\"gauge_style\":\"half\",\"gauge_width\":10,\"id\":\"9f51b730-1b91-11e7-bec4-a5e9ec5cab8b\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"9f51b731-1b91-11e7-bec4-a5e9ec5cab8b\",\"label\":\"Memory Usage\",\"line_width\":1,\"metrics\":[{\"field\":\"system.memory.actual.used.pct\",\"id\":\"9f51b732-1b91-11e7-bec4-a5e9ec5cab8b\",\"type\":\"avg\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"gauge\"},\"title\":\"Memory Usage Gauge [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "d3166e80-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+  "references": [],
+  "type": "visualization"
+}

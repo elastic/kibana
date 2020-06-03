@@ -1,0 +1,14 @@
+title: Log Yaml pipeline
+
+type: logs
+
+ingest_pipeline: pipeline-entry
+
+streams:
+  - input: logs
+    title: Yamlpipline example logs
+    description: Yamlpipeline example
+    vars:
+      - name: paths
+        required: true
+        default:

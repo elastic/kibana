@@ -1,0 +1,10 @@
+{
+    "index_patterns": [
+        "events-*-*"
+    ],
+    "priority": 0,
+    "composed_of": [
+        "events-mappings",
+        "events-settings"
+    ]
+}

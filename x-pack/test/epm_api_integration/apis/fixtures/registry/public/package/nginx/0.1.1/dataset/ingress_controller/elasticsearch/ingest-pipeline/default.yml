@@ -1,0 +1,173 @@
+---
+description: Pipeline for parsing Nginx ingress controller access logs. Requires the
+  geoip and user_agent plugins.
+processors:
+- grok:
+    field: message
+    patterns:
+    - (%{NGINX_HOST} )?"?(?:%{NGINX_ADDRESS_LIST:nginx.ingress_controller.remote_ip_list}|%{NOTSPACE:source.address})
+      - (-|%{DATA:user.name}) \[%{HTTPDATE:nginx.ingress_controller.time}\] "%{DATA:nginx.ingress_controller.info}"
+      %{NUMBER:http.response.status_code:long} %{NUMBER:http.response.body.bytes:long}
+      "(-|%{DATA:http.request.referrer})" "(-|%{DATA:user_agent.original})" %{NUMBER:nginx.ingress_controller.http.request.length:long}
+      %{NUMBER:nginx.ingress_controller.http.request.time:double} \[%{DATA:nginx.ingress_controller.upstream.name}\]
+      \[%{DATA:nginx.ingress_controller.upstream.alternative_name}\] (%{UPSTREAM_ADDRESS}|-)
+      (%{NUMBER:nginx.ingress_controller.upstream.response.length:long}|-) (%{NUMBER:nginx.ingress_controller.upstream.response.time:double}|-)
+      (%{NUMBER:nginx.ingress_controller.upstream.response.status_code:long}|-) %{GREEDYDATA:nginx.ingress_controller.http.request.id}
+    pattern_definitions:
+      NGINX_HOST: (?:%{IP:destination.ip}|%{NGINX_NOTSEPARATOR:destination.domain})(:%{NUMBER:destination.port})?
+      NGINX_NOTSEPARATOR: "[^\t ,:]+"
+      NGINX_ADDRESS_LIST: (?:%{IP}|%{WORD})("?,?\s*(?:%{IP}|%{WORD}))*
+      UPSTREAM_ADDRESS: '%{IP:nginx.ingress_controller.upstream.ip}(:%{NUMBER:nginx.ingress_controller.upstream.port})?'
+    ignore_missing: true
+- grok:
+    field: nginx.ingress_controller.info
+    patterns:
+    - '%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}'
+    - ""
+    ignore_missing: true
+- remove:
+    field: nginx.ingress_controller.info
+- split:
+    field: nginx.ingress_controller.remote_ip_list
+    separator: '"?,?\s+'
+    ignore_missing: true
+- split:
+    field: nginx.ingress_controller.origin
+    separator: '"?,?\s+'
+    ignore_missing: true
+- set:
+    field: source.address
+    if: ctx.source?.address == null
+    value: ""
+- script:
+    if: ctx.nginx?.access?.remote_ip_list != null && ctx.nginx.ingress_controller.remote_ip_list.length > 0
+    lang: painless
+    source: >-
+      boolean isPrivate(def dot, def ip) {
+        try {
+          StringTokenizer tok = new StringTokenizer(ip, dot);
+          int firstByte = Integer.parseInt(tok.nextToken());
+          int secondByte = Integer.parseInt(tok.nextToken());
+          if (firstByte == 10) {
+            return true;
+          }
+          if (firstByte == 192 && secondByte == 168) {
+            return true;
+          }
+          if (firstByte == 172 && secondByte >= 16 && secondByte <= 31) {
+            return true;
+          }
+          if (firstByte == 127) {
+            return true;
+          }
+          return false;
+        }
+        catch (Exception e) {
+          return false;
+        }
+      }
+      try {
+        ctx.source.address = null;
+        if (ctx.nginx.ingress_controller.remote_ip_list == null) {
+          return;
+        }
+        def found = false;
+        for (def item : ctx.nginx.ingress_controller.remote_ip_list) {
+          if (!isPrivate(params.dot, item)) {
+            ctx.source.address = item;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          ctx.source.address = ctx.nginx.ingress_controller.remote_ip_list[0];
+        }
+      }
+      catch (Exception e) {
+        ctx.source.address = null;
+      }
+    params:
+      dot: .
+- remove:
+    field: source.address
+    if: ctx.source.address == null
+- grok:
+    field: source.address
+    patterns:
+    - ^%{IP:source.ip}$
+    ignore_failure: true
+- remove:
+    field: message
+- rename:
+    field: '@timestamp'
+    target_field: event.created
+- date:
+    field: nginx.ingress_controller.time
+    target_field: '@timestamp'
+    formats:
+    - dd/MMM/yyyy:H:m:s Z
+    on_failure:
+    - append:
+        field: error.message
+        value: '{{ _ingest.on_failure_message }}'
+- remove:
+    field: nginx.ingress_controller.time
+- user_agent:
+    field: user_agent.original
+    ignore_missing: true
+- geoip:
+    field: source.ip
+    target_field: source.geo
+    ignore_missing: true
+- geoip:
+    database_file: GeoLite2-ASN.mmdb
+    field: source.ip
+    target_field: source.as
+    properties:
+    - asn
+    - organization_name
+    ignore_missing: true
+- rename:
+    field: source.as.asn
+    target_field: source.as.number
+    ignore_missing: true
+- rename:
+    field: source.as.organization_name
+    target_field: source.as.organization.name
+    ignore_missing: true
+- set:
+    field: event.kind
+    value: event
+- append:
+    field: event.category
+    value: web
+- append:
+    field: event.type
+    value: info
+- set:
+    field: event.outcome
+    value: success
+    if: "ctx?.http?.response?.status_code != null && ctx.http.response.status_code < 400"
+- set:
+    field: event.outcome
+    value: failure
+    if: "ctx?.http?.response?.status_code != null && ctx.http.response.status_code >= 400"
+- lowercase:
+    field: http.request.method
+    ignore_missing: true
+- append:
+    field: related.ip
+    value: "{{source.ip}}"
+    if: "ctx?.source?.ip != null"
+- append:
+    field: related.ip
+    value: "{{destination.ip}}"
+    if: "ctx?.destination?.ip != null"
+- append:
+    field: related.user
+    value: "{{user.name}}"
+    if: "ctx?.user?.name != null"
+on_failure:
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'

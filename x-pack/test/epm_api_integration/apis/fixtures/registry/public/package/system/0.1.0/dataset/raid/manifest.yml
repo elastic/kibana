@@ -1,0 +1,7 @@
+title: System raid metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  title: System raid metrics
+  description: Collect System raid metrics

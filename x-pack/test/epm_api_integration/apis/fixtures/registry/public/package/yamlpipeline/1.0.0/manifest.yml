@@ -1,0 +1,20 @@
+format_version: 1.0.0
+
+name: yamlpipeline
+title: Yaml Pipeline package
+description: >
+  This package contains a yaml pipeline.
+version: 1.0.0
+categories: [logs]
+release: beta
+
+license: basic
+type: integration
+
+requirement:
+  elasticsearch:
+    version.min: 7.0.0
+
+# No icons
+icons:
+

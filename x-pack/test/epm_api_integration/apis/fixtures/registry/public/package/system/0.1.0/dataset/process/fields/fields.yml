@@ -1,0 +1,343 @@
+- name: system.process
+  type: group
+  release: ga
+  fields:
+  - name: state
+    type: keyword
+    description: |
+      The process state. For example: "running".
+  - name: cmdline
+    type: keyword
+    description: |
+      The full command-line used to start the process, including the arguments separated by space.
+    ignore_above: 2048
+  - name: env
+    type: object
+    description: |
+      The environment variables used to start the process. The data is available on FreeBSD, Linux, and OS X.
+  - name: cpu
+    type: group
+    fields:
+    - name: user.ticks
+      type: long
+      description: |
+        The amount of CPU time the process spent in user space.
+    - name: total.value
+      type: long
+      description: |
+        The value of CPU usage since starting the process.
+    - name: total.pct
+      type: scaled_float
+      format: percent
+      description: |
+        The percentage of CPU time spent by the process since the last update. Its value is similar to the %CPU value of the process displayed by the top command on Unix systems.
+    - name: total.norm.pct
+      type: scaled_float
+      format: percent
+      description: |
+        The percentage of CPU time spent by the process since the last event. This value is normalized by the number of CPU cores and it ranges from 0 to 100%.
+    - name: system.ticks
+      type: long
+      description: |
+        The amount of CPU time the process spent in kernel space.
+    - name: total.ticks
+      type: long
+      description: |
+        The total CPU time spent by the process.
+    - name: start_time
+      type: date
+      description: |
+        The time when the process was started.
+  - name: memory
+    type: group
+    fields:
+    - name: size
+      type: long
+      format: bytes
+      description: |
+        The total virtual memory the process has. On Windows this represents the Commit Charge (the total amount of memory that the memory manager has committed for a running process) value in bytes for this process.
+    - name: rss.bytes
+      type: long
+      format: bytes
+      description: |
+        The Resident Set Size. The amount of memory the process occupied in main memory (RAM). On Windows this represents the current working set size, in bytes.
+    - name: rss.pct
+      type: scaled_float
+      format: percent
+      description: |
+        The percentage of memory the process occupied in main memory (RAM).
+    - name: share
+      type: long
+      format: bytes
+      description: |
+        The shared memory the process uses.
+  - name: fd
+    type: group
+    fields:
+    - name: open
+      type: long
+      description: The number of file descriptors open by the process.
+    - name: limit.soft
+      type: long
+      description: |
+        The soft limit on the number of file descriptors opened by the process. The soft limit can be changed by the process at any time.
+    - name: limit.hard
+      type: long
+      description: |
+        The hard limit on the number of file descriptors opened by the process. The hard limit can only be raised by root.
+  - name: cgroup
+    type: group
+    fields:
+    - name: id
+      type: keyword
+      description: |
+        The ID common to all cgroups associated with this task. If there isn't a common ID used by all cgroups this field will be absent.
+    - name: path
+      type: keyword
+      description: |
+        The path to the cgroup relative to the cgroup subsystem's mountpoint. If there isn't a common path used by all cgroups this field will be absent.
+    - name: cpu
+      type: group
+      fields:
+      - name: id
+        type: keyword
+        description: ID of the cgroup.
+      - name: path
+        type: keyword
+        description: |
+          Path to the cgroup relative to the cgroup subsystem's mountpoint.
+      - name: cfs.period.us
+        type: long
+        description: |
+          Period of time in microseconds for how regularly a cgroup's access to CPU resources should be reallocated.
+      - name: cfs.quota.us
+        type: long
+        description: |
+          Total amount of time in microseconds for which all tasks in a cgroup can run during one period (as defined by cfs.period.us).
+      - name: cfs.shares
+        type: long
+        description: |
+          An integer value that specifies a relative share of CPU time available to the tasks in a cgroup. The value specified in the cpu.shares file must be 2 or higher.
+      - name: rt.period.us
+        type: long
+        description: |
+          Period of time in microseconds for how regularly a cgroup's access to CPU resources is reallocated.
+      - name: rt.runtime.us
+        type: long
+        description: |
+          Period of time in microseconds for the longest continuous period in which the tasks in a cgroup have access to CPU resources.
+      - name: stats.periods
+        type: long
+        description: |
+          Number of period intervals (as specified in cpu.cfs.period.us) that have elapsed.
+      - name: stats.throttled.periods
+        type: long
+        description: |
+          Number of times tasks in a cgroup have been throttled (that is, not allowed to run because they have exhausted all of the available time as specified by their quota).
+      - name: stats.throttled.ns
+        type: long
+        description: |
+          The total time duration (in nanoseconds) for which tasks in a cgroup have been throttled.
+    - name: cpuacct
+      type: group
+      fields:
+      - name: id
+        type: keyword
+        description: ID of the cgroup.
+      - name: path
+        type: keyword
+        description: |
+          Path to the cgroup relative to the cgroup subsystem's mountpoint.
+      - name: total.ns
+        type: long
+        description: |
+          Total CPU time in nanoseconds consumed by all tasks in the cgroup.
+      - name: stats.user.ns
+        type: long
+        description: CPU time consumed by tasks in user mode.
+      - name: stats.system.ns
+        type: long
+        description: CPU time consumed by tasks in user (kernel) mode.
+      - name: percpu
+        type: object
+        description: |
+          CPU time (in nanoseconds) consumed on each CPU by all tasks in this cgroup.
+    - name: memory
+      type: group
+      fields:
+      - name: id
+        type: keyword
+        description: ID of the cgroup.
+      - name: path
+        type: keyword
+        description: |
+          Path to the cgroup relative to the cgroup subsystem's mountpoint.
+      - name: mem.usage.bytes
+        type: long
+        format: bytes
+        description: |
+          Total memory usage by processes in the cgroup (in bytes).
+      - name: mem.usage.max.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum memory used by processes in the cgroup (in bytes).
+      - name: mem.limit.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum amount of user memory in bytes (including file cache) that tasks in the cgroup are allowed to use.
+      - name: mem.failures
+        type: long
+        description: |
+          The number of times that the memory limit (mem.limit.bytes) was reached.
+      - name: memsw.usage.bytes
+        type: long
+        format: bytes
+        description: |
+          The sum of current memory usage plus swap space used by processes in the cgroup (in bytes).
+      - name: memsw.usage.max.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum amount of memory and swap space used by processes in the cgroup (in bytes).
+      - name: memsw.limit.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum amount for the sum of memory and swap usage that tasks in the cgroup are allowed to use.
+      - name: memsw.failures
+        type: long
+        description: |
+          The number of times that the memory plus swap space limit (memsw.limit.bytes) was reached.
+      - name: kmem.usage.bytes
+        type: long
+        format: bytes
+        description: |
+          Total kernel memory usage by processes in the cgroup (in bytes).
+      - name: kmem.usage.max.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum kernel memory used by processes in the cgroup (in bytes).
+      - name: kmem.limit.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum amount of kernel memory that tasks in the cgroup are allowed to use.
+      - name: kmem.failures
+        type: long
+        description: |
+          The number of times that the memory limit (kmem.limit.bytes) was reached.
+      - name: kmem_tcp.usage.bytes
+        type: long
+        format: bytes
+        description: |
+          Total memory usage for TCP buffers in bytes.
+      - name: kmem_tcp.usage.max.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum memory used for TCP buffers by processes in the cgroup (in bytes).
+      - name: kmem_tcp.limit.bytes
+        type: long
+        format: bytes
+        description: |
+          The maximum amount of memory for TCP buffers that tasks in the cgroup are allowed to use.
+      - name: kmem_tcp.failures
+        type: long
+        description: |
+          The number of times that the memory limit (kmem_tcp.limit.bytes) was reached.
+      - name: stats.active_anon.bytes
+        type: long
+        format: bytes
+        description: |
+          Anonymous and swap cache on active least-recently-used (LRU) list, including tmpfs (shmem), in bytes.
+      - name: stats.active_file.bytes
+        type: long
+        format: bytes
+        description: File-backed memory on active LRU list, in bytes.
+      - name: stats.cache.bytes
+        type: long
+        format: bytes
+        description: Page cache, including tmpfs (shmem), in bytes.
+      - name: stats.hierarchical_memory_limit.bytes
+        type: long
+        format: bytes
+        description: |
+          Memory limit for the hierarchy that contains the memory cgroup, in bytes.
+      - name: stats.hierarchical_memsw_limit.bytes
+        type: long
+        format: bytes
+        description: |
+          Memory plus swap limit for the hierarchy that contains the memory cgroup, in bytes.
+      - name: stats.inactive_anon.bytes
+        type: long
+        format: bytes
+        description: |
+          Anonymous and swap cache on inactive LRU list, including tmpfs (shmem), in bytes
+      - name: stats.inactive_file.bytes
+        type: long
+        format: bytes
+        description: |
+          File-backed memory on inactive LRU list, in bytes.
+      - name: stats.mapped_file.bytes
+        type: long
+        format: bytes
+        description: |
+          Size of memory-mapped mapped files, including tmpfs (shmem), in bytes.
+      - name: stats.page_faults
+        type: long
+        description: |
+          Number of times that a process in the cgroup triggered a page fault.
+      - name: stats.major_page_faults
+        type: long
+        description: |
+          Number of times that a process in the cgroup triggered a major fault. "Major" faults happen when the kernel actually has to read the data from disk.
+      - name: stats.pages_in
+        type: long
+        description: |
+          Number of pages paged into memory. This is a counter.
+      - name: stats.pages_out
+        type: long
+        description: |
+          Number of pages paged out of memory. This is a counter.
+      - name: stats.rss.bytes
+        type: long
+        format: bytes
+        description: |
+          Anonymous and swap cache (includes transparent hugepages), not including tmpfs (shmem), in bytes.
+      - name: stats.rss_huge.bytes
+        type: long
+        format: bytes
+        description: |
+          Number of bytes of anonymous transparent hugepages.
+      - name: stats.swap.bytes
+        type: long
+        format: bytes
+        description: |
+          Swap usage, in bytes.
+      - name: stats.unevictable.bytes
+        type: long
+        format: bytes
+        description: |
+          Memory that cannot be reclaimed, in bytes.
+    - name: blkio
+      type: group
+      fields:
+      - name: id
+        type: keyword
+        description: ID of the cgroup.
+      - name: path
+        type: keyword
+        description: |
+          Path to the cgroup relative to the cgroup subsystems mountpoint.
+      - name: total.bytes
+        type: long
+        format: bytes
+        description: |
+          Total number of bytes transferred to and from all block devices by processes in the cgroup.
+      - name: total.ios
+        type: long
+        description: |
+          Total number of I/O operations performed on all devices by processes in the cgroup as seen by the throttling policy.

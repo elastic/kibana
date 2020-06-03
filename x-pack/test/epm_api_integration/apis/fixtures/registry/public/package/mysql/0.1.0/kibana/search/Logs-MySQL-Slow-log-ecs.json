@@ -1,0 +1,39 @@
+{
+  "attributes": {
+    "columns": [
+      "_source"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\",\"key\":\"query\",\"negate\":false,\"type\":\"custom\",\"value\":\"{\\\"match_phrase_prefix\\\":{\\\"event.dataset\\\":{\\\"query\\\":\\\"mysql.\\\"}}}\"},\"query\":{\"match_phrase_prefix\":{\"event.dataset\":{\"query\":\"mysql.\"}}}},{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index\",\"key\":\"fileset.name\",\"negate\":false,\"params\":{\"query\":\"slowlog\",\"type\":\"phrase\"},\"type\":\"phrase\",\"value\":\"slowlog\"},\"query\":{\"match\":{\"fileset.name\":{\"query\":\"slowlog\",\"type\":\"phrase\"}}}}],\"highlight\":{\"fields\":{\"*\":{}},\"fragment_size\":2147483647,\"post_tags\":[\"@/kibana-highlighted-field@\"],\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false},\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Slow logs [Logs MySQL] ECS",
+    "version": 1
+  },
+  "id": "Logs-MySQL-Slow-log-ecs",
+  "references": [
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

@@ -1,0 +1,23 @@
+title: MySQL error logs
+type: logs
+release: beta
+streams:
+- input: logs
+  vars:
+  - name: paths
+    type: text
+    title: Error log paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/mysql/error.log*
+    - /var/log/mysqld.log*
+    os.darwin:
+      default:
+      - /usr/local/var/mysql/localhost.localdomain.err*
+    os.windows:
+      default:
+      - c:/programdata/MySQL/MySQL Server*/error.log*
+  title: MySQL error logs
+  description: Collect MySQL error logs

@@ -1,0 +1,79 @@
+- name: network
+  title: Network
+  group: 2
+  type: group
+  fields:
+  - name: direction
+    level: core
+    type: keyword
+    description: |-
+      Direction of the network traffic.
+      Recommended values are:
+        * inbound
+        * outbound
+        * internal
+        * external
+        * unknown
+
+      When mapping events from a host-based monitoring context, populate this field from the host's point of view.
+      When mapping events from a network or perimeter-based monitoring context, populate this field from the point of view of your network perimeter.
+    ignore_above: 1024
+  - name: type
+    level: core
+    type: keyword
+    description: |-
+      In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc
+      The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS".
+    ignore_above: 1024
+- name: process
+  title: Process
+  group: 2
+  type: group
+  fields:
+  - name: executable
+    level: extended
+    type: keyword
+    description: Absolute path to the process executable.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+  - name: name
+    level: extended
+    type: keyword
+    description: |-
+      Process name.
+      Sometimes called program name or similar.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+  - name: pid
+    level: core
+    type: long
+    format: string
+    description: Process id.
+- name: user
+  title: User
+  group: 2
+  type: group
+  fields:
+  - name: full_name
+    level: extended
+    type: keyword
+    description: User's full name, if available.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+  - name: id
+    level: core
+    type: keyword
+    description: Unique identifier of the user.
+    ignore_above: 1024
