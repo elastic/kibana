@@ -18,7 +18,7 @@ kibanaPipeline(timeoutMinutes: 240) {
         }
 
         if (params.NOTIFY_ON_FAILURE) {
-          kibanaPipeline.bash("""### Exception: ${ex}""", '### On Failure Print')
+          kibanaPipeline.bash('echo "### Something failed"', '### On Failure Print')
           kibanaCoverage.onFailure()
         }
       }
