@@ -68,11 +68,11 @@ export default function ({ getService, getPageObjects }) {
       await initAreaChart();
     });
 
-    after(async function() {
+    after(async function () {
       await security.testUser.restoreDefaults();
     });
 
-    it('should save and load with special characters', async function() {
+    it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
