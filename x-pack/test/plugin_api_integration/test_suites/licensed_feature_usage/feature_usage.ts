@@ -27,9 +27,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
 
-      const testFeaturesResponse = response.body.filter((feature: { name: string }) =>
-        feature.name.startsWith('Test feature ')
-      );
+      const testFeaturesResponse = {
+        ...response.body,
+        features: response.body.features.filter((feature: { name: string }) =>
+          feature.name.startsWith('Test feature ')
+        ),
+      };
 
       expect(testFeaturesResponse).to.eql({
         features: [
