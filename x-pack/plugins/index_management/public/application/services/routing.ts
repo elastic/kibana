@@ -22,13 +22,17 @@ export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHas
 
 export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(
-    `${BASE_PATH}edit_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${isLegacy}`
+    `${BASE_PATH}edit_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${
+      isLegacy === true
+    }`
   );
 };
 
 export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(
-    `${BASE_PATH}clone_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${isLegacy}`
+    `${BASE_PATH}clone_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${
+      isLegacy === true
+    }`
   );
 };
 
