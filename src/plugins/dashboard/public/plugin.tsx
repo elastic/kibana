@@ -181,9 +181,11 @@ export class DashboardPlugin
         }, [toggleChrome]);
       };
 
-      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps & {
-        toggleChrome: boolean;
-      }> = ({ toggleChrome, ...props }) => {
+      const ExitFullScreenButton: React.FC<
+        ExitFullScreenButtonProps & {
+          toggleChrome: boolean;
+        }
+      > = ({ toggleChrome, ...props }) => {
         useHideChrome({ toggleChrome });
         return <ExitFullScreenButtonUi {...props} />;
       };
@@ -299,7 +301,7 @@ export class DashboardPlugin
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
-      path => {
+      (path) => {
         const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
         if (!id && !tail) {
           // unrecognized sub url
@@ -316,7 +318,7 @@ export class DashboardPlugin
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
-      path => {
+      (path) => {
         const [, tail] = /(\?.*)/.exec(path) || [];
         // carry over query if it exists
         return `#/list${tail || ''}`;
