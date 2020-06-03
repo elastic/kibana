@@ -7,7 +7,6 @@ import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
-import { hostListReducer, hostMiddlewareFactory } from './index';
 
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
@@ -20,6 +19,8 @@ import { AppAction } from '../../../../common/store/actions';
 import { mockHostResultList } from './mock_host_result_list';
 import { listData } from './selectors';
 import { HostState } from '../types';
+import { hostListReducer } from './reducer';
+import { hostMiddlewareFactory } from './middleware';
 import { getManagementUrl } from '../../..';
 
 describe('host list middleware', () => {

@@ -26,10 +26,9 @@ import {
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
-import { getManagementInitialState } from '../../management/store';
-
-const alertList = initialAlertListState();
-const management = getManagementInitialState();
+import { mockManagementState } from '../../management/store/reducer';
+import { AlertListState } from '../../../common/endpoint_alerts/types';
+import { ManagementState } from '../../management/types';
 
 export const mockGlobalState: State = {
   app: {
@@ -231,6 +230,10 @@ export const mockGlobalState: State = {
       },
     },
   },
-  alertList,
-  management,
+  /**
+   * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
+   * they are cast to mutable versions here.
+   */
+  alertList: initialAlertListState as AlertListState,
+  management: mockManagementState as ManagementState,
 };

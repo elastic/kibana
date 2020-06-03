@@ -7,8 +7,8 @@
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { HostState } from '../types';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { State } from '../../../../common/store';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { State } from '../../common/store/types';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,

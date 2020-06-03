@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers as reduxCombineReducers } from 'redux';
+import { combineReducers } from 'redux';
 import {
-  initialPolicyDetailsState,
   policyDetailsReducer,
+  initialPolicyDetailsState,
 } from '../pages/policy/store/policy_details/reducer';
 import {
-  initialPolicyListState,
   policyListReducer,
+  initialPolicyListState,
 } from '../pages/policy/store/policy_list/reducer';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
@@ -19,31 +19,26 @@ import {
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
-import { AppAction } from '../../common/store/actions';
-import { ManagementState } from './types';
+import { Immutable } from '../../../common/endpoint/types';
+import { ManagementState } from '../types';
 import { hostListReducer, initialHostListState } from '../pages/endpoint_hosts/store/reducer';
 
-// Change the type of `combinerReducers` locally
-const combineReducers: ImmutableCombineReducers = reduxCombineReducers;
+const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
 /**
  * Returns the initial state of the store for the SIEM Management section
  */
-export const getManagementInitialState = (): ManagementState => {
-  return {
-    [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
-    [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
-    [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState(),
-  };
+export const mockManagementStatemockManagementState: Immutable<ManagementState> = {
+  [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
+  [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
+  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState(),
 };
 
 /**
  * Redux store reducer for the SIEM Management section
  */
-export const managementReducer = combineReducers<ManagementState, AppAction>({
-  // @ts-ignore
+export const managementReducer = immutableCombineReducers({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
-  // @ts-ignore
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
   // @ts-ignore
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: hostListReducer,

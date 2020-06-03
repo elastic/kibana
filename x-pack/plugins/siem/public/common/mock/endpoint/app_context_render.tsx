@@ -17,7 +17,8 @@ import { apolloClientObservable } from '../test_providers';
 import { createStore, State, substateMiddlewareFactory } from '../../store';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
-import { managementMiddlewareFactory } from '../../../management/store';
+import { managementMiddlewareFactory } from '../../../management/store/middleware';
+import { hostMiddlewareFactory } from '../../../endpoint_hosts/store/middleware';
 import { createKibanaContextProviderMock } from '../kibana_react';
 import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';
 
@@ -56,8 +57,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const state: State = mockGlobalState;
-  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, [
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, [
     substateMiddlewareFactory(
       (globalState) => globalState.alertList,
       alertMiddlewareFactory(coreStart, depsStart)
@@ -75,7 +75,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     </MockKibanaContextProvider>
   );
   const render: UiRender = (ui, options) => {
-    // @ts-ignore
     return reactRender(ui, {
       wrapper: AppWrapper as React.ComponentType,
       ...options,
