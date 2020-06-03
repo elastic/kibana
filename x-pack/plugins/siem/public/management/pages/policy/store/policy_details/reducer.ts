@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
-import { PolicyDetailsState } from '../../types';
 import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../../common/endpoint/types';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
+import { PolicyDetailsState } from '../../types';
 
-export const initialPolicyDetailsState = (): PolicyDetailsState => {
-  return {
-    policyItem: undefined,
-    isLoading: false,
-    agentStatusSummary: {
-      error: 0,
-      events: 0,
-      offline: 0,
-      online: 0,
-      total: 0,
-    },
-  };
-};
+/**
+ * Return a fresh copy of initial state, since we mutate state in the reducer.
+ */
+export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = () => ({
+  policyItem: undefined,
+  isLoading: false,
+  agentStatusSummary: {
+    error: 0,
+    events: 0,
+    offline: 0,
+    online: 0,
+    total: 0,
+  },
+});
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
   state = initialPolicyDetailsState(),

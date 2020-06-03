@@ -5,7 +5,7 @@
  */
 
 import { readNotifications } from './read_notifications';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import {
   getNotificationResult,
   getFindNotificationsResultWithSingleHit,
