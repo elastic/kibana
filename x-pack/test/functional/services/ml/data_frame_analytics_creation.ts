@@ -274,9 +274,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertTrainingPercentValue(trainingPercent);
     },
 
-    async continueToNextStep(nextStep: string) {
+    async continueToAdditionalOptionsStep() {
       await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail(nextStep);
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep');
+    },
+
+    async continueToDetailsStep() {
+      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep');
+    },
+
+    async continueToCreateStep() {
+      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep');
     },
 
     async assertModelMemoryInputExists() {

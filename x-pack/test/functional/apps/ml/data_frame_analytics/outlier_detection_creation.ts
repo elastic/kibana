@@ -80,9 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('continues to the additional options step', async () => {
-          await ml.dataFrameAnalyticsCreation.continueToNextStep(
-            'mlAnalyticsCreateJobWizardAdvancedStep'
-          );
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
         it('inputs the model memory limit', async () => {
@@ -91,9 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('continues to the details step', async () => {
-          await ml.dataFrameAnalyticsCreation.continueToNextStep(
-            'mlAnalyticsCreateJobWizardDetailsStep'
-          );
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
         });
 
         it('inputs the job id', async () => {
@@ -119,9 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('continues to the create step', async () => {
-          await ml.dataFrameAnalyticsCreation.continueToNextStep(
-            'mlAnalyticsCreateJobWizardCreateStep'
-          );
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
 
         it('creates and starts the analytics job', async () => {
