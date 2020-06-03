@@ -27,7 +27,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
 
-      expect(response.body).to.eql({
+      const testFeaturesResponse = response.body.filter((feature: { name: string }) =>
+        feature.name.startsWith('Test feature ')
+      );
+
+      expect(testFeaturesResponse).to.eql({
         features: [
           {
             last_used: null,
@@ -43,16 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
             last_used: toISO(timeA),
             license_level: 'platinum',
             name: 'Test feature C',
-          },
-          {
-            last_used: null,
-            license_level: 'gold',
-            name: 'Subfeature privileges',
-          },
-          {
-            last_used: null,
-            license_level: 'gold',
-            name: 'Pre-access agreement',
           },
         ],
       });

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Optional } from '@kbn/utility-types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from '../../../licensing/server';
-import { RoleKibanaPrivilege } from '../../common/model';
 
 interface SetupDeps {
   featureUsage: FeatureUsageServiceSetup;
@@ -32,7 +30,7 @@ export class SecurityFeatureUsageService {
       recordPreAccessAgreementUsage() {
         featureUsage.notifyUsage('Pre-access agreement');
       },
-      recordSubFeaturePrivilegeUsage(kibanaPrivileges: Array<Optional<RoleKibanaPrivilege>> = []) {
+      recordSubFeaturePrivilegeUsage() {
         featureUsage.notifyUsage('Subfeature privileges');
       },
     };

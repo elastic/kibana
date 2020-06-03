@@ -91,7 +91,7 @@ export class Plugin {
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
 
-  private featureUsageService?: SecurityFeatureUsageService;
+  private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
   private readonly getFeatureUsageService = () => {
     if (!this.featureUsageServiceStart) {
@@ -138,7 +138,6 @@ export class Plugin {
       license$: licensing.license$,
     });
 
-    this.featureUsageService = new SecurityFeatureUsageService();
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
 
     const audit = this.auditService.setup({ license, config: config.audit });
@@ -228,9 +227,9 @@ export class Plugin {
     });
   }
 
-  public start(core: CoreStart, { licensing, features }: PluginStartDependencies) {
+  public start(core: CoreStart, { licensing }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
-    this.featureUsageServiceStart = this.featureUsageService!.start({
+    this.featureUsageServiceStart = this.featureUsageService.start({
       featureUsage: licensing.featureUsage,
     });
   }
@@ -246,10 +245,6 @@ export class Plugin {
     if (this.securityLicenseService) {
       this.securityLicenseService.stop();
       this.securityLicenseService = undefined;
-    }
-
-    if (this.featureUsageService) {
-      this.featureUsageService = undefined;
     }
 
     if (this.featureUsageServiceStart) {
