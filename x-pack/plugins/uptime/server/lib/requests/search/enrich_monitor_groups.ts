@@ -15,6 +15,7 @@ import {
   SortOrder,
 } from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
   queryContext: QueryContext,
@@ -317,11 +318,13 @@ const getHistogramForMonitors = async (
       },
       aggs: {
         histogram: {
-          auto_date_histogram: {
+          date_histogram: {
             field: '@timestamp',
             // 12 seems to be a good size for performance given
             // long monitor lists of up to 100 on the overview page
-            buckets: 12,
+            fixed_interval:
+              getHistogramInterval(queryContext.dateRangeStart, queryContext.dateRangeEnd, 12) +
+              'ms',
             missing: 0,
           },
           aggs: {
