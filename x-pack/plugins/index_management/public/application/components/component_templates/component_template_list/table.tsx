@@ -11,10 +11,10 @@ import {
   EuiButton,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
-  EuiHealth,
   EuiIcon,
 } from '@elastic/eui';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ComponentTemplateListItem } from '../types';
 
 export interface Props {
@@ -37,7 +37,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {
       onSelectionChange: setSelection,
-      selectable: ({ isInUse }) => !isInUse,
+      selectable: ({ usedBy }) => usedBy.length === 0,
       selectableMessage: (selectable) =>
         !selectable
           ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
@@ -90,30 +90,28 @@ export const ComponentTable: FunctionComponent<Props> = ({
       },
       filters: [
         {
-          type: 'field_value_selection' as const,
-          field: 'isInUse',
-          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseFilterLabel', {
-            defaultMessage: 'Status',
-          }),
-          multiSelect: false,
-          options: [
+          type: 'field_value_toggle_group',
+          field: 'usedBy.length',
+          items: [
             {
-              value: true,
-              view: i18n.translate(
+              value: 1,
+              name: i18n.translate(
                 'xpack.idxMgmt.componentTemplatesList.table.inUseFilterOptionLabel',
                 {
                   defaultMessage: 'In use',
                 }
               ),
+              operator: 'gte',
             },
             {
-              value: false,
-              view: i18n.translate(
+              value: 0,
+              name: i18n.translate(
                 'xpack.idxMgmt.componentTemplatesList.table.notInUseFilterOptionLabel',
                 {
                   defaultMessage: 'Not in use',
                 }
               ),
+              operator: 'eq',
             },
           ],
         },
@@ -132,21 +130,37 @@ export const ComponentTable: FunctionComponent<Props> = ({
         sortable: true,
       },
       {
-        field: 'isInUse',
+        field: 'usedBy',
         name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
-          defaultMessage: 'Status',
+          defaultMessage: 'Used by',
         }),
         sortable: true,
-        render: (isInUse: boolean) => {
-          const label = isInUse
-            ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.inUseCellDescription', {
-                defaultMessage: 'In use',
-              })
-            : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.notInUseCellDescription', {
-                defaultMessage: 'Not in use',
-              });
-          const color = isInUse ? 'success' : 'danger';
-          return <EuiHealth color={color}>{label}</EuiHealth>;
+        render: (usedBy: string[]) => {
+          if (usedBy.length) {
+            return i18n.translate(
+              'xpack.idxMgmt.componentTemplatesList.table.inUseCellDescription',
+              {
+                defaultMessage: '{count} index {count, plural, one {template} other {templates}}',
+                values: {
+                  count: usedBy.length,
+                },
+              }
+            );
+          }
+
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="cross" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplatesList.table.deleteComponentTemplatesButtonLabel"
+                  defaultMessage="Not in use"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
         },
       },
       {
@@ -198,7 +212,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             icon: 'trash',
             color: 'danger',
             onClick: ({ name }) => onDeleteClick([name]),
-            enabled: ({ isInUse }) => !isInUse,
+            enabled: ({ usedBy }) => usedBy.length === 0,
           },
         ],
       },

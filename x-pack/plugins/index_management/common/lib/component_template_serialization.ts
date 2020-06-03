@@ -53,7 +53,7 @@ export function deserializeComponenTemplateList(
 
   const componentTemplateListItem: ComponentTemplateListItem = {
     name,
-    isInUse: Boolean(associatedTemplates.length),
+    usedBy: associatedTemplates,
     hasSettings: hasEntries(template.settings),
     hasMappings: hasEntries(template.mappings),
     hasAliases: hasEntries(template.aliases),

@@ -32,7 +32,7 @@ export interface ComponentTemplateEs {
 
 export interface ComponentTemplateListItem {
   name: string;
-  isInUse: boolean;
+  usedBy: string[];
   hasMappings: boolean;
   hasAliases: boolean;
   hasSettings: boolean;
