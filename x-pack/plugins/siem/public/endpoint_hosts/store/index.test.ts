@@ -5,10 +5,11 @@
  */
 
 import { createStore, Dispatch, Store } from 'redux';
-import { HostAction, hostListReducer } from './index';
 import { HostState } from '../types';
 import { listData } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
+import { HostAction } from './action';
+import { hostListReducer } from './reducer';
 
 describe('HostList store concerns', () => {
   let store: Store<HostState>;

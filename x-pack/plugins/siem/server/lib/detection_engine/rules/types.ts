@@ -13,8 +13,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
+import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
+import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 

@@ -17,7 +17,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
+} from '../../alerts/public';
 import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,
@@ -44,7 +44,7 @@ export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerting?: AlertingPluginPublicSetup;
+  alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home: HomePublicPluginSetup;
@@ -53,7 +53,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmPluginStartDeps {
-  alerting?: AlertingPluginPublicStart;
+  alerts?: AlertingPluginPublicStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
