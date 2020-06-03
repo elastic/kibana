@@ -182,7 +182,7 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           <ChartsSyncContextProvider>
             <EuiFlexItem>
               <ErrorDistribution

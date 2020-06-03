@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiTitle } from '@elastic/eui';
-import numeral from '@elastic/numeral';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import mean from 'lodash.mean';
+import React, { useCallback, useMemo } from 'react';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -18,7 +18,7 @@ import { asPercent } from '../../../../utils/formatters';
 import CustomPlot from '../CustomPlot';
 
 const tickFormatY = (y?: number) => {
-  return numeral(y || 0).format('0 %');
+  return asPercent(y || 0, 1);
 };
 
 export const ErrorRateChart = () => {
@@ -45,6 +45,10 @@ export const ErrorRateChart = () => {
     }
   }, [serviceName, start, end, uiFilters, errorGroupId]);
 
+  const average = useMemo(() => {
+    return tickFormatY(mean(errorRateData.map((rate) => rate.y)));
+  }, [errorRateData]);
+
   const combinedOnHover = useCallback(
     (hoverX: number) => {
       return syncedChartsProps.onHover(hoverX);
@@ -64,6 +68,13 @@ export const ErrorRateChart = () => {
       <CustomPlot
         {...syncedChartsProps}
         series={[
+          {
+            color: theme.euiColorVis7,
+            data: [],
+            legendValue: average,
+            title: 'Avg.',
+            type: 'linemark',
+          },
           {
             data: errorRateData,
             type: 'line',

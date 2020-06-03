@@ -26,6 +26,7 @@ import Tooltip from '../Tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tint } from 'polished';
 import { getTimeTicksTZ, getDomainTZ } from '../helper/timezone';
+import Legends from '../CustomPlot/Legends';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -99,6 +100,7 @@ export class HistogramInner extends PureComponent {
       tooltipHeader,
       verticalLineHover,
       width: XY_WIDTH,
+      legends,
     } = this.props;
     const { hoveredBucket } = this.state;
     if (isEmpty(buckets) || XY_WIDTH === 0) {
@@ -235,6 +237,17 @@ export class HistogramInner extends PureComponent {
               y={() => 1}
             />
           </XYPlot>
+
+          {legends && (
+            <Legends
+              series={legends}
+              seriesEnabledState={[]}
+              hiddenSeriesCount={0}
+              clickLegend={() => {}}
+              truncateLegends={false}
+              noHits={false}
+            />
+          )}
         </ChartsWrapper>
       </div>
     );
@@ -255,6 +268,7 @@ HistogramInner.propTypes = {
   verticalLineHover: PropTypes.func,
   width: PropTypes.number.isRequired,
   xType: PropTypes.string,
+  legends: PropTypes.array,
 };
 
 HistogramInner.defaultProps = {

@@ -5,10 +5,13 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { scaleUtc } from 'd3-scale';
+import mean from 'lodash.mean';
 import d3 from 'd3';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
@@ -64,6 +67,11 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
+  const average = useMemo(() => {
+    const averageValue = buckets ? mean(buckets.map((bucket) => bucket.y)) : 0;
+    return numeral(averageValue).format('0a');
+  }, [buckets]);
+
   if (!buckets || distribution.noHits) {
     return (
       <EmptyMessage
@@ -105,6 +113,13 @@ export function ErrorDistribution({ distribution, title }: Props) {
             values: { occCount: value },
           })
         }
+        legends={[
+          {
+            color: theme.euiColorVis1,
+            legendValue: average,
+            title: 'Avg.',
+          },
+        ]}
       />
     </div>
   );
