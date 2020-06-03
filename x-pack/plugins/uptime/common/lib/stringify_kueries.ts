@@ -35,6 +35,10 @@ export const stringifyKueries = (kueries: Map<string, Array<number | string>>): 
     .reduce((prev, cur, index, array) => {
       if (array.length === 1 || index === 0) {
         return cur;
+      } else if (cur === '') {
+        return prev;
+      } else if (prev === '' && !!cur) {
+        return cur;
       }
       return `${prev} and ${cur}`;
     }, '');
