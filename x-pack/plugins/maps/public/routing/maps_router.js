@@ -49,17 +49,18 @@ const App = ({ history, appBasePath, hasSavedMaps }) => {
               path={`/map`}
               render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
             />
+            <Route exact path={`/`} component={MapsListView} />
+            <Route component={MapsListView} />
             <Route
               path={``}
               render={({ location }) => {
                 return location.hash ? (
                   <Redirect to={`${appBasePath}${location.hash.replace('#', '')}`} />
                 ) : (
-                  <MapsListView />
+                  <Redirect to="/" />
                 );
               }}
             />
-            <Route component={MapsListView} />
           </Switch>
         </Router>
       </Provider>
