@@ -34,8 +34,7 @@ def sendSlackMsg(Map params = [:]) {
     iconEmoji: config.icon,
     color: config.color,
     message: config.message,
-    blocks: blocks,
-    timestamp: config.timestamp
+    blocks: blocks
   )
 }
 
