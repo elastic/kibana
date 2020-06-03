@@ -42,6 +42,8 @@ describe('getDefaultPreference', () => {
 
     const storedPref = setItemSpy.mock.calls[0][1];
 
+    expect(storage.length).toBe(1);
+    expect(storage.key(0)).toBe('globalSearch:defaultPref');
     expect(storedPref).toEqual(returnedPref);
   });
 });
