@@ -216,14 +216,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: pinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
   }))
-  .case(removeColumn, (state, { id, columnId }) => ({
-    ...state,
-    timelineById: removeTimelineColumn({
-      id,
-      columnId,
-      timelineById: state.timelineById,
-    }),
-  }))
+  .case(removeColumn, (state, { id, columnId }) => {
+    return {
+      ...state,
+      timelineById: removeTimelineColumn({
+        id,
+        columnId,
+        timelineById: state.timelineById,
+      }),
+    };
+  })
   .case(removeProvider, (state, { id, providerId, andProviderId }) => ({
     ...state,
     timelineById: removeTimelineProvider({
