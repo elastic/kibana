@@ -11,17 +11,16 @@ kibanaPipeline(timeoutMinutes: 240) {
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        try {
+        catchError {
           doesNotExist()
           kibanaCoverage.runTests()
           handleIngestion(TIME_STAMP)
-        } catch (ex) {
-          if (params.NOTIFY_ON_FAILURE) {
-            kibanaPipeline.bash("""### Exception: ${ex}""", '### On Failure Print')
-            kibanaCoverage.onFailure()
-          }
         }
-        kibanaCoverage.onFailure()
+
+        if (params.NOTIFY_ON_FAILURE) {
+          kibanaPipeline.bash("""### Exception: ${ex}""", '### On Failure Print')
+          kibanaCoverage.onFailure()
+        }
       }
     }
     kibanaPipeline.sendMail()
