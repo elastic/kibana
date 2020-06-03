@@ -181,7 +181,7 @@ describe('ExceptionDetails', () => {
 
     expect(wrapper.find('EuiDescriptionListTitle').at(1).text()).toEqual('Date created');
     expect(wrapper.find('EuiDescriptionListDescription').at(1).text()).toEqual(
-      'April 22nd 2020 @ 20:19:13'
+      'April 23rd 2020 @ 00:19:13'
     );
   });
 
