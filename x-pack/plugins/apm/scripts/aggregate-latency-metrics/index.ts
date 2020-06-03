@@ -29,6 +29,27 @@ import {
 import { stampLogger } from '../shared/stamp-logger';
 import { createOrUpdateIndex } from '../shared/create-or-update-index';
 
+// This script will try to estimate how many latency metric documents
+// will be created based on the available transaction documents.
+// It can also generate metric documents based on a painless script
+// and hdr histograms.
+//
+// Options:
+// - interval: the interval (in minutes) for which latency metrics will be aggregated.
+// Defaults to 1.
+// - concurrency: number of maximum concurrent requests to ES. Defaults to 3.
+// - from: start of the date range that should be processed. Should be a valid ISO timestamp.
+// - to: end of the date range that should be processed. Should be a valid ISO timestamp.
+// - source: from which transaction documents should be read. Should be location of ES (basic auth
+// is supported) plus the index name (or an index pattern). Example:
+// https://foo:bar@apm.elstc.co:9999/apm-8.0.0-transaction
+// - dest: to which metric documents should be written. If this is not set, no metric documents
+// will be created.Should be location of ES (basic auth is supported) plus the index name.
+// Example: https://foo:bar@apm.elstc.co:9999/apm-8.0.0-metric
+// - include: comma-separated list of fields that should be aggregated on, in addition to the
+// default ones.
+// - exclude: comma-separated list of fields that should be not be aggregated on.
+
 stampLogger();
 
 export async function aggregateLatencyMetrics() {
@@ -49,6 +70,7 @@ export async function aggregateLatencyMetrics() {
   }
 
   const limit = pLimit(concurrency);
+  // retry function to handle ES timeouts
   const retry = (fn: (...args: any[]) => any) => {
     return () =>
       pRetry(fn, {
@@ -220,6 +242,7 @@ export async function aggregateLatencyMetrics() {
                     },
                     ...(dest
                       ? {
+                          // scripted metric agg to get all the values (rather than downloading all the documents)
                           aggs: {
                             recorded_values: {
                               scripted_metric: {
@@ -312,6 +335,8 @@ export async function aggregateLatencyMetrics() {
                 h.recordValue(value);
               });
 
+              // "private" property so not in the type def. Not sure if there
+              // is an API for this.
               const counts: number[] = (h as any).counts;
 
               const distribution = Object.keys(counts).reduce(
