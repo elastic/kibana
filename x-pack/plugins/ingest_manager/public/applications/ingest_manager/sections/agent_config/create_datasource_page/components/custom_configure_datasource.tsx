@@ -6,7 +6,6 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { ConfigureEndpointDatasource } from '../../../../../../../../siem/public';
 import { NewDatasource } from '../../../../types';
 import { CreateDatasourceFrom } from '../types';
 
@@ -17,14 +16,26 @@ export interface CustomConfigureDatasourceProps {
 }
 
 /**
- * Allows external plugins to create custom content for the Ingest
+ * Custom content type that external plugins can provide to Ingest's
  * Datasource configuration.
  */
 export type CustomConfigureDatasourceContent = React.FC<CustomConfigureDatasourceProps>;
 
-const ConfigureDatasourceMapping: { [key: string]: CustomConfigureDatasourceContent } = {
-  endpoint: ConfigureEndpointDatasource,
-};
+type AllowedDatasourceKey = 'endpoint';
+const ConfigureDatasourceMapping: {
+  [key: string]: CustomConfigureDatasourceContent;
+} = {};
+
+/**
+ * Plugins can call this function from the start lifecycle to
+ * register a custom component in the Ingest Datasource configuration.
+ */
+export function registerDatasource(
+  key: AllowedDatasourceKey,
+  value: CustomConfigureDatasourceContent
+) {
+  ConfigureDatasourceMapping[key] = value;
+}
 
 const EmptyConfigureDatasource: CustomConfigureDatasourceContent = () => (
   <EuiEmptyPrompt

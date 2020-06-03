@@ -11,5 +11,3 @@ import { PluginSetup, PluginStart } from './types';
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
 export { Plugin, PluginSetup, PluginStart };
-
-export { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';

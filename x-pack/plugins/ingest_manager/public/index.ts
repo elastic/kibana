@@ -15,6 +15,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 export {
   CustomConfigureDatasourceContent,
   CustomConfigureDatasourceProps,
+  registerDatasource,
 } from './applications/ingest_manager/sections/agent_config/create_datasource_page/components/custom_configure_datasource';
 
 export { NewDatasource } from './applications/ingest_manager/types';
