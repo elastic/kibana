@@ -93,7 +93,7 @@ comparisons.
 Kibana reads the index mapping and lists all fields that contain a timestamp. If your
 index doesn't have time-based data, choose *I don't want to use the Time Filter*.
 +
-Without a default time field you will not be able to use global time filters on your dashboards.
+You must select a time field to use global time filters on your dashboards.
 
 . Click *Create index pattern*.
 +
