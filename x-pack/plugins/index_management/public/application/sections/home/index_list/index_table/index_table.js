@@ -66,7 +66,7 @@ const HEADERS = {
   size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
     defaultMessage: 'Storage size',
   }),
-  dataStream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
+  data_stream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
     defaultMessage: 'Data stream',
   }),
 };
