@@ -7,9 +7,11 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
+import { isRight } from 'fp-ts/lib/Either';
 import { selectMonitorStatusAlert, overviewFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 import { fetchOverviewFilters, setSearchTextAction } from '../../../../state/actions';
+import { AtomicStatusCheckParamsType } from '../../../../../common/runtime_types';
 
 interface Props {
   alertParams: { [key: string]: any };
@@ -56,13 +58,18 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       dispatch(setSearchTextAction(alertParams.search));
     }
   }, [alertParams, dispatch]);
+  const isOldAlert = React.useMemo(
+    () => !isRight(AtomicStatusCheckParamsType.decode(alertParams)),
+    [alertParams]
+  );
 
   return (
     <AlertMonitorStatusComponent
+      alertParams={alertParams}
       autocomplete={autocomplete}
       enabled={enabled}
       hasFilters={!!overviewFilters?.filters}
-      alertParams={alertParams}
+      isOldAlert={isOldAlert}
       locations={locations}
       numTimes={numTimes}
       setAlertParams={setAlertParams}

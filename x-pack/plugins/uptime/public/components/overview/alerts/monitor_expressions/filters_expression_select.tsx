@@ -35,7 +35,8 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   const selectedTags = alertParams?.filters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    if (alertParams.filters) {
+    // the `filters` field is no longer a string
+    if (alertParams.filters && typeof alertParams.filters !== 'string') {
       setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
     } else {
       setAlertParams(

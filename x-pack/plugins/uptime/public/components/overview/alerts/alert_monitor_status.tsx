@@ -5,7 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
 import {
@@ -22,6 +23,7 @@ interface AlertMonitorStatusProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   hasFilters: boolean;
+  isOldAlert: boolean;
   locations: string[];
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
@@ -32,7 +34,7 @@ interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const { alertParams, hasFilters, setAlertParams } = props;
+  const { alertParams, hasFilters, isOldAlert, setAlertParams } = props;
 
   const alertFilters = alertParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(
@@ -42,6 +44,22 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
   return (
     <>
       <EuiSpacer size="m" />
+
+      {isOldAlert && (
+        <EuiCallOut
+          size="s"
+          title={
+            <FormattedMessage
+              id="xpack.uptime.alerts.monitorStatus.oldAlertCallout.Title"
+              defaultMessage="You are editing an older alert, some fields may not auto-populate."
+            />
+          }
+          iconType="alert"
+        />
+      )}
+
+      <EuiSpacer size="m" />
+
       <KueryBar
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
         autocomplete={props.autocomplete}

@@ -10,7 +10,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
-import { AtomicStatusCheckParamsType } from '../../../common/runtime_types';
+import { AtomicStatusCheckParamsType, StatusCheckParamsType } from '../../../common/runtime_types';
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
@@ -19,11 +19,17 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 export const validate = (alertParams: unknown) => {
   const errors: Record<string, any> = {};
   const decoded = AtomicStatusCheckParamsType.decode(alertParams);
+  const oldDecoded = StatusCheckParamsType.decode(alertParams);
 
-  if (!isRight(decoded)) {
-    errors.typeCheckFailure = 'Provided parameters do not conform to the expected type.';
-    errors.typeCheckParsingMessage = PathReporter.report(decoded);
-  } else {
+  if (!isRight(decoded) && !isRight(oldDecoded)) {
+    return {
+      errors: {
+        typeCheckFailure: 'Provided parameters do not conform to the expected type.',
+        typeCheckParsingMessage: PathReporter.report(decoded),
+      },
+    };
+  }
+  if (isRight(decoded)) {
     const { numTimes, timerangeCount } = decoded.right;
     if (numTimes < 1) {
       errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
