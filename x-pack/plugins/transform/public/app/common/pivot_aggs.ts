@@ -84,6 +84,10 @@ export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;
   aggName: AggName;
   dropDownName: string;
+  /** Indicates if aggregation supports sub-aggregations */
+  isSubAggsSupported?: boolean;
+  /** Dictionary of the sub-aggregations */
+  subAggs?: PivotAggsConfigDict;
 }
 
 /**
@@ -113,7 +117,12 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
   }
 
   if (aggKeys.includes('aggs')) {
-    // TODO process sub-aggregation
+    config.subAggs = {};
+    for (const [subAggName, subAggConfigs] of Object.entries(
+      esAggDefinition.aggs as Record<string, object>
+    )) {
+      config.subAggs[subAggName] = getAggConfigFromEsAgg(subAggConfigs, subAggName);
+    }
   }
 
   return config;
@@ -121,10 +130,6 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName;
-  /** Indicates if aggregation supports sub-aggregations */
-  isSubAggsSupported?: boolean;
-  /** Dictionary of the sub-aggregations */
-  subAggs?: PivotAggsConfigDict;
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
