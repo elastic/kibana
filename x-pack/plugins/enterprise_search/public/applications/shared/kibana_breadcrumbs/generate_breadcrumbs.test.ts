@@ -7,7 +7,8 @@
 import { generateBreadcrumb } from './generate_breadcrumbs';
 import { appSearchBreadcrumbs, enterpriseSearchBreadcrumbs } from './';
 
-import { mockHistory } from '../../__mocks__';
+import { mockHistory as mockHistoryUntyped } from '../../__mocks__';
+const mockHistory = mockHistoryUntyped as any;
 
 jest.mock('../react_router_helpers', () => ({ letBrowserHandleEvent: jest.fn(() => false) }));
 import { letBrowserHandleEvent } from '../react_router_helpers';
@@ -31,7 +32,7 @@ describe('generateBreadcrumb', () => {
   });
 
   it('prevents default navigation and uses React Router history on click', () => {
-    const breadcrumb = generateBreadcrumb({ text: '', path: '/', history: mockHistory });
+    const breadcrumb = generateBreadcrumb({ text: '', path: '/', history: mockHistory }) as any;
     const event = { preventDefault: jest.fn() };
     breadcrumb.onClick(event);
 
@@ -40,9 +41,9 @@ describe('generateBreadcrumb', () => {
   });
 
   it('does not prevents default browser behavior on new tab/window clicks', () => {
-    const breadcrumb = generateBreadcrumb({ text: '', path: '/', history: mockHistory });
+    const breadcrumb = generateBreadcrumb({ text: '', path: '/', history: mockHistory }) as any;
 
-    letBrowserHandleEvent.mockImplementationOnce(() => true);
+    (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
     breadcrumb.onClick();
 
     expect(mockHistory.push).not.toHaveBeenCalled();
@@ -103,19 +104,19 @@ describe('enterpriseSearchBreadcrumbs', () => {
   describe('links', () => {
     const eventMock = {
       preventDefault: jest.fn(),
-    };
+    } as any;
 
     it('has Enterprise Search text first', () => {
       expect(subject()[0].onClick).toBeUndefined();
     });
 
     it('has a link to page 1 second', () => {
-      subject()[1].onClick(eventMock);
+      (subject()[1] as any).onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/page1');
     });
 
     it('has a link to page 2 last', () => {
-      subject()[2].onClick(eventMock);
+      (subject()[2] as any).onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/page2');
     });
   });
@@ -136,7 +137,7 @@ describe('appSearchBreadcrumbs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHistory.createHref.mockImplementation(
-      ({ pathname }) => `/enterprise_search/app_search${pathname}`
+      ({ pathname }: any) => `/enterprise_search/app_search${pathname}`
     );
   });
 
@@ -181,24 +182,24 @@ describe('appSearchBreadcrumbs', () => {
   describe('links', () => {
     const eventMock = {
       preventDefault: jest.fn(),
-    };
+    } as any;
 
     it('has Enterprise Search text first', () => {
       expect(subject()[0].onClick).toBeUndefined();
     });
 
     it('has a link to App Search second', () => {
-      subject()[1].onClick(eventMock);
+      (subject()[1] as any).onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/');
     });
 
     it('has a link to page 1 third', () => {
-      subject()[2].onClick(eventMock);
+      (subject()[2] as any).onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/page1');
     });
 
     it('has a link to page 2 last', () => {
-      subject()[3].onClick(eventMock);
+      (subject()[3] as any).onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/page2');
     });
   });

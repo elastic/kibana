@@ -8,17 +8,17 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 
-import { ILicense } from '../../../../licensing/public';
+import { ILicense } from '../../../../../licensing/public';
 
 export interface ILicenseContext {
-  license?: ILicense;
+  license: ILicense;
 }
 interface ILicenseContextProps {
   license$: Observable<ILicense>;
   children: React.ReactNode;
 }
 
-export const LicenseContext = React.createContext();
+export const LicenseContext = React.createContext({});
 
 export const LicenseProvider: React.FC<ILicenseContextProps> = ({ license$, children }) => {
   // Listen for changes to license subscription
