@@ -160,6 +160,36 @@ export const NewCase = React.memo<NewCaseProps>(
 );
 NewCase.displayName = 'NewCase';
 
+interface ExistingCaseProps {
+  onClosePopover: () => void;
+  onOpenCaseModal: () => void;
+  timelineStatus: TimelineStatus;
+}
+export const ExistingCase = React.memo<ExistingCaseProps>(
+  ({ onClosePopover, onOpenCaseModal, timelineStatus }) => {
+    const handleClick = useCallback(() => {
+      onClosePopover();
+      onOpenCaseModal();
+    }, [onOpenCaseModal, onClosePopover]);
+
+    return (
+      <>
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-existing-case"
+          color="text"
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+        >
+          {i18n.ATTACH_TIMELINE_TO_EXISTING_CASE}
+        </EuiButtonEmpty>
+      </>
+    );
+  }
+);
+ExistingCase.displayName = 'ExistingCase';
+
 interface NewTimelineProps {
   createTimeline: CreateTimeline;
   onClosePopover: () => void;

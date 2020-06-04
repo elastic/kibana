@@ -14,7 +14,7 @@ import { useRouteSpy } from './use_route_spy';
 
 export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
   ({
-    location: { pathname, search },
+    location: { pathname, search, state: locationState },
     history,
     match: {
       params: { pageName, detailName, tabName, flowTarget },
@@ -41,7 +41,16 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
             route: {
               detailName,
               flowTarget,
-              history,
+              history: {
+                ...history,
+                location: {
+                  ...history.location,
+                  state: {
+                    ...history.location.state,
+                    ...locationState,
+                  },
+                },
+              },
               pageName,
               pathName: pathname,
               state,
@@ -55,7 +64,16 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
             route: {
               detailName,
               flowTarget,
-              history,
+              history: {
+                ...history,
+                location: {
+                  ...history.location,
+                  state: {
+                    ...history.location.state,
+                    ...locationState,
+                  },
+                },
+              },
               pageName,
               pathName: pathname,
               search,
@@ -71,7 +89,16 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
             route: {
               detailName,
               flowTarget,
-              history,
+              history: {
+                ...history,
+                location: {
+                  ...history.location,
+                  state: {
+                    ...history.location.state,
+                    ...locationState,
+                  },
+                },
+              },
               pageName,
               pathName: pathname,
               search,
@@ -81,7 +108,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           });
         }
       }
-    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
+    }, [pathname, search, pageName, detailName, tabName, flowTarget, state, locationState]);
     return null;
   }
 );

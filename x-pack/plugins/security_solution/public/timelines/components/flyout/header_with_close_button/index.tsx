@@ -40,7 +40,7 @@ const FlyoutHeaderWithCloseButtonComponent: React.FC<{
         />
       </EuiToolTip>
     </WrappedCloseButton>
-    <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
+    <FlyoutHeader onClose={onClose} timelineId={timelineId} usersViewing={usersViewing} />
   </FlyoutHeaderContainer>
 );
 

@@ -38,21 +38,20 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { state } = useLocation();
-  const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
+  const location = useLocation();
+  const [routerStateImplemented, setRouterStateImplemented] = useState<boolean>(false);
 
   useEffect(() => {
-    if (routerState && routerState.insertTimeline) {
-      dispatch(
-        timelineActions.showTimeline({ id: routerState.insertTimeline.timelineId, show: false })
-      );
+    const { state } = location;
+    if (state && state.insertTimeline && !routerStateImplemented) {
+      dispatch(timelineActions.showTimeline({ id: state.insertTimeline.timelineId, show: false }));
       onTimelineChange(
-        routerState.insertTimeline.timelineTitle,
-        routerState.insertTimeline.timelineSavedObjectId
+        state.insertTimeline.timelineTitle,
+        state.insertTimeline.timelineSavedObjectId
       );
-      setRouterState(null);
+      setRouterStateImplemented(true);
     }
-  }, [routerState]);
+  }, [routerStateImplemented, location]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);

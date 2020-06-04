@@ -116,6 +116,13 @@ export const ATTACH_TIMELINE_TO_NEW_CASE = i18n.translate(
   }
 );
 
+export const ATTACH_TIMELINE_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.existingCaseButtonLabel',
+  {
+    defaultMessage: 'Attach timeline to existing case',
+  }
+);
+
 export const STREAM_LIVE = i18n.translate(
   'xpack.securitySolution.timeline.properties.streamLiveButtonLabel',
   {

@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
-import { NewTimeline, Description, NotesButton, NewCase } from './helpers';
+import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -60,55 +60,57 @@ type UpdateDescription = ({ id, description }: { id: string; description: string
 export type UpdateNote = (note: Note) => void;
 
 interface Props {
+  associateNote: AssociateNote;
+  createTimeline: CreateTimeline;
+  description: string;
+  getNotesByIds: (noteIds: string[]) => Note[];
+  isDataInTimeline: boolean;
+  noteIds: string[];
   onButtonClick: () => void;
   onClosePopover: () => void;
+  onCloseTimelineModal: () => void;
+  onOpenCaseModal: () => void;
+  onOpenTimelineModal: () => void;
+  onToggleShowNotes: () => void;
   showActions: boolean;
-  createTimeline: CreateTimeline;
-  timelineId: string;
-  isDataInTimeline: boolean;
+  showDescription: boolean;
   showNotes: boolean;
   showNotesFromWidth: boolean;
-  showDescription: boolean;
-  showUsersView: boolean;
-  usersViewing: string[];
-  description: string;
-  updateDescription: UpdateDescription;
-  associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  noteIds: string[];
-  onToggleShowNotes: () => void;
-  onCloseTimelineModal: () => void;
-  onOpenTimelineModal: () => void;
   showTimelineModal: boolean;
+  showUsersView: boolean;
   status: TimelineStatus;
+  timelineId: string;
   title: string;
+  updateDescription: UpdateDescription;
   updateNote: UpdateNote;
+  usersViewing: string[];
 }
 
 const PropertiesRightComponent: React.FC<Props> = ({
-  onButtonClick,
-  showActions,
-  onClosePopover,
-  createTimeline,
-  timelineId,
-  isDataInTimeline,
-  showNotesFromWidth,
-  showNotes,
-  showDescription,
-  showUsersView,
-  usersViewing,
-  description,
-  updateDescription,
   associateNote,
+  createTimeline,
+  description,
   getNotesByIds,
+  isDataInTimeline,
   noteIds,
-  onToggleShowNotes,
-  updateNote,
-  showTimelineModal,
+  onButtonClick,
+  onClosePopover,
   onCloseTimelineModal,
+  onOpenCaseModal,
   onOpenTimelineModal,
-  title,
+  onToggleShowNotes,
+  showActions,
+  showDescription,
+  showNotes,
+  showNotesFromWidth,
+  showTimelineModal,
+  showUsersView,
   status,
+  timelineId,
+  title,
+  updateDescription,
+  updateNote,
+  usersViewing,
 }) => (
   <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
     <EuiFlexItem grow={false}>
@@ -145,6 +147,13 @@ const PropertiesRightComponent: React.FC<Props> = ({
                 onClosePopover={onClosePopover}
                 timelineId={timelineId}
                 timelineTitle={title}
+                timelineStatus={status}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExistingCase
+                onClosePopover={onClosePopover}
+                onOpenCaseModal={onOpenCaseModal}
                 timelineStatus={status}
               />
             </EuiFlexItem>
