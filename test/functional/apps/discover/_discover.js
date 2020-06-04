@@ -68,6 +68,16 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      it('renaming a saved query should modify name in breadcrumb', async function () {
+        const queryName2 = 'Modified Query # 1';
+        await PageObjects.discover.loadSavedSearch(queryName1);
+        await PageObjects.discover.saveSearch(queryName2);
+
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName2);
+        });
+      });
+
       it('should show the correct hit count', async function () {
         const expectedHitCount = '14,004';
         await retry.try(async function () {
@@ -256,6 +266,20 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitKibanaChrome();
 
         expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+      });
+    });
+
+    describe('empty query', function () {
+      it('should update the histogram timerange when the query is resubmitted', async function () {
+        await kibanaServer.uiSettings.update({
+          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+        });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+        const initialTimeString = await PageObjects.discover.getChartTimespan();
+        await queryBar.submitQuery();
+        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+        expect(refreshedTimeString).not.to.be(initialTimeString);
       });
     });
   });

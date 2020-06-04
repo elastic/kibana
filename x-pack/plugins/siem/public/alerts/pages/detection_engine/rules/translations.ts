@@ -6,12 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_DETECTION_ENGINE = i18n.translate(
-  'xpack.siem.detectionEngine.rules.backOptionsHeader',
-  {
-    defaultMessage: 'Back to detections',
-  }
-);
+export const BACK_TO_ALERTS = i18n.translate('xpack.siem.detectionEngine.rules.backOptionsHeader', {
+  defaultMessage: 'Back to alerts',
+});
 
 export const IMPORT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.importRuleTitle', {
   defaultMessage: 'Import rule…',
@@ -22,7 +19,7 @@ export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.add
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Signal detection rules',
+  defaultMessage: 'Detection rules',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.addPageTitle', {

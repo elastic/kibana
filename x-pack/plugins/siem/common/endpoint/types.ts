@@ -685,10 +685,6 @@ export interface HostPolicyResponse {
         id: string;
         status: HostPolicyResponseActionStatus;
         actions: HostPolicyResponseAppliedAction[];
-        policy: {
-          id: string;
-          version: string;
-        };
         response: {
           configurations: {
             malware: HostPolicyResponseConfigurationStatus;

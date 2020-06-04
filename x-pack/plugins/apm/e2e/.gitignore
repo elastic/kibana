@@ -1,3 +1,4 @@
 cypress/screenshots/*
+cypress/videos/*
 cypress/test-results
 tmp
