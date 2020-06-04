@@ -16,13 +16,13 @@ import {
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
 } from '../policy_list/services/ingest';
-import { NewPolicyData, PolicyData, Immutable } from '../../../../../../common/endpoint/types';
+import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
-export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<
-  PolicyDetailsState
->> = (coreStart) => {
+export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
+  coreStart
+) => {
   const http = coreStart.http;
 
   return ({ getState, dispatch }) => (next) => async (action) => {
