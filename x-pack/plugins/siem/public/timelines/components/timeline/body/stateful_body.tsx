@@ -6,7 +6,7 @@
 
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -29,13 +29,13 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { useTimelineTypeContext } from '../timeline_context';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
+import { useManageTimeline } from '../../manage_timeline';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -80,7 +80,11 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
-    const timelineTypeContext = useTimelineTypeContext();
+    const { getManageTimelineById } = useManageTimeline();
+    const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
+      getManageTimelineById,
+      id,
+    ]);
 
     const getNotesByIds = useCallback(
       (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
@@ -97,13 +101,13 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
         setSelected!({
           id,
-          eventIds: getEventIdToDataMapping(data, eventIds, timelineTypeContext.queryFields ?? []),
+          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
           isSelected,
           isSelectAllChecked:
             isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
         });
       },
-      [setSelected, id, data, selectedEventIds, timelineTypeContext.queryFields]
+      [setSelected, id, data, selectedEventIds, queryFields]
     );
 
     const onSelectAll: OnSelectAll = useCallback(
@@ -114,13 +118,13 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
               eventIds: getEventIdToDataMapping(
                 data,
                 data.map((event) => event._id),
-                timelineTypeContext.queryFields ?? []
+                queryFields
               ),
               isSelected,
               isSelectAllChecked: isSelected,
             })
           : clearSelected!({ id }),
-      [setSelected, clearSelected, id, data, timelineTypeContext.queryFields]
+      [setSelected, clearSelected, id, data, queryFields]
     );
 
     const onColumnSorted: OnColumnSorted = useCallback(
@@ -151,12 +155,12 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [id]
     );
 
-    // Sync to timelineTypeContext.selectAll so parent components can select all events
+    // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (timelineTypeContext.selectAll) {
+      if (selectAll) {
         onSelectAll({ isSelected: true });
       }
-    }, [timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
+    }, [selectAll]); // onSelectAll dependency not necessary
 
     return (
       <Body
