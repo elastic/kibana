@@ -7,7 +7,7 @@
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Alert } from '../../../../../alerts/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
-import { CreateRuleParams } from './types';
+import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
 
@@ -44,7 +44,7 @@ export const createRules = async ({
   version,
   exceptions_list,
   actions,
-}: CreateRuleParams): Promise<Alert> => {
+}: CreateRulesOptions): Promise<Alert> => {
   // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
   const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
   return alertsClient.create({

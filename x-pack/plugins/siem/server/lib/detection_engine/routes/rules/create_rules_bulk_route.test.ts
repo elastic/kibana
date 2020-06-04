@@ -180,7 +180,7 @@ describe('create_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
+        'Invalid value "unexpected_type" supplied to "type"'
       );
     });
   });

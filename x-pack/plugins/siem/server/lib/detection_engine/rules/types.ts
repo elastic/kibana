@@ -13,10 +13,42 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { ListsDefaultArraySchema } from '../../../../common/detection_engine/schemas/types/lists_default_array';
+import {
+  FalsePositives,
+  From,
+  RuleId,
+  Immutable,
+  Interval,
+  MaxSignals,
+  RiskScore,
+  OutputIndex,
+  Name,
+  Severity,
+  Tags,
+  Threat,
+  To,
+  Type,
+  References,
+  Version,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  LanguageOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  MachineLearningJobIdOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  Description,
+  Enabled,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
+import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest, PartialFilter } from '../types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
@@ -155,10 +187,6 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId' | 'throttle'> & {
-  ruleId: string;
-} & Clients;
-
 export interface ReadRuleParams {
   alertsClient: AlertsClient;
   id?: string | undefined | null;
@@ -190,3 +218,38 @@ export const isRuleStatusFindTypes = (
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
   return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
 };
+
+export interface CreateRulesOptions {
+  alertsClient: AlertsClient;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+  description: Description;
+  enabled: Enabled;
+  falsePositives: FalsePositives;
+  from: From;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  ruleId: RuleId;
+  immutable: Immutable;
+  index: IndexOrUndefined;
+  interval: Interval;
+  maxSignals: MaxSignals;
+  riskScore: RiskScore;
+  outputIndex: OutputIndex;
+  name: Name;
+  severity: Severity;
+  tags: Tags;
+  threat: Threat;
+  to: To;
+  type: Type;
+  references: References;
+  note: NoteOrUndefined;
+  version: Version;
+  exceptions_list: ListsDefaultArraySchema;
+  actions: RuleAlertAction[];
+}

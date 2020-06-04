@@ -14,18 +14,23 @@ import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greate
 import { PositiveInteger } from '../types/positive_integer';
 
 export const description = t.string;
+export type Description = t.TypeOf<typeof description>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
-export const exclude_export_details = t.boolean;
+
 export const false_positives = t.array(t.string);
 export type FalsePositives = t.TypeOf<typeof false_positives>;
+
 export const file_name = t.string;
+export const exclude_export_details = t.boolean;
 
 /**
  * TODO: Right now the filters is an "unknown", when it could more than likely
  * become the actual ESFilter as a type.
  */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
+export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-able yet
 
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
@@ -52,6 +57,7 @@ export const from = t.string;
 export type From = t.TypeOf<typeof from>;
 
 export const immutable = t.boolean;
+export type Immutable = t.TypeOf<typeof immutable>;
 
 // Note: Never make this a strict uuid, we allow the rule_id to be any string at the moment
 // in case we encounter 3rd party rule systems which might be using auto incrementing numbers
@@ -60,25 +66,68 @@ export const rule_id = t.string;
 export type RuleId = t.TypeOf<typeof rule_id>;
 
 export const id = UUID;
+
 export const index = t.array(t.string);
+export type Index = t.TypeOf<typeof index>;
+
+export const indexOrUndefined = t.union([index, t.undefined]);
+export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
+
 export const interval = t.string;
 export type Interval = t.TypeOf<typeof interval>;
+
 export const query = t.string;
 export type Query = t.TypeOf<typeof query>;
+
+export const queryOrUndefined = t.union([query, t.undefined]);
+export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
+
 export const language = t.keyof({ kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
+
+export const languageOrUndefined = t.union([language, t.undefined]);
+export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
+
 export const objects = t.array(t.type({ rule_id }));
+
 export const output_index = t.string;
+export type OutputIndex = t.TypeOf<typeof output_index>;
+
 export const saved_id = t.string;
+export type SavedId = t.TypeOf<typeof saved_id>;
+
+export const savedIdOrUndefined = t.union([saved_id, t.undefined]);
+export type SavedIdOrUndefined = t.TypeOf<typeof savedIdOrUndefined>;
+
 export const timeline_id = t.string;
+export type TimelineId = t.TypeOf<typeof timeline_id>;
+
+export const timelineIdOrUndefined = t.union([timeline_id, t.undefined]);
+export type TimelineIdOrUndefined = t.TypeOf<typeof timelineIdOrUndefined>;
+
 export const timeline_title = t.string;
+export type TimelineTitle = t.TypeOf<typeof t.string>;
+
+export const timelineTitleOrUndefined = t.union([timeline_title, t.undefined]);
+export type TimelineTitleOrUndefined = t.TypeOf<typeof timelineTitleOrUndefined>;
+
 export const throttle = t.string;
-export const throttleOrNull = t.union([throttle, t.null]);
 export type Throttle = t.TypeOf<typeof throttle>;
+
+export const throttleOrNull = t.union([throttle, t.null]);
 export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
 
 export const anomaly_threshold = PositiveInteger;
+export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
+
+export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
+export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
+
 export const machine_learning_job_id = t.string;
+export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
+
+export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
+export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
 
 /**
  * Note that this is a plain unknown object because we allow the UI
@@ -88,13 +137,24 @@ export const machine_learning_job_id = t.string;
  * so we have tighter control over 3rd party data structures.
  */
 export const meta = t.object;
+export type Meta = t.TypeOf<typeof meta>;
+export const metaOrUndefined = t.union([meta, t.undefined]);
+export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
 export const max_signals = PositiveIntegerGreaterThanZero;
 export type MaxSignals = t.TypeOf<typeof max_signals>;
+
 export const name = t.string;
+export type Name = t.TypeOf<typeof name>;
+
 export const risk_score = RiskScore;
+export type RiskScore = t.TypeOf<typeof risk_score>;
+
 export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
+export type Severity = t.TypeOf<typeof severity>;
+
 export const status = t.keyof({ open: null, closed: null });
+
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
 
 // TODO: Create a regular expression type or custom date math part type here
@@ -102,9 +162,13 @@ export const to = t.string;
 export type To = t.TypeOf<typeof to>;
 
 export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
+export type Type = t.TypeOf<typeof type>;
+
 export const queryFilter = t.string;
+
 export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
+
 export const per_page = PositiveInteger;
 export const page = PositiveIntegerGreaterThanZero;
 export const signal_ids = t.array(t.string);
@@ -114,8 +178,10 @@ export const signal_status_query = t.object;
 
 export const sort_field = t.string;
 export const sort_order = t.keyof({ asc: null, desc: null });
+
 export const tags = t.array(t.string);
 export type Tags = t.TypeOf<typeof tags>;
+
 export const fields = t.array(t.string);
 export const threat_framework = t.string;
 export const threat_tactic_id = t.string;
@@ -153,8 +219,10 @@ export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
+
 export const version = PositiveIntegerGreaterThanZero;
 export type Version = t.TypeOf<typeof version>;
+
 export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
 export const last_failure_at = IsoDateString;
@@ -171,7 +239,12 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+
 export const note = t.string;
+export type Note = t.TypeOf<typeof note>;
+
+export const noteOrUndefined = t.union([note, t.undefined]);
+export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
 
 // NOTE: Experimental list support not being shipped currently and behind a feature flag
 // TODO: Remove this comment once we lists have passed testing and is ready for the release

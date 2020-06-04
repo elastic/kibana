@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
-
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -25,7 +23,7 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
-import { PartialFilter, Meta } from '../../types';
+import { PartialFilter } from '../../types';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -59,7 +57,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         saved_id: savedId,
         timeline_id: timelineId,
         timeline_title: timelineTitle,
-        meta: metaObjectOrUndefined,
+        meta,
         machine_learning_job_id: machineLearningJobId,
         filters: filtersRest,
         rule_id: ruleId,
@@ -89,8 +87,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-        const filters: PartialFilter[] = filtersRest as PartialFilter[];
-        const meta: Meta | undefined | null = metaObjectOrUndefined as Meta;
+        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
@@ -138,7 +135,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           meta,
           machineLearningJobId,
           filters,
-          ruleId: ruleId ?? uuid.v4(),
+          ruleId,
           index,
           interval,
           maxSignals,
