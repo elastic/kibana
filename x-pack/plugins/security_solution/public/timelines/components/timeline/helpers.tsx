@@ -13,6 +13,7 @@ import {
   DataProvider,
   DataProviderType,
   DataProvidersAnd,
+  IS_OPERATOR,
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
@@ -84,7 +85,22 @@ const buildQueryForAndProvider = (
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
     .reduce((query, dataProvider: DataProvider, i) => {
-      if (dataProvider.type === DataProviderType.template) return query;
+      const dataProviderQueries = [];
+
+      if (dataProvider.enabled) {
+        dataProviderQueries.push(buildQueryMatch(dataProvider, browserFields));
+      }
+
+      if (dataProvider.and.length) {
+        dataProvider.forEach();
+      }
+
+      // if (
+      //   dataProvider.type !== DataProviderType.template &&
+      //   dataProvider.queryMatch.operator === IS_OPERATOR
+      // ) {
+      //   return query;
+      // }
 
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       const openParen = i >= 0 && dataProviders.length > 1 ? '(' : '';

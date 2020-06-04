@@ -20,7 +20,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -1041,6 +1041,12 @@ export const updateTimelineProviderType = ({
   timelineById,
 }: UpdateTimelineProviderTypeParams): TimelineById => {
   const timeline = timelineById[id];
+
+  if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
+    // Not template timeline cannot have template type providers
+    return timelineById;
+  }
+
   return {
     ...timelineById,
     [id]: {
@@ -1050,7 +1056,7 @@ export const updateTimelineProviderType = ({
           ? {
               ...provider,
               type,
-              name: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+              name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
               queryMatch: {
                 ...provider.queryMatch,
                 value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',

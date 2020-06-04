@@ -56,7 +56,7 @@ export const importTimelinesRoute = (
         body: buildRouteValidation(ImportTimelinesPayloadSchemaRt),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:access:securitySolution'],
         body: {
           maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',

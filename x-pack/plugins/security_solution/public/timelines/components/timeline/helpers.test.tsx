@@ -7,6 +7,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { mockIndexPattern } from '../../../common/mock';
 
+import { DataProviderType } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
@@ -18,9 +19,23 @@ const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
 
 describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {
-    const dataProviders = mockDataProviders.slice(0, 1);
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1"');
+  });
+
+  test('Build KQL query with one template data provider', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].type = DataProviderType.template;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('');
+  });
+
+  test('Build KQL query with one disabled data provider', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('');
   });
 
   test('Build KQL query with one data provider as timestamp (string input)', () => {
@@ -61,11 +76,33 @@ describe('Build KQL Query', () => {
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1" ) or (name : "Provider 2" )');
   });
 
+  test('Build KQL query with two data provider (first is template)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].type = DataProviderType.template;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 2" )');
+  });
+
+  test('Build KQL query with two data provider (second is template)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[1].type = DataProviderType.template;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1" )');
+  });
+
   test('Build KQL query with one data provider and one and', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].and = mockDataProviders.slice(1, 2);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and name : "Provider 2"');
+  });
+
+  test('Build KQL query with one template data provider and one and', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].type = DataProviderType.template;
+    dataProviders[0].and = mockDataProviders.slice(1, 2);
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 2"');
   });
 
   test('Build KQL query with one data provider and one and as timestamp (string input)', () => {
