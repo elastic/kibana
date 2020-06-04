@@ -155,7 +155,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplatesList.table.deleteComponentTemplatesButtonLabel"
+                  id="xpack.idxMgmt.componentTemplatesList.table.notInUseCellDescription"
                   defaultMessage="Not in use"
                 />
               </EuiFlexItem>
