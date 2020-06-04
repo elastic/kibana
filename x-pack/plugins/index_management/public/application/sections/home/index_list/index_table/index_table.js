@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
-import * as qs from 'query-string';
+import qs from 'query-string';
 
 import {
   EuiButton,
