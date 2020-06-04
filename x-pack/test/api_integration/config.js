@@ -28,7 +28,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         '--optimize.enabled=false',
         '--telemetry.optIn=true',
         '--xpack.ingestManager.enabled=true',
-        '--xpack.siem.alertResultListDefaultDateRange.from=2018-01-10T00:00:00.000Z',
+        '--xpack.securitySolution.alertResultListDefaultDateRange.from=2018-01-10T00:00:00.000Z',
       ],
     },
     esTestCluster: {

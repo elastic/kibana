@@ -162,8 +162,8 @@ app.config(($routeProvider) => {
                   mapping: {
                     search: '/',
                     'index-pattern': {
-                      app: 'kibana',
-                      path: `#/management/kibana/objects/savedSearches/${$route.current.params.id}`,
+                      app: 'management',
+                      path: `kibana/objects/savedSearches/${$route.current.params.id}`,
                     },
                   },
                   toastNotifications,
@@ -750,6 +750,13 @@ function discoverController(
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
             chrome.docTitle.change(savedSearch.lastSavedTitle);
+            chrome.setBreadcrumbs([
+              {
+                text: discoverBreadcrumbsTitle,
+                href: '#/',
+              },
+              { text: savedSearch.title },
+            ]);
           }
         }
       });
@@ -870,6 +877,7 @@ function discoverController(
       if ($scope.vis.data.aggs.aggs[1]) {
         $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
       }
+      $scope.updateTime();
     }
 
     $scope.hits = resp.hits.total;
