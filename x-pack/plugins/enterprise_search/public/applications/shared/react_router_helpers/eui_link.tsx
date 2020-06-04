@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiLink, EuiButton } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
 
 import { letBrowserHandleEvent } from './link_events';
 
@@ -19,13 +19,12 @@ import { letBrowserHandleEvent } from './link_events';
 
 interface IEuiReactRouterProps {
   to: string;
-  isButton?: boolean;
 }
 
-export const EuiReactRouterLink: React.FC<IEuiReactRouterProps> = ({ to, isButton, ...rest }) => {
+export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
   const history = useHistory();
 
-  const onClick = (event) => {
+  const onClick = (event: React.MouseEvent) => {
     if (letBrowserHandleEvent(event)) return;
 
     // Prevent regular link behavior, which causes a browser refresh.
@@ -38,10 +37,21 @@ export const EuiReactRouterLink: React.FC<IEuiReactRouterProps> = ({ to, isButto
   // Generate the correct link href (with basename etc. accounted for)
   const href = history.createHref({ pathname: to });
 
-  const props = { ...rest, href, onClick };
-  return isButton ? <EuiButton {...props} /> : <EuiLink {...props} />;
+  const reactRouterProps = { href, onClick };
+  return React.cloneElement(children as React.ReactElement, reactRouterProps);
 };
 
-export const EuiReactRouterButton: React.FC<IEuiReactRouterProps> = (props) => (
-  <EuiReactRouterLink {...props} isButton />
+type TEuiReactRouterLinkProps = EuiLinkAnchorProps & IEuiReactRouterProps;
+type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
+
+export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
+  <EuiReactRouterHelper to={to}>
+    <EuiLink {...rest} />
+  </EuiReactRouterHelper>
+);
+
+export const EuiReactRouterButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
+  <EuiReactRouterHelper to={to}>
+    <EuiButton {...rest} />
+  </EuiReactRouterHelper>
 );

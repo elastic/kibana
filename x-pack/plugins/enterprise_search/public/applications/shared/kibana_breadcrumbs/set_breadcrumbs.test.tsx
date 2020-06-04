@@ -14,16 +14,16 @@ import { appSearchBreadcrumbs, SetAppSearchBreadcrumbs } from './';
 
 describe('SetAppSearchBreadcrumbs', () => {
   const setBreadcrumbs = jest.fn();
-  const builtBreadcrumbs = [];
+  const builtBreadcrumbs = [] as any;
   const appSearchBreadCrumbsInnerCall = jest.fn().mockReturnValue(builtBreadcrumbs);
   const appSearchBreadCrumbsOuterCall = jest.fn().mockReturnValue(appSearchBreadCrumbsInnerCall);
-  appSearchBreadcrumbs.mockImplementation(appSearchBreadCrumbsOuterCall);
+  (appSearchBreadcrumbs as jest.Mock).mockImplementation(appSearchBreadCrumbsOuterCall);
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  const mountSetAppSearchBreadcrumbs = (props) => {
+  const mountSetAppSearchBreadcrumbs = (props: any) => {
     return mountWithKibanaContext(<SetAppSearchBreadcrumbs {...props} />, {
       http: {},
       enterpriseSearchUrl: 'http://localhost:3002',

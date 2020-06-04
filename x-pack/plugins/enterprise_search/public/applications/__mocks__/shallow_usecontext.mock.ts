@@ -12,7 +12,7 @@ import { mockKibanaContext } from './kibana_context.mock';
 import { mockLicenseContext } from './license_context.mock';
 
 jest.mock('react', () => ({
-  ...jest.requireActual('react'),
+  ...(jest.requireActual('react') as object),
   useContext: jest.fn(() => ({ ...mockKibanaContext, ...mockLicenseContext })),
 }));
 

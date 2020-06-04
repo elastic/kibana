@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SyntheticEvent } from 'react';
+import { MouseEvent } from 'react';
 
 /**
  * Helper functions for determining which events we should
  * let browsers handle natively, e.g. new tabs/windows
  */
 
-type THandleEvent = (event: SyntheticEvent) => boolean;
+type THandleEvent = (event: MouseEvent) => boolean;
 
 export const letBrowserHandleEvent: THandleEvent = (event) =>
   event.defaultPrevented ||
@@ -25,6 +25,7 @@ const isModifiedEvent: THandleEvent = (event) =>
 const isLeftClickEvent: THandleEvent = (event) => event.button === 0;
 
 const isTargetBlank: THandleEvent = (event) => {
-  const target = event.target.getAttribute('target');
+  const element = event.target as HTMLElement;
+  const target = element.getAttribute('target');
   return !!target && target !== '_self';
 };
