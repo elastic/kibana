@@ -24,6 +24,8 @@ import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { displayNameRecord } from './process_event_dot';
+import { uniquePidForProcess, uniqueParentPidForProcess } from '../models/process_event';
+import { EuiDescriptionList } from '@elastic/eui';
 
 const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
@@ -33,6 +35,7 @@ const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   minute: '2-digit',
   second: '2-digit',
 });
+
 const ProcessListWithCounts = memo(function ProcessListWithCounts() {
   interface ProcessTableView {
     name: string;
@@ -59,7 +62,7 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.processNameTitle', {
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.processNameTitle', {
           defaultMessage: 'Process Name',
         }),
         sortable: true,
@@ -81,7 +84,7 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
       },
       {
         field: 'timestamp',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.timestampTitle', {
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.timestampTitle', {
           defaultMessage: 'Timestamp',
         }),
         dataType: 'date',
@@ -92,7 +95,7 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
           ) : (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.siem.endpoint.resolver.panel.tabel.row.timestampInvalidLabel',
+                'xpack.siem.endpoint.resolver.panel.table.row.timestampInvalidLabel',
                 {
                   defaultMessage: 'invalid',
                 }
@@ -102,19 +105,19 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
         },
       },
       {
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.actionsTitle', {
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.actionsTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: i18n.translate(
-              'xpack.siem.endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
+              'xpack.siem.endpoint.resolver.panel.table.row.actions.bringIntoViewButtonLabel',
               {
                 defaultMessage: 'Bring into view',
               }
             ),
             description: i18n.translate(
-              'xpack.siem.endpoint.resolver.panel.tabel.row.bringIntoViewLabel',
+              'xpack.siem.endpoint.resolver.panel.table.row.bringIntoViewLabel',
               {
                 defaultMessage: 'Bring the process into view on the map.',
               }
@@ -156,6 +159,36 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
   )
 });
 
+const ProcessDetails = memo(function ProcessListWithCounts() {
+  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+  const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
+  const processInfoEntry = useMemo(() =>{
+    const [processEvent] = [...processNodePositions.keys()].filter(processEvent=>event.entityId(processEvent)===selectedDescendantProcessId);
+    
+    let dateTime = '';
+    const eventTime = processEvent && event.eventTimestamp(processEvent);
+    if (eventTime) {
+      const date = new Date(eventTime);
+      if (isFinite(date.getTime())) {
+        dateTime = formatter.format(date);
+      }
+    }
+
+    const processInfo = processEvent ? {
+      Created: dateTime,
+      PID: uniquePidForProcess(processEvent),
+      name: event.eventName(processEvent),
+      PPID: uniqueParentPidForProcess(processEvent),
+    } : {};
+
+    return Object.entries(processInfo).map(([title,description])=>{ return {title, description: String(description)} });
+  }, [processNodePositions,selectedDescendantProcessId]);
+  console.log(processInfoEntry);
+  return (
+    <EuiDescriptionList type="responsiveColumn" listItems={processInfoEntry} />
+  )
+});
+
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();
   const urlSearch = location.search;
@@ -176,7 +209,7 @@ const PanelContent = memo(function PanelContent() {
       const processSubject = graphableProcesses.find(evt=>event.entityId(evt)===crumbEvent);
       if(!processSubject){
         //should never happen, but bail out to default
-        return console.log('default'),'default';
+        return console.log('default'), (<ProcessListWithCounts />);
       }
       const relatedEventsState = relatedEvents.get(processSubject)!;
       if(relatedEventsState === 'waitingForRelatedEventData'){
@@ -205,7 +238,7 @@ const PanelContent = memo(function PanelContent() {
       if(crumbEvent === ''){
         //If there is no crumbEvent param, it's for the process detail
         //Note: this view should handle its own effect for requesting /events
-        return console.log('processDetail'),'processDetail';
+        return console.log('processDetail'), <ProcessDetails />;
       }
       if(crumbEvent === 'all'){
         //If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
@@ -218,7 +251,7 @@ const PanelContent = memo(function PanelContent() {
       }
     }
     //The default 'Event List' / 'List of all processes' view
-    return console.log('default'),'default';
+    return console.log('default'),(<ProcessListWithCounts />);
   },[queryParams,graphableProcesses,relatedEvents]);
 
   /**
@@ -236,7 +269,7 @@ const PanelContent = memo(function PanelContent() {
   console.log(queryParams);
 
   return (
-    <ProcessListWithCounts />
+    <>{whichTableViewAndBreadcrumbsToRender}</>
   )
 });
 

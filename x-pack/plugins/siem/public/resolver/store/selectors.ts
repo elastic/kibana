@@ -82,6 +82,14 @@ export const uiSelectedDescendantId = composeSelectors(
 );
 
 /**
+ * Returns the entity_id of the "selected" tree node's process
+ */
+export const uiSelectedDescendantProcessId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantProcessId
+);
+
+/**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {

@@ -334,6 +334,7 @@ const ProcessEventDotComponents = React.memo(
         type: 'userSelectedResolverNode',
         payload: {
           nodeId,
+          selectedProcessId: selfId,
         },
       });
     }, [animationTarget, dispatch, nodeId]);

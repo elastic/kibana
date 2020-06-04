@@ -43,6 +43,10 @@ export interface ResolverUIState {
    * The ID attribute of the resolver's currently selected descendant.
    */
   readonly selectedDescendantId: string | null;
+  /**
+   * The entity_id of the process for the resolver's currently selected descendant.
+   */
+  readonly processEntityIdOfSelectedDescendant: string | null;
 }
 
 /**

@@ -19,7 +19,7 @@ import { uniquePidForProcess } from '../models/process_event';
 const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
-  uiState = { activeDescendantId: null, selectedDescendantId: null },
+  uiState = { activeDescendantId: null, selectedDescendantId: null, processEntityIdOfSelectedDescendant: null },
   action
 ) => {
   if (action.type === 'userFocusedOnResolverNode') {
@@ -31,6 +31,7 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
     return {
       ...uiState,
       selectedDescendantId: action.payload.nodeId,
+      processEntityIdOfSelectedDescendant: action.payload.selectedProcessId,
     };
   } else if (action.type === 'userBroughtProcessIntoView') {
     /**
