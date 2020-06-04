@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Reducer, useReducer, Dispatch } from 'react';
+import uuid from 'uuid';
+
 import { DeserializeResult } from '../deserialize';
-import { unsafeProcessorMove } from './utils';
 import { getValue, setValue } from '../utils';
 import { ProcessorInternal, ProcessorSelector } from '../types';
+
+import { unsafeProcessorMove } from './utils';
 
 export type State = Omit<DeserializeResult, 'onFailure'> & {
   onFailure: ProcessorInternal[];
@@ -17,12 +20,12 @@ export type State = Omit<DeserializeResult, 'onFailure'> & {
 type Action =
   | {
       type: 'addTopLevelProcessor';
-      payload: { processor: ProcessorInternal; selector: ProcessorSelector };
+      payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };
     }
   | {
       type: 'addOnFailureProcessor';
       payload: {
-        onFailureProcessor: ProcessorInternal;
+        onFailureProcessor: Omit<ProcessorInternal, 'id'>;
         targetSelector: ProcessorSelector;
       };
     }
@@ -66,12 +69,13 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   }
 
   if (action.type === 'addTopLevelProcessor') {
-    const { processor, selector } = action.payload;
-    return setValue(selector, state, getValue(selector, state).concat(processor));
+    const { processor: processorArgs, selector } = action.payload;
+    const newProcessor = { ...processorArgs, id: uuid.v4() };
+    return setValue(selector, state, getValue(selector, state).concat(newProcessor));
   }
 
   if (action.type === 'addOnFailureProcessor') {
-    const { onFailureProcessor, targetSelector } = action.payload;
+    const { onFailureProcessor: processorArgs, targetSelector } = action.payload;
     if (!targetSelector.length) {
       throw new Error('Expected target selector to contain a path, but received an empty array.');
     }
@@ -79,9 +83,10 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     if (!targetProcessor) {
       throw new Error(`Could not find processor at ${targetSelector.join('.')}`);
     }
+    const newProcessor = { ...processorArgs, id: uuid.v4() };
     targetProcessor.onFailure = targetProcessor.onFailure
-      ? targetProcessor.onFailure.concat(onFailureProcessor)
-      : [onFailureProcessor];
+      ? targetProcessor.onFailure.concat(newProcessor)
+      : [newProcessor];
     return setValue(targetSelector, state, targetProcessor);
   }
 

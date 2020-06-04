@@ -5,6 +5,8 @@
  */
 
 import { ESCommonProcessorOptions } from '../../../../common/types';
+import { OnFormUpdateArg } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { SerializeResult } from './serialize';
 
 /**
  * An array of keys that map to a value in an object
@@ -23,7 +25,16 @@ export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOpt
 
 /** @private */
 export interface ProcessorInternal<CustomProcessorOptions = {}> {
+  id: string;
   type: string;
   options: ProcessorOptions<CustomProcessorOptions>;
   onFailure?: ProcessorInternal[];
+}
+
+export interface FormValidityState {
+  validate: OnFormUpdateArg<any>['validate'];
+}
+
+export interface OnUpdateHandlerArg extends FormValidityState {
+  getData: () => SerializeResult;
 }

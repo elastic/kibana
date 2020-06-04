@@ -11,45 +11,66 @@ import './tree.scss';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
-import { TreeLeaf } from './tree_leaf';
+import { TreeNode } from './tree_node';
 import { RenderTreeItemFunction } from './types';
 
 export type TreeMode = 'copy' | 'move' | 'idle';
 
-export interface SelectedNode {
+export interface ProcessorInfo {
+  id: string;
   selector: ProcessorSelector;
+  aboveId?: string;
+  belowId?: string;
 }
+
+export type PrivateOnActionArgs =
+  | {
+      type: 'selectToMove';
+      payload: ProcessorInfo;
+    }
+  | { type: 'move'; payload: ProcessorSelector };
+
+export type PrivateOnActionHandler = (args: PrivateOnActionArgs) => void;
 
 export interface PrivateProps extends Omit<Props, 'baseSelector' | 'onAction'> {
   selector: ProcessorSelector;
-  onAction: (args: any) => void;
+  privateOnAction: PrivateOnActionHandler;
   mode: TreeMode;
-  selectedNode?: SelectedNode;
+  selectedProcessorInfo?: ProcessorInfo;
 }
 
-export type PrivateTreeAction = 'selectToMove' | 'move';
+const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
+  return Boolean(
+    // Is the selected node first in a list?
+    !selectedProcessor.aboveId &&
+      // Is the selected processor the current processor?
+      processor.id === selectedProcessor.id
+  );
+};
 
-interface PrivateTreeActionArg {
-  type: PrivateTreeAction;
-  selector: ProcessorSelector;
-}
+const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
+  return processor.id === selectedProcessor.id || processor.belowId === selectedProcessor.id;
+};
 
 export const PrivateTree: FunctionComponent<PrivateProps> = ({
   processors,
   selector,
-  selectedNode,
-  onAction,
+  selectedProcessorInfo,
+  privateOnAction,
   renderItem,
   mode,
 }) => {
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
       {processors.map((processor, idx) => {
-        const processorSelector = selector.concat(String(idx));
-        const maybeSelectedNodeString = selectedNode?.selector.join('.');
-        const adjacentToSelectedNode =
-          maybeSelectedNodeString === processorSelector.join('.') ||
-          maybeSelectedNodeString === selector.concat(String(idx + 1)).join('.');
+        const above = processors[idx - 1];
+        const below = processors[idx + 1];
+        const info: ProcessorInfo = {
+          id: processor.id,
+          selector: selector.concat(String(idx)),
+          aboveId: above?.id,
+          belowId: below?.id,
+        };
         return (
           <React.Fragment key={idx}>
             {idx === 0 ? (
@@ -58,16 +79,10 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                   aria-label="temp"
                   iconType="pin"
                   disabled={
-                    mode !== 'move' ||
-                    Boolean(
-                      selectedNode &&
-                        selectedNode.selector[selectedNode.selector.length - 1] === '0' &&
-                        selectedNode.selector.length === processorSelector.length &&
-                        selectedNode.selector.every((p, i) => processorSelector[i] === p)
-                    )
+                    mode !== 'move' || isDropZoneAboveDisabled(info, selectedProcessorInfo!)
                   }
                   onClick={() => {
-                    onAction({ type: 'move', selector: selector.concat(String(idx)) });
+                    privateOnAction({ type: 'move', payload: selector.concat(String(idx)) });
                   }}
                 >
                   Move Here
@@ -75,12 +90,12 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
               </EuiFlexItem>
             ) : undefined}
             <EuiFlexItem>
-              <TreeLeaf
+              <TreeNode
                 mode={mode}
-                selector={processorSelector}
-                onAction={onAction}
                 processor={processor}
-                selectedNode={selectedNode}
+                processorInfo={info}
+                privateOnAction={privateOnAction}
+                selectedProcessorInfo={selectedProcessorInfo}
                 renderItem={renderItem}
               />
             </EuiFlexItem>
@@ -88,9 +103,9 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
               <EuiButtonIcon
                 aria-label="temp"
                 iconType="pin"
-                disabled={mode !== 'move' || adjacentToSelectedNode}
+                disabled={mode !== 'move' || isDropZoneBelowDisabled(info, selectedProcessorInfo!)}
                 onClick={() => {
-                  onAction({ type: 'move', selector: selector.concat(String(idx + 1)) });
+                  privateOnAction({ type: 'move', payload: selector.concat(String(idx + 1)) });
                 }}
               >
                 Move Here
@@ -117,24 +132,25 @@ export const Tree: FunctionComponent<Props> = ({
   renderItem,
 }) => {
   const [treeMode, setTreeMode] = useState<TreeMode>('idle');
-  const [selectedNode, setSelectedNode] = useState<SelectedNode | undefined>();
+  const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
   return (
     <PrivateTree
       renderItem={renderItem}
-      onAction={(action) => {
+      privateOnAction={(action) => {
         if (action.type === 'selectToMove') {
           setTreeMode('move');
-          setSelectedNode({ selector: action.selector });
+          setSelectedProcessorInfo(action.payload);
           return;
         }
 
         if (action.type === 'move') {
-          onAction({ source: selectedNode!.selector, destination: action.selector });
-          setSelectedNode(undefined);
           setTreeMode('idle');
+          onAction({ source: selectedProcessorInfo!.selector, destination: action.payload });
+          setSelectedProcessorInfo(undefined);
+          return;
         }
       }}
-      selectedNode={selectedNode}
+      selectedProcessorInfo={selectedProcessorInfo}
       processors={processors}
       selector={baseSelector}
       mode={treeMode}

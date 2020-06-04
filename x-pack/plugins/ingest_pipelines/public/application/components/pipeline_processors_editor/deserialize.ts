@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import uuid from 'uuid';
 import { Processor } from '../../../../common/types';
 import { ProcessorInternal } from './types';
 
@@ -27,6 +29,7 @@ const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInte
     ? convertProcessors(originalOnFailure)
     : (originalOnFailure as ProcessorInternal[] | undefined);
   return {
+    id: uuid.v4(),
     type,
     onFailure,
     options,

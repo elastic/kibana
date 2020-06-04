@@ -16,9 +16,9 @@ const initialState: State = {
 
 describe('Processors reducer', () => {
   it('reorders processors', () => {
-    const processor1 = { type: 'test1', options: {} };
-    const processor2 = { type: 'test2', options: {} };
-    const processor3 = { type: 'test3', options: {} };
+    const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+    const processor2 = { id: expect.any(String), type: 'test2', options: {} };
+    const processor3 = { id: expect.any(String), type: 'test3', options: {} };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
@@ -48,10 +48,10 @@ describe('Processors reducer', () => {
   });
 
   it('moves and orders processors out of lists', () => {
-    const processor1 = { type: 'test1', options: {} };
-    const processor2 = { type: 'test2', options: {} };
-    const processor3 = { type: 'test3', options: {} };
-    const processor4 = { type: 'test4', options: {} };
+    const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+    const processor2 = { id: expect.any(String), type: 'test2', options: {} };
+    const processor3 = { id: expect.any(String), type: 'test3', options: {} };
+    const processor4 = { id: expect.any(String), type: 'test4', options: {} };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
@@ -98,10 +98,10 @@ describe('Processors reducer', () => {
   });
 
   it('moves and orders processors into lists', () => {
-    const processor1 = { type: 'test1', options: {} };
-    const processor2 = { type: 'test2', options: {} };
-    const processor3 = { type: 'test3', options: {} };
-    const processor4 = { type: 'test4', options: {} };
+    const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+    const processor2 = { id: expect.any(String), type: 'test2', options: {} };
+    const processor3 = { id: expect.any(String), type: 'test3', options: {} };
+    const processor4 = { id: expect.any(String), type: 'test4', options: {} };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
@@ -148,9 +148,9 @@ describe('Processors reducer', () => {
   });
 
   it('handles sending processor to bottom correctly', () => {
-    const processor1 = { type: 'test1', options: {} };
-    const processor2 = { type: 'test2', options: {} };
-    const processor3 = { type: 'test3', options: {} };
+    const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+    const processor2 = { id: expect.any(String), type: 'test2', options: {} };
+    const processor3 = { id: expect.any(String), type: 'test3', options: {} };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
@@ -181,8 +181,8 @@ describe('Processors reducer', () => {
   });
 
   it('will not set the root "onFailure" to "undefined" if it is empty', () => {
-    const processor1 = { type: 'test1', options: {} };
-    const processor2 = { type: 'test2', options: {} };
+    const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+    const processor2 = { id: expect.any(String), type: 'test2', options: {} };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
@@ -224,10 +224,10 @@ describe('Processors reducer', () => {
     });
 
     it('prevents moving a parent into child list', () => {
-      const processor1 = { type: 'test1', options: {} };
-      const processor2 = { type: 'test2', options: {} };
-      const processor3 = { type: 'test3', options: {} };
-      const processor4 = { type: 'test4', options: {} };
+      const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+      const processor2 = { id: expect.any(String), type: 'test2', options: {} };
+      const processor3 = { id: expect.any(String), type: 'test3', options: {} };
+      const processor4 = { id: expect.any(String), type: 'test4', options: {} };
 
       const s1 = reducer(initialState, {
         type: 'addTopLevelProcessor',
@@ -273,8 +273,8 @@ describe('Processors reducer', () => {
     });
 
     it('throws for bad move processor', () => {
-      const processor1 = { type: 'test1', options: {} };
-      const processor2 = { type: 'test2', options: {} };
+      const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+      const processor2 = { id: expect.any(String), type: 'test2', options: {} };
 
       const s1 = reducer(initialState, {
         type: 'addTopLevelProcessor',
