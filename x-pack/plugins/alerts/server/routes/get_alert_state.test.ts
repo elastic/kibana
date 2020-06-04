@@ -84,13 +84,6 @@ describe('getAlertStateRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
 
     alertsClient.getAlertState.mockResolvedValueOnce(undefined);
 
@@ -127,13 +120,6 @@ describe('getAlertStateRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
 
     alertsClient.getAlertState = jest
       .fn()

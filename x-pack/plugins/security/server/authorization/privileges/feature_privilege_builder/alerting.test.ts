@@ -182,8 +182,10 @@ describe(`feature_privilege_builder`, () => {
 
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
-            allGlobally: [],
-            readGlobally: ['alert-type'],
+            globally: {
+              all: [],
+              read: ['alert-type'],
+            },
           },
 
           savedObject: {
@@ -218,8 +220,10 @@ describe(`feature_privilege_builder`, () => {
 
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
-            allGlobally: ['alert-type'],
-            readGlobally: [],
+            globally: {
+              all: ['alert-type'],
+              read: [],
+            },
           },
 
           savedObject: {
@@ -264,8 +268,10 @@ describe(`feature_privilege_builder`, () => {
 
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
-            allGlobally: ['alert-type'],
-            readGlobally: ['readonly-alert-type'],
+            globally: {
+              all: ['alert-type'],
+              read: ['readonly-alert-type'],
+            },
           },
 
           savedObject: {

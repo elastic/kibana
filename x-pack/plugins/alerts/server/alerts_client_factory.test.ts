@@ -67,6 +67,7 @@ test('creates an alerts client with proper constructor arguments when security i
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedWrappers: ['security'],
+    includedHiddenTypes: ['alert'],
   });
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
@@ -79,10 +80,10 @@ test('creates an alerts client with proper constructor arguments when security i
     spaceId: 'default',
     namespace: 'default',
     getUserName: expect.any(Function),
+    getActionsClient: expect.any(Function),
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
-    preconfiguredActions: [],
   });
 });
 
@@ -97,6 +98,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedWrappers: ['security'],
+    includedHiddenTypes: ['alert'],
   });
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({

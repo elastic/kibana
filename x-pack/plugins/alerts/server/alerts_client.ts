@@ -32,12 +32,12 @@ import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
   SecurityPluginSetup,
+  CheckPrivilegesResponse,
 } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
-import { CheckPrivilegesResponse } from '../../security/server';
 import { RegistryAlertType } from './alert_type_registry';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
@@ -473,9 +473,7 @@ export class AlertsClient {
     }
 
     try {
-      const apiKeyId = Buffer.from(apiKey, 'base64')
-        .toString()
-        .split(':')[0];
+      const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
       const response = await this.invalidateAPIKey({ id: apiKeyId });
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
@@ -741,8 +739,8 @@ export class AlertsClient {
     actions: RawAlert['actions'],
     references: SavedObjectReference[]
   ) {
-    return actions.map(action => {
-      const reference = references.find(ref => ref.name === action.actionRef);
+    return actions.map((action) => {
+      const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Reference ${action.actionRef} not found`);
       }
@@ -787,10 +785,10 @@ export class AlertsClient {
 
   private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
-    const usedAlertActionGroups = actions.map(action => action.group);
+    const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
     const invalidActionGroups = usedAlertActionGroups.filter(
-      group => !availableAlertTypeActionGroups.has(group)
+      (group) => !availableAlertTypeActionGroups.has(group)
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
@@ -808,11 +806,11 @@ export class AlertsClient {
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
     const actionsClient = await this.getActionsClient();
-    const actionIds = [...new Set(alertActions.map(alertAction => alertAction.id))];
+    const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
     const actionResults = await actionsClient.getBulk(actionIds);
     const references: SavedObjectReference[] = [];
     const actions = alertActions.map(({ id, ...alertAction }, i) => {
-      const actionResultValue = actionResults.find(action => action.id === id);
+      const actionResultValue = actionResults.find((action) => action.id === id);
       if (actionResultValue) {
         const actionRef = `action_${i}`;
         references.push({

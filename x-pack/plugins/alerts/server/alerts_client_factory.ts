@@ -59,7 +59,7 @@ export class AlertsClientFactory {
       alertTypeRegistry: this.alertTypeRegistry,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedWrappers: ['security'],
-        includedHiddenTypes: ['alert', 'action'],
+        includedHiddenTypes: ['alert'],
       }),
       authorization: this.securityPluginSetup?.authz,
       request,

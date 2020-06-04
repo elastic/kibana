@@ -9,6 +9,9 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { alertsClientMock } from '../alerts_client.mock';
+
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -40,12 +43,16 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        actionVariables: [],
+        actionVariables: {
+          context: [],
+          state: [],
+        },
         producer: 'test',
       },
     ];
+    alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
 
-    const [context, req, res] = mockHandlerArguments({ listTypes }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -57,7 +64,10 @@ describe('listAlertTypesRoute', () => {
                 "name": "Default",
               },
             ],
-            "actionVariables": Array [],
+            "actionVariables": Object {
+              "context": Array [],
+              "state": Array [],
+            },
             "defaultActionGroupId": "default",
             "id": "1",
             "name": "name",
@@ -67,7 +77,7 @@ describe('listAlertTypesRoute', () => {
       }
     `);
 
-    expect(context.alerting!.listTypes).toHaveBeenCalledTimes(1);
+    expect(alertsClient.listAlertTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
@@ -83,19 +93,11 @@ describe('listAlertTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
 
     const listTypes = [
       {
         id: '1',
         name: 'name',
-        enabled: true,
         actionGroups: [
           {
             id: 'default',
@@ -103,13 +105,18 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        actionVariables: [],
+        actionVariables: {
+          context: [],
+          state: [],
+        },
         producer: 'alerting',
       },
     ];
 
+    alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+
     const [context, req, res] = mockHandlerArguments(
-      { listTypes },
+      { alertsClient },
       {
         params: { id: '1' },
       },
@@ -134,13 +141,6 @@ describe('listAlertTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
 
     const listTypes = [
       {
@@ -153,13 +153,18 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        actionVariables: [],
+        actionVariables: {
+          context: [],
+          state: [],
+        },
         producer: 'alerting',
       },
     ];
 
+    alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+
     const [context, req, res] = mockHandlerArguments(
-      { listTypes },
+      { alertsClient },
       {
         params: { id: '1' },
       },
