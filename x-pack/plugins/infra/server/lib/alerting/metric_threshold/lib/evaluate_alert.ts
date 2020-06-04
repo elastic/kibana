@@ -8,7 +8,7 @@ import { mapValues, first, last } from 'lodash';
 import { InfraSource } from '../../../../../common/http_api/source_api';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
-import { AlertServices, AlertExecutorOptions } from '../../../../../../alerting/server';
+import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { DOCUMENT_COUNT_I18N } from '../messages';
