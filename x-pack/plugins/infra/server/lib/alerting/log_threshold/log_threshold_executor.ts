@@ -54,11 +54,12 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
     try {
       const query = getESQuery(castParams, sourceConfiguration.configuration);
 
-      const results = groupBy
-        ? await getGroupedResults(query, indexPattern, callCluster, GROUP_BY_KEY)
-        : await getUngroupedResults(query, indexPattern, callCluster);
+      const results =
+        groupBy && groupBy.length > 0
+          ? await getGroupedResults(query, indexPattern, callCluster, GROUP_BY_KEY)
+          : await getUngroupedResults(query, indexPattern, callCluster);
 
-      if (groupBy) {
+      if (groupBy && groupBy.length > 0) {
         processGroupByResults({ results, params: castParams, alertInstanceFactory, alertId });
       } else {
         processUngroupedResults({ results, params: castParams, alertInstanceFactory, alertId });
