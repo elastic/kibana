@@ -6,7 +6,6 @@
 
 import './no_data';
 import './access_denied';
-import './alerts';
 import './license';
 import './cluster/listing';
 import './cluster/overview';

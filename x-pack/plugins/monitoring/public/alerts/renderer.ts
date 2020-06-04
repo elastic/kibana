@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { CommonAlertStatus } from '../../../../common/types';
-import { Legacy } from '../../../legacy_shims';
+import { CommonAlertStatus } from '../../common/types';
+import { Legacy } from '../legacy_shims';
 
 interface AlertRendererProps {
   alertTypeIds: string[];

@@ -71,16 +71,6 @@ export class CpuUsageAlert extends BaseAlert {
     threshold: DEFAULT_THRESHOLD,
     duration: DEFAULT_DURATION,
   };
-  // public get paramDetails() {
-  //   if (!this.rawAlert) {
-  //     return {};
-  //   }
-
-  //   const params = this.rawAlert.params as CpuUsageParams;
-  //   return {
-
-  //   };
-  // }
 
   protected async fetchData(
     params: CommonAlertParams,
