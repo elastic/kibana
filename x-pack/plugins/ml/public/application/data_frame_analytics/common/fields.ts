@@ -5,6 +5,7 @@
  */
 
 import {
+  getNumTopClasses,
   getNumTopFeatureImportanceValues,
   getPredictedFieldName,
   getDependentVar,
@@ -208,6 +209,7 @@ export const getDefaultFieldsFromJobCaps = (
     type = newJobCapsService.getFieldById(dependentVariable)?.type;
     const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
     const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
+    const numTopClasses = getNumTopClasses(jobConfig.analysis);
 
     const defaultPredictionField = `${dependentVariable}_prediction`;
     predictedField = `${resultsField}.${
@@ -221,15 +223,14 @@ export const getDefaultFieldsFromJobCaps = (
         type: KBN_FIELD_TYPES.UNKNOWN,
       });
     }
-    // TODO: Will need to remove ml.top_classes.something and ml.feature_importance_values.something
-    // from results from field api - so we don't end up using those as columns.
-    // if ((numTopClasses ?? 0) > 0) {
-    topClassesFields.push({
-      id: `${resultsField}.${TOP_CLASSES}`,
-      name: `${resultsField}.${TOP_CLASSES}`,
-      type: KBN_FIELD_TYPES.UNKNOWN,
-    });
-    // }
+
+    if ((numTopClasses ?? 0) > 0) {
+      topClassesFields.push({
+        id: `${resultsField}.${TOP_CLASSES}`,
+        name: `${resultsField}.${TOP_CLASSES}`,
+        type: KBN_FIELD_TYPES.UNKNOWN,
+      });
+    }
 
     // Only need to add these fields if we didn't use dest index pattern to get the fields
     if (needsDestIndexFields === true) {
