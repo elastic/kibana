@@ -172,4 +172,4 @@ export const ConfigSchema = schema.object({
   poll: PollSchema,
 });
 
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export type ReportingConfigType = TypeOf<typeof ConfigSchema>;
