@@ -21,6 +21,9 @@ const mockLayer = {
   getDisplayName: () => {
     return 'layer 1';
   },
+  isPreviewLayer: () => {
+    return false;
+  },
   isVisible: () => {
     return true;
   },

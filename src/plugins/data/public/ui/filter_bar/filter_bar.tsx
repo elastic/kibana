@@ -64,6 +64,7 @@ function FilterBarUI(props: Props) {
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
         <FilterItem
           id={`${i}`}
+          intl={props.intl}
           filter={filter}
           onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}

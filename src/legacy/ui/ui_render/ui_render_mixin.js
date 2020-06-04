@@ -173,6 +173,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
 
+          `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
             (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
@@ -199,9 +200,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
-              : `${regularBundlePath}/${app.getId()}.bundle.js`,
+            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
@@ -247,9 +246,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       rendering,
       legacy,
       savedObjectsClientProvider: savedObjects,
-      uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
-    const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
+    const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+      savedObjects.getClient(h.request)
+    );
     const vars = await legacy.getVars(app.getId(), h.request, {
       apmConfig: getApmConfig(app),
       ...overrides,

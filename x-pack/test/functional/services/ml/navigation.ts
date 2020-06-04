@@ -25,8 +25,10 @@ export function MachineLearningNavigationProvider({
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
       await retry.tryForTime(10000, async () => {
-        expect(await testSubjects.findAll(`~${tabTypeSubject}`, 3)).to.have.length(
-          areaSubjects.length
+        const allTabs = await testSubjects.findAll(`~${tabTypeSubject}`, 3);
+        expect(allTabs).to.have.length(
+          areaSubjects.length,
+          `Expected number of '${tabTypeSubject}' to be '${areaSubjects.length}' (got '${allTabs.length}')`
         );
         for (const areaSubj of areaSubjects) {
           await testSubjects.existOrFail(`~${tabTypeSubject}&~${areaSubj}`, { timeout: 1000 });

@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "include": [
+    "mocks.ts",
     "typings/**/*",
     "legacy/common/**/*",
     "legacy/server/**/*",
@@ -11,7 +12,7 @@
   ],
   "exclude": [
     "test/**/*",
-    "plugins/siem/cypress/**/*",
+    "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
     "**/typespec_tests.ts"
   ],

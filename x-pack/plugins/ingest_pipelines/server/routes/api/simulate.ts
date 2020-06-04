@@ -28,7 +28,7 @@ export const registerSimulateRoute = ({
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
 
       const { pipeline, documents, verbose } = req.body;
 

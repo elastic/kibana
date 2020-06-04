@@ -120,20 +120,20 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertIndexPreview(columns: number, rows: number) {
+    async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
         const rowsData = await this.parseEuiDataGrid('transformIndexPreview');
 
         expect(rowsData).to.length(
-          rows,
-          `EuiDataGrid rows should be ${rows} (got ${rowsData.length})`
+          expectedNumberOfRows,
+          `EuiDataGrid rows should be '${expectedNumberOfRows}' (got '${rowsData.length}')`
         );
 
         rowsData.map((r, i) =>
           expect(r).to.length(
             columns,
-            `EuiDataGrid row #${i + 1} column count should be ${columns} (got ${r.length})`
+            `EuiDataGrid row #${i + 1} column count should be '${columns}' (got '${r.length}')`
           )
         );
       });
@@ -185,7 +185,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Advanced query editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
+        `Advanced query editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -198,7 +198,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
           'transformGroupBySelection > comboBoxInput'
         );
-        expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+        expect(comboBoxSelectedOptions).to.eql(
+          expectedIdentifier,
+          `Expected group by value to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        );
       });
     },
 
@@ -214,7 +217,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
       expect(actualLabel).to.eql(
         expectedLabel,
-        `Label for group by entry ${index} should be '${expectedLabel}' (got '${actualLabel}')`
+        `Label for group by entry '${index}' should be '${expectedLabel}' (got '${actualLabel}')`
       );
 
       if (expectedIntervalLabel !== undefined) {
@@ -223,7 +226,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         );
         expect(actualIntervalLabel).to.eql(
           expectedIntervalLabel,
-          `Label for group by entry ${index} should be '${expectedIntervalLabel}' (got '${actualIntervalLabel}')`
+          `Label for group by entry '${index}' should be '${expectedIntervalLabel}' (got '${actualIntervalLabel}')`
         );
       }
     },
@@ -248,7 +251,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
           'transformAggregationSelection > comboBoxInput'
         );
-        expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+        expect(comboBoxSelectedOptions).to.eql(
+          expectedIdentifier,
+          `Expected aggregation value to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        );
       });
     },
 
@@ -260,14 +266,52 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
       expect(actualLabel).to.eql(
         expectedLabel,
-        `Label for aggregation entry ${index} should be '${expectedLabel}' (got '${actualLabel}')`
+        `Label for aggregation entry '${index}' should be '${expectedLabel}' (got '${actualLabel}')`
       );
     },
 
-    async addAggregationEntry(index: number, identifier: string, expectedLabel: string) {
+    async addAggregationEntry(
+      index: number,
+      identifier: string,
+      expectedLabel: string,
+      formData?: Record<string, any>
+    ) {
       await comboBox.set('transformAggregationSelection > comboBoxInput', identifier);
       await this.assertAggregationInputValue([]);
       await this.assertAggregationEntryExists(index, expectedLabel);
+
+      if (formData !== undefined) {
+        await this.fillPopoverForm(identifier, expectedLabel, formData);
+      }
+    },
+
+    async fillPopoverForm(
+      identifier: string,
+      expectedLabel: string,
+      formData: Record<string, any>
+    ) {
+      await testSubjects.existOrFail(`transformAggPopoverForm_${expectedLabel}`);
+
+      for (const [testObj, value] of Object.entries(formData)) {
+        switch (testObj) {
+          case 'transformFilterAggTypeSelector':
+            await this.selectFilerAggType(value);
+            break;
+          case 'transformFilterTermValueSelector':
+            await this.fillFilterTermValue(value);
+            break;
+        }
+      }
+      await testSubjects.clickWhenNotDisabled('transformApplyAggChanges');
+      await testSubjects.missingOrFail(`transformAggPopoverForm_${expectedLabel}`);
+    },
+
+    async selectFilerAggType(value: string) {
+      await testSubjects.selectValue('transformFilterAggTypeSelector', value);
+    },
+
+    async fillFilterTermValue(value: string) {
+      await comboBox.set('transformFilterTermValueSelector', value);
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
@@ -278,7 +322,11 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
       // const advancedEditorValue = JSON.parse(advancedEditorString);
       // expect(advancedEditorValue).to.eql(expectedValue);
-      expect(advancedEditorString.split('\n').splice(0, 3)).to.eql(expectedValue);
+      const splicedAdvancedEditorValue = advancedEditorString.split('\n').splice(0, 3);
+      expect(splicedAdvancedEditorValue).to.eql(
+        expectedValue,
+        `Expected the first editor lines to be '${expectedValue}' (got '${splicedAdvancedEditorValue}')`
+      );
     },
 
     async assertAdvancedPivotEditorSwitchExists() {
@@ -291,7 +339,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Advanced pivot editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
+        `Advanced pivot editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -310,7 +358,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       const actualTransformId = await testSubjects.getAttribute('transformIdInput', 'value');
       expect(actualTransformId).to.eql(
         expectedValue,
-        `Transform id input text should be ${expectedValue} (got ${actualTransformId})`
+        `Transform id input text should be '${expectedValue}' (got '${actualTransformId}')`
       );
     },
 
@@ -330,7 +378,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
       expect(actualTransformDescription).to.eql(
         expectedValue,
-        `Transform description input text should be ${expectedValue} (got ${actualTransformDescription})`
+        `Transform description input text should be '${expectedValue}' (got '${actualTransformDescription}')`
       );
     },
 
@@ -352,7 +400,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
       expect(actualDestinationIndex).to.eql(
         expectedValue,
-        `Destination index input text should be ${expectedValue} (got ${actualDestinationIndex})`
+        `Destination index input text should be '${expectedValue}' (got '${actualDestinationIndex}')`
       );
     },
 
@@ -373,7 +421,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be ${expectedCheckState} (got ${actualCheckState})`
+        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -387,7 +435,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Continuous mode switch check state should be ${expectedCheckState} (got ${actualCheckState})`
+        `Continuous mode switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -405,7 +453,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         expectedValue,
         `Expected 'Create and start' button to be '${
           expectedValue ? 'enabled' : 'disabled'
-        }' (got ${isEnabled ? 'enabled' : 'disabled'}')`
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
     },
 
@@ -421,7 +469,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       const isEnabled = await testSubjects.isEnabled('transformWizardCreateButton');
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected 'Create' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+        `Expected 'Create' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
@@ -441,7 +489,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         expectedValue,
         `Expected 'Copy to clipboard' button to be '${
           expectedValue ? 'enabled' : 'disabled'
-        }' (got ${isEnabled ? 'enabled' : 'disabled'}')`
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
     },
 
@@ -460,7 +508,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+          `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
             isEnabled ? 'enabled' : 'disabled'
           }')`
         );

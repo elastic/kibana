@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { exactCheck } from '../../siem/common/exact_check';
-export { getPaths, foldLeftRight } from '../../siem/common/test_utils';
+export { exactCheck } from '../../security_solution/common/exact_check';
+export { getPaths, foldLeftRight } from '../../security_solution/common/test_utils';

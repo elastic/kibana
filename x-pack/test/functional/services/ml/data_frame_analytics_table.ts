@@ -107,7 +107,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {
       const rows = await this.parseAnalyticsTable();
       const analyticsRow = rows.filter((row) => row.id === analyticsId)[0];
-      expect(analyticsRow).to.eql(expectedRow);
+      expect(analyticsRow).to.eql(
+        expectedRow,
+        `Expected analytics row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
+          analyticsRow
+        )}')`
+      );
     }
 
     public async openRowActions(analyticsId: string) {
