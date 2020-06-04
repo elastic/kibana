@@ -35,7 +35,10 @@ def handleIngestion(timestamp) {
 def handleFail() {
   def buildStatus = buildUtils.getBuildStatus()
   if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
-    kibanaCoverage.onFailure()
+    slackNotifications.sendFailedBuild(
+      channel: '#kibana-qa',
+      username: 'Kibana QA'
+    )
   }
 }
 
