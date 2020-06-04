@@ -39,15 +39,15 @@ export const pickSavedTimeline = (
         savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
       }
     }
-  } else if (savedTimeline.status === TimelineStatus.draft) {
-    savedTimeline.status = !isEmpty(savedTimeline.title)
-      ? TimelineStatus.active
-      : TimelineStatus.draft;
   } else {
     savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
     savedTimeline.status = savedTimeline.status ?? TimelineStatus.active;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
+  }
+
+  if (!isEmpty(savedTimeline.title) && savedTimeline.status === TimelineStatus.draft) {
+    savedTimeline.status = TimelineStatus.active;
   }
 
   return savedTimeline;

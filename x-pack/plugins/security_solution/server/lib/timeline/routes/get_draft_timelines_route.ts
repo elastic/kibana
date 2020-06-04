@@ -27,7 +27,7 @@ export const getDraftTimelinesRoute = (
         query: buildRouteValidation(getDraftTimelineSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
@@ -51,12 +51,10 @@ export const getDraftTimelinesRoute = (
           });
         }
 
-        const newTimelineResponse = await persistTimeline(
-          frameworkRequest,
-          null,
-          null,
-          draftTimelineDefaults
-        );
+        const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
+          ...draftTimelineDefaults,
+          timelineType: request.query.timelineType,
+        });
 
         if (newTimelineResponse.code === 200) {
           return response.ok({

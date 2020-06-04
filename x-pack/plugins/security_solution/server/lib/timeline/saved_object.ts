@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
-import { UNAUTHENTICATED_USER } from '../../../common/constants';
+import { UNAUTHENTICATED_USER, disableTemplate } from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
 import {
@@ -122,7 +122,6 @@ const getTimelineTypeFilter = (
   const draftFilter = includeDraft
     ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
     : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
-
   return `${typeFilter} and ${draftFilter}`;
 };
 
@@ -316,7 +315,11 @@ const updatePartialSavedTimeline = async (
   );
 };
 
-export const resetTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+export const resetTimeline = async (
+  request: FrameworkRequest,
+  timelineIds: string[],
+  timelineType: TimelineType
+) => {
   if (!timelineIds.length) {
     return Promise.reject(new Error('timelineIds is empty'));
   }
@@ -332,7 +335,7 @@ export const resetTimeline = async (request: FrameworkRequest, timelineIds: stri
 
   const response = await Promise.all(
     timelineIds.map((timelineId) =>
-      updatePartialSavedTimeline(request, timelineId, draftTimelineDefaults)
+      updatePartialSavedTimeline(request, timelineId, { ...draftTimelineDefaults, timelineType })
     )
   );
 
