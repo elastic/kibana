@@ -16,18 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { XJsonMode } from '../../../public';
-import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
-const xJsonMode = new XJsonMode();
-
-interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {
-  xJsonMode: typeof xJsonMode;
-}
-
-export const useXJsonMode = (json: Parameters<typeof useBaseXJsonMode>[0]): ReturnValue => {
-  return {
-    ...useBaseXJsonMode(json),
-    xJsonMode,
-  };
+export const globals = {
+  escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
 };
