@@ -15,6 +15,10 @@ export interface StatsResult {
 }
 
 interface CategoriesAgg extends AggBucket {
+  /**
+   * The reason categories is optional here is because if no data was returned in the query the categories aggregation
+   * will not be defined on the response (because it's a sub aggregation).
+   */
   categories?: {
     buckets?: AggBucket[];
   };
@@ -160,11 +164,11 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
     if (!catAgg.categories?.buckets) {
       return {
         total,
-        categories: {},
+        byCategory: {},
       };
     }
 
-    const categories: Record<string, number> = catAgg.categories.buckets.reduce(
+    const byCategory: Record<string, number> = catAgg.categories.buckets.reduce(
       (cummulative: Record<string, number>, bucket: AggBucket) => ({
         ...cummulative,
         [bucket.key]: bucket.doc_count,
@@ -173,7 +177,7 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
     );
     return {
       total,
-      categories,
+      byCategory,
     };
   }
 

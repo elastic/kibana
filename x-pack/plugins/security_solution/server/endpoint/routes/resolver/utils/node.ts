@@ -83,7 +83,7 @@ export function createTree(entityID: string): ResolverTree {
       totalAlerts: 0,
       events: {
         total: 0,
-        categories: {},
+        byCategory: {},
       },
     },
   };

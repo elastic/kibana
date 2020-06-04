@@ -160,10 +160,10 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
       // if there are multiple ecs categories used to define a related event, the count for all of them should be the same
       // and they should equal what is defined in the categories used to generate the related events
       for (const ecsCat of ecsCategories) {
-        expect(stats?.events.categories[ecsCat]).to.be(cat.count);
+        expect(stats?.events.byCategory[ecsCat]).to.be(cat.count);
       }
     } else {
-      expect(stats?.events.categories[ecsCategories]).to.be(cat.count);
+      expect(stats?.events.byCategory[ecsCategories]).to.be(cat.count);
     }
 
     totalExpEvents += cat.count;

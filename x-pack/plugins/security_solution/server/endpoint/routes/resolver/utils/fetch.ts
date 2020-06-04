@@ -178,7 +178,7 @@ export class Fetcher {
     ids.forEach((id) => {
       tree.addStats(id, {
         totalAlerts: alerts[id] || 0,
-        events: events[id] || { total: 0, categories: {} },
+        events: events[id] || { total: 0, byCategory: {} },
       });
     });
   }

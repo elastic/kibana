@@ -54,7 +54,7 @@ export interface EventStats {
    *    file: 2
    *  }
    */
-  categories: Record<string, number>;
+  byCategory: Record<string, number>;
 }
 
 /**
