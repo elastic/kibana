@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('index_pattern_without_timefield');
+      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     it('should not display a timepicker', async () => {
