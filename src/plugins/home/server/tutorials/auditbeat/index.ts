@@ -36,7 +36,7 @@ export function auditbeatSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.auditbeat.nameTitle', {
       defaultMessage: 'Auditbeat',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.auditbeat.shortDescription', {
       defaultMessage: 'Collect audit data from your hosts.',
     }),
@@ -53,9 +53,9 @@ processes, users, logins, sockets information, file accesses, and more. \
     artifacts: {
       dashboards: [],
       application: {
-        path: '/app/siem',
+        path: '/app/security',
         label: i18n.translate('home.tutorials.auditbeat.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'SIEM App',
+          defaultMessage: 'Security App',
         }),
       },
       exportedFields: {

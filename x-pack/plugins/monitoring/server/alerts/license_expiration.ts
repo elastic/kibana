@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
-import { AlertType } from '../../../../plugins/alerting/server';
+import { AlertType } from '../../../alerts/server';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import {
   AlertCommonState,
