@@ -21,7 +21,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
     {
       name: 'transform_source',
       elasticsearch: {
-        indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata', 'manage'] }],
+        indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
       },
       kibana: [],
     },

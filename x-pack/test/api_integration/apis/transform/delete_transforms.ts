@@ -9,6 +9,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common';
 import { USER } from '../../../functional/services/transform/security_common';
 
+async function asyncForEach(array: any[], callback: Function) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -16,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const transform = getService('transform');
 
   function generateDestIndex(transformId: string): string {
-    return `dest_${transformId}`;
+    return `user-${transformId}`;
   }
 
   async function createTransformJob(transformId: string, destinationIndex: string) {
@@ -73,7 +79,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].transformJobDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-        await transform.api.waitForIndicesToExist(destinationIndex);
         await transform.api.waitForTransformJobNotToExist(transformId);
       });
 
@@ -90,7 +95,6 @@ export default ({ getService }: FtrProviderContext) => {
             transformsInfo,
           })
           .expect(403);
-        await transform.api.waitForIndicesToExist(destinationIndex);
         await transform.api.waitForTransformJobToExist(transformId);
       });
     });
@@ -118,17 +122,19 @@ export default ({ getService }: FtrProviderContext) => {
         { id: 'bulk_delete_test_1' },
         { id: 'bulk_delete_test_2' },
       ];
+      const destinationIndices = transformsInfo.map((d) => generateDestIndex(d.id));
 
       beforeEach(async () => {
-        await createTransformJob('bulk_delete_test_1', 'bulk_delete_test_1');
-        await transform.api.createIndices('bulk_delete_test_1');
-        await createTransformJob('bulk_delete_test_2', 'bulk_delete_test_2');
-        await transform.api.createIndices('bulk_delete_test_2');
+        await asyncForEach(transformsInfo, async ({ id }: { id: string }, idx: number) => {
+          await createTransformJob(id, destinationIndices[idx]);
+          await transform.api.createIndices(destinationIndices[idx]);
+        });
       });
 
       afterEach(async () => {
-        await transform.api.deleteIndices('bulk_delete_test_1');
-        await transform.api.deleteIndices('bulk_delete_test_2');
+        await asyncForEach(destinationIndices, async (destinationIndex: string) => {
+          await transform.api.deleteIndices(destinationIndex);
+        });
       });
 
       it('should delete multiple transform jobs by transformIds', async () => {
@@ -144,13 +150,12 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        transformsInfo.forEach(({ id: transformId }) => {
+        await asyncForEach(transformsInfo, async ({ id: transformId }: { id: string }) => {
           expect(body[transformId].transformJobDeleted.success).to.eql(true);
           expect(body[transformId].destIndexDeleted.success).to.eql(false);
           expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+          await transform.api.waitForTransformJobNotToExist(transformId);
         });
-        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_1');
-        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_2');
       });
 
       it('should delete multiple transform jobs by transformIds, even if one of the transformIds is invalid', async () => {
@@ -164,20 +169,20 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .send({
             transformsInfo: [
-              { id: 'bulk_delete_test_1' },
+              { id: transformsInfo[0].id },
               { id: invalidTransformId },
-              { id: 'bulk_delete_test_2' },
+              { id: transformsInfo[1].id },
             ],
           })
           .expect(200);
 
-        transformsInfo.forEach(({ id: transformId }) => {
+        await asyncForEach(transformsInfo, async ({ id: transformId }: { id: string }) => {
           expect(body[transformId].transformJobDeleted.success).to.eql(true);
           expect(body[transformId].destIndexDeleted.success).to.eql(false);
           expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+          await transform.api.waitForTransformJobNotToExist(transformId);
         });
-        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_1');
-        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_2');
+
         expect(body[invalidTransformId].transformJobDeleted.success).to.eql(false);
         expect(body[invalidTransformId].transformJobDeleted).to.have.property('error');
       });
@@ -226,13 +231,12 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await createTransformJob(transformId, destinationIndex);
         await transform.api.createIndices(destinationIndex);
-        await transform.api.waitForIndicesToExist(destinationIndex);
-        await transform.api.createIndexPatternIfNeeded(destinationIndex);
+        await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
       });
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.api.deleteIndexPattern(destinationIndex);
+        await transform.testResources.deleteIndexPattern(destinationIndex);
       });
 
       it('should delete transform and destination index pattern', async () => {
@@ -255,8 +259,47 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
         await transform.api.waitForTransformJobNotToExist(transformId);
-        await transform.api.waitForIndicesToExist(destinationIndex);
-        await transform.api.waitForIndexPatternNotToExist(destinationIndex);
+        await transform.testResources.assertIndexPatternNotExist(destinationIndex);
+      });
+    });
+
+    describe('with deleteDestIndex & deleteDestIndexPattern setting', function () {
+      const transformId = 'test4';
+      const destinationIndex = generateDestIndex(transformId);
+
+      before(async () => {
+        await createTransformJob(transformId, destinationIndex);
+        await transform.api.createIndices(destinationIndex);
+        await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
+      });
+
+      after(async () => {
+        await transform.api.deleteIndices(destinationIndex);
+        await transform.testResources.deleteIndexPattern(destinationIndex);
+      });
+
+      it('should delete transform, destination index, & destination index pattern', async () => {
+        const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
+        const { body } = await supertest
+          .post(`/api/transform/delete_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send({
+            transformsInfo,
+            deleteDestIndex: true,
+            deleteDestIndexPattern: true,
+          })
+          .expect(200);
+
+        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].destIndexDeleted.success).to.eql(true);
+        expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
+        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForIndicesNotToExist(destinationIndex);
+        await transform.testResources.assertIndexPatternNotExist(destinationIndex);
       });
     });
   });
