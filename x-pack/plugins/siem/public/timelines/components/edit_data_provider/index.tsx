@@ -77,6 +77,9 @@ export const getInitialOperatorLabel = (
   }
 };
 
+export const getProviderId = (timelineId: string, label = 'blank-template-field', value: string) =>
+  `${timelineId}-${label}-${value}`;
+
 export const StatefulEditDataProvider = React.memo<Props>(
   ({
     andProviderId,
@@ -156,11 +159,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
         field: updatedField.length > 0 ? updatedField[0].label : '',
         id: timelineId,
         operator: getQueryOperatorFromSelection(updatedOperator),
-        providerId:
-          providerId ??
-          `${timelineId}-${
-            updatedField.length > 0 ? updatedField[0].label : 'template-field-blank'
-          }-${updatedValue}`,
+        providerId: providerId ?? getProviderId(timelineId, updatedField[0].label, updatedValue),
         value: updatedValue,
         type,
       });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, isEmpty } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import { Filter, esKuery, KueryNode } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
@@ -12,10 +12,6 @@ import {
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Ecs, TimelineType } from '../../../graphql/types';
-
-const TEMPLATE_FIELD_VALUE_REGEX = new RegExp(/^{.*}$/);
-
-const isTemplateFieldValue = (value: string) => TEMPLATE_FIELD_VALUE_REGEX.test(value.trim());
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -109,7 +105,7 @@ export const findValueToChangeInQuery = (
 export const replaceTemplateFieldFromQuery = (
   query: string,
   ecsData: Ecs,
-  timelineType: TimelineType
+  timelineType: TimelineType = TimelineType.default
 ): string => {
   if (timelineType === TimelineType.default) {
     if (query.trim() !== '') {
@@ -127,7 +123,7 @@ export const replaceTemplateFieldFromQuery = (
     }
   }
 
-  return query;
+  return query.trim();
 };
 
 export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData: Ecs): Filter[] =>
@@ -167,14 +163,17 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
   }
 
   if (timelineType === TimelineType.template) {
-    if (isTemplateFieldValue(`${dataProvider.queryMatch.value}`)) {
-      const newValue = getOr(false, `${dataProvider.queryMatch.value}`.slice(1, -1), ecsData);
+    if (
+      dataProvider.type === DataProviderType.template &&
+      dataProvider.queryMatch.operator === ':'
+    ) {
+      const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
 
-      if (!newValue) {
+      if (!newValue.length) {
         dataProvider.enabled = false;
       }
 
-      dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue);
+      dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue[0]);
       dataProvider.name = newValue[0];
       dataProvider.queryMatch.value = newValue[0];
       dataProvider.queryMatch.displayField = undefined;
@@ -190,7 +189,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
   ecsData: Ecs,
-  timelineType: TimelineType
+  timelineType: TimelineType = TimelineType.default
 ): DataProvider[] =>
   dataProviders.map((dataProvider) => {
     const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData, timelineType);
