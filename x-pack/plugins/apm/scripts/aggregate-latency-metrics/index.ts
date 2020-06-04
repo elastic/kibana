@@ -23,7 +23,6 @@ import {
   CONTAINER_ID,
   SERVICE_VERSION,
   TRANSACTION_RESULT,
-  USER_AGENT_ORIGINAL,
   PROCESSOR_EVENT,
 } from '../../common/elasticsearch_fieldnames';
 import { stampLogger } from '../shared/stamp-logger';
@@ -84,16 +83,15 @@ export async function aggregateLatencyMetrics() {
 
   const defaultFields = [
     SERVICE_NAME,
-    AGENT_NAME,
+    SERVICE_VERSION,
     SERVICE_ENVIRONMENT,
+    AGENT_NAME,
     HOST_NAME,
     POD_NAME,
     CONTAINER_ID,
-    SERVICE_VERSION,
     TRANSACTION_NAME,
     TRANSACTION_RESULT,
     TRANSACTION_TYPE,
-    USER_AGENT_ORIGINAL,
   ];
 
   const include = String(argv.include ?? '')
@@ -104,7 +102,15 @@ export async function aggregateLatencyMetrics() {
     .split(',')
     .filter(Boolean) as string[];
 
-  const fields = without(unique([...include, ...defaultFields]), ...exclude);
+  const only = String(argv.only ?? '')
+    .split(',')
+    .filter(Boolean) as string[];
+
+  const fields = only.length
+    ? unique(only)
+    : without(unique([...include, ...defaultFields]), ...exclude);
+
+  const globalFilter = argv.filter ? JSON.parse(String(argv.filter)) : {};
 
   // eslint-disable-next-line no-console
   console.log('Aggregating on', fields.join(','));
@@ -128,6 +134,9 @@ export async function aggregateLatencyMetrics() {
 
   const sourceClient = new Client({
     node: sourceOptions.node,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   });
 
   let destClient: Client | undefined;
@@ -139,6 +148,9 @@ export async function aggregateLatencyMetrics() {
     destOptions = getClientOptionsFromIndexUrl(dest);
     destClient = new Client({
       node: destOptions.node,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     });
 
     const mappings = (
@@ -204,6 +216,22 @@ export async function aggregateLatencyMetrics() {
             },
           ];
 
+          const query: {
+            query: Record<string, any>;
+          } = {
+            ...globalFilter,
+            query: {
+              ...(globalFilter?.query ?? {}),
+              bool: {
+                ...(globalFilter?.query?.bool ?? {}),
+                filter: [
+                  ...Object.values(globalFilter?.query?.bool?.filter ?? {}),
+                  ...filter,
+                ],
+              },
+            },
+          };
+
           async function paginateThroughBuckets(
             buckets: Array<{
               doc_count: number;
@@ -221,11 +249,7 @@ export async function aggregateLatencyMetrics() {
             const params = {
               index: sourceOptions.index,
               body: {
-                query: {
-                  bool: {
-                    filter,
-                  },
-                },
+                ...query,
                 aggs: {
                   transactionGroups: {
                     composite: {
@@ -320,9 +344,10 @@ export async function aggregateLatencyMetrics() {
           console.log(
             `${rangeLabel}: Compression: ${
               buckets.length
-            }/${numberOfTransactionDocuments} (${Math.round(
-              (buckets.length / numberOfTransactionDocuments) * 100
-            )}%)`
+            }/${numberOfTransactionDocuments} (${(
+              (buckets.length / numberOfTransactionDocuments) *
+              100
+            ).toPrecision(2)}%)`
           );
 
           const docs: Array<Record<string, any>> = [];
@@ -330,27 +355,27 @@ export async function aggregateLatencyMetrics() {
           if (uploadMetrics) {
             buckets.forEach((bucket) => {
               const values = (bucket.recorded_values?.value ?? []) as number[];
-              const h = histogram.build();
+              const h = histogram.build({
+                numberOfSignificantValueDigits: 2,
+              });
               values.forEach((value) => {
                 h.recordValue(value);
               });
 
-              // "private" property so not in the type def. Not sure if there
-              // is an API for this.
-              const counts: number[] = (h as any).counts;
+              const iterator = h.recordedValuesIterator;
 
-              const distribution = Object.keys(counts).reduce(
-                (prev, key) => {
-                  const value = Number(key);
-                  const count = Number(counts[value]);
-                  if (count > 0) {
-                    prev.values.push(value);
-                    prev.counts.push(count);
-                  }
-                  return prev;
-                },
-                { values: [] as number[], counts: [] as number[] }
-              );
+              const distribution = {
+                values: [] as number[],
+                counts: [] as number[],
+              };
+
+              iterator.reset();
+
+              while (iterator.hasNext()) {
+                const value = iterator.next();
+                distribution.values.push(value.valueIteratedTo);
+                distribution.counts.push(value.countAtValueIteratedTo);
+              }
 
               const structured = Object.keys(bucket.key).reduce((prev, key) => {
                 set(prev, key, bucket.key[key]);

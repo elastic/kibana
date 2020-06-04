@@ -21,8 +21,9 @@ const {
 } = require('./aggregate-latency-metrics/index.ts');
 
 aggregateLatencyMetrics().catch((err) => {
-  if (err.meta) {
-    console.error(err.meta.body.error);
+  if (err.meta && err.meta.body) {
+    // error from elasticsearch client
+    console.error(err.meta.body);
   } else {
     console.error(err);
   }
