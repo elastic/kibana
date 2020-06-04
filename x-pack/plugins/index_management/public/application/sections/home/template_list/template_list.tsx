@@ -8,6 +8,7 @@ import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ScopedHistory } from 'kibana/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
@@ -40,7 +41,7 @@ interface MatchParams {
 }
 
 const stripOutSystemTemplates = (templates: TemplateListItem[]): TemplateListItem[] =>
-  templates.filter((template) => !template.name.startsWith('.'));
+  templates.filter(template => !template.name.startsWith('.'));
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -162,6 +163,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
         reload={reload}
         editTemplate={editTemplate}
         cloneTemplate={cloneTemplate}
+        history={history as ScopedHistory}
       />
     </>
   );

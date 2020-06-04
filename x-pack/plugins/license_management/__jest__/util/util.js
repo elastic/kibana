@@ -9,14 +9,22 @@ import React from 'react';
 import { Provider } from 'react-redux';
 
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
 import { licenseManagementStore } from '../../public/application/store/store';
 import { AppContextProvider } from '../../public/application/app_context';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location) => {
+  return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+});
+
 const appDependencies = {
   docLinks: {},
+  services: {
+    history,
+  },
 };
 
 export const createMockLicense = (type, expiryDateInMillis = highExpirationMillis) => {
@@ -30,6 +38,7 @@ export const createMockLicense = (type, expiryDateInMillis = highExpirationMilli
 export const getComponent = (initialState, Component) => {
   const services = {
     http: httpServiceMock.createSetupContract(),
+    history,
   };
   const store = licenseManagementStore(initialState, services);
   return mountWithIntl(

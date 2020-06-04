@@ -118,7 +118,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({ templates, reloa
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
         <TemplateDeleteModal
-          callback={(data) => {
+          callback={data => {
             if (data && data.hasDeletedTemplates) {
               reload();
             } else {

@@ -8,11 +8,12 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { TemplateListItem } from '../../../../../../../common';
-import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
+import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../../components';
 import { useServices } from '../../../../../app_context';
-import { getTemplateDetailsLink } from '../../../../../services/routing';
 import { SendRequestResponse } from '../../../../../../shared_imports';
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
   reload: () => Promise<SendRequestResponse>;
   editTemplate: (name: string, isLegacy?: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
+  history: ScopedHistory;
 }
 
 export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
@@ -27,6 +29,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
   reload,
   editTemplate,
   cloneTemplate,
+  history,
 }) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
@@ -46,9 +49,15 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
-            href={getTemplateDetailsLink(name, item._kbnMeta.isLegacy, true)}
+            {...reactRouterNavigate(
+              history,
+              {
+                pathname: `/templates/${encodeURIComponent(encodeURIComponent(name))}`,
+                search: `legacy=${Boolean(item._kbnMeta.isLegacy)}`,
+              },
+              () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+            )}
             data-test-subj="templateDetailsLink"
-            onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>
@@ -237,13 +246,15 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             values={{ count: selection.length }}
           />
         </EuiButton>
-      ) : undefined,
+      ) : (
+        undefined
+      ),
     toolsRight: [
       <EuiButton
-        href={`#${BASE_PATH}create_template`}
         iconType="plusInCircle"
         data-test-subj="createLegacyTemplateButton"
         key="createTemplateButton"
+        {...reactRouterNavigate(history, '/create_template')}
       >
         <FormattedMessage
           id="xpack.idxMgmt.templateList.legacyTable.createLegacyTemplatesButtonLabel"
@@ -257,7 +268,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
         <TemplateDeleteModal
-          callback={(data) => {
+          callback={data => {
             if (data && data.hasDeletedTemplates) {
               reload();
             } else {

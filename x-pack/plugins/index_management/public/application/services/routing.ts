@@ -3,16 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BASE_PATH } from '../../../common/constants';
 
-export const getTemplateListLink = () => {
-  return `${BASE_PATH}templates`;
-};
+export const getTemplateListLink = () => `/templates`;
 
 // Need to add some additonal encoding/decoding logic to work with React Router
 // For background, see: https://github.com/ReactTraining/history/issues/505
 export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHash = false) => {
-  const baseUrl = `${BASE_PATH}templates/${encodeURIComponent(encodeURIComponent(name))}`;
+  const baseUrl = `/templates/${encodeURIComponent(encodeURIComponent(name))}`;
   let url = withHash ? `#${baseUrl}` : baseUrl;
   if (isLegacy) {
     url = `${url}?legacy=${isLegacy}`;
@@ -22,17 +19,13 @@ export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHas
 
 export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(
-    `${BASE_PATH}edit_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${
-      isLegacy === true
-    }`
+    `/edit_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${isLegacy === true}`
   );
 };
 
 export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(
-    `${BASE_PATH}clone_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${
-      isLegacy === true
-    }`
+    `/clone_template/${encodeURIComponent(encodeURIComponent(name))}?legacy=${isLegacy === true}`
   );
 };
 
