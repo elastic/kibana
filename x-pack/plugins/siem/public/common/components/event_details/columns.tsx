@@ -147,6 +147,7 @@ export const getColumns = ({
                     data-test-subj="field-name"
                     fieldId={field}
                     onUpdateColumns={onUpdateColumns}
+                    timelineId={contextId}
                   />
                 </div>
               )}

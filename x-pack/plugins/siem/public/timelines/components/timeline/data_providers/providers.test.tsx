@@ -12,12 +12,12 @@ import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { TimelineContext } from '../timeline_context';
 
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { ManageGlobalTimeline, timelineDefaults } from '../../manage_timeline';
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
@@ -26,6 +26,14 @@ describe('Providers', () => {
   const mount = useMountAppended();
   const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
+  const manageTimelineForTesting = {
+    foo: {
+      ...timelineDefaults,
+      id: 'foo',
+      filterManager,
+      isLoading,
+    },
+  };
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -102,7 +110,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -116,7 +124,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
 
@@ -162,7 +170,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -176,7 +184,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
       wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
@@ -230,7 +238,7 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -244,7 +252,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
 
@@ -302,7 +310,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -316,7 +324,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
 
@@ -408,7 +416,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -422,7 +430,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
 
@@ -489,7 +497,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -503,7 +511,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
 
@@ -575,7 +583,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ filterManager, isLoading }}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -589,7 +597,7 @@ describe('Providers', () => {
                 onToggleDataProviderType={jest.fn()}
               />
             </DroppableWrapper>
-          </TimelineContext.Provider>
+          </ManageGlobalTimeline>
         </TestProviders>
       );
 

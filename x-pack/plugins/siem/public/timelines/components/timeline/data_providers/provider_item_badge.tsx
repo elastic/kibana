@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
@@ -16,7 +16,7 @@ import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 import { DataProvidersAnd, DataProviderType, QueryOperator } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
-import { TimelineContext } from '../timeline_context';
+import { useManageTimeline } from '../../manage_timeline';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;
@@ -60,6 +60,11 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     val,
     type = DataProviderType.default,
   }) => {
+    const { getManageTimelineById } = useManageTimeline();
+    const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
+      getManageTimelineById,
+      timelineId,
+    ]);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => {
@@ -111,45 +116,41 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     );
 
     return (
-      <TimelineContext.Consumer>
-        {({ isLoading }) => (
-          <ProviderItemActions
-            andProviderId={andProviderId}
-            browserFields={browserFields}
-            button={
-              <ProviderBadge
-                deleteProvider={!isLoading ? deleteProvider : noop}
-                field={field}
-                kqlQuery={kqlQuery}
-                isEnabled={isEnabled}
-                isExcluded={isExcluded}
-                providerId={providerId}
-                togglePopover={togglePopover}
-                val={val}
-                operator={operator}
-              />
-            }
-            closePopover={closePopover}
-            deleteProvider={deleteProvider}
+      <ProviderItemActions
+        andProviderId={andProviderId}
+        browserFields={browserFields}
+        button={
+          <ProviderBadge
+            deleteProvider={!isLoading ? deleteProvider : noop}
             field={field}
             kqlQuery={kqlQuery}
             isEnabled={isEnabled}
             isExcluded={isExcluded}
-            isLoading={isLoading}
-            isOpen={isPopoverOpen}
-            onDataProviderEdited={onDataProviderEdited}
-            operator={operator}
             providerId={providerId}
-            timelineId={timelineId}
-            timelineType={timelineType}
-            toggleEnabledProvider={onToggleEnabledProvider}
-            toggleExcludedProvider={onToggleExcludedProvider}
-            toggleTypeProvider={onToggleTypeProvider}
-            value={val}
-            type={type}
+            togglePopover={togglePopover}
+            val={val}
+            operator={operator}
           />
-        )}
-      </TimelineContext.Consumer>
+        }
+        closePopover={closePopover}
+        deleteProvider={deleteProvider}
+        field={field}
+        kqlQuery={kqlQuery}
+        isEnabled={isEnabled}
+        isExcluded={isExcluded}
+        isLoading={isLoading}
+        isOpen={isPopoverOpen}
+        onDataProviderEdited={onDataProviderEdited}
+        operator={operator}
+        providerId={providerId}
+        timelineId={timelineId}
+        timelineType={timelineType}
+        toggleEnabledProvider={onToggleEnabledProvider}
+        toggleExcludedProvider={onToggleExcludedProvider}
+        toggleTypeProvider={onToggleTypeProvider}
+        value={val}
+        type={type}
+      />
     );
   }
 );
