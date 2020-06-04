@@ -5,7 +5,8 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
 import { PrivateTree, TreeMode, ProcessorInfo, PrivateOnActionHandler } from './tree';
@@ -31,6 +32,9 @@ export const TreeNode: FunctionComponent<Props> = ({
   const onMove = () => {
     privateOnAction({ type: 'selectToMove', payload: processorInfo });
   };
+  const onDuplicate = () => {
+    privateOnAction({ type: 'duplicate', payload: processorInfo.selector });
+  };
   return (
     <EuiPanel paddingSize="s">
       <EuiFlexGroup
@@ -41,7 +45,21 @@ export const TreeNode: FunctionComponent<Props> = ({
         gutterSize="none"
       >
         <EuiFlexItem className="processorsEditor__tree__treeLeaf__itemLeft" grow={false}>
-          {renderItem({ processor, selector: processorInfo.selector, onMove })}
+          {renderItem({ processor, selector: processorInfo.selector })}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" onClick={onMove}>
+            {i18n.translate('xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel', {
+              defaultMessage: 'Move',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" onClick={onDuplicate}>
+            {i18n.translate('xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonLabel', {
+              defaultMessage: 'Duplicate',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       {processor.onFailure?.length && (

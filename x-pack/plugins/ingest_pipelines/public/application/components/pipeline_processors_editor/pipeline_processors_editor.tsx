@@ -137,7 +137,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     };
 
     const renderItem = useCallback<RenderTreeItemFunction>(
-      ({ processor, selector, onMove }) => {
+      ({ processor, selector }) => {
         return (
           <PipelineProcessorsEditorItem
             onClick={(type) => {
@@ -160,9 +160,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                   break;
                 case 'addOnFailure':
                   setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
-                  break;
-                case 'move':
-                  onMove();
                   break;
               }
             }}
@@ -192,12 +189,15 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             >
               <EuiFlexItem grow={false}>
                 <Tree
-                  onAction={({ destination, source }) => {
-                    processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
-                  }}
                   baseSelector={PROCESSOR_STATE_SCOPE}
                   processors={processors}
                   renderItem={renderItem}
+                  onMove={(args) => {
+                    processorsDispatch({ type: 'moveProcessor', payload: args });
+                  }}
+                  onDuplicate={(args) => {
+                    processorsDispatch({ type: 'duplicateProcessor', payload: args });
+                  }}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -249,8 +249,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 <Tree
                   baseSelector={ON_FAILURE_STATE_SCOPE}
                   processors={onFailureProcessors}
-                  onAction={({ destination, source }) => {
-                    processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
+                  onMove={(args) => {
+                    processorsDispatch({ type: 'moveProcessor', payload: args });
+                  }}
+                  onDuplicate={(args) => {
+                    processorsDispatch({ type: 'duplicateProcessor', payload: args });
                   }}
                   renderItem={renderItem}
                 />

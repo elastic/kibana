@@ -28,11 +28,14 @@ export type PrivateOnActionArgs =
       type: 'selectToMove';
       payload: ProcessorInfo;
     }
-  | { type: 'move'; payload: ProcessorSelector };
+  | { type: 'move'; payload: ProcessorSelector }
+  | { type: 'duplicate'; payload: ProcessorSelector };
 
 export type PrivateOnActionHandler = (args: PrivateOnActionArgs) => void;
 
-export interface PrivateProps extends Omit<Props, 'baseSelector' | 'onAction'> {
+export interface PrivateProps {
+  processors: ProcessorInternal[];
+  renderItem: RenderTreeItemFunction;
   selector: ProcessorSelector;
   privateOnAction: PrivateOnActionHandler;
   mode: TreeMode;
@@ -118,18 +121,26 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   );
 };
 
+export type OnMoveHandler = (args: {
+  source: ProcessorSelector;
+  destination: ProcessorSelector;
+}) => void;
+export type OnDuplicateHandler = (args: { source: ProcessorSelector }) => void;
+
 export interface Props {
   processors: ProcessorInternal[];
   baseSelector: ProcessorSelector;
   renderItem: RenderTreeItemFunction;
-  onAction: (action: { source: ProcessorSelector; destination: ProcessorSelector }) => void;
+  onMove: OnMoveHandler;
+  onDuplicate: OnDuplicateHandler;
 }
 
 export const Tree: FunctionComponent<Props> = ({
   processors,
   baseSelector,
-  onAction,
   renderItem,
+  onDuplicate,
+  onMove,
 }) => {
   const [treeMode, setTreeMode] = useState<TreeMode>('idle');
   const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
@@ -145,7 +156,14 @@ export const Tree: FunctionComponent<Props> = ({
 
         if (action.type === 'move') {
           setTreeMode('idle');
-          onAction({ source: selectedProcessorInfo!.selector, destination: action.payload });
+          onMove({ source: selectedProcessorInfo!.selector, destination: action.payload });
+          setSelectedProcessorInfo(undefined);
+          return;
+        }
+
+        if (action.type === 'duplicate') {
+          setTreeMode('idle');
+          onDuplicate({ source: action.payload });
           setSelectedProcessorInfo(undefined);
           return;
         }

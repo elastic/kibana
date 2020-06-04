@@ -9,7 +9,6 @@ import { ProcessorInternal, ProcessorSelector } from '../../types';
 export interface TreeNodeComponentArgs {
   processor: ProcessorInternal;
   selector: ProcessorSelector;
-  onMove: () => void;
 }
 
 export type RenderTreeItemFunction = (arg: TreeNodeComponentArgs) => React.ReactNode;
