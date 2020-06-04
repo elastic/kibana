@@ -17,7 +17,7 @@ export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,
   outputId: string,
   agentId: string
-): Promise<string> {
+): Promise<{ key: string; id: string }> {
   const name = `${agentId}:${outputId}`;
   const key = await createAPIKey(soClient, name, {
     'fleet-output': {
@@ -35,7 +35,7 @@ export async function generateOutputApiKey(
     throw new Error('Unable to create an output api key');
   }
 
-  return `${key.id}:${key.api_key}`;
+  return { key: `${key.id}:${key.api_key}`, id: key.id };
 }
 
 export async function generateAccessApiKey(

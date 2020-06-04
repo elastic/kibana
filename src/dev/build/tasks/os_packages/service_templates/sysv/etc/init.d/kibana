@@ -17,7 +17,6 @@
 
 name=kibana
 program=/usr/share/kibana/bin/kibana
-args=-c\\\ /etc/kibana/kibana.yml
 pidfile="/var/run/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
@@ -53,7 +52,7 @@ start() {
   chroot --userspec "$user":"$group" "$chroot" sh -c "
 
     cd \"$chdir\"
-    exec \"$program\" $args
+    exec \"$program\"
   " >> /var/log/kibana/kibana.stdout 2>> /var/log/kibana/kibana.stderr &
 
   # Generate the pidfile from here. If we instead made the forked process

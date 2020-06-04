@@ -9,6 +9,7 @@ Object {
     "id": "popover-2",
     "open": true,
   },
+  "searchText": "",
 }
 `;
 
@@ -18,5 +19,6 @@ Object {
   "basePath": "yyz",
   "esKuery": "",
   "integrationsPopoverOpen": null,
+  "searchText": "",
 }
 `;
