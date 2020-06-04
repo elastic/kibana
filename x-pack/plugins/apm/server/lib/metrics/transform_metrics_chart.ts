@@ -51,7 +51,11 @@ export function transformDataToMetricsChart(
     yUnit: chartBase.yUnit,
     noHits: hits.total.value === 0,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const overallValue = aggregations?.[seriesKey].value;
+      const overallValue = (aggregations?.[seriesKey] as
+        | {
+            value: number | null;
+          }
+        | undefined)?.value;
 
       return {
         title: chartBase.series[seriesKey].title,

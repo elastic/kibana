@@ -34,7 +34,7 @@ export const apmIndicesRoute = createRoute(() => ({
 }));
 
 // save ui indices
-export const saveApmIndicesRoute = createRoute((core) => ({
+export const saveApmIndicesRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/apm-indices/save',
   options: {
