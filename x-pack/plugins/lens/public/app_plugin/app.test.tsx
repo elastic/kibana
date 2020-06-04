@@ -13,7 +13,10 @@ import { AppMountParameters } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import {
+  SavedObjectSaveModal,
+  checkForDuplicateTitle,
+} from '../../../../../src/plugins/saved_objects/public';
 import {
   esFilters,
   FilterManager,
@@ -29,6 +32,17 @@ import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
+jest.mock('../../../../../src/plugins/saved_objects/public', () => {
+  // eslint-disable-next-line no-shadow
+  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
+    '../../../../../src/plugins/saved_objects/public'
+  );
+  return {
+    SavedObjectSaveModal,
+    SavedObjectSaveModalOrigin,
+    checkForDuplicateTitle: jest.fn(),
+  };
+});
 
 const navigationStartMock = navigationPluginMock.createStartContract();
 
@@ -631,6 +645,46 @@ describe('Lens App', () => {
             filters: [unpinned],
           },
         });
+      });
+
+      it('checks for duplicate title before saving', async () => {
+        const args = defaultArgs;
+        args.editorFrame = frame;
+        (args.docStorage.save as jest.Mock).mockReturnValue(Promise.resolve({ id: '123' }));
+
+        instance = mount(<App {...args} />);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        await act(async () =>
+          onChange({
+            filterableIndexPatterns: [],
+            doc: ({ id: '123', expression: 'valid expression' } as unknown) as Document,
+          })
+        );
+        instance.update();
+        await act(async () => {
+          getButton(instance).run(instance.getDOMNode());
+        });
+        instance.update();
+
+        const onTitleDuplicate = jest.fn();
+
+        await act(async () => {
+          instance.find(SavedObjectSaveModal).prop('onSave')({
+            onTitleDuplicate,
+            isTitleDuplicateConfirmed: false,
+            newCopyOnSave: false,
+            newDescription: '',
+            newTitle: 'test',
+          });
+        });
+
+        expect(checkForDuplicateTitle).toHaveBeenCalledWith(
+          expect.objectContaining({ id: '123' }),
+          false,
+          onTitleDuplicate,
+          expect.anything()
+        );
       });
 
       it('does not show the copy button on first save', async () => {
