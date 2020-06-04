@@ -56,13 +56,16 @@ describe('NewTemplateTimeline', () => {
 
     test('render with iconType', () => {
       expect(
-        wrapper.find('[data-test-subj="timeline-new-with-border"]').first().prop('iconType')
+        wrapper
+          .find('[data-test-subj="template-timeline-new-with-border"]')
+          .first()
+          .prop('iconType')
       ).toEqual('plusInCircle');
     });
 
     test('render with onClick', () => {
       expect(
-        wrapper.find('[data-test-subj="timeline-new-with-border"]').first().prop('onClick')
+        wrapper.find('[data-test-subj="template-timeline-new-with-border"]').first().prop('onClick')
       ).toBeTruthy();
     });
   });
@@ -93,7 +96,9 @@ describe('NewTemplateTimeline', () => {
     });
 
     test('no render', () => {
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="template-timeline-new-with-border"]').exists()
+      ).toBeFalsy();
     });
   });
 });

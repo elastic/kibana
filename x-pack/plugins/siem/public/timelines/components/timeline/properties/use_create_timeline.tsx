@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 
 export const useCreateTimelineButton = ({
   timelineId,
@@ -47,12 +47,14 @@ export const useCreateTimelineButton = ({
         iconType: 'plusInCircle',
         onClick: handleButtonClick,
       };
+      const dataTestSubjPrefix =
+        timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
       return outline ? (
-        <EuiButton data-test-subj="timeline-new-with-border" {...buttonProps} fill>
+        <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps} fill>
           {title}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty data-test-subj="timeline-new" color="text" {...buttonProps}>
+        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...buttonProps}>
           {title}
         </EuiButtonEmpty>
       );

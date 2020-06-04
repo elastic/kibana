@@ -62,7 +62,13 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              {capabilitiesCanUserCRUD && <NewTimeline timelineId="timeline-1" outline={true} />}
+              {capabilitiesCanUserCRUD && (
+                <NewTimeline
+                  timelineId="timeline-1"
+                  outline={true}
+                  data-test-subj="create-default-btn"
+                />
+              )}
             </EuiFlexItem>
             {/**
              * CreateTemplateTimelineBtn
