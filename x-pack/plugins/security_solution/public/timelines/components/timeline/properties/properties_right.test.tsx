@@ -209,8 +209,10 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).not.toBeTruthy();
       });
 
-      test('it renders no create template timelin btn', () => {
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).not.toBeTruthy();
+      test('it renders create template timelin btn if it is enabled', () => {
+        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(
+          !disableTemplate
+        );
       });
 
       test('it renders create attach timeline to a case btn', () => {
