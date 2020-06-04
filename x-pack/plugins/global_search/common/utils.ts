@@ -22,7 +22,7 @@ export const convertResultUrl = (
 ): string => {
   if (typeof url === 'string') {
     // relative path
-    if (url.indexOf('/') === 0) {
+    if (url.startsWith('/')) {
       return basePath.prepend(url);
     }
     // absolute url

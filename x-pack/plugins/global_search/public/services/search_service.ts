@@ -51,15 +51,15 @@ export interface SearchServiceStart {
    *
    * @example
    * ```ts
-   * startDeps.globalSearch.find('some term').subscribe(
-   *  ({ results }) => {
+   * startDeps.globalSearch.find('some term').subscribe({
+   *  next: ({ results }) => {
    *   addNewResultsToList(results);
    *  },
-   *  () => {},
-   *  () => {
+   *  error: () => {},
+   *  complete: () => {
    *   showAsyncSearchIndicator(false);
    *  }
-   * );
+   * });
    * ```
    *
    * @remarks
