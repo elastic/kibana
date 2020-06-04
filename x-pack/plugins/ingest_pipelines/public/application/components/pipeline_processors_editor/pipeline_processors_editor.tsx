@@ -12,11 +12,9 @@ import './pipeline_processors_editor.scss';
 
 import {
   RenderTreeItemFunction,
-  OnDragEndArgs,
   PipelineProcessorsEditorItem,
   ProcessorsTitleAndTestButton,
   OnFailureProcessorsTitle,
-  DragAndDropTreeProvider,
   Tree,
 } from './components';
 
@@ -32,7 +30,6 @@ export interface Props {
   onTestPipelineClick: () => void;
   learnMoreAboutProcessorsUrl: string;
   learnMoreAboutOnFailureProcessorsUrl: string;
-  onDragEnd: (args: OnDragEndArgs) => void;
 }
 
 const PROCESSOR_STATE_SCOPE: ProcessorSelector = ['processors'];
@@ -49,7 +46,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     learnMoreAboutProcessorsUrl,
     isTestButtonDisabled,
     learnMoreAboutOnFailureProcessorsUrl,
-    onDragEnd,
   }) {
     const renderItem = useCallback<RenderTreeItemFunction>(
       ({ processor, selector, onMove }) => {
@@ -89,119 +85,117 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     );
 
     return (
-      <DragAndDropTreeProvider onDragEnd={onDragEnd}>
-        <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-          <EuiFlexItem grow={false}>
-            <ProcessorsTitleAndTestButton
-              learnMoreAboutProcessorsUrl={learnMoreAboutProcessorsUrl}
-              onTestPipelineClick={onTestPipelineClick}
-              isTestButtonDisabled={isTestButtonDisabled}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              responsive={false}
-              className="processorsEditorContainer"
-            >
-              <EuiFlexItem grow={false}>
-                <Tree
-                  onAction={({ destination, source }) => {
-                    processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
-                  }}
-                  baseSelector={PROCESSOR_STATE_SCOPE}
-                  processors={processors}
-                  renderItem={renderItem}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  justifyContent="flexStart"
-                  alignItems="center"
-                  gutterSize="l"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconSide="left"
-                      iconType="plusInCircle"
-                      onClick={() =>
-                        setSettingsFormMode({
-                          id: 'creatingTopLevelProcessor',
-                          arg: PROCESSOR_STATE_SCOPE,
-                        })
+      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+        <EuiFlexItem grow={false}>
+          <ProcessorsTitleAndTestButton
+            learnMoreAboutProcessorsUrl={learnMoreAboutProcessorsUrl}
+            onTestPipelineClick={onTestPipelineClick}
+            isTestButtonDisabled={isTestButtonDisabled}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            className="processorsEditorContainer"
+          >
+            <EuiFlexItem grow={false}>
+              <Tree
+                onAction={({ destination, source }) => {
+                  processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
+                }}
+                baseSelector={PROCESSOR_STATE_SCOPE}
+                processors={processors}
+                renderItem={renderItem}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                alignItems="center"
+                gutterSize="l"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconSide="left"
+                    iconType="plusInCircle"
+                    onClick={() =>
+                      setSettingsFormMode({
+                        id: 'creatingTopLevelProcessor',
+                        arg: PROCESSOR_STATE_SCOPE,
+                      })
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
+                      {
+                        defaultMessage: 'Add a processor',
                       }
-                    >
-                      {i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
-                        {
-                          defaultMessage: 'Add a processor',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <OnFailureProcessorsTitle
-              learnMoreAboutOnFailureProcessorsUrl={learnMoreAboutOnFailureProcessorsUrl}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              responsive={false}
-              className="processorsEditorContainer"
-            >
-              <EuiFlexItem grow={false}>
-                <Tree
-                  baseSelector={ON_FAILURE_STATE_SCOPE}
-                  processors={onFailureProcessors}
-                  onAction={({ destination, source }) => {
-                    processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
-                  }}
-                  renderItem={renderItem}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  justifyContent="flexStart"
-                  alignItems="center"
-                  gutterSize="l"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconSide="left"
-                      iconType="plusInCircle"
-                      onClick={() =>
-                        setSettingsFormMode({
-                          id: 'creatingTopLevelProcessor',
-                          arg: ON_FAILURE_STATE_SCOPE,
-                        })
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <OnFailureProcessorsTitle
+            learnMoreAboutOnFailureProcessorsUrl={learnMoreAboutOnFailureProcessorsUrl}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            className="processorsEditorContainer"
+          >
+            <EuiFlexItem grow={false}>
+              <Tree
+                baseSelector={ON_FAILURE_STATE_SCOPE}
+                processors={onFailureProcessors}
+                onAction={({ destination, source }) => {
+                  processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
+                }}
+                renderItem={renderItem}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                alignItems="center"
+                gutterSize="l"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconSide="left"
+                    iconType="plusInCircle"
+                    onClick={() =>
+                      setSettingsFormMode({
+                        id: 'creatingTopLevelProcessor',
+                        arg: ON_FAILURE_STATE_SCOPE,
+                      })
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
+                      {
+                        defaultMessage: 'Add a processor',
                       }
-                    >
-                      {i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
-                        {
-                          defaultMessage: 'Add a processor',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </DragAndDropTreeProvider>
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

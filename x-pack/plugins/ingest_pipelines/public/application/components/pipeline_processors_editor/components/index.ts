@@ -8,8 +8,6 @@ export { SettingsFormFlyout } from './settings_form_flyout';
 
 export { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
 
-export { DragAndDropTree, DragAndDropTreeProvider, OnDragEndArgs } from './drag_and_drop_tree';
-
 export { Tree, RenderTreeItemFunction } from './tree';
 
 export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item';
