@@ -79,9 +79,9 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
     [savedObjectsClient, toastNotifications]
   );
 
-  const checkUserIndexPermission = useCallback(() => {
+  const checkUserIndexPermission = useCallback(async () => {
     try {
-      const userCanDelete = canDeleteIndex(http);
+      const userCanDelete = await canDeleteIndex(http);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
