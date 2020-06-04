@@ -142,6 +142,26 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
    * const extended = origin.extends({
    *   added: schema.number(),
    * }, { defaultValue: { initial: 'foo', added: 'bar' }});
+   *
+   * @remarks
+   * `extends` only support extending first-level properties. It's currently not possible to perform deep/nested extensions.
+   *
+   * ```ts
+   * const origin = schema.object({
+   *   foo: schema.string(),
+   *   nested: schema.object({
+   *     a: schema.string(),
+   *     b: schema.string(),
+   *   }),
+   * });
+   *
+   * const extended = origin.extends({
+   *   nested: schema.object({
+   *     c: schema.string(),
+   *   }),
+   * });
+   *
+   * // TypeOf<typeof extended> is `{ foo: string; nested: { c: string } }`
    * ```
    */
   public extends<NP extends NullableProps>(
