@@ -134,12 +134,14 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         queryRef.current = props.query;
         setQuery(props.query || defaultQuery);
       }
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, [defaultQuery, props.query]);
 
     useEffect(() => {
       if (props.onQuerySubmit !== onQuerySubmitRef.current) {
         onQuerySubmitRef.current = props.onQuerySubmit;
       }
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, [props.onQuerySubmit]);
 
     // handle service state updates.

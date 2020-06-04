@@ -14,6 +14,7 @@ import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
 export const PreferenceFormattedDate = React.memo<{ dateFormat?: string; value: Date }>(
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   ({ value, dateFormat = useDateFormat() }) => (
     <>{moment.tz(value, useTimeZone()).format(dateFormat)}</>
   )

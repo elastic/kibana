@@ -136,8 +136,14 @@ export const PolicyResponse = memo(
           const attentionCount = responseAttentionCount.get(key);
           return (
             <PolicyResponseConfigAccordion
-              id={useMemo(() => htmlIdGenerator()(), [])}
-              key={useMemo(() => htmlIdGenerator()(), [])}
+              id={
+                /* eslint-disable-next-line react-hooks/rules-of-hooks */
+                useMemo(() => htmlIdGenerator()(), [])
+              }
+              key={
+                /* eslint-disable-next-line react-hooks/rules-of-hooks */
+                useMemo(() => htmlIdGenerator()(), [])
+              }
               data-test-subj="hostDetailsPolicyResponseConfigAccordion"
               buttonContent={
                 <EuiText size="s">

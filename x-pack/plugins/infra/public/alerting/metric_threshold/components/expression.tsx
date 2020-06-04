@@ -90,6 +90,7 @@ export const Expressions: React.FC<Props> = (props) => {
         aggregation: 'avg',
       };
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [alertsContext.metadata]);
 
   const updateParams = useCallback(
@@ -109,6 +110,7 @@ export const Expressions: React.FC<Props> = (props) => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
@@ -119,6 +121,7 @@ export const Expressions: React.FC<Props> = (props) => {
         setAlertParams('criteria', exp);
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [setAlertParams, alertParams.criteria]
   );
 
@@ -133,6 +136,7 @@ export const Expressions: React.FC<Props> = (props) => {
     [setAlertParams, derivedIndexPattern]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
@@ -162,6 +166,7 @@ export const Expressions: React.FC<Props> = (props) => {
       setTimeSize(ts || undefined);
       setAlertParams('criteria', criteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams.criteria, setAlertParams]
   );
 
@@ -175,6 +180,7 @@ export const Expressions: React.FC<Props> = (props) => {
       setTimeUnit(tu as TimeUnit);
       setAlertParams('criteria', criteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams.criteria, setAlertParams]
   );
 
