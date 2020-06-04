@@ -18,7 +18,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/t
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../graphql/types';
 
-const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
+const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
 export const addHistory = actionCreator<{ id: string; historyId: string }>('ADD_HISTORY');
 

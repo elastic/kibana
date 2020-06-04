@@ -9,7 +9,12 @@ import memoizeOne from 'memoize-one';
 
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
-import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
+import {
+  DataProvider,
+  DataProviderType,
+  DataProvidersAnd,
+  EXISTS_OPERATOR,
+} from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
 import {
   IIndexPattern,
@@ -79,7 +84,7 @@ const buildQueryForAndProvider = (
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
     .reduce((query, dataProvider: DataProvider, i) => {
-      if (dataProvider.type === 'template') return query;
+      if (dataProvider.type === DataProviderType.template) return query;
 
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       const openParen = i >= 0 && dataProviders.length > 1 ? '(' : '';

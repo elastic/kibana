@@ -159,7 +159,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
         field: updatedField.length > 0 ? updatedField[0].label : '',
         id: timelineId,
         operator: getQueryOperatorFromSelection(updatedOperator),
-        providerId: providerId ?? getProviderId(timelineId, updatedField[0].label, updatedValue),
+        providerId:
+          providerId ?? getProviderId(timelineId, updatedField[0].label, `${updatedValue}`),
         value: updatedValue,
         type,
       });

@@ -144,11 +144,13 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
           },
         ]
       }
-      id="foo"
       onDataProviderEdited={[MockFunction]}
       onDataProviderRemoved={[MockFunction]}
       onToggleDataProviderEnabled={[MockFunction]}
       onToggleDataProviderExcluded={[MockFunction]}
+      onToggleDataProviderType={[MockFunction]}
+      timelineId="foo"
+      timelineType="default"
     />
   </DropTargetDataProviders>
 </styled.div>
