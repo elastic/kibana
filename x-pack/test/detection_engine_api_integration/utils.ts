@@ -7,8 +7,8 @@
 import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { OutputRuleAlertRest } from '../../plugins/siem/server/lib/detection_engine/types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/siem/common/constants';
+import { OutputRuleAlertRest } from '../../plugins/security_solution/server/lib/detection_engine/types';
+import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/security_solution/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...

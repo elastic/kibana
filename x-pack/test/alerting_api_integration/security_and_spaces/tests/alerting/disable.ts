@@ -40,11 +40,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
       describe(scenario.id, () => {
         it('should handle disable alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: true }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -86,11 +86,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it('should still be able to disable alert when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: true }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
             .put(
@@ -144,11 +144,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
         it(`shouldn't disable alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alert`)
+            .post(`${getUrlPrefix('other')}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: true }))
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert', undefined);
+          objectRemover.add('other', createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
