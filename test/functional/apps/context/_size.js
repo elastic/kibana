@@ -26,10 +26,9 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['context']);
-  let rowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
+  let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('context size', function contextSize() {
+  describe('context size', function contextSize() {
     before(async function () {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
@@ -39,10 +38,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should default to the `context:defaultSize` setting', async function () {
-      await retry.waitFor(`number of rows displayed initially is ${rowLength}`, async function () {
-        const rows = await docTable.getRowsText();
-        return rows.length === rowLength;
-      });
+      await retry.waitFor(
+        `number of rows displayed initially is ${expectedRowLength}`,
+        async function () {
+          const rows = await docTable.getRowsText();
+          return rows.length === expectedRowLength;
+        }
+      );
       await retry.waitFor(
         `predecessor count picker is set to ${TEST_DEFAULT_CONTEXT_SIZE}`,
         async function () {
@@ -55,26 +57,26 @@ export default function ({ getService, getPageObjects }) {
 
     it('should increase according to the `context:step` setting when clicking the `load newer` button', async function () {
       await PageObjects.context.clickPredecessorLoadMoreButton();
-      rowLength += TEST_STEP_SIZE;
+      expectedRowLength += TEST_STEP_SIZE;
 
       await retry.waitFor(
-        `number of rows displayed after clicking load more predecessors is ${rowLength}`,
+        `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
           const rows = await docTable.getRowsText();
-          return rows.length === rowLength;
+          return rows.length === expectedRowLength;
         }
       );
     });
 
     it('should increase according to the `context:step` setting when clicking the `load older` button', async function () {
       await PageObjects.context.clickSuccessorLoadMoreButton();
-      rowLength += TEST_STEP_SIZE;
+      expectedRowLength += TEST_STEP_SIZE;
 
       await retry.waitFor(
-        `number of rows displayed after clicking load more successors is ${rowLength}`,
+        `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
           const rows = await docTable.getRowsText();
-          return rows.length === rowLength;
+          return rows.length === expectedRowLength;
         }
       );
     });
