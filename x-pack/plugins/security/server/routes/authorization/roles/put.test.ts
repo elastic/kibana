@@ -155,7 +155,7 @@ const putRoleTest = (
     } else {
       expect(
         mockRouteDefinitionParams.getFeatureUsageService().recordSubFeaturePrivilegeUsage
-      ).toHaveBeenCalledTimes(0);
+      ).not.toHaveBeenCalled();
     }
   });
 };

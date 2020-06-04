@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { SubFeaturePrivilegeConfig, Feature } from '../../../../../features/common';
-import { Role } from '../../../../common/model';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Feature } from '../../../../../features/common';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
@@ -16,27 +15,24 @@ import {
   transformPutPayloadToElasticsearchRole,
 } from './model';
 
-const roleGrantsSubFeaturePrivileges = (features: Feature[], role: Role) => {
-  const subFeaturePrivileges: Record<string, SubFeaturePrivilegeConfig[]> = features.reduce(
-    (acc, feature) => {
-      return {
-        ...acc,
-        [feature.id]: feature.subFeatures
-          ?.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges))
-          .flat(2),
-      };
-    },
-    {}
+const roleGrantsSubFeaturePrivileges = (
+  features: Feature[],
+  role: TypeOf<ReturnType<typeof getPutPayloadSchema>>
+) => {
+  if (!role.kibana) {
+    return false;
+  }
+
+  const subFeaturePrivileges = new Map(
+    features.map((feature) => [
+      feature.id,
+      feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2),
+    ])
   );
 
-  const hasAnySubFeaturePrivileges = (role.kibana ?? []).some((kibanaPrivilege) =>
+  const hasAnySubFeaturePrivileges = role.kibana.some((kibanaPrivilege) =>
     Object.entries(kibanaPrivilege.feature ?? {}).some(([featureId, privileges]) => {
-      return (
-        subFeaturePrivileges.hasOwnProperty(featureId) &&
-        subFeaturePrivileges[featureId].some(({ id }) => {
-          return privileges.includes(id);
-        })
-      );
+      return !!subFeaturePrivileges.get(featureId)?.some(({ id }) => privileges.includes(id));
     })
   );
 
@@ -88,7 +84,7 @@ export function definePutRolesRoutes({
             .callAsCurrentUser('shield.putRole', { name: request.params.name, body }),
         ]);
 
-        if (roleGrantsSubFeaturePrivileges(features, request.body as Role)) {
+        if (roleGrantsSubFeaturePrivileges(features, request.body)) {
           getFeatureUsageService().recordSubFeaturePrivilegeUsage();
         }
 

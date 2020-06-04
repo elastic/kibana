@@ -97,7 +97,7 @@ export class Plugin {
     if (!this.featureUsageServiceStart) {
       throw new Error(`featureUsageServiceStart is not registered!`);
     }
-    return this.featureUsageServiceStart!;
+    return this.featureUsageServiceStart;
   };
 
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
@@ -115,7 +115,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup<PluginStartDependencies>,
+    { features, licensing }: PluginSetupDependencies
+  ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
         map((rawConfig) =>
@@ -184,9 +187,9 @@ export class Plugin {
       authz,
       license,
       getFeatures: () =>
-        (core.getStartServices() as Promise<
-          [CoreStart, PluginStartDependencies, unknown]
-        >).then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+        core
+          .getStartServices()
+          .then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
     });
 
