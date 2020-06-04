@@ -214,7 +214,11 @@ describe('Processors reducer', () => {
     const processor1 = { id: expect.any(String), type: 'test1', options: {} };
     const processor2 = { id: expect.any(String), type: 'test2', options: {} };
     const processor3 = { id: expect.any(String), type: 'test3', options: {} };
-    const processor4 = { id: expect.any(String), type: 'test4', options: {} };
+    const processor4 = {
+      id: expect.any(String),
+      type: 'test4',
+      options: { randomCoolStuff: 'we want to copy' } as any,
+    };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
