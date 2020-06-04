@@ -12,11 +12,15 @@ import {
   CoreSetup,
   Logger,
   PluginInitializerContext,
+  CoreStart,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
-import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import {
+  PluginSetupContract as FeaturesSetupContract,
+  PluginStartContract as FeaturesStartContract,
+} from '../../features/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
@@ -26,6 +30,7 @@ import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
+import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -72,6 +77,11 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
 }
 
+export interface PluginStartDependencies {
+  features: FeaturesStartContract;
+  licensing: LicensingPluginStart;
+}
+
 /**
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
@@ -80,6 +90,16 @@ export class Plugin {
   private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+
+  private readonly featureUsageService = new SecurityFeatureUsageService();
+  private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
+  private readonly getFeatureUsageService = () => {
+    if (!this.featureUsageServiceStart) {
+      throw new Error(`featureUsageServiceStart is not registered!`);
+    }
+    return this.featureUsageServiceStart;
+  };
+
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
 
   private readonly getSpacesService = () => {
@@ -95,7 +115,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup<PluginStartDependencies>,
+    { features, licensing }: PluginSetupDependencies
+  ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
         map((rawConfig) =>
@@ -118,11 +141,14 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
+
     const audit = this.auditService.setup({ license, config: config.audit });
     const auditLogger = new SecurityAuditLogger(audit.getLogger());
 
     const authc = await setupAuthentication({
       auditLogger,
+      getFeatureUsageService: this.getFeatureUsageService,
       http: core.http,
       clusterClient: this.clusterClient,
       config,
@@ -160,6 +186,11 @@ export class Plugin {
       authc,
       authz,
       license,
+      getFeatures: () =>
+        core
+          .getStartServices()
+          .then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+      getFeatureUsageService: this.getFeatureUsageService,
     });
 
     return deepFreeze<SecurityPluginSetup>({
@@ -199,8 +230,11 @@ export class Plugin {
     });
   }
 
-  public start() {
+  public start(core: CoreStart, { licensing }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
+    this.featureUsageServiceStart = this.featureUsageService.start({
+      featureUsage: licensing.featureUsage,
+    });
   }
 
   public stop() {
@@ -216,6 +250,9 @@ export class Plugin {
       this.securityLicenseService = undefined;
     }
 
+    if (this.featureUsageServiceStart) {
+      this.featureUsageServiceStart = undefined;
+    }
     this.auditService.stop();
   }
 
