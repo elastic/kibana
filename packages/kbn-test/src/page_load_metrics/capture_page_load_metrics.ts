@@ -21,7 +21,15 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { NavigationOptions, createUrl, navigateToApps } from './navigation';
 
 export async function capturePageLoadMetrics(log: ToolingLog, options: NavigationOptions) {
-  const responsesByPageView = await navigateToApps(log, options);
+  let responsesByPageView = [];
+  log.debug(`Running script in a loop`);
+  for (let i = 1; i <= 10; i++) {
+    try {
+      responsesByPageView = await navigateToApps(log, options);
+    } catch (err) {
+      log.error(`iteration ${i} failed: ${err}`);
+    }
+  }
 
   const assetSizeMeasurements = new Map<string, number[]>();
 
