@@ -12,13 +12,13 @@ function getSetup() {
     start: 1528113600000,
     end: 1528977600000,
     client: {
-      search: jest.fn()
+      search: jest.fn(),
     } as any,
     internalClient: {
-      search: jest.fn()
+      search: jest.fn(),
     } as any,
     config: {
-      'xpack.apm.ui.transactionGroupBucketSize': 100
+      'xpack.apm.ui.transactionGroupBucketSize': 100,
     } as APMConfig,
     uiFiltersES: [{ term: { 'service.environment': 'test' } }],
     indices: {
@@ -29,9 +29,9 @@ function getSetup() {
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
-      apmCustomLinkIndex: 'myIndex'
+      apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any
+    dynamicIndexPattern: null as any,
   };
 }
 
@@ -51,7 +51,7 @@ describe('transactionGroupsFetcher', () => {
         {
           type: 'top_transactions',
           serviceName: 'opbeans-node',
-          transactionType: 'request'
+          transactionType: 'request',
         },
         setup
       );

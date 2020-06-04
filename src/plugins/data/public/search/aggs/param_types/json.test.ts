@@ -21,7 +21,7 @@ import { BaseParamType } from './base';
 import { JsonParamType } from './json';
 import { IAggConfig } from '../agg_config';
 
-describe('JSON', function() {
+describe('JSON', function () {
   const paramName = 'json_test';
   let aggConfig: IAggConfig;
   let output: Record<string, any>;
@@ -33,7 +33,7 @@ describe('JSON', function() {
       name: paramName,
     });
 
-  beforeEach(function() {
+  beforeEach(function () {
     aggConfig = { params: {} } as IAggConfig;
     output = { params: {} };
   });

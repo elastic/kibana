@@ -68,7 +68,19 @@ router.get(
 ...
 ```
 
-5. To retrieve Saved Object with decrypted content use the dedicated `getDecryptedAsInternalUser` API method. 
+5. Instantiate an EncryptedSavedObjects client so that you can interact with Saved Objects whose content has been encrypted.
+
+```typescript
+const esoClient = encryptedSavedObjects.getClient();
+```
+
+If your SavedObject type is a _hidden_ type, then you will have to specify it as an included type:
+
+```typescript
+const esoClient = encryptedSavedObjects.getClient({ includedHiddenTypes: ['myHiddenType'] });
+```
+
+6. To retrieve Saved Object with decrypted content use the dedicated `getDecryptedAsInternalUser` API method. 
 
 **Note:** As name suggests the method will retrieve the encrypted values and decrypt them on behalf of the internal Kibana
 user to make it possible to use this method even when user request context is not available (e.g. in background tasks).
@@ -77,7 +89,7 @@ and preferably only as a part of the Kibana server routines that are outside of 
 user has control over.
 
 ```typescript
-const savedObjectWithDecryptedContent =  await encryptedSavedObjects.getDecryptedAsInternalUser(
+const savedObjectWithDecryptedContent =  await esoClient.getDecryptedAsInternalUser(
   'my-saved-object-type',
   'saved-object-id'
 );

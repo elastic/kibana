@@ -25,6 +25,7 @@ describe('Security Plugin', () => {
           idleTimeout: 1500,
           lifespan: null,
         },
+        audit: { enabled: false },
         authc: {
           selector: { enabled: false },
           providers: ['saml', 'token'],
@@ -38,11 +39,11 @@ describe('Security Plugin', () => {
     mockCoreSetup.http.isTlsEnabled = true;
 
     mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
-    );
+    mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
-    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
+    mockDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+    } as unknown) as PluginSetupDependencies;
   });
 
   describe('setup()', () => {
@@ -50,8 +51,10 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
-                  "registerLegacyAPI": [Function],
                   "registerPrivilegesWithCluster": [Function],
+                },
+                "audit": Object {
+                  "getLogger": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],
@@ -111,8 +114,8 @@ describe('Security Plugin', () => {
     it('properly creates cluster client instance', async () => {
       await plugin.setup(mockCoreSetup, mockDependencies);
 
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
         plugins: [elasticsearchClientPlugin],
       });
     });

@@ -30,7 +30,7 @@ describe('OptInDetailsComponent', () => {
     const onClick = jest.fn();
     const component = shallowWithIntl(<OptInBanner onChangeOptInClick={onClick} />);
 
-    const enableButton = component.findWhere(n => {
+    const enableButton = component.findWhere((n) => {
       const props = n.props();
       return n.type() === EuiButton && props['data-test-subj'] === 'enable';
     });
@@ -48,7 +48,7 @@ describe('OptInDetailsComponent', () => {
     const onClick = jest.fn();
     const component = shallowWithIntl(<OptInBanner onChangeOptInClick={onClick} />);
 
-    const disableButton = component.findWhere(n => {
+    const disableButton = component.findWhere((n) => {
       const props = n.props();
       return n.type() === EuiButton && props['data-test-subj'] === 'disable';
     });

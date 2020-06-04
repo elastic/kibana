@@ -118,7 +118,7 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <CustomInterval onSubmit={value => onSetInterval(value)} />
+        <CustomInterval onSubmit={(value) => onSetInterval(value)} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

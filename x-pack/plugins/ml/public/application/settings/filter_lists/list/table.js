@@ -81,7 +81,9 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: id => <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>,
+      render: (id) => (
+        <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>
+      ),
       sortable: true,
       scope: 'row',
     },
@@ -104,7 +106,7 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.inUseColumnName', {
         defaultMessage: 'In use',
       }),
-      render: usedBy => <UsedByIcon usedBy={usedBy} />,
+      render: (usedBy) => <UsedByIcon usedBy={usedBy} />,
       sortable: true,
     },
   ];
@@ -157,10 +159,10 @@ export function FilterListsTable({
   };
 
   const tableSelection = {
-    selectable: filterList =>
+    selectable: (filterList) =>
       filterList.used_by === undefined || filterList.used_by.jobs.length === 0,
     selectableMessage: () => undefined,
-    onSelectionChange: selection => setSelectedFilterLists(selection),
+    onSelectionChange: (selection) => setSelectedFilterLists(selection),
   };
 
   return (

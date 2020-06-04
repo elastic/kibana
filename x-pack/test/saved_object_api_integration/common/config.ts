@@ -56,7 +56,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--optimize.enabled=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

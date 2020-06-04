@@ -51,7 +51,7 @@ export class WorkpadTemplates extends React.PureComponent {
 
   onSearch = ({ queryText }) => this.setState(extractSearch(queryText));
 
-  cloneTemplate = template => this.props.cloneWorkpad(template).then(() => this.props.onClose());
+  cloneTemplate = (template) => this.props.cloneWorkpad(template).then(() => this.props.onClose());
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
@@ -90,7 +90,7 @@ export class WorkpadTemplates extends React.PureComponent {
         sortable: false,
         dataType: 'string',
         width: '30%',
-        render: tags => <TagList tags={tags} tagType={this.tagType} />,
+        render: (tags) => <TagList tags={tags} tagType={this.tagType} />,
       },
     ];
 
@@ -148,7 +148,7 @@ export class WorkpadTemplates extends React.PureComponent {
 
     const filteredTemplates = sortedTemplates.filter(({ name = '', help = '', tags = [] }) => {
       const tagMatch = filterTags.length
-        ? filterTags.every(filterTag => tags.indexOf(filterTag) > -1)
+        ? filterTags.every((filterTag) => tags.indexOf(filterTag) > -1)
         : true;
 
       const lowercaseSearch = searchTerm.toLowerCase();
@@ -162,7 +162,7 @@ export class WorkpadTemplates extends React.PureComponent {
 
     return (
       <Paginate rows={filteredTemplates}>
-        {pagination => (
+        {(pagination) => (
           <Fragment>
             {this.renderSearch()}
             <EuiSpacer />

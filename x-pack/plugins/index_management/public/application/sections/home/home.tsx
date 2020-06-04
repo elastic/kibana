@@ -18,7 +18,6 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import { BASE_PATH } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
@@ -53,7 +52,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   ];
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`${BASE_PATH}${newSection}`);
+    history.push(`/${newSection}`);
   };
 
   useEffect(() => {
@@ -92,7 +91,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
@@ -107,9 +106,13 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
+          <Route exact path="/indices" component={IndexList} />
+          <Route exact path="/indices/filter/:filter?" component={IndexList} />
+          <Route
+            exact
+            path={['/templates', '/templates/:templateName?']}
+            component={TemplateList}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

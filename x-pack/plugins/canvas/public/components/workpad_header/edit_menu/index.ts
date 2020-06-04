@@ -67,7 +67,7 @@ const mapStateToProps = (state: State) => {
     selectedPrimaryShapeObjects.map((shape: PositionedElement) =>
       nodes.find((n: PositionedElement) => n.id === shape.id) // is it a leaf or a persisted group?
         ? [shape.id]
-        : nodes.filter((s: PositionedElement) => s.position.parent === shape.id).map(s => s.id)
+        : nodes.filter((s: PositionedElement) => s.position.parent === shape.id).map((s) => s.id)
     )
   );
   const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
@@ -75,7 +75,7 @@ const mapStateToProps = (state: State) => {
   return {
     pageId,
     selectedToplevelNodes,
-    selectedNodes: selectedNodeIds.map((id: string) => nodes.find(s => s.id === id)),
+    selectedNodes: selectedNodeIds.map((id: string) => nodes.find((s) => s.id === id)),
     state,
   };
 };
@@ -86,7 +86,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   removeNodes: (nodeIds: string[], pageId: string) => dispatch(removeElements(nodeIds, pageId)),
   selectToplevelNodes: (nodes: PositionedElement[]) =>
     dispatch(
-      selectToplevelNodes(nodes.filter((e: PositionedElement) => !e.position.parent).map(e => e.id))
+      selectToplevelNodes(
+        nodes.filter((e: PositionedElement) => !e.position.parent).map((e) => e.id)
+      )
     ),
   elementLayer: (pageId: string, elementId: string, movement: number) => {
     dispatch(elementLayer({ pageId, elementId, movement }));

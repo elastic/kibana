@@ -46,7 +46,7 @@ export function TimeBuckets(timeBucketsConfig) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBarTarget = function(bt) {
+TimeBuckets.prototype.setBarTarget = function (bt) {
   this.barTarget = bt;
 };
 
@@ -57,7 +57,7 @@ TimeBuckets.prototype.setBarTarget = function(bt) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setMaxBars = function(mb) {
+TimeBuckets.prototype.setMaxBars = function (mb) {
   this.maxBars = mb;
 };
 
@@ -72,7 +72,7 @@ TimeBuckets.prototype.setMaxBars = function(mb) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBounds = function(input) {
+TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
   let bounds;
@@ -83,9 +83,7 @@ TimeBuckets.prototype.setBounds = function(input) {
     bounds = Array.isArray(input) ? input : [];
   }
 
-  const moments = _(bounds)
-    .map(_.ary(moment, 1))
-    .sortBy(Number);
+  const moments = _(bounds).map(_.ary(moment, 1)).sortBy(Number);
 
   const valid = moments.size() === 2 && moments.every(isValidMoment);
   if (!valid) {
@@ -105,7 +103,7 @@ TimeBuckets.prototype.setBounds = function(input) {
  *
  * @return {undefined}
  */
-TimeBuckets.prototype.clearBounds = function() {
+TimeBuckets.prototype.clearBounds = function () {
   this._lb = this._ub = null;
 };
 
@@ -114,7 +112,7 @@ TimeBuckets.prototype.clearBounds = function() {
  *
  * @return {Boolean}
  */
-TimeBuckets.prototype.hasBounds = function() {
+TimeBuckets.prototype.hasBounds = function () {
   return isValidMoment(this._ub) && isValidMoment(this._lb);
 };
 
@@ -130,7 +128,7 @@ TimeBuckets.prototype.hasBounds = function() {
  *                      min and max. Each property will be a moment()
  *                      object
  */
-TimeBuckets.prototype.getBounds = function() {
+TimeBuckets.prototype.getBounds = function () {
   if (!this.hasBounds()) return;
   return {
     min: this._lb,
@@ -145,7 +143,7 @@ TimeBuckets.prototype.getBounds = function() {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getDuration = function() {
+TimeBuckets.prototype.getDuration = function () {
   if (!this.hasBounds()) return;
   return moment.duration(this._ub - this._lb, 'ms');
 };
@@ -161,7 +159,7 @@ TimeBuckets.prototype.getDuration = function() {
  *
  * @param {string|moment.duration} input - see desc
  */
-TimeBuckets.prototype.setInterval = function(input) {
+TimeBuckets.prototype.setInterval = function (input) {
   // Preserve the original units because they're lost when the interval is converted to a
   // moment duration object.
   this.originalInterval = input;
@@ -223,7 +221,7 @@ TimeBuckets.prototype.setInterval = function(input) {
  *
  * @return {[type]} [description]
  */
-TimeBuckets.prototype.getInterval = function() {
+TimeBuckets.prototype.getInterval = function () {
   const self = this;
   const duration = self.getDuration();
   return decorateInterval(maybeScaleInterval(readInterval()), duration);
@@ -268,7 +266,7 @@ TimeBuckets.prototype.getInterval = function() {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
+TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
   const interval = this.getInterval();
   const intervalSecs = interval.asSeconds();
 
@@ -306,7 +304,7 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
  *
  * @return {string}
  */
-TimeBuckets.prototype.getScaledDateFormat = function() {
+TimeBuckets.prototype.getScaledDateFormat = function () {
   const interval = this.getInterval();
   const rules = this._timeBucketsConfig['dateFormat:scaled'];
 
@@ -320,7 +318,7 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
   return this._timeBucketsConfig.dateFormat;
 };
 
-TimeBuckets.prototype.getScaledDateFormatter = function() {
+TimeBuckets.prototype.getScaledDateFormatter = function () {
   const fieldFormats = getFieldFormats();
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat(

@@ -87,7 +87,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
 
   const onStepValidityChange = useCallback(
     (isValid: boolean | undefined) => {
-      setValidation(prev => ({
+      setValidation((prev) => ({
         ...prev,
         [currentStep]: {
           isValid,

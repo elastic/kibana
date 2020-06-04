@@ -5,23 +5,24 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getOtherCategoryLabel, makeMbClampedNumberExpression } from '../style_util';
-import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
-import { ColorGradient } from '../../components/color_gradient';
-import React from 'react';
+import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  EuiTextColor,
-} from '@elastic/eui';
-import { Category } from '../components/legend/category';
-import { COLOR_MAP_TYPE, RGBA_0000 } from '../../../../../common/constants';
-import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
+  getOrdinalMbColorRampStops,
+  getColorPalette,
+  getHexColorRangeStrings,
+  GRADIENT_INTERVALS,
+} from '../../color_utils';
+import React from 'react';
+import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import {
+  isCategoricalStopsInvalid,
+  getOtherCategoryLabel,
+} from '../components/color/color_stops_utils';
+import { BreakedLegend } from '../components/legend/breaked_legend';
+import { EuiTextColor } from '@elastic/eui';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
+const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -99,14 +100,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return true;
   }
 
-  isOrdinalRanged() {
-    return this.isOrdinal() && !this._options.useCustomColorRamp;
-  }
-
-  hasOrdinalBreaks() {
-    return (this.isOrdinal() && this._options.useCustomColorRamp) || this.isCategorical();
-  }
-
   _getMbColor() {
     if (!this._field || !this._field.getName()) {
       return null;
@@ -142,10 +135,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return null;
       }
 
-      const colorStops = getOrdinalColorRampStops(
+      const colorStops = getOrdinalMbColorRampStops(
         this._options.color,
         rangeFieldMeta.min,
-        rangeFieldMeta.max
+        rangeFieldMeta.max,
+        GRADIENT_INTERVALS
       );
       if (!colorStops) {
         return null;
@@ -237,28 +231,47 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     for (let i = 0; i < stops.length; i++) {
       const stop = stops[i];
       const branch = `${stop.stop}`;
-      if (typeof branch === 'string') {
-        mbStops.push(branch);
-        mbStops.push(stop.color);
-      }
+      mbStops.push(branch);
+      mbStops.push(stop.color);
     }
 
     mbStops.push(defaultColor); //last color is default color
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
-  renderRangeLegendHeader() {
-    if (this._options.color) {
-      return <ColorGradient colorRampName={this._options.color} />;
-    } else {
-      return null;
-    }
-  }
-
   _getColorRampStops() {
-    return this._options.useCustomColorRamp && this._options.customColorRamp
-      ? this._options.customColorRamp
-      : [];
+    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
+      return this._options.customColorRamp;
+    }
+
+    if (!this._options.color) {
+      return [];
+    }
+
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (!rangeFieldMeta) {
+      return [];
+    }
+
+    const colors = getHexColorRangeStrings(this._options.color, GRADIENT_INTERVALS);
+
+    if (rangeFieldMeta.delta === 0) {
+      //map to last color.
+      return [
+        {
+          color: colors[colors.length - 1],
+          stop: dynamicRound(rangeFieldMeta.max),
+        },
+      ];
+    }
+
+    return colors.map((color, index) => {
+      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / GRADIENT_INTERVALS);
+      return {
+        color,
+        stop: dynamicRound(rawStopValue),
+      };
+    });
   }
 
   _getColorStops() {
@@ -274,55 +287,33 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
   }
 
-  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
-    const categories = [];
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     const { stops, defaultColor } = this._getColorStops();
-    stops.map(({ stop, color }) => {
-      categories.push(
-        <Category
-          key={stop}
-          styleName={this.getStyleName()}
-          label={this.formatField(stop)}
-          color={color}
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={symbolId}
-        />
-      );
+    const breaks = [];
+    stops.forEach(({ stop, color }) => {
+      if (stop) {
+        breaks.push({
+          color,
+          symbolId,
+          label: this.formatField(stop),
+        });
+      }
     });
-
     if (defaultColor) {
-      categories.push(
-        <Category
-          key="fallbackCategory"
-          styleName={this.getStyleName()}
-          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
-          color={defaultColor}
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={symbolId}
-        />
-      );
+      breaks.push({
+        color: defaultColor,
+        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        symbolId,
+      });
     }
 
     return (
-      <div>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
-                <small>
-                  <strong>{fieldLabel}</strong>
-                </small>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <BreakedLegend
+        style={this}
+        breaks={breaks}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+      />
     );
   }
 }

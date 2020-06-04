@@ -17,7 +17,7 @@
  * under the License.
  */
 
-jest.mock('repl', () => ({ start: opts => ({ opts, context: {} }) }), { virtual: true });
+jest.mock('repl', () => ({ start: (opts) => ({ opts, context: {} }) }), { virtual: true });
 
 describe('repl', () => {
   const originalConsoleLog = console.log;
@@ -25,7 +25,7 @@ describe('repl', () => {
 
   beforeEach(() => {
     global.console.log = jest.fn();
-    require('repl').start = opts => {
+    require('repl').start = (opts) => {
       let resetHandler;
       const replServer = {
         opts,
@@ -188,7 +188,7 @@ describe('repl', () => {
 
   async function waitForPrompt(replServer, fn) {
     let resolveDone;
-    const done = new Promise(resolve => (resolveDone = resolve));
+    const done = new Promise((resolve) => (resolveDone = resolve));
     replServer.displayPrompt = () => {
       resolveDone();
     };

@@ -28,7 +28,7 @@ export function initXAxis(chart: Chart, table: Table) {
   chart.xAxisOrderedValues =
     accessor === -1 && 'defaultValue' in params
       ? [params.defaultValue]
-      : uniq(table.rows.map(r => r[accessor]));
+      : uniq(table.rows.map((r) => r[accessor]));
   chart.xAxisFormat = format;
   chart.xAxisLabel = title;
 

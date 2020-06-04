@@ -21,7 +21,7 @@ const FullWidthNavRow = styled(EuiPage)`
 `;
 
 const Text = styled.span`
-  margin-right: ${props => props.theme.eui.euiSizeM};
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 type HeaderProps = PackageInfo & { iconType?: IconType };

@@ -284,13 +284,13 @@ describe('IndexPattern Data Panel', () => {
   describe('loading existence data', () => {
     function testProps() {
       const setState = jest.fn();
-      core.http.post.mockImplementation(async path => {
+      core.http.post.mockImplementation(async (path) => {
         const parts = ((path as unknown) as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
           existingFieldNames: ['field_1', 'field_2'].map(
-            fieldName => `${indexPatternTitle}_${fieldName}`
+            (fieldName) => `${indexPatternTitle}_${fieldName}`
           ),
         };
       });
@@ -489,7 +489,7 @@ describe('IndexPattern Data Panel', () => {
       let overlapCount = 0;
       const props = testProps();
 
-      core.http.post.mockImplementation(path => {
+      core.http.post.mockImplementation((path) => {
         if (queryCount) {
           ++overlapCount;
         }
@@ -500,7 +500,7 @@ describe('IndexPattern Data Panel', () => {
         const result = Promise.resolve({
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
-            fieldName => `${indexPatternTitle}_${fieldName}`
+            (fieldName) => `${indexPatternTitle}_${fieldName}`
           ),
         });
 
@@ -540,7 +540,7 @@ describe('IndexPattern Data Panel', () => {
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
         'bytes',
         'client',
@@ -561,7 +561,7 @@ describe('IndexPattern Data Panel', () => {
         } as ChangeEvent<HTMLInputElement>);
       });
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
       ]);
     });
@@ -571,17 +571,11 @@ describe('IndexPattern Data Panel', () => {
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="typeFilter-number"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'bytes',
         'memory',
       ]);
@@ -592,21 +586,12 @@ describe('IndexPattern Data Panel', () => {
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="typeFilter-number"]')
-        .first()
-        .simulate('click');
-      wrapper
-        .find('[data-test-subj="typeFilter-number"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
         'bytes',
         'client',
@@ -627,17 +612,11 @@ describe('IndexPattern Data Panel', () => {
         } as ChangeEvent<HTMLInputElement>);
       });
 
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="typeFilter-number"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
       ]);
     });
@@ -653,7 +632,7 @@ describe('IndexPattern Data Panel', () => {
           ...defaultProps.indexPatterns,
           '1': {
             ...defaultProps.indexPatterns['1'],
-            fields: defaultProps.indexPatterns['1'].fields.map(field => ({
+            fields: defaultProps.indexPatterns['1'].fields.map((field) => ({
               ...field,
               exists: field.type === 'number',
             })),
@@ -675,7 +654,7 @@ describe('IndexPattern Data Panel', () => {
       };
       const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...props} />);
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
         'bytes',
         'memory',
@@ -693,7 +672,7 @@ describe('IndexPattern Data Panel', () => {
         } as ChangeEvent<HTMLInputElement>);
       });
 
-      expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
       ]);
     });
@@ -701,15 +680,11 @@ describe('IndexPattern Data Panel', () => {
     it('should allow removing the filter for data', () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
 
-      wrapper
-        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="lnsEmptyFilter"]')
-        .first()
-        .prop('onChange')!({} as ChangeEvent);
+      wrapper.find('[data-test-subj="lnsEmptyFilter"]').first().prop('onChange')!(
+        {} as ChangeEvent
+      );
 
       expect(emptyFieldsTestProps.onToggleEmptyFields).toHaveBeenCalled();
     });

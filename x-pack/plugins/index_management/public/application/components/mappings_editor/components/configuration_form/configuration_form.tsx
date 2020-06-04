@@ -24,7 +24,7 @@ interface Props {
 const stringifyJson = (json: GenericObject) =>
   Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
 
-const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
+const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
   const {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,

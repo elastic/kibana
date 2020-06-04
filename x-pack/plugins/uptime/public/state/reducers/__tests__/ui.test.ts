@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  setBasePath,
-  toggleIntegrationsPopover,
-  triggerAppRefresh,
-  setAlertFlyoutVisible,
-} from '../../actions';
+import { setBasePath, toggleIntegrationsPopover, setAlertFlyoutVisible } from '../../actions';
 import { uiReducer } from '../ui';
 import { Action } from 'redux-actions';
 
@@ -23,7 +18,7 @@ describe('ui reducer', () => {
           basePath: 'abc',
           esKuery: '',
           integrationsPopoverOpen: null,
-          lastRefresh: 125,
+          searchText: '',
         },
         action
       )
@@ -42,23 +37,7 @@ describe('ui reducer', () => {
           basePath: '',
           esKuery: '',
           integrationsPopoverOpen: null,
-          lastRefresh: 125,
-        },
-        action
-      )
-    ).toMatchSnapshot();
-  });
-
-  it('updates the refresh value', () => {
-    const action = triggerAppRefresh(125) as Action<never>;
-    expect(
-      uiReducer(
-        {
-          alertFlyoutVisible: false,
-          basePath: 'abc',
-          esKuery: '',
-          integrationsPopoverOpen: null,
-          lastRefresh: 125,
+          searchText: '',
         },
         action
       )
@@ -74,7 +53,7 @@ describe('ui reducer', () => {
           basePath: '',
           esKuery: '',
           integrationsPopoverOpen: null,
-          lastRefresh: 125,
+          searchText: '',
         },
         action
       )
@@ -84,7 +63,7 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
-        "lastRefresh": 125,
+        "searchText": "",
       }
     `);
   });

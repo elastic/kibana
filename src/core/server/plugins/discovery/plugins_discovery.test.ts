@@ -143,7 +143,7 @@ test('properly iterates through plugin search locations', async () => {
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '6'),
     TEST_EXTRA_PLUGIN_PATH,
   ]) {
-    const discoveredPlugin = plugins.find(plugin => plugin.path === path)!;
+    const discoveredPlugin = plugins.find((plugin) => plugin.path === path)!;
     expect(discoveredPlugin).toBeInstanceOf(PluginWrapper);
     expect(discoveredPlugin.configPath).toEqual(['core', 'config']);
     expect(discoveredPlugin.requiredPlugins).toEqual(['a', 'b']);
@@ -153,7 +153,7 @@ test('properly iterates through plugin search locations', async () => {
   await expect(
     error$
       .pipe(
-        map(error => error.toString()),
+        map((error) => error.toString()),
         toArray()
       )
       .toPromise()

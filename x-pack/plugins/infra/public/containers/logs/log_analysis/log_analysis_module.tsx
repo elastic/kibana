@@ -27,7 +27,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
         return await moduleDescriptor.getJobSummary(spaceId, sourceId);
       },
-      onResolve: jobResponse => {
+      onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,

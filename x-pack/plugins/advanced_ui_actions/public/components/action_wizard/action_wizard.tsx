@@ -75,7 +75,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         }}
         context={context}
         config={config}
-        onConfigChange={newConfig => {
+        onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
       />
@@ -86,7 +86,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
     <ActionFactorySelector
       context={context}
       actionFactories={actionFactories}
-      onActionFactorySelected={actionFactory => {
+      onActionFactorySelected={(actionFactory) => {
         onActionFactoryChange(actionFactory);
       }}
     />
@@ -179,7 +179,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
       {[...actionFactories]
         .sort((f1, f2) => f2.order - f1.order)
-        .map(actionFactory => (
+        .map((actionFactory) => (
           <EuiFlexItem grow={false} key={actionFactory.id}>
             <EuiKeyPadMenuItem
               className="auaActionWizard__actionFactoryItem"

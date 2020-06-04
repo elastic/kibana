@@ -34,7 +34,7 @@ import { AddDeleteButtons } from '../../add_delete_buttons';
 export const MultiValueRow = ({ model, onChange, onDelete, onAdd, disableAdd, disableDelete }) => {
   const htmlId = htmlIdGenerator();
 
-  const onFieldNumberChange = event =>
+  const onFieldNumberChange = (event) =>
     onChange({
       ...model,
       value: get(event, 'target.value'),

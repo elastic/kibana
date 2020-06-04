@@ -136,7 +136,7 @@ test('Can delete multiple drilldowns', async () => {
 
   const checkboxes = screen.getAllByLabelText(/Select this drilldown/i);
   expect(checkboxes).toHaveLength(3);
-  checkboxes.forEach(checkbox => fireEvent.click(checkbox));
+  checkboxes.forEach((checkbox) => fireEvent.click(checkbox));
   expect(screen.queryByText(/Create/i)).not.toBeInTheDocument();
   fireEvent.click(screen.getByText(/Delete \(3\)/i));
 

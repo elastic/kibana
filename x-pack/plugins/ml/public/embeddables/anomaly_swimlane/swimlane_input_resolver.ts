@@ -42,7 +42,7 @@ function getJobsObservable(
   return embeddableInput.pipe(
     pluck('jobIds'),
     distinctUntilChanged(isEqual),
-    switchMap(jobsIds => anomalyDetectorService.getJobs$(jobsIds))
+    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds))
   );
 }
 
@@ -74,7 +74,7 @@ export function useSwimlaneInputResolver(
       getJobsObservable(embeddableInput, anomalyDetectorService),
       embeddableInput,
       chartWidth$.pipe(
-        skipWhile(v => !v),
+        skipWhile((v) => !v),
         distinctUntilChanged((prev, curr) => {
           // emit only if the width has been changed significantly
           return Math.abs(curr - prev) < RESIZE_IGNORED_DIFF_PX;
@@ -100,7 +100,7 @@ export function useSwimlaneInputResolver(
             setSwimlaneType(swimlaneTypeInput);
           }
 
-          const explorerJobs: ExplorerJob[] = jobs.map(job => {
+          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
             const bucketSpan = parseInterval(job.analysis_config.bucket_span);
             return {
               id: job.job_id,
@@ -119,7 +119,7 @@ export function useSwimlaneInputResolver(
           }
 
           return from(explorerService.loadOverallData(explorerJobs, swimlaneContainerWidth)).pipe(
-            switchMap(overallSwimlaneData => {
+            switchMap((overallSwimlaneData) => {
               const { earliest, latest } = overallSwimlaneData;
 
               if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
@@ -134,7 +134,7 @@ export function useSwimlaneInputResolver(
                     appliedFilters
                   )
                 ).pipe(
-                  map(viewBySwimlaneData => {
+                  map((viewBySwimlaneData) => {
                     return {
                       ...viewBySwimlaneData!,
                       earliest,
@@ -147,12 +147,12 @@ export function useSwimlaneInputResolver(
             })
           );
         }),
-        catchError(e => {
+        catchError((e) => {
           setError(e.body);
           return of(undefined);
         })
       )
-      .subscribe(data => {
+      .subscribe((data) => {
         if (data !== undefined) {
           setError(null);
           setSwimlaneData(data);

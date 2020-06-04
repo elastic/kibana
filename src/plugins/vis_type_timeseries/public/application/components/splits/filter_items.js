@@ -35,7 +35,7 @@ class FilterItemsUi extends Component {
   }
 
   handleChange(item, name) {
-    return e => {
+    return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(
         _.assign({}, item, {
@@ -52,7 +52,7 @@ class FilterItemsUi extends Component {
     const indexPatterns = this.props.indexPatterns;
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
-    const handleChange = part => {
+    const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
@@ -82,7 +82,7 @@ class FilterItemsUi extends Component {
               language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
-            onChange={query => this.handleQueryChange(model, query)}
+            onChange={(query) => this.handleQueryChange(model, query)}
             indexPatterns={[indexPatterns]}
           />
         </EuiFlexItem>

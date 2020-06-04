@@ -75,11 +75,13 @@ function RangesParamEditor({
   setValidity,
   validateRange,
 }: RangesParamEditorProps) {
-  const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
+  const [ranges, setRanges] = useState(() =>
+    value.map((range) => ({ ...range, id: generateId() }))
+  );
   const updateRanges = useCallback(
     (rangeValues: RangeValuesModel[]) => {
       // do not set internal id parameter into saved object
-      setValue(rangeValues.map(range => omit(range, 'id')));
+      setValue(rangeValues.map((range) => omit(range, 'id')));
       setRanges(rangeValues);
 
       if (setTouched) {
@@ -95,10 +97,10 @@ function RangesParamEditor({
         : updateRanges([...ranges, { id: generateId() }]),
     [addRangeValues, ranges, updateRanges]
   );
-  const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
+  const onRemoveRange = (id: string) => updateRanges(ranges.filter((range) => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
-      ranges.map(range =>
+      ranges.map((range) =>
         range.id === id
           ? {
               ...range,
@@ -121,7 +123,7 @@ function RangesParamEditor({
       value.length !== ranges.length ||
       value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
     ) {
-      setRanges(value.map(range => ({ ...range, id: generateId() })));
+      setRanges(value.map((range) => ({ ...range, id: generateId() })));
     }
   }, [ranges, value]);
 
@@ -197,7 +199,7 @@ function RangesParamEditor({
                     data-test-subj={`${dataTestSubj}${index}__from`}
                     value={isEmpty(from) ? '' : from}
                     placeholder={hidePlaceholders ? undefined : FROM_PLACEHOLDER}
-                    onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                    onChange={(ev) => onChangeRange(id, 'from', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isFromValid}
@@ -219,7 +221,7 @@ function RangesParamEditor({
                     data-test-subj={`${dataTestSubj}${index}__to`}
                     value={isEmpty(to) ? '' : to}
                     placeholder={hidePlaceholders ? undefined : TO_PLACEHOLDER}
-                    onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                    onChange={(ev) => onChangeRange(id, 'to', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isToValid}

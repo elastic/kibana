@@ -12,6 +12,8 @@ import {
   Settings,
   TooltipValue,
   RectAnnotation,
+  AnnotationDomainTypes,
+  LineAnnotation,
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
@@ -118,7 +120,7 @@ export const ExpressionChart: React.FC<Props> = ({
 
   const series = {
     ...firstSeries,
-    rows: firstSeries.rows.map(row => {
+    rows: firstSeries.rows.map((row) => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
         newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;
@@ -140,6 +142,7 @@ export const ExpressionChart: React.FC<Props> = ({
   }
 
   const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(expression.comparator);
+  const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
   const { timeSize, timeUnit } = expression;
   const timeLabel = TIME_LABELS[timeUnit];
@@ -149,44 +152,49 @@ export const ExpressionChart: React.FC<Props> = ({
       <ChartContainer>
         <Chart>
           <MetricExplorerSeriesChart
-            type={MetricsExplorerChartType.area}
+            type={MetricsExplorerChartType.bar}
             metric={metric}
             id="0"
             series={series}
             stack={false}
           />
-          {thresholds.length ? (
-            <MetricExplorerSeriesChart
-              type={isAbove ? MetricsExplorerChartType.line : MetricsExplorerChartType.area}
-              metric={{
-                ...metric,
-                color: MetricsExplorerColor.color1,
-                label: i18n.translate('xpack.infra.metrics.alerts.thresholdLabel', {
-                  defaultMessage: 'Threshold',
-                }),
-              }}
-              id={thresholds.map((t, i) => `threshold_${i}`)}
-              series={series}
-              stack={false}
-              opacity={opacity}
-            />
-          ) : null}
-          {thresholds.length && expression.comparator === Comparator.OUTSIDE_RANGE ? (
+          <LineAnnotation
+            id={`thresholds`}
+            domainType={AnnotationDomainTypes.YDomain}
+            dataValues={thresholds.map((threshold) => ({
+              dataValue: threshold,
+            }))}
+            style={{
+              line: {
+                strokeWidth: 2,
+                stroke: colorTransformer(MetricsExplorerColor.color1),
+                opacity: 1,
+              },
+            }}
+          />
+          {thresholds.length === 2 && expression.comparator === Comparator.BETWEEN ? (
             <>
-              <MetricExplorerSeriesChart
-                type={MetricsExplorerChartType.line}
-                metric={{
-                  ...metric,
-                  color: MetricsExplorerColor.color1,
-                  label: i18n.translate('xpack.infra.metrics.alerts.thresholdLabel', {
-                    defaultMessage: 'Threshold',
-                  }),
+              <RectAnnotation
+                id="lower-threshold"
+                style={{
+                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  opacity,
                 }}
-                id={thresholds.map((t, i) => `threshold_${i}`)}
-                series={series}
-                stack={false}
-                opacity={opacity}
+                dataValues={[
+                  {
+                    coordinates: {
+                      x0: firstTimestamp,
+                      x1: lastTimestamp,
+                      y0: first(expression.threshold),
+                      y1: last(expression.threshold),
+                    },
+                  },
+                ]}
               />
+            </>
+          ) : null}
+          {thresholds.length === 2 && expression.comparator === Comparator.OUTSIDE_RANGE ? (
+            <>
               <RectAnnotation
                 id="lower-threshold"
                 style={{
@@ -222,6 +230,25 @@ export const ExpressionChart: React.FC<Props> = ({
                 ]}
               />
             </>
+          ) : null}
+          {isBelow && first(expression.threshold) != null ? (
+            <RectAnnotation
+              id="upper-threshold"
+              style={{
+                fill: colorTransformer(MetricsExplorerColor.color1),
+                opacity,
+              }}
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: firstTimestamp,
+                    x1: lastTimestamp,
+                    y0: domain.min,
+                    y1: first(expression.threshold),
+                  },
+                },
+              ]}
+            />
           ) : null}
           {isAbove && first(expression.threshold) != null ? (
             <RectAnnotation

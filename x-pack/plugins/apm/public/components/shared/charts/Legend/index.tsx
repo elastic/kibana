@@ -11,7 +11,7 @@ import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {
   circle = 'circle',
-  square = 'square'
+  square = 'square',
 }
 
 interface ContainerProps {
@@ -23,10 +23,10 @@ interface ContainerProps {
 const Container = styled.div<ContainerProps>`
   display: flex;
   align-items: center;
-  font-size: ${props => props.fontSize};
+  font-size: ${(props) => props.fontSize};
   color: ${theme.euiColorDarkShade};
-  cursor: ${props => (props.clickable ? 'pointer' : 'initial')};
-  opacity: ${props => (props.disabled ? 0.4 : 1)};
+  cursor: ${(props) => (props.clickable ? 'pointer' : 'initial')};
+  opacity: ${(props) => (props.disabled ? 0.4 : 1)};
   user-select: none;
 `;
 
@@ -37,11 +37,11 @@ interface IndicatorProps {
   withMargin: boolean;
 }
 export const Indicator = styled.span<IndicatorProps>`
-  width: ${props => px(props.radius)};
-  height: ${props => px(props.radius)};
-  margin-right: ${props => (props.withMargin ? px(props.radius / 2) : 0)};
-  background: ${props => props.color};
-  border-radius: ${props => {
+  width: ${(props) => px(props.radius)};
+  height: ${(props) => px(props.radius)};
+  margin-right: ${(props) => (props.withMargin ? px(props.radius / 2) : 0)};
+  background: ${(props) => props.color};
+  border-radius: ${(props) => {
     return props.shape === Shape.circle ? '100%' : '0';
   }};
 `;

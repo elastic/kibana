@@ -34,12 +34,12 @@ import invoke from '../helpers/invoke_series_fn.js';
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
     esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function() {
+      callAsCurrentUser: function () {
         return Bluebird.resolve(response);
       },
     }),
     savedObjectsClient: {
-      find: function() {
+      find: function () {
         return Bluebird.resolve({
           saved_objects: indexPatternSavedObjects,
         });
@@ -58,14 +58,14 @@ describe('es', () => {
       });
       return invoke(es, [5], tlConfig)
         .then(expect.fail)
-        .catch(e => {
+        .catch((e) => {
           expect(e).to.be.an('error');
         });
     });
 
     it('returns a seriesList', () => {
       tlConfig = stubRequestAndServer(esResponse);
-      return invoke(es, [5], tlConfig).then(r => {
+      return invoke(es, [5], tlConfig).then((r) => {
         expect(r.output.type).to.eql('seriesList');
       });
     });
@@ -239,7 +239,7 @@ describe('es', () => {
             to: 5,
           },
           request: {
-            payload: {
+            body: {
               extended: {
                 es: {
                   filter: {
@@ -258,7 +258,7 @@ describe('es', () => {
         });
       });
 
-      it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
+      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.body.query.bool.filter.bool;

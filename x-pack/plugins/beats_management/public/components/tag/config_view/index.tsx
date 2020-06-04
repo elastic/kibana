@@ -63,7 +63,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
     }));
   };
   public render() {
-    const thisConfigSchema = this.schema.find(s => this.state.configBlock.type === s.id);
+    const thisConfigSchema = this.schema.find((s) => this.state.configBlock.type === s.id);
 
     if (!thisConfigSchema) {
       return i18n.translate('xpack.beatsManagement.tagConfig.invalidSchema', {
@@ -97,7 +97,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
             })}
           >
             <EuiSelect
-              options={this.schema.map(s => ({ value: s.id, text: s.name }))}
+              options={this.schema.map((s) => ({ value: s.id, text: s.name }))}
               value={this.state.configBlock.type}
               disabled={this.editMode}
               onChange={this.onValueChange('type')}
@@ -134,7 +134,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
           <ConfigForm
             onSubmit={
               this.props.onSave
-                ? data => {
+                ? (data) => {
                     if (this.props.onSave) {
                       this.props.onSave({
                         ...this.state.configBlock,
@@ -145,7 +145,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
                   }
                 : undefined
             }
-            canSubmit={canIt => this.setState({ valid: canIt })}
+            canSubmit={(canIt) => this.setState({ valid: canIt })}
             ref={this.form}
             values={this.state.configBlock}
             id={thisConfigSchema ? thisConfigSchema.name : 'Undefined'}

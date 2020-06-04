@@ -24,16 +24,16 @@ import { Table, Column } from '../../types';
 import { Serie } from './_add_to_siri';
 import { Point } from './_get_point';
 
-describe('getSeries', function() {
+describe('getSeries', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convert: jest.fn(v => v),
+        convert: jest.fn((v) => v),
       }),
     } as any);
   });
 
-  it('produces a single series with points for each row', function() {
+  it('produces a single series with points for each row', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
@@ -67,14 +67,14 @@ describe('getSeries', function() {
     expect(siri.values).toEqual(expect.any(Array));
     expect(siri.values).toHaveLength(5);
 
-    siri.values.forEach(point => {
+    siri.values.forEach((point) => {
       expect(point).toHaveProperty('x', 1);
       expect(point).toHaveProperty('y', 2);
       expect(point).toHaveProperty('z', 3);
     });
   });
 
-  it('adds the seriesId to each point', function() {
+  it('adds the seriesId to each point', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
@@ -98,16 +98,16 @@ describe('getSeries', function() {
 
     const series = getSeries(table, chart);
 
-    series[0].values.forEach(point => {
+    series[0].values.forEach((point) => {
       expect(point).toHaveProperty('seriesId', '1');
     });
 
-    series[1].values.forEach(point => {
+    series[1].values.forEach((point) => {
       expect(point).toHaveProperty('seriesId', '2');
     });
   });
 
-  it('produces multiple series if there are multiple y aspects', function() {
+  it('produces multiple series if there are multiple y aspects', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
@@ -134,7 +134,7 @@ describe('getSeries', function() {
     expect(series).toEqual(expect.any(Array));
     expect(series).toHaveLength(2);
 
-    series.forEach(function(siri: Serie, i: number) {
+    series.forEach(function (siri: Serie, i: number) {
       expect(siri).toEqual(expect.any(Object));
       expect(siri).toHaveProperty('label', '' + i);
       expect(siri).toHaveProperty('values');
@@ -142,14 +142,14 @@ describe('getSeries', function() {
       expect(siri.values).toEqual(expect.any(Array));
       expect(siri.values).toHaveLength(5);
 
-      siri.values.forEach(function(point: Point) {
+      siri.values.forEach(function (point: Point) {
         expect(point).toHaveProperty('x', 1);
         expect(point).toHaveProperty('y', i + 2);
       });
     });
   });
 
-  it('produces multiple series if there is a series aspect', function() {
+  it('produces multiple series if there is a series aspect', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
@@ -175,7 +175,7 @@ describe('getSeries', function() {
     expect(series).toEqual(expect.any(Array));
     expect(series).toHaveLength(2);
 
-    series.forEach(function(siri: Serie, i: number) {
+    series.forEach(function (siri: Serie, i: number) {
       expect(siri).toEqual(expect.any(Object));
       expect(siri).toHaveProperty('label', '' + i);
       expect(siri).toHaveProperty('values');
@@ -183,13 +183,13 @@ describe('getSeries', function() {
       expect(siri.values).toEqual(expect.any(Array));
       expect(siri.values).toHaveLength(3);
 
-      siri.values.forEach(function(point: Point) {
+      siri.values.forEach(function (point: Point) {
         expect(point).toHaveProperty('y', 2);
       });
     });
   });
 
-  it('produces multiple series if there is a series aspect and multiple y aspects', function() {
+  it('produces multiple series if there is a series aspect and multiple y aspects', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
@@ -231,13 +231,13 @@ describe('getSeries', function() {
       expect(siri.values).toEqual(expect.any(Array));
       expect(siri.values).toHaveLength(3);
 
-      siri.values.forEach(function(point: Point) {
+      siri.values.forEach(function (point: Point) {
         expect(point).toHaveProperty('y', y);
       });
     }
   });
 
-  it('produces a series list in the same order as its corresponding metric column', function() {
+  it('produces a series list in the same order as its corresponding metric column', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
@@ -268,7 +268,7 @@ describe('getSeries', function() {
 
     // switch the order of the y columns
     chart.aspects.y = chart.aspects.y.reverse();
-    chart.aspects.y.forEach(function(y: any, i) {
+    chart.aspects.y.forEach(function (y: any, i) {
       y.i = i;
     });
 

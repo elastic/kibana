@@ -6,14 +6,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  describe('security feature controls', function() {
+  describe('security feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load('canvas/default');
@@ -65,7 +65,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Canvas', 'Stack Management']);
       });
 
@@ -141,7 +141,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Canvas', 'Stack Management']);
       });
 

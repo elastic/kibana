@@ -52,7 +52,7 @@ interface MessageColumnContentProps {
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
   text-overflow: ellipsis;
-  ${props =>
+  ${(props) =>
     props.wrapMode === 'long'
       ? longWrappedContentStyle
       : props.wrapMode === 'pre-wrapped'
@@ -68,7 +68,7 @@ const formatMessageSegments = (
   messageSegments.map((messageSegment, index) =>
     formatMessageSegment(
       messageSegment,
-      highlights.map(highlight => {
+      highlights.map((highlight) => {
         if (isHighlightMessageColumn(highlight)) {
           const segment = highlight.message[index];
           if (isHighlightFieldSegment(segment)) {

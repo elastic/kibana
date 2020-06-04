@@ -15,10 +15,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   function request({ method, url, data }: { method: string; url: string; data?: JsonObject }) {
     switch (method.toLowerCase()) {
       case 'post':
-        return supertest
-          .post(url)
-          .send(data)
-          .set('kbn-xsrf', 'foo');
+        return supertest.post(url).send(data).set('kbn-xsrf', 'foo');
 
       default:
         throw new Error(`Unsupported methoed ${method}`);

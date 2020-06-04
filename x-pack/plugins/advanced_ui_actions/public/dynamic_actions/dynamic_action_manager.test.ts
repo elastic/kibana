@@ -291,7 +291,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events.length).toBe(0);
 
-        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch(e => e);
+        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch((e) => e);
 
         expect(manager.state.get().events.length).toBe(1);
 
@@ -378,7 +378,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events.length).toBe(0);
 
-        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch(e => e);
+        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch((e) => e);
 
         expect(manager.state.get().events.length).toBe(1);
 
@@ -502,7 +502,7 @@ describe('DynamicActionManager', () => {
 
         const promise = manager
           .updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER'])
-          .catch(e => e);
+          .catch((e) => e);
 
         expect(manager.state.get().events[0].action.name).toBe('foo');
 

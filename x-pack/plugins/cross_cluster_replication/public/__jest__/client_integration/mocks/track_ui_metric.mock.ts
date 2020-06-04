@@ -8,6 +8,6 @@ jest.mock('../../../app/services/track_ui_metric', () => ({
   ...jest.requireActual('../../../app/services/track_ui_metric'),
   trackUiMetric: jest.fn(),
   trackUserRequest: (request: Promise<any>) => {
-    return request.then(response => response);
+    return request.then((response) => response);
   },
 }));

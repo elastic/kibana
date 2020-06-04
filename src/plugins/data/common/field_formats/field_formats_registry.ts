@@ -129,7 +129,7 @@ export class FieldFormatsRegistry {
       return undefined;
     }
 
-    return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type].es);
+    return esTypes.find((type) => this.defaultMap[type] && this.defaultMap[type].es);
   };
 
   /**
@@ -231,7 +231,7 @@ export class FieldFormatsRegistry {
 
   parseDefaultTypeMap(value: any) {
     this.defaultMap = value;
-    forOwn(this, fn => {
+    forOwn(this, (fn) => {
       if (isFunction(fn) && fn.cache) {
         // clear all memoize caches
         // @ts-ignore
@@ -241,7 +241,7 @@ export class FieldFormatsRegistry {
   }
 
   register(fieldFormats: FieldFormatInstanceType[]) {
-    fieldFormats.forEach(fieldFormat => this.fieldFormats.set(fieldFormat.id, fieldFormat));
+    fieldFormats.forEach((fieldFormat) => this.fieldFormats.set(fieldFormat.id, fieldFormat));
   }
 
   /**

@@ -21,7 +21,7 @@ function isReservedSystemTemplate(templateName: string, indexPatterns: string[])
   return (
     templateName.startsWith('kibana_index_template') ||
     (templateName.startsWith('.') &&
-      indexPatterns.every(pattern => {
+      indexPatterns.every((pattern) => {
         return !pattern.includes('*');
       }))
   );
@@ -66,7 +66,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
     license.guardApiRoute(async (context, request, response) => {
       try {
         const templates = await fetchTemplates(
-          context.core.elasticsearch.dataClient.callAsCurrentUser
+          context.core.elasticsearch.legacy.client.callAsCurrentUser
         );
         const okResponse = { body: filterAndFormatTemplates(templates) };
         return response.ok(okResponse);

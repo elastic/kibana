@@ -113,7 +113,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: Object.entries(item.stats.stats).map(s => {
+    items: Object.entries(item.stats.stats).map((s) => {
       return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
     position: 'right',

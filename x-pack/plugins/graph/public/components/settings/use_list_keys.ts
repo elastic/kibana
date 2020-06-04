@@ -30,7 +30,7 @@ export function useListKeys<T>(list: T[]) {
   const idStore = useRef<Map<T, string>>(new Map());
   const currentIdMap = useMemo(() => {
     const newMap: Map<T, string> = new Map();
-    list.forEach(item => {
+    list.forEach((item) => {
       if (idStore.current.has(item)) {
         newMap.set(item, idStore.current.get(item)!);
       } else {

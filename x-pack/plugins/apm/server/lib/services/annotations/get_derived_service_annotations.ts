@@ -11,14 +11,14 @@ import { rangeFilter } from '../../helpers/range_filter';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  SERVICE_VERSION
+  SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
-  environment
+  environment,
 }: {
   serviceName: string;
   environment?: string;
@@ -28,7 +28,7 @@ export async function getDerivedServiceAnnotations({
 
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [SERVICE_NAME]: serviceName } }
+    { term: { [SERVICE_NAME]: serviceName } },
   ];
 
   const environmentFilter = getEnvironmentUiFilterES(environment);
@@ -45,25 +45,25 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({ range: rangeFilter(start, end) })
-            }
+              filter: filter.concat({ range: rangeFilter(start, end) }),
+            },
           },
           aggs: {
             versions: {
               terms: {
-                field: SERVICE_VERSION
-              }
-            }
-          }
-        }
+                field: SERVICE_VERSION,
+              },
+            },
+          },
+        },
       })
-    ).aggregations?.versions.buckets.map(bucket => bucket.key) ?? [];
+    ).aggregations?.versions.buckets.map((bucket) => bucket.key) ?? [];
 
   if (versions.length <= 1) {
     return [];
   }
   const annotations = await Promise.all(
-    versions.map(async version => {
+    versions.map(async (version) => {
       const response = await client.search({
         index: indices['apm_oss.transactionIndices'],
         body: {
@@ -72,19 +72,19 @@ export async function getDerivedServiceAnnotations({
             bool: {
               filter: filter.concat({
                 term: {
-                  [SERVICE_VERSION]: version
-                }
-              })
-            }
+                  [SERVICE_VERSION]: version,
+                },
+              }),
+            },
           },
           aggs: {
             first_seen: {
               min: {
-                field: '@timestamp'
-              }
-            }
-          }
-        }
+                field: '@timestamp',
+              },
+            },
+          },
+        },
       });
 
       const firstSeen = response.aggregations?.first_seen.value;
@@ -103,7 +103,7 @@ export async function getDerivedServiceAnnotations({
         type: AnnotationType.VERSION,
         id: version,
         '@timestamp': firstSeen,
-        text: version
+        text: version,
       };
     })
   );

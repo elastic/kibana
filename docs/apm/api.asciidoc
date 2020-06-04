@@ -9,14 +9,43 @@
 Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
+* <<apm-annotation-api>>
 
-TIP: Kibana provides additional <<api,REST APIs>>,
-and general information on <<using-api,how to use APIs>>.
+[float]
+[[apm-api-example]]
+=== Using the APIs
+
+Users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
+In addition, there are request headers to be aware of, like `kbn-xsrf: true`, and `Content-Type: applicaton/json`.
+Here's an example CURL request that adds an annotation to the APM app:
+
+[source,curl]
+----
+curl -X POST \
+  http://localhost:5601/api/apm/services/opbeans-java/annotation \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+-d '{
+      "@timestamp": "2020-05-11T10:31:30.452Z",
+      "service": {
+        "version": "1.2"
+      },
+      "message": "Revert upgrade",
+      "tags": [
+        "elastic.co", "customer"
+      ]
+    }'
+----
+
+The Kibana <<api,REST API reference>> provides additional information on how to use Kibana APIs,
+required request headers, and token-based authentication options.
 
 ////
 *******************************************************
 ////
 
+[role="xpack"]
 [[agent-config-api]]
 === Agent Configuration API
 
@@ -29,6 +58,8 @@ The following Agent configuration APIs are available:
 * <<apm-delete-config>> to delete an Agent configuration.
 * <<apm-list-config>> to list all Agent configurations.
 * <<apm-search-config>> to search for an Agent configuration.
+
+See <<apm-app-api-config-manager>> for information on the privileges required to use this API endpoint.
 
 ////
 *******************************************************
@@ -276,4 +307,118 @@ POST /api/apm/settings/agent-configuration/search
 
 ////
 *******************************************************
+*******************************************************
 ////
+
+[role="xpack"]
+[[apm-annotation-api]]
+=== Annotation API
+
+The Annotation API allows you to annotate visualizations in the APM app with significant events, like deployments,
+allowing you to easily see how these events are impacting the performance of your existing applications.
+
+The following APIs are available:
+
+* <<apm-annotation-create>> to create an annotation for APM.
+// * <<obs-annotation-create>> POST /api/observability/annotation
+// * <<obs-annotation-get>> GET /api/observability/annotation/:id
+// * <<obs-annotation-delete>> DELETE /api/observability/annotation/:id
+
+By default, annotations are stored in a newly created `observability-annotations` index.
+The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+
+See <<apm-app-api-annotation-manager>> for information on the privileges required to use this API endpoint.
+
+////
+*******************************************************
+////
+
+[[apm-annotation-create]]
+==== Create or update annotation
+
+[[apm-annotation-config-req]]
+===== Request
+
+`POST /api/apm/services/:serviceName/annotation`
+
+[role="child_attributes"]
+[[apm-annotation-config-req-body]]
+===== Request body
+
+`service`::
+(required, object) Service identifying the configuration to create or update.
++
+.Properties of `service`
+[%collapsible%open]
+======
+`version` :::
+  (required, string) Name of service.
+
+`environment` :::
+  (optional, string) Environment of service.
+======
+
+`@timestamp`::
+(required, string) The date and time of the annotation. Must be in https://www.w3.org/TR/NOTE-datetime[ISO 8601] format.
+
+`message`::
+(optional, string) The message displayed in the annotation. Defaults to `service.version`.
+
+`tags`::
+(optional, array) Tags are used by the APM app to distinguish APM annotations from other annotations.
+Tags may have additional functionality in future releases. Defaults to `[apm]`.
+While you can add additional tags, you cannot remove the `apm` tag.
+
+[[apm-annotation-config-example]]
+===== Example
+
+The following example creates an annotation for a service named `opbeans-java`.
+
+[source,console]
+--------------------------------------------------
+POST /api/apm/services/opbeans-java/annotation
+{
+	"@timestamp": "2020-05-08T10:31:30.452Z",
+	"service": {
+		"version": "1.2"
+	},
+	"message": "Deployment 1.2",
+	"tags": [
+		"elastic.co", "customer"
+	]
+}
+--------------------------------------------------
+
+[[apm-annotation-config-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "_index": "observability-annotations",
+  "_id": "Lc9I93EBh6DbmkeV7nFX",
+  "_version": 1,
+  "_seq_no": 12,
+  "_primary_term": 1,
+  "found": true,
+  "_source": {
+    "message": "Deployment 1.2",
+    "@timestamp": "2020-05-08T10:31:30.452Z",
+    "service": {
+      "version": "1.2",
+      "name": "opbeans-java"
+    },
+    "tags": [
+      "apm",
+      "elastic.co",
+      "customer"
+    ],
+    "annotation": {
+      "type": "deployment"
+    },
+    "event": {
+      "created": "2020-05-09T02:34:43.937Z"
+    }
+  }
+}
+--------------------------------------------------

@@ -11,14 +11,14 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_DURATION,
-  TRANSACTION_DURATION_HISTOGRAM
+  TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  SetupHasTransactionDurationMetrics
+  SetupHasTransactionDurationMetrics,
 } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../../common/projections/services';
 
@@ -44,7 +44,7 @@ interface AggregationParams {
 
 const getTransactionDurationAvg = async ({
   setup,
-  projection
+  projection,
 }: AggregationParams) => {
   const { client } = setup;
 
@@ -58,10 +58,10 @@ const getTransactionDurationAvg = async ({
               term: {
                 [PROCESSOR_EVENT]: setup.hasTransactionDurationMetrics
                   ? 'metric'
-                  : 'transaction'
-              }
-            })
-          }
+                  : 'transaction',
+              },
+            }),
+          },
         },
         aggs: {
           services: {
@@ -71,13 +71,13 @@ const getTransactionDurationAvg = async ({
                 avg: {
                   field: setup.hasTransactionDurationMetrics
                     ? TRANSACTION_DURATION_HISTOGRAM
-                    : TRANSACTION_DURATION
-                }
-              }
-            }
-          }
-        }
-      }
+                    : TRANSACTION_DURATION,
+                },
+              },
+            },
+          },
+        },
+      },
     })
   );
 
@@ -87,9 +87,9 @@ const getTransactionDurationAvg = async ({
     return [];
   }
 
-  return aggregations.services.buckets.map(bucket => ({
+  return aggregations.services.buckets.map((bucket) => ({
     name: bucket.key as string,
-    value: bucket.average.value
+    value: bucket.average.value,
   }));
 };
 
@@ -105,11 +105,11 @@ const getAgentName = async ({ setup, projection }: AggregationParams) => {
                 terms: {
                   [PROCESSOR_EVENT]: setup.hasTransactionDurationMetrics
                     ? ['metric', 'error']
-                    : ['metric', 'error', 'transaction']
-                }
-              }
-            ]
-          }
+                    : ['metric', 'error', 'transaction'],
+                },
+              },
+            ],
+          },
         },
         aggs: {
           services: {
@@ -118,14 +118,14 @@ const getAgentName = async ({ setup, projection }: AggregationParams) => {
               agent_name: {
                 top_hits: {
                   _source: [AGENT_NAME],
-                  size: 1
-                }
-              }
-            }
-          }
+                  size: 1,
+                },
+              },
+            },
+          },
         },
-        size: 0
-      }
+        size: 0,
+      },
     })
   );
 
@@ -135,13 +135,13 @@ const getAgentName = async ({ setup, projection }: AggregationParams) => {
     return [];
   }
 
-  return aggregations.services.buckets.map(bucket => ({
+  return aggregations.services.buckets.map((bucket) => ({
     name: bucket.key as string,
     value: (bucket.agent_name.hits.hits[0]?._source as {
       agent: {
         name: string;
       };
-    }).agent.name
+    }).agent.name,
   }));
 };
 
@@ -158,11 +158,11 @@ const getTransactionRate = async ({ setup, projection }: AggregationParams) => {
                 term: {
                   [PROCESSOR_EVENT]: setup.hasTransactionDurationMetrics
                     ? 'metric'
-                    : 'transaction'
-                }
-              }
-            ]
-          }
+                    : 'transaction',
+                },
+              },
+            ],
+          },
         },
         aggs: setup.hasTransactionDurationMetrics
           ? {
@@ -171,14 +171,14 @@ const getTransactionRate = async ({ setup, projection }: AggregationParams) => {
                 aggs: {
                   count: {
                     value_count: {
-                      field: TRANSACTION_DURATION_HISTOGRAM
-                    }
-                  }
-                }
-              }
+                      field: TRANSACTION_DURATION_HISTOGRAM,
+                    },
+                  },
+                },
+              },
             }
-          : projection.body.aggs
-      }
+          : projection.body.aggs,
+      },
     })
   );
 
@@ -190,13 +190,13 @@ const getTransactionRate = async ({ setup, projection }: AggregationParams) => {
 
   const deltaAsMinutes = (setup.end - setup.start) / 1000 / 60;
 
-  return arrayUnionToCallable(aggregations.services.buckets).map(bucket => {
+  return arrayUnionToCallable(aggregations.services.buckets).map((bucket) => {
     const count =
       ('count' in bucket ? bucket.count.value : bucket.doc_count) ?? 0;
     const transactionsPerMinute = count / deltaAsMinutes;
     return {
       name: bucket.key as string,
-      value: transactionsPerMinute
+      value: transactionsPerMinute,
     };
   });
 };
@@ -212,13 +212,13 @@ const getErrorRate = async ({ setup, projection }: AggregationParams) => {
               ...projection.body.query.bool.filter,
               {
                 term: {
-                  [PROCESSOR_EVENT]: 'error'
-                }
-              }
-            ]
-          }
-        }
-      }
+                  [PROCESSOR_EVENT]: 'error',
+                },
+              },
+            ],
+          },
+        },
+      },
     })
   );
 
@@ -230,11 +230,11 @@ const getErrorRate = async ({ setup, projection }: AggregationParams) => {
 
   const deltaAsMinutes = (setup.end - setup.start) / 1000 / 60;
 
-  return aggregations.services.buckets.map(bucket => {
+  return aggregations.services.buckets.map((bucket) => {
     const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
       name: bucket.key as string,
-      value: transactionsPerMinute
+      value: transactionsPerMinute,
     };
   });
 };
@@ -252,11 +252,11 @@ const getEnvironments = async ({ setup, projection }: AggregationParams) => {
                 terms: {
                   [PROCESSOR_EVENT]: setup.hasTransactionDurationMetrics
                     ? ['error', 'metric']
-                    : ['transaction', 'error', 'metric']
-                }
-              }
-            ]
-          }
+                    : ['transaction', 'error', 'metric'],
+                },
+              },
+            ],
+          },
         },
         aggs: {
           services: {
@@ -264,13 +264,13 @@ const getEnvironments = async ({ setup, projection }: AggregationParams) => {
             aggs: {
               environments: {
                 terms: {
-                  field: SERVICE_ENVIRONMENT
-                }
-              }
-            }
-          }
-        }
-      }
+                  field: SERVICE_ENVIRONMENT,
+                },
+              },
+            },
+          },
+        },
+      },
     })
   );
 
@@ -280,9 +280,9 @@ const getEnvironments = async ({ setup, projection }: AggregationParams) => {
     return [];
   }
 
-  return aggregations.services.buckets.map(bucket => ({
+  return aggregations.services.buckets.map((bucket) => ({
     name: bucket.key as string,
-    value: bucket.environments.buckets.map(env => env.key as string)
+    value: bucket.environments.buckets.map((env) => env.key as string),
   }));
 };
 
@@ -291,7 +291,7 @@ export async function getServicesItems(setup: ServicesItemsSetup) {
 
   const params = {
     setup,
-    projection
+    projection,
   };
 
   const [
@@ -299,13 +299,13 @@ export async function getServicesItems(setup: ServicesItemsSetup) {
     agentName,
     transactionRate,
     errorRate,
-    environments
+    environments,
   ] = await Promise.all([
     getTransactionDurationAvg(params),
     getAgentName(params),
     getTransactionRate(params),
     getErrorRate(params),
-    getEnvironments(params)
+    getEnvironments(params),
   ]);
 
   const allMetrics = [
@@ -313,32 +313,35 @@ export async function getServicesItems(setup: ServicesItemsSetup) {
     agentName,
     transactionRate,
     errorRate,
-    environments
+    environments,
   ];
 
   const serviceNames = uniq(
     arrayUnionToCallable(
-      allMetrics.flatMap(metric =>
-        arrayUnionToCallable(metric).map(service => service.name)
+      allMetrics.flatMap((metric) =>
+        arrayUnionToCallable(metric).map((service) => service.name)
       )
     )
   );
 
-  const items = serviceNames.map(serviceName => {
+  const items = serviceNames.map((serviceName) => {
     return {
       serviceName,
       agentName:
-        agentName.find(service => service.name === serviceName)?.value ?? null,
-      transactionsPerMinute:
-        transactionRate.find(service => service.name === serviceName)?.value ??
+        agentName.find((service) => service.name === serviceName)?.value ??
         null,
+      transactionsPerMinute:
+        transactionRate.find((service) => service.name === serviceName)
+          ?.value ?? null,
       errorsPerMinute:
-        errorRate.find(service => service.name === serviceName)?.value ?? null,
+        errorRate.find((service) => service.name === serviceName)?.value ??
+        null,
       avgResponseTime:
-        transactionDurationAvg.find(service => service.name === serviceName)
+        transactionDurationAvg.find((service) => service.name === serviceName)
           ?.value ?? null,
       environments:
-        environments.find(service => service.name === serviceName)?.value ?? []
+        environments.find((service) => service.name === serviceName)?.value ??
+        [],
     };
   });
 

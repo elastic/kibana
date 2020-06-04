@@ -20,7 +20,7 @@ class ProtectedApplications {
       this.applications = new Set(
         this.featuresService
           .getFeatures()
-          .map(feature => feature.app)
+          .map((feature) => feature.app)
           .flat()
       );
     }

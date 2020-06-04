@@ -16,7 +16,7 @@ import { CODE_PATH_BEATS } from '../../../../common/constants';
 uiRoutes.when('/beats/beat/:beatUuid', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },

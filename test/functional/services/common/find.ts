@@ -44,7 +44,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     );
 
   const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) =>
-    webElements.map(e => wrap(e));
+    webElements.map((e) => wrap(e));
 
   const findAndWrap = async (locator: By, timeout: number): Promise<WebElementWrapper> => {
     const webElement = await driver.wait(until.elementLocated(locator), timeout);
@@ -145,7 +145,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
           elements = [];
         }
         // Force isStale checks for all the retrieved elements.
-        await Promise.all(elements.map(async element => await element.isEnabled()));
+        await Promise.all(elements.map(async (element) => await element.isEnabled()));
         await this._withTimeout(defaultFindTimeout);
         return elements;
       });
@@ -289,7 +289,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<boolean> {
       log.debug(`Find.existsByLinkText('${linkText}')  with timeout=${timeout}`);
       return await this.exists(
-        async drive => wrapAll(await drive.findElements(By.linkText(linkText))),
+        async (drive) => wrapAll(await drive.findElements(By.linkText(linkText))),
         timeout
       );
     }
@@ -322,7 +322,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.existsByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(async drive => {
+      return await this.exists(async (drive) => {
         return wrapAll(await drive.findElements(By.css(selector)));
       }, timeout);
     }
@@ -377,11 +377,11 @@ export async function FindProvider({ getService }: FtrProviderContext) {
         const _element = element instanceof WebElementWrapper ? element._webElement : element;
         const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(
-          allButtons.map(async el => {
+          allButtons.map(async (el) => {
             return el.getVisibleText();
           })
         );
-        const index = buttonTexts.findIndex(text => text.trim() === buttonText.trim());
+        const index = buttonTexts.findIndex((text) => text.trim() === buttonText.trim());
         if (index === -1) {
           throw new Error('Button not found');
         }

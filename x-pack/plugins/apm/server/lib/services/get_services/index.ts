@@ -10,7 +10,7 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  SetupHasTransactionDurationMetrics
+  SetupHasTransactionDurationMetrics,
 } from '../../helpers/setup_request';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
@@ -26,7 +26,7 @@ export async function getServices(
 ) {
   const [items, hasLegacyData] = await Promise.all([
     getServicesItems(setup),
-    getLegacyDataStatus(setup)
+    getLegacyDataStatus(setup),
   ]);
 
   const noDataInCurrentTimeRange = isEmpty(items);
@@ -37,6 +37,6 @@ export async function getServices(
   return {
     items,
     hasHistoricalData,
-    hasLegacyData
+    hasLegacyData,
   };
 }

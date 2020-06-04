@@ -66,17 +66,17 @@ export class VisualizeEmbeddableFactory
     name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
     includeFields: ['visState'],
     type: 'visualization',
-    getIconForSavedObject: savedObject => {
+    getIconForSavedObject: (savedObject) => {
       return (
         getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
       );
     },
-    getTooltipForSavedObject: savedObject => {
+    getTooltipForSavedObject: (savedObject) => {
       return `${savedObject.attributes.title} (${
         getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
       })`;
     },
-    showSavedObject: savedObject => {
+    showSavedObject: (savedObject) => {
       const typeName: string = JSON.parse(savedObject.attributes.visState).type;
       const visType = getTypes().get(typeName);
       if (!visType) {

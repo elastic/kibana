@@ -113,7 +113,7 @@ const ActionsColumnContent = euiStyled(LogEntryColumnContent)`
 `;
 
 const ButtonWrapper = euiStyled.div`
-  background: ${props => props.theme.eui.euiColorPrimary};
+  background: ${(props) => props.theme.eui.euiColorPrimary};
   border-radius: 50%;
 `;
 

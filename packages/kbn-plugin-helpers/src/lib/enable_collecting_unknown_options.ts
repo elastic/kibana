@@ -22,7 +22,7 @@ import { Command } from 'commander';
 export function enableCollectingUnknownOptions(command: Command) {
   const origParse = command.parseOptions;
   command.allowUnknownOption();
-  command.parseOptions = function(argv: string[]) {
+  command.parseOptions = function (argv: string[]) {
     const opts = origParse.call(this, argv);
     this.unknownOptions = opts.unknown;
     return opts;

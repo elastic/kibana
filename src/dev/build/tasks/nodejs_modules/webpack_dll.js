@@ -31,7 +31,7 @@ function checkDllEntryAccess(entry, baseDir = '') {
 export async function getDllEntries(manifestPaths, whiteListedModules, baseDir = '') {
   // Read and parse all manifests
   const manifests = await Promise.all(
-    manifestPaths.map(async manifestPath => JSON.parse(await read(manifestPath)))
+    manifestPaths.map(async (manifestPath) => JSON.parse(await read(manifestPath)))
   );
 
   // Process and group modules from all manifests
@@ -58,8 +58,8 @@ export async function getDllEntries(manifestPaths, whiteListedModules, baseDir =
 
   // Only includes modules who are not in the white list of modules
   // and that are node_modules
-  return manifestsModules.filter(entry => {
-    const isWhiteListed = whiteListedModules.some(nonEntry =>
+  return manifestsModules.filter((entry) => {
+    const isWhiteListed = whiteListedModules.some((nonEntry) =>
       normalizePosixPath(entry).includes(`node_modules/${nonEntry}`)
     );
     const isNodeModule = entry.includes('node_modules');
@@ -113,7 +113,7 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   ]);
 
   await deleteAll(
-    filesToDelete.filter(path => {
+    filesToDelete.filter((path) => {
       const relativePath = relative(moduleDir, path);
       return !relativePath.endsWith('package.json') || relativePath.includes('node_modules');
     })

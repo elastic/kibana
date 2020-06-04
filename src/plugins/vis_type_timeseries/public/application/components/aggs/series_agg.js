@@ -108,7 +108,7 @@ function SeriesAggUi(props) {
       value: 'cumulative_sum',
     },
   ];
-  const selectedFunctionOption = functionOptions.find(option => {
+  const selectedFunctionOption = functionOptions.find((option) => {
     return model.function === option.value;
   });
 

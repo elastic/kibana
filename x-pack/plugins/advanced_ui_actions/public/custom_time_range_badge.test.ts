@@ -14,7 +14,7 @@ import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { ReactElement } from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
-test('Removing custom time range from badge resets embeddable back to container time', async done => {
+test('Removing custom time range from badge resets embeddable back to container time', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },

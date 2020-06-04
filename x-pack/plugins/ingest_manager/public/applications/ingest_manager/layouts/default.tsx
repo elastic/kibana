@@ -18,14 +18,14 @@ interface Props {
 }
 
 const Container = styled.div`
-  min-height: calc(100vh - ${props => props.theme.eui.euiHeaderChildSize});
-  background: ${props => props.theme.eui.euiColorEmptyShade};
+  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 const Nav = styled.nav`
-  background: ${props => props.theme.eui.euiColorEmptyShade};
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  padding: ${props =>
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  padding: ${(props) =>
     `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`};
   .euiTabs {
     padding-left: 3px;

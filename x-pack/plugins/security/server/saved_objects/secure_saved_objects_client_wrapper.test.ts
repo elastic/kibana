@@ -76,7 +76,7 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>) => 
   const spaceId = args.options?.namespace || 'default';
 
   const ACTION = getCalls[0][1];
-  const types = getCalls.map(x => x[0]);
+  const types = getCalls.map((x) => x[0]);
   const missing = [{ spaceId, privilege: actions[0] }]; // if there was more than one type, only the first type was unauthorized
   const spaceIds = [spaceId];
 
@@ -99,7 +99,7 @@ const expectSuccess = async (fn: Function, args: Record<string, any>) => {
     SavedObjectActions['get']
   >).mock.calls;
   const ACTION = getCalls[0][1];
-  const types = getCalls.map(x => x[0]);
+  const types = getCalls.map((x) => x[0]);
   const spaceIds = [args.options?.namespace || 'default'];
 
   expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
@@ -123,7 +123,7 @@ const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => 
   const getResults = (clientOpts.actions.savedObject.get as jest.MockedFunction<
     SavedObjectActions['get']
   >).mock.results;
-  const actions = getResults.map(x => x.value);
+  const actions = getResults.map((x) => x.value);
 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
@@ -206,8 +206,8 @@ function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: 
     hasAllRequested: true,
     username: USERNAME,
     privileges: _namespaces
-      .map(resource =>
-        _actions.map(action => ({
+      .map((resource) =>
+        _actions.map((action) => ({
           resource,
           privilege: action,
           authorized: true,

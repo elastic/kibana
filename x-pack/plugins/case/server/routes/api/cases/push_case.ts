@@ -100,7 +100,7 @@ export function initPushCaseUserActionApi({
           connector_id: myCase.attributes.connector_id ?? caseConfigureConnectorId,
         };
 
-        if (!connectors.some(connector => connector.id === updateConnectorId.connector_id)) {
+        if (!connectors.some((connector) => connector.id === updateConnectorId.connector_id)) {
           throw Boom.notFound('Connector not found or set to none');
         }
 
@@ -127,8 +127,8 @@ export function initPushCaseUserActionApi({
           caseService.patchComments({
             client,
             comments: comments.saved_objects
-              .filter(comment => comment.attributes.pushed_at == null)
-              .map(comment => ({
+              .filter((comment) => comment.attributes.pushed_at == null)
+              .map((comment) => ({
                 commentId: comment.id,
                 updatedAttributes: {
                   pushed_at: pushedDate,
@@ -174,9 +174,9 @@ export function initPushCaseUserActionApi({
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
               },
-              comments: comments.saved_objects.map(origComment => {
+              comments: comments.saved_objects.map((origComment) => {
                 const updatedComment = updatedComments.saved_objects.find(
-                  c => c.id === origComment.id
+                  (c) => c.id === origComment.id
                 );
                 return {
                   ...origComment,

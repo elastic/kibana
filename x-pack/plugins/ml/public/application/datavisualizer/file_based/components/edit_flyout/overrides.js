@@ -130,7 +130,7 @@ class OverridesUI extends Component {
     }
 
     if (originalTimestampFormat !== undefined) {
-      const optionExists = TIMESTAMP_OPTIONS.some(option => option === originalTimestampFormat);
+      const optionExists = TIMESTAMP_OPTIONS.some((option) => option === originalTimestampFormat);
       if (optionExists === false) {
         // Incoming format does not exist in dropdown. Display custom input with incoming format as default value.
         const overrides = { ...this.state.overrides };
@@ -177,7 +177,7 @@ class OverridesUI extends Component {
     }
   };
 
-  onCustomTimestampFormatChange = e => {
+  onCustomTimestampFormatChange = (e) => {
     this.setState({ customTimestampFormat: e.target.value });
     // check whether the value is valid and set that to state.
     const { isValid, errorMessage } = isTimestampFormatValid(e.target.value);
@@ -195,7 +195,7 @@ class OverridesUI extends Component {
     this.setOverride({ delimiter });
   };
 
-  onCustomDelimiterChange = e => {
+  onCustomDelimiterChange = (e) => {
     this.setState({ customDelimiter: e.target.value });
   };
 
@@ -204,11 +204,11 @@ class OverridesUI extends Component {
     this.setOverride({ quote });
   };
 
-  onHasHeaderRowChange = e => {
+  onHasHeaderRowChange = (e) => {
     this.setOverride({ hasHeaderRow: e.target.checked });
   };
 
-  onShouldTrimFieldsChange = e => {
+  onShouldTrimFieldsChange = (e) => {
     this.setOverride({ shouldTrimFields: e.target.checked });
   };
 
@@ -223,11 +223,11 @@ class OverridesUI extends Component {
     this.setOverride({ columnNames });
   };
 
-  grokPatternChange = e => {
+  grokPatternChange = (e) => {
     this.setOverride({ grokPattern: e.target.value });
   };
 
-  onLinesToSampleChange = e => {
+  onLinesToSampleChange = (e) => {
     const linesToSample = +e.target.value;
     this.setOverride({ linesToSample });
 
@@ -493,7 +493,7 @@ class OverridesUI extends Component {
               <EuiFormRow label={f} key={f}>
                 <EuiFieldText
                   value={columnNames[i]}
-                  onChange={e => this.onColumnNameChange(e, i)}
+                  onChange={(e) => this.onColumnNameChange(e, i)}
                 />
               </EuiFormRow>
             ))}
@@ -514,7 +514,7 @@ function selectedOption(opt) {
 // also sort alphanumerically
 function getSortedFields(fields) {
   return fields
-    .map(f => ({ label: f }))
+    .map((f) => ({ label: f }))
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 }
 

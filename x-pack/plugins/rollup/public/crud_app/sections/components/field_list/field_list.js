@@ -37,7 +37,7 @@ export const FieldList = ({
           icon: 'trash',
           type: 'icon',
           color: 'danger',
-          onClick: field => onRemoveField(field),
+          onClick: (field) => onRemoveField(field),
         },
       ],
     });

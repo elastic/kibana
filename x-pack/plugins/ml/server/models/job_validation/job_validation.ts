@@ -58,7 +58,7 @@ export async function validateJob(
     if (basicValidation.valid === true) {
       // remove basic success messages from tests
       // where we run additional extended tests.
-      const filteredBasicValidationMessages = basicValidation.messages.filter(m => {
+      const filteredBasicValidationMessages = basicValidation.messages.filter((m) => {
         return m.id !== 'bucket_span_valid';
       });
 
@@ -83,7 +83,7 @@ export async function validateJob(
       // so we can decide later whether certain additional tests should be run
       const cardinalityMessages = await validateCardinality(callWithRequest, job);
       validationMessages.push(...cardinalityMessages);
-      const cardinalityError = cardinalityMessages.some(m => {
+      const cardinalityError = cardinalityMessages.some((m) => {
         return messages[m.id as MessageId].status === VALIDATION_STATUS.ERROR;
       });
 
@@ -111,7 +111,7 @@ export async function validateJob(
       validationMessages.push({ id: 'skipped_extended_tests' });
     }
 
-    return uniqWithIsEqual(validationMessages).map(message => {
+    return uniqWithIsEqual(validationMessages).map((message) => {
       const messageId = message.id as MessageId;
       const messageDef = messages[messageId] as JobValidationMessageDef;
       if (typeof messageDef !== 'undefined') {

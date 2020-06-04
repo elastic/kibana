@@ -62,7 +62,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
     setState({ isModalOpen: false });
   };
 
-  const updateField: UpdateFieldFunc = field => {
+  const updateField: UpdateFieldFunc = (field) => {
     const previousField = byId[field.id];
 
     const willDeleteChildFields = (oldType: DataType, newType: DataType): boolean => {
@@ -102,7 +102,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
         if (requiresConfirmation) {
           aliasesToDelete = aliasesOnFieldAndDescendants.filter(
             // We will only delete aliases that points to possible children, *NOT* the field itself
-            id => aliasesOnField.includes(id) === false
+            (id) => aliasesOnField.includes(id) === false
           );
         }
       }
@@ -112,7 +112,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
           isModalOpen: true,
           field,
           aliases: Boolean(aliasesToDelete.length)
-            ? aliasesToDelete.map(id => byId[id].path.join(' > ')).sort()
+            ? aliasesToDelete.map((id) => byId[id].path.join(' > ')).sort()
             : undefined,
         });
         return;

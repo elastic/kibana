@@ -5,12 +5,11 @@
  */
 
 import React, { memo } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useKibanaLink } from '../../../../hooks/use_kibana_link';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DataStream } from '../../../../types';
-import { TableRowActionsNested } from '../../../../components/table_row_actions_nested';
+import { useKibanaLink } from '../../../../hooks';
+import { ContextMenuActions } from '../../../../components';
 
 export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
   const { dashboards } = datastream;
@@ -68,7 +67,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     panels.push({
       id: 1,
       title: panelTitle,
-      items: dashboards.map(dashboard => {
+      items: dashboards.map((dashboard) => {
         return {
           icon: 'dashboardApp',
           href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
@@ -78,5 +77,5 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     });
   }
 
-  return <TableRowActionsNested panels={panels} />;
+  return <ContextMenuActions panels={panels} />;
 });

@@ -21,7 +21,7 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
 import { IIndexPattern } from '../..';
 
-describe('SearchSource#normalizeSortRequest', function() {
+describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {
     name: 'script string',
     type: 'number',
@@ -40,7 +40,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     fields: [scriptedField, murmurScriptedField],
   } as IIndexPattern;
 
-  it('should return an array', function() {
+  it('should return an array', function () {
     const sortable = { someField: SortDirection.desc };
     const result = normalizeSortRequest(sortable, indexPattern);
     expect(result).toEqual([
@@ -55,7 +55,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     expect(sortable).toEqual({ someField: SortDirection.desc });
   });
 
-  it('should make plain string sort into the more verbose format', function() {
+  it('should make plain string sort into the more verbose format', function () {
     const result = normalizeSortRequest([{ someField: SortDirection.desc }], indexPattern);
     expect(result).toEqual([
       {
@@ -66,7 +66,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should append default sort options', function() {
+  it('should append default sort options', function () {
     const defaultSortOptions = {
       unmapped_type: 'boolean',
     };
@@ -85,7 +85,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should enable script based sorting', function() {
+  it('should enable script based sorting', function () {
     const result = normalizeSortRequest(
       {
         [scriptedField.name]: SortDirection.desc,
@@ -106,7 +106,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should use script based sorting only on sortable types', function() {
+  it('should use script based sorting only on sortable types', function () {
     const result = normalizeSortRequest(
       [
         {
@@ -125,7 +125,7 @@ describe('SearchSource#normalizeSortRequest', function() {
     ]);
   });
 
-  it('should remove unmapped_type parameter from _score sorting', function() {
+  it('should remove unmapped_type parameter from _score sorting', function () {
     const result = normalizeSortRequest({ _score: SortDirection.desc }, indexPattern, {
       unmapped_type: 'boolean',
     });

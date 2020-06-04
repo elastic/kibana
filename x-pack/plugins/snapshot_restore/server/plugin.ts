@@ -92,7 +92,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       router,
       license: this.license,
       config: {
-        isSecurityEnabled: security !== undefined,
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
         isCloudEnabled: cloud !== undefined && cloud.isCloudEnabled,
         isSlmEnabled: pluginConfig.slm_ui.enabled,
       },

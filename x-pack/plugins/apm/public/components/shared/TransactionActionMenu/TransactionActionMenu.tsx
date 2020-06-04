@@ -17,7 +17,7 @@ import {
   SectionLink,
   SectionLinks,
   SectionSubtitle,
-  SectionTitle
+  SectionTitle,
 } from '../../../../../observability/public';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../hooks/useFetcher';
@@ -37,13 +37,13 @@ interface Props {
 const ActionMenuButton = ({ onClick }: { onClick: () => void }) => (
   <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
     {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
-      defaultMessage: 'Actions'
+      defaultMessage: 'Actions',
     })}
   </EuiButtonEmpty>
 );
 
 export const TransactionActionMenu: FunctionComponent<Props> = ({
-  transaction
+  transaction,
 }: Props) => {
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
@@ -64,16 +64,16 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
         { key: 'service.name', value: transaction?.service.name },
         { key: 'service.environment', value: transaction?.service.environment },
         { key: 'transaction.name', value: transaction?.transaction.name },
-        { key: 'transaction.type', value: transaction?.transaction.type }
+        { key: 'transaction.type', value: transaction?.transaction.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
     [transaction]
   );
 
   const { data: customLinks = [], status, refetch } = useFetcher(
-    callApmApi =>
+    (callApmApi) =>
       callApmApi({
         pathname: '/api/apm/settings/custom_links',
-        params: { query: convertFiltersToQuery(filters) }
+        params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]
   );
@@ -82,11 +82,11 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     transaction,
     basePath: core.http.basePath,
     location,
-    urlParams
-  }).map(sectionList =>
-    sectionList.map(section => ({
+    urlParams,
+  }).map((sectionList) =>
+    sectionList.map((section) => ({
       ...section,
-      actions: section.actions.map(action => {
+      actions: section.actions.map((action) => {
         const { href } = action;
 
         // use navigateToApp as a temporary workaround for faster navigation between observability apps.
@@ -105,15 +105,16 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
             if (app === 'uptime' || app === 'metrics' || app === 'logs') {
               event.preventDefault();
+              const search = parsed.search || '';
+
+              const path = `${rest.join('/')}${search}`;
               core.application.navigateToApp(app, {
-                path: `${rest.join('/')}${
-                  parsed.search ? `&${parsed.search}` : ''
-                }`
+                path,
               });
             }
-          }
+          },
         };
-      })
+      }),
     }))
   );
 
@@ -124,11 +125,11 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
   const toggleCustomLinkFlyout = () => {
     closePopover();
-    setIsCustomLinkFlyoutOpen(isOpen => !isOpen);
+    setIsCustomLinkFlyoutOpen((isOpen) => !isOpen);
   };
 
   const toggleCustomLinkPopover = () => {
-    setIsCustomLinksPopoverOpen(isOpen => !isOpen);
+    setIsCustomLinksPopoverOpen((isOpen) => !isOpen);
   };
 
   return (
@@ -170,7 +171,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
                 const isLastSection = idx !== sections.length - 1;
                 return (
                   <div key={idx}>
-                    {section.map(item => (
+                    {section.map((item) => (
                       <Section key={item.key}>
                         {item.title && (
                           <SectionTitle>{item.title}</SectionTitle>
@@ -179,7 +180,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
                           <SectionSubtitle>{item.subtitle}</SectionSubtitle>
                         )}
                         <SectionLinks>
-                          {item.actions.map(action => (
+                          {item.actions.map((action) => (
                             <SectionLink
                               key={action.key}
                               label={action.label}

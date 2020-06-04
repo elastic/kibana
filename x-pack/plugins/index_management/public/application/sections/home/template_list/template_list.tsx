@@ -7,6 +7,7 @@
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ScopedHistory } from 'kibana/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
@@ -52,7 +53,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Filter out system index templates
   const filteredTemplates = useMemo(
-    () => (templates ? templates.filter(template => !template.name.startsWith('.')) : []),
+    () => (templates ? templates.filter((template) => !template.name.startsWith('.')) : []),
     [templates]
   );
 
@@ -128,7 +129,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               id="checkboxShowSystemIndexTemplates"
               data-test-subj="systemTemplatesSwitch"
               checked={showSystemTemplates}
-              onChange={event => setShowSystemTemplates(event.target.checked)}
+              onChange={(event) => setShowSystemTemplates(event.target.checked)}
               label={
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
@@ -144,6 +145,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           reload={reload}
           editTemplate={editTemplate}
           cloneTemplate={cloneTemplate}
+          history={history as ScopedHistory}
         />
       </Fragment>
     );

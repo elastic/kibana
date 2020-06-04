@@ -27,15 +27,13 @@ import { useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { LinkedAgentCount } from '../components';
-import { ConfigDatasourcesView } from './components/datasources';
-import { ConfigYamlView } from './components/yaml';
-import { ConfigSettingsView } from './components/settings';
+import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
+import { ConfigDatasourcesView, ConfigSettingsView } from './components';
 
 const Divider = styled.div`
   width: 0;
   height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
@@ -147,21 +145,31 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
               )) ||
               '',
           },
+          { isDivider: true },
+          {
+            content: agentConfig && <AgentConfigActionMenu configId={configId} fullButton={true} />,
+          },
         ].map((item, index) => (
           <EuiFlexItem grow={false} key={index}>
             {item.isDivider ?? false ? (
               <Divider />
-            ) : (
+            ) : item.label ? (
               <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
-                <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
+                <EuiDescriptionListTitle className="eui-textNoWrap">
+                  {item.label}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription className="eui-textNoWrap">
+                  {item.content}
+                </EuiDescriptionListDescription>
               </EuiDescriptionList>
+            ) : (
+              item.content
             )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
     ),
-    [agentConfig, agentStatus]
+    [agentConfig, configId, agentStatus]
   );
 
   const headerTabs = useMemo(() => {
@@ -173,14 +181,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         }),
         href: getHref('configuration_details', { configId, tabId: 'datasources' }),
         isSelected: tabId === '' || tabId === 'datasources',
-      },
-      {
-        id: 'yaml',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlTabText', {
-          defaultMessage: 'YAML',
-        }),
-        href: getHref('configuration_details', { configId, tabId: 'yaml' }),
-        isSelected: tabId === 'yaml',
       },
       {
         id: 'settings',
@@ -254,12 +254,6 @@ const AgentConfigDetailsContent: React.FunctionComponent<{ agentConfig: AgentCon
   useBreadcrumbs('configuration_details', { configName: agentConfig.name });
   return (
     <Switch>
-      <Route
-        path={PAGE_ROUTING_PATHS.configuration_details_yaml}
-        render={() => {
-          return <ConfigYamlView config={agentConfig} />;
-        }}
-      />
       <Route
         path={PAGE_ROUTING_PATHS.configuration_details_settings}
         render={() => {

@@ -25,6 +25,9 @@ import { Type } from '@kbn/config-schema';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
+// @internal (undocumented)
+export function __kbnBootstrap__(): void;
+
 // @public
 export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;
@@ -106,6 +109,7 @@ export interface ApplicationSetup {
 
 // @public (undocumented)
 export interface ApplicationStart {
+    applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
     capabilities: RecursiveReadonly<Capabilities>;
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
@@ -116,6 +120,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): Promise<void>;
+    navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -285,6 +290,7 @@ export interface ChromeNavLink {
     readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
+    readonly href?: string;
     readonly icon?: string;
     readonly id: string;
     // @internal
@@ -313,7 +319,7 @@ export interface ChromeNavLinks {
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -855,6 +861,18 @@ export interface IUiSettingsClient {
     set: (key: string, value: any) => Promise<boolean>;
 }
 
+// @public (undocumented)
+export interface LegacyApp extends AppBase {
+    // (undocumented)
+    appUrl: string;
+    // (undocumented)
+    disableSubUrlTracking?: boolean;
+    // (undocumented)
+    linkToLastSubUrl?: boolean;
+    // (undocumented)
+    subUrlBase?: string;
+}
+
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup<any, any> {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
@@ -990,6 +1008,16 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 
 // @public (undocumented)
 export type PluginOpaqueId = symbol;
+
+// @public
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+    legacy: false;
+};
+
+// @public
+export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+    legacy: true;
+};
 
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;

@@ -31,7 +31,7 @@ import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from '.
 const Divider = styled.div`
   width: 0;
   height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
@@ -140,9 +140,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
     [agentConfigData, agentData, getHref, isAgentConfigLoading]
   );
 

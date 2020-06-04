@@ -108,7 +108,7 @@ export class LoggingService implements LoggerFactory {
 
     const { level, appenders } = this.getLoggerConfigByContext(config, context);
     const loggerLevel = LogLevel.fromId(level);
-    const loggerAppenders = appenders.map(appenderKey => this.appenders.get(appenderKey)!);
+    const loggerAppenders = appenders.map((appenderKey) => this.appenders.get(appenderKey)!);
 
     return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory());
   }

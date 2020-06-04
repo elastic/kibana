@@ -7,14 +7,14 @@
 import moment from 'moment';
 import {
   PROCESSOR_EVENT,
-  TRANSACTION_DURATION_HISTOGRAM
+  TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../common/elasticsearch_fieldnames';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { APMConfig } from '../..';
 import {
   getApmIndices,
-  ApmIndicesConfig
+  ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { ESClient } from './es_client';
@@ -99,7 +99,7 @@ export async function setupRequest<
 
   const indices = await getApmIndices({
     savedObjectsClient: context.core.savedObjects.client,
-    config
+    config,
   });
 
   const client = getESClient(context, request, { clientAsInternalUser: false });
@@ -119,32 +119,32 @@ export async function setupRequest<
               ...(start.start && end.end
                 ? [{ range: rangeFilter(start.start, end.end) }]
                 : []),
-              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } }
-            ]
-          }
+              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+            ],
+          },
         },
-        size: 0
+        size: 0,
       },
-      terminateAfter: 1
+      terminateAfter: 1,
     });
 
     return {
-      hasTransactionDurationMetrics: response.hits.total.value > 0
+      hasTransactionDurationMetrics: response.hits.total.value > 0,
     };
   };
 
   const [
     dynamicIndexPattern,
-    hasTransactionDurationMetrics
+    hasTransactionDurationMetrics,
   ] = await Promise.all([
     getDynamicIndexPattern({
       context,
       indices,
-      processorEvent: query.processorEvent
+      processorEvent: query.processorEvent,
     }),
     options?.checkForTransactionDurationMetrics
       ? checkTransactionDurationMetrics()
-      : Promise.resolve({})
+      : Promise.resolve({}),
   ]);
 
   const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
@@ -153,10 +153,10 @@ export async function setupRequest<
     indices,
     client,
     internalClient: getESClient(context, request, {
-      clientAsInternalUser: true
+      clientAsInternalUser: true,
     }),
     config,
-    dynamicIndexPattern
+    dynamicIndexPattern,
   };
 
   return {
@@ -164,6 +164,6 @@ export async function setupRequest<
     ...end,
     ...hasTransactionDurationMetrics,
     ...('uiFilters' in query ? { uiFiltersES } : {}),
-    ...coreSetupRequest
+    ...coreSetupRequest,
   } as InferSetup<TParams, TOptions>;
 }

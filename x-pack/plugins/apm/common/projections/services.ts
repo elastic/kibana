@@ -8,7 +8,7 @@ import {
   Setup,
   SetupUIFilters,
   SetupTimeRange,
-  SetupHasTransactionDurationMetrics
+  SetupHasTransactionDurationMetrics,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME } from '../elasticsearch_fieldnames';
@@ -16,7 +16,7 @@ import { SERVICE_NAME } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getServicesProjection({
-  setup
+  setup,
 }: {
   setup: Setup &
     SetupTimeRange &
@@ -28,12 +28,12 @@ export function getServicesProjection({
     end,
     uiFiltersES,
     indices,
-    hasTransactionDurationMetrics
+    hasTransactionDurationMetrics,
   } = setup;
 
   const index = [
     indices['apm_oss.metricsIndices'],
-    indices['apm_oss.errorIndices']
+    indices['apm_oss.errorIndices'],
   ];
 
   if (!hasTransactionDurationMetrics) {
@@ -46,16 +46,16 @@ export function getServicesProjection({
       size: 0,
       query: {
         bool: {
-          filter: [{ range: rangeFilter(start, end) }, ...uiFiltersES]
-        }
+          filter: [{ range: rangeFilter(start, end) }, ...uiFiltersES],
+        },
       },
       aggs: {
         services: {
           terms: {
-            field: SERVICE_NAME
-          }
-        }
-      }
-    }
+            field: SERVICE_NAME,
+          },
+        },
+      },
+    },
   };
 }

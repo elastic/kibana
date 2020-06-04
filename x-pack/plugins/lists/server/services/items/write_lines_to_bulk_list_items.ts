@@ -33,7 +33,7 @@ export const importListItemsToStream = ({
   user,
   meta,
 }: ImportListItemsToStreamOptions): Promise<void> => {
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     const readBuffer = new BufferLines({ input: stream });
     readBuffer.on('lines', async (lines: string[]) => {
       await writeBufferToItems({
@@ -85,7 +85,7 @@ export const writeBufferToItems = async ({
     value: buffer,
   });
   const duplicatesRemoved = buffer.filter(
-    bufferedValue => !items.some(item => item.value === bufferedValue)
+    (bufferedValue) => !items.some((item) => item.value === bufferedValue)
   );
   const linesProcessed = duplicatesRemoved.length;
   const duplicatesFound = buffer.length - duplicatesRemoved.length;

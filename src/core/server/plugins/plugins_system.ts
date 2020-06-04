@@ -53,9 +53,9 @@ export class PluginsSystem {
         [
           ...new Set([
             ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter(optPlugin => this.plugins.has(optPlugin)),
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
           ]),
-        ].map(depId => this.plugins.get(depId)!.opaqueId),
+        ].map((depId) => this.plugins.get(depId)!.opaqueId),
       ])
     );
   }
@@ -161,18 +161,22 @@ export class PluginsSystem {
    */
   public uiPlugins() {
     const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
-      pluginName => this.plugins.get(pluginName)!.includesUiPlugin
+      (pluginName) => this.plugins.get(pluginName)!.includesUiPlugin
     );
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      uiPluginNames.map(pluginName => {
+      uiPluginNames.map((pluginName) => {
         const plugin = this.plugins.get(pluginName)!;
         return [
           pluginName,
           {
             id: pluginName,
             configPath: plugin.manifest.configPath,
-            requiredPlugins: plugin.manifest.requiredPlugins.filter(p => uiPluginNames.includes(p)),
-            optionalPlugins: plugin.manifest.optionalPlugins.filter(p => uiPluginNames.includes(p)),
+            requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
+              uiPluginNames.includes(p)
+            ),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
+              uiPluginNames.includes(p)
+            ),
           },
         ];
       })
@@ -200,7 +204,7 @@ export class PluginsSystem {
           pluginName,
           new Set([
             ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter(dependency => this.plugins.has(dependency)),
+            ...plugin.optionalPlugins.filter((dependency) => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })
@@ -209,7 +213,7 @@ export class PluginsSystem {
     // First, find a list of "start nodes" which have no outgoing edges. At least
     // one such node must exist in a non-empty acyclic graph.
     const pluginsWithAllDependenciesSorted = [...pluginsDependenciesGraph.keys()].filter(
-      pluginName => pluginsDependenciesGraph.get(pluginName)!.size === 0
+      (pluginName) => pluginsDependenciesGraph.get(pluginName)!.size === 0
     );
 
     const sortedPluginNames = new Set<PluginName>();

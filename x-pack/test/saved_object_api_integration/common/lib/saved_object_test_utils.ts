@@ -48,11 +48,11 @@ export const getTestTitle = (
   bulkStatusCode?: 200 | 403 // only used for bulk test suites; other suites specify forbidden/permitted in each test case
 ) => {
   const testCases = Array.isArray(testCaseOrCases) ? testCaseOrCases : [testCaseOrCases];
-  const stringify = (array: TestCase[]) => array.map(x => `${x.type}/${x.id}`).join();
+  const stringify = (array: TestCase[]) => array.map((x) => `${x.type}/${x.id}`).join();
   if (bulkStatusCode === 403 || (testCases.length === 1 && testCases[0].failure === 403)) {
     return `forbidden [${stringify(testCases)}]`;
   }
-  if (testCases.find(x => x.failure === 403)) {
+  if (testCases.find((x) => x.failure === 403)) {
     throw new Error(
       'Cannot create test title for multiple forbidden test cases; specify individual tests for each of these test cases'
     );
@@ -65,7 +65,7 @@ export const getTestTitle = (
     'not found': 404,
     conflict: 409,
   }).forEach(([descriptor, failure]) => {
-    const filtered = testCases.filter(x => x.failure === failure);
+    const filtered = testCases.filter((x) => x.failure === failure);
     if (filtered.length) {
       list.push(`${descriptor} [${stringify(filtered)}]`);
     }
@@ -228,7 +228,7 @@ export const getTestScenarios = <T>(modifiers?: T[]) => {
     spaceId: string;
   }
 
-  let spaces: Spaces[] = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map(x => ({ spaceId: x }));
+  let spaces: Spaces[] = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map((x) => ({ spaceId: x }));
   let security: Security[] = [
     {
       users: {
@@ -289,7 +289,7 @@ export const getTestScenarios = <T>(modifiers?: T[]) => {
   ];
   if (modifiers) {
     const addModifier = <T>(list: T[]) =>
-      list.map(x => modifiers.map(modifier => ({ ...x, modifier }))).flat();
+      list.map((x) => modifiers.map((modifier) => ({ ...x, modifier }))).flat();
     spaces = addModifier(spaces);
     security = addModifier(security);
     securityAndSpaces = addModifier(securityAndSpaces);

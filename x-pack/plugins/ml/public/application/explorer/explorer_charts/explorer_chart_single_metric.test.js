@@ -143,15 +143,9 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('y')).toBe(2);
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
-    const xAxisTicks = wrapper
-      .getDOMNode()
-      .querySelector('.x')
-      .querySelectorAll('.tick');
+    const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
     expect([...xAxisTicks]).toHaveLength(0);
-    const yAxisTicks = wrapper
-      .getDOMNode()
-      .querySelector('.y')
-      .querySelectorAll('.tick');
+    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(10);
 
     const paths = wrapper.getDOMNode().querySelectorAll('path');
@@ -162,10 +156,7 @@ describe('ExplorerChart', () => {
       'MNaN,159.33024504444444ZMNaN,9.166257955555556LNaN,169.60736875555557'
     );
 
-    const dots = wrapper
-      .getDOMNode()
-      .querySelector('.values-dots')
-      .querySelectorAll('circle');
+    const dots = wrapper.getDOMNode().querySelector('.values-dots').querySelectorAll('circle');
     expect([...dots]).toHaveLength(1);
     expect(dots[0].getAttribute('r')).toBe('1.5');
 
@@ -174,7 +165,7 @@ describe('ExplorerChart', () => {
       .querySelector('.chart-markers')
       .querySelectorAll('circle');
     expect([...chartMarkers]).toHaveLength(4);
-    expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7, 7]);
+    expect([...chartMarkers].map((d) => +d.getAttribute('r'))).toEqual([7, 7, 7, 7]);
   });
 
   it('Anomaly Explorer Chart with single data point', () => {
@@ -191,10 +182,7 @@ describe('ExplorerChart', () => {
 
     const wrapper = init(chartData);
 
-    const yAxisTicks = wrapper
-      .getDOMNode()
-      .querySelector('.y')
-      .querySelectorAll('.tick');
+    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(13);
   });
 });

@@ -12,7 +12,7 @@ export const API_BASE_URL = '/api/reporting';
 export const API_LIST_URL = `${API_BASE_URL}/jobs`;
 export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL}/v1/generate/immediate/csv/saved-object`;
-export const REPORTING_MANAGEMENT_HOME = '/app/kibana#/management/kibana/reporting';
+export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 
 // Statuses
 export const JOB_STATUS_FAILED = 'failed';

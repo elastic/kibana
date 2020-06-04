@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { selectMonitorStatusAlert } from '../../../../state/selectors';
+import { selectMonitorStatusAlert, searchTextSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 
 interface Props {
@@ -21,14 +21,20 @@ interface Props {
   };
 }
 
-export const AlertMonitorStatus = ({
+export const AlertMonitorStatus: React.FC<Props> = ({
   autocomplete,
   enabled,
   numTimes,
   setAlertParams,
   timerange,
-}: Props) => {
+}) => {
   const { filters, locations } = useSelector(selectMonitorStatusAlert);
+  const searchText = useSelector(searchTextSelector);
+
+  useEffect(() => {
+    setAlertParams('search', searchText);
+  }, [setAlertParams, searchText]);
+
   return (
     <AlertMonitorStatusComponent
       autocomplete={autocomplete}
@@ -41,3 +47,6 @@ export const AlertMonitorStatus = ({
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertMonitorStatus as default };

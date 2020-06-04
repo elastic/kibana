@@ -16,7 +16,7 @@ export function useHTTPRequest<Response>(
   pathname: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD',
   body?: string | null,
-  decode: (response: any) => Response = response => response,
+  decode: (response: any) => Response = (response) => response,
   fetch?: HttpHandler,
   toastWarning?: (input: ToastInput) => void
 ) {
@@ -37,7 +37,7 @@ export function useHTTPRequest<Response>(
           body,
         });
       },
-      onResolve: resp => setResponse(decode(resp)),
+      onResolve: (resp) => setResponse(decode(resp)),
       onReject: (e: unknown) => {
         const err = e as IHttpFetchError;
         setError(err);

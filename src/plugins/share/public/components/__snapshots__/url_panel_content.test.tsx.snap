@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`render 1`] = `
+exports[`share url panel content render 1`] = `
 <I18nProvider>
   <EuiForm
     className="kbnShareContextMenu__finalPanel"
@@ -167,7 +167,7 @@ exports[`render 1`] = `
 </I18nProvider>
 `;
 
-exports[`should enable saved object export option when objectId is provided 1`] = `
+exports[`share url panel content should enable saved object export option when objectId is provided 1`] = `
 <I18nProvider>
   <EuiForm
     className="kbnShareContextMenu__finalPanel"
@@ -323,7 +323,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
 </I18nProvider>
 `;
 
-exports[`should hide short url section when allowShortUrl is false 1`] = `
+exports[`share url panel content should hide short url section when allowShortUrl is false 1`] = `
 <I18nProvider>
   <EuiForm
     className="kbnShareContextMenu__finalPanel"

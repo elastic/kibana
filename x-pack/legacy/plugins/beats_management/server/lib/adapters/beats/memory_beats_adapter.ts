@@ -18,7 +18,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async get(user: FrameworkUser, id: string) {
-    return this.beatsDB.find(beat => beat.id === id) || null;
+    return this.beatsDB.find((beat) => beat.id === id) || null;
   }
 
   public async insert(user: FrameworkUser, beat: CMBeat) {
@@ -26,7 +26,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async update(user: FrameworkUser, beat: CMBeat) {
-    const beatIndex = this.beatsDB.findIndex(b => b.id === beat.id);
+    const beatIndex = this.beatsDB.findIndex((b) => b.id === beat.id);
 
     this.beatsDB[beatIndex] = {
       ...this.beatsDB[beatIndex],
@@ -35,18 +35,18 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getWithIds(user: FrameworkUser, beatIds: string[]) {
-    return this.beatsDB.filter(beat => beatIds.includes(beat.id));
+    return this.beatsDB.filter((beat) => beatIds.includes(beat.id));
   }
 
   public async getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]> {
-    return this.beatsDB.filter(beat => intersection(tagIds, beat.tags || []).length !== 0);
+    return this.beatsDB.filter((beat) => intersection(tagIds, beat.tags || []).length !== 0);
   }
 
   public async getBeatWithToken(
     user: FrameworkUser,
     enrollmentToken: string
   ): Promise<CMBeat | null> {
-    return this.beatsDB.find(beat => enrollmentToken === beat.enrollment_token) || null;
+    return this.beatsDB.find((beat) => enrollmentToken === beat.enrollment_token) || null;
   }
 
   public async getAll(user: FrameworkUser) {
@@ -57,15 +57,15 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     user: FrameworkUser,
     removals: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]> {
-    const beatIds = removals.map(r => r.beatId);
+    const beatIds = removals.map((r) => r.beatId);
 
     const response = this.beatsDB
-      .filter(beat => beatIds.includes(beat.id))
-      .map(beat => {
-        const tagData = removals.find(r => r.beatId === beat.id);
+      .filter((beat) => beatIds.includes(beat.id))
+      .map((beat) => {
+        const tagData = removals.find((r) => r.beatId === beat.id);
         if (tagData) {
           if (beat.tags) {
-            beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
+            beat.tags = beat.tags.filter((tag) => tag !== tagData.tag);
           }
         }
         return beat;
@@ -82,14 +82,14 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     user: FrameworkUser,
     assignments: BeatsTagAssignment[]
   ): Promise<BeatsTagAssignment[]> {
-    const beatIds = assignments.map(r => r.beatId);
+    const beatIds = assignments.map((r) => r.beatId);
 
     this.beatsDB
-      .filter(beat => beatIds.includes(beat.id))
-      .map(beat => {
+      .filter((beat) => beatIds.includes(beat.id))
+      .map((beat) => {
         // get tags that need to be assigned to this beat
         const tags = assignments
-          .filter(a => a.beatId === beat.id)
+          .filter((a) => a.beatId === beat.id)
           .map((t: BeatsTagAssignment) => t.tag);
 
         if (tags.length > 0) {

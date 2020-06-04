@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_SYSTEM_FREE_MEMORY,
-  METRIC_SYSTEM_TOTAL_MEMORY
+  METRIC_SYSTEM_TOTAL_MEMORY,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -20,32 +20,32 @@ import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 const series = {
   memoryUsedMax: {
     title: i18n.translate('xpack.apm.chart.memorySeries.systemMaxLabel', {
-      defaultMessage: 'Max'
-    })
+      defaultMessage: 'Max',
+    }),
   },
   memoryUsedAvg: {
     title: i18n.translate('xpack.apm.chart.memorySeries.systemAverageLabel', {
-      defaultMessage: 'Average'
-    })
-  }
+      defaultMessage: 'Average',
+    }),
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate(
     'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
     {
-      defaultMessage: 'System memory usage'
+      defaultMessage: 'System memory usage',
     }
   ),
   key: 'memory_usage_chart',
   type: 'linemark',
   yUnit: 'percent',
-  series
+  series,
 };
 
 export const percentMemoryUsedScript = {
   lang: 'expression',
-  source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
+  source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`,
 };
 
 export async function getMemoryChartData(
@@ -60,19 +60,19 @@ export async function getMemoryChartData(
     chartBase,
     aggs: {
       memoryUsedAvg: { avg: { script: percentMemoryUsedScript } },
-      memoryUsedMax: { max: { script: percentMemoryUsedScript } }
+      memoryUsedMax: { max: { script: percentMemoryUsedScript } },
     },
     additionalFilters: [
       {
         exists: {
-          field: METRIC_SYSTEM_FREE_MEMORY
-        }
+          field: METRIC_SYSTEM_FREE_MEMORY,
+        },
       },
       {
         exists: {
-          field: METRIC_SYSTEM_TOTAL_MEMORY
-        }
-      }
-    ]
+          field: METRIC_SYSTEM_TOTAL_MEMORY,
+        },
+      },
+    ],
   });
 }

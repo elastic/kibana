@@ -10,9 +10,9 @@ import styled from 'styled-components';
 
 const Button = styled(EuiButtonEmpty).attrs(() => ({
   contentProps: {
-    className: 'alignLeft'
+    className: 'alignLeft',
   },
-  color: 'text'
+  color: 'text',
 }))`
   width: 100%;
 

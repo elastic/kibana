@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { ScopedHistory } from 'kibana/public';
 
 import { CoreStart } from '../../../../../src/core/public';
 import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
@@ -18,6 +19,7 @@ export interface AppDependencies {
   core: CoreStart;
   services: {
     breadcrumbService: BreadcrumbService;
+    history: ScopedHistory;
   };
   plugins: {
     licensing: LicensingPluginSetup;

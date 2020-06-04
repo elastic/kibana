@@ -41,7 +41,7 @@ export const LogsSettingsPage = () => {
   } = useLogSourceContext();
 
   const availableFields = useMemo(
-    () => sourceStatus?.logIndexFields.map(field => field.name) ?? [],
+    () => sourceStatus?.logIndexFields.map((field) => field.name) ?? [],
     [sourceStatus]
   );
 

@@ -70,7 +70,7 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
       let parent: Slice;
       let dataLevel = slices;
 
-      buckets.forEach(bucket => {
+      buckets.forEach((bucket) => {
         const bucketColumn = table.columns[bucket.accessor];
         const bucketValueColumn = table.columns[bucket.accessor + 1];
         const bucketFormatter = getFormatService().deserialize(bucket.format);
@@ -78,7 +78,7 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
         const size = row[bucketValueColumn.id] as number;
         names[name] = name;
 
-        let slice = dataLevel.find(dataLevelSlice => dataLevelSlice.name === name);
+        let slice = dataLevel.find((dataLevelSlice) => dataLevelSlice.name === name);
         if (!slice) {
           slice = {
             name,

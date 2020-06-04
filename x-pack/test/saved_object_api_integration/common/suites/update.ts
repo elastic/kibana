@@ -56,9 +56,9 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 200,
       request: createRequest(x),

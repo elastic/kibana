@@ -36,7 +36,7 @@ interface Props {
   onDelete: (asset: AssetType) => void;
 }
 
-export const Asset: FunctionComponent<Props> = props => {
+export const Asset: FunctionComponent<Props> = (props) => {
   const { asset, onCreate, onCopy, onDelete } = props;
 
   const createImage = (

@@ -62,7 +62,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
       params: schema.object(
         {
           criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-          groupBy: schema.maybe(schema.string()),
+          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filterQuery: schema.maybe(
             schema.string({
               validate: validateIsStringElasticsearchJSONFilter,

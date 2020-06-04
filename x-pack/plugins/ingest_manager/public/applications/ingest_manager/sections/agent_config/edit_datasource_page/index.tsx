@@ -69,7 +69,8 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   const [loadingError, setLoadingError] = useState<Error>();
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [datasource, setDatasource] = useState<NewDatasource>({
+  const [datasource, setDatasource] = useState<NewDatasource & { id: string }>({
+    id: '',
     name: '',
     description: '',
     config_id: '',
@@ -93,7 +94,6 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         }
         if (datasourceData?.item) {
           const {
-            id,
             revision,
             inputs,
             created_by,
@@ -105,11 +105,11 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
           // Remove `agent_stream` from all stream info, we assign this after saving
           const newDatasource = {
             ...restOfDatasource,
-            inputs: inputs.map(input => {
+            inputs: inputs.map((input) => {
               const { streams, ...restOfInput } = input;
               return {
                 ...restOfInput,
-                streams: streams.map(stream => {
+                streams: streams.map((stream) => {
                   const { agent_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
@@ -299,6 +299,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                 ),
                 children: (
                   <StepConfigureDatasource
+                    from={'edit'}
                     packageInfo={packageInfo}
                     datasource={datasource}
                     updateDatasource={updateDatasource}

@@ -309,7 +309,7 @@ export class SearchSource {
       }
     }
 
-    return Promise.all(handlers.map(fn => fn(this, options)));
+    return Promise.all(handlers.map((fn) => fn(this, options)));
   }
 
   /**
