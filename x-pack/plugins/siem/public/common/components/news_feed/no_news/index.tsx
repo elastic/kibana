@@ -13,7 +13,7 @@ export const NoNews = React.memo(() => (
   <>
     <EuiText color="subdued" size="s">
       {i18n.NO_NEWS_MESSAGE}{' '}
-      <EuiLink href={'/app/kibana#/management/kibana/settings'}>
+      <EuiLink href={'/app/management/kibana/settings'}>
         {i18n.ADVANCED_SETTINGS_LINK_TITLE}
       </EuiLink>
       {'.'}

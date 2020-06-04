@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
-import { useUrlParams } from '../../../hooks';
+import { useSearchText, useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
@@ -45,6 +45,7 @@ export function KueryBar({
   'data-test-subj': dataTestSubj,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
+  const { updateSearchText } = useSearchText();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -56,12 +57,18 @@ export function KueryBar({
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
 
+  useEffect(() => {
+    updateSearchText(kuery);
+  }, [kuery, updateSearchText]);
+
   const indexPatternMissing = loading && !indexPattern;
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (!indexPattern) {
       return;
     }
+
+    updateSearchText(inputValue);
 
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
