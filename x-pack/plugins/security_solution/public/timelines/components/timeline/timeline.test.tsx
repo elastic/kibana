@@ -103,7 +103,11 @@ describe('Timeline', () => {
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<TimelineComponent {...props} />);
+      const wrapper = shallow(
+        <TestProviders>
+          <TimelineComponent {...props} />
+        </TestProviders>
+      );
 
       expect(wrapper).toMatchSnapshot();
     });
