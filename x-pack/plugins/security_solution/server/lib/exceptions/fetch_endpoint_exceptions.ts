@@ -40,8 +40,8 @@ export async function GetFullEndpointExceptionList(
   do {
     const response = await eClient.findExceptionListItem({
       listId: 'endpoint_list',
-      namespaceType: 'agnostic',
-      filter: `_tags:"sensor:${os}"`,
+      namespaceType: 'single',
+      filter: undefined, // TODO this doesnt work `_tags:"sensor:${os}"`,
       perPage: 100,
       page,
       sortField: 'created_at',

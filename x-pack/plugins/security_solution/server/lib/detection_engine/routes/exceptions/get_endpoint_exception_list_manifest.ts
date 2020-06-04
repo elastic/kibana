@@ -6,8 +6,25 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { ArtifactConstants } from '../../../exceptions';
+import { buildRouteValidation } from '../utils';
+import { GetExceptionListManifestRequestParams } from '../../exceptions/types';
+import { getExceptionListManifestSchema } from '../schemas/get_endpoint_exception_manifest_schema';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
+
+export interface Manifest {
+  schemaVersion: string;
+  manifestVersion: string;
+  artifacts: Artifacts;
+}
+export interface Artifacts {
+  [key: string]: Artifact;
+}
+export interface Artifact {
+  url: string;
+  sha256: string;
+  size: number;
+}
 
 /**
  * Registers the exception list route to enable sensors to retrieve a manifest of available lists
@@ -16,7 +33,11 @@ export function getEndpointExceptionListManifest(router: IRouter) {
   router.get(
     {
       path: `${allowlistBaseRoute}/manifest/{schemaVersion}`,
-      validate: {},
+      validate: {
+        params: buildRouteValidation<GetExceptionListManifestRequestParams>(
+          getExceptionListManifestSchema
+        ),
+      },
       options: { authRequired: true },
     },
     handleAllowlistManifest
@@ -29,16 +50,21 @@ export function getEndpointExceptionListManifest(router: IRouter) {
 async function handleAllowlistManifest(context, req, res) {
   try {
     const resp = await getAllowlistManifest(context, req.params.schemaVersion);
-    const manifestResp = {};
+    if (resp.saved_objects.length === 0) {
+      return res.notFound({ body: `No manifest found for version ${req.params.schemaVersion}` });
+    }
+    const manifestResp: Manifest = {
+      schemaVersion: req.params.schemaVersion,
+      manifestVersion: '1.0.0', // TODO hardcode?
+      artifacts: {},
+    };
 
     // transform and validate response
     for (const manifest of resp.saved_objects) {
-      manifestResp[manifest.attributes.name] = {
-        [manifest.attributes.name]: {
-          url: `${allowlistBaseRoute}/download/${manifest.attributes.sha256}`,
-          sha256: manifest.attributes.sha256,
-          size: manifest.attributes.size, // TODO add size
-        },
+      manifestResp.artifacts[manifest.attributes.name] = {
+        url: `${allowlistBaseRoute}/download/${manifest.attributes.sha256}`,
+        sha256: manifest.attributes.sha256,
+        size: manifest.attributes.size,
       };
     }
 
@@ -51,9 +77,10 @@ async function handleAllowlistManifest(context, req, res) {
 /**
  * Creates the manifest for the whitelist
  */
-async function getAllowlistManifest(ctx, schemaVersion) {
+async function getAllowlistManifest(ctx, schemaVersion: string) {
   const soClient = ctx.core.savedObjects.client;
 
+  // TODO page
   const manifestResp = soClient.find({
     type: ArtifactConstants.SAVED_OBJECT_TYPE,
     fields: ['name', 'schemaVersion', 'sha256', 'encoding', 'size', 'created'],

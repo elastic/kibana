@@ -56,6 +56,12 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os);
+      // Don't create an artifact if there are no exceptions
+      if (exceptions.exceptions_list.length === 0) {
+        context.logger.debug('No endpoint exceptions found.');
+        return;
+      }
+
       const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
 
       const sha256Hash = createHash('sha256')

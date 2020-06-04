@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface DownloadExceptionListRequestParams {
-  sha256: string;
-}
+import Joi from 'joi';
 
-export interface GetExceptionListManifestRequestParams {
-  schemaVersion: string;
-}
+export const getExceptionListManifestSchema = Joi.object({
+  schemaVersion: Joi.string(),
+});
