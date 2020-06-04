@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
-import { routing } from '../../services/routing';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,
@@ -54,7 +54,7 @@ export class AutoFollowPatternEdit extends PureComponent {
 
     selectAutoFollowPattern(decodedId);
 
-    setBreadcrumbs([listBreadcrumb, editBreadcrumb]);
+    setBreadcrumbs([listBreadcrumb('/auto_follow_patterns'), editBreadcrumb]);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -108,7 +108,7 @@ export class AutoFollowPatternEdit extends PureComponent {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              {...routing.getRouterLinkProps('/auto_follow_patterns')}
+              {...reactRouterNavigate(this.props.history, `/auto_follow_patterns`)}
               iconType="arrowLeft"
               flush="left"
               data-test-subj="viewAutoFollowPatternListButton"

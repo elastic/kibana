@@ -39,18 +39,26 @@ _Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sa
 
 ### Unit testing
 
-Note: Run the following commands from `kibana/x-pack`.
+Note: Run the following commands from `kibana/x-pack/plugins/apm`.
 
 #### Run unit tests
 
 ```
-node scripts/jest.js plugins/apm --watch
+npx jest --watch
 ```
 
 #### Update snapshots
 
 ```
-node scripts/jest.js plugins/apm --updateSnapshot
+npx jest --updateSnapshot
+```
+
+#### Coverage
+
+HTML coverage report can be found in target/coverage/jest after tests have run.
+
+```
+open target/coverage/jest/index.html
 ```
 
 ### Functional tests
