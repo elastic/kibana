@@ -71,21 +71,21 @@ describe('summarizeCopyResult', () => {
       Object {
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo",
             "name": "my-dashboard",
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo-viz",
             "name": "Foo Viz",
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "bar-viz",
             "name": "Bar Viz",
@@ -113,48 +113,44 @@ describe('summarizeCopyResult', () => {
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo",
             "name": "my-dashboard",
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [
-              Object {
-                "error": Object {
-                  "type": "conflict",
-                },
-                "obj": Object {
-                  "id": "foo-viz",
-                  "type": "visualization",
-                },
+            "conflict": Object {
+              "error": Object {
+                "type": "conflict",
               },
-            ],
+              "obj": Object {
+                "id": "foo-viz",
+                "type": "visualization",
+              },
+            },
             "hasUnresolvableErrors": false,
             "id": "foo-viz",
             "name": "Foo Viz",
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "bar-viz",
             "name": "Bar Viz",
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [
-              Object {
-                "error": Object {
-                  "type": "conflict",
-                },
-                "obj": Object {
-                  "id": "transient-index-pattern-conflict",
-                  "type": "index-pattern",
-                },
+            "conflict": Object {
+              "error": Object {
+                "type": "conflict",
               },
-            ],
+              "obj": Object {
+                "id": "transient-index-pattern-conflict",
+                "type": "index-pattern",
+              },
+            },
             "hasUnresolvableErrors": false,
             "id": "transient-index-pattern-conflict",
             "name": "transient-index-pattern-conflict",
@@ -183,21 +179,21 @@ describe('summarizeCopyResult', () => {
         "hasUnresolvableErrors": true,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo",
             "name": "my-dashboard",
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo-viz",
             "name": "Foo Viz",
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": true,
             "id": "bar-viz",
             "name": "Bar Viz",
@@ -226,21 +222,21 @@ describe('summarizeCopyResult', () => {
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo",
             "name": "my-dashboard",
             "type": "dashboard",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo-viz",
             "name": "Foo Viz",
             "type": "visualization",
           },
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "bar-viz",
             "name": "Bar Viz",
@@ -269,7 +265,7 @@ describe('summarizeCopyResult', () => {
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
-            "conflicts": Array [],
+            "conflict": undefined,
             "hasUnresolvableErrors": false,
             "id": "foo",
             "name": "my-dashboard",

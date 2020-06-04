@@ -51,9 +51,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
         const objectOverwritePending = hasPendingOverwrite(object);
 
         const showOverwriteButton =
-          object.conflicts.length > 0 &&
-          !objectOverwritePending &&
-          !props.conflictResolutionInProgress;
+          object.conflict && !objectOverwritePending && !props.conflictResolutionInProgress;
 
         const showSkipButton =
           !showOverwriteButton && objectOverwritePending && !props.conflictResolutionInProgress;

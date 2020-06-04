@@ -7,13 +7,15 @@
 import {
   SavedObjectsManagementRecord,
   ProcessedImportResponse,
+  FailedImport,
 } from 'src/plugins/saved_objects_management/public';
+import { SavedObjectsImportConflictError } from 'kibana/public';
 
 export interface SummarizedSavedObjectResult {
   type: string;
   id: string;
   name: string;
-  conflicts: ProcessedImportResponse['failedImports'];
+  conflict?: FailedImportConflict;
   hasUnresolvableErrors: boolean;
 }
 
@@ -37,6 +39,14 @@ interface ProcessingResponse {
   processing: true;
 }
 
+interface FailedImportConflict {
+  obj: FailedImport['obj'];
+  error: SavedObjectsImportConflictError;
+}
+
+const isConflict = (failure: FailedImport): failure is FailedImportConflict =>
+  failure.error.type === 'conflict';
+
 export type SummarizedCopyToSpaceResult =
   | SuccessfulResponse
   | UnsuccessfulResponse
@@ -47,33 +57,23 @@ export function summarizeCopyResult(
   copyResult: ProcessedImportResponse | undefined,
   includeRelated: boolean
 ): SummarizedCopyToSpaceResult {
-  const successful = Boolean(copyResult && copyResult.failedImports.length === 0);
+  const conflicts = copyResult?.failedImports.filter(isConflict) ?? [];
+  const unresolvableErrors =
+    copyResult?.failedImports.filter((failed) => !isConflict(failed)) ?? [];
+  const getErrorFields = ({ type, id }: { type: string; id: string }) => {
+    const conflict = conflicts.find(({ obj }) => obj.type === type && obj.id === id);
+    const hasUnresolvableErrors = unresolvableErrors.some(
+      ({ obj }) => obj.type === type && obj.id === id
+    );
+    return { conflict, hasUnresolvableErrors };
+  };
 
-  const conflicts = copyResult
-    ? copyResult.failedImports.filter((failed) => failed.error.type === 'conflict')
-    : [];
-
-  const unresolvableErrors = copyResult
-    ? copyResult.failedImports.filter((failed) => failed.error.type !== 'conflict')
-    : [];
-
-  const hasConflicts = conflicts.length > 0;
-
-  const hasUnresolvableErrors = Boolean(
-    copyResult && copyResult.failedImports.some((failed) => failed.error.type !== 'conflict')
-  );
-
-  const objectMap = new Map();
+  const objectMap = new Map<string, SummarizedSavedObjectResult>();
   objectMap.set(`${savedObject.type}:${savedObject.id}`, {
     type: savedObject.type,
     id: savedObject.id,
     name: savedObject.meta.title,
-    conflicts: conflicts.filter(
-      (c) => c.obj.type === savedObject.type && c.obj.id === savedObject.id
-    ),
-    hasUnresolvableErrors: unresolvableErrors.some(
-      (e) => e.obj.type === savedObject.type && e.obj.id === savedObject.id
-    ),
+    ...getErrorFields(savedObject),
   });
 
   if (includeRelated) {
@@ -82,10 +82,7 @@ export function summarizeCopyResult(
         type: ref.type,
         id: ref.id,
         name: ref.name,
-        conflicts: conflicts.filter((c) => c.obj.type === ref.type && c.obj.id === ref.id),
-        hasUnresolvableErrors: unresolvableErrors.some(
-          (e) => e.obj.type === ref.type && e.obj.id === ref.id
-        ),
+        ...getErrorFields(ref),
       });
     });
 
@@ -100,10 +97,7 @@ export function summarizeCopyResult(
         type: conflict.obj.type,
         id: conflict.obj.id,
         name: conflict.obj.title || conflict.obj.id,
-        conflicts: conflicts.filter((c) => c.obj.type === conflict.obj.type && conflict.obj.id),
-        hasUnresolvableErrors: unresolvableErrors.some(
-          (e) => e.obj.type === conflict.obj.type && e.obj.id === conflict.obj.id
-        ),
+        ...getErrorFields(conflict.obj),
       });
     });
   }
@@ -115,6 +109,7 @@ export function summarizeCopyResult(
     };
   }
 
+  const successful = Boolean(copyResult && copyResult.failedImports.length === 0);
   if (successful) {
     return {
       successful,
@@ -125,6 +120,10 @@ export function summarizeCopyResult(
     };
   }
 
+  const hasConflicts = conflicts.length > 0;
+  const hasUnresolvableErrors = Boolean(
+    copyResult && copyResult.failedImports.some((failed) => failed.error.type !== 'conflict')
+  );
   return {
     successful,
     hasConflicts,

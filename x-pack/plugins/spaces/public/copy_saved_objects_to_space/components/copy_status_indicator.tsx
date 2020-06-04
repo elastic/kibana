@@ -28,9 +28,9 @@ export const CopyStatusIndicator = (props: Props) => {
 
   const successful =
     !objectResult.hasUnresolvableErrors &&
-    (objectResult.conflicts.length === 0 || props.overwritePending === true);
+    (!objectResult.conflict || props.overwritePending === true);
   const successColor = props.overwritePending ? 'warning' : 'success';
-  const hasConflicts = objectResult.conflicts.length > 0;
+  const hasConflicts = objectResult.conflict !== undefined;
   const hasUnresolvableErrors = objectResult.hasUnresolvableErrors;
 
   if (successful) {
@@ -74,7 +74,7 @@ export const CopyStatusIndicator = (props: Props) => {
                 id="xpack.spaces.management.copyToSpace.copyStatus.conflictsMessage"
                 defaultMessage="A saved object with a matching id ({id}) already exists in this space."
                 values={{
-                  id: objectResult.conflicts[0].obj.id,
+                  id: objectResult.conflict!.obj.id,
                 }}
               />
             </p>
