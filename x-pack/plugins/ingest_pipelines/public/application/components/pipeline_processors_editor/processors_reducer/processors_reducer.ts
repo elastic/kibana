@@ -40,6 +40,10 @@ type Action =
   | {
       type: 'moveProcessor';
       payload: { source: ProcessorSelector; destination: ProcessorSelector };
+    }
+  | {
+      type: 'duplicateProcessor';
+      payload: { source: ProcessorSelector };
     };
 
 export type ProcessorsDispatch = Dispatch<Action>;
@@ -102,6 +106,25 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const processors = getValue<ProcessorInternal[]>(processorsSelector, state);
     processors[idx] = processor;
     return setValue(processorsSelector, state, [...processors]);
+  }
+
+  if (action.type === 'duplicateProcessor') {
+    const sourceSelector = action.payload.source;
+    const sourceProcessor = getValue<ProcessorInternal>(sourceSelector, state);
+    const sourceIdx = parseInt(sourceSelector[sourceSelector.length - 1], 10);
+    const sourceProcessorsArraySelector = sourceSelector.slice(0, -1);
+    const sourceProcessorsArray = [
+      ...getValue<ProcessorInternal[]>(sourceProcessorsArraySelector, state),
+    ];
+    const copy: ProcessorInternal = {
+      ...sourceProcessor,
+      id: uuid.v4(),
+      options: {
+        ...sourceProcessor.options,
+      },
+    };
+    sourceProcessorsArray.splice(sourceIdx + 1, 0, copy);
+    return setValue(sourceProcessorsArraySelector, state, sourceProcessorsArray);
   }
 
   return state;

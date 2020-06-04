@@ -210,6 +210,53 @@ describe('Processors reducer', () => {
     });
   });
 
+  it('places copies and places the copied processor below the original', () => {
+    const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+    const processor2 = { id: expect.any(String), type: 'test2', options: {} };
+    const processor3 = { id: expect.any(String), type: 'test3', options: {} };
+    const processor4 = { id: expect.any(String), type: 'test4', options: {} };
+
+    const s1 = reducer(initialState, {
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor1, selector: ['processors'] },
+    });
+    const s2 = reducer(s1, {
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor2, selector: ['processors'] },
+    });
+
+    const s3 = reducer(s2, {
+      type: 'addOnFailureProcessor',
+      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+    });
+
+    const s4 = reducer(s3, {
+      type: 'addOnFailureProcessor',
+      payload: {
+        onFailureProcessor: processor4,
+        targetSelector: ['processors', '1', 'onFailure', '0'],
+      },
+    });
+
+    const s5 = reducer(s4, {
+      type: 'duplicateProcessor',
+      payload: { source: ['processors', '1', 'onFailure', '0', 'onFailure', '0'] },
+    });
+
+    const s6 = reducer(s5, {
+      type: 'duplicateProcessor',
+      payload: { source: ['processors', '1', 'onFailure', '0', 'onFailure', '0'] },
+    });
+
+    expect(s6.processors).toEqual([
+      processor1,
+      {
+        ...processor2,
+        onFailure: [{ ...processor3, onFailure: [processor4, processor4, processor4] }],
+      },
+    ]);
+  });
+
   describe('Error conditions', () => {
     /* eslint-disable no-console */
     let originalErrorLogger: any;
