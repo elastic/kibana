@@ -39,6 +39,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           timerange,
           accountId,
           region,
+          includeTimeseries,
         } = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
@@ -57,6 +58,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           sourceConfiguration: source.configuration,
           metric,
           timerange,
+          includeTimeseries,
         };
 
         const searchES = <Hit = {}, Aggregation = undefined>(

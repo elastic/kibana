@@ -133,7 +133,7 @@ export function extractJobDetails(job) {
       defaultMessage: 'Datafeed',
     }),
     position: 'left',
-    items: filterObjects(job.datafeed_config, true, true),
+    items: filterObjects(job.datafeed_config || {}, true, true),
   };
   if (job.node) {
     datafeed.items.push(['node', JSON.stringify(job.node)]);

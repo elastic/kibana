@@ -187,9 +187,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow navigation to Index Patterns; redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/indexPatterns', {
+        await PageObjects.common.navigateToUrl('management', 'kibana/indexPatterns', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('managementHome', {
           timeout: config.get('timeouts.waitFor'),
