@@ -80,11 +80,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     };
     const siemData = {
       title: intl.formatMessage({
-        id: 'home.addData.siem.nameTitle',
-        defaultMessage: 'SIEM',
+        id: 'home.addData.securitySolution.nameTitle',
+        defaultMessage: 'Security',
       }),
       description: intl.formatMessage({
-        id: 'home.addData.siem.nameDescription',
+        id: 'home.addData.securitySolution.nameDescription',
         defaultMessage:
           'Centralize security events for interactive investigation in ready-to-go visualizations.',
       }),
@@ -225,7 +225,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                 aria-describedby={siemData.ariaDescribedby}
               >
                 <FormattedMessage
-                  id="home.addData.security.addSecurityEventsButtonLabel"
+                  id="home.addData.securitySolution.addSecurityEventsButtonLabel"
                   defaultMessage="Add events"
                 />
               </EuiButton>

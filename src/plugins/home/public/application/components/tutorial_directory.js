@@ -77,7 +77,7 @@ class TutorialDirectoryUi extends React.Component {
       {
         id: 'security',
         name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.securityTitle',
+          id: 'home.tutorial.tabs.securitySolutionTitle',
           defaultMessage: 'Security',
         }),
       },
