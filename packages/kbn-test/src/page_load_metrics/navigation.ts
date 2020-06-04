@@ -140,7 +140,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
           await page.bringToFront();
           Fs.mkdirSync(failureDir, { recursive: true });
           await page.screenshot({
-            path: resolve(failureDir, `${app.path.replace('/', '_')}_navigation.png`),
+            path: resolve(failureDir, `${app.path.split('/').join('_')}_navigation.png`),
             type: 'png',
             fullPage: true,
           });
