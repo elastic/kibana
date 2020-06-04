@@ -127,7 +127,6 @@ export const Providers = React.memo<Props>(
       () => [...flattenIntoAndGroups(dataProviders), ...EMPTY_GROUP],
       [dataProviders]
     );
-
     return (
       <div>
         {dataProviderGroups.map((group, groupIndex) => (

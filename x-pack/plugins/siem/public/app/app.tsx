@@ -29,6 +29,7 @@ import { PageRouter } from './routes';
 import { createStore, createInitialState } from '../common/store';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
+import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 
 import { ApolloClientContext } from '../common/utils/apollo_context';
 import { SecuritySubPlugins } from './types';
@@ -49,19 +50,21 @@ const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
   history,
 }) => (
   <ManageGlobalToaster>
-    <ReduxStoreProvider store={store}>
-      <ApolloProvider client={apolloClient}>
-        <ApolloClientContext.Provider value={apolloClient}>
-          <ThemeProvider theme={theme}>
-            <MlCapabilitiesProvider>
-              <PageRouter history={history} subPluginRoutes={subPluginRoutes} />
-            </MlCapabilitiesProvider>
-          </ThemeProvider>
-          <ErrorToastDispatcher />
-          <GlobalToaster />
-        </ApolloClientContext.Provider>
-      </ApolloProvider>
-    </ReduxStoreProvider>
+    <ManageGlobalTimeline>
+      <ReduxStoreProvider store={store}>
+        <ApolloProvider client={apolloClient}>
+          <ApolloClientContext.Provider value={apolloClient}>
+            <ThemeProvider theme={theme}>
+              <MlCapabilitiesProvider>
+                <PageRouter history={history} subPluginRoutes={subPluginRoutes} />
+              </MlCapabilitiesProvider>
+            </ThemeProvider>
+            <ErrorToastDispatcher />
+            <GlobalToaster />
+          </ApolloClientContext.Provider>
+        </ApolloProvider>
+      </ReduxStoreProvider>
+    </ManageGlobalTimeline>
   </ManageGlobalToaster>
 );
 

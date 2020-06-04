@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FindResult } from '../../../../../alerting/server';
+import { FindResult } from '../../../../../alerts/server';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { FindNotificationParams } from './types';
 

@@ -87,7 +87,9 @@ export class ListPlugin
         core: {
           savedObjects: { client: savedObjectsClient },
           elasticsearch: {
-            dataClient: { callAsCurrentUser: callCluster },
+            legacy: {
+              client: { callAsCurrentUser: callCluster },
+            },
           },
         },
       } = context;

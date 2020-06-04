@@ -21,17 +21,17 @@ export const heatmapLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Geospatial data grouped in grids to show density',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
       const layerDescriptor = HeatmapLayer.createDescriptor({
         sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return (

@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Datafeed, Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
-
-  const COMMON_HEADERS = {
-    'kbn-xsrf': 'some-xsrf-token',
-  };
 
   const JOB_CONFIG: Job = {
     job_id: `fq_multi_1_ae`,
@@ -75,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`/api/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(200);
 
@@ -100,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`/api/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(400);
 
@@ -125,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`/api/ml/results/anomalies_table_data`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(404);
 

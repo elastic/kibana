@@ -18,32 +18,32 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { mount } from 'enzyme';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
-// eslint-disable-next-line
-import { docLinksServiceMock } from '../../../../../../../core/public/doc_links/doc_links_service.mock';
 
 describe('ScriptingWarningCallOut', () => {
-  const docLinksScriptedFields = docLinksServiceMock.createStartContract().links.scriptedFields;
+  const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
+
   it('should render normally', async () => {
-    const component = shallow(
-      <ScriptingWarningCallOut
-        isVisible={true}
-        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
-      />
-    );
+    const component = mount(<ScriptingWarningCallOut isVisible={true} />, {
+      wrappingComponent: KibanaContextProvider,
+      wrappingComponentProps: {
+        services: mockedContext,
+      },
+    });
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render nothing if not visible', async () => {
-    const component = shallow(
-      <ScriptingWarningCallOut
-        isVisible={false}
-        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
-      />
-    );
+    const component = mount(<ScriptingWarningCallOut isVisible={false} />, {
+      wrappingComponent: KibanaContextProvider,
+      wrappingComponentProps: {
+        services: mockedContext,
+      },
+    });
 
     expect(component).toMatchSnapshot();
   });

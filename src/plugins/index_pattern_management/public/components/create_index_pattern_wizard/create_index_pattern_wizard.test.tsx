@@ -17,18 +17,11 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import {
-  CreateIndexPatternWizard,
-  CreateIndexPatternWizardProps,
-} from './create_index_pattern_wizard';
-import { coreMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 import { IndexPattern } from '../../../../../plugins/data/public';
-import { SavedObjectsClient } from '../../../../../core/public';
-import { IndexPatternCreationConfig } from '../../service/creation';
+import { mockManagementPlugin } from '../../mocks';
+import { IndexPatternCreationConfig } from '../../';
+import { createComponentWithContext } from '../test_utils';
 
 jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
@@ -40,30 +33,6 @@ jest.mock('./lib/get_indices', () => ({
     return [{ name: 'kibana' }];
   },
 }));
-
-const { savedObjects, overlays, uiSettings, chrome, http } = coreMock.createStart();
-const { indexPatterns, search } = dataPluginMock.createStartContract();
-
-const mockIndexPatternCreationType = new IndexPatternCreationConfig({
-  type: 'default',
-  name: 'name',
-});
-
-const services = ({
-  indexPatternCreation: {
-    getType: jest.fn(() => mockIndexPatternCreationType),
-  },
-  es: search.__LEGACY.esClient,
-  indexPatterns,
-  savedObjectsClient: savedObjects.client as SavedObjectsClient,
-  uiSettings,
-  changeUrl: jest.fn(),
-  openConfirm: overlays.openConfirm,
-  setBreadcrumbs: jest.fn(),
-  docTitle: chrome.docTitle,
-  prependBasePath: http.basePath.prepend,
-} as unknown) as CreateIndexPatternWizardProps['services'];
-
 const routeComponentPropsMock = {
   history: {
     push: jest.fn(),
@@ -71,19 +40,30 @@ const routeComponentPropsMock = {
   location: {} as any,
   match: {} as any,
 };
+const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
+mockContext.indexPatternManagementStart.creation.getType = () => {
+  return new IndexPatternCreationConfig({
+    type: 'default',
+    name: 'name',
+  });
+};
 
 describe('CreateIndexPatternWizard', () => {
   test(`defaults to the loading state`, () => {
-    const component = shallow(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     expect(component).toMatchSnapshot();
   });
 
   test('renders the empty state when there are no indices', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     component.setState({
@@ -97,8 +77,10 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('renders when there are no indices but there are remote clusters', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     component.setState({
@@ -112,8 +94,10 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('shows system indices even if there are no other indices if the include system indices is toggled', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     component.setState({
@@ -127,8 +111,10 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('renders index pattern step when there are indices', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     component.setState({
@@ -141,8 +127,10 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('renders time field step when step is set to 2', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     component.setState({
@@ -158,7 +146,7 @@ describe('CreateIndexPatternWizard', () => {
   test('invokes the provided services when creating an index pattern', async () => {
     const create = jest.fn().mockImplementation(() => 'id');
     const clear = jest.fn();
-    services.indexPatterns.clearCache = clear;
+    mockContext.data.indexPatterns.clearCache = clear;
     const indexPattern = ({
       id: '1',
       title: 'my-fake-index-pattern',
@@ -166,17 +154,19 @@ describe('CreateIndexPatternWizard', () => {
       fields: [],
       create,
     } as unknown) as IndexPattern;
-    services.indexPatterns.make = async () => {
+    mockContext.data.indexPatterns.make = async () => {
       return indexPattern;
     };
 
-    const component = shallow<CreateIndexPatternWizard>(
-      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
     );
 
     component.setState({ indexPattern: 'foo' });
-    await component.instance().createIndexPattern(undefined, 'id');
-    expect(services.uiSettings.get).toBeCalled();
+    await (component.instance() as CreateIndexPatternWizard).createIndexPattern(undefined, 'id');
+    expect(mockContext.uiSettings.get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
     expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/id`);

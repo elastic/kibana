@@ -10,13 +10,13 @@ import React from 'react';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
-import { useTimelineContext } from '../../../timeline_context';
 import { Sort } from '../../sort';
 
 import * as i18n from '../translations';
 
 interface Props {
   header: ColumnHeaderOptions;
+  isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
   sort: Sort;
 }
@@ -43,8 +43,7 @@ export const CloseButton = React.memo<{
 
 CloseButton.displayName = 'CloseButton';
 
-export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {
-  const { isLoading } = useTimelineContext();
+export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort, isLoading }) => {
   return (
     <>
       {sort.columnId === header.id && isLoading ? (

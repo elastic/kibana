@@ -70,7 +70,7 @@ async function main() {
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint-default-1',
+      default: 'metrics-endpoint.metadata-default-1',
       type: 'string',
     },
     policyIndex: {
@@ -118,6 +118,13 @@ async function main() {
       describe: 'percent of process events to add termination event for',
       type: 'number',
       default: 30,
+    },
+    maxChildrenPerNode: {
+      alias: 'maxCh',
+      describe:
+        'always generate the max number of children per node instead of it being random up to the max children',
+      type: 'boolean',
+      default: false,
     },
     numHosts: {
       alias: 'ne',
@@ -214,6 +221,7 @@ async function main() {
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
   const random = seedrandom(seed);
+  const startTime = new Date().getTime();
   for (let i = 0; i < argv.numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
     const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -234,35 +242,37 @@ async function main() {
       });
     }
 
-    for (let j = 0; j < argv.alertsPerHost; j++) {
-      const resolverDocGenerator = generator.fullResolverTreeGenerator(
-        argv.ancestors,
-        argv.generations,
-        argv.children,
-        argv.relatedEvents,
-        argv.percentWithRelated,
-        argv.percentTerminated
-      );
-      let result = resolverDocGenerator.next();
-      while (!result.done) {
-        let k = 0;
-        const resolverDocs: Event[] = [];
-        while (k < 1000 && !result.done) {
-          resolverDocs.push(result.value);
-          result = resolverDocGenerator.next();
-          k++;
-        }
-        const body = resolverDocs.reduce(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (array: Array<Record<string, any>>, doc) => (
-            array.push({ index: { _index: argv.eventIndex } }, doc), array
-          ),
-          []
-        );
-        await client.bulk({ body });
+    const alertGenerator = generator.alertsGenerator(
+      argv.alertsPerHost,
+      argv.ancestors,
+      argv.generations,
+      argv.children,
+      argv.relatedEvents,
+      argv.percentWithRelated,
+      argv.percentTerminated,
+      argv.maxChildrenPerNode
+    );
+    let result = alertGenerator.next();
+    while (!result.done) {
+      let k = 0;
+      const resolverDocs: Event[] = [];
+      while (k < 1000 && !result.done) {
+        resolverDocs.push(result.value);
+        result = alertGenerator.next();
+        k++;
       }
+      const body = resolverDocs.reduce(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (array: Array<Record<string, any>>, doc) => (
+          array.push({ index: { _index: argv.eventIndex } }, doc), array
+        ),
+        []
+      );
+      await client.bulk({ body });
     }
   }
+  // eslint-disable-next-line no-console
+  console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -12,7 +12,7 @@ import { Store } from 'redux';
 import { mockAlertResultList } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 import { DepsStartMock } from '../../common/mock/endpoint';
-import { State } from '../../common/store/reducer';
+import { State } from '../../common/store/types';
 import { AppAction } from '../../common/store/actions';
 
 describe('when on the alerting page', () => {
@@ -98,6 +98,12 @@ describe('when on the alerting page', () => {
       });
       it('should no longer show the flyout', () => {
         expect(render().queryByTestId('alertDetailFlyout')).toBeNull();
+      });
+      it('should no longer track flyout state in url', () => {
+        const unexpectedTabString = 'active_details_tab';
+        const unexpectedAlertString = 'selected_alert';
+        expect(history.location.search).toEqual(expect.not.stringContaining(unexpectedTabString));
+        expect(history.location.search).toEqual(expect.not.stringContaining(unexpectedAlertString));
       });
     });
   });
