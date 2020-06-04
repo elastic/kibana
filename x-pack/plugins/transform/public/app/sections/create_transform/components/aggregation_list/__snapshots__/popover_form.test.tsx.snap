@@ -37,7 +37,7 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
     labelType="label"
   >
     <EuiButton
-      data-test-subj="applyTransformAggChanges"
+      data-test-subj="transformApplyAggChanges"
       isDisabled={false}
       onClick={[Function]}
     >

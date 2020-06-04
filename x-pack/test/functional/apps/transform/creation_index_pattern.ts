@@ -54,8 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
             identifier: 'filter(geoip.city_name)',
             label: 'geoip.city_name.filter',
             form: {
-              filterAggTypeSelector: 'term',
-              filterTermValueSelector: 'New York',
+              transformFilterAggTypeSelector: 'term',
+              transformFilterTermValueSelector: 'New York',
             },
           },
         ],
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
             identifier: 'filter(customer_phone)',
             label: 'customer_phone.filter',
             form: {
-              filterAggTypeSelector: 'exists',
+              transformFilterAggTypeSelector: 'exists',
             },
           },
         ],

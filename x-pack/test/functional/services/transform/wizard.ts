@@ -294,24 +294,24 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
       for (const [testObj, value] of Object.entries(formData)) {
         switch (testObj) {
-          case 'filterAggTypeSelector':
+          case 'transformFilterAggTypeSelector':
             await this.selectFilerAggType(value);
             break;
-          case 'filterTermValueSelector':
+          case 'transformFilterTermValueSelector':
             await this.fillFilterTermValue(value);
             break;
         }
       }
-      await testSubjects.clickWhenNotDisabled('applyTransformAggChanges');
+      await testSubjects.clickWhenNotDisabled('transformApplyAggChanges');
       await testSubjects.missingOrFail(`transformAggPopoverForm_${expectedLabel}`);
     },
 
     async selectFilerAggType(value: string) {
-      await testSubjects.selectValue('filterAggTypeSelector', value);
+      await testSubjects.selectValue('transformFilterAggTypeSelector', value);
     },
 
     async fillFilterTermValue(value: string) {
-      await comboBox.set('filterTermValueSelector', value);
+      await comboBox.set('transformFilterTermValueSelector', value);
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {

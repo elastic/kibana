@@ -44,7 +44,7 @@ describe('FilterAggForm', () => {
 
     expect(getByLabelText('Filter agg')).toBeInTheDocument();
 
-    const { options } = (await findByTestId('filterAggTypeSelector')) as HTMLSelectElement;
+    const { options } = (await findByTestId('transformFilterAggTypeSelector')) as HTMLSelectElement;
 
     expect(container.childElementCount).toBe(1);
 
@@ -67,7 +67,7 @@ describe('FilterAggForm', () => {
       </I18nProvider>
     );
 
-    const select = (await findByTestId('filterAggTypeSelector')) as HTMLSelectElement;
+    const select = (await findByTestId('transformFilterAggTypeSelector')) as HTMLSelectElement;
 
     fireEvent.change(select, {
       target: { value: 'term' },
@@ -106,7 +106,7 @@ describe('FilterAggForm', () => {
 
     expect(onChange).toHaveBeenCalledWith({});
 
-    const { options } = (await findByTestId('filterAggTypeSelector')) as HTMLSelectElement;
+    const { options } = (await findByTestId('transformFilterAggTypeSelector')) as HTMLSelectElement;
 
     expect(options.length).toBe(4);
     expect(options[0].value).toBe('');
@@ -142,7 +142,7 @@ describe('FilterAggForm', () => {
       </I18nProvider>
     );
 
-    const { options } = (await findByTestId('filterAggTypeSelector')) as HTMLSelectElement;
+    const { options } = (await findByTestId('transformFilterAggTypeSelector')) as HTMLSelectElement;
 
     expect(options[3].value).toBe('term');
     expect(options[3].selected).toBe(true);

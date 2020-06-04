@@ -145,7 +145,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
           updateConfig({ value });
         }}
         onSearchChange={onSearchChange}
-        data-test-subj="filterTermValueSelector"
+        data-test-subj="transformFilterTermValueSelector"
       />
     </EuiFormRow>
   );

@@ -290,7 +290,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         <EuiButton
           isDisabled={!formValid}
           onClick={() => onChange(getUpdatedItem())}
-          data-test-subj="applyTransformAggChanges"
+          data-test-subj="transformApplyAggChanges"
         >
           {i18n.translate('xpack.transform.agg.popoverForm.submitButtonLabel', {
             defaultMessage: 'Apply',
