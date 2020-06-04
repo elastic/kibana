@@ -64,12 +64,14 @@ enum ModalAction {
 
 interface ExceptionsViewerProps {
   exceptionLists: RuleExceptionList[];
-  onAssociateList: (listId: string) => void;
+  commentsAccordionId: string;
+  onAssociateList?: (listId: string) => void;
 }
 
 const ExceptionsViewerComponent = ({
   exceptionLists,
   onAssociateList,
+  commentsAccordionId,
 }: ExceptionsViewerProps): JSX.Element => {
   const [initLoading, setInitLoading] = useState(true);
   const [
@@ -187,13 +189,13 @@ const ExceptionsViewerComponent = ({
 
       // TODO: This callback along with fetchList can probably get
       // passed to the modal for it to call itself maybe
-      if (actionType === ModalAction.CREATE && listId != null) {
+      if (actionType === ModalAction.CREATE && listId != null && onAssociateList != null) {
         onAssociateList(listId);
       }
 
       onFetchList({ id: listId, namespaceType: listNamespaceType });
     },
-    [setIsModalOpen, onFetchList]
+    [setIsModalOpen, onFetchList, onAssociateList]
   );
 
   const onDeleteException = useCallback(
@@ -321,6 +323,10 @@ const ExceptionsViewerComponent = ({
     }
   }, [exceptionItems]);
 
+  const showEmpty = useMemo((): boolean => {
+    return !initLoading && exceptions.length === 0;
+  }, [initLoading, exceptions.length]);
+
   return (
     <>
       {isModalOpen && (
@@ -349,7 +355,7 @@ const ExceptionsViewerComponent = ({
         <EuiLoadingContent data-test-subj="initialLoadingAllExceptionItemsView" lines={10} />
       )}
 
-      {!initLoading && !exceptions.length && (
+      {showEmpty && (
         <EuiEmptyPrompt
           iconType="advancedSettingsApp"
           title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
@@ -358,16 +364,17 @@ const ExceptionsViewerComponent = ({
       )}
 
       {!initLoading &&
-        exceptions.length &&
+        exceptions.length > 0 &&
         exceptions.map((exception, index) => (
-          <>
+          <div key={exception.id}>
             <OrBadgeWrapper>{index !== 0 && <AndOrBadge type="or" />}</OrBadgeWrapper>
             <ExceptionItem
+              commentsAccordionId={commentsAccordionId}
               exceptionItem={exception}
               handleDelete={onDeleteException}
               handleEdit={onEditExceptionItem}
             />
-          </>
+          </div>
         ))}
     </>
   );

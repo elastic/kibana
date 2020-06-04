@@ -19,6 +19,7 @@ import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntries, getFormattedComments } from '../../helpers';
 import { FormattedEntry, ExceptionListItemSchema } from '../../types';
+import { NamespaceType } from '../../../../../../public/lists_plugin_deps';
 
 const MyFlexItem = styled(EuiFlexItem)`
     &.comments--show {
@@ -30,7 +31,7 @@ const MyFlexItem = styled(EuiFlexItem)`
 interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
-  handleDelete: ({ id }: { id: string }) => void;
+  handleDelete: ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) => void;
   handleEdit: (item: ExceptionListItemSchema) => void;
 }
 
@@ -49,7 +50,7 @@ const ExceptionItemComponent = ({
   }, [exceptionItem.entries]);
 
   const onDelete = useCallback((): void => {
-    handleDelete({ id: exceptionItem.id });
+    handleDelete({ id: exceptionItem.id, namespaceType: exceptionItem.namespaceType });
   }, [handleDelete, exceptionItem]);
 
   const onEdit = useCallback((): void => {
@@ -61,7 +62,8 @@ const ExceptionItemComponent = ({
   }, [setShowComments, showComments]);
 
   const formattedComments = useMemo((): EuiCommentProps[] => {
-    return getFormattedComments(exceptionItem.comments);
+    // TODO: return back to exceptionItem.comments once updated
+    return getFormattedComments(exceptionItem.comment);
   }, [exceptionItem]);
 
   return (
