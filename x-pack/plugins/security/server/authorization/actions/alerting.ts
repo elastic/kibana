@@ -26,6 +26,8 @@ export class AlertingActions {
       throw new Error('consumer is optional but must be a string when specified');
     }
 
-    return `${this.prefix}${alertTypeId}${consumer ? `/${consumer}` : ''}/${operation}`;
+    return `${this.prefix}${alertTypeId}/${
+      consumer ? `feature/${consumer}` : '_global'
+    }/${operation}`;
   }
 }

@@ -25,26 +25,20 @@ const allOperations: string[] = [...readOperations, ...writeOperations];
 
 export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
-    const allOperationsWithinConsumer = (privileges: string[], consumer?: string) =>
-      flatten(
-        privileges.map((type) => [
-          ...allOperations.map((operation) => this.actions.alerting.get(type, consumer, operation)),
-        ])
-      );
-    const readOperationsWithinConsumer = (privileges: string[], consumer?: string) =>
-      flatten(
-        privileges.map((type) => [
-          ...readOperations.map((operation) =>
-            this.actions.alerting.get(type, consumer, operation)
-          ),
-        ])
+    const getAlertingPrivilege = (
+      operations: string[],
+      privilegedTypes: string[],
+      consumer?: string
+    ) =>
+      privilegedTypes.flatMap((type) =>
+        operations.map((operation) => this.actions.alerting.get(type, consumer, operation))
       );
 
     return uniq([
-      ...allOperationsWithinConsumer(privilegeDefinition.alerting?.all ?? [], feature.id),
-      ...readOperationsWithinConsumer(privilegeDefinition.alerting?.read ?? [], feature.id),
-      ...allOperationsWithinConsumer(privilegeDefinition.alerting?.globally?.all ?? []),
-      ...readOperationsWithinConsumer(privilegeDefinition.alerting?.globally?.read ?? []),
+      ...getAlertingPrivilege(allOperations, privilegeDefinition.alerting?.all ?? [], feature.id),
+      ...getAlertingPrivilege(readOperations, privilegeDefinition.alerting?.read ?? [], feature.id),
+      ...getAlertingPrivilege(allOperations, privilegeDefinition.alerting?.globally?.all ?? []),
+      ...getAlertingPrivilege(readOperations, privilegeDefinition.alerting?.globally?.read ?? []),
     ]);
   }
 }
