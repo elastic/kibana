@@ -98,7 +98,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/src/plugins,
           <absolute path>/x-pack/plugins,
           <absolute path>/plugins,
-          "/Users/angelachuang/workspace/kibana-extra",
+          <absolute path>-extra,
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
