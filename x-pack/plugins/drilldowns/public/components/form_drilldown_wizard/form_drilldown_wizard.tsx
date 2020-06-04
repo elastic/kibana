@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
-  AdvancedUiActionsActionFactory as ActionFactory,
+  UiActionsEnhancedActionFactory as ActionFactory,
   ActionWizard,
 } from '../../../../ui_actions_enhanced/public';
 

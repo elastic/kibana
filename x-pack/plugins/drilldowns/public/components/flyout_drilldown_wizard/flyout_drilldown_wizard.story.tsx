@@ -15,7 +15,7 @@ import {
   urlFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../ui_actions_enhanced/public/components/action_wizard/test_data';
-import { AdvancedUiActionsActionFactory as ActionFactory } from '../../../../ui_actions_enhanced/public/';
+import { UiActionsEnhancedActionFactory as ActionFactory } from '../../../../ui_actions_enhanced/public/';
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {

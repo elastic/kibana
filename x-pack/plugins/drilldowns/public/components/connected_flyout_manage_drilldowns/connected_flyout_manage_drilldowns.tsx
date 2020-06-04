@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
-  AdvancedUiActionsActionFactory as ActionFactory,
+  UiActionsEnhancedActionFactory as ActionFactory,
   AdvancedUiActionsStart,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedSerializedAction,
