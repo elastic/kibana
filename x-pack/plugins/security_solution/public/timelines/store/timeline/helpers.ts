@@ -18,21 +18,10 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/m
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
-import { TimelineById, TimelineState } from './types';
+import { TimelineById } from './types';
 import { TimelineNonEcsData } from '../../../graphql/types';
 
-const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
-
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
-
-export const initialTimelineState: TimelineState = {
-  timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
-  showCallOutUnauthorizedMsg: false,
-};
 
 interface AddTimelineHistoryParams {
   id: string;

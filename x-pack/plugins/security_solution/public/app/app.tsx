@@ -34,6 +34,7 @@ import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { ApolloClientContext } from '../common/utils/apollo_context';
 import { SecuritySubPlugins } from './types';
 import { createSiemLocalStorage } from '../common/lib/local_storage';
+import { initialTimelineState } from '../timelines/store/timeline/reducer';
 
 interface AppPluginRootComponentProps {
   apolloClient: AppApolloClient;
@@ -86,9 +87,9 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
     createInitialState({
       ...subPluginsStore.initialState,
       timeline: {
-        ...subPluginsStore.initialState.timeline,
+        ...(subPluginsStore.initialState.timeline ?? initialTimelineState),
         timelineById: {
-          ...subPluginsStore.initialState.timeline.timelineById,
+          ...(subPluginsStore.initialState.timeline?.timelineById ?? {}),
           ...(storage.getAllTimelines() ?? {}),
         },
       },

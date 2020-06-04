@@ -53,9 +53,8 @@ import {
   displayErrorToast,
 } from '../../../common/components/toasters';
 
-export const ALERTS_TABLE_TIMELINE_ID = 'alerts-table';
-
 interface OwnProps {
+  timelineId: string;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;
@@ -68,6 +67,7 @@ interface OwnProps {
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
+  timelineId,
   canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,
@@ -141,16 +141,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isLoading });
+      setEventsLoading!({ id: timelineId, eventIds, isLoading });
     },
-    [setEventsLoading, ALERTS_TABLE_TIMELINE_ID]
+    [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isDeleted });
+      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
     },
-    [setEventsDeleted, ALERTS_TABLE_TIMELINE_ID]
+    [setEventsDeleted, timelineId]
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
@@ -186,9 +186,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: AlertFilterOption) => {
-      clearEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID });
-      clearEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID });
-      clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
+      clearEventsLoading!({ id: timelineId });
+      clearEventsDeleted!({ id: timelineId });
+      clearSelected!({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
@@ -196,7 +196,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
+    clearSelected!({ id: timelineId });
     setSelectAll(false);
     setShowClearSelectionAction(false);
   }, [clearSelected, setSelectAll, setShowClearSelectionAction]);
@@ -343,7 +343,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       defaultModel={alertsDefaultModel}
       end={to}
       headerFilterGroup={headerFilterGroup}
-      id={ALERTS_TABLE_TIMELINE_ID}
+      id={timelineId}
       start={from}
       utilityBar={utilityBarCallback}
     />
@@ -353,9 +353,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getGlobalInputs = inputsSelectors.globalSelector();
-  const mapStateToProps = (state: State) => {
-    const timeline: TimelineModel =
-      getTimeline(state, ALERTS_TABLE_TIMELINE_ID) ?? timelineDefaults;
+  const mapStateToProps = (state: State, ownProps: OwnProps) => {
+    const { timelineId } = ownProps;
+    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);

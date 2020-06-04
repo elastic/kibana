@@ -13,6 +13,7 @@ describe('AlertsTableComponent', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
       <AlertsTableComponent
+        timelineId={'test'}
         canUserCRUD
         hasIndexWrite
         from={0}

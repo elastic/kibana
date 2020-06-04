@@ -71,6 +71,8 @@ import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 
+export const ALERTS_TABLE_ID = 'detections-page-rule-details';
+
 enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
@@ -374,6 +376,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <EuiSpacer />
                         {ruleId != null && (
                           <AlertsTable
+                            timelineId={ALERTS_TABLE_ID}
                             canUserCRUD={canUserCRUD ?? false}
                             defaultFilters={alertDefaultFilters}
                             hasIndexWrite={hasIndexWrite ?? false}
