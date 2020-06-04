@@ -24,25 +24,23 @@ export class SecurityLayerTemplate extends Component<RenderWizardArguments, Stat
   };
 
   _previewLayer() {
-    if (!this._hasIndexPattern()) {
+    if (!this.state.indexPattern) {
       this.props.previewLayers([]);
       return;
     }
 
     this.props.previewLayers(
-      createLayerDescriptors(this.state.indexPattern!.id, this.state.indexPattern!.title)
+      // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
+      createLayerDescriptors(this.state.indexPattern.id, this.state.indexPattern.title)
     );
-  }
-
-  _hasIndexPattern() {
-    return !!this.state.indexPattern;
   }
 
   render() {
     return (
       <Fragment>
         <IndexPatternSelect
-          value={this._hasIndexPattern() ? this.state.indexPattern!.id : ''}
+          // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
+          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
           onChange={this._onIndexPatternChange}
         />
       </Fragment>
