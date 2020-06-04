@@ -209,6 +209,11 @@ module.exports = {
                 errorMessage: `Public code can not import from server, use a common directory.`,
               },
               {
+                target: ['(src|x-pack)/plugins/*/common/**/*'],
+                from: ['(src|x-pack)/plugins/*/(server|public)/**/*'],
+                errorMessage: `Common code can not import from server or public, use a common directory.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -226,7 +231,7 @@ module.exports = {
                   '!src/core/server/index.ts', // relative import
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
-                  '!src/core/server/test_utils',
+                  '!src/core/server/test_utils{,.ts}',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
