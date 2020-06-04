@@ -27,7 +27,7 @@ jest.mock('../../../app_context', () => ({
     http: jest.fn(),
     capabilities: {
       get: jest.fn(() => ({})),
-      siem: {
+      securitySolution: {
         'alerting:show': true,
         'alerting:save': true,
         'alerting:delete': true,
