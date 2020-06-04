@@ -104,7 +104,7 @@ describe('fully matching IDs', () => {
         location: 'my-location',
         monitorId: 'my-monitor',
         status: 'up',
-        summaryTimestamp: '2020-06-04T12:39:54.698-0500',
+        summaryTimestamp: new Date('2020-06-04T12:39:54.698-0500'),
       },
     ]);
     expect(res).toEqual(expected);

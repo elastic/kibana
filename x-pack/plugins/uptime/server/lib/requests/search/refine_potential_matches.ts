@@ -79,7 +79,7 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
         location,
         checkGroup,
         status,
-        summaryTimestamp: latestSource['@timestamp'],
+        summaryTimestamp: new Date(latestSource['@timestamp']),
       });
     }
 
