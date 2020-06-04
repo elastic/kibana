@@ -19,7 +19,7 @@ const columns = [
     id: 'checkbox',
     isCheckbox: true,
     textOnly: false,
-    width: '24px',
+    width: '32px',
   },
   {
     label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.fieldNameColumn', {

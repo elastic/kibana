@@ -311,7 +311,7 @@ export function CustomSelectionTable({
           isSelected={isItemSelected(item[tableItemId])}
           isSelectable={true}
           hasActions={true}
-          data-test-subj="mlFlyoutJobSelectorTableRow"
+          data-test-subj="mlCustomSelectionTableRow"
         >
           {cells}
         </EuiTableRow>
@@ -339,7 +339,7 @@ export function CustomSelectionTable({
     <Fragment>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false} data-test-subj="mlFlyoutJobSelectorSearchBar">
+        <EuiFlexItem grow={false} data-test-subj="mlCustomSelectionTableSearchBar">
           <EuiSearchBar
             defaultQuery={query}
             box={{
@@ -367,7 +367,7 @@ export function CustomSelectionTable({
           <EuiFlexItem grow={false}>{renderSelectAll(true)}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableHeaderMobile>
-      <EuiTable data-test-subj="mlFlyoutJobSelectorTable">
+      <EuiTable data-test-subj="mlCustomSelectionTable">
         <EuiTableHeader>{renderHeaderCells()}</EuiTableHeader>
         <EuiTableBody>{renderRows()}</EuiTableBody>
       </EuiTable>
