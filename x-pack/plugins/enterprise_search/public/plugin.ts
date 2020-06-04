@@ -32,7 +32,7 @@ export interface PluginsSetup {
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
   }
 

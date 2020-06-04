@@ -9,18 +9,17 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart, AppMountParams, HttpHandler } from 'src/core/public';
+import { CoreStart, AppMountParameters, HttpSetup, ChromeBreadcrumb } from 'src/core/public';
 import { ClientConfigType, PluginsSetup } from '../plugin';
-import { TSetBreadcrumbs } from './shared/kibana_breadcrumbs';
 import { LicenseProvider } from './shared/licensing';
 
 export interface IKibanaContext {
   enterpriseSearchUrl?: string;
-  http(): HttpHandler;
-  setBreadCrumbs(): TSetBreadcrumbs;
+  http: HttpSetup;
+  setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
 }
 
-export const KibanaContext = React.createContext();
+export const KibanaContext = React.createContext({});
 
 /**
  * This file serves as a reusable wrapper to share Kibana-level context and other helpers
@@ -29,9 +28,9 @@ export const KibanaContext = React.createContext();
  */
 
 export const renderApp = (
-  App: React.Element,
+  App: React.FC,
   core: CoreStart,
-  params: AppMountParams,
+  params: AppMountParameters,
   config: ClientConfigType,
   plugins: PluginsSetup
 ) => {

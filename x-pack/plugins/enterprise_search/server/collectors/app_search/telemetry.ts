@@ -5,7 +5,11 @@
  */
 
 import { set } from 'lodash';
-import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsServiceStart,
+  SavedObjectAttributes,
+} from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { AS_TELEMETRY_NAME, ITelemetrySavedObject } from '../../saved_objects/app_search/telemetry';
@@ -21,6 +25,7 @@ export const registerTelemetryUsageCollector = (
   const telemetryUsageCollector = usageCollection.makeUsageCollector({
     type: 'app_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects),
+    isReady: () => true,
   });
   usageCollection.registerCollector(telemetryUsageCollector);
 };
@@ -31,7 +36,9 @@ export const registerTelemetryUsageCollector = (
 
 const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => {
   const savedObjectsRepository = savedObjects.createInternalRepository();
-  const savedObjectAttributes = await getSavedObjectAttributesFromRepo(savedObjectsRepository);
+  const savedObjectAttributes = (await getSavedObjectAttributesFromRepo(
+    savedObjectsRepository
+  )) as SavedObjectAttributes;
 
   const defaultTelemetrySavedObject: ITelemetrySavedObject = {
     ui_viewed: {
@@ -67,10 +74,6 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
 /**
  * Helper function - fetches saved objects attributes
  */
-
-interface ISavedObjectAttributes {
-  [key: string]: any;
-}
 
 const getSavedObjectAttributesFromRepo = async (
   savedObjectsRepository: ISavedObjectsRepository

@@ -8,7 +8,7 @@ import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
 import { KibanaContext, IKibanaContext } from '../../index';
-import { appSearchBreadcrumbs } from './generate_breadcrumbs';
+import { appSearchBreadcrumbs, TBreadcrumbs } from './generate_breadcrumbs';
 
 /**
  * Small on-mount helper for setting Kibana's chrome breadcrumbs on any App Search view
@@ -17,20 +17,27 @@ import { appSearchBreadcrumbs } from './generate_breadcrumbs';
 
 export type TSetBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) => void;
 
-interface ISetBreadcrumbsProps {
+interface IBreadcrumbProps {
   text: string;
-  isRoot?: boolean;
+  isRoot?: never;
+}
+interface IRootBreadcrumbProps {
+  isRoot: true;
+  text?: never;
 }
 
-export const SetAppSearchBreadcrumbs: React.FC<ISetBreadcrumbsProps> = ({ text, isRoot }) => {
+export const SetAppSearchBreadcrumbs: React.FC<IBreadcrumbProps | IRootBreadcrumbProps> = ({
+  text,
+  isRoot,
+}) => {
   const history = useHistory();
   const { setBreadcrumbs } = useContext(KibanaContext) as IKibanaContext;
 
   const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
 
   useEffect(() => {
-    setBreadcrumbs(appSearchBreadcrumbs(history)(crumb));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setBreadcrumbs(appSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
+  }, []);
 
   return null;
 };

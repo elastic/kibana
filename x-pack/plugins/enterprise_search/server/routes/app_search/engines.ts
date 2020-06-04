@@ -8,9 +8,10 @@ import fetch from 'node-fetch';
 import querystring from 'querystring';
 import { schema } from '@kbn/config-schema';
 
+import { IRouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
 
-export function registerEnginesRoute({ router, config, log }) {
+export function registerEnginesRoute({ router, config, log }: IRouteDependencies) {
   router.get(
     {
       path: '/api/app_search/engines',
@@ -23,7 +24,7 @@ export function registerEnginesRoute({ router, config, log }) {
     },
     async (context, request, response) => {
       try {
-        const appSearchUrl = config.host;
+        const appSearchUrl = config.host as string;
         const { type, pageIndex } = request.query;
 
         const params = querystring.stringify({
@@ -34,7 +35,7 @@ export function registerEnginesRoute({ router, config, log }) {
         const url = `${encodeURI(appSearchUrl)}/as/engines/collection?${params}`;
 
         const enginesResponse = await fetch(url, {
-          headers: { Authorization: request.headers.authorization },
+          headers: { Authorization: request.headers.authorization as string },
         });
 
         if (enginesResponse.url.endsWith('/login')) {
@@ -58,7 +59,7 @@ export function registerEnginesRoute({ router, config, log }) {
         }
       } catch (e) {
         log.error(`Cannot connect to App Search: ${e.toString()}`);
-        if (e instanceof Error) log.debug(e.stack);
+        if (e instanceof Error) log.debug(e.stack as string);
 
         return response.notFound({ body: 'cannot-connect' });
       }

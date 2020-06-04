@@ -17,7 +17,7 @@ describe('App Search Telemetry Usage Collector', () => {
   const usageCollectionMock = {
     makeUsageCollector: makeUsageCollectorStub,
     registerCollector: registerStub,
-  };
+  } as any;
 
   const savedObjectsRepoStub = {
     get: () => ({
@@ -35,7 +35,7 @@ describe('App Search Telemetry Usage Collector', () => {
   };
   const savedObjectsMock = {
     createInternalRepository: jest.fn(() => savedObjectsRepoStub),
-  };
+  } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,6 +48,7 @@ describe('App Search Telemetry Usage Collector', () => {
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('app_search');
+      expect(makeUsageCollectorStub.mock.calls[0][0].isReady()).toBe(true);
     });
   });
 
@@ -74,7 +75,7 @@ describe('App Search Telemetry Usage Collector', () => {
     });
 
     it('should not error & should return a default telemetry object if no saved data exists', async () => {
-      const emptySavedObjectsMock = { createInternalRepository: () => ({}) };
+      const emptySavedObjectsMock = { createInternalRepository: () => ({}) } as any;
 
       registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();

@@ -18,14 +18,14 @@ describe('renderApp', () => {
   const config = {};
   const plugins = {
     licensing: licensingMock.createSetup(),
-  };
+  } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('mounts and unmounts UI', () => {
-    const MockApp: React.FC = () => <div className="hello-world">Hello world!</div>;
+    const MockApp = () => <div className="hello-world">Hello world!</div>;
 
     const unmount = renderApp(MockApp, core, params, config, plugins);
     expect(params.element.querySelector('.hello-world')).not.toBeNull();

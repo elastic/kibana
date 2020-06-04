@@ -24,8 +24,8 @@ describe('EngineOverviewHeader', () => {
     const wrapper = shallow(<EngineOverviewHeader />);
     const button = wrapper.find('[data-test-subj="launchButton"]');
 
-    expect(button.props().href).toBe('http://localhost:3002/as');
-    expect(button.props().isDisabled).toBeFalsy();
+    expect(button.prop('href')).toBe('http://localhost:3002/as');
+    expect(button.prop('isDisabled')).toBeFalsy();
 
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalled();
@@ -35,7 +35,7 @@ describe('EngineOverviewHeader', () => {
     const wrapper = shallow(<EngineOverviewHeader isButtonDisabled />);
     const button = wrapper.find('[data-test-subj="launchButton"]');
 
-    expect(button.props().isDisabled).toBe(true);
-    expect(button.props().href).toBeUndefined();
+    expect(button.prop('isDisabled')).toBe(true);
+    expect(button.prop('href')).toBeUndefined();
   });
 });

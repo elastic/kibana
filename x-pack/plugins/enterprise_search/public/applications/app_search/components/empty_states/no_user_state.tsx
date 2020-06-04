@@ -15,7 +15,7 @@ import { getUserName } from '../../utils/get_username';
 
 import './empty_states.scss';
 
-export const NoUserState: React.FC<> = () => {
+export const NoUserState: React.FC = () => {
   const username = getUserName();
 
   return (

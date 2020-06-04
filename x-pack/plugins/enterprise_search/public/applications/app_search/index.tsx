@@ -12,7 +12,7 @@ import { KibanaContext, IKibanaContext } from '../index';
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
-export const AppSearch: React.FC<> = () => {
+export const AppSearch: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
 
   return (

@@ -12,7 +12,7 @@ import { EngineOverviewHeader } from '../engine_overview_header';
 
 import './empty_states.scss';
 
-export const LoadingState: React.FC<> = () => {
+export const LoadingState: React.FC = () => {
   return (
     <EuiPage restrictWidth className="engine-overview empty-state">
       <SetBreadcrumbs isRoot />
