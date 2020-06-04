@@ -28,6 +28,9 @@ export type PrivateOnActionArgs =
       type: 'selectToMove';
       payload: ProcessorInfo;
     }
+  | {
+      type: 'cancelMove';
+    }
   | { type: 'move'; payload: ProcessorSelector }
   | { type: 'duplicate'; payload: ProcessorSelector };
 
@@ -146,6 +149,12 @@ export const Tree: FunctionComponent<Props> = memo(
           if (action.type === 'selectToMove') {
             setTreeMode('move');
             setSelectedProcessorInfo(action.payload);
+            return;
+          }
+
+          if (action.type === 'cancelMove') {
+            setTreeMode('idle');
+            setSelectedProcessorInfo(undefined);
             return;
           }
 

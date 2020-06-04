@@ -32,6 +32,9 @@ export const TreeNode: FunctionComponent<Props> = ({
   const onMove = () => {
     privateOnAction({ type: 'selectToMove', payload: processorInfo });
   };
+  const onCancelMove = () => {
+    privateOnAction({ type: 'cancelMove' });
+  };
   const onDuplicate = () => {
     privateOnAction({ type: 'duplicate', payload: processorInfo.selector });
   };
@@ -48,11 +51,22 @@ export const TreeNode: FunctionComponent<Props> = ({
           {renderItem({ processor, selector: processorInfo.selector })}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={onMove}>
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel', {
-              defaultMessage: 'Move',
-            })}
-          </EuiButtonEmpty>
+          {selectedProcessorInfo?.id === processor.id ? (
+            <EuiButtonEmpty size="s" onClick={onCancelMove}>
+              {i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.cancelMoveProcessorButtonLabel',
+                {
+                  defaultMessage: 'Cancel Move',
+                }
+              )}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty size="s" onClick={onMove}>
+              {i18n.translate('xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel', {
+                defaultMessage: 'Move',
+              })}
+            </EuiButtonEmpty>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" onClick={onDuplicate}>
