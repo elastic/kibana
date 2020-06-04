@@ -94,14 +94,14 @@ export const HostList = () => {
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
-    const lastActiveColumnName = i18n.translate('xpack.siem.endpointList.lastActive', {
+    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
       defaultMessage: 'Last Active',
     });
 
     return [
       {
         field: 'metadata.host',
-        name: i18n.translate('xpack.siem.endpointList.hostname', {
+        name: i18n.translate('xpack.securitySolution.endpointList.hostname', {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
@@ -121,7 +121,7 @@ export const HostList = () => {
       },
       {
         field: 'host_status',
-        name: i18n.translate('xpack.siem.endpointList.hostStatus', {
+        name: i18n.translate('xpack.securitySolution.endpointList.hostStatus', {
           defaultMessage: 'Host Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -133,7 +133,7 @@ export const HostList = () => {
               className="eui-textTruncate"
             >
               <FormattedMessage
-                id="xpack.siem.endpointList.hostStatusValue"
+                id="xpack.securitySolution.endpointList.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
                 values={{ hostStatus }}
               />
@@ -143,7 +143,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.siem.endpointList.policy', {
+        name: i18n.translate('xpack.securitySolution.endpointList.policy', {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
@@ -154,7 +154,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.siem.endpointList.policyStatus', {
+        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -162,7 +162,7 @@ export const HostList = () => {
           return (
             <EuiHealth color="success" className="eui-textTruncate">
               <FormattedMessage
-                id="xpack.siem.endpointList.policyStatus"
+                id="xpack.securitySolution.endpointList.policyStatus"
                 defaultMessage="Policy Status"
               />
             </EuiHealth>
@@ -171,7 +171,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.siem.endpointList.alerts', {
+        name: i18n.translate('xpack.securitySolution.endpointList.alerts', {
           defaultMessage: 'Alerts',
         }),
         dataType: 'number',
@@ -181,14 +181,14 @@ export const HostList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        name: i18n.translate('xpack.siem.endpointList.os', {
+        name: i18n.translate('xpack.securitySolution.endpointList.os', {
           defaultMessage: 'Operating System',
         }),
         truncateText: true,
       },
       {
         field: 'metadata.host.ip',
-        name: i18n.translate('xpack.siem.endpointList.ip', {
+        name: i18n.translate('xpack.securitySolution.endpointList.ip', {
           defaultMessage: 'IP Address',
         }),
         // eslint-disable-next-line react/display-name
@@ -206,7 +206,7 @@ export const HostList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.siem.endpointList.endpointVersion', {
+        name: i18n.translate('xpack.securitySolution.endpointList.endpointVersion', {
           defaultMessage: 'Version',
         }),
       },
@@ -230,14 +230,14 @@ export const HostList = () => {
     <ManagementPageView
       viewType="list"
       data-test-subj="hostPage"
-      headerLeft={i18n.translate('xpack.siem.endpointLis.pageTitle', {
+      headerLeft={i18n.translate('xpack.securitySolution.endpointLis.pageTitle', {
         defaultMessage: 'Endpoints',
       })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
       <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
         <FormattedMessage
-          id="xpack.siem.endpointList.totalCount"
+          id="xpack.securitySolution.endpointList.totalCount"
           defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
           values={{ totalItemCount }}
         />
