@@ -27,6 +27,7 @@ import {
   ProcessorSelector,
   OnUpdateHandlerArg,
   FormValidityState,
+  OnFormUpdateArg,
 } from './types';
 
 import { serialize } from './serialize';
@@ -78,9 +79,16 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       validate: () => Promise.resolve(true),
     });
 
-    const onFormUpdate = useCallback(
-      (arg) => {
-        setFormState({ validate: arg.validate });
+    const onFormUpdate = useCallback<(arg: OnFormUpdateArg<any>) => void>(
+      ({ isValid, validate }) => {
+        setFormState({
+          validate: async () => {
+            if (isValid === undefined) {
+              return validate();
+            }
+            return isValid;
+          },
+        });
       },
       [setFormState]
     );
@@ -131,6 +139,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       },
       [processorsDispatch, settingsFormMode]
     );
+
+    const onCloseSettingsForm = useCallback(() => {
+      dismissFlyout();
+      setFormState({ validate: () => Promise.resolve(true) });
+    }, [setFormState]);
 
     const dismissFlyout = () => {
       setSettingsFormMode({ id: 'closed' });
@@ -304,10 +317,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 ? settingsFormMode.arg.processor
                 : undefined
             }
-            onClose={() => {
-              dismissFlyout();
-              setFormState({ validate: () => Promise.resolve(true) });
-            }}
+            onClose={onCloseSettingsForm}
           />
         ) : undefined}
         {processorToDeleteSelector && (

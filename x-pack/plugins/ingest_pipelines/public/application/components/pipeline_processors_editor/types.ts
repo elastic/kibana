@@ -31,6 +31,8 @@ export interface ProcessorInternal<CustomProcessorOptions = {}> {
   onFailure?: ProcessorInternal[];
 }
 
+export { OnFormUpdateArg };
+
 export interface FormValidityState {
   validate: OnFormUpdateArg<any>['validate'];
 }

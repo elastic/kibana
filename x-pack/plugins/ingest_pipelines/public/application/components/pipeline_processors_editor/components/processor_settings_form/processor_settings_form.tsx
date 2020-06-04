@@ -29,7 +29,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   onFormUpdate,
 }) => {
   const handleSubmit = useCallback(
-    (data: any, isValid: boolean) => {
+    async (data: any, isValid: boolean) => {
       if (isValid) {
         const { type, customOptions, ...options } = data;
         onSubmit({
@@ -42,7 +42,6 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   );
 
   const { form } = useForm({
-    defaultValue: processor?.options,
     onSubmit: handleSubmit,
   });
 
@@ -63,7 +62,8 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
       <EuiHorizontalRule />
 
       <FormDataProvider pathsToWatch="type">
-        {({ type, customOptions, ...options }) => {
+        {(arg: any) => {
+          const { type, customOptions, ...options } = arg;
           let formContent: React.ReactNode | undefined;
 
           if (type?.length) {
@@ -77,7 +77,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
                 </>
               );
             } else {
-              formContent = <Custom defaultOptions={options} />;
+              formContent = <Custom defaultOptions={processor?.options} />;
             }
 
             return (
