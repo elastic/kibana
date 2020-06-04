@@ -17,7 +17,7 @@
 
 name=kibana
 program=/usr/share/kibana/bin/kibana
-pidfile="/var/run/$name.pid"
+pidfile="/var/run/kibana/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
@@ -43,6 +43,11 @@ start() {
   chown "$user":"$group" "/var/log/kibana/"
   chmod 755 "/var/log/kibana/"
 
+
+  # Ensure the log directory is setup correctly.
+  [ ! -d "/var/run/kibana/" ] && mkdir "/var/run/kibana/"
+  chown "$user":"$group" "/var/run/kibana/"
+  chmod 755 "/var/run/kibana/"
 
   # Setup any environmental stuff beforehand
 
