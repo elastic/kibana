@@ -37,6 +37,7 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { ScriptField } from './script_field';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
@@ -127,6 +128,7 @@ const StandardDeviationAggUi = (props) => {
             }
           >
             <FieldSelect
+              includeScript
               fields={fields}
               type={model.type}
               restrict={RESTRICT_FIELDS}
@@ -168,6 +170,7 @@ const StandardDeviationAggUi = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <ScriptField model={model} onChange={handleTextChange('script')} />
     </AggRow>
   );
 };

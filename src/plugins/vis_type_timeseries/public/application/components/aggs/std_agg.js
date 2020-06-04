@@ -24,6 +24,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -35,10 +36,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
+import { ScriptField } from './script_field';
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
+  const handleTextChange = createTextHandler(handleChange);
   const handleSelectChange = createSelectHandler(handleChange);
   const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [KBN_FIELD_TYPES.NUMBER];
 
@@ -85,6 +88,7 @@ export function StandardAgg(props) {
               fullWidth
             >
               <FieldSelect
+                includeScript
                 fields={fields}
                 type={model.type}
                 restrict={restrictFields}
@@ -98,6 +102,7 @@ export function StandardAgg(props) {
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
+      <ScriptField model={model} onChange={handleTextChange('script')} />
     </AggRow>
   );
 }

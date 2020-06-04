@@ -95,6 +95,10 @@ const metricsItems = schema.object({
   window: numberOptional,
   function: stringOptionalNullable,
   script: stringOptionalNullable,
+  agg_with: stringOptionalNullable,
+  size: stringOptionalNullable,
+  order: stringOptionalNullable,
+  order_by: stringOptionalNullable,
   variables: schema.maybe(
     schema.arrayOf(
       schema.object({

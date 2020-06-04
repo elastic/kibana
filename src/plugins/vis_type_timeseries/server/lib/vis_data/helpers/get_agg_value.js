@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { get, includes, max, min, sum, noop } from 'lodash';
+import { get, includes, max, min, sum, noop, flattenDeep } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 const aggFns = {
   max,
@@ -56,7 +57,14 @@ export const getAggValue = (row, metric) => {
       }
 
       const hits = get(row, [metric.id, 'docs', 'hits', 'hits'], []);
-      const values = hits.map((doc) => get(doc, `_source.${metric.field}`));
+      const values = flattenDeep(
+        hits.map((doc) => {
+          if (metric.field === SCRIPTED_FIELD_VALUE) {
+            return get(doc, ['fields', SCRIPTED_FIELD_VALUE], []);
+          }
+          return get(doc, `_source.${metric.field}`);
+        })
+      );
       const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.noop;
 
       return aggWith(values);

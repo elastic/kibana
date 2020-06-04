@@ -18,6 +18,7 @@
  */
 
 import { getAggValue } from './get_agg_value';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 function testAgg(row, metric, expected) {
   let name = metric.type;
@@ -91,6 +92,27 @@ describe('getAggValue', () => {
     testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'sum', field: 'example.value' }, 75);
     testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'max', field: 'example.value' }, 25);
     testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'min', field: 'example.value' }, 25);
+  });
+
+  describe('top hits with scripted field', () => {
+    const row = {
+      test: {
+        doc_count: 1,
+        docs: {
+          hits: {
+            hits: [
+              { fields: { [SCRIPTED_FIELD_VALUE]: [25] } },
+              { fields: { [SCRIPTED_FIELD_VALUE]: [25] } },
+              { fields: { [SCRIPTED_FIELD_VALUE]: [25] } },
+            ],
+          },
+        },
+      },
+    };
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'avg', field: SCRIPTED_FIELD_VALUE }, 25);
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'sum', field: SCRIPTED_FIELD_VALUE }, 75);
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'max', field: SCRIPTED_FIELD_VALUE }, 25);
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'min', field: SCRIPTED_FIELD_VALUE }, 25);
   });
 
   const basicWithDerv = {

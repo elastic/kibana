@@ -23,9 +23,12 @@ import { EuiComboBox } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 import { i18n } from '@kbn/i18n';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
+
+const SCRIPT_OPTION = { label: 'Script', value: SCRIPTED_FIELD_VALUE };
 
 function FieldSelectUi({
   type,
@@ -37,6 +40,7 @@ function FieldSelectUi({
   restrict,
   placeholder,
   uiRestrictions,
+  includeScript,
   ...rest
 }) {
   if (type === 'count') {
@@ -73,6 +77,14 @@ function FieldSelectUi({
     }, {})
   );
 
+  if (includeScript) {
+    options.unshift({ options: [SCRIPT_OPTION], label: 'special ' });
+  }
+
+  if (onChange && value === SCRIPTED_FIELD_VALUE && !selectedOptions.length) {
+    selectedOptions.push(SCRIPT_OPTION);
+  }
+
   if (onChange && value && !selectedOptions.length) {
     onChange();
   }
@@ -91,6 +103,7 @@ function FieldSelectUi({
 }
 
 FieldSelectUi.defaultProps = {
+  includeScript: false,
   indexPattern: '*',
   disabled: false,
   restrict: [],
@@ -100,6 +113,7 @@ FieldSelectUi.defaultProps = {
 };
 
 FieldSelectUi.propTypes = {
+  includeScript: PropTypes.bool,
   disabled: PropTypes.bool,
   fields: PropTypes.object,
   id: PropTypes.string,

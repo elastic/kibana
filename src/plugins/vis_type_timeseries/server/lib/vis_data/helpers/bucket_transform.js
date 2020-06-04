@@ -22,6 +22,8 @@ import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
+import { collectScriptFields } from '../helpers/collect_scrpt_fields';
 
 function checkMetric(metric, fields) {
   fields.forEach((field) => {
@@ -36,19 +38,21 @@ function checkMetric(metric, fields) {
   });
 }
 
+function isScriptedField(bucket) {
+  return bucket.field === SCRIPTED_FIELD_VALUE;
+}
+
 function stdMetric(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {};
-  body[bucket.type] = {
-    field: bucket.field,
-  };
+  body[bucket.type] = isScriptedField(bucket) ? { script: bucket.script } : { field: bucket.field };
   return body;
 }
 
 function extendStats(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {
-    extended_stats: { field: bucket.field },
+    extended_stats: isScriptedField(bucket) ? { script: bucket.script } : { field: bucket.field },
   };
   if (bucket.sigma) body.extended_stats.sigma = parseInt(bucket.sigma, 10);
   return body;
@@ -103,19 +107,41 @@ export const bucketTransform = {
 
   top_hit: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'size']);
-    const body = {
-      filter: {
-        exists: { field: bucket.field },
-      },
-      aggs: {
-        docs: {
-          top_hits: {
-            size: bucket.size,
-            _source: { includes: [bucket.field] },
+    let body;
+    if (bucket.field === SCRIPTED_FIELD_VALUE) {
+      const scriptFields = collectScriptFields(bucket.script);
+      body = {
+        filter: {
+          bool: { filter: scriptFields.map((field) => ({ exists: { field } })) },
+        },
+        aggs: {
+          docs: {
+            top_hits: {
+              size: bucket.size,
+              script_fields: {
+                [SCRIPTED_FIELD_VALUE]: {
+                  script: bucket.script,
+                },
+              },
+            },
           },
         },
-      },
-    };
+      };
+    } else {
+      body = {
+        filter: {
+          exists: { field: bucket.field },
+        },
+        aggs: {
+          docs: {
+            top_hits: {
+              size: bucket.size,
+              _source: { includes: [bucket.field] },
+            },
+          },
+        },
+      };
+    }
     if (bucket.order_by) {
       set(body, 'aggs.docs.top_hits.sort', [{ [bucket.order_by]: { order: bucket.order } }]);
     }
@@ -139,22 +165,32 @@ export const bucketTransform = {
       );
     }
     const agg = {
-      percentiles: {
-        field: bucket.field,
-        percents,
-      },
+      percentiles: isScriptedField(bucket)
+        ? {
+            script: bucket.script,
+            percents,
+          }
+        : {
+            field: bucket.field,
+            percents,
+          },
     };
     return agg;
   },
 
   percentile_rank: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'values']);
-
+    const values = (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value));
     return {
-      percentile_ranks: {
-        field: bucket.field,
-        values: (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value)),
-      },
+      percentile_ranks: isScriptedField(bucket)
+        ? {
+            script: bucket.script,
+            values,
+          }
+        : {
+            field: bucket.field,
+            values,
+          },
     };
   },
 

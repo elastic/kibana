@@ -24,6 +24,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiSpacer,
@@ -35,6 +36,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { Percentiles, newPercentile } from './percentile_ui';
+import { ScriptField } from './script_field';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
@@ -46,6 +48,7 @@ export function PercentileAgg(props) {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleTextChange = createTextHandler(handleChange);
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
@@ -94,6 +97,7 @@ export function PercentileAgg(props) {
             }
           >
             <FieldSelect
+              includeScript
               fields={fields}
               type={model.type}
               restrict={RESTRICT_FIELDS}
@@ -104,6 +108,7 @@ export function PercentileAgg(props) {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <ScriptField model={model} onChange={handleTextChange('script')} />
 
       <EuiSpacer size="m" />
 

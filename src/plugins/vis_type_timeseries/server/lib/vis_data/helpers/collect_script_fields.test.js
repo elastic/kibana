@@ -17,5 +17,20 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const SCRIPTED_FIELD_VALUE = '__SCRIPT__';
+import { collectScriptFields } from './collect_scrpt_fields';
+
+describe('collectScriptFields', () => {
+  it('should work', () => {
+    const script =
+      "doc['system.cpu.user.pct'].size() > 0 && doc['system.cpu.system.pct'].size() > 0 && doc['system.cpu.cores'].size() > 0 ? ((doc['system.cpu.user.pct'].value + doc['system.cpu.system.pct'].value) / doc['system.cpu.cores'].value) : 0";
+    expect(collectScriptFields(script)).toEqual([
+      'system.cpu.user.pct',
+      'system.cpu.system.pct',
+      'system.cpu.cores',
+    ]);
+  });
+  it('should work with an empty script', () => {
+    const script = '';
+    expect(collectScriptFields(script)).toEqual([]);
+  });
+});

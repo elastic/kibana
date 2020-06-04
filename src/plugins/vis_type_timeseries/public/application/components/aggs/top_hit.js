@@ -37,6 +37,8 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/panel_types';
+import { ScriptField } from './script_field';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -126,7 +128,10 @@ const TopHitAggUi = (props) => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  const field = fields[indexPattern].find((f) => f.name === model.field);
+  const field =
+    model.field === SCRIPTED_FIELD_VALUE
+      ? { type: 'number' }
+      : fields[indexPattern].find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
@@ -174,6 +179,7 @@ const TopHitAggUi = (props) => {
             }
           >
             <FieldSelect
+              includeScript
               fields={fields}
               type={model.type}
               restrict={aggWithOptionsRestrictFields}
@@ -184,7 +190,7 @@ const TopHitAggUi = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      <ScriptField model={model} onChange={handleTextChange('script')} />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">

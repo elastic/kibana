@@ -25,7 +25,9 @@ import { FieldSelect } from '../field_select';
 import { AggRow } from '../agg_row';
 import { createChangeHandler } from '../../lib/create_change_handler';
 import { createSelectHandler } from '../../lib/create_select_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { PercentileRankValues } from './percentile_rank_values';
+import { ScriptField } from '../script_field';
 
 import {
   htmlIdGenerator,
@@ -51,6 +53,7 @@ export const PercentileRankAgg = (props) => {
   const isTablePanel = panel.type === 'table';
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleTextChange = createTextHandler(handleChange);
 
   const handlePercentileRankValuesChange = (values) => {
     handleChange(
@@ -97,6 +100,7 @@ export const PercentileRankAgg = (props) => {
             }
           >
             <FieldSelect
+              includeScript
               fields={fields}
               type={model.type}
               restrict={RESTRICT_FIELDS}
@@ -107,6 +111,7 @@ export const PercentileRankAgg = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <ScriptField model={model} onChange={handleTextChange('script')} />
       <EuiSpacer />
       <PercentileRankValues
         disableAdd={isTablePanel}

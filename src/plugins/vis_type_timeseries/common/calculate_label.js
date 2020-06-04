@@ -20,6 +20,7 @@
 import { includes, startsWith } from 'lodash';
 import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
+import { SCRIPTED_FIELD_VALUE } from './constants';
 
 const paths = [
   'cumulative_sum',
@@ -113,8 +114,12 @@ export function calculateLabel(metric, metrics) {
     });
   }
 
+  const field =
+    metric.field === SCRIPTED_FIELD_VALUE
+      ? i18n.translate('visTypeTimeSeries.calculateLabel.scriptLabel', { defaultMessage: 'Script' })
+      : metric.field;
   return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
-    values: { lookupMetricType: lookup[metric.type], metricField: metric.field },
+    values: { lookupMetricType: lookup[metric.type], metricField: field },
   });
 }

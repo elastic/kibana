@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const SCRIPTED_FIELD_VALUE = '__SCRIPT__';
+const REGEX = /doc\['([^']+)'\].value/g;
+export const collectScriptFields = (script) => {
+  if (!script) {
+    return [];
+  }
+  return script.match(REGEX).map((m) => m.replace(REGEX, '$1'));
+};

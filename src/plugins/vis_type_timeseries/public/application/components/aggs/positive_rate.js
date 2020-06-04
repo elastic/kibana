@@ -24,6 +24,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -38,6 +39,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { ScriptField } from './script_field';
 
 const UNIT_OPTIONS = [
   {
@@ -74,6 +76,7 @@ export const PositiveRateAgg = (props) => {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleTextChange = createTextHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
   const indexPattern =
@@ -121,6 +124,7 @@ export const PositiveRateAgg = (props) => {
             fullWidth
           >
             <FieldSelect
+              includeScript
               fields={props.fields}
               type={model.type}
               restrict={KBN_FIELD_TYPES.NUMBER}
@@ -155,6 +159,7 @@ export const PositiveRateAgg = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <ScriptField onChange={handleTextChange('script')} model={model} />
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
         <p>
