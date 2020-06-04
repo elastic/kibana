@@ -73,9 +73,7 @@ describe('<IndexManagementHome />', () => {
 
       component.update();
 
-      find('indexTableIndexNameLink')
-        .at(0)
-        .simulate('click');
+      find('indexTableIndexNameLink').at(0).simulate('click');
     });
 
     test('should encode indexName when loading settings in detail panel', async () => {

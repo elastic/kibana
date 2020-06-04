@@ -72,10 +72,7 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
   const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
     const tabs = ['summary', 'settings', 'mappings', 'aliases'];
 
-    testBed
-      .find('templateDetails.tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -100,10 +97,7 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
 
     clickActionMenu(templateName);
 
-    component
-      .find('.euiContextMenuItem')
-      .at(actions.indexOf(action))
-      .simulate('click');
+    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
   };
 
   const clickTemplateAt = async (index: number) => {
@@ -136,9 +130,7 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
 
     // Then click on a filter item
     act(() => {
-      find('filterList.filterItem')
-        .at(views.indexOf(view))
-        .simulate('click');
+      find('filterList.filterItem').at(views.indexOf(view)).simulate('click');
     });
     component.update();
   };

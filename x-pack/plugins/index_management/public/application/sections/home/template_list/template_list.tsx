@@ -41,7 +41,7 @@ interface MatchParams {
 }
 
 const stripOutSystemTemplates = (templates: TemplateListItem[]): TemplateListItem[] =>
-  templates.filter(template => !template.name.startsWith('.'));
+  templates.filter((template) => !template.name.startsWith('.'));
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
