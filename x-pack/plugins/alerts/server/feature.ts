@@ -27,7 +27,7 @@ export function registerFeature(features: FeaturesPluginSetup) {
       read: {
         alerting: {
           globally: {
-            all: [IndexThresholdId],
+            read: [IndexThresholdId],
           },
         },
         savedObject: {

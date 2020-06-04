@@ -11,6 +11,7 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
 import { KibanaRequest, CoreSetup } from 'kibana/server';
+import { featuresPluginMock } from '../../features/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -33,6 +34,7 @@ describe('Alerting Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsSetup,
           taskManager: taskManagerMock.createSetup(),
           eventLog: eventLogServiceMock.create(),
+          features: featuresPluginMock.createSetup(),
         } as unknown) as AlertingPluginsSetup
       );
 
@@ -40,6 +42,100 @@ describe('Alerting Plugin', () => {
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
       );
+    });
+
+    it('should grant global `all` priviliges to built in AlertTypes for anyone with `all` priviliges to alerts', async () => {
+      const context = coreMock.createPluginInitializerContext();
+      const plugin = new AlertingPlugin(context);
+
+      const coreSetup = coreMock.createSetup();
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const features = featuresPluginMock.createSetup();
+      await plugin.setup(
+        ({
+          ...coreSetup,
+          http: {
+            ...coreSetup.http,
+            route: jest.fn(),
+          },
+        } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
+        ({
+          licensing: licensingMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsSetup,
+          taskManager: taskManagerMock.createSetup(),
+          eventLog: eventLogServiceMock.create(),
+          features,
+        } as unknown) as AlertingPluginsSetup
+      );
+
+      expect(features.registerFeature).toHaveBeenCalledTimes(1);
+      const { privileges } = features.registerFeature.mock.calls[0][0];
+
+      expect(privileges?.all.alerting).toMatchInlineSnapshot(`
+        Object {
+          "globally": Object {
+            "all": Array [
+              ".index-threshold",
+            ],
+          },
+        }
+      `);
+      expect(privileges?.read.alerting).toMatchInlineSnapshot(`
+        Object {
+          "globally": Object {
+            "read": Array [
+              ".index-threshold",
+            ],
+          },
+        }
+      `);
+    });
+
+    it('should grant global `read` priviliges to built in AlertTypes for anyone with `read` priviliges to alerts', async () => {
+      const context = coreMock.createPluginInitializerContext();
+      const plugin = new AlertingPlugin(context);
+
+      const coreSetup = coreMock.createSetup();
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const features = featuresPluginMock.createSetup();
+      await plugin.setup(
+        ({
+          ...coreSetup,
+          http: {
+            ...coreSetup.http,
+            route: jest.fn(),
+          },
+        } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
+        ({
+          licensing: licensingMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsSetup,
+          taskManager: taskManagerMock.createSetup(),
+          eventLog: eventLogServiceMock.create(),
+          features,
+        } as unknown) as AlertingPluginsSetup
+      );
+
+      expect(features.registerFeature).toHaveBeenCalledTimes(1);
+      const { privileges } = features.registerFeature.mock.calls[0][0];
+
+      expect(privileges?.all.alerting).toMatchInlineSnapshot(`
+        Object {
+          "globally": Object {
+            "all": Array [
+              ".index-threshold",
+            ],
+          },
+        }
+      `);
+      expect(privileges?.read.alerting).toMatchInlineSnapshot(`
+        Object {
+          "globally": Object {
+            "read": Array [
+              ".index-threshold",
+            ],
+          },
+        }
+      `);
     });
   });
 
@@ -71,6 +167,7 @@ describe('Alerting Plugin', () => {
             encryptedSavedObjects: encryptedSavedObjectsSetup,
             taskManager: taskManagerMock.createSetup(),
             eventLog: eventLogServiceMock.create(),
+            features: featuresPluginMock.createSetup(),
           } as unknown) as AlertingPluginsSetup
         );
 
@@ -115,6 +212,7 @@ describe('Alerting Plugin', () => {
             encryptedSavedObjects: encryptedSavedObjectsSetup,
             taskManager: taskManagerMock.createSetup(),
             eventLog: eventLogServiceMock.create(),
+            features: featuresPluginMock.createSetup(),
           } as unknown) as AlertingPluginsSetup
         );
 
