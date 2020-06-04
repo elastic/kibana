@@ -55,7 +55,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
       componentProps={{
         euiFieldProps: {
           fullWidth: true,
-          options: types.map(type => ({ label: type, value: type })),
+          options: types.map((type) => ({ label: type, value: type })),
           noSuggestions: false,
           singleSelection: {
             asPlainText: true,

@@ -94,7 +94,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   );
 
   const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
-    arg => (processorStateRef.current = arg),
+    (arg) => (processorStateRef.current = arg),
     []
   );
 

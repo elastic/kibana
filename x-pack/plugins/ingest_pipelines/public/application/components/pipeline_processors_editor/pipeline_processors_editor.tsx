@@ -43,8 +43,6 @@ export type SettingsFormMode =
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'closed' };
 
-export type SetSettingsFormMode = Dispatch<SettingsFormMode>;
-
 export interface Props {
   processors: ProcessorInternal[];
   onFailureProcessors: ProcessorInternal[];
