@@ -66,8 +66,8 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               enabled,
               false_positives: falsePositives,
               from,
-              query,
-              language,
+              query: queryOrUndefined,
+              language: languageOrUndefined,
               machine_learning_job_id: machineLearningJobId,
               output_index: outputIndex,
               saved_id: savedId,
@@ -93,6 +93,14 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               exceptions_list,
             } = payloadRule;
             try {
+              const query =
+                type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+
+              const language =
+                type !== 'machine_learning' && languageOrUndefined == null
+                  ? 'kuery'
+                  : languageOrUndefined;
+
               // TODO: Fix these either with an is conversion or by better typing them within io-ts
               const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
               const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
