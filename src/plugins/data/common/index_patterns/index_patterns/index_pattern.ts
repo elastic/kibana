@@ -18,7 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { i18n } from '@kbn/i18n';
+// import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
 import {
   DuplicateField,
@@ -26,7 +26,7 @@ import {
   expandShorthand,
   FieldMappingSpec,
   MappingObject,
-} from '../../../../kibana_utils/public';
+} from '../../../../kibana_utils/common';
 
 import {
   ES_FIELD_TYPES,
@@ -41,9 +41,10 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats } from '../../services';
-import { TypeMeta } from './types';
+import { IIndexPatternsApiClient } from '.';
+// import { getNotifications, getFieldFormats } from '../../services';
+import { TypeMeta } from '.';
+import { FieldFormatMethods } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -71,6 +72,7 @@ export class IndexPattern implements IIndexPattern {
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
+  private fieldFormats: FieldFormatMethods;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -99,7 +101,8 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: any,
+    fieldFormats: FieldFormatMethods
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -107,13 +110,14 @@ export class IndexPattern implements IIndexPattern {
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
+    this.fieldFormats = fieldFormats;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats: getFieldFormats(),
-      toastNotifications: getNotifications().toasts,
+      fieldFormats,
+      // toastNotifications: getNotifications().toasts,
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
@@ -121,7 +125,7 @@ export class IndexPattern implements IIndexPattern {
     this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
       this,
-      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
     );
     this.formatField = this.formatHit.formatField;
   }
@@ -133,7 +137,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = getFieldFormats().getType(mapping.id);
+    const FieldFormat = this.fieldFormats.getType(mapping.id);
 
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
@@ -289,8 +293,8 @@ export class IndexPattern implements IIndexPattern {
         },
         false,
         {
-          fieldFormats: getFieldFormats(),
-          toastNotifications: getNotifications().toasts,
+          fieldFormats: this.fieldFormats,
+          // toastNotifications: getNotifications().toasts,
         }
       )
     );
@@ -393,7 +397,8 @@ export class IndexPattern implements IIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.fieldFormats
         );
         await duplicatePattern.destroy();
       }
@@ -442,7 +447,8 @@ export class IndexPattern implements IIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.fieldFormats
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -467,6 +473,7 @@ export class IndexPattern implements IIndexPattern {
             }
 
             if (unresolvedCollision) {
+              /*
               const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
                 defaultMessage:
                   'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -474,6 +481,7 @@ export class IndexPattern implements IIndexPattern {
               const { toasts } = getNotifications();
 
               toasts.addDanger(message);
+              */
 
               throw err;
             }
@@ -512,14 +520,15 @@ export class IndexPattern implements IIndexPattern {
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
-        const { toasts } = getNotifications();
+        // const { toasts } = getNotifications();
 
         if (err instanceof IndexPatternMissingIndices) {
-          toasts.addDanger((err as any).message);
+          // toasts.addDanger((err as any).message);
 
           return [];
         }
 
+        /*
         toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
@@ -529,6 +538,7 @@ export class IndexPattern implements IIndexPattern {
             },
           }),
         });
+        */
       });
   }
 

@@ -17,19 +17,10 @@
  * under the License.
  */
 
-export type AggregationRestrictions = Record<
-  string,
-  {
-    agg?: string;
-    interval?: number;
-    fixed_interval?: string;
-    calendar_interval?: string;
-    delay?: string;
-    time_zone?: string;
-  }
->;
-
-export interface TypeMeta {
-  aggs?: Record<string, AggregationRestrictions>;
-  [key: string]: any;
-}
+export * from './index_patterns_api_client';
+export * from './types';
+export * from './_pattern_cache';
+export * from './flatten_hit';
+export * from './format_hit';
+export * from './index_pattern';
+export * from './index_patterns';

@@ -17,32 +17,10 @@
  * under the License.
  */
 
-import { FieldFormatsRegistry } from '../../field_formats';
+export { IndexPatternMissingIndices } from './errors';
+export { getTitle } from './get_title';
+export { getFromSavedObject } from './get_from_saved_object';
+export { isDefault } from './is_default';
 
-export interface IFieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
-
-export interface IFieldType {
-  name: string;
-  type: string;
-  script?: string;
-  lang?: string;
-  count?: number;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
-  aggregatable?: boolean;
-  filterable?: boolean;
-  searchable?: boolean;
-  sortable?: boolean;
-  visualizable?: boolean;
-  readFromDocValues?: boolean;
-  scripted?: boolean;
-  subType?: IFieldSubType;
-  displayName?: string;
-  format?: any;
-}
-
-export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;
+export * from './types';
+export { validateIndexPattern } from './validate_index_pattern';

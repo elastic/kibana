@@ -21,11 +21,11 @@
 import { IndexPatternsService } from './index_patterns';
 import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
 import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+import { fieldFormatsMock } from '../../field_formats/mocks';
 
 const core = coreMock.createStart();
 const http = httpServiceMock.createStartContract();
-const fieldFormats = fieldFormatsServiceMock.createStartContract();
+const fieldFormats = fieldFormatsMock;
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {

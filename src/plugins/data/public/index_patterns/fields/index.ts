@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './field_list';
-export * from './field';
+export * from '../../../common/index_patterns/fields';

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
+// import { i18n } from '@kbn/i18n';
+// import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-import { IndexPattern } from '../index_patterns';
+import { IIndexPattern } from '../../types';
 import {
   IFieldType,
   getKbnFieldType,
@@ -29,13 +29,13 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatMethods } from './types';
 
 export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
-  fieldFormats: FieldFormatsStart;
-  toastNotifications: ToastsStart;
+  fieldFormats: FieldFormatMethods;
+  // toastNotifications: ToastsStart;
 }
 
 export class Field implements IFieldType {
@@ -55,17 +55,20 @@ export class Field implements IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
-  indexPattern?: IndexPattern;
+  indexPattern?: IIndexPattern;
   readFromDocValues?: boolean;
   format: any;
   $$spec: FieldSpec;
   conflictDescriptions?: Record<string, string[]>;
 
   constructor(
-    indexPattern: IndexPattern,
+    indexPattern: IIndexPattern,
     spec: FieldSpec | Field,
     shortDotsEnable: boolean,
-    { fieldFormats, toastNotifications }: FieldDependencies
+    {
+      fieldFormats,
+    }: // toastNotifications
+    FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -82,6 +85,7 @@ export class Field implements IFieldType {
     // find the type for this field, fallback to unknown type
     let type = getKbnFieldType(spec.type);
     if (spec.type && !type) {
+      /*
       const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
         values: { type: spec.type },
         defaultMessage: 'Unknown field type {type}',
@@ -95,6 +99,7 @@ export class Field implements IFieldType {
         title,
         text,
       });
+      */
     }
 
     if (!type) type = getKbnFieldType('unknown');
@@ -103,7 +108,7 @@ export class Field implements IFieldType {
 
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       format =
-        indexPattern.fieldFormatMap[spec.name] ||
+        (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[spec.name]) ||
         fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
     }
 

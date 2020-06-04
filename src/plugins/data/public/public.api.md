@@ -622,7 +622,7 @@ export function getEsPreference(uiSettings: IUiSettingsClient_2, sessionId?: str
 // Warning: (ae-missing-release-tag) "getIndexPatternFieldListCreator" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const getIndexPatternFieldListCreator: ({ fieldFormats, toastNotifications, }: FieldListDependencies) => CreateIndexPatternFieldList;
+export const getIndexPatternFieldListCreator: ({ fieldFormats, }: FieldListDependencies) => CreateIndexPatternFieldList;
 
 // Warning: (ae-missing-release-tag) "getKbnTypeNames" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -841,7 +841,8 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternsApiClient" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any);
+    // Warning: (ae-forgotten-export) The symbol "FieldFormatMethods" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any, fieldFormats: FieldFormatMethods_2);
     // (undocumented)
     [key: string]: any;
     // (undocumented)
@@ -969,7 +970,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     $$spec: FieldSpec;
     // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, toastNotifications }: FieldDependencies);
+    constructor(indexPattern: IIndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, }: FieldDependencies);
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
@@ -985,7 +986,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     format: any;
     // (undocumented)
-    indexPattern?: IndexPattern;
+    indexPattern?: IIndexPattern;
     // (undocumented)
     lang?: string;
     // (undocumented)

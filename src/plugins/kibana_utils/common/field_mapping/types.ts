@@ -17,32 +17,14 @@
  * under the License.
  */
 
-import { FieldFormatsRegistry } from '../../field_formats';
+import { ES_FIELD_TYPES } from '../../../data/common';
 
-export interface IFieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
+/** @public */
+export interface FieldMappingSpec {
+  type: ES_FIELD_TYPES;
+  _serialize?: (mapping: any) => string | undefined;
+  _deserialize?: (mapping: string) => any | undefined;
 }
 
-export interface IFieldType {
-  name: string;
-  type: string;
-  script?: string;
-  lang?: string;
-  count?: number;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
-  aggregatable?: boolean;
-  filterable?: boolean;
-  searchable?: boolean;
-  sortable?: boolean;
-  visualizable?: boolean;
-  readFromDocValues?: boolean;
-  scripted?: boolean;
-  subType?: IFieldSubType;
-  displayName?: string;
-  format?: any;
-}
-
-export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;
+/** @public */
+export type MappingObject = Record<string, FieldMappingSpec>;

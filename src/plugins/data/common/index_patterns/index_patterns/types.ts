@@ -17,14 +17,23 @@
  * under the License.
  */
 
-import { ES_FIELD_TYPES } from '../../../data/public';
+import { FieldFormatsRegistry } from '../../../common';
 
-/** @public */
-export interface FieldMappingSpec {
-  type: ES_FIELD_TYPES;
-  _serialize?: (mapping: any) => string | undefined;
-  _deserialize?: (mapping: string) => any | undefined;
+export type AggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
+
+export interface TypeMeta {
+  aggs?: Record<string, AggregationRestrictions>;
+  [key: string]: any;
 }
 
-/** @public */
-export type MappingObject = Record<string, FieldMappingSpec>;
+export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;

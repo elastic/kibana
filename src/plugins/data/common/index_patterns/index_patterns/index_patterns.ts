@@ -25,9 +25,9 @@ import {
   CoreStart,
 } from 'src/core/public';
 
-import { createIndexPatternCache } from './_pattern_cache';
+import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
+import { IndexPatternsApiClient, GetFieldsOptions } from '.';
 import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
@@ -38,7 +38,7 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatMethods } from './types';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -53,6 +53,7 @@ export class IndexPatternsService {
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
+  private fieldFormats: FieldFormatMethods;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
   createFieldList: CreateIndexPatternFieldList;
   createField: (
@@ -65,20 +66,21 @@ export class IndexPatternsService {
     core: CoreStart,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpStart,
-    fieldFormats: FieldFormatsStart
+    fieldFormats: FieldFormatMethods
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
+    this.fieldFormats = fieldFormats;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats,
-      toastNotifications: core.notifications.toasts,
+      // toastNotifications: core.notifications.toasts,
     });
     this.createField = (indexPattern, spec, shortDotsEnable) => {
       return new Field(indexPattern, spec, shortDotsEnable, {
         fieldFormats,
-        toastNotifications: core.notifications.toasts,
+        // toastNotifications: core.notifications.toasts,
       });
     };
   }
@@ -178,7 +180,8 @@ export class IndexPatternsService {
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache
+      indexPatternCache,
+      this.fieldFormats
     );
 
     return indexPattern.init();

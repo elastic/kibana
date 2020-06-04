@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export { getTitle } from './get_title';
-export * from './types';
-export { validateIndexPattern } from './validate_index_pattern';
-export { IndexPatternMissingIndices } from './errors';
-export { getFromSavedObject } from './get_from_saved_object';
-export { isDefault } from './is_default';
+export * from '../../../common/index_patterns/lib';
