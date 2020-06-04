@@ -29,7 +29,7 @@ async function fetchIndexSettings(indexPatternTitle) {
   const http = getHttp();
   const toasts = getToasts();
   try {
-    const indexSettings = await http.fetch(`../${INDEX_SETTINGS_API_PATH}`, {
+    const indexSettings = await http.fetch(`../../${INDEX_SETTINGS_API_PATH}`, {
       method: 'GET',
       credentials: 'same-origin',
       query: {
