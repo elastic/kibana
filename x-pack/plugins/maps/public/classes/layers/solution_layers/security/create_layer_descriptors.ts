@@ -20,6 +20,7 @@ import {
   AGG_TYPE,
   COUNT_PROP_NAME,
   FIELD_ORIGIN,
+  SCALING_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
@@ -49,6 +50,8 @@ function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: 
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
     geoField: getSourceField(indexPatternTitle),
+    scalingType: SCALING_TYPES.TOP_HITS,
+    topHitsSplitField: isApmIndex(indexPatternTitle) ? 'client.ip' : 'source.ip',
     tooltipProperties: isApmIndex(indexPatternTitle)
       ? [
           'host.name',
@@ -100,6 +103,8 @@ function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTi
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
     geoField: getDestinationField(indexPatternTitle),
+    scalingType: SCALING_TYPES.TOP_HITS,
+    topHitsSplitField: isApmIndex(indexPatternTitle) ? 'server.ip' : 'destination.ip',
     tooltipProperties: isApmIndex(indexPatternTitle)
       ? [
           'host.name',
