@@ -36,6 +36,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [viewName, setViewName] = useState('');
   const openSaveModal = useCallback(() => {
     setIsInvalid(false);
     setCreateModalOpen(true);
@@ -55,6 +56,14 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       saveView({ name, ...currentState });
     },
     [props.viewState, saveView]
+  );
+
+  const changeView = useCallback(
+    (viewState: ViewState & { name: string }) => {
+      setViewName(viewState.name);
+      props.onViewChange(viewState);
+    },
+    [props]
   );
 
   useEffect(() => {
@@ -85,6 +94,13 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     }
   }, [errorOnCreate, errorOnFind, kibana]);
 
+  useEffect(() => {
+    if (!viewName) {
+      const [defaultView] = views.filter((v) => v.isDefault);
+      setViewName(defaultView.name);
+    }
+  }, [views, setViewName, viewName]);
+
   return (
     <>
       <EuiFlexGroup>
@@ -95,10 +111,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           />
         </EuiButtonEmpty>
         <EuiButtonEmpty iconType="importAction" onClick={loadViews} data-test-subj="loadViews">
-          <FormattedMessage
-            defaultMessage="Load"
-            id="xpack.infra.waffle.savedViews.loadViewsLabel"
-          />
+          {viewName}
         </EuiButtonEmpty>
       </EuiFlexGroup>
 
@@ -111,7 +124,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           views={views}
           deleteView={deleteView}
           close={closeModal}
-          setView={props.onViewChange}
+          setView={changeView}
         />
       )}
     </>
