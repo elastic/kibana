@@ -35,10 +35,8 @@ import {
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
-  // @ts-ignore not TS yet
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
-import { ElasticChartProvider } from './elastic_chart';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarProvider } from './filter_bar';
 import { FlyoutProvider } from './flyout';
@@ -49,8 +47,7 @@ import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
-// @ts-ignore not TS yet
-import { PieChartProvider } from './visualizations';
+import { PieChartProvider, ElasticChartProvider } from './visualizations';
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';

@@ -5,7 +5,7 @@
  */
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import { AlertStates } from './types';
 import { evaluateAlert } from './lib/evaluate_alert';
