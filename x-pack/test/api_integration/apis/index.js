@@ -23,7 +23,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
-    loadTestFile(require.resolve('./siem'));
+    loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./fleet'));

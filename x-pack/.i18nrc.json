@@ -40,7 +40,7 @@
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": ["legacy/plugins/security", "plugins/security"],
     "xpack.server": "legacy/server",
-    "xpack.siem": "plugins/siem",
+    "xpack.securitySolution": "plugins/security_solution",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": ["legacy/plugins/spaces", "plugins/spaces"],
     "xpack.taskManager": "legacy/plugins/task_manager",
