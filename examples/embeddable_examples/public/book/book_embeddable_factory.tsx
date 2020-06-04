@@ -90,21 +90,15 @@ export class BookEmbeddableFactory
    * This function is used when dynamically creating a new embeddable to add to a
    * container that is not neccessarily backed by a saved object.
    */
-  public async getExplicitInput(): Promise<{
-    savedObjectId?: string;
-    attributes?: BookSavedObjectAttributes;
-  }> {
+  public async getExplicitInput(): Promise<Omit<BookEmbeddableInput, 'id'>> {
     const { openModal, savedObjectsClient } = await this.getStartServices();
-    return new Promise<{
-      savedObjectId?: string;
-      attributes?: BookSavedObjectAttributes;
-    }>((resolve) => {
+    return new Promise<Omit<BookEmbeddableInput, 'id'>>((resolve) => {
       const onSave = async (attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
         if (includeInLibrary) {
           const savedItem = await savedObjectsClient.create(BOOK_SAVED_OBJECT, attributes);
           resolve({ savedObjectId: savedItem.id });
         } else {
-          resolve({ attributes });
+          resolve({ ...attributes });
         }
       };
       const overlay = openModal(

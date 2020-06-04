@@ -36,6 +36,7 @@ import {
   MULTI_TASK_TODO_EMBEDDABLE,
   SEARCHABLE_LIST_CONTAINER,
 } from '../../embeddable_examples/public';
+import { BOOK_EMBEDDABLE } from '../../embeddable_examples/public/book/book_embeddable';
 
 interface Props {
   embeddableServices: EmbeddableStart;
@@ -69,6 +70,21 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
           icon: 'searchProfilerApp',
           title: 'Learn more',
           tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
+        },
+      },
+      '4': {
+        type: BOOK_EMBEDDABLE,
+        explicitInput: {
+          id: '4',
+          savedObjectId: 'sample-book-saved-object',
+        },
+      },
+      '5': {
+        type: BOOK_EMBEDDABLE,
+        explicitInput: {
+          id: '5',
+          title: 'Creating an embeddable by value: A Guide',
+          author: 'John A. ByValue',
         },
       },
     },

@@ -28,6 +28,7 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
+import { BookEmbeddableComponent } from './book_component';
 // import { TodoComboEmbeddableComponent } from './todo_combo_component';
 
 export const BOOK_EMBEDDABLE = 'book';
@@ -85,6 +86,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
     this.savedObjectsClient = savedObjectsClient;
 
     this.subscription = this.getInput$().subscribe(async () => {
+      // console.log('book input changed to', this.getInput());
       let savedAttributes: BookSavedObjectAttributes | undefined;
       if (isReferenceInput(this.input)) {
         if (this.savedObjectId !== this.input.savedObjectId) {
@@ -104,6 +106,10 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
         hasMatch: getHasMatch(this.input.search, savedAttributes),
         savedAttributes,
       });
+      // console.log('set output to:', {
+      //   hasMatch: getHasMatch(this.input.search, savedAttributes),
+      //   savedAttributes,
+      // });
     });
   }
 
@@ -112,11 +118,11 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
-    ReactDOM.render(<div>test</div>, node);
-    // ReactDOM.render(<TodoComboEmbeddableComponent embeddable={this} />, node);
+    ReactDOM.render(<BookEmbeddableComponent embeddable={this} />, node);
   }
 
   public async reload() {
+    // console.log('reload called');
     if (isReferenceInput(this.input)) {
       this.savedObjectId = this.input.savedObjectId;
       const todoSavedObject = await this.savedObjectsClient.get<BookSavedObjectAttributes>(
