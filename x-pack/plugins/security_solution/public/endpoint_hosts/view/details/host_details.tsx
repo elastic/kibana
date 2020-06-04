@@ -17,7 +17,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../common/endpoint/types';
-import { useHostSelector, useHostLogsUrl } from '../hooks';
+import { useHostSelector, useHostLogsUrl, useHostIngestUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
@@ -33,7 +33,8 @@ const HostIds = styled(EuiListGroupItem)`
 `;
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { appId, appPath, url } = useHostLogsUrl(details.host.id);
+  const { appId: logsAppId, appPath: logsAppPath, url: logsUrl } = useHostLogsUrl(details.host.id);
+  const { appId: ingestAppId, appPath: ingestAppPath, url: ingestUrl } = useHostIngestUrl();
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -70,7 +71,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   }, [details.host.id, queryParams]);
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseUri);
 
-  const detailsResultsLower = useMemo(() => {
+  const detailsResultsPolicy = useMemo(() => {
     return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
@@ -102,6 +103,10 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           </EuiHealth>
         ),
       },
+    ];
+  });
+  const detailsResultsLower = useMemo(() => {
+    return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.ipAddress', {
           defaultMessage: 'IP Address',
@@ -147,20 +152,37 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       <EuiHorizontalRule margin="s" />
       <EuiDescriptionList
         type="column"
+        listItems={detailsResultsPolicy}
+        data-test-subj="hostDetailsPolicyList"
+      />
+      <EuiHorizontalRule margin="s" />
+      <EuiDescriptionList
+        type="column"
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
       <EuiHorizontalRule margin="s" />
       <p>
         <LinkToApp
-          appId={appId}
-          appPath={appPath}
-          href={url}
+          appId={logsAppId}
+          appPath={logsAppPath}
+          href={logsUrl}
           data-test-subj="hostDetailsLinkToLogs"
         >
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToLogsTitle"
             defaultMessage="Endpoint Logs"
+          />
+        </LinkToApp>
+        <LinkToApp
+          appId={ingestAppId}
+          appPath={ingestAppPath}
+          href={ingestUrl}
+          data-test-subj="hostDetailsLinkToIngest"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            defaultMessage="Reassign Policy"
           />
         </LinkToApp>
       </p>
