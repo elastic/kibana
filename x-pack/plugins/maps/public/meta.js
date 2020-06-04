@@ -5,15 +5,7 @@
  */
 
 import {
-  GIS_API_PATH,
-  EMS_FILES_CATALOGUE_PATH,
-  EMS_TILES_CATALOGUE_PATH,
-  EMS_GLYPHS_PATH,
-  EMS_APP_NAME,
-} from '../common/constants';
-import { i18n } from '@kbn/i18n';
-import { EMSClient } from '@elastic/ems-client';
-import {
+  getHttp,
   getLicenseId,
   getIsEmsEnabled,
   getRegionmapLayers,
@@ -25,6 +17,17 @@ import {
   getProxyElasticMapsServiceInMaps,
   getKibanaVersion,
 } from './kibana_services';
+import {
+  GIS_API_PATH,
+  EMS_FILES_CATALOGUE_PATH,
+  EMS_TILES_CATALOGUE_PATH,
+  EMS_GLYPHS_PATH,
+  EMS_APP_NAME,
+  FONTS_API_PATH,
+} from '../common/constants';
+import { i18n } from '@kbn/i18n';
+import { EMSClient } from '@elastic/ems-client';
+
 import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
@@ -95,7 +98,7 @@ export function getEMSClient() {
 
 export function getGlyphUrl() {
   if (!getIsEmsEnabled()) {
-    return '';
+    return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
   return getProxyElasticMapsServiceInMaps()
     ? relativeToAbsolute(`../${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`) +
