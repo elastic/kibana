@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -104,6 +106,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
+  PublicAppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -120,6 +123,8 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
+  LegacyApp,
+  PublicLegacyAppInfo,
 } from './application';
 
 export {
@@ -360,3 +365,5 @@ export {
   UiSettingsState,
   NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';
