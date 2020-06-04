@@ -9,7 +9,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { Store } from 'redux';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -20,13 +19,11 @@ import {
 } from '../../../../common/constants';
 import { UMFrameworkAdapter } from '../../lib';
 import { ClientPluginsStart, ClientPluginsSetup } from '../../../apps/plugin';
-import { AppState } from '../../../state';
 
 export const getKibanaFrameworkAdapter = (
   core: CoreStart,
   plugins: ClientPluginsSetup,
-  startPlugins: ClientPluginsStart,
-  store: Store<AppState>
+  startPlugins: ClientPluginsStart
 ): UMFrameworkAdapter => {
   const {
     application: { capabilities },
@@ -74,7 +71,6 @@ export const getKibanaFrameworkAdapter = (
     routerBasename: basePath.prepend(PLUGIN.ROUTER_BASE_NAME),
     setBadge,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
-    store,
   };
 
   return {

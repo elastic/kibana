@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Store } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
@@ -12,7 +11,6 @@ import { initTlsAlertType } from './tls';
 import { ClientPluginsStart } from '../../apps/plugin';
 
 export type AlertTypeInitializer = (dependenies: {
-  store: Store<any>;
   core: CoreStart;
   plugins: ClientPluginsStart;
 }) => AlertTypeModel;

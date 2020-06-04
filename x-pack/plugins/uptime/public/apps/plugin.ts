@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Store } from 'redux';
 import {
   CoreSetup,
   CoreStart,
@@ -27,7 +26,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { initializeStore } from '../state';
 import { kibanaService } from '../state/kibana_service';
 
 export interface ClientPluginsSetup {
@@ -47,10 +45,7 @@ export type ClientStart = void;
 
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
-  private _store: Store<any, any>;
-  constructor(_context: PluginInitializerContext) {
-    this._store = initializeStore();
-  }
+  constructor(_context: PluginInitializerContext) {}
 
   public async setup(
     core: CoreSetup<ClientPluginsStart, unknown>,
@@ -68,7 +63,6 @@ export class UptimePlugin
       });
     }
 
-    const self = this;
     core.application.register({
       appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
@@ -85,7 +79,7 @@ export class UptimePlugin
         const { element } = params;
 
         const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins, self._store),
+          framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
         };
         return libs.framework.render(element);
       },
@@ -96,7 +90,6 @@ export class UptimePlugin
     kibanaService.core = start;
     alertTypeInitializers.forEach((init) => {
       const alertInitializer = init({
-        store: this._store,
         core: start,
         plugins,
       });

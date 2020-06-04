@@ -11,16 +11,13 @@ import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { TlsTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { store } from '../../state';
 
 const { name, defaultActionMessage } = TlsTranslations;
 const TlsAlertExpression = React.lazy(() =>
   import('../../components/overview/alerts/alerts_containers/alert_tls')
 );
-export const initTlsAlertType: AlertTypeInitializer = ({
-  store,
-  core,
-  plugins,
-}): AlertTypeModel => ({
+export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   alertParamsExpression: (_params: any) => (

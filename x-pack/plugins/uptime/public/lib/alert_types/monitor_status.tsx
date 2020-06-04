@@ -15,6 +15,7 @@ import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { store } from '../../state';
 
 export const validate = (alertParams: unknown) => {
   const errors: Record<string, any> = {};
@@ -52,7 +53,6 @@ const AlertMonitorStatus = React.lazy(() =>
 );
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
-  store,
   core,
   plugins,
 }): AlertTypeModel => ({

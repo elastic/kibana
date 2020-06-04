@@ -11,14 +11,10 @@ import { rootReducer } from './reducers';
 
 export type AppState = ReturnType<typeof rootReducer>;
 
-export const initializeStore = () => {
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  const sagaMW = createSagaMiddleware();
+const sagaMW = createSagaMiddleware();
 
-  const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
+export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
 
-  sagaMW.run(rootEffect);
-
-  return store;
-};
+sagaMW.run(rootEffect);

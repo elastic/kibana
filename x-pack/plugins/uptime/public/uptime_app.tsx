@@ -10,7 +10,6 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'src/core/public';
-import { Store } from 'redux';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { ClientPluginsSetup, ClientPluginsStart } from './apps/plugin';
 import { UMUpdateBadge } from './lib/lib';
@@ -27,6 +26,7 @@ import {
   UptimeAlertsContextProvider,
   UptimeAlertsFlyoutWrapper,
 } from './components/overview/alerts';
+import { store } from './state';
 
 export interface UptimeAppColors {
   danger: string;
@@ -53,7 +53,6 @@ export interface UptimeAppProps {
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  store: Store<any>;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -68,7 +67,6 @@ const Application = (props: UptimeAppProps) => {
     routerBasename,
     setBadge,
     startPlugins,
-    store,
   } = props;
 
   useEffect(() => {
