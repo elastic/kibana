@@ -300,7 +300,9 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getIndexPatternList() {
       await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
-      return await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+      return await find.allByCssSelector(
+        '[data-test-subj="indexPatternTable"] .euiTable .euiTableRow'
+      );
     }
 
     async isIndexPatternListEmpty() {
