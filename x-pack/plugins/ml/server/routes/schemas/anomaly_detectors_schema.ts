@@ -77,6 +77,12 @@ export const analysisConfigSchema = schema.object({
   detectors: schema.arrayOf(detectorSchema),
   influencers: schema.arrayOf(schema.maybe(schema.string())),
   categorization_field_name: schema.maybe(schema.string()),
+  per_partition_categorization: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      stop_on_warn: schema.maybe(schema.boolean()),
+    })
+  ),
 });
 
 export const anomalyDetectionJobSchema = {

@@ -14,10 +14,13 @@ import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
-import { TimelineContext } from '../../../timelines/components/timeline/timeline_context';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
+import {
+  ManageGlobalTimeline,
+  timelineDefaults,
+} from '../../../timelines/components/manage_timeline';
 
 jest.mock('../../lib/kibana');
 
@@ -31,8 +34,17 @@ jest.mock('uuid', () => {
 jest.mock('../../hooks/use_add_to_timeline');
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const timelineId = 'cool-id';
 const field = 'process.name';
 const value = 'nice';
+const toggleTopN = jest.fn();
+const defaultProps = {
+  field,
+  showTopN: false,
+  timelineId,
+  toggleTopN,
+  value,
+};
 
 describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
@@ -44,6 +56,9 @@ describe('DraggableWrapperHoverContent', () => {
   /* eslint-disable no-console */
   const originalError = console.error;
   const originalWarn = console.warn;
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   beforeAll(() => {
     console.warn = jest.fn();
     console.error = jest.fn();
@@ -64,12 +79,7 @@ describe('DraggableWrapperHoverContent', () => {
       test(`it renders the 'Filter ${hoverAction} value' button when showTopN is false`, () => {
         const wrapper = mount(
           <TestProviders>
-            <DraggableWrapperHoverContent
-              field={field}
-              showTopN={false}
-              toggleTopN={jest.fn()}
-              value={value}
-            />
+            <DraggableWrapperHoverContent {...defaultProps} />
           </TestProviders>
         );
 
@@ -81,12 +91,7 @@ describe('DraggableWrapperHoverContent', () => {
       test(`it does NOT render the 'Filter ${hoverAction} value' button when showTopN is true`, () => {
         const wrapper = mount(
           <TestProviders>
-            <DraggableWrapperHoverContent
-              field={field}
-              showTopN={true}
-              toggleTopN={jest.fn()}
-              value={value}
-            />
+            <DraggableWrapperHoverContent {...{ ...defaultProps, showTopN: true }} />
           </TestProviders>
         );
 
@@ -104,22 +109,22 @@ describe('DraggableWrapperHoverContent', () => {
           filterManager = new FilterManager(mockUiSettingsForFilterManager);
           filterManager.addFilters = jest.fn();
           onFilterAdded = jest.fn();
+          const manageTimelineForTesting = {
+            [timelineId]: {
+              ...timelineDefaults,
+              id: timelineId,
+              filterManager,
+            },
+          };
 
           wrapper = mount(
             <TestProviders>
-              <TimelineContext.Provider value={{ filterManager, isLoading: false }}>
-                <DraggableWrapperHoverContent
-                  field={field}
-                  onFilterAdded={onFilterAdded}
-                  showTopN={false}
-                  toggleTopN={jest.fn()}
-                  value={value}
-                />
-              </TimelineContext.Provider>
+              <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+                <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded }} />
+              </ManageGlobalTimeline>
             </TestProviders>
           );
         });
-
         test('when clicked, it adds a filter to the timeline when running in the context of a timeline', () => {
           wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
@@ -157,13 +162,7 @@ describe('DraggableWrapperHoverContent', () => {
 
           wrapper = mount(
             <TestProviders>
-              <DraggableWrapperHoverContent
-                field={field}
-                onFilterAdded={onFilterAdded}
-                showTopN={false}
-                toggleTopN={jest.fn()}
-                value={value}
-              />
+              <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded }} />
             </TestProviders>
           );
         });
@@ -204,17 +203,19 @@ describe('DraggableWrapperHoverContent', () => {
           filterManager.addFilters = jest.fn();
           onFilterAdded = jest.fn();
 
+          const manageTimelineForTesting = {
+            [timelineId]: {
+              ...timelineDefaults,
+              id: timelineId,
+              filterManager,
+            },
+          };
+
           wrapper = mount(
             <TestProviders>
-              <TimelineContext.Provider value={{ filterManager, isLoading: false }}>
-                <DraggableWrapperHoverContent
-                  field={field}
-                  onFilterAdded={onFilterAdded}
-                  showTopN={false}
-                  toggleTopN={jest.fn()}
-                  value={''}
-                />
-              </TimelineContext.Provider>
+              <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+                <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded, value: '' }} />
+              </ManageGlobalTimeline>
             </TestProviders>
           );
         });
@@ -265,13 +266,7 @@ describe('DraggableWrapperHoverContent', () => {
 
           wrapper = mount(
             <TestProviders>
-              <DraggableWrapperHoverContent
-                field={field}
-                onFilterAdded={onFilterAdded}
-                showTopN={false}
-                toggleTopN={jest.fn()}
-                value={''}
-              />
+              <DraggableWrapperHoverContent {...{ ...defaultProps, onFilterAdded, value: '' }} />
             </TestProviders>
           );
         });
@@ -328,11 +323,13 @@ describe('DraggableWrapperHoverContent', () => {
               <TestProviders>
                 <MockedProvider mocks={mocksSource} addTypename={false}>
                   <DraggableWrapperHoverContent
-                    draggableId={maybeDraggableId}
-                    field={aggregatableStringField}
-                    showTopN={showTopN}
-                    toggleTopN={jest.fn()}
-                    value={maybeValue}
+                    {...{
+                      ...defaultProps,
+                      draggableId: maybeDraggableId,
+                      field: aggregatableStringField,
+                      showTopN,
+                      value: maybeValue,
+                    }}
                   />
                 </MockedProvider>
               </TestProviders>
@@ -351,11 +348,11 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              draggableId={draggableId}
-              field={aggregatableStringField}
-              showTopN={false}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                draggableId,
+                field: aggregatableStringField,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -383,10 +380,10 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={aggregatableStringField}
-              showTopN={false}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: aggregatableStringField,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -404,10 +401,10 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={whitelistedField}
-              showTopN={false}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: whitelistedField,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -425,10 +422,10 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={notKnownToBrowserFields}
-              showTopN={false}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: notKnownToBrowserFields,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -441,16 +438,15 @@ describe('DraggableWrapperHoverContent', () => {
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
-      const toggleTopN = jest.fn();
       const whitelistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={whitelistedField}
-              showTopN={false}
-              toggleTopN={toggleTopN}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: whitelistedField,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -471,10 +467,10 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={whitelistedField}
-              showTopN={false}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: whitelistedField,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -494,10 +490,11 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={whitelistedField}
-              showTopN={true}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: whitelistedField,
+                showTopN: true,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -515,10 +512,11 @@ describe('DraggableWrapperHoverContent', () => {
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DraggableWrapperHoverContent
-              field={whitelistedField}
-              showTopN={true}
-              toggleTopN={jest.fn()}
-              value={value}
+              {...{
+                ...defaultProps,
+                field: whitelistedField,
+                showTopN: true,
+              }}
             />
           </MockedProvider>
         </TestProviders>
@@ -537,12 +535,7 @@ describe('DraggableWrapperHoverContent', () => {
     test(`it renders the 'Copy to Clipboard' button when showTopN is false`, () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableWrapperHoverContent
-            field={field}
-            showTopN={false}
-            toggleTopN={jest.fn()}
-            value={value}
-          />
+          <DraggableWrapperHoverContent {...defaultProps} />
         </TestProviders>
       );
 
@@ -553,10 +546,10 @@ describe('DraggableWrapperHoverContent', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
-            field={field}
-            showTopN={true}
-            toggleTopN={jest.fn()}
-            value={value}
+            {...{
+              ...defaultProps,
+              showTopN: true,
+            }}
           />
         </TestProviders>
       );

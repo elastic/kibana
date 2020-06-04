@@ -12,12 +12,13 @@ jest.mock('./edit_user', () => ({
   EditUserPage: (props: any) => `User Edit Page: ${JSON.stringify(props)}`,
 }));
 
+import { ScopedHistory } from 'src/core/public';
 import { usersManagementApp } from './users_management_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 import { securityMock } from '../../mocks';
 
-async function mountApp(basePath: string) {
+async function mountApp(basePath: string, pathname: string) {
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
@@ -26,7 +27,12 @@ async function mountApp(basePath: string) {
       authc: securityMock.createSetup().authc,
       getStartServices: coreMock.createSetup().getStartServices as any,
     })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({
+      basePath,
+      element: container,
+      setBreadcrumbs,
+      history: (scopedHistoryMock.create({ pathname }) as unknown) as ScopedHistory,
+    });
 
   return { unmount, container, setBreadcrumbs };
 }
@@ -49,16 +55,13 @@ describe('usersManagementApp', () => {
   });
 
   it('mount() works for the `grid` page', async () => {
-    const basePath = '/some-base-path/users';
-    window.location.hash = basePath;
-
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Users' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Users' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Users Page: {"notifications":{"toasts":{}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}}}
+        Users Page: {"notifications":{"toasts":{}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
       </div>
     `);
 
@@ -68,19 +71,13 @@ describe('usersManagementApp', () => {
   });
 
   it('mount() works for the `create user` page', async () => {
-    const basePath = '/some-base-path/users';
-    window.location.hash = `${basePath}/edit`;
-
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/edit');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Users' },
-      { text: 'Create' },
-    ]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Users' }, { text: 'Create' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}}}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
       </div>
     `);
 
@@ -90,20 +87,18 @@ describe('usersManagementApp', () => {
   });
 
   it('mount() works for the `edit user` page', async () => {
-    const basePath = '/some-base-path/users';
     const userName = 'someUserName';
-    window.location.hash = `${basePath}/edit/${userName}`;
 
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${userName}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Users' },
-      { href: `#/some-base-path/users/edit/${userName}`, text: userName },
+      { href: `/`, text: 'Users' },
+      { href: `/edit/${userName}`, text: userName },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName"}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/someUserName","search":"","hash":""}}}
       </div>
     `);
 
@@ -113,17 +108,15 @@ describe('usersManagementApp', () => {
   });
 
   it('mount() properly encodes user name in `edit user` page link in breadcrumbs', async () => {
-    const basePath = '/some-base-path/users';
     const username = 'some 安全性 user';
-    window.location.hash = `${basePath}/edit/${username}`;
 
-    const { setBreadcrumbs } = await mountApp(basePath);
+    const { setBreadcrumbs } = await mountApp('/', `/edit/${username}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Users' },
+      { href: `/`, text: 'Users' },
       {
-        href: '#/some-base-path/users/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20user',
+        href: '/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20user',
         text: username,
       },
     ]);

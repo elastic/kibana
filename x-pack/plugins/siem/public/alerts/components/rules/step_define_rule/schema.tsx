@@ -168,7 +168,7 @@ export const schema: FormSchema = {
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
       {
-        defaultMessage: 'Select which timeline to use when investigating generated signals.',
+        defaultMessage: 'Select which timeline to use when investigating generated alerts.',
       }
     ),
   },
