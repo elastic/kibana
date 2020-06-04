@@ -15,6 +15,7 @@ export const getCreateRulesSchemaMock = (): CreateRulesSchema => ({
   type: 'query',
   risk_score: 55,
   language: 'kuery',
+  rule_id: 'rule-1',
 });
 
 export const getCreateRulesSchemaDecodedMock = (): CreateRulesSchemaDecoded => ({
@@ -38,4 +39,5 @@ export const getCreateRulesSchemaDecodedMock = (): CreateRulesSchemaDecoded => (
   throttle: null,
   version: 1,
   exceptions_list: [],
+  rule_id: 'rule-1',
 });

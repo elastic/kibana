@@ -11,7 +11,7 @@ import {
   description,
   anomaly_threshold,
   filters,
-  rule_id,
+  RuleId,
   index,
   output_index,
   saved_id,
@@ -52,6 +52,7 @@ import { DefaultThreatArray } from '../types/default_threat_array';
 import { DefaultThrottleNull } from '../types/default_throttle_null';
 import { DefaultVersionNumber } from '../types/default_version_number';
 import { ListsDefaultArray, ListsDefaultArraySchema } from '../types/lists_default_array';
+import { DefaultUuid } from '../types/default_uuid';
 
 export const createRulesSchema = t.intersection([
   t.exact(
@@ -66,27 +67,22 @@ export const createRulesSchema = t.intersection([
   t.exact(
     t.partial({
       actions: DefaultActionsArray, // defaults to empty actions array if not set during decode
-      // TODO: anomaly_threshold: Runtime validation
       anomaly_threshold, // defaults to undefined if not set during decode
       enabled: DefaultBooleanTrue, // defaults to true if not set during decode
       false_positives: DefaultStringArray, // defaults to empty string array if not set during decode
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
-      // TODO: rule_id: Default this to UUID v4 on the way in
-      rule_id, // defaults to undefined if not set during decode
+      rule_id: DefaultUuid,
       index, // defaults to undefined if not set during decode
       interval: DefaultIntervalString, // defaults to "5m" if not set during decode
-      // TODO: query: Runtime validation
       query, // defaults to undefined if not set during decode
       language, // defaults to undefined if not set during decode
       // TODO: output_index: This should be removed eventually
       output_index, // defaults to "undefined" if not set during decode
-      // TODO: saved_id: Runtime validation
       saved_id, // defaults to "undefined" if not set during decode
       timeline_id, // defaults to "undefined" if not set during decode
       timeline_title, // defaults to "undefined" if not set during decode
       meta, // defaults to "undefined" if not set during decode
-      // TODO: machine_learning_job_id: Runtime validation
       machine_learning_job_id, // defaults to "undefined" if not set during decode
       max_signals: DefaultMaxSignalsNumber, // defaults to DEFAULT_MAX_SIGNALS (100) if not set during decode
       tags: DefaultStringArray, // defaults to empty string array if not set during decode
@@ -96,7 +92,7 @@ export const createRulesSchema = t.intersection([
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode
       note, // defaults to "undefined" if not set during decode
       version: DefaultVersionNumber, // defaults to 1 if not set during decode
-      exceptions_list: ListsDefaultArray,
+      exceptions_list: ListsDefaultArray, // defaults to empty array if not set during decode
     })
   ),
 ]);
@@ -119,6 +115,7 @@ export type CreateRulesSchemaDecoded = Omit<
   | 'throttle'
   | 'version'
   | 'exceptions_list'
+  | 'rule_id'
 > & {
   references: References;
   actions: Actions;
@@ -133,4 +130,5 @@ export type CreateRulesSchemaDecoded = Omit<
   throttle: ThrottleOrNull;
   version: Version;
   exceptions_list: ListsDefaultArraySchema;
+  rule_id: RuleId;
 };

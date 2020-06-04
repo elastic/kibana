@@ -1372,6 +1372,7 @@ describe('create rules schema', () => {
       actions: [],
       enabled: true,
       throttle: 'no_actions',
+      rule_id: 'rule-1',
     };
 
     const decoded = createRulesSchema.decode(payload);
@@ -1400,8 +1401,20 @@ describe('create rules schema', () => {
       exceptions_list: [],
       max_signals: DEFAULT_MAX_SIGNALS,
       version: 1,
+      rule_id: 'rule-1',
     };
     expect(message.schema).toEqual(expected);
+  });
+
+  test('it generates a uuid v4 whenever you omit the rule_id', () => {
+    const { rule_id, ...noRuleId } = getCreateRulesSchemaMock();
+    const decoded = createRulesSchema.decode(noRuleId);
+    const checked = exactCheck(noRuleId, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect((message.schema as CreateRulesSchemaDecoded).rule_id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
   });
 
   // TODO: The exception_list tests are skipped and empty until we re-integrate it from the lists plugin

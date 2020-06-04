@@ -6,3 +6,6 @@
 
 export { exactCheck } from '../../siem/common/exact_check';
 export { getPaths, foldLeftRight } from '../../siem/common/test_utils';
+export { NonEmptyString } from '../../siem/common/detection_engine/schemas/types/non_empty_string';
+export { DefaultUuid } from '../../siem/common/detection_engine/schemas/types/default_uuid';
+export { DefaultStringArray } from '../../siem/common/detection_engine/schemas/types/default_string_array';

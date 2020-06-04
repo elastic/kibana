@@ -57,6 +57,7 @@ export const immutable = t.boolean;
 // in case we encounter 3rd party rule systems which might be using auto incrementing numbers
 // or other different things.
 export const rule_id = t.string;
+export type RuleId = t.TypeOf<typeof rule_id>;
 
 export const id = UUID;
 export const index = t.array(t.string);
