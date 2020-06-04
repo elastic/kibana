@@ -6,13 +6,13 @@
 
 import {
   EuiButton,
+  EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiImage,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { ISection, Section } from './section';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { ISection, Section } from './section';
 
 const appsSection: ISection[] = [
   {
@@ -233,15 +233,19 @@ export const Home = () => {
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="center">
               {tryItOutItemsSection.map((item) => (
-                <EuiFlexItem grow={false} key={item.id}>
-                  <EuiPanel
-                    hasShadow
-                    paddingSize="s"
-                    // adds hover style to panel
-                    onClick={() => {}}
-                  >
-                    <Section section={item} />
-                  </EuiPanel>
+                <EuiFlexItem grow={false} key={item.id} style={{ width: '260px' }}>
+                  <EuiCard
+                    layout="horizontal"
+                    icon={<EuiIcon size="l" type={item.icon} />}
+                    title={
+                      <EuiTitle size="xs" className="title">
+                        <h3>{item.title}</h3>
+                      </EuiTitle>
+                    }
+                    description={item.description}
+                    target={item.target}
+                    href={item.href}
+                  />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
