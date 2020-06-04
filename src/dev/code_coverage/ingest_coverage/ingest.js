@@ -17,21 +17,24 @@
  * under the License.
  */
 
+import { pretty } from './utils';
+
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
-import { logSuccess, errMsg, redact } from './ingest_helpers';
+import { errMsg, redact } from './ingest_helpers';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
+const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
 
 export const ingest = (log) => async (body) => {
   const index = body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
   const sendIndex = send(index);
 
   process.env.NODE_ENV === 'integration_test'
-    ? logSuccess(log, index, redacted, body)
+    ? log.verbose(pretty(body))
     : await sendIndex(log, body);
 };
 
@@ -39,7 +42,7 @@ function send(index) {
   return async (log, body) => {
     try {
       await client.index(request(index, body));
-      logSuccess(log, index, redacted, body);
+      log.verbose(pretty(body));
     } catch (e) {
       throw createFailError(errMsg(index, redacted, body, e));
     }
@@ -47,6 +50,5 @@ function send(index) {
 }
 
 export function request(index, body) {
-  const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
-  return index.includes('total') ? body : { ...body, pipeline };
+  return index === TOTALS_INDEX ? body : { ...body, pipeline };
 }

@@ -17,21 +17,9 @@
  * under the License.
  */
 
-import { green, always, pretty } from './utils';
+import { always, pretty } from './utils';
 import chalk from 'chalk';
 import { fromNullable } from './either';
-
-export function logSuccess(log, index, redacted, body) {
-  const logShort = () => `### Sent:
-### ES HOST (redacted): ${redacted}
-### Index: ${green(index)}`;
-
-  logShort();
-  log.verbose(pretty(body));
-
-  const { staticSiteUrl } = body;
-  log.debug(`### staticSiteUrl: ${staticSiteUrl}`);
-}
 
 export function errMsg(index, redacted, body, e) {
   const orig = fromNullable(e.body).fold(
