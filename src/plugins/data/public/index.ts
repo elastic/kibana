@@ -20,6 +20,7 @@
 import './index.scss';
 
 import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
 
 /*
  * Filters:
@@ -450,7 +451,7 @@ export {
 
 import { DataPublicPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataPublicPlugin(initializerContext);
 }
 
