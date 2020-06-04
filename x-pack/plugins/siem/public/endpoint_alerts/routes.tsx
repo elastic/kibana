@@ -9,7 +9,7 @@ import { Route } from 'react-router-dom';
 
 import { AlertIndex } from './view';
 
-export const getEndpointAlertsRoutes = () => [
+export const endpointAlertsRoutes = () => [
   <Route path="/:pageName(endpoint-alerts)">
     <AlertIndex />
   </Route>,

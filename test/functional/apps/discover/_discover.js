@@ -243,5 +243,19 @@ export default function ({ getService, getPageObjects }) {
         expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
       });
     });
+
+    describe('empty query', function () {
+      it('should update the histogram timerange when the query is resubmitted', async function () {
+        await kibanaServer.uiSettings.update({
+          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+        });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+        const initialTimeString = await PageObjects.discover.getChartTimespan();
+        await queryBar.submitQuery();
+        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+        expect(refreshedTimeString).not.to.be(initialTimeString);
+      });
+    });
   });
 }

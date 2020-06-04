@@ -162,8 +162,8 @@ app.config(($routeProvider) => {
                   mapping: {
                     search: '/',
                     'index-pattern': {
-                      app: 'kibana',
-                      path: `#/management/kibana/objects/savedSearches/${$route.current.params.id}`,
+                      app: 'management',
+                      path: `kibana/objects/savedSearches/${$route.current.params.id}`,
                     },
                   },
                   toastNotifications,
@@ -877,6 +877,7 @@ function discoverController(
       if ($scope.vis.data.aggs.aggs[1]) {
         $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
       }
+      $scope.updateTime();
     }
 
     $scope.hits = resp.hits.total;

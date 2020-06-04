@@ -26,7 +26,7 @@ type ThrottleSelectField = typeof SelectField;
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE =
-  'Rule {{context.rule.name}} generated {{state.signals_count}} signals';
+  'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const FieldErrorsContainer = styled.div`
   p {
