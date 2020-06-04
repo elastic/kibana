@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type ArtifactName = 'global-whitelist';
+type ArtifactName = 'endpoint-allowlist';
 type ArtifactVersion = '1.0.0';
 type ArtifactEncoding = 'xz';
 

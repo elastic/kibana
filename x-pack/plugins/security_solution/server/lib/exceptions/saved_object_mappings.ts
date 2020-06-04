@@ -6,7 +6,7 @@
 
 import { SavedObjectsType } from '../../../../../../src/core/server';
 
-export const exceptionsArtifactSavedObjectType = 'siem-exceptions-artifact';
+export const exceptionsArtifactSavedObjectType = 'securitySolution-exceptions-artifact';
 
 export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {

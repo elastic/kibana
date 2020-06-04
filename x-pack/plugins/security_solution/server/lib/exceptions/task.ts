@@ -16,12 +16,12 @@ import { GetFullEndpointExceptionList, CompressExceptionList } from './fetch_end
 const PackagerTaskConstants = {
   INTERVAL: '30s',
   TIMEOUT: '1m',
-  TYPE: 'siem:endpoint:exceptions-packager',
+  TYPE: 'securitySolution:endpoint:exceptions-packager',
 };
 
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-allowlist',
-  SAVED_OBJECT_TYPE: 'siem-exceptions-artifact',
+  SAVED_OBJECT_TYPE: 'securitySolution-exceptions-artifact',
   SUPPORTED_OPERATING_SYSTEMS: ['windows'],
   SUPPORTED_SCHEMA_VERSIONS: ['1.0.0'],
 };
@@ -101,7 +101,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           await runnerContext.taskManager.ensureScheduled({
             id: PackagerTaskConstants.TYPE,
             taskType: PackagerTaskConstants.TYPE,
-            scope: ['siem'],
+            scope: ['securitySolution'],
             schedule: {
               interval: PackagerTaskConstants.INTERVAL,
             },
@@ -116,8 +116,8 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   };
 
   context.taskManager.registerTaskDefinitions({
-    'siem:endpoint:exceptions-packager': {
-      title: 'SIEM Endpoint Exceptions Handler',
+    'securitySolution:endpoint:exceptions-packager': {
+      title: 'Security Solution Endpoint Exceptions Handler',
       type: PackagerTaskConstants.TYPE,
       timeout: PackagerTaskConstants.TIMEOUT,
       createTaskRunner: () => {
