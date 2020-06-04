@@ -33,6 +33,24 @@ describe('monitor status alert type', () => {
       `);
     });
 
+    it('accepts original alert params', () => {
+      expect(
+        validate({
+          locations: ['fairbanks'],
+          numTimes: 3,
+          timerange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+          filters: '{foo: "bar"}',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "errors": Object {},
+        }
+      `);
+    });
+
     describe('timerange', () => {
       it('has invalid timerangeCount value', () => {
         expect(validate({ ...params, timerangeCount: 0 })).toMatchInlineSnapshot(`
