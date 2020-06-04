@@ -121,6 +121,10 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName;
+  /** Indicates if aggregation supports sub-aggregations */
+  isSubAggsSupported?: boolean;
+  /** Dictionary of the sub-aggregations */
+  subAggs?: PivotAggsConfigDict;
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
@@ -208,7 +212,20 @@ export function getEsAggFromAggConfig(
     }
   }
 
-  return {
+  const result = {
     [pivotAggsConfig.agg]: esAgg,
   };
+
+  if (
+    isPivotAggsConfigWithUiSupport(pivotAggsConfig) &&
+    pivotAggsConfig.subAggs !== undefined &&
+    Object.keys(pivotAggsConfig.subAggs).length > 0
+  ) {
+    result.aggs = {};
+    for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig);
+    }
+  }
+
+  return result;
 }

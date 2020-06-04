@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import {
   AggName,
@@ -22,9 +22,16 @@ export interface AggListProps {
   options: PivotAggsConfigWithUiSupportDict;
   deleteHandler(l: string): void;
   onChange(previousAggName: AggName, item: PivotAggsConfig): void;
+  aggOptions: EuiComboBoxOptionOption[];
 }
 
-export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onChange, options }) => {
+export const AggListForm: React.FC<AggListProps> = ({
+  deleteHandler,
+  list,
+  onChange,
+  options,
+  aggOptions,
+}) => {
   const listKeys = Object.keys(list);
   return (
     <Fragment>
@@ -39,6 +46,7 @@ export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onCha
                 onChange={(item) => onChange(aggName, item)}
                 otherAggNames={otherAggNames}
                 options={options}
+                aggOptions={aggOptions}
               />
             </EuiPanel>
             {listKeys.length > 0 && <EuiSpacer size="s" />}

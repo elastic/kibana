@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
+import React, { memo, FC, createContext } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 
@@ -16,20 +16,26 @@ import { DropDown } from '../aggregation_dropdown';
 import { GroupByListForm } from '../group_by_list';
 import { StepDefineFormHook } from '../step_define';
 
+export const PivotConfigurationContext = createContext<
+  { actions: StepDefineFormHook['pivotConfig']['actions'] } | undefined
+>(undefined);
+
 export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
   ({
-    actions: {
+    actions,
+    state: { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData },
+  }) => {
+    const {
       addAggregation,
       addGroupBy,
       deleteAggregation,
       deleteGroupBy,
       updateAggregation,
       updateGroupBy,
-    },
-    state: { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData },
-  }) => {
+    } = actions;
+
     return (
-      <>
+      <PivotConfigurationContext.Provider value={{ actions }}>
         <EuiFormRow
           fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
@@ -66,6 +72,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
               options={aggOptionsData}
               onChange={updateAggregation}
               deleteHandler={deleteAggregation}
+              aggOptions={aggOptions}
             />
             <DropDown
               changeHandler={addAggregation}
@@ -80,7 +87,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             />
           </>
         </EuiFormRow>
-      </>
+      </PivotConfigurationContext.Provider>
     );
   },
   (prevProps, nextProps) => {

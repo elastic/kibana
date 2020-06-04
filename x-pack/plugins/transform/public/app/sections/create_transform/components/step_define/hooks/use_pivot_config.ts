@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
-import { AggName, DropDownLabel, PivotAggsConfig, PivotGroupByConfig } from '../../../../../common';
+import {
+  AggName,
+  DropDownLabel,
+  isPivotAggsConfigWithUiSupport,
+  PivotAggsConfig,
+  PivotGroupByConfig,
+} from '../../../../../common';
 
 import {
   getAggNameConflictToastMessages,
@@ -115,6 +121,52 @@ export const usePivotConfig = (
   };
 
   /**
+   * Adds sub-aggregation to the aggregation item
+   */
+  const addSubAggregation = useCallback(
+    (item: PivotAggsConfig, d: DropDownLabel[]) => {
+      const label: AggName = d[0].label;
+      const config: PivotAggsConfig = aggOptionsData[label];
+
+      const updatedItem = { ...item };
+
+      if (isPivotAggsConfigWithUiSupport(updatedItem)) {
+        updatedItem.subAggs = {
+          ...updatedItem.subAggs,
+          [label]: config,
+        };
+      }
+
+      updateAggregation(updatedItem.aggName, updatedItem);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aggOptionsData]
+  );
+
+  /**
+   * Updates sub-aggregation of the aggregation item
+   */
+  const updateSubAggregation = useCallback(
+    (item: PivotAggsConfig, prevSubItemName: AggName, subItem: PivotAggsConfig) => {
+      const updatedItem = { ...item };
+
+      if (isPivotAggsConfigWithUiSupport(updatedItem)) {
+        const itemSubAggs = updatedItem.subAggs !== undefined ? { ...updatedItem.subAggs } : {};
+        delete itemSubAggs[prevSubItemName];
+
+        updatedItem.subAggs = {
+          ...itemSubAggs,
+          [subItem.aggName]: subItem,
+        };
+      }
+
+      updateAggregation(updatedItem.aggName, updatedItem);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aggOptionsData]
+  );
+
+  /**
    * Deletes aggregation from the list
    */
   const deleteAggregation = (aggName: AggName) => {
@@ -131,6 +183,8 @@ export const usePivotConfig = (
     actions: {
       addAggregation,
       addGroupBy,
+      addSubAggregation,
+      updateSubAggregation,
       deleteAggregation,
       deleteGroupBy,
       setAggList,
