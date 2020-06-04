@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Unionize, UnionToIntersection } from 'utility-types';
+import { Unionize } from 'utility-types';
 
 type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
@@ -321,7 +321,6 @@ export type AggregationResponseMap<
       [TName in keyof TAggregationInputMap]: AggregationResponsePart<
         TAggregationInputMap[TName],
         TDocument
-      >[AggregationType &
-        keyof UnionToIntersection<TAggregationInputMap[TName]>];
+      >[AggregationType & keyof TAggregationInputMap[TName]];
     }
   : undefined;

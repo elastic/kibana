@@ -37,7 +37,7 @@ import { useUiTracker } from '../../../../../../../../observability/public';
 import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 
-function removeEmpty<T>(obj: T): T {
+function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(
     Object.entries(obj).filter(([k, v]) => v != null && v !== '')
   );

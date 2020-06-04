@@ -137,7 +137,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
 }));
 
 // Lookup single configuration (used by APM Server)
-export const agentConfigurationSearchRoute = createRoute((core) => ({
+export const agentConfigurationSearchRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
