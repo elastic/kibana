@@ -117,7 +117,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesSetup,
       },
       registerSearchStrategy: this.registerSearchStrategy,
-      getSearchStrategy: this.getSearchStrategy,
     };
   }
 
@@ -165,6 +164,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         },
         types: aggTypesStart,
       },
+      getSearchStrategy: this.getSearchStrategy,
       search,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),

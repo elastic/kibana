@@ -17,18 +17,27 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { DataPublicPluginSetup, ISearch } from '../../../src/plugins/data/public';
+import { Observable, from } from 'rxjs';
+import { CoreSetup } from 'kibana/public';
+import { flatMap } from 'rxjs/operators';
+import { ISearch } from '../../../src/plugins/data/public';
 import { ASYNC_SEARCH_STRATEGY } from '../../../x-pack/plugins/data_enhanced/public';
 import { ASYNC_DEMO_SEARCH_STRATEGY, IAsyncDemoResponse } from '../common';
+import { DemoDataSearchStartDependencies } from './types';
 
-export function asyncDemoClientSearchStrategyProvider(data: DataPublicPluginSetup) {
-  const asyncStrategy = data.search.getSearchStrategy(ASYNC_SEARCH_STRATEGY);
+export function asyncDemoClientSearchStrategyProvider(core: CoreSetup) {
   const search: ISearch<typeof ASYNC_DEMO_SEARCH_STRATEGY> = (request, options) => {
-    return asyncStrategy.search(
-      { ...request, serverStrategy: ASYNC_DEMO_SEARCH_STRATEGY },
-      options
-    ) as Observable<IAsyncDemoResponse>;
+    return from(core.getStartServices()).pipe(
+      flatMap((startServices) => {
+        const asyncStrategy = (startServices[1] as DemoDataSearchStartDependencies).data.search.getSearchStrategy(
+          ASYNC_SEARCH_STRATEGY
+        );
+        return asyncStrategy.search(
+          { ...request, serverStrategy: ASYNC_DEMO_SEARCH_STRATEGY },
+          options
+        ) as Observable<IAsyncDemoResponse>;
+      })
+    );
   };
   return { search };
 }

@@ -39,7 +39,6 @@ describe('Search service', () => {
         expressions: expressionsPluginMock.createSetupContract(),
       } as any);
       expect(setup).toHaveProperty('registerSearchStrategy');
-      expect(setup).toHaveProperty('getSearchStrategy');
     });
   });
 });

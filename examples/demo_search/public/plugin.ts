@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { DataPublicPluginSetup } from '../../../src/plugins/data/public';
 import { Plugin, CoreSetup } from '../../../src/core/public';
 import {
   DEMO_SEARCH_STRATEGY,
@@ -29,10 +28,7 @@ import {
 } from '../common';
 import { demoClientSearchStrategyProvider } from './demo_search_strategy';
 import { asyncDemoClientSearchStrategyProvider } from './async_demo_search_strategy';
-
-interface DemoDataSearchSetupDependencies {
-  data: DataPublicPluginSetup;
-}
+import { DemoDataSearchSetupDependencies, DemoDataSearchStartDependencies } from './types';
 
 /**
  * Add the typescript mappings for our search strategy to the request and
@@ -55,10 +51,11 @@ declare module '../../../src/plugins/data/public' {
   }
 }
 
-export class DemoDataPlugin implements Plugin {
+export class DemoDataPlugin
+  implements Plugin<void, void, DemoDataSearchSetupDependencies, DemoDataSearchStartDependencies> {
   public setup(core: CoreSetup, { data }: DemoDataSearchSetupDependencies) {
-    const demoClientSearchStrategy = demoClientSearchStrategyProvider(data);
-    const asyncDemoClientSearchStrategy = asyncDemoClientSearchStrategyProvider(data);
+    const demoClientSearchStrategy = demoClientSearchStrategyProvider(core);
+    const asyncDemoClientSearchStrategy = asyncDemoClientSearchStrategyProvider(core);
     data.search.registerSearchStrategy(DEMO_SEARCH_STRATEGY, demoClientSearchStrategy);
     data.search.registerSearchStrategy(ASYNC_DEMO_SEARCH_STRATEGY, asyncDemoClientSearchStrategy);
   }

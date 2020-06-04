@@ -65,16 +65,17 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategy: TRegisterSearchStrategy;
-
-  /**
-   * Used if a plugin needs access to an already registered search strategy.
-   */
-  getSearchStrategy: TGetSearchStrategy;
 }
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
+
+  /**
+   * Used if a plugin needs access to an already registered search strategy.
+   */
+  getSearchStrategy: TGetSearchStrategy;
+
   search: ISearchGeneric;
   searchSource: {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;

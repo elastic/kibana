@@ -35,7 +35,7 @@ export class DataEnhancedPlugin implements Plugin {
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
-    const asyncSearchStrategy = asyncSearchStrategyProvider(core, data);
+    const asyncSearchStrategy = asyncSearchStrategyProvider(core);
     const esSearchStrategy = enhancedEsSearchStrategyProvider(core, asyncSearchStrategy);
     data.search.registerSearchStrategy(ASYNC_SEARCH_STRATEGY, asyncSearchStrategy);
     data.search.registerSearchStrategy(ES_SEARCH_STRATEGY, esSearchStrategy);

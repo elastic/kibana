@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EMPTY, fromEvent, NEVER, throwError, timer, Observable } from 'rxjs';
-import { mergeMap, expand, takeUntil } from 'rxjs/operators';
+import { EMPTY, fromEvent, NEVER, throwError, timer, Observable, from } from 'rxjs';
+import { mergeMap, expand, takeUntil, share, flatMap } from 'rxjs/operators';
 import { CoreSetup } from '../../../../../src/core/public';
 import { AbortError } from '../../../../../src/plugins/data/common';
 import {
-  DataPublicPluginSetup,
   ISearch,
   ISearchStrategy,
   ISyncSearchRequest,
   SYNC_SEARCH_STRATEGY,
 } from '../../../../../src/plugins/data/public';
 import { IAsyncSearchOptions, IAsyncSearchResponse, IAsyncSearchRequest } from './types';
+import { DataEnhancedStartDependencies } from '../plugin';
 
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
 
@@ -26,10 +26,10 @@ declare module '../../../../../src/plugins/data/public' {
 }
 
 export function asyncSearchStrategyProvider(
-  core: CoreSetup,
-  data: DataPublicPluginSetup
+  core: CoreSetup
 ): ISearchStrategy<typeof ASYNC_SEARCH_STRATEGY> {
-  const syncSearch = data.search.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+  const startServices$ = from(core.getStartServices()).pipe(share());
+
   const search: ISearch<typeof ASYNC_SEARCH_STRATEGY> = (
     request: ISyncSearchRequest,
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
@@ -51,27 +51,34 @@ export function asyncSearchStrategyProvider(
         )
       : NEVER;
 
-    return (syncSearch.search(request, options) as Observable<IAsyncSearchResponse>).pipe(
-      expand((response) => {
-        // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (response.is_partial && !response.is_running)) {
-          return throwError(new AbortError());
-        }
-
-        // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.is_running) return EMPTY;
-
-        id = response.id;
-
-        // Delay by the given poll interval
-        return timer(pollInterval).pipe(
-          // Send future requests using just the ID from the response
-          mergeMap(() => {
-            return search({ id, serverStrategy }, options);
-          })
+    return startServices$.pipe(
+      flatMap((startServices) => {
+        const syncSearch = (startServices[1] as DataEnhancedStartDependencies).data.search.getSearchStrategy(
+          SYNC_SEARCH_STRATEGY
         );
-      }),
-      takeUntil(aborted$)
+        return (syncSearch.search(request, options) as Observable<IAsyncSearchResponse>).pipe(
+          expand((response) => {
+            // If the response indicates of an error, stop polling and complete the observable
+            if (!response || (response.is_partial && !response.is_running)) {
+              return throwError(new AbortError());
+            }
+
+            // If the response indicates it is complete, stop polling and complete the observable
+            if (!response.is_running) return EMPTY;
+
+            id = response.id;
+
+            // Delay by the given poll interval
+            return timer(pollInterval).pipe(
+              // Send future requests using just the ID from the response
+              mergeMap(() => {
+                return search({ id, serverStrategy }, options);
+              })
+            );
+          }),
+          takeUntil(aborted$)
+        );
+      })
     );
   };
   return { search };
