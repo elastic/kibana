@@ -18,6 +18,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useHostSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import {
@@ -34,10 +35,10 @@ import {
 } from '../../store/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
-import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
+import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { getManagementUrl } from '../../../..';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -58,13 +59,13 @@ export const HostDetailsFlyout = memo(() => {
       notifications.toasts.danger({
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.errorTitle"
+            id="xpack.siem.endpoint.host.details.errorTitle"
             defaultMessage="Could not find host"
           />
         ),
         body: (
           <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.errorBody"
+            id="xpack.siem.endpoint.host.details.errorBody"
             defaultMessage="Please exit the flyout and select an available host."
           />
         ),
@@ -115,24 +116,32 @@ const PolicyResponseFlyoutPanel = memo<{
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const loading = useHostSelector(policyResponseLoading);
   const error = useHostSelector(policyResponseError);
-  const detailsUri = useMemo(
-    () =>
-      urlFromQueryParams({
+  const [detailsUri, detailsRoutePath] = useMemo(
+    () => [
+      getManagementUrl({
+        name: 'endpointList',
         ...queryParams,
         selected_host: hostMeta.host.id,
       }),
+      getManagementUrl({
+        name: 'endpointList',
+        excludePrefix: true,
+        ...queryParams,
+        selected_host: hostMeta.host.id,
+      }),
+    ],
     [hostMeta.host.id, queryParams]
   );
-  const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsUri);
+  const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsRoutePath);
   const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
     return {
-      title: i18n.translate('xpack.securitySolution.endpoint.host.policyResponse.backLinkTitle', {
+      title: i18n.translate('xpack.siem.endpoint.host.policyResponse.backLinkTitle', {
         defaultMessage: 'Endpoint Details',
       }),
-      href: `?${detailsUri.search}`,
+      href: detailsUri,
       onClick: backToDetailsClickHandler,
     };
-  }, [backToDetailsClickHandler, detailsUri.search]);
+  }, [backToDetailsClickHandler, detailsUri]);
 
   return (
     <>
@@ -144,7 +153,7 @@ const PolicyResponseFlyoutPanel = memo<{
         <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
           <h4>
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.host.policyResponse.title"
+              id="xpack.siem.endpoint.host.policyResponse.title"
               defaultMessage="Policy Response"
             />
           </h4>
@@ -153,7 +162,7 @@ const PolicyResponseFlyoutPanel = memo<{
           <EuiEmptyPrompt
             title={
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostDetails.noPolicyResponse"
+                id="xpack.siem.endpoint.hostDetails.noPolicyResponse"
                 defaultMessage="No policy response available"
               />
             }
