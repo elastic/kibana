@@ -14,7 +14,9 @@ export interface GlobalSearchFindOptions {
    * A custom preference token associated with a search 'session' that should be used to get consistent scoring
    * when performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere
    * than an elasticsearch cluster.
-   * If not specified, a random token will be generated and used.
+   *
+   * If not specified, a random token will be generated and used. The token is stored in the sessionStorage and is guaranteed
+   * to be consistent during a given http 'session'
    */
   preference?: string;
   /**

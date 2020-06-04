@@ -22,11 +22,14 @@ export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultPr
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
 
 /**
- * globalSearch route handler context
+ * globalSearch route handler context.
  *
  * @public
  */
 export interface RouteHandlerGlobalSearchContext {
+  /**
+   * See {@link SearchServiceStart.find | the find API}
+   */
   find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
 }
 
@@ -78,7 +81,27 @@ export interface GlobalSearchFindOptions {
  * @public
  */
 export interface GlobalSearchResultProvider {
+  /**
+   * id of the provider
+   */
   id: string;
+  /**
+   * Method that should return an observable used to emit new results from the provider.
+   *
+   * See {@GlobalSearchProviderResult | the result type} for the expected result structure.
+   *
+   * @example
+   * ```ts
+   * // returning all results in a single batch
+   * setupDeps.globalSearch.registerResultProvider({
+   *   id: 'my_provider',
+   *   find: (term, { aborted$, preference, maxResults }, context) => {
+   *     const resultPromise = myService.search(term, { preference, maxResults }, context.core.savedObjects.client);
+   *     return from(resultPromise).pipe(takeUntil(aborted$));
+   *   },
+   * });
+   * ```
+   */
   find(
     term: string,
     options: GlobalSearchProviderFindOptions,
