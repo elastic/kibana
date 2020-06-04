@@ -29,8 +29,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags(['ciGroup4', 'skipFirefox']);
 
       loadTestFile(require.resolve('./smokescreen'));
-      loadTestFile(require.resolve('./lens_reporting'));
       loadTestFile(require.resolve('./persistent_context'));
+      loadTestFile(require.resolve('./lens_reporting'));
     });
   });
 }
