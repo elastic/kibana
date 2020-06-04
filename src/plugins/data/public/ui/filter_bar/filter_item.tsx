@@ -74,7 +74,8 @@ export function FilterItem(props: Props) {
           setIndexPatternExists(false);
         });
     } else {
-      setIndexPatternExists(false);
+      // Allow filters without an index pattern and don't validate them.
+      setIndexPatternExists(true);
     }
   }, [props.filter.meta.index]);
 
