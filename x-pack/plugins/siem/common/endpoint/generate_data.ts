@@ -446,6 +446,41 @@ export class EndpointDocGenerator {
   }
 
   /**
+   * Wrapper generator for fullResolverTreeGenerator to make it easier to quickly stream
+   * many resolver trees to Elasticsearch.
+   * @param numAlerts - number of alerts to generate
+   * @param alertAncestors - number of ancestor generations to create relative to the alert
+   * @param childGenerations - number of child generations to create relative to the alert
+   * @param maxChildrenPerNode - maximum number of children for any given node in the tree
+   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param percentNodesWithRelated - percent of nodes which should have related events
+   * @param percentTerminated - percent of nodes which will have process termination events
+   * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
+   */
+  public *alertsGenerator(
+    numAlerts: number,
+    alertAncestors?: number,
+    childGenerations?: number,
+    maxChildrenPerNode?: number,
+    relatedEventsPerNode?: number,
+    percentNodesWithRelated?: number,
+    percentTerminated?: number,
+    alwaysGenMaxChildrenPerNode?: boolean
+  ) {
+    for (let i = 0; i < numAlerts; i++) {
+      yield* this.fullResolverTreeGenerator(
+        alertAncestors,
+        childGenerations,
+        maxChildrenPerNode,
+        relatedEventsPerNode,
+        percentNodesWithRelated,
+        percentTerminated,
+        alwaysGenMaxChildrenPerNode
+      );
+    }
+  }
+
+  /**
    * Generator function that creates the full set of events needed to render resolver.
    * The number of nodes grows exponentially with the number of generations and children per node.
    * Each node is logically a process, and will have 1 or more process events associated with it.

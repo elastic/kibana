@@ -20,6 +20,7 @@ import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import { updateAlertStatusAction } from './actions';
@@ -291,7 +292,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       onAlertStatusUpdateFailure,
     ]
   );
-
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
@@ -303,20 +303,25 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       ];
     }
   }, [defaultFilters, filterGroup]);
+  const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
 
-  const timelineTypeContext = useMemo(
-    () => ({
+  useEffect(() => {
+    initializeTimeline({
+      id: ALERTS_TABLE_TIMELINE_ID,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       loadingText: i18n.LOADING_ALERTS,
-      queryFields: requiredFieldsForActions,
-      timelineActions: additionalActions,
       title: i18n.ALERTS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
-    }),
-    [additionalActions, canUserCRUD, selectAll]
-  );
-
+    });
+  }, []);
+  useEffect(() => {
+    setTimelineRowActions({
+      id: ALERTS_TABLE_TIMELINE_ID,
+      queryFields: requiredFieldsForActions,
+      timelineRowActions: additionalActions,
+    });
+  }, [additionalActions]);
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]
@@ -340,7 +345,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={ALERTS_TABLE_TIMELINE_ID}
       start={from}
-      timelineTypeContext={timelineTypeContext}
       utilityBar={utilityBarCallback}
     />
   );
