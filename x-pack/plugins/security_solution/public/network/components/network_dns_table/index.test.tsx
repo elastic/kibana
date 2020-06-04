@@ -15,7 +15,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { State, createStore } from '../../../common/store';
 import { networkModel } from '../../store';
@@ -27,12 +27,22 @@ import { mockData } from './mock';
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
-  const siemLocalStorageMock = createSiemLocalStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    securitySolutionLocalStorageMock
+  );
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      securitySolutionLocalStorageMock
+    );
   });
 
   describe('rendering', () => {

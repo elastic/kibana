@@ -20,7 +20,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -119,11 +119,21 @@ describe('Ip Details', () => {
   });
 
   const state: State = mockGlobalState;
-  const siemLocalStorageMock = createSiemLocalStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    securitySolutionLocalStorageMock
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      securitySolutionLocalStorageMock
+    );
     localSource = cloneDeep(mocksSource);
   });
 

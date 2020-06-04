@@ -14,7 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
@@ -32,7 +32,7 @@ const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
-  const siemLocalStorageMock = createSiemLocalStorageMock();
+  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
 
   describe('rendering', () => {
     test('it renders correctly against snapshot', () => {
@@ -62,7 +62,7 @@ describe('Flyout', () => {
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        siemLocalStorageMock
+        securitySolutionLocalStorageMock
       );
 
       const wrapper = mount(
@@ -86,7 +86,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        siemLocalStorageMock
+        securitySolutionLocalStorageMock
       );
 
       const wrapper = mount(
@@ -108,7 +108,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        siemLocalStorageMock
+        securitySolutionLocalStorageMock
       );
 
       const wrapper = mount(
@@ -142,7 +142,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        siemLocalStorageMock
+        securitySolutionLocalStorageMock
       );
 
       const wrapper = mount(

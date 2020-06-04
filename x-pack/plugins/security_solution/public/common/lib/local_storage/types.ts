@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface SiemStorage {
+export interface SecuritySolutionStorage {
   getAllTimelines: () => object | null;
   addTimeline: (id: string, timeline: unknown) => void;
 }

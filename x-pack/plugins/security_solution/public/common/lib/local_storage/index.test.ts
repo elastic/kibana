@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSiemLocalStorage, LOCAL_STORAGE_TIMELINE_KEY } from '.';
+import { createSecuritySolutionStorage, LOCAL_STORAGE_TIMELINE_KEY } from '.';
 import { localStorageMock } from '../../mock';
 
 describe('SiemLocalStorage', () => {
   const localStorage = localStorageMock();
-  const storage = createSiemLocalStorage(localStorage);
+  const storage = createSecuritySolutionStorage(localStorage);
 
   beforeEach(() => {
     localStorage.clear();

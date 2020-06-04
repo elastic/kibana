@@ -5,18 +5,18 @@
  */
 
 import { Storage, IStorage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { SiemStorage } from './types';
+import { SecuritySolutionStorage } from './types';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 
-export const createSiemLocalStorage = (store: IStorage): SiemStorage => {
+export const createSecuritySolutionStorage = (store: IStorage): SecuritySolutionStorage => {
   const storage = new Storage(store);
 
-  const getAllTimelines: SiemStorage['getAllTimelines'] = () => {
+  const getAllTimelines: SecuritySolutionStorage['getAllTimelines'] = () => {
     return storage.get(LOCAL_STORAGE_TIMELINE_KEY);
   };
 
-  const addTimeline: SiemStorage['addTimeline'] = (id, timeline) => {
+  const addTimeline: SecuritySolutionStorage['addTimeline'] = (id, timeline) => {
     const timelines = getAllTimelines() ?? {};
     storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
       ...timelines,
@@ -27,4 +27,4 @@ export const createSiemLocalStorage = (store: IStorage): SiemStorage => {
   return { getAllTimelines, addTimeline };
 };
 
-export { SiemStorage };
+export { SecuritySolutionStorage };

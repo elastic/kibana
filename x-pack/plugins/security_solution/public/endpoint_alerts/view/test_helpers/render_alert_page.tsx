@@ -19,7 +19,7 @@ import {
   SUB_PLUGINS_REDUCER,
   mockGlobalState,
   apolloClientObservable,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 
 export const alertPageTestRender = () => {
@@ -30,12 +30,12 @@ export const alertPageTestRender = () => {
   /**
    * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
    */
-  const siemLocalStorageMock = createSiemLocalStorageMock();
+  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
   const store = createStore(
     mockGlobalState,
     SUB_PLUGINS_REDUCER,
     apolloClientObservable,
-    siemLocalStorageMock
+    securitySolutionLocalStorageMock
   );
 
   const depsStart = depsStartMock();

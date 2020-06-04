@@ -33,7 +33,7 @@ import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 
 import { ApolloClientContext } from '../common/utils/apollo_context';
 import { SecuritySubPlugins } from './types';
-import { createSiemLocalStorage } from '../common/lib/local_storage';
+import { createSecuritySolutionStorage } from '../common/lib/local_storage';
 import { initialTimelineState } from '../timelines/store/timeline/reducer';
 
 interface AppPluginRootComponentProps {
@@ -81,7 +81,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
   const { i18n } = useKibana().services;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
-  const storage = createSiemLocalStorage(localStorage);
+  const storage = createSecuritySolutionStorage(localStorage);
 
   const store = createStore(
     createInitialState({

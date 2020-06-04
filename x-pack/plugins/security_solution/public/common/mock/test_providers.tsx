@@ -22,7 +22,7 @@ import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
 import { FieldHook, useForm } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
-import { createSiemLocalStorageMock, localStorageMock } from './mock_local_storage';
+import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
 const state: State = mockGlobalState;
 
@@ -44,12 +44,17 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
-const siemLocalStorageMock = createSiemLocalStorageMock();
+const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock),
+  store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    securitySolutionLocalStorageMock
+  ),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
@@ -69,7 +74,12 @@ export const TestProviders = React.memo(TestProvidersComponent);
 
 const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock),
+  store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    securitySolutionLocalStorageMock
+  ),
 }) => (
   <I18nProvider>
     <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>

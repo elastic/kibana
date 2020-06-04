@@ -28,7 +28,7 @@ import { AppApolloClient } from '../lib/lib';
 import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
 import { State } from './types';
-import { SiemStorage } from '../lib/local_storage';
+import { SecuritySolutionStorage } from '../lib/local_storage';
 
 type ComposeType = typeof compose;
 declare global {
@@ -49,7 +49,7 @@ export const createStore = (
   state: PreloadedState<State>,
   pluginsReducer: SubPluginsInitReducer,
   apolloClient: Observable<AppApolloClient>,
-  storage: SiemStorage,
+  storage: SecuritySolutionStorage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

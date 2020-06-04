@@ -14,7 +14,7 @@ import {
   apolloClientObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
 } from '../../mock';
 import { createUseUiSetting$Mock } from '../../mock/kibana_react';
 import { createStore, State } from '../../store';
@@ -80,17 +80,22 @@ const timepickerRanges = [
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
-    const siemLocalStorageMock = createSiemLocalStorageMock();
+    const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
     let store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
       apolloClientObservable,
-      siemLocalStorageMock
+      securitySolutionLocalStorageMock
     );
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+      store = createStore(
+        state,
+        SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
+        securitySolutionLocalStorageMock
+      );
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 

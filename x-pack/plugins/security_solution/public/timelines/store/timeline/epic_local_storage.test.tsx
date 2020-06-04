@@ -13,7 +13,7 @@ import {
   apolloClientObservable,
   TestProviders,
   defaultHeaders,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
   mockIndexPattern,
 } from '../../../common/mock';
 
@@ -44,8 +44,13 @@ const wait = (ms: number = 500): Promise<void> => {
 
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
-  const siemLocalStorageMock = createSiemLocalStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    securitySolutionLocalStorageMock
+  );
 
   let props = {} as TimelineComponentProps;
   const sort: Sort = {
@@ -58,7 +63,12 @@ describe('epicLocalStorage', () => {
   const indexPattern = mockIndexPattern;
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      securitySolutionLocalStorageMock
+    );
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
@@ -103,7 +113,7 @@ describe('epicLocalStorage', () => {
     );
     store.dispatch(upsertColumn({ id: 'test', index: 1, column: defaultHeaders[0] }));
     await wait();
-    expect(siemLocalStorageMock.addTimeline).toHaveBeenCalled();
+    expect(securitySolutionLocalStorageMock.addTimeline).toHaveBeenCalled();
   });
 
   it('persist timeline when removing a column ', async () => {
@@ -114,7 +124,7 @@ describe('epicLocalStorage', () => {
     );
     store.dispatch(removeColumn({ id: 'test', columnId: '@timestamp' }));
     await wait();
-    expect(siemLocalStorageMock.addTimeline).toHaveBeenCalled();
+    expect(securitySolutionLocalStorageMock.addTimeline).toHaveBeenCalled();
   });
 
   it('persists resizing of a column', async () => {
@@ -125,7 +135,7 @@ describe('epicLocalStorage', () => {
     );
     store.dispatch(applyDeltaToColumnWidth({ id: 'test', columnId: '@timestamp', delta: 80 }));
     await wait();
-    expect(siemLocalStorageMock.addTimeline).toHaveBeenCalled();
+    expect(securitySolutionLocalStorageMock.addTimeline).toHaveBeenCalled();
   });
 
   it('persist the resetting of the fields', async () => {
@@ -136,7 +146,7 @@ describe('epicLocalStorage', () => {
     );
     store.dispatch(updateColumns({ id: 'test', columns: defaultHeaders }));
     await wait();
-    expect(siemLocalStorageMock.addTimeline).toHaveBeenCalled();
+    expect(securitySolutionLocalStorageMock.addTimeline).toHaveBeenCalled();
   });
 
   it('persist items per page', async () => {
@@ -147,7 +157,7 @@ describe('epicLocalStorage', () => {
     );
     store.dispatch(updateItemsPerPage({ id: 'test', itemsPerPage: 50 }));
     await wait();
-    expect(siemLocalStorageMock.addTimeline).toHaveBeenCalled();
+    expect(securitySolutionLocalStorageMock.addTimeline).toHaveBeenCalled();
   });
 
   it('persist the sorting of a column', async () => {
@@ -166,6 +176,6 @@ describe('epicLocalStorage', () => {
       })
     );
     await wait();
-    expect(siemLocalStorageMock.addTimeline).toHaveBeenCalled();
+    expect(securitySolutionLocalStorageMock.addTimeline).toHaveBeenCalled();
   });
 });

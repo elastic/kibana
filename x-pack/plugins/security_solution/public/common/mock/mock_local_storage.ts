@@ -25,7 +25,7 @@ export const localStorageMock = (): IStorage => {
   };
 };
 
-export const createSiemLocalStorageMock = () => ({
+export const createSecuritySolutionStorageMock = () => ({
   getAllTimelines: jest.fn(),
   addTimeline: jest.fn(),
 });

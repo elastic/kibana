@@ -34,7 +34,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
-  createSiemLocalStorageMock,
+  createSecuritySolutionStorageMock,
 } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -54,12 +54,12 @@ jest.mock('../charts/barchart', () => {
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-  const siemLocalStorageMock = createSiemLocalStorageMock();
+  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
   const store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
     apolloClientObservable,
-    siemLocalStorageMock
+    securitySolutionLocalStorageMock
   );
 
   describe.each([
