@@ -18,18 +18,14 @@ import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 // check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
-  potentialMatchMonitorIDs: string[],
-  potentialMatchCheckGroups: Set<string>
+  potentialMatchMonitorIDs: string[]
 ): Promise<MonitorGroups[]> => {
   if (potentialMatchMonitorIDs.length === 0) {
     return [];
   }
 
-  const recentGroupsMatchingStatus = await fullyMatchingIds(
-    queryContext,
-    potentialMatchMonitorIDs,
-    potentialMatchCheckGroups
-  );
+  const queryResult = await query(queryContext, potentialMatchMonitorIDs);
+  const recentGroupsMatchingStatus = await fullyMatchingIds(queryResult, queryContext.statusFilter);
 
   // Return the monitor groups filtering out potential matches that weren't current
   const matches: MonitorGroups[] = potentialMatchMonitorIDs
@@ -49,15 +45,9 @@ export const refinePotentialMatches = async (
   return matches;
 };
 
-const fullyMatchingIds = async (
-  queryContext: QueryContext,
-  potentialMatchMonitorIDs: string[],
-  potentialMatchCheckGroups: Set<string>
-) => {
-  const mostRecentQueryResult = await mostRecentCheckGroups(queryContext, potentialMatchMonitorIDs);
-
+export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
   const matching = new Map<string, MonitorLocCheckGroup[]>();
-  MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
+  MonitorLoop: for (const monBucket of queryResult.aggregations.monitor.buckets) {
     const monitorId: string = monBucket.key;
     const groups: MonitorLocCheckGroup[] = [];
 
@@ -80,7 +70,7 @@ const fullyMatchingIds = async (
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
       // Only skip in case of up statusFilter, for a monitor to be up, all checks should be up
-      if (queryContext?.statusFilter === 'up' && queryContext.statusFilter !== status) {
+      if (statusFilter === 'up' && statusFilter !== status) {
         continue MonitorLoop;
       }
 
@@ -102,7 +92,7 @@ const fullyMatchingIds = async (
   return matching;
 };
 
-export const mostRecentCheckGroups = async (
+export const query = async (
   queryContext: QueryContext,
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
