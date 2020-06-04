@@ -32,10 +32,16 @@ export const TemplateContentIndicator = ({ mappings, settings, aliases }: Props)
   return (
     <>
       <EuiToolTip content={texts.mappings}>
-        <EuiBadge color={getColor(mappings)}>M</EuiBadge>
+        <>
+          <EuiBadge color={getColor(mappings)}>M</EuiBadge>
+          &nbsp;
+        </>
       </EuiToolTip>
       <EuiToolTip content={texts.settings}>
-        <EuiBadge color={getColor(settings)}>S</EuiBadge>
+        <>
+          <EuiBadge color={getColor(settings)}>S</EuiBadge>
+          &nbsp;
+        </>
       </EuiToolTip>
       <EuiToolTip content={texts.aliases}>
         <EuiBadge color={getColor(aliases)}>A</EuiBadge>
