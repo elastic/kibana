@@ -80,4 +80,4 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   }, 500);
 }
 
-export const PhraseSuggestor = withKibana(PhraseSuggestorUI);
+export const PhraseSuggestor = withKibana(PhraseSuggestorUI as any);
