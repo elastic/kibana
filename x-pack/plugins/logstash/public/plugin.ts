@@ -71,7 +71,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
               defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
             }),
             icon: 'pipelineApp',
-            path: '/app/kibana#/management/ingest/pipelines',
+            path: '/app/management/ingest/pipelines',
             showOnHomePage: true,
             category: FeatureCatalogueCategory.ADMIN,
           });
