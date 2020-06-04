@@ -126,7 +126,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           <Route exact path={`/${Section.Indices}/filter/:filter?`} component={IndexList} />
           <Route
             exact
-            path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName*`]}
+            path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
             component={TemplateList}
           />
           <Route exact path={`/${Section.ComponentTemplates}`} component={ComponentTemplateList} />
