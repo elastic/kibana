@@ -78,6 +78,7 @@ export interface DataDescription {
 
 export interface ModelPlotConfig {
   enabled: boolean;
+  annotations_enabled?: boolean;
   terms?: string;
 }
 
