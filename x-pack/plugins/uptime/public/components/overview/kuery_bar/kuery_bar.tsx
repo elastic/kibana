@@ -74,14 +74,8 @@ export function KueryBar({
       return;
     }
 
-    updateSearchText(inputValue);
-
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
-
-    if (updateDefaultKuery) {
-      updateDefaultKuery(inputValue);
-    }
 
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
@@ -124,6 +118,10 @@ export function KueryBar({
 
       if (shouldUpdateUrl !== false) {
         updateUrlParams({ search: inputValue.trim() });
+      }
+      updateSearchText(inputValue);
+      if (updateDefaultKuery) {
+        updateDefaultKuery(inputValue);
       }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console

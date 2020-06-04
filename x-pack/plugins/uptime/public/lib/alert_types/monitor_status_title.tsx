@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { snapshotDataSelector } from '../../state/selectors';
+import { snapshotDataSelector, esKuerySelector } from '../../state/selectors';
+import { getSnapshotCountAction } from '../../state/actions';
 
 export const MonitorStatusTitle = () => {
   const { count, loading } = useSelector(snapshotDataSelector);
+  const esKuery = useSelector(esKuerySelector);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(
+      getSnapshotCountAction({ dateRangeStart: 'now-15m', dateRangeEnd: 'now', filters: esKuery })
+    );
+  }, [dispatch, esKuery]);
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>

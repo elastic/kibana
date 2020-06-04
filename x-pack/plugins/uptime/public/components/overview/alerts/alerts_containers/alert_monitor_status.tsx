@@ -10,8 +10,14 @@ import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { isRight } from 'fp-ts/lib/Either';
 import { selectMonitorStatusAlert, overviewFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
-import { fetchOverviewFilters, setSearchTextAction } from '../../../../state/actions';
+import {
+  fetchOverviewFilters,
+  setSearchTextAction,
+  setEsKueryString,
+} from '../../../../state/actions';
 import { AtomicStatusCheckParamsType } from '../../../../../common/runtime_types';
+import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
+import { useUpdateKueryString } from '../../../../hooks';
 
 interface Props {
   alertParams: { [key: string]: any };
@@ -54,6 +60,18 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       dispatch(setSearchTextAction(alertParams.search));
     }
   }, [alertParams, dispatch]);
+
+  const { index_pattern: indexPattern } = useIndexPattern();
+  const [esFilters] = useUpdateKueryString(
+    indexPattern,
+    alertParams.search,
+    typeof alertParams.filters === 'string' ? {} : alertParams.filters
+  );
+
+  useEffect(() => {
+    dispatch(setEsKueryString(esFilters ?? ''));
+  }, [dispatch, esFilters]);
+
   const isOldAlert = React.useMemo(
     () => !isRight(AtomicStatusCheckParamsType.decode(alertParams)),
     [alertParams]
