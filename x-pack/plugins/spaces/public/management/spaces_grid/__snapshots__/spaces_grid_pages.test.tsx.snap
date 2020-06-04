@@ -39,7 +39,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
       >
         <EuiButton
           fill={true}
-          href="#/management/kibana/spaces/create"
+          onClick={[Function]}
         >
           <FormattedMessage
             defaultMessage="Create a space"
@@ -122,7 +122,9 @@ exports[`SpacesGridPage renders as expected 1`] = `
       tableLayout="fixed"
     />
   </EuiPageContent>
-  <SecureSpaceMessage />
+  <SecureSpaceMessage
+    getUrlForApp={[Function]}
+  />
 </div>
 `;
 

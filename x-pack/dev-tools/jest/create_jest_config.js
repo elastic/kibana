@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
+export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirectory }) {
   const fileMockPath = `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`;
   return {
-    rootDir: xPackKibanaDirectory,
+    rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
@@ -24,7 +24,8 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': fileMockPath,
       '\\.module.(css|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/css_module_mock.js`,
       '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
-      '\\.ace\\.worker.js$': `${kibanaDirectory}/src/dev/jest/mocks/ace_worker_module_mock.js`,
+      '\\.ace\\.worker.js$': `${kibanaDirectory}/src/dev/jest/mocks/worker_module_mock.js`,
+      '\\.editor\\.worker.js$': `${kibanaDirectory}/src/dev/jest/mocks/worker_module_mock.js`,
       '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
       '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
       '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
@@ -44,15 +45,15 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '!**/plugins/apm/e2e/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
-    coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
+    coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,
     coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html'],
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
-      `<rootDir>/dev-tools/jest/setup/polyfills.js`,
-      `<rootDir>/dev-tools/jest/setup/enzyme.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/polyfills.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/enzyme.js`,
     ],
     setupFilesAfterEnv: [
-      `<rootDir>/dev-tools/jest/setup/setup_test.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
