@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { Monaco } from '../../../../../../src/plugins/es_ui_shared/public';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
@@ -13,21 +12,14 @@ interface Props {
 }
 
 export function Editor({ code, onChange }: Props) {
-  const { XJsonLang, xJson, setXJson } = Monaco.useXJsonMode(code);
   return (
     <CodeEditor
-      languageId={XJsonLang.ID}
+      languageId="painless"
       // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
       width="99%"
       height="100%"
-      editorDidMount={(editor) => {
-        XJsonLang.registerGrammarChecker(editor);
-      }}
-      value={xJson}
-      onChange={(value) => {
-        setXJson(value);
-        onChange(value);
-      }}
+      value={code}
+      onChange={onChange}
       options={{
         fontSize: 12,
         minimap: {
