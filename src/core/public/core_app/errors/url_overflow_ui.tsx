@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 
 import { IBasePath } from '../../http';
-import { IS_IE, URL_MAX_LENGTH } from './url_overflow';
+import { IS_IE } from './url_overflow';
 
 export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) => {
   return (
@@ -32,11 +32,7 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
         <p>
           <FormattedMessage
             id="core.ui.errorUrlOverflow.errorDescription"
-            defaultMessage="That's a big URL you have there. I have some unfortunate news: Your browser doesn't play nice
-    with Kibana's bacon-double-cheese-burger-with-extra-fries sized URL. To keep you from running
-    into problems Kibana limits URLs in your browser to {urlCharacterLimit} characters for your
-    safety."
-            values={{ urlCharacterLimit: URL_MAX_LENGTH }}
+            defaultMessage="The URL for this dashboard is too long, and we can't display the dashboard."
           />
         </p>
       </EuiText>
@@ -44,33 +40,25 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
       <EuiHorizontalRule size="half" />
 
       <EuiText textAlign="left">
-        <h3>
-          <FormattedMessage
-            id="core.ui.errorUrlOverflow.howTofixErrorTitle"
-            defaultMessage="Ok, how do I fix this?"
-          />
-        </h3>
-
         <p>
           <FormattedMessage
-            id="core.ui.errorUrlOverflow.howTofixErrorDescription"
-            defaultMessage="This usually only happens with big, complex dashboards, so you have some options:"
+            id="core.ui.errorUrlOverflow.optionsToFixErrorDescription"
+            defaultMessage="Things to try:"
           />
         </p>
 
         <ol>
           <li>
             <FormattedMessage
-              id="core.ui.errorUrlOverflow.howTofixError.enableOptionText"
-              defaultMessage="Enable the {storeInSessionStorageConfig} option in the {kibanaSettingsLink}. This will prevent the URLs from
-      getting long, but makes them a bit less portable."
+              id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText"
+              defaultMessage="Enable the {storeInSessionStorageConfig} option in the {kibanaSettingsLink}."
               values={{
                 storeInSessionStorageConfig: <code>state:storeInSessionStorage</code>,
                 kibanaSettingsLink: (
                   <a href={basePath.prepend('/app/management/kibana/settings')}>
                     <FormattedMessage
-                      id="core.ui.errorUrlOverflow.howTofixError.enableOptionText.advancedSettingsLinkText"
-                      defaultMessage="advanced settings"
+                      id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText"
+                      defaultMessage="Advanced Settings"
                     />
                   </a>
                 ),
@@ -79,15 +67,15 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
           </li>
           <li>
             <FormattedMessage
-              id="core.ui.errorUrlOverflow.howTofixError.removeStuffFromDashboardText"
-              defaultMessage="Remove some stuff from your dashboard. This will reduce the length of the URL and keep your browser in a good place."
+              id="core.ui.errorUrlOverflow.optionsToFixError.removeStuffFromDashboardText"
+              defaultMessage="Remove content from your dashboard. This error occurs only for complex dashboards."
             />
           </li>
           {IS_IE && (
             <li>
               <FormattedMessage
-                id="core.ui.errorUrlOverflow.howTofixError.doNotUseIEText"
-                defaultMessage="Don't use IE. Every other supported browser we know of doesn't have this limit."
+                id="core.ui.errorUrlOverflow.optionsToFixError.doNotUseIEText"
+                defaultMessage="Upgrade to a modern browser. Every other supported browser we know of doesn't have this limit."
               />
             </li>
           )}
