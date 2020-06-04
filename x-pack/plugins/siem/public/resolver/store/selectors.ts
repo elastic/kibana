@@ -113,6 +113,11 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
 
 /**
+ * An array containing all the processes currently in the Resolver than can be graphed
+ */
+export const graphableProcesses = composeSelectors(dataStateSelector, dataSelectors.graphableProcesses);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */

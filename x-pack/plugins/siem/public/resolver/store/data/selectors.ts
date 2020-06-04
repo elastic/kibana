@@ -81,15 +81,6 @@ export const graphableProcesses = createSelector(
   }
 );
 
-/**
- * A Set of ids for graphable processes 
- */
-export const graphableProcessesEntityIds = createSelector(
-  graphableProcesses,
-  function (graphableProcesses) {
-    return new Set(graphableProcesses.map(uniquePidForProcess));
-  }
-);
 
 /**
  * In laying out the graph, we precalculate the 'width' of each subtree. The 'width' of the subtree is determined by its
