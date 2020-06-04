@@ -60,6 +60,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
 
   const changeView = useCallback(
     (viewState: ViewState & { name: string }) => {
+      // INFO: All views have a name along side their state.
       setViewName(viewState.name);
       props.onViewChange(viewState);
     },
