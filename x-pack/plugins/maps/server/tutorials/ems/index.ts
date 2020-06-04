@@ -63,7 +63,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
 2. Click `Add layer`, then select `Upload GeoJSON`.\n\
 3. Upload the GeoJSON file and click `Import file`.',
                     values: {
-                      newMapUrl: prependBasePath('/app/maps#/map'),
+                      newMapUrl: prependBasePath('/app/maps/map'),
                     },
                   }),
                 },

@@ -81,7 +81,7 @@ export function createSavedGisMapClass(services) {
       this.showInRecentlyAccessed = true;
     }
     getFullPath() {
-      return `/app/maps#map/${this.id}`;
+      return `/app/maps/map/${this.id}`;
     }
     getLayerList() {
       return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
