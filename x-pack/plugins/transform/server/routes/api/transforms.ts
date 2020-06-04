@@ -19,7 +19,7 @@ import {
   TransformEndpointResult,
   TransformId,
   TRANSFORM_STATE,
-  DeleteTransformEndpoint,
+  DeleteTransformEndpointRequest,
   DeleteTransformStatus,
   ResultData,
 } from '../../../common';
@@ -185,7 +185,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         body: schema.maybe(schema.any()),
         query: schema.object({
           /**
-           * Analytics Destination Index
+           * Transform Destination Index
            */
           deleteDestIndex: schema.maybe(schema.boolean()),
           deleteDestIndexPattern: schema.maybe(schema.boolean()),
@@ -197,7 +197,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         transformsInfo,
         deleteDestIndex,
         deleteDestIndexPattern,
-      } = req.body as DeleteTransformEndpoint;
+      } = req.body as DeleteTransformEndpointRequest;
 
       try {
         const body = await deleteTransforms(
@@ -315,7 +315,7 @@ async function deleteTransforms(
 
   for (const transformInfo of transformsInfo) {
     let destinationIndex: string | undefined;
-    const transformJobDeleted: ResultData = { success: false };
+    const transformDeleted: ResultData = { success: false };
     const destIndexDeleted: ResultData = { success: false };
     const destIndexPatternDeleted: ResultData = {
       success: false,
@@ -351,9 +351,9 @@ async function deleteTransforms(
           ? transformConfig.dest.index[0]
           : transformConfig.dest.index;
       } catch (getTransformConfigError) {
-        transformJobDeleted.error = wrapError(getTransformConfigError);
+        transformDeleted.error = wrapError(getTransformConfigError);
         results[transformId] = {
-          transformJobDeleted,
+          transformDeleted,
           destIndexDeleted,
           destIndexPatternDeleted,
           destinationIndex,
@@ -395,16 +395,16 @@ async function deleteTransforms(
         await ctx.transform!.dataClient.callAsCurrentUser('transform.deleteTransform', {
           transformId,
         });
-        transformJobDeleted.success = true;
+        transformDeleted.success = true;
       } catch (deleteTransformJobError) {
-        transformJobDeleted.error = wrapError(deleteTransformJobError);
-        if (transformJobDeleted.error.statusCode === 403) {
+        transformDeleted.error = wrapError(deleteTransformJobError);
+        if (transformDeleted.error.statusCode === 403) {
           return response.forbidden();
         }
       }
 
       results[transformId] = {
-        transformJobDeleted,
+        transformDeleted,
         destIndexDeleted,
         destIndexPatternDeleted,
         destinationIndex,
@@ -418,7 +418,7 @@ async function deleteTransforms(
           action: TRANSFORM_ACTIONS.DELETE,
         });
       }
-      results[transformId] = { transformJobDeleted: { success: false, error: JSON.stringify(e) } };
+      results[transformId] = { transformDeleted: { success: false, error: JSON.stringify(e) } };
     }
   }
   return results;

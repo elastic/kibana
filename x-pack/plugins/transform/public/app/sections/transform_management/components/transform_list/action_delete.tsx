@@ -85,7 +85,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
     defaultMessage: 'Delete {transformId}',
     values: { transformId: items[0] && items[0].config.id },
   });
-  const bulkDeleteModalMessage = (
+  const bulkDeleteModalContent = (
     <>
       <p>
         <FormattedMessage
@@ -98,7 +98,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
         <EuiFlexItem>
           {
             <EuiSwitch
-              data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
+              data-test-subj="transformBulkDeleteIndexSwitch"
               style={{ paddingBottom: 10 }}
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.bulkDeleteDestinationIndexTitle',
@@ -114,7 +114,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
         <EuiFlexItem>
           {
             <EuiSwitch
-              data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
+              data-test-subj="transformBulkDeleteIndexPatternSwitch"
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.bulkDeleteDestIndexPatternTitle',
                 {
@@ -130,8 +130,8 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
     </>
   );
 
-  const deleteModalMessage = (
-    <React.Fragment>
+  const deleteModalContent = (
+    <>
       <p>
         <FormattedMessage
           id="xpack.transform.transformList.deleteModalBody"
@@ -142,7 +142,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
         <EuiFlexItem>
           {userCanDeleteIndex && (
             <EuiSwitch
-              data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
+              data-test-subj="transformDeleteIndexSwitch"
               style={{ paddingBottom: 10 }}
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.deleteDestinationIndexTitle',
@@ -159,7 +159,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
         <EuiFlexItem>
           {userCanDeleteIndex && indexPatternExists && (
             <EuiSwitch
-              data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
+              data-test-subj="transformDeleteIndexPatternSwitch"
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.deleteDestIndexPatternTitle',
                 {
@@ -173,7 +173,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </React.Fragment>
+    </>
   );
 
   let deleteButton = (
@@ -228,7 +228,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
             buttonColor="danger"
           >
-            {isBulkAction ? bulkDeleteModalMessage : deleteModalMessage}
+            {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}

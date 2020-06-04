@@ -132,13 +132,13 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Creating transform with id '${transformId}'...`);
       await esSupertest.put(`/_transform/${transformId}`).send(transformConfig).expect(200);
 
-      await this.waitForTransformJobToExist(
+      await this.waitForTransformToExist(
         transformId,
         `expected transform '${transformId}' to be created`
       );
     },
 
-    async waitForTransformJobToExist(transformId: string, errorMsg?: string) {
+    async waitForTransformToExist(transformId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${transformId}' to exist`, 5 * 1000, async () => {
         if (await this.getTransform(transformId, 200)) {
           return true;
@@ -147,7 +147,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         }
       });
     },
-    async waitForTransformJobNotToExist(transformId: string, errorMsg?: string) {
+    async waitForTransformNotToExist(transformId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${transformId}' to exist`, 5 * 1000, async () => {
         if (await this.getTransform(transformId, 404)) {
           return true;

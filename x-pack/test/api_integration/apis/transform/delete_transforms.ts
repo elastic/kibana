@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
     return `user-${transformId}`;
   }
 
-  async function createTransformJob(transformId: string, destinationIndex: string) {
+  async function createTransform(transformId: string, destinationIndex: string) {
     const config = {
       id: transformId,
       source: { index: ['farequote-*'] },
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       beforeEach(async () => {
-        await createTransformJob(transformId, destinationIndex);
+        await createTransform(transformId, destinationIndex);
         await transform.api.createIndices(destinationIndex);
       });
 
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
         await transform.api.deleteIndices(destinationIndex);
       });
 
-      it('should delete transform job by transformId', async () => {
+      it('should delete transform by transformId', async () => {
         const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
         const { body } = await supertest
           .post(`/api/transform/delete_transforms`)
@@ -76,10 +76,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForTransformNotToExist(transformId);
       });
 
       it('should return 403 for unauthorized user', async () => {
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
             transformsInfo,
           })
           .expect(403);
-        await transform.api.waitForTransformJobToExist(transformId);
+        await transform.api.waitForTransformToExist(transformId);
       });
     });
 
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
             transformsInfo,
           })
           .expect(200);
-        expect(body.invalid_transform_id.transformJobDeleted.success).to.eql(false);
+        expect(body.invalid_transform_id.transformDeleted.success).to.eql(false);
       });
     });
 
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await asyncForEach(transformsInfo, async ({ id }: { id: string }, idx: number) => {
-          await createTransformJob(id, destinationIndices[idx]);
+          await createTransform(id, destinationIndices[idx]);
           await transform.api.createIndices(destinationIndices[idx]);
         });
       });
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should delete multiple transform jobs by transformIds', async () => {
+      it('should delete multiple transforms by transformIds', async () => {
         const { body } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
@@ -151,14 +151,14 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await asyncForEach(transformsInfo, async ({ id: transformId }: { id: string }) => {
-          expect(body[transformId].transformJobDeleted.success).to.eql(true);
+          expect(body[transformId].transformDeleted.success).to.eql(true);
           expect(body[transformId].destIndexDeleted.success).to.eql(false);
           expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-          await transform.api.waitForTransformJobNotToExist(transformId);
+          await transform.api.waitForTransformNotToExist(transformId);
         });
       });
 
-      it('should delete multiple transform jobs by transformIds, even if one of the transformIds is invalid', async () => {
+      it('should delete multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
         const { body } = await supertest
           .post(`/api/transform/delete_transforms`)
@@ -177,14 +177,14 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await asyncForEach(transformsInfo, async ({ id: transformId }: { id: string }) => {
-          expect(body[transformId].transformJobDeleted.success).to.eql(true);
+          expect(body[transformId].transformDeleted.success).to.eql(true);
           expect(body[transformId].destIndexDeleted.success).to.eql(false);
           expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-          await transform.api.waitForTransformJobNotToExist(transformId);
+          await transform.api.waitForTransformNotToExist(transformId);
         });
 
-        expect(body[invalidTransformId].transformJobDeleted.success).to.eql(false);
-        expect(body[invalidTransformId].transformJobDeleted).to.have.property('error');
+        expect(body[invalidTransformId].transformDeleted.success).to.eql(false);
+        expect(body[invalidTransformId].transformDeleted).to.have.property('error');
       });
     });
 
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       before(async () => {
-        await createTransformJob(transformId, destinationIndex);
+        await createTransform(transformId, destinationIndex);
         await transform.api.createIndices(destinationIndex);
       });
 
@@ -216,10 +216,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(true);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
       });
     });
@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       before(async () => {
-        await createTransformJob(transformId, destinationIndex);
+        await createTransform(transformId, destinationIndex);
         await transform.api.createIndices(destinationIndex);
         await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
       });
@@ -255,10 +255,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
-        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForTransformNotToExist(transformId);
         await transform.testResources.assertIndexPatternNotExist(destinationIndex);
       });
     });
@@ -268,7 +268,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       before(async () => {
-        await createTransformJob(transformId, destinationIndex);
+        await createTransform(transformId, destinationIndex);
         await transform.api.createIndices(destinationIndex);
         await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
       });
@@ -294,10 +294,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(true);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
-        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
         await transform.testResources.assertIndexPatternNotExist(destinationIndex);
       });

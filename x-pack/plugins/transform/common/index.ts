@@ -39,14 +39,14 @@ export interface TransformEndpointResult {
   [key: string]: ResultData;
 }
 
-export interface DeleteTransformEndpoint {
+export interface DeleteTransformEndpointRequest {
   transformsInfo: TransformEndpointRequest[];
   deleteDestIndex?: boolean;
   deleteDestIndexPattern?: boolean;
 }
 
 export interface DeleteTransformStatus {
-  transformJobDeleted: ResultData;
+  transformDeleted: ResultData;
   destIndexDeleted?: ResultData;
   destIndexPatternDeleted?: ResultData;
   destinationIndex?: string | undefined;
