@@ -26,6 +26,7 @@ import React, {
   Fragment,
   FunctionComponent,
   HTMLProps,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -37,6 +38,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
+import { ScopedHistory } from 'kibana/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
 import { Feature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -53,7 +55,6 @@ import {
   RoleIndexPrivilege,
   getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
-import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
@@ -65,6 +66,7 @@ import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
 import { KibanaPrivileges } from '../model';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -81,6 +83,7 @@ interface Props {
   uiCapabilities: Capabilities;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
+  history: ScopedHistory;
 }
 
 function useRunAsUsers(
@@ -155,6 +158,7 @@ function useRole(
   notifications: NotificationsStart,
   license: SecurityLicense,
   action: string,
+  backToRoleList: () => void,
   roleName?: string
 ) {
   const [role, setRole] = useState<Role | null>(null);
@@ -215,7 +219,7 @@ function useRole(
           fatalErrors.add(err);
         }
       });
-  }, [roleName, action, fatalErrors, rolesAPIClient, notifications, license]);
+  }, [roleName, action, fatalErrors, rolesAPIClient, notifications, license, backToRoleList]);
 
   return [role, setRole] as [Role | null, typeof setRole];
 }
@@ -269,10 +273,6 @@ function useFeatures(
   return features;
 }
 
-function backToRoleList() {
-  window.location.hash = ROLES_PATH;
-}
-
 export const EditRolePage: FunctionComponent<Props> = ({
   userAPIClient,
   indexPatterns,
@@ -288,7 +288,10 @@ export const EditRolePage: FunctionComponent<Props> = ({
   docLinks,
   uiCapabilities,
   notifications,
+  history,
 }) => {
+  const backToRoleList = useCallback(() => history.push('/'), [history]);
+
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
@@ -305,6 +308,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     notifications,
     license,
     action,
+    backToRoleList,
     roleName
   );
 
@@ -465,7 +469,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getReturnToRoleListButton = () => {
     return (
-      <EuiButton onClick={backToRoleList} data-test-subj="roleFormReturnButton">
+      <EuiButton {...reactRouterNavigate(history, '')} data-test-subj="roleFormReturnButton">
         <FormattedMessage
           id="xpack.security.management.editRole.returnToRoleListButtonLabel"
           defaultMessage="Return to role list"
@@ -571,11 +575,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
     <div className="editRolePage">
       <EuiForm {...formError}>
         {getFormTitle()}
-
         <EuiSpacer />
-
         <EuiText size="s">{description}</EuiText>
-
         {isRoleReserved && (
           <Fragment>
             <EuiSpacer size="s" />
@@ -589,7 +590,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
             </EuiText>
           </Fragment>
         )}
-
         {isDeprecatedRole && (
           <Fragment>
             <EuiSpacer size="s" />
@@ -600,17 +600,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
             />
           </Fragment>
         )}
-
         <EuiSpacer />
-
         {getRoleName()}
-
         {getElasticsearchPrivileges()}
-
         {getKibanaPrivileges()}
-
         <EuiSpacer />
-
         {getFormButtons()}
       </EuiForm>
     </div>
