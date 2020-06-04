@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineProcessorsEditor, OnUpdateHandler } from './pipeline_processors_editor.container';
+import { Pipeline } from '../../../../common/types';
 
-export { OnUpdateHandlerArg } from './types';
+export type ReadProcessorsFunction = () => Pick<Pipeline, 'processors' | 'on_failure'>;

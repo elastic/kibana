@@ -170,6 +170,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* ES request flyout */}
         {isRequestVisible ? (
           <PipelineRequestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
           />
         ) : null}
@@ -177,6 +180,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* Test pipeline flyout */}
         {isTestingPipeline ? (
           <PipelineTestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => {
               setIsTestingPipeline((prevIsTestingPipeline) => !prevIsTestingPipeline);
             }}
