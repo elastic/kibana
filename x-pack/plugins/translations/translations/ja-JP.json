@@ -87,7 +87,7 @@
     "advancedSettings.categoryNames.notificationsLabel": "通知",
     "advancedSettings.categoryNames.reportingLabel": "レポート",
     "advancedSettings.categoryNames.searchLabel": "検索",
-    "advancedSettings.categoryNames.siemLabel": "SIEM",
+    "advancedSettings.categoryNames.securitySolutionLabel": "Security Solution",
     "advancedSettings.categoryNames.timelionLabel": "Timelion",
     "advancedSettings.categoryNames.visualizationsLabel": "可視化",
     "advancedSettings.categorySearchLabel": "カテゴリー",
