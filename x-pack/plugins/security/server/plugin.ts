@@ -20,7 +20,7 @@ import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
@@ -30,6 +30,7 @@ import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
+import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -72,6 +73,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   features: FeaturesPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 /**
@@ -82,6 +84,16 @@ export class Plugin {
   private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+
+  private readonly featureUsageService = new SecurityFeatureUsageService();
+  private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
+  private readonly getFeatureUsageService = () => {
+    if (!this.featureUsageServiceStart) {
+      throw new Error(`featureUsageServiceStart is not registered!`);
+    }
+    return this.featureUsageServiceStart;
+  };
+
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
   private readonly authorizationService = new AuthorizationService();
 
@@ -98,7 +110,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup<PluginStartDependencies>,
+    { features, licensing }: PluginSetupDependencies
+  ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
         map((rawConfig) =>
@@ -121,11 +136,14 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
+
     const audit = this.auditService.setup({ license, config: config.audit });
     const auditLogger = new SecurityAuditLogger(audit.getLogger());
 
     const authc = await setupAuthentication({
       auditLogger,
+      getFeatureUsageService: this.getFeatureUsageService,
       http: core.http,
       clusterClient: this.clusterClient,
       config,
@@ -163,6 +181,11 @@ export class Plugin {
       authc,
       authz,
       license,
+      getFeatures: () =>
+        core
+          .getStartServices()
+          .then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+      getFeatureUsageService: this.getFeatureUsageService,
     });
 
     return deepFreeze<SecurityPluginSetup>({
@@ -198,8 +221,11 @@ export class Plugin {
     });
   }
 
-  public start(core: CoreStart, { features }: PluginStartDependencies) {
+  public start(core: CoreStart, { features, licensing }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
+    this.featureUsageServiceStart = this.featureUsageService.start({
+      featureUsage: licensing.featureUsage,
+    });
     this.authorizationService.start({ features, clusterClient: this.clusterClient! });
   }
 
@@ -216,6 +242,9 @@ export class Plugin {
       this.securityLicenseService = undefined;
     }
 
+    if (this.featureUsageServiceStart) {
+      this.featureUsageServiceStart = undefined;
+    }
     this.auditService.stop();
     this.authorizationService.stop();
   }
