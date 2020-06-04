@@ -33,32 +33,26 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
   let timeoutId: NodeJS.Timeout | undefined;
 
   /**
-   * Checks whether a default index pattern is set and exists and defines
-   * one otherwise.
+   * Checks whether a default index pattern is set and exists.
+   * If this is not the case returns the first index pattern of the existing index patterns
    *
    * If there are no index patterns, redirect to management page and show
    * banner. In this case the promise returned from this function will never
    * resolve to wait for the URL change to happen.
    */
-  return async function ensureDefaultIndexPattern(this: IndexPatternsContract, history: History) {
+  return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
     const patterns = await this.getIds();
-    let defaultId = core.uiSettings.get('defaultIndex');
-    let defined = !!defaultId;
+    const defaultId = core.uiSettings.get('defaultIndex');
+    const defined = !!defaultId;
     const exists = contains(patterns, defaultId);
 
-    if (defined && !exists) {
-      core.uiSettings.remove('defaultIndex');
-      defaultId = defined = false;
-    }
-
-    if (defined) {
-      return;
+    if (defined && exists) {
+      return defaultId;
     }
 
     // If there is any index pattern created, set the first as default
     if (patterns.length >= 1) {
-      defaultId = patterns[0];
-      core.uiSettings.set('defaultIndex', defaultId);
+      return patterns[0];
     } else {
       const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
       const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';

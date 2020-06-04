@@ -151,14 +151,29 @@ export class IndexPatternsService {
     }
     return this.savedObjectsCache;
   };
-
+  /**
+   * Returns the default index pattern, configured in index pattern management.
+   * In case no index pattern is configured  or the configured default index pattern doesn't exist
+   * the first index pattern of the cached list is returned
+   */
   getDefault = async () => {
+    const getFallbackIndexPattern = async () => {
+      const list = await this.getCache();
+      if (list && list.length) {
+        return await this.get(list[0].id);
+      }
+      return null;
+    };
     const defaultIndexPatternId = this.config.get('defaultIndex');
-    if (defaultIndexPatternId) {
-      return await this.get(defaultIndexPatternId);
+    if (!defaultIndexPatternId) {
+      return await getFallbackIndexPattern();
     }
 
-    return null;
+    try {
+      return await this.get(defaultIndexPatternId);
+    } catch (e) {
+      return await getFallbackIndexPattern();
+    }
   };
 
   get = async (id: string): Promise<IndexPattern> => {
