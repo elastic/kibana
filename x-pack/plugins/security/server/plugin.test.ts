@@ -41,7 +41,9 @@ describe('Security Plugin', () => {
     mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
     mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
-    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
+    mockDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+    } as unknown) as PluginSetupDependencies;
   });
 
   describe('setup()', () => {
