@@ -75,6 +75,7 @@ async function getStats(callCluster: APICaller, index: string) {
       spaces_min: _.min(spaceCounts),
       spaces_max: _.max(spaceCounts),
       spaces_avg: total / spaceCounts.length,
+      saved_7_days_total: curr.filter((c) => c.past_days <= 7).length,
       saved_30_days_total: curr.filter((c) => c.past_days <= 30).length,
       saved_90_days_total: curr.filter((c) => c.past_days <= 90).length,
     };
