@@ -24,10 +24,14 @@ import classNames from 'classnames';
 import { Action, PreviewState, EditorFrameState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import {
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -53,6 +57,7 @@ export interface SuggestionPanelProps {
   frame: FramePublicAPI;
   stagedPreview?: PreviewState;
   state: EditorFrameState;
+  plugins: { data: DataPublicPluginStart };
 }
 
 const PreviewRenderer = ({
@@ -156,6 +161,7 @@ export function SuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
   state,
+  plugins,
 }: SuggestionPanelProps) {
   const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
   const currentVisualizationState = stagedPreview
@@ -207,6 +213,13 @@ export function SuggestionPanel({
     datasourceMap,
     visualizationMap,
   ]);
+
+  const AutoRefreshExpressionRenderer = useMemo(() => {
+    const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
+    return (props: ReactExpressionRendererProps) => (
+      <ExpressionRendererComponent {...props} reload$={autoRefreshFetch$} />
+    );
+  }, [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$, ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -300,7 +313,7 @@ export function SuggestionPanel({
                 defaultMessage: 'Current',
               }),
             }}
-            ExpressionRenderer={ExpressionRendererComponent}
+            ExpressionRenderer={AutoRefreshExpressionRenderer}
             onSelect={rollbackToCurrentVisualization}
             selected={lastSelectedSuggestion === -1}
             showTitleAsLabel
@@ -316,7 +329,7 @@ export function SuggestionPanel({
                 icon: suggestion.previewIcon,
                 title: suggestion.title,
               }}
-              ExpressionRenderer={ExpressionRendererComponent}
+              ExpressionRenderer={AutoRefreshExpressionRenderer}
               key={index}
               onSelect={() => {
                 trackUiEvent('suggestion_clicked');

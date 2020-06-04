@@ -308,6 +308,7 @@ export function EditorFrame(props: EditorFrameProps) {
               ExpressionRenderer={props.ExpressionRenderer}
               stagedPreview={state.stagedPreview}
               state={state}
+              plugins={props.plugins}
             />
           )
         }
