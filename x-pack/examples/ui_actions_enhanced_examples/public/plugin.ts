@@ -9,7 +9,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/pl
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-} from '../../../../x-pack/plugins/advanced_ui_actions/public';
+} from '../../../../x-pack/plugins/ui_actions_enhanced/public';
 import { DashboardHelloWorldDrilldown } from './dashboard_hello_world_drilldown';
 import { DashboardToUrlDrilldown } from './dashboard_to_url_drilldown';
 import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
@@ -17,19 +17,19 @@ import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;
-  advancedUiActions: AdvancedUiActionsSetup;
+  uiActionsEnhanced: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
-  advancedUiActions: AdvancedUiActionsStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
 export class UiActionsEnhancedExamplesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   public setup(
     core: CoreSetup<StartDependencies>,
-    { advancedUiActions: uiActions }: SetupDependencies
+    { uiActionsEnhanced: uiActions }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
 

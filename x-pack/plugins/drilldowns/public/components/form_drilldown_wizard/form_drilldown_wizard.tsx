@@ -10,7 +10,7 @@ import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './
 import {
   AdvancedUiActionsActionFactory as ActionFactory,
   ActionWizard,
-} from '../../../../advanced_ui_actions/public';
+} from '../../../../ui_actions_enhanced/public';
 
 const noopFn = () => {};
 
