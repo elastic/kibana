@@ -14,10 +14,12 @@ import { IndexTemplatesTabTestBed, setup } from './index_templates_tab.helpers';
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   array.map((value) => {
-    if (!value.trim) {
+    if (typeof value !== 'string') {
       return value;
     }
-    return value.trim();
+
+    // Convert non breaking spaces (&nbsp;) to ordinary space
+    return value.trim().replace(/\s/g, ' ');
   });
 
 describe('Index Templates tab', () => {
@@ -148,7 +150,7 @@ describe('Index Templates tab', () => {
           ilmPolicyName,
           composedOfString,
           priorityFormatted,
-          'MSA', // Mappings Settings Aliases badges
+          'M S A', // Mappings Settings Aliases badges
         ]);
       });
 
