@@ -17,5 +17,17 @@
  * under the License.
  */
 
-require('../src/setup_node_env/babel_register');
-require('../src/dev/run_prettier_on_changed');
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const configSchema = schema.object({
+  autocomplete: schema.object({
+    querySuggestions: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    valueSuggestions: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
