@@ -18,7 +18,6 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
 import {
   DuplicateField,
@@ -42,8 +41,7 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats } from '../../services';
-import { TypeMeta } from './types';
+import { TypeMeta, OnUnknownFieldType, FieldFormatMethods } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -72,6 +70,12 @@ export class IndexPattern implements IIndexPattern {
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
 
+  private fieldFormats: FieldFormatMethods;
+  private onUnknownFieldType: OnUnknownFieldType;
+  private onIndexPatternWriteCollision: () => void;
+  private onIndexPatternMissingIndices: (message: string) => void;
+  private onErrorFechingFields: (id: string, title: string) => void;
+
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
     timeFieldName: ES_FIELD_TYPES.KEYWORD,
@@ -99,7 +103,12 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: any,
+    fieldFormats: FieldFormatMethods,
+    onUnknownFieldType: OnUnknownFieldType,
+    onIndexPatternWriteCollision: () => void,
+    onIndexPatternMissingIndices: (message: string) => void,
+    onErrorFechingFields: (id: string, title: string) => void
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -110,10 +119,15 @@ export class IndexPattern implements IIndexPattern {
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
+    this.fieldFormats = fieldFormats;
+    this.onUnknownFieldType = onUnknownFieldType;
+    this.onIndexPatternWriteCollision = onIndexPatternWriteCollision;
+    this.onIndexPatternMissingIndices = onIndexPatternMissingIndices;
+    this.onErrorFechingFields = onErrorFechingFields;
 
     this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats: getFieldFormats(),
-      toastNotifications: getNotifications().toasts,
+      fieldFormatsGetDefaultInstance: fieldFormats.getDefaultInstance,
+      onUnknownFieldType,
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
@@ -121,7 +135,7 @@ export class IndexPattern implements IIndexPattern {
     this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
       this,
-      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      this.fieldFormatsGetDefaultInstance(KBN_FIELD_TYPES.STRING)
     );
     this.formatField = this.formatHit.formatField;
   }
@@ -133,7 +147,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = getFieldFormats().getType(mapping.id);
+    const FieldFormat = this.fieldFormats.getType(mapping.id);
 
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
@@ -289,8 +303,8 @@ export class IndexPattern implements IIndexPattern {
         },
         false,
         {
-          fieldFormats: getFieldFormats(),
-          toastNotifications: getNotifications().toasts,
+          fieldFormatsGetDefaultInstance: this.fieldFormatsGetDefaultInstance,
+          onUnknownFieldType: this.onUnknownFieldType,
         }
       )
     );
@@ -393,7 +407,12 @@ export class IndexPattern implements IIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.fieldFormatsGetDefaultInstance,
+          this.onUnknownFieldType,
+          this.onIndexPatternWriteCollision,
+          this.onIndexPatternMissingIndices,
+          this.onErrorFechingFields
         );
         await duplicatePattern.destroy();
       }
@@ -442,7 +461,12 @@ export class IndexPattern implements IIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.fieldFormatsGetDefaultInstance,
+            this.onUnknownFieldType,
+            this.onIndexPatternWriteCollision,
+            this.onIndexPatternMissingIndices,
+            this.onErrorFechingFields
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -467,6 +491,7 @@ export class IndexPattern implements IIndexPattern {
             }
 
             if (unresolvedCollision) {
+              /*
               const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
                 defaultMessage:
                   'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -474,6 +499,8 @@ export class IndexPattern implements IIndexPattern {
               const { toasts } = getNotifications();
 
               toasts.addDanger(message);
+              */
+              this.onIndexPatternWriteCollision();
 
               throw err;
             }
@@ -512,14 +539,15 @@ export class IndexPattern implements IIndexPattern {
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
-        const { toasts } = getNotifications();
+        // const { toasts } = getNotifications();
 
         if (err instanceof IndexPatternMissingIndices) {
-          toasts.addDanger((err as any).message);
+          this.onIndexPatternMissingIndices((err as any).message);
 
           return [];
         }
-
+        this.onErrorFechingFields(this.id || 'undefined', this.title);
+        /*
         toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
@@ -529,6 +557,7 @@ export class IndexPattern implements IIndexPattern {
             },
           }),
         });
+        */
       });
   }
 

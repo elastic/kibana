@@ -24,6 +24,7 @@ import {
   Plugin,
   PackageInfo,
 } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
@@ -73,6 +74,8 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
+
+import { OnUnknownFieldType } from '../common/index_patterns';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -160,7 +163,38 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http, fieldFormats);
+    // todo move
+    const onUnknownFieldType: OnUnknownFieldType = ({ type, name, indexPatternTitle }) => {
+      const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+        values: { type },
+        defaultMessage: 'Unknown field type {type}',
+      });
+      const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
+        values: { name, title: indexPatternTitle },
+        defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
+      });
+
+      notifications.toasts.addDanger({
+        title,
+        text,
+      });
+    };
+
+    const indexPatterns = new IndexPatternsService(
+      core,
+      savedObjects.client,
+      http,
+      fieldFormats, // FieldFormatStart vs FieldFormatRegistry
+      onUnknownFieldType,
+      /*
+      onIndexPatternWriteCollision: () => {},
+      onIndexPatternMissingIndices: (message: string) => {},
+      onErrorFechingFields: (id: string, title: string) => {}
+*/
+      () => {},
+      (message: string) => {},
+      (id: string, title: string) => {}
+    );
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);

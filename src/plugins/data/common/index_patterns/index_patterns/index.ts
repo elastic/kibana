@@ -17,7 +17,9 @@
  * under the License.
  */
 
+export * from './flatten_hit';
+export * from './format_hit';
+export * from './index_pattern';
+export * from './index_patterns';
+export * from './index_patterns_api_client';
 export * from './types';
-export { isFilterable, isNestedField } from './utils';
-export * from './field_list';
-export * from './field';

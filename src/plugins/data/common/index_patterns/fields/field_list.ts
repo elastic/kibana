@@ -18,17 +18,17 @@
  */
 
 import { findIndex } from 'lodash';
-import { ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../index_patterns';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsRegistry } from '../../field_formats';
+import { OnUnknownFieldType } from '../types';
 
 type FieldMap = Map<Field['name'], Field>;
 
 interface FieldListDependencies {
-  fieldFormats: FieldFormatsStart;
-  toastNotifications: ToastsStart;
+  fieldFormatsGetDefaultInstance: FieldFormatsRegistry['getDefaultInstance'];
+  onUnknownFieldType: OnUnknownFieldType;
 }
 
 export interface IIndexPatternFieldList extends Array<Field> {
@@ -46,8 +46,8 @@ export type CreateIndexPatternFieldList = (
 ) => IIndexPatternFieldList;
 
 export const getIndexPatternFieldListCreator = ({
-  fieldFormats,
-  toastNotifications,
+  fieldFormatsGetDefaultInstance,
+  onUnknownFieldType,
 }: FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
   class FieldList extends Array<Field> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
@@ -75,8 +75,8 @@ export const getIndexPatternFieldListCreator = ({
     getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
     add = (field: FieldSpec) => {
       const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
-        fieldFormats,
-        toastNotifications,
+        fieldFormatsGetDefaultInstance,
+        onUnknownFieldType,
       });
       this.push(newField);
       this.setByName(newField);
@@ -93,8 +93,8 @@ export const getIndexPatternFieldListCreator = ({
 
     update = (field: FieldSpec) => {
       const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
-        fieldFormats,
-        toastNotifications,
+        fieldFormatsGetDefaultInstance,
+        onUnknownFieldType,
       });
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);

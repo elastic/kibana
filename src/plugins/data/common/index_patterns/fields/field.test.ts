@@ -19,9 +19,8 @@
 
 import { Field } from './field';
 import { IndexPattern } from '..';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { FieldFormatsStart } from '../../field_formats';
 import { KBN_FIELD_TYPES } from '../../../common';
+import { FieldFormatsRegistry } from '../..';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -34,8 +33,8 @@ describe('Field', function () {
       { ...fieldValues, ...values },
       false,
       {
-        fieldFormats: {} as FieldFormatsStart,
-        toastNotifications: notificationServiceMock.createStartContract().toasts,
+        fieldFormatsGetDefaultInstance: ((() => ({})) as unknown) as FieldFormatsRegistry['getDefaultInstance'],
+        onUnknownFieldType: () => {},
       }
     );
   }
@@ -215,8 +214,8 @@ describe('Field', function () {
 
   it('exports the property to JSON', () => {
     const field = new Field({ fieldFormatMap: { name: {} } } as IndexPattern, fieldValues, false, {
-      fieldFormats: {} as FieldFormatsStart,
-      toastNotifications: notificationServiceMock.createStartContract().toasts,
+      fieldFormatsGetDefaultInstance: ((() => ({})) as unknown) as FieldFormatsRegistry['getDefaultInstance'],
+      onUnknownFieldType: () => {},
     });
     expect(flatten(field)).toMatchSnapshot();
   });

@@ -28,12 +28,8 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 // @ts-ignore
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
-import { setNotifications, setFieldFormats } from '../../services';
 
-// Temporary disable eslint, will be removed after moving to new platform folder
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatMethods } from './types';
 
 jest.mock('../../../../kibana_utils/public', () => {
   const originalModule = jest.requireActual('../../../../kibana_utils/public');
@@ -104,7 +100,13 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     (cfg: any) => config.get(cfg),
     savedObjectsClient as any,
     apiClient,
-    patternCache
+    patternCache,
+    ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatMethods,
+    // ((() => ({})) as unknown) as FieldFormatsRegistry['getDefaultInstance'],
+    () => {},
+    () => {},
+    () => {},
+    () => {}
   );
 
   setDocsourcePayload(id, payload);
@@ -118,18 +120,11 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 
 describe('IndexPattern', () => {
   const indexPatternId = 'test-pattern';
-  const notifications = notificationServiceMock.createStartContract();
 
   let indexPattern: IndexPattern;
 
   // create an indexPattern instance for each test
   beforeEach(() => {
-    setNotifications(notifications);
-    setFieldFormats(({
-      getDefaultInstance: jest.fn(),
-      deserialize: jest.fn() as any,
-    } as unknown) as FieldFormatsStart);
-
     return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;
     });
@@ -374,7 +369,12 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatMethods,
+      () => {},
+      () => {},
+      () => {},
+      () => {}
     );
     await pattern.init();
 
@@ -386,7 +386,12 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatMethods,
+      () => {},
+      () => {},
+      () => {},
+      () => {}
     );
     await samePattern.init();
 

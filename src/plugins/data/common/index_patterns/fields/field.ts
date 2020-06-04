@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
@@ -29,13 +27,14 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsRegistry } from '../../field_formats';
+import { OnUnknownFieldType } from '../types';
 
 export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
-  fieldFormats: FieldFormatsStart;
-  toastNotifications: ToastsStart;
+  fieldFormatsGetDefaultInstance: FieldFormatsRegistry['getDefaultInstance'];
+  onUnknownFieldType: OnUnknownFieldType;
 }
 
 export class Field implements IFieldType {
@@ -65,7 +64,7 @@ export class Field implements IFieldType {
     indexPattern: IndexPattern,
     spec: FieldSpec | Field,
     shortDotsEnable: boolean,
-    { fieldFormats, toastNotifications }: FieldDependencies
+    { fieldFormatsGetDefaultInstance, onUnknownFieldType }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -82,18 +81,10 @@ export class Field implements IFieldType {
     // find the type for this field, fallback to unknown type
     let type = getKbnFieldType(spec.type);
     if (spec.type && !type) {
-      const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
-        values: { type: spec.type },
-        defaultMessage: 'Unknown field type {type}',
-      });
-      const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
-        values: { name: spec.name, title: indexPattern.title },
-        defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
-      });
-
-      toastNotifications.addDanger({
-        title,
-        text,
+      onUnknownFieldType({
+        type: spec.type,
+        name: spec.name,
+        indexPatternTitle: indexPattern.title,
       });
     }
 
@@ -104,7 +95,7 @@ export class Field implements IFieldType {
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       format =
         indexPattern.fieldFormatMap[spec.name] ||
-        fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
+        fieldFormatsGetDefaultInstance(spec.type, spec.esTypes);
     }
 
     const indexed = !!spec.indexed;

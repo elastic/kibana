@@ -16,6 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FieldFormatsRegistry } from '../../../common';
 
-export * from './field_list';
-export * from './field';
+export type AggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
+
+export interface TypeMeta {
+  aggs?: Record<string, AggregationRestrictions>;
+  [key: string]: any;
+}
+
+export type OnUnknownFieldType = (unknownType: {
+  type: string;
+  name: string;
+  indexPatternTitle: string;
+}) => void;
+
+export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;

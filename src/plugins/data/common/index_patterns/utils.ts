@@ -17,19 +17,34 @@
  * under the License.
  */
 
-export type AggregationRestrictions = Record<
-  string,
-  {
-    agg?: string;
-    interval?: number;
-    fixed_interval?: string;
-    calendar_interval?: string;
-    delay?: string;
-    time_zone?: string;
-  }
->;
+import { find } from 'lodash';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
-export interface TypeMeta {
-  aggs?: Record<string, AggregationRestrictions>;
-  [key: string]: any;
+/**
+ * Returns an object matching a given title
+ *
+ * @param client {SavedObjectsClientContract}
+ * @param title {string}
+ * @returns {Promise<SimpleSavedObject|undefined>}
+ */
+export async function findByTitle(
+  client: SavedObjectsClientContract,
+  title: string
+): Promise<SimpleSavedObject<any> | void> {
+  if (!title) {
+    return Promise.resolve();
+  }
+
+  const { savedObjects } = await client.find({
+    type: 'index-pattern',
+    perPage: 10,
+    search: `"${title}"`,
+    searchFields: ['title'],
+    fields: ['title'],
+  });
+
+  return find(
+    savedObjects,
+    (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
+  );
 }

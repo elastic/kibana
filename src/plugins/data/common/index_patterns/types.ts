@@ -47,3 +47,9 @@ export interface IndexPatternAttributes {
   typeMeta: string;
   timeFieldName?: string;
 }
+
+export type OnUnknownFieldType = (unknownType: {
+  type: string;
+  name: string;
+  indexPatternTitle: string;
+}) => void;

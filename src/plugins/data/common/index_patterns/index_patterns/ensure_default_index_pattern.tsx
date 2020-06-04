@@ -18,19 +18,20 @@
  */
 
 import { contains } from 'lodash';
-import React from 'react';
-import { History } from 'history';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+// import React from 'react';
+// import { History } from 'history';
+// import { i18n } from '@kbn/i18n';
+// import { EuiCallOut } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
-import { toMountPoint } from '../../../../kibana_react/public';
+// import { toMountPoint } from '../../../../kibana_react/public';
 import { IndexPatternsContract } from './index_patterns';
 
-export type EnsureDefaultIndexPattern = (history: History) => Promise<unknown> | undefined;
+// export type EnsureDefaultIndexPattern = (history: History) => Promise<unknown> | undefined;
+export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 
 export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
-  let bannerId: string;
-  let timeoutId: NodeJS.Timeout | undefined;
+  // let bannerId: string;
+  // let timeoutId: NodeJS.Timeout | undefined;
 
   /**
    * Checks whether a default index pattern is set and exists and defines
@@ -40,7 +41,8 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
    * banner. In this case the promise returned from this function will never
    * resolve to wait for the URL change to happen.
    */
-  return async function ensureDefaultIndexPattern(this: IndexPatternsContract, history: History) {
+  // return async function ensureDefaultIndexPattern(this: IndexPatternsContract, history: History) {
+  return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
     const patterns = await this.getIds();
     let defaultId = core.uiSettings.get('defaultIndex');
     let defined = !!defaultId;
@@ -60,12 +62,14 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
       defaultId = patterns[0];
       core.uiSettings.set('defaultIndex', defaultId);
     } else {
-      const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
-      const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
+      /*
+      // const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
+      // const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
 
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
+
 
       const bannerMessage = i18n.translate(
         'data.indexPatterns.ensureDefaultIndexPattern.bannerLabel',
@@ -95,7 +99,7 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
           `/app/kibana#/management/kibana/indexPatterns?bannerMessage=${bannerMessage}`
         );
       }
-
+*/
       // return never-resolving promise to stop resolving and wait for the url change
       return new Promise(() => {});
     }
