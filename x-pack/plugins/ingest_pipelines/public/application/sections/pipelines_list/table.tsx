@@ -13,9 +13,10 @@ import {
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
-import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
+import { useKibana } from '../../../shared_imports';
 
 export interface Props {
   pipelines: Pipeline[];
@@ -32,6 +33,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
+  const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
@@ -80,14 +82,14 @@ export const PipelineTable: FunctionComponent<Props> = ({
           })}
         </EuiButton>,
         <EuiButton
-          href={`#${BASE_PATH}/create`}
           fill
           iconType="plusInCircle"
           data-test-subj="createPipelineButton"
           key="createPipelineButton"
+          {...reactRouterNavigate(history, '/create')}
         >
           {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-            defaultMessage: 'Create a pipeline',
+            defaultMessage: 'Create a pipeline here',
           })}
         </EuiButton>,
       ],
@@ -107,7 +109,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }),
         sortable: true,
         render: (name: string) => (
-          <EuiLink href={`#${BASE_PATH}?pipeline=${name}`} data-test-subj="pipelineDetailsLink">
+          <EuiLink
+            data-test-subj="pipelineDetailsLink"
+            {...reactRouterNavigate(history, { pathname: '/', search: `pipeline=${name}` })}
+          >
             {name}
           </EuiLink>
         ),
