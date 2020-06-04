@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
-
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import {
+  CreateRulesBulkSchemaDecoded,
+  createRulesBulkSchema,
+} from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -13,29 +16,27 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
-import { RuleAlertParamsRest } from '../../types';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
-import {
-  transformBulkError,
-  createBulkErrorObject,
-  buildRouteValidation,
-  buildSiemResponse,
-} from '../utils';
-import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+
+import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { PartialFilter } from '../../types';
 
 export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
       validate: {
-        body: buildRouteValidation<RuleAlertParamsRest[]>(createRulesBulkSchema),
+        body: buildRouteValidation<typeof createRulesBulkSchema, CreateRulesBulkSchemaDecoded>(
+          createRulesBulkSchema
+        ),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
@@ -59,19 +60,19 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
           .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async (payloadRule) => {
             const {
-              actions,
+              actions: actionsRest,
               anomaly_threshold: anomalyThreshold,
               description,
               enabled,
               false_positives: falsePositives,
               from,
-              query,
-              language,
+              query: queryOrUndefined,
+              language: languageOrUndefined,
               machine_learning_job_id: machineLearningJobId,
               output_index: outputIndex,
               saved_id: savedId,
               meta,
-              filters,
+              filters: filtersRest,
               rule_id: ruleId,
               index,
               interval,
@@ -91,15 +92,25 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               version,
               exceptions_list,
             } = payloadRule;
-            const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
+              const query =
+                type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+
+              const language =
+                type !== 'machine_learning' && languageOrUndefined == null
+                  ? 'kuery'
+                  : languageOrUndefined;
+
+              // TODO: Fix these either with an is conversion or by better typing them within io-ts
+              const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
+              const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
               throwHttpError(await mlAuthz.validateRuleType(type));
 
               const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
-                  ruleId: ruleIdOrUuid,
+                  ruleId,
                   statusCode: 400,
                   message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
                 });
@@ -131,7 +142,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 timelineTitle,
                 meta,
                 filters,
-                ruleId: ruleIdOrUuid,
+                ruleId,
                 index,
                 interval,
                 maxSignals,
@@ -159,9 +170,9 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 name,
               });
 
-              return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
+              return transformValidateBulkError(ruleId, createdRule, ruleActions);
             } catch (err) {
-              return transformBulkError(ruleIdOrUuid, err);
+              return transformBulkError(ruleId, err);
             }
           })
       );
