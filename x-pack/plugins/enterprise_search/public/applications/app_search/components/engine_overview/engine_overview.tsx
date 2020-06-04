@@ -30,7 +30,7 @@ import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
 
-export const EngineOverview: ReactFC<> = () => {
+export const EngineOverview: React.FC = () => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
   const { license } = useContext(LicenseContext) as ILicenseContext;
 
@@ -45,12 +45,12 @@ export const EngineOverview: ReactFC<> = () => {
   const [metaEnginesPage, setMetaEnginesPage] = useState(1);
   const [metaEnginesTotal, setMetaEnginesTotal] = useState(0);
 
-  const getEnginesData = async ({ type, pageIndex }) => {
+  const getEnginesData = async ({ type, pageIndex }: IGetEnginesParams) => {
     return await http.get('/api/app_search/engines', {
       query: { type, pageIndex },
     });
   };
-  const setEnginesData = async (params, callbacks) => {
+  const setEnginesData = async (params: IGetEnginesParams, callbacks: ISetEnginesCallbacks) => {
     try {
       const response = await getEnginesData(params);
 
@@ -72,7 +72,7 @@ export const EngineOverview: ReactFC<> = () => {
     const callbacks = { setResults: setEngines, setResultsTotal: setEnginesTotal };
 
     setEnginesData(params, callbacks);
-  }, [enginesPage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enginesPage]);
 
   useEffect(() => {
     if (hasPlatinumLicense(license)) {
@@ -81,7 +81,7 @@ export const EngineOverview: ReactFC<> = () => {
 
       setEnginesData(params, callbacks);
     }
-  }, [license, metaEnginesPage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [license, metaEnginesPage]);
 
   if (hasErrorConnecting) return <ErrorState />;
   if (hasNoAccount) return <NoUserState />;
@@ -150,3 +150,16 @@ export const EngineOverview: ReactFC<> = () => {
     </EuiPage>
   );
 };
+
+/**
+ * Type definitions
+ */
+
+interface IGetEnginesParams {
+  type: string;
+  pageIndex: number;
+}
+interface ISetEnginesCallbacks {
+  setResults: React.Dispatch<React.SetStateAction<never[]>>;
+  setResultsTotal: React.Dispatch<React.SetStateAction<number>>;
+}

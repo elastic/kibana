@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiImage,
   EuiIcon,
   EuiSteps,
   EuiCode,
@@ -32,7 +31,7 @@ import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemet
 import GettingStarted from '../../assets/getting_started.png';
 import './setup_guide.scss';
 
-export const SetupGuide: React.FC<> = () => {
+export const SetupGuide: React.FC = () => {
   return (
     <EuiPage className="setup-guide">
       <SetBreadcrumbs text="Setup Guide" />

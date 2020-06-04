@@ -8,7 +8,7 @@ import '../../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { render } from 'enzyme';
+import { render, ReactWrapper } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContext } from '../../../';
@@ -16,7 +16,7 @@ import { LicenseContext } from '../../../shared/licensing';
 import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
 
 import { EmptyState, ErrorState, NoUserState } from '../empty_states';
-import { EngineTable } from './engine_table';
+import { EngineTable, IEngineTablePagination } from './engine_table';
 
 import { EngineOverview } from './';
 
@@ -25,7 +25,7 @@ describe('EngineOverview', () => {
     it('isLoading', () => {
       // We use render() instead of mount() here to not trigger lifecycle methods (i.e., useEffect)
       // TODO: Consider pulling this out to a renderWithContext mock/helper
-      const wrapper = render(
+      const wrapper: Cheerio = render(
         <I18nProvider>
           <KibanaContext.Provider value={{ http: {} }}>
             <LicenseContext.Provider value={{ license: {} }}>
@@ -85,7 +85,7 @@ describe('EngineOverview', () => {
       },
     };
     const mockApi = jest.fn(() => mockedApiResponse);
-    let wrapper;
+    let wrapper: ReactWrapper;
 
     beforeAll(async () => {
       wrapper = await mountWithApiMock({ get: mockApi });
@@ -105,7 +105,8 @@ describe('EngineOverview', () => {
     });
 
     describe('pagination', () => {
-      const getTablePagination = () => wrapper.find(EngineTable).first().prop('pagination');
+      const getTablePagination: () => IEngineTablePagination = () =>
+        wrapper.find(EngineTable).first().prop('pagination');
 
       it('passes down page data from the API', () => {
         const pagination = getTablePagination();
@@ -156,8 +157,8 @@ describe('EngineOverview', () => {
    * Test helpers
    */
 
-  const mountWithApiMock = async ({ get, license }) => {
-    let wrapper;
+  const mountWithApiMock = async ({ get, license }: { get(): any; license?: object }) => {
+    let wrapper: ReactWrapper | undefined;
     const httpMock = { ...mockKibanaContext.http, get };
 
     // We get a lot of act() warning/errors in the terminal without this.
@@ -166,8 +167,12 @@ describe('EngineOverview', () => {
     await act(async () => {
       wrapper = mountWithContext(<EngineOverview />, { http: httpMock, license });
     });
-    wrapper.update(); // This seems to be required for the DOM to actually update
+    if (wrapper) {
+      wrapper.update(); // This seems to be required for the DOM to actually update
 
-    return wrapper;
+      return wrapper;
+    } else {
+      throw new Error('Could not mount wrapper');
+    }
   };
 });

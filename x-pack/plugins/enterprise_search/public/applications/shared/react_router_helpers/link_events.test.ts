@@ -17,7 +17,7 @@ describe('letBrowserHandleEvent', () => {
     target: {
       getAttribute: () => '_self',
     },
-  };
+  } as any;
 
   describe('the browser should handle the link when', () => {
     it('default is prevented', () => {
@@ -95,7 +95,7 @@ describe('letBrowserHandleEvent', () => {
   });
 });
 
-const targetValue = (value) => {
+const targetValue = (value: string | null) => {
   return {
     getAttribute: () => value,
   };

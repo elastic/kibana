@@ -18,7 +18,7 @@ import { AppSearch } from './';
 describe('App Search Routes', () => {
   describe('/', () => {
     it('redirects to Setup Guide when enterpriseSearchUrl is not set', () => {
-      useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
+      (useContext as jest.Mock).mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
       const wrapper = shallow(<AppSearch />);
 
       expect(wrapper.find(Redirect)).toHaveLength(1);
@@ -26,7 +26,9 @@ describe('App Search Routes', () => {
     });
 
     it('renders Engine Overview when enterpriseSearchUrl is set', () => {
-      useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: 'https://foo.bar' }));
+      (useContext as jest.Mock).mockImplementationOnce(() => ({
+        enterpriseSearchUrl: 'https://foo.bar',
+      }));
       const wrapper = shallow(<AppSearch />);
 
       expect(wrapper.find(EngineOverview)).toHaveLength(1);

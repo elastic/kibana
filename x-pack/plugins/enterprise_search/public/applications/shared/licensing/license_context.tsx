@@ -9,15 +9,15 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { KibanaContext, IKibanaContext } from '../../';
 
-import { ILicense } from '../../../../licensing/public';
+import { ILicense } from '../../../../../licensing/public';
 
 export interface ILicenseContext {
-  license?: ILicense;
+  license: ILicense;
 }
 
-export const LicenseContext = React.createContext();
+export const LicenseContext = React.createContext({});
 
-export const LicenseProvider: React.FC<> = ({ children }) => {
+export const LicenseProvider: React.FC = ({ children }) => {
   // Listen for changes to license subscription
   const { license$ } = useContext(KibanaContext) as IKibanaContext;
   const license = useObservable(license$);

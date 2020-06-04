@@ -27,7 +27,7 @@ export interface ITelemetrySavedObject {
 export const appSearchTelemetryType: SavedObjectsType = {
   name: AS_TELEMETRY_NAME,
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'single',
   mappings: {
     properties: {
       ui_viewed: {

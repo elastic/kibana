@@ -21,7 +21,7 @@ interface IGenerateBreadcrumbProps {
 }
 
 export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbProps) => {
-  const breadcrumb = { text };
+  const breadcrumb = { text } as EuiBreadcrumb;
 
   if (path && history) {
     breadcrumb.href = history.createHref({ pathname: path });
@@ -39,13 +39,15 @@ export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbP
  * Product-specific breadcrumb helpers
  */
 
-type TBreadcrumbs = EuiBreadcrumb[] | [];
+export type TBreadcrumbs = IGenerateBreadcrumbProps[];
 
 export const enterpriseSearchBreadcrumbs = (history: History) => (
   breadcrumbs: TBreadcrumbs = []
 ) => [
   generateBreadcrumb({ text: 'Enterprise Search' }),
-  ...breadcrumbs.map(({ text, path }) => generateBreadcrumb({ text, path, history })),
+  ...breadcrumbs.map(({ text, path }: IGenerateBreadcrumbProps) =>
+    generateBreadcrumb({ text, path, history })
+  ),
 ];
 
 export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>

@@ -6,9 +6,14 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { IRouteDependencies } from '../../plugin';
 import { incrementUICounter } from '../../collectors/app_search/telemetry';
 
-export function registerTelemetryRoute({ router, getSavedObjectsService, log }) {
+export function registerTelemetryRoute({
+  router,
+  getSavedObjectsService,
+  log,
+}: IRouteDependencies) {
   router.put(
     {
       path: '/api/app_search/telemetry',
@@ -27,6 +32,8 @@ export function registerTelemetryRoute({ router, getSavedObjectsService, log }) 
       const { action, metric } = request.body;
 
       try {
+        if (!getSavedObjectsService) throw new Error('Could not find Saved Objects service');
+
         return response.ok({
           body: await incrementUICounter({
             savedObjects: getSavedObjectsService(),

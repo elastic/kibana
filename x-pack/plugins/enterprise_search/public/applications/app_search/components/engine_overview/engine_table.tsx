@@ -5,7 +5,7 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiBasicTable, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,31 +14,33 @@ import { KibanaContext, IKibanaContext } from '../../../index';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 
-interface IEngineTableProps {
-  data: Array<{
-    name: string;
-    created_at: string;
-    document_count: number;
-    field_count: number;
-  }>;
-  pagination: {
-    totalEngines: number;
-    pageIndex: number;
-    onPaginate(pageIndex: number);
-  };
+export interface IEngineTableData {
+  name: string;
+  created_at: string;
+  document_count: number;
+  field_count: number;
 }
-interface IOnChange {
+export interface IEngineTablePagination {
+  totalEngines: number;
+  pageIndex: number;
+  onPaginate(pageIndex: number): void;
+}
+export interface IEngineTableProps {
+  data: IEngineTableData[];
+  pagination: IEngineTablePagination;
+}
+export interface IOnChange {
   page: {
     index: number;
   };
 }
 
-export const EngineTable: ReactFC<IEngineTableProps> = ({
+export const EngineTable: React.FC<IEngineTableProps> = ({
   data,
-  pagination: { totalEngines, pageIndex = 0, onPaginate },
+  pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
   const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
-  const engineLinkProps = (name) => ({
+  const engineLinkProps = (name: string) => ({
     href: `${enterpriseSearchUrl}/as/engines/${name}`,
     target: '_blank',
     onClick: () =>
@@ -50,13 +52,13 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       }),
   });
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<IEngineTableData>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
         defaultMessage: 'Name',
       }),
-      render: (name) => (
+      render: (name: string) => (
         <EuiLink data-test-subj="engineNameLink" {...engineLinkProps(name)}>
           {name}
         </EuiLink>
@@ -65,6 +67,8 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       truncateText: true,
       mobileOptions: {
         header: true,
+        // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
+        // @ts-ignore
         enlarge: true,
         fullWidth: true,
         truncateText: false,
@@ -79,7 +83,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (dateString) => (
+      render: (dateString: string) => (
         // e.g., January 1, 1970
         <FormattedDate value={new Date(dateString)} year="numeric" month="long" day="numeric" />
       ),
@@ -93,7 +97,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'number',
-      render: (number) => <FormattedNumber value={number} />,
+      render: (number: number) => <FormattedNumber value={number} />,
       truncateText: true,
     },
     {
@@ -105,7 +109,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'number',
-      render: (number) => <FormattedNumber value={number} />,
+      render: (number: number) => <FormattedNumber value={number} />,
       truncateText: true,
     },
     {
@@ -117,7 +121,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (name) => (
+      render: (name: string) => (
         <EuiLink {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
@@ -140,7 +144,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         totalItemCount: totalEngines,
         hidePerPageOptions: true,
       }}
-      onChange={({ page }): IOnChange => {
+      onChange={({ page }: IOnChange) => {
         const { index } = page;
         onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
       }}

@@ -33,18 +33,19 @@ describe('Shared Telemetry Helpers', () => {
     });
 
     it('throws an error if the telemetry endpoint fails', () => {
-      const httpRejectMock = { put: () => Promise.reject() };
+      const httpRejectMock = sendTelemetry({
+        http: { put: () => Promise.reject() },
+      } as any);
 
-      expect(sendTelemetry({ http: httpRejectMock })).rejects.toThrow('Unable to send telemetry');
+      expect(httpRejectMock).rejects.toThrow('Unable to send telemetry');
     });
   });
 
   describe('React component helpers', () => {
     it('SendAppSearchTelemetry component', () => {
-      const wrapper = mountWithKibanaContext(
-        <SendAppSearchTelemetry action="clicked" metric="button" />,
-        { http: httpMock }
-      );
+      mountWithKibanaContext(<SendAppSearchTelemetry action="clicked" metric="button" />, {
+        http: httpMock,
+      });
 
       expect(httpMock.put).toHaveBeenCalledWith('/api/app_search/telemetry', {
         headers: { 'content-type': 'application/json; charset=utf-8' },

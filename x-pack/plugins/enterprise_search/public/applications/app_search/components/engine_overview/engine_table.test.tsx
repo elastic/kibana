@@ -72,9 +72,9 @@ describe('EngineTable', () => {
 
   it('handles empty data', () => {
     const emptyWrapper = mountWithContext(
-      <EngineTable data={[]} pagination={{ totalEngines: 0 }} />
+      <EngineTable data={[]} pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }} />
     );
-    const emptyTable = wrapper.find(EuiBasicTable);
+    const emptyTable = emptyWrapper.find(EuiBasicTable);
     expect(emptyTable.prop('pagination').pageIndex).toEqual(0);
   });
 });

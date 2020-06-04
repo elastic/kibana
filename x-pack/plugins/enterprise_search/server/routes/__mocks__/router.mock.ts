@@ -5,7 +5,12 @@
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { IRouter, RequestHandlerContext, RouteValidatorConfig } from 'src/core/server';
+import {
+  IRouter,
+  KibanaRequest,
+  RequestHandlerContext,
+  RouteValidatorConfig,
+} from 'src/core/server';
 
 /**
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)
@@ -14,13 +19,24 @@ import { IRouter, RequestHandlerContext, RouteValidatorConfig } from 'src/core/s
 type methodType = 'get' | 'post' | 'put' | 'patch' | 'delete';
 type payloadType = 'params' | 'query' | 'body';
 
+interface IMockRouterProps {
+  method: methodType;
+  payload: payloadType;
+}
+interface IMockRouterRequest {
+  body?: object;
+  query?: object;
+  params?: object;
+}
+type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
+
 export class MockRouter {
-  public router: jest.Mocked<IRouter>;
+  public router!: jest.Mocked<IRouter>;
   public method: methodType;
   public payload: payloadType;
   public response = httpServerMock.createResponseFactory();
 
-  private constructor({ method, payload }) {
+  constructor({ method, payload }: IMockRouterProps) {
     this.createRouter();
     this.method = method;
     this.payload = payload;
@@ -30,29 +46,32 @@ export class MockRouter {
     this.router = httpServiceMock.createRouter();
   };
 
-  public callRoute = async (request) => {
-    const [_, handler] = this.router[this.method].mock.calls[0];
+  public callRoute = async (request: TMockRouterRequest) => {
+    const [, handler] = this.router[this.method].mock.calls[0];
 
     const context = {} as jest.Mocked<RequestHandlerContext>;
-    await handler(context, httpServerMock.createKibanaRequest(request), this.response);
+    await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
 
   /**
    * Schema validation helpers
    */
 
-  public validateRoute = (request) => {
+  public validateRoute = (request: TMockRouterRequest) => {
     const [config] = this.router[this.method].mock.calls[0];
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
 
-    validate[this.payload].validate(request[this.payload]);
+    const payloadValidation = validate[this.payload] as { validate(request: KibanaRequest): void };
+    const payloadRequest = request[this.payload] as KibanaRequest;
+
+    payloadValidation.validate(payloadRequest);
   };
 
-  public shouldValidate = (request) => {
+  public shouldValidate = (request: TMockRouterRequest) => {
     expect(() => this.validateRoute(request)).not.toThrow();
   };
 
-  public shouldThrow = (request) => {
+  public shouldThrow = (request: TMockRouterRequest) => {
     expect(() => this.validateRoute(request)).toThrow();
   };
 }

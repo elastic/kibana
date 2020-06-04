@@ -22,7 +22,7 @@ import { mockLicenseContext } from './license_context.mock';
  *
  * const wrapper = mountWithContext(<Component />, { enterpriseSearchUrl: 'someOverride', license: {} });
  */
-export const mountWithContext = (children, context) => {
+export const mountWithContext = (children: React.ReactNode, context?: object) => {
   return mount(
     <I18nProvider>
       <KibanaContext.Provider value={{ ...mockKibanaContext, ...context }}>
@@ -40,7 +40,7 @@ export const mountWithContext = (children, context) => {
  *
  * Same usage/override functionality as mountWithContext
  */
-export const mountWithKibanaContext = (children, context) => {
+export const mountWithKibanaContext = (children: React.ReactNode, context?: object) => {
   return mount(
     <KibanaContext.Provider value={{ ...mockKibanaContext, ...context }}>
       {children}

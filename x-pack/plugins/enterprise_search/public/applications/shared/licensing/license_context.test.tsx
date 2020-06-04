@@ -10,9 +10,9 @@ import { mountWithContext } from '../../__mocks__';
 import { LicenseContext, ILicenseContext } from './';
 
 describe('LicenseProvider', () => {
-  const MockComponent: React.FC<> = () => {
+  const MockComponent: React.FC = () => {
     const { license } = useContext(LicenseContext) as ILicenseContext;
-    return <div className="license-test">{license.type}</div>;
+    return <div className="license-test">{license?.type}</div>;
   };
 
   it('renders children', () => {

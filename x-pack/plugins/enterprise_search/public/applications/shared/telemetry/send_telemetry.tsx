@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect } from 'react';
 
-import { HttpHandler } from 'src/core/public';
+import { HttpSetup } from 'src/core/public';
 import { KibanaContext, IKibanaContext } from '../../index';
 
 interface ISendTelemetryProps {
@@ -15,7 +15,7 @@ interface ISendTelemetryProps {
 }
 
 interface ISendTelemetry extends ISendTelemetryProps {
-  http(): HttpHandler;
+  http: HttpSetup;
   product: 'app_search' | 'workplace_search' | 'enterprise_search';
 }
 

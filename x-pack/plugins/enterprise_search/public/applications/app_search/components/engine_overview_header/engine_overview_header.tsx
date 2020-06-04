@@ -5,7 +5,14 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiButton } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+  EuiButton,
+  EuiButtonProps,
+  EuiLinkProps,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../shared/telemetry';
@@ -24,7 +31,8 @@ export const EngineOverviewHeader: React.FC<IEngineOverviewHeaderProps> = ({
     fill: true,
     iconType: 'popout',
     'data-test-subj': 'launchButton',
-  };
+  } as EuiButtonProps & EuiLinkProps;
+
   if (isButtonDisabled) {
     buttonProps.isDisabled = true;
   } else {

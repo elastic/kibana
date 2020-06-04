@@ -16,7 +16,7 @@ import { EngineOverviewHeader } from '../engine_overview_header';
 
 import './empty_states.scss';
 
-export const EmptyState: React.FC<> = () => {
+export const EmptyState: React.FC = () => {
   const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {

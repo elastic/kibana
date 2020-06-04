@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { MockRouter } from '../__mocks__/router.mock';
 
 import { registerEnginesRoute } from './engines';
@@ -28,7 +28,7 @@ describe('engine routes', () => {
     };
 
     const mockRouter = new MockRouter({ method: 'get', payload: 'query' });
-    const mockLogger = loggingServiceMock.create().get();
+    const mockLogger = loggingSystemMock.create().get();
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -172,7 +172,7 @@ describe('engine routes', () => {
               return Promise.resolve(new Response(JSON.stringify(response)));
             });
           },
-          andReturnInvalidData(response: object) {
+          andReturnInvalidData() {
             fetchMock.mockImplementation((url: string, params: object) => {
               expect(url).toEqual(expectedUrl);
               expect(params).toEqual(expectedParams);
@@ -180,7 +180,7 @@ describe('engine routes', () => {
               return Promise.resolve(new Response(JSON.stringify({ foo: 'bar' })));
             });
           },
-          andReturnError(response: object) {
+          andReturnError() {
             fetchMock.mockImplementation((url: string, params: object) => {
               expect(url).toEqual(expectedUrl);
               expect(params).toEqual(expectedParams);

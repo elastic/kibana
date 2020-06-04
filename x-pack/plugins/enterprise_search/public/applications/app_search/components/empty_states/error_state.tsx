@@ -16,7 +16,7 @@ import { EngineOverviewHeader } from '../engine_overview_header';
 
 import './empty_states.scss';
 
-export const ErrorState: ReactFC<> = () => {
+export const ErrorState: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
 
   return (

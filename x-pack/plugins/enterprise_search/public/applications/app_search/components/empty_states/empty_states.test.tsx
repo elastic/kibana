@@ -39,7 +39,8 @@ describe('NoUserState', () => {
   });
 
   it('renders with username', () => {
-    getUserName.mockImplementationOnce(() => 'dolores-abernathy');
+    (getUserName as jest.Mock).mockImplementationOnce(() => 'dolores-abernathy');
+
     const wrapper = shallowWithIntl(<NoUserState />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
     const description1 = prompt.find(FormattedMessage).at(1).dive();
@@ -62,7 +63,7 @@ describe('EmptyState', () => {
 
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalled();
-    sendTelemetry.mockClear();
+    (sendTelemetry as jest.Mock).mockClear();
   });
 });
 
