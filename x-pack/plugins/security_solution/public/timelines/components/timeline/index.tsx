@@ -71,7 +71,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       ) {
         return [signalIndexName];
       }
-      return [];
+      return ['unknown-049FC71A-4C2C-446F-9901-3770C5024C51-index']; // Following index does not exist so we won't show any events;
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
