@@ -68,6 +68,7 @@ import {
   saveObjects,
 } from '../../../lib/resolve_saved_objects';
 import { ISavedObjectsManagementServiceRegistry } from '../../../services';
+import { FailedImportConflict, ConflictResolution } from '../../../lib/resolve_import_errors';
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -101,7 +102,7 @@ export interface FlyoutState {
 interface ConflictingRecord {
   id: string;
   type: string;
-  title: string;
+  title?: string;
   done: (success: boolean) => void;
 }
 
@@ -189,23 +190,27 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    *
    * Function iterates through the objects, displays a modal for each asking the user if they wish to overwrite it or not.
    *
-   * @param {array} objects List of objects to request the user if they wish to overwrite it
+   * @param {array} failures List of objects to request the user if they wish to overwrite it
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
-  getConflictResolutions = async (objects: any[]) => {
-    const resolutions: Record<string, boolean> = {};
-    for (const { type, id, title } of objects) {
-      const overwrite = await new Promise<boolean>((resolve) => {
-        this.setState({
-          conflictingRecord: {
-            id,
-            type,
-            title,
-            done: resolve,
-          },
-        });
+  getConflictResolutions = async (failures: FailedImportConflict[]) => {
+    const resolutions: Record<string, ConflictResolution> = {};
+    for (const {
+      obj: { type, id, title },
+      error: { destinationId },
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // TODO: other destination properties (title, updated_at, etc.)
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    } of failures) {
+      const overwrite = await new Promise<boolean>((done) => {
+        this.setState({ conflictingRecord: { id, type, title, done } });
       });
-      resolutions[`${type}:${id}`] = overwrite;
+      if (overwrite) {
+        resolutions[`${type}:${id}`] = {
+          retry: true,
+          options: { overwrite: true, ...(destinationId && { idToOverwrite: destinationId }) },
+        };
+      }
       this.setState({ conflictingRecord: undefined });
     }
     return resolutions;
@@ -944,11 +949,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             onCancel={this.overwriteSkipped.bind(this)}
             onConfirm={this.overwriteConfirmed.bind(this)}
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+            maxWidth="500px"
           >
             <p>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.confirmOverwriteBody"
-                defaultMessage="Are you sure you want to overwrite {title}?"
+                defaultMessage="'{title}' conflicts with an existing object, are you sure you want to overwrite it?"
                 values={{
                   title:
                     this.state.conflictingRecord.title ||

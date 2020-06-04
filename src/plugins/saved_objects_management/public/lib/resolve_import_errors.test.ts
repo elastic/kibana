@@ -107,8 +107,9 @@ Object {
       successCount: 1,
     });
     getConflictResolutions.mockReturnValueOnce({
-      'a:1': true,
-      'a:2': false,
+      'a:1': { retry: true, options: { overwrite: true } },
+      'a:2': { retry: true, options: { overwrite: true, idToOverwrite: 'x' } },
+      'a:3': { retry: false },
     });
     const result = await resolveImportErrors({
       http: httpMock,
@@ -116,24 +117,9 @@ Object {
       state: {
         importCount: 0,
         failedImports: [
-          {
-            obj: {
-              type: 'a',
-              id: '1',
-            },
-            error: {
-              type: 'conflict',
-            },
-          },
-          {
-            obj: {
-              type: 'a',
-              id: '2',
-            },
-            error: {
-              type: 'conflict',
-            },
-          },
+          { obj: { type: 'a', id: '1' }, error: { type: 'conflict' } },
+          { obj: { type: 'a', id: '2' }, error: { type: 'conflict', destinationId: 'x' } },
+          { obj: { type: 'a', id: '3' }, error: { type: 'conflict' } },
         ],
       },
     });
@@ -152,6 +138,13 @@ Object {
   "retries": Array [
     Object {
       "id": "1",
+      "overwrite": true,
+      "replaceReferences": Array [],
+      "type": "a",
+    },
+    Object {
+      "id": "2",
+      "idToOverwrite": "x",
       "overwrite": true,
       "replaceReferences": Array [],
       "type": "a",
@@ -180,24 +173,11 @@ Object {
         ],
         failedImports: [
           {
-            obj: {
-              type: 'a',
-              id: '1',
-            },
+            obj: { type: 'a', id: '1' },
             error: {
               type: 'missing_references',
-              references: [
-                {
-                  type: 'index-pattern',
-                  id: '2',
-                },
-              ],
-              blocking: [
-                {
-                  type: 'a',
-                  id: '2',
-                },
-              ],
+              references: [{ type: 'index-pattern', id: '2' }],
+              blocking: [{ type: 'a', id: '2' }],
             },
           },
         ],
@@ -217,7 +197,6 @@ Object {
   "retries": Array [
     Object {
       "id": "1",
-      "overwrite": false,
       "replaceReferences": Array [
         Object {
           "from": "2",
@@ -287,15 +266,7 @@ Object {
     httpMock.post.mockResolvedValueOnce({
       success: false,
       successCount: 0,
-      errors: [
-        {
-          type: 'a',
-          id: '1',
-          error: {
-            type: 'conflict',
-          },
-        },
-      ],
+      errors: [{ type: 'a', id: '1', error: { type: 'conflict' } }],
     });
     httpMock.post.mockResolvedValueOnce({
       success: true,
@@ -303,33 +274,20 @@ Object {
     });
     getConflictResolutions.mockResolvedValueOnce({});
     getConflictResolutions.mockResolvedValueOnce({
-      'a:1': true,
+      'a:1': { retry: true, options: { overwrite: true } },
     });
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
-        unmatchedReferences: [
-          {
-            existingIndexPatternId: '2',
-            newIndexPatternId: '3',
-          },
-        ],
+        unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3' }],
         failedImports: [
           {
-            obj: {
-              type: 'a',
-              id: '1',
-            },
+            obj: { type: 'a', id: '1' },
             error: {
               type: 'missing_references',
-              references: [
-                {
-                  type: 'index-pattern',
-                  id: '2',
-                },
-              ],
+              references: [{ type: 'index-pattern', id: '2' }],
               blocking: [],
             },
           },
@@ -350,7 +308,6 @@ Object {
   "retries": Array [
     Object {
       "id": "1",
-      "overwrite": false,
       "replaceReferences": Array [
         Object {
           "from": "2",
