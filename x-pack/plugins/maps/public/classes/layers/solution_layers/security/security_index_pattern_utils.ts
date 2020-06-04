@@ -7,12 +7,15 @@
 
 import minimatch from 'minimatch';
 import { IndexPattern } from 'src/plugins/data/public';
+import { SimpleSavedObject } from 'src/core/public';
 import { getIndexPatternService, getUiSettings } from '../../../../kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IndexPatternSavedObjectAttrs } from '../../../../../../../../src/plugins/data/public/index_patterns/index_patterns/index_patterns';
 
 const SIEM_DEFAULT_INDEX = 'siem:defaultIndex';
 
 let indexPatterns: IndexPattern[];
-let indexPatternsPromise: Promse<IndexPattern[]>;
+let indexPatternsPromise: Promise<IndexPattern[]>;
 
 export async function getSecurityIndexPatterns(): Promise<IndexPattern[]> {
   if (indexPatterns) {
@@ -29,14 +32,14 @@ export async function getSecurityIndexPatterns(): Promise<IndexPattern[]> {
 async function loadSecurityIndexPatterns(): Promise<IndexPattern[]> {
   const securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
   const indexPatternCache = await getIndexPatternService().getCache();
-  const promises = indexPatternCache
-    .filter((savedObject) => {
+  const promises = indexPatternCache!
+    .filter((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
       return securityIndexPatternTitles.some((indexPatternTitle) => {
         // glob matching index pattern title
         return minimatch(indexPatternTitle, savedObject?.attributes?.title);
       });
     })
-    .map(async (savedObject) => {
+    .map(async (savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
       return await getIndexPatternService().get(savedObject.id);
     });
 

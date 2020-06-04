@@ -6,14 +6,10 @@
 
 import minimatch from 'minimatch';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/plugins/data/public';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import {
-  AggDescriptor,
-  ColorDynamicOptions,
   LayerDescriptor,
   SizeDynamicOptions,
-  StylePropertyField,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import {
@@ -27,7 +23,9 @@ import {
 } from '../../../../../common/constants';
 import { VectorLayer } from '../../vector_layer/vector_layer';
 import { VectorStyle } from '../../../styles/vector/vector_style';
+// @ts-ignore
 import { ESSearchSource } from '../../../sources/es_search_source';
+// @ts-ignore
 import { ESPewPewSource } from '../../../sources/es_pew_pew_source';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 

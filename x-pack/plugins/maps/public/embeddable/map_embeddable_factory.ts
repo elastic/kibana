@@ -21,6 +21,8 @@ import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
 import { MapEmbeddableOutput } from './map_embeddable';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { EventHandlers } from '../reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IndexPatternsService } from '../../../../../src/plugins/data/public/index_patterns/index_patterns/index_patterns';
 
 let whenModulesLoadedPromise: Promise<boolean>;
 
@@ -33,9 +35,7 @@ let MapEmbeddable: new (
   eventHandlers?: EventHandlers
 ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
 
-let getIndexPatternService: () => {
-  get: (id: string) => IIndexPattern | undefined;
-};
+let getIndexPatternService: () => IndexPatternsService;
 let getHttp: () => any;
 let getMapsCapabilities: () => any;
 let createMapStore: () => MapStore;

@@ -24,21 +24,25 @@ export class SecurityLayerTemplate extends Component<RenderWizardArguments, Stat
   };
 
   _previewLayer() {
-    if (!this.state.indexPattern) {
+    if (!this._hasIndexPattern()) {
       this.props.previewLayers([]);
       return;
     }
 
     this.props.previewLayers(
-      createLayerDescriptors(this.state.indexPattern.id, this.state.indexPattern.title)
+      createLayerDescriptors(this.state.indexPattern!.id, this.state.indexPattern!.title)
     );
+  }
+
+  _hasIndexPattern() {
+    return !!this.state.indexPattern;
   }
 
   render() {
     return (
       <Fragment>
         <IndexPatternSelect
-          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
+          value={this._hasIndexPattern() ? this.state.indexPattern!.id : ''}
           onChange={this._onIndexPatternChange}
         />
       </Fragment>

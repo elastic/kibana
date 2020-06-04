@@ -5,14 +5,14 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from 'src/plugins/data/public';
 import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 
 interface Props {
   value: string;
-  onChange: (indexPattern: IndexPattern | null) => void;
+  onChange: (indexPattern: IndexPattern | undefined) => void;
 }
 
 interface State {
