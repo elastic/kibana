@@ -21,7 +21,6 @@ import {
   TRANSFORM_STATE,
   DeleteTransformEndpoint,
   DeleteTransformStatus,
-  DeleteTransformEndpointResult,
   ResultData,
 } from '../../../common';
 
@@ -44,31 +43,6 @@ interface StopOptions {
   transformId: TransformId;
   force: boolean;
   waitForCompletion?: boolean;
-}
-
-export async function canDeleteIndex(
-  indexName: string,
-  callAsCurrentUser: CallCluster,
-  license: RouteDependencies['license']
-): Promise<boolean> {
-  if (!license.getStatus().isSecurityEnabled) {
-    // If security isn't enabled, let the user use app.
-    return true;
-  }
-
-  const { has_all_requested: hasAllPrivileges } = await callAsCurrentUser('transport.request', {
-    path: '/_security/user/_has_privileges',
-    method: 'POST',
-    body: {
-      index: [
-        {
-          names: [indexName],
-          privileges: ['delete_index'],
-        },
-      ],
-    },
-  });
-  return hasAllPrivileges;
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
@@ -226,25 +200,27 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       } = req.body as DeleteTransformEndpoint;
 
       try {
-        if (deleteDestIndex || deleteDestIndexPattern) {
-          return res.ok({
-            body: await deleteTransformsWithDestIndex(
-              transformsInfo,
-              deleteDestIndex,
-              deleteDestIndexPattern,
-              ctx,
-              license,
-              res
-            ),
-          });
-        } else {
-          return res.ok({
-            body: await deleteTransforms(
-              transformsInfo,
-              ctx.transform!.dataClient.callAsCurrentUser
-            ),
-          });
+        const body = await deleteTransforms(
+          transformsInfo,
+          deleteDestIndex,
+          deleteDestIndexPattern,
+          ctx,
+          license,
+          res
+        );
+
+        if (body && body.status) {
+          if (body.status === 404) {
+            return res.notFound();
+          }
+          if (body.status === 403) {
+            return res.forbidden();
+          }
         }
+
+        return res.ok({
+          body,
+        });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
       }
@@ -300,51 +276,6 @@ const getTransforms = async (options: { transformId?: string }, callAsCurrentUse
   return await callAsCurrentUser('transform.getTransforms', options);
 };
 
-async function deleteTransforms(
-  transformsInfo: TransformEndpointRequest[],
-  callAsCurrentUser: CallCluster
-) {
-  const results: DeleteTransformEndpointResult = {};
-
-  for (const transformInfo of transformsInfo) {
-    const transformId = transformInfo.id;
-    try {
-      if (transformInfo.state === TRANSFORM_STATE.FAILED) {
-        try {
-          await callAsCurrentUser('transform.stopTransform', {
-            transformId,
-            force: true,
-            waitForCompletion: true,
-          } as StopOptions);
-        } catch (e) {
-          if (isRequestTimeout(e)) {
-            return fillResultsWithTimeouts({
-              results,
-              id: transformId,
-              items: transformsInfo,
-              action: TRANSFORM_ACTIONS.DELETE,
-            });
-          }
-        }
-      }
-
-      await callAsCurrentUser('transform.deleteTransform', { transformId });
-      results[transformId] = { transformJobDeleted: { success: true } };
-    } catch (e) {
-      if (isRequestTimeout(e)) {
-        return fillResultsWithTimeouts({
-          results,
-          id: transformInfo.id,
-          items: transformsInfo,
-          action: TRANSFORM_ACTIONS.DELETE,
-        });
-      }
-      results[transformId] = { transformJobDeleted: { success: false, error: JSON.stringify(e) } };
-    }
-  }
-  return results;
-}
-
 async function getIndexPatternId(
   indexName: string,
   savedObjectsClient: SavedObjectsClientContract
@@ -371,7 +302,7 @@ async function deleteDestIndexPatternById(
   return await savedObjectsClient.delete('index-pattern', indexPatternId);
 }
 
-async function deleteTransformsWithDestIndex(
+async function deleteTransforms(
   transformsInfo: TransformEndpointRequest[],
   deleteDestIndex: boolean | undefined,
   deleteDestIndexPattern: boolean | undefined,
@@ -420,29 +351,27 @@ async function deleteTransformsWithDestIndex(
           ? transformConfig.dest.index[0]
           : transformConfig.dest.index;
       } catch (getTransformConfigError) {
-        return response.customError(wrapError(getTransformConfigError));
+        transformJobDeleted.error = wrapError(getTransformConfigError);
+        results[transformId] = {
+          transformJobDeleted,
+          destIndexDeleted,
+          destIndexPatternDeleted,
+          destinationIndex,
+        };
+        continue;
       }
 
       // If user checks box to delete the destinationIndex associated with the job
       if (destinationIndex && deleteDestIndex) {
-        // Verify if user has privilege to delete the destination index
-        const userCanDeleteDestIndex = await canDeleteIndex(
-          destinationIndex,
-          ctx.transform!.dataClient.callAsCurrentUser,
-          license
-        );
-        // If user does have privilege to delete the index, then delete the index
-        if (userCanDeleteDestIndex) {
-          try {
-            await ctx.transform!.dataClient.callAsCurrentUser('indices.delete', {
-              index: destinationIndex,
-            });
-            destIndexDeleted.success = true;
-          } catch (deleteIndexError) {
-            destIndexDeleted.error = wrapError(deleteIndexError);
-          }
-        } else {
-          return response.forbidden();
+        try {
+          // If user does have privilege to delete the index, then delete the index
+          // if no permission then return 403 forbidden
+          await ctx.transform!.dataClient.callAsCurrentUser('indices.delete', {
+            index: destinationIndex,
+          });
+          destIndexDeleted.success = true;
+        } catch (deleteIndexError) {
+          destIndexDeleted.error = wrapError(deleteIndexError);
         }
       }
 
@@ -469,9 +398,6 @@ async function deleteTransformsWithDestIndex(
         transformJobDeleted.success = true;
       } catch (deleteTransformJobError) {
         transformJobDeleted.error = wrapError(deleteTransformJobError);
-        if (transformJobDeleted.error.statusCode === 404) {
-          return response.notFound();
-        }
         if (transformJobDeleted.error.statusCode === 403) {
           return response.forbidden();
         }

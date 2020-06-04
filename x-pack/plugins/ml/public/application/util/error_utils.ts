@@ -27,6 +27,13 @@ export const extractErrorMessage = (
         return error.body.message?.msg;
       }
     }
+    if (typeof error.body === 'object' && 'msg' in error.body) {
+      // @ts-ignore
+      if (typeof error.body.msg === 'string') {
+        // @ts-ignore
+        return error.body.msg;
+      }
+    }
   }
   return undefined;
 };

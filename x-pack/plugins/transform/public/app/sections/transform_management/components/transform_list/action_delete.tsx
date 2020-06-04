@@ -101,7 +101,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
               data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
               style={{ paddingBottom: 10 }}
               label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
+                'xpack.transform.actionDeleteTransform.bulkDeleteDestinationIndexTitle',
                 {
                   defaultMessage: 'Delete destination index',
                 }
@@ -116,7 +116,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
             <EuiSwitch
               data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
               label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteDestIndexPatternTitle',
+                'xpack.transform.actionDeleteTransform.bulkDeleteDestIndexPatternTitle',
                 {
                   defaultMessage: 'Delete index pattern',
                 }
@@ -145,7 +145,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
               data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
               style={{ paddingBottom: 10 }}
               label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
+                'xpack.transform.actionDeleteTransform.deleteDestinationIndexTitle',
                 {
                   defaultMessage: 'Delete destination index {destinationIndex}',
                   values: { destinationIndex: items[0] && items[0].config.dest.index },
@@ -161,7 +161,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
             <EuiSwitch
               data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
               label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteDestIndexPatternTitle',
+                'xpack.transform.actionDeleteTransform.deleteDestIndexPatternTitle',
                 {
                   defaultMessage: 'Delete index pattern {destinationIndex}',
                   values: { destinationIndex: items[0] && items[0].config.dest.index },

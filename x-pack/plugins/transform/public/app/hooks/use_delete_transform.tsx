@@ -5,55 +5,17 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-
 import { i18n } from '@kbn/i18n';
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import { CoreSetup } from 'kibana/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-
 import { TransformEndpointRequest, DeleteTransformEndpointResult } from '../../../common';
-
-import { getErrorMessage } from '../../shared_imports';
-
+import { getErrorMessage, extractErrorMessage } from '../../shared_imports';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 import { ToastNotificationText } from '../components';
-
 import { useApi } from './use_api';
 import { API_BASE_PATH } from '../../../common/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
-
-export const extractErrorMessage = (
-  error: CustomHttpResponseOptions<ResponseError> | undefined | string
-): string | undefined => {
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  if (error?.body) {
-    if (typeof error.body === 'string') {
-      return error.body;
-    }
-    if (typeof error.body === 'object' && 'message' in error.body) {
-      if (typeof error.body.message === 'string') {
-        return error.body.message;
-      }
-      // @ts-ignore
-      if (typeof (error.body.message?.msg === 'string')) {
-        // @ts-ignore
-        return error.body.message?.msg;
-      }
-    }
-    if (typeof error.body === 'object' && 'msg' in error.body) {
-      // @ts-ignore
-      if (typeof error.body.msg === 'string') {
-        // @ts-ignore
-        return error.body.msg;
-      }
-    }
-  }
-  return undefined;
-};
 
 export const canDeleteIndex = async (http: CoreSetup['http']) => {
   const privilege = await http.get(`${API_BASE_PATH}privileges`);
@@ -100,7 +62,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 
         toastNotifications.addDanger(
           i18n.translate(
-            'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+            'xpack.transform.deleteTransfrom.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
             {
               defaultMessage:
                 'An error occurred checking if index pattern {indexPattern} exists: {error}',
@@ -201,7 +163,7 @@ export const useDeleteTransforms = () => {
             if (status.destIndexDeleted?.success) {
               toastNotifications.addSuccess(
                 i18n.translate(
-                  'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexSuccessMessage',
+                  'xpack.transform.deleteTransfrom.deleteAnalyticsWithIndexSuccessMessage',
                   {
                     defaultMessage:
                       'Request to delete destination index {destinationIndex} acknowledged.',
@@ -213,7 +175,7 @@ export const useDeleteTransforms = () => {
             if (status.destIndexPatternDeleted?.success) {
               toastNotifications.addSuccess(
                 i18n.translate(
-                  'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
+                  'xpack.transform.deleteTransfrom.deleteAnalyticsWithIndexPatternSuccessMessage',
                   {
                     defaultMessage:
                       'Request to delete index pattern {destinationIndex} acknowledged.',
@@ -248,7 +210,7 @@ export const useDeleteTransforms = () => {
             const error = extractErrorMessage(status.destIndexDeleted.error);
             toastNotifications.addDanger({
               title: i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexErrorMessage',
+                'xpack.transform.deleteTransfrom.deleteAnalyticsWithIndexErrorMessage',
                 {
                   defaultMessage: 'An error occurred deleting destination index {destinationIndex}',
                   values: { destinationIndex },
@@ -264,7 +226,7 @@ export const useDeleteTransforms = () => {
             const error = extractErrorMessage(status.destIndexPatternDeleted.error);
             toastNotifications.addDanger({
               title: i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternErrorMessage',
+                'xpack.transform.deleteTransfrom.deleteAnalyticsWithIndexPatternErrorMessage',
                 {
                   defaultMessage: 'An error occurred deleting index pattern {destinationIndex}',
                   values: { destinationIndex },
@@ -281,7 +243,7 @@ export const useDeleteTransforms = () => {
       if (isBulk) {
         if (successCount.transformJobDeleted > 0) {
           toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.deleteTransformSuccessMessage', {
+            i18n.translate('xpack.transform.transformList.bulkDeleteTransformSuccessMessage', {
               defaultMessage:
                 'Successfully deleted {count} transform {count, plural, one {job} other {jobs}}.',
               values: { count: successCount.transformJobDeleted },
@@ -291,7 +253,7 @@ export const useDeleteTransforms = () => {
 
         if (successCount.destIndexDeleted > 0) {
           toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.deleteTransformSuccessMessage', {
+            i18n.translate('xpack.transform.transformList.bulkDeleteDestIndexSuccessMessage', {
               defaultMessage:
                 'Successfully deleted {count} destination {count, plural, one {index} other {indices}}.',
               values: { count: successCount.destIndexDeleted },
@@ -300,11 +262,14 @@ export const useDeleteTransforms = () => {
         }
         if (successCount.destIndexPatternDeleted > 0) {
           toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.deleteTransformSuccessMessage', {
-              defaultMessage:
-                'Successfully deleted {count} destination index {count, plural, one {pattern} other {patterns}}.',
-              values: { count: successCount.destIndexPatternDeleted },
-            })
+            i18n.translate(
+              'xpack.transform.transformList.bulkDeleteDestIndexPatternSuccessMessage',
+              {
+                defaultMessage:
+                  'Successfully deleted {count} destination index {count, plural, one {pattern} other {patterns}}.',
+                values: { count: successCount.destIndexPatternDeleted },
+              }
+            )
           );
         }
       }

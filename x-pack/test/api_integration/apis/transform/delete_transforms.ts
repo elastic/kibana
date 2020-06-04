@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const transform = getService('transform');
 
   function generateDestIndex(transformId: string): string {
-    return `dest_del_${transformId}`;
+    return `dest_${transformId}`;
   }
 
   async function createTransformJob(transformId: string, destinationIndex: string) {
@@ -43,15 +43,16 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.api.cleanTransformIndices();
     });
 
-    describe('single deletion', function () {
-      const transformId = 'test2';
+    describe('single transform deletion', function () {
+      const transformId = 'test1';
       const destinationIndex = generateDestIndex(transformId);
-      before(async () => {
+
+      beforeEach(async () => {
         await createTransformJob(transformId, destinationIndex);
         await transform.api.createIndices(destinationIndex);
       });
 
-      after(async () => {
+      afterEach(async () => {
         await transform.api.deleteIndices(destinationIndex);
       });
 
@@ -76,8 +77,8 @@ export default ({ getService }: FtrProviderContext) => {
         await transform.api.waitForTransformJobNotToExist(transformId);
       });
 
-      it('should return response of status 200 with error info if invalid transformId', async () => {
-        const transformsInfo: TransformEndpointRequest[] = [{ id: 'invalid_trasnform_id' }];
+      it('should return 403 for unauthorized user', async () => {
+        const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
         await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
@@ -87,111 +88,176 @@ export default ({ getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .send({
             transformsInfo,
-          });
-        // .expect(200);
-
-        // expect(body.invalid_trasnform_id.transformJobDeleted.success).to.eql(false);
-        // expect(body.invalid_trasnform_id.transformJobDeleted.error).not.to.eql(undefined);
+          })
+          .expect(403);
+        await transform.api.waitForIndicesToExist(destinationIndex);
+        await transform.api.waitForTransformJobToExist(transformId);
       });
     });
-    //
-    // describe('bulk deletion', function () {
-    //   const transformsInfo: TransformEndpointRequest[] = [
-    //     { id: 'bulk_delete_test_1' },
-    //     { id: 'bulk_delete_test_2' },
-    //   ];
-    //
-    //   before(async () => {
-    //     await createTransformJob('bulk_delete_test_1', 'bulk_delete_test_1');
-    //     await transform.api.createIndices('bulk_delete_test_1');
-    //     await createTransformJob('bulk_delete_test_2', 'bulk_delete_test_2');
-    //     await transform.api.createIndices('bulk_delete_test_2');
-    //   });
-    //
-    //   after(async () => {
-    //     await transform.api.deleteIndices('bulk_delete_test_1');
-    //     await transform.api.deleteIndices('bulk_delete_test_2');
-    //   });
-    //
-    //   it('should delete multiple transform jobs by transformIds', async () => {
-    //     const { body } = await supertest
-    //       .post(`/api/transform/delete_transforms`)
-    //       .auth(
-    //         USER.TRANSFORM_POWERUSER,
-    //         transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-    //       )
-    //       .set(COMMON_REQUEST_HEADERS)
-    //       .send({
-    //         transformsInfo,
-    //       })
-    //       .expect(200);
-    //
-    //     transformsInfo.forEach(({ id: transformId }) => {
-    //       expect(body[transformId].transformJobDeleted.success).to.eql(true);
-    //       expect(body[transformId].destIndexDeleted).to.eql(undefined);
-    //       expect(body[transformId].destIndexPatternDeleted).to.eql(undefined);
-    //     });
-    //     await transform.api.waitForTransformJobNotToExist('bulk_delete_test_1');
-    //     await transform.api.waitForTransformJobNotToExist('bulk_delete_test_2');
-    //   });
-    // });
-    //
-    // describe('with deleteDestIndex', function () {
-    //   const transformId = 'test2';
-    //   const destinationIndex = generateDestIndex(transformId);
-    //
-    //   before(async () => {
-    //     await createTransformJob(transformId, destinationIndex);
-    //     await transform.api.createIndices(destinationIndex);
-    //   });
-    //
-    //   after(async () => {
-    //     await transform.api.deleteIndices(destinationIndex);
-    //   });
-    //
-    //   it('should delete transform and destination index', async () => {
-    //     const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
-    //     const { body } = await supertest
-    //       .post(`/api/transform/delete_transforms`)
-    //       .auth(
-    //         USER.TRANSFORM_POWERUSER,
-    //         transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-    //       )
-    //       .set(COMMON_REQUEST_HEADERS)
-    //       .send({
-    //         transformsInfo,
-    //         deleteDestIndex: true,
-    //       })
-    //       .expect(200);
-    //
-    //     expect(body[transformId].transformJobDeleted.success).to.eql(true);
-    //     expect(body[transformId].destIndexDeleted.success).to.eql(true);
-    //     expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-    //     await transform.api.waitForTransformJobNotToExist(destinationIndex);
-    //     await transform.api.waitForIndicesNotToExist(destinationIndex);
-    //   });
-    //   it('should return 404 for unauthorized user', async () => {
-    //     const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
-    //     const { body } = await supertest
-    //       .post(`/api/transform/delete_transforms`)
-    //       .auth(
-    //         USER.TRANSFORM_VIEWER,
-    //         transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
-    //       )
-    //       .set(COMMON_REQUEST_HEADERS)
-    //       .send({
-    //         transformsInfo,
-    //         deleteDestIndex: true,
-    //       })
-    //       .expect(200);
-    //
-    //     console.log('BODY', body);
-    //
-    //     // expect(body.error).to.eql('Not Found');
-    //     // expect(body.message).to.eql('Not Found');
-    //     // await transform.api.waitForTransformJobToExist(destinationIndex);
-    //     // await transform.api.waitForIndicesToExist(destinationIndex);
-    //   });
-    // });
+
+    describe('single transform deletion with invalid transformId', function () {
+      it('should return 404 with error message if invalid transformId', async () => {
+        const transformsInfo: TransformEndpointRequest[] = [{ id: 'invalid_transform_id' }];
+        const { body } = await supertest
+          .post(`/api/transform/delete_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send({
+            transformsInfo,
+          })
+          .expect(200);
+        expect(body.invalid_transform_id.transformJobDeleted.success).to.eql(false);
+      });
+    });
+
+    describe('bulk deletion', function () {
+      const transformsInfo: TransformEndpointRequest[] = [
+        { id: 'bulk_delete_test_1' },
+        { id: 'bulk_delete_test_2' },
+      ];
+
+      beforeEach(async () => {
+        await createTransformJob('bulk_delete_test_1', 'bulk_delete_test_1');
+        await transform.api.createIndices('bulk_delete_test_1');
+        await createTransformJob('bulk_delete_test_2', 'bulk_delete_test_2');
+        await transform.api.createIndices('bulk_delete_test_2');
+      });
+
+      afterEach(async () => {
+        await transform.api.deleteIndices('bulk_delete_test_1');
+        await transform.api.deleteIndices('bulk_delete_test_2');
+      });
+
+      it('should delete multiple transform jobs by transformIds', async () => {
+        const { body } = await supertest
+          .post(`/api/transform/delete_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send({
+            transformsInfo,
+          })
+          .expect(200);
+
+        transformsInfo.forEach(({ id: transformId }) => {
+          expect(body[transformId].transformJobDeleted.success).to.eql(true);
+          expect(body[transformId].destIndexDeleted.success).to.eql(false);
+          expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+        });
+        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_1');
+        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_2');
+      });
+
+      it('should delete multiple transform jobs by transformIds, even if one of the transformIds is invalid', async () => {
+        const invalidTransformId = 'invalid_transform_id';
+        const { body } = await supertest
+          .post(`/api/transform/delete_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send({
+            transformsInfo: [
+              { id: 'bulk_delete_test_1' },
+              { id: invalidTransformId },
+              { id: 'bulk_delete_test_2' },
+            ],
+          })
+          .expect(200);
+
+        transformsInfo.forEach(({ id: transformId }) => {
+          expect(body[transformId].transformJobDeleted.success).to.eql(true);
+          expect(body[transformId].destIndexDeleted.success).to.eql(false);
+          expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+        });
+        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_1');
+        await transform.api.waitForTransformJobNotToExist('bulk_delete_test_2');
+        expect(body[invalidTransformId].transformJobDeleted.success).to.eql(false);
+        expect(body[invalidTransformId].transformJobDeleted).to.have.property('error');
+      });
+    });
+
+    describe('with deleteDestIndex setting', function () {
+      const transformId = 'test2';
+      const destinationIndex = generateDestIndex(transformId);
+
+      before(async () => {
+        await createTransformJob(transformId, destinationIndex);
+        await transform.api.createIndices(destinationIndex);
+      });
+
+      after(async () => {
+        await transform.api.deleteIndices(destinationIndex);
+      });
+
+      it('should delete transform and destination index', async () => {
+        const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
+        const { body } = await supertest
+          .post(`/api/transform/delete_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send({
+            transformsInfo,
+            deleteDestIndex: true,
+          })
+          .expect(200);
+
+        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].destIndexDeleted.success).to.eql(true);
+        expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForIndicesNotToExist(destinationIndex);
+      });
+    });
+
+    describe('with deleteDestIndexPattern setting', function () {
+      const transformId = 'test3';
+      const destinationIndex = generateDestIndex(transformId);
+
+      before(async () => {
+        await createTransformJob(transformId, destinationIndex);
+        await transform.api.createIndices(destinationIndex);
+        await transform.api.waitForIndicesToExist(destinationIndex);
+        await transform.api.createIndexPatternIfNeeded(destinationIndex);
+      });
+
+      after(async () => {
+        await transform.api.deleteIndices(destinationIndex);
+        await transform.api.deleteIndexPattern(destinationIndex);
+      });
+
+      it('should delete transform and destination index pattern', async () => {
+        const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
+        const { body } = await supertest
+          .post(`/api/transform/delete_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send({
+            transformsInfo,
+            deleteDestIndex: false,
+            deleteDestIndexPattern: true,
+          })
+          .expect(200);
+
+        expect(body[transformId].transformJobDeleted.success).to.eql(true);
+        expect(body[transformId].destIndexDeleted.success).to.eql(false);
+        expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
+        await transform.api.waitForTransformJobNotToExist(transformId);
+        await transform.api.waitForIndicesToExist(destinationIndex);
+        await transform.api.waitForIndexPatternNotToExist(destinationIndex);
+      });
+    });
   });
 };

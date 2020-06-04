@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import { isErrorResponse } from '../types/errors';
 
 export function getErrorMessage(error: any) {
@@ -17,3 +18,35 @@ export function getErrorMessage(error: any) {
 
   return JSON.stringify(error);
 }
+
+export const extractErrorMessage = (
+  error: CustomHttpResponseOptions<ResponseError> | undefined | string
+): string | undefined => {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error?.body) {
+    if (typeof error.body === 'string') {
+      return error.body;
+    }
+    if (typeof error.body === 'object' && 'message' in error.body) {
+      if (typeof error.body.message === 'string') {
+        return error.body.message;
+      }
+      // @ts-ignore
+      if (typeof (error.body.message?.msg === 'string')) {
+        // @ts-ignore
+        return error.body.message?.msg;
+      }
+    }
+    if (typeof error.body === 'object' && 'msg' in error.body) {
+      // @ts-ignore
+      if (typeof error.body.msg === 'string') {
+        // @ts-ignore
+        return error.body.msg;
+      }
+    }
+  }
+  return undefined;
+};
