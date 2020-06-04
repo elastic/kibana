@@ -70,12 +70,13 @@ const mapStateToProps = (state: State) => {
         : nodes.filter((s: PositionedElement) => s.position.parent === shape.id).map((s) => s.id)
     )
   );
-  const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
+
+  const selectedNodes = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
 
   return {
     pageId,
     selectedToplevelNodes,
-    selectedNodes: selectedNodeIds.map((id: string) => nodes.find((s) => s.id === id)),
+    selectedNodes,
     state,
   };
 };

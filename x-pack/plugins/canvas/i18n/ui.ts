@@ -1075,10 +1075,14 @@ export const ViewStrings = {
       }),
     getMaintainAspectDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectTitle', {
-        defaultMessage: 'Fixed ratio',
+        defaultMessage: 'Aspect ratio settings',
+      }),
+    getMaintainAspectLabelName: () =>
+      i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
+        defaultMessage: 'Use a fixed ratio',
       }),
     getMaintainAspectHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
+      i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectHelpLabel', {
         defaultMessage: `Enable to maintain aspect ratio`,
       }),
     getShapeDisplayName: () =>
