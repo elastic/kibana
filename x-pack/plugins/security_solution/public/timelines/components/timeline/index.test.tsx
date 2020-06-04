@@ -10,24 +10,23 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { act } from 'react-dom/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
-
-import { Direction } from '../../graphql/types';
-import { defaultHeaders, mockTimelineData, TestProviders } from '../../mock';
+import {
+  useSignalIndex,
+  ReturnSignalIndex,
+} from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { mocksSource } from '../../../common/containers/source/mock';
+import { wait } from '../../../common/lib/helpers';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
+import { Direction } from '../../../graphql/types';
+import { timelineQuery } from '../../containers/index.gql_query';
 import { timelineActions } from '../../store/timeline';
 
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { timelineQuery } from '../../containers/timeline/index.gql_query';
-import { mocksSource } from '../../containers/source/mock';
+import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
-import { wait } from '../../lib/helpers';
-import {
-  useSignalIndex,
-  ReturnSignalIndex,
-} from '../../containers/detection_engine/signals/use_signal_index';
 
-jest.mock('../../lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');

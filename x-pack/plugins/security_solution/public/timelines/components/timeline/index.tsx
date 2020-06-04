@@ -30,7 +30,7 @@ export interface OwnProps {
   usersViewing: string[];
 }
 
-type Props = OwnProps & PropsFromRedux;
+export type Props = OwnProps & PropsFromRedux;
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
