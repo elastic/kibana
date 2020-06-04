@@ -5,7 +5,7 @@
  */
 
 import { combineLatest, BehaviorSubject, Subscription } from 'rxjs';
-import { filter, takeWhile } from 'rxjs/operators';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { UICapabilities } from 'ui/capabilities';
 import {
   LoggerFactory,
@@ -183,10 +183,13 @@ export class AuthorizationService {
     this.statusSubscription = combineLatest([
       this.status.core$,
       this.license.features$,
-      retries$.asObservable(),
+      retries$.asObservable().pipe(
+        // We shouldn't emit new value if retry counter is reset. This comparator isn't called for
+        // the initial value.
+        distinctUntilChanged((prev, curr) => prev === curr || curr === 0)
+      ),
     ])
       .pipe(
-        takeWhile(() => !retries$.isStopped),
         filter(
           ([status]) =>
             this.license.isEnabled() && status.elasticsearch.level === ServiceStatusLevels.available
@@ -205,7 +208,7 @@ export class AuthorizationService {
             this.applicationName,
             clusterClient
           );
-          retries$.complete();
+          retries$.next(0);
         } catch (err) {
           const retriesElapsed = retries$.getValue() + 1;
           retryTimeout = setTimeout(

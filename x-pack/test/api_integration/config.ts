@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export async function getApiIntegrationConfig({ readConfigFile }) {
+export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.js')
   );

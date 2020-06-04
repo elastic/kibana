@@ -173,9 +173,9 @@ describe('#start', () => {
 
     await nextTick();
 
-    // New changes don't trigger privileges registration.
+    // New changes still trigger privileges re-registration.
     licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
   });
 
   it('schedules retries if fails to register cluster privileges', async () => {
@@ -214,9 +214,9 @@ describe('#start', () => {
     jest.runAllTimers();
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
 
-    // New changes don't trigger privileges registration.
+    // New changes still trigger privileges re-registration.
     licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(5);
   });
 });
 
