@@ -22,6 +22,7 @@ import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
 import { useSourceId } from '../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
+import { GroupByExpression } from '../../shared/group_by_expression/group_by_expression';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -171,6 +172,13 @@ export const Editor: React.FC<Props> = (props) => {
     [setAlertParams]
   );
 
+  const updateGroupBy = useCallback(
+    (groups: string[]) => {
+      setAlertParams('groupBy', groups);
+    },
+    [setAlertParams]
+  );
+
   const addCriterion = useCallback(() => {
     const nextCriteria = alertParams?.criteria
       ? [...alertParams.criteria, DEFAULT_CRITERIA]
@@ -214,6 +222,12 @@ export const Editor: React.FC<Props> = (props) => {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         errors={errors as { [key: string]: string[] }}
+      />
+
+      <GroupByExpression
+        selectedGroups={alertParams.groupBy}
+        onChange={updateGroupBy}
+        fields={supportedFields}
       />
 
       <div>

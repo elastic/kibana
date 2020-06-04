@@ -41,32 +41,27 @@ const checkValueAgainstComparatorMap: {
 };
 
 export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLibs) =>
-  async function ({
-    services,
-    params,
-  }: AlertExecutorOptions & { params: LogDocumentCountAlertParams }) {
+  async function ({ services, params }: AlertExecutorOptions) {
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
-    const groupBy = ['host.name', 'host.architecture'];
+    const castParams = params as LogDocumentCountAlertParams;
+    const { groupBy } = castParams;
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const indexPattern = sourceConfiguration.configuration.logAlias;
     const alertInstance = alertInstanceFactory(alertId);
 
     try {
-      const query = getESQuery(
-        params as LogDocumentCountAlertParams,
-        sourceConfiguration.configuration
-      );
+      const query = getESQuery(castParams, sourceConfiguration.configuration);
 
       const results = groupBy
         ? await getGroupedResults(query, indexPattern, callCluster, GROUP_BY_KEY)
         : await getUngroupedResults(query, indexPattern, callCluster);
 
       if (groupBy) {
-        processGroupByResults({ results, params, alertInstanceFactory, alertId });
+        processGroupByResults({ results, params: castParams, alertInstanceFactory, alertId });
       } else {
-        processUngroupedResults({ results, params, alertInstanceFactory, alertId });
+        processUngroupedResults({ results, params: castParams, alertInstanceFactory, alertId });
       }
     } catch (e) {
       alertInstance.replaceState({
@@ -162,8 +157,7 @@ const getESQuery = (
   params: LogDocumentCountAlertParams,
   sourceConfiguration: InfraSource['configuration']
 ): object => {
-  const { timeSize, timeUnit, criteria } = params;
-  const groupBy = ['host.name', 'host.architecture'];
+  const { timeSize, timeUnit, criteria, groupBy } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const to = Date.now();

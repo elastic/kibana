@@ -82,6 +82,7 @@ export async function registerLogThresholdAlertType(
         criteria: schema.arrayOf(criteriaSchema),
         timeUnit: schema.string(),
         timeSize: schema.number(),
+        groupBy: schema.maybe(schema.arrayOf(schema.string())),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
