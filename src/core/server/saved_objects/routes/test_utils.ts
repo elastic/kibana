@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ContextService } from '../../../context';
-import { createHttpServer, createCoreContext } from '../../../http/test_utils';
-import { coreMock } from '../../../mocks';
-import { SavedObjectsType } from '../../types';
+import { ContextService } from '../../context';
+import { createHttpServer, createCoreContext } from '../../http/test_utils';
+import { coreMock } from '../../mocks';
+import { SavedObjectsType } from '../types';
 
-const coreId = Symbol('core');
+const defaultCoreId = Symbol('core');
 
-export const setupServer = async () => {
+export const setupServer = async (coreId: symbol = defaultCoreId) => {
   const coreContext = createCoreContext({ coreId });
   const contextService = new ContextService(coreContext);
 
