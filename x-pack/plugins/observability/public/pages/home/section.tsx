@@ -3,18 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export interface ISection {
   id: string;
@@ -25,57 +15,27 @@ export interface ISection {
   target?: '_blank';
 }
 
-const Link = styled(EuiButtonEmpty)`
-  height: auto;
-  &:focus {
-    background-color: transparent;
-  }
-  &:hover {
-    .title {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const Icon = styled(EuiIcon)`
-  color: ${(props) => props.theme.eui.euiIconColors.text};
-`;
-
 export const Section = ({ section }: { section: ISection }) => {
-  const { core } = usePluginContext();
-  const { icon, title, description, href } = section;
+  const { icon, title, description } = section;
 
-  const sectionContent = (
-    <EuiFlexGroup gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <Icon type={icon} size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem style={{ textAlign: 'left' }}>
-        <EuiTitle size="xs" className="title">
-          <h3>{title}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        {description && (
-          <EuiText size="s" style={{ whiteSpace: 'normal' }} color="default">
-            {description}
-          </EuiText>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  return (
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} size="l" color="default" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xs" className="title">
+            <h3>{title}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {description && (
+            <EuiText size="s" color="default">
+              {description}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
-
-  if (href) {
-    return (
-      <EuiFlexItem>
-        <Link
-          target={section.target}
-          href={core.http.basePath.prepend(href)}
-          style={{ textDecoration: 'none' }}
-        >
-          {sectionContent}
-        </Link>
-      </EuiFlexItem>
-    );
-  }
-  return <EuiFlexItem>{sectionContent}</EuiFlexItem>;
 };
