@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { syncUrlHashQueryParam } from './sync_url_hash_query_param.js';
+(window as any).Worker = class Worker {
+  onmessage() {}
+  postMessage() {}
+};
