@@ -90,7 +90,7 @@ export function defineAlertTypes(
 
       const runCount = (state.runCount || 0) + 1;
 
-      times(runCount, index => {
+      times(runCount, (index) => {
         services
           .alertInstanceFactory(`instance-${index}`)
           .replaceState({ instanceStateValue: true })
