@@ -7,15 +7,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
 
 import { DataStream } from '../../../../../../common/types';
 
 interface Props {
   dataStreams?: DataStream[];
+  reload: () => {};
 }
 
-export const DataStreamTable: React.FunctionComponent<Props> = ({ dataStreams }) => {
+export const DataStreamTable: React.FunctionComponent<Props> = ({ dataStreams, reload }) => {
   const columns: Array<EuiBasicTableColumn<DataStream>> = [
     {
       field: 'name',
@@ -72,7 +73,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({ dataStreams })
     },
     toolsLeft: undefined /* TODO: Actions menu */,
     toolsRight: [
-      /* TODO: Reload button */
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+        key="reloadButton"
+      >
+        <FormattedMessage
+          id="xpack.idxMgmt.dataStreamList.reloadDataStreamsButtonLabel"
+          defaultMessage="Reload"
+        />
+      </EuiButton>,
     ],
   };
 

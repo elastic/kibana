@@ -13,7 +13,7 @@ import { useLoadDataStreams } from '../../../services/api';
 import { DataStreamTable } from './data_stream_table';
 
 export const DataStreamList = () => {
-  const { error, isLoading, data: dataStreams } = useLoadDataStreams();
+  const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams();
 
   let content;
 
@@ -66,7 +66,7 @@ export const DataStreamList = () => {
           </EuiText>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <DataStreamTable dataStreams={dataStreams} />
+        <DataStreamTable dataStreams={dataStreams} reload={reload} />
       </>
     );
   }

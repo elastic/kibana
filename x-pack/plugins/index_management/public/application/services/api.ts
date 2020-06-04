@@ -31,12 +31,7 @@ import {
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
 } from '../../../common/constants';
-import {
-  TemplateDeserialized,
-  TemplateListItem,
-  IndexTemplateFormatVersion,
-  DataStream,
-} from '../../../common';
+import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
