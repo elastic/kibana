@@ -6,16 +6,16 @@
 
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { NotFoundPage } from '../pages/404';
 import { LinkToLogsPage } from '../pages/link_to';
 import { LogsPage } from '../pages/logs';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { AppRouter } from './index';
+import { AppRouter } from './types';
 
 export const LogsRouter: AppRouter = ({ history }) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+
   return (
     <Router history={history}>
       <Switch>
