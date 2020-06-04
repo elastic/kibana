@@ -95,8 +95,9 @@ export class Plugin
       title: 'infra',
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
-        const { startLegacyApp } = await import('./apps/start_legacy_app');
-        return startLegacyApp(params);
+        const { renderApp } = await import('./apps/legacy_app');
+
+        return renderApp(params);
       },
     });
   }
