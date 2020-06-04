@@ -221,11 +221,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             footer={
               <EuiButton
                 className="homAddData__button"
-                href="#/tutorial_directory/siem"
+                href="#/tutorial_directory/security"
                 aria-describedby={siemData.ariaDescribedby}
               >
                 <FormattedMessage
-                  id="home.addData.siem.addSiemEventsButtonLabel"
+                  id="home.addData.security.addSecurityEventsButtonLabel"
                   defaultMessage="Add events"
                 />
               </EuiButton>
