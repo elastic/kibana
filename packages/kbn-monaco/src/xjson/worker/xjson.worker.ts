@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { XJsonMode } from '../../../public';
-import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
-const xJsonMode = new XJsonMode();
+// Please note: this module is intended to be run inside of a webworker.
+/* eslint-disable @kbn/eslint/module_migration */
 
-interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {
-  xJsonMode: typeof xJsonMode;
-}
+import 'regenerator-runtime/runtime';
+// @ts-ignore
+import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { XJsonWorker } from './xjson_worker';
 
-export const useXJsonMode = (json: Parameters<typeof useBaseXJsonMode>[0]): ReturnValue => {
-  return {
-    ...useBaseXJsonMode(json),
-    xJsonMode,
-  };
+self.onmessage = () => {
+  worker.initialize((ctx: any, createData: any) => {
+    return new XJsonWorker(ctx);
+  });
 };

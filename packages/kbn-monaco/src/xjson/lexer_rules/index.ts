@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { XJsonMode } from '../../../public';
-import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
-const xJsonMode = new XJsonMode();
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import * as xJson from './xjson';
+import * as esql from './esql';
+import * as painless from './painless';
 
-interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {
-  xJsonMode: typeof xJsonMode;
-}
-
-export const useXJsonMode = (json: Parameters<typeof useBaseXJsonMode>[0]): ReturnValue => {
-  return {
-    ...useBaseXJsonMode(json),
-    xJsonMode,
-  };
+export const registerLexerRules = (m: typeof monaco) => {
+  m.languages.register({ id: xJson.ID });
+  m.languages.setMonarchTokensProvider(xJson.ID, xJson.lexerRules);
+  m.languages.register({ id: painless.ID });
+  m.languages.setMonarchTokensProvider(painless.ID, painless.lexerRules);
+  m.languages.register({ id: esql.ID });
+  m.languages.setMonarchTokensProvider(esql.ID, esql.lexerRules);
 };

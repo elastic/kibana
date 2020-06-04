@@ -1,10 +1,25 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '../../monaco';
+
+export const ID = 'painless';
 
 /**
  * Extends the default type for a Monarch language so we can use
@@ -25,8 +40,9 @@ interface Language extends monaco.languages.IMonarchLanguage {
   operators: string[];
 }
 
-export const monacoPainlessLang = {
-  default: '',
+export const lexerRules = {
+  default: 'invalid',
+  tokenPostfix: '',
   // painless does not use < >, so we define our own
   brackets: [
     ['{', '}', 'delimiter.curly'],
@@ -120,9 +136,9 @@ export const monacoPainlessLang = {
         },
       ],
       // whitespace
-      [/[ \t\r\n]+/, '@whitespace'],
+      [/[ \t\r\n]+/, { token: 'whitespace' }],
       // comments
-      // [/\/\*/, 'comment', '@comment'],
+      [/\/\*/, 'comment', '@comment'],
       [/\/\/.*$/, 'comment'],
       // brackets
       [/[{}()\[\]]/, '@brackets'],
@@ -152,6 +168,7 @@ export const monacoPainlessLang = {
       // strings single quoted
       [/'([^'\\]|\\.)*$/, 'string.invalid'], // string without termination
       [/'/, 'string', '@string_sq'],
+      [/"""/, { token: 'punctuation.end_triple_quote', nextEmbedded: '@pop' }],
     ],
     comment: [
       [/[^\/*]+/, 'comment'],
@@ -172,3 +189,6 @@ export const monacoPainlessLang = {
     ],
   },
 } as Language;
+
+monaco.languages.register({ id: ID });
+monaco.languages.setMonarchTokensProvider(ID, lexerRules);
