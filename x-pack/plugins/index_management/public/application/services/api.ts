@@ -37,12 +37,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import {
-  TemplateDeserialized,
-  TemplateListItem,
-  IndexTemplateFormatVersion,
-} from '../../../common';
-import { doMappingsHaveType } from '../components/mappings_editor';
+import { TemplateDeserialized, TemplateListItem } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
@@ -215,17 +210,15 @@ export async function loadIndexData(type: string, indexName: string) {
 }
 
 export function useLoadIndexTemplates() {
-  return useRequest<TemplateListItem[]>({
-    path: `${API_BASE_PATH}/templates`,
+  return useRequest<{ templates: TemplateListItem[]; legacyTemplates: TemplateListItem[] }>({
+    path: `${API_BASE_PATH}/index-templates`,
     method: 'get',
   });
 }
 
-export async function deleteTemplates(
-  templates: Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
-) {
+export async function deleteTemplates(templates: Array<{ name: string; isLegacy?: boolean }>) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/delete-templates`,
+    path: `${API_BASE_PATH}/delete-index-templates`,
     method: 'post',
     body: { templates },
   });
@@ -237,15 +230,12 @@ export async function deleteTemplates(
   return result;
 }
 
-export function useLoadIndexTemplate(
-  name: TemplateDeserialized['name'],
-  formatVersion: IndexTemplateFormatVersion
-) {
+export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegacy?: boolean) {
   return useRequest<TemplateDeserialized>({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/index-templates/${encodeURIComponent(name)}`,
     method: 'get',
     query: {
-      v: formatVersion,
+      legacy: isLegacy,
     },
   });
 }
@@ -253,8 +243,8 @@ export function useLoadIndexTemplate(
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
   const includeTypeName = doMappingsHaveType(template.template.mappings);
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates`,
-    method: 'put',
+    path: `${API_BASE_PATH}/index-templates`,
+    method: 'post',
     body: JSON.stringify(template),
     query: {
       include_type_name: includeTypeName,
@@ -272,7 +262,7 @@ export async function updateTemplate(template: TemplateDeserialized) {
   const includeTypeName = doMappingsHaveType(template.template.mappings);
   const { name } = template;
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/index-templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
     query: {
