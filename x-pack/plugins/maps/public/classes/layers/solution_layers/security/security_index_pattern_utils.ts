@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import minimatch from 'minimatch';
-import { IndexPattern } from 'src/plugins/data/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { getIndexPatternService, getUiSettings } from '../../../../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -14,10 +13,15 @@ import { IndexPatternSavedObjectAttrs } from '../../../../../../../../src/plugin
 
 const SIEM_DEFAULT_INDEX = 'siem:defaultIndex';
 
-let indexPatterns: IndexPattern[];
-let indexPatternsPromise: Promise<IndexPattern[]>;
+export type IndexPatternMeta = {
+  id: string;
+  title: string;
+};
 
-export async function getSecurityIndexPatterns(): Promise<IndexPattern[]> {
+let indexPatterns: IndexPatternMeta[];
+let indexPatternsPromise: Promise<IndexPatternMeta[]>;
+
+export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
   if (indexPatterns) {
     return indexPatterns;
   }
@@ -29,19 +33,20 @@ export async function getSecurityIndexPatterns(): Promise<IndexPattern[]> {
   return indexPatternsPromise;
 }
 
-async function loadSecurityIndexPatterns(): Promise<IndexPattern[]> {
+async function loadSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
   const securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
   const indexPatternCache = await getIndexPatternService().getCache();
-  const promises = indexPatternCache!
+  return indexPatternCache!
     .filter((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
       return securityIndexPatternTitles.some((indexPatternTitle) => {
         // glob matching index pattern title
         return minimatch(indexPatternTitle, savedObject?.attributes?.title);
       });
     })
-    .map(async (savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
-      return await getIndexPatternService().get(savedObject.id);
+    .map((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
+      return {
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+      };
     });
-
-  return await Promise.all(promises);
 }

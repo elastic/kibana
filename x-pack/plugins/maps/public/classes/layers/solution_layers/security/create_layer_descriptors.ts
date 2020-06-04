@@ -88,7 +88,7 @@ function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: 
   };
 
   return VectorLayer.createDescriptor({
-    label: i18n.translate('xpack.maps.sescurity.destinationLayerLabel', {
+    label: i18n.translate('xpack.maps.sescurity.sourceLayerLabel', {
       defaultMessage: '{indexPatternTitle} | Source Point',
       values: { indexPatternTitle },
     }),

@@ -5,33 +5,40 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { IndexPatternSelect } from './index_pattern_select';
 import { createLayerDescriptors } from './create_layer_descriptors';
+import { IndexPatternMeta } from './security_index_pattern_utils';
 
 interface State {
-  indexPattern: IndexPattern | undefined;
+  indexPatternId: string | null;
+  indexPatternTitle: string | null;
 }
 
 export class SecurityLayerTemplate extends Component<RenderWizardArguments, State> {
   state = {
-    indexPattern: undefined,
+    indexPatternId: null,
+    indexPatternTitle: null,
   };
 
-  _onIndexPatternChange = (indexPattern: IndexPattern | undefined) => {
-    this.setState({ indexPattern }, this._previewLayer);
+  _onIndexPatternChange = (indexPatternMeta: IndexPatternMeta | null) => {
+    this.setState(
+      {
+        indexPatternId: indexPatternMeta ? indexPatternMeta.id : null,
+        indexPatternTitle: indexPatternMeta ? indexPatternMeta.title : null,
+      },
+      this._previewLayer
+    );
   };
 
   _previewLayer() {
-    if (!this.state.indexPattern) {
+    if (!this.state.indexPatternId || !this.state.indexPatternTitle) {
       this.props.previewLayers([]);
       return;
     }
 
     this.props.previewLayers(
-      // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
-      createLayerDescriptors(this.state.indexPattern.id, this.state.indexPattern.title)
+      createLayerDescriptors(this.state.indexPatternId!, this.state.indexPatternTitle!)
     );
   }
 
@@ -39,8 +46,7 @@ export class SecurityLayerTemplate extends Component<RenderWizardArguments, Stat
     return (
       <Fragment>
         <IndexPatternSelect
-          // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
-          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
+          value={this.state.indexPatternId ? this.state.indexPatternId! : ''}
           onChange={this._onIndexPatternChange}
         />
       </Fragment>

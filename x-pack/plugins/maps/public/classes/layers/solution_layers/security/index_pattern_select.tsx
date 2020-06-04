@@ -5,19 +5,18 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/plugins/data/public';
-import { getSecurityIndexPatterns } from './security_index_pattern_utils';
+import { getSecurityIndexPatterns, IndexPatternMeta } from './security_index_pattern_utils';
 
 interface Props {
   value: string;
-  onChange: (indexPattern: IndexPattern | undefined) => void;
+  onChange: (indexPatternMeta: IndexPatternMeta | null) => void;
 }
 
 interface State {
   hasLoaded: boolean;
-  indexPatterns: IndexPattern[];
+  options: EuiSelectOption[];
 }
 
 export class IndexPatternSelect extends Component<Props, State> {
@@ -25,7 +24,7 @@ export class IndexPatternSelect extends Component<Props, State> {
 
   state = {
     hasLoaded: false,
-    indexPatterns: [],
+    options: [],
   };
 
   componentWillUnmount() {
@@ -34,10 +33,10 @@ export class IndexPatternSelect extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadIndexPatterns();
+    this._loadOptions();
   }
 
-  async _loadIndexPatterns() {
+  async _loadOptions() {
     const indexPatterns = await getSecurityIndexPatterns();
     if (!this._isMounted) {
       return;
@@ -45,28 +44,40 @@ export class IndexPatternSelect extends Component<Props, State> {
 
     this.setState({
       hasLoaded: true,
-      indexPatterns,
+      options: [
+        { value: '', text: '' },
+        ...indexPatterns.map(({ id, title }: IndexPatternMeta) => {
+          return {
+            value: id,
+            text: title,
+          };
+        }),
+      ],
     });
   }
 
   _onChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const targetIndexPattern = this.state.indexPatterns.find((indexPattern: IndexPattern) => {
-      return event.target.value === indexPattern.id;
+    const targetOption = this.state.options.find(({ value, text }: EuiSelectOption) => {
+      return event.target.value === value;
     });
-    this.props.onChange(targetIndexPattern);
+
+    if (event.target.value === '' || !targetOption) {
+      this.props.onChange(null);
+      return;
+    }
+
+    this.props.onChange({
+      // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
+      id: targetOption.value,
+      // @ts-ignore - avoid wrong "Property does not exist on type 'never'." compile error
+      title: targetOption.text,
+    });
   };
 
   render() {
     if (!this.state.hasLoaded) {
       return null;
     }
-
-    const options = this.state.indexPatterns.map((indexPattern: IndexPattern) => {
-      return {
-        value: indexPattern.id,
-        text: indexPattern.title,
-      };
-    });
 
     return (
       <EuiFormRow
@@ -75,7 +86,7 @@ export class IndexPatternSelect extends Component<Props, State> {
         })}
       >
         <EuiSelect
-          options={[{ value: '', text: '' }, ...options]}
+          options={this.state.options}
           value={this.props.value ? this.props.value : ''}
           onChange={this._onChange}
         />
