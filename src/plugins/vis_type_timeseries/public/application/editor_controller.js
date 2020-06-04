@@ -20,7 +20,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
-import { getSavedObjectsClient, getUISettings, getI18n } from '../services';
+import { getUISettings, getI18n, getDataStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 
 export class EditorController {
@@ -37,17 +37,8 @@ export class EditorController {
     };
   }
 
-  fetchDefaultIndexPattern = async () => {
-    const indexPattern = await getSavedObjectsClient().client.get(
-      'index-pattern',
-      getUISettings().get('defaultIndex')
-    );
-
-    return indexPattern.attributes;
-  };
-
   fetchDefaultParams = async () => {
-    const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
+    const { title, timeFieldName } = await getDataStart().indexPatterns.getDefault();
 
     this.state.vis.params.default_index_pattern = title;
     this.state.vis.params.default_timefield = timeFieldName;
