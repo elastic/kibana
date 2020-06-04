@@ -37,7 +37,7 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.ciscoLogs.nameTitle', {
       defaultMessage: 'Cisco',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.ciscoLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from Cisco ASA firewalls.',
     }),
@@ -54,9 +54,9 @@ supports the "asa" fileset for Cisco ASA firewall logs received over syslog or r
     artifacts: {
       dashboards: [],
       application: {
-        path: '/app/siem',
+        path: '/app/security',
         label: i18n.translate('home.tutorials.ciscoLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'SIEM App',
+          defaultMessage: 'Security App',
         }),
       },
       exportedFields: {
