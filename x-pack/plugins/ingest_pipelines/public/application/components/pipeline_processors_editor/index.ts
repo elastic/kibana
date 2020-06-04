@@ -7,3 +7,5 @@
 export { PipelineProcessorsEditor, OnUpdateHandler } from './pipeline_processors_editor.container';
 
 export { OnUpdateHandlerArg } from './types';
+
+export { SerializeResult } from './serialize';

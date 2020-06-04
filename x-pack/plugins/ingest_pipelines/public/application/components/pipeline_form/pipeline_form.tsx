@@ -16,7 +16,11 @@ import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
-import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_processors_editor';
+import {
+  OnUpdateHandlerArg,
+  OnUpdateHandler,
+  SerializeResult,
+} from '../pipeline_processors_editor';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -48,7 +52,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   const processorStateRef = useRef<OnUpdateHandlerArg>();
 
   const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    let override: any = {};
+    let override: SerializeResult | undefined;
 
     if (!isValid) {
       return;
@@ -63,7 +67,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       }
     }
 
-    onSave({ ...formData, ...override } as Pipeline);
+    onSave({ ...formData, ...(override || {}) } as Pipeline);
   };
 
   const handleTestPipelineClick = () => {
