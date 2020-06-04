@@ -5,6 +5,8 @@
  */
 import { ReactNode } from 'react';
 
+import { NamespaceType } from '../../../lists_plugin_deps';
+
 export interface OperatorOption {
   message: string;
   value: string;
@@ -54,6 +56,27 @@ export interface Comment {
   user: string;
   timestamp: string;
   comment: string;
+}
+
+export enum ToggleId {
+  DETECTION_ENGINE = 'detection',
+  ENDPOINT = 'endpoint',
+}
+
+export interface RuleExceptionList {
+  id: string | null;
+  type: string | null;
+  namespaceType: NamespaceType | null;
+}
+
+export interface FilterOptions {
+  filter: string;
+  tags: string[];
+}
+
+export interface ApiProps {
+  id: string | null;
+  namespaceType: NamespaceType | null;
 }
 
 // TODO: Delete once types are updated
