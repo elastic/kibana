@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { join } from 'path';
+import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'siem',
-  storyGlobs: [join(__dirname, '..', 'public', '**', 'components', '**', '*.stories.tsx')],
+export const AND = i18n.translate('xpack.securitySolution.andOrBadge.and', {
+  defaultMessage: 'AND',
+});
+
+export const OR = i18n.translate('xpack.securitySolution.andOrBadge.or', {
+  defaultMessage: 'OR',
 });
