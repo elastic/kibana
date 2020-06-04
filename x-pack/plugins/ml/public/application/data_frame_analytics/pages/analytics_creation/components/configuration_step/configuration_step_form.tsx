@@ -56,7 +56,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   const { currentSavedSearch, currentIndexPattern } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
-  const { initiateWizard, setEstimatedModelMemoryLimit, setFormState } = actions;
+  const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
@@ -233,10 +233,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       });
     }
   }, 300);
-
-  useEffect(() => {
-    initiateWizard();
-  }, []);
 
   useEffect(() => {
     setFormState({ sourceIndex: currentIndexPattern.title });

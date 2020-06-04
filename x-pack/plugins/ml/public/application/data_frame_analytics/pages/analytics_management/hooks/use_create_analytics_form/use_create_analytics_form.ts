@@ -267,15 +267,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
   };
 
-  const openModal = async () => {
-    await mlContext.indexPatterns.clearCache();
-    resetForm();
-    await prepareFormValidation();
-    dispatch({ type: ACTION.OPEN_MODAL });
-  };
-
   const initiateWizard = async () => {
     await mlContext.indexPatterns.clearCache();
+    resetForm();
     await prepareFormValidation();
   };
 
@@ -326,9 +320,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {
-    resetForm();
-    await prepareFormValidation();
-
+    // resetForm();
     const config = extractCloningConfig(cloneJob);
     if (isAdvancedConfig(config)) {
       setJobConfig(config);
@@ -339,13 +331,11 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     dispatch({ type: ACTION.SET_JOB_CLONE, cloneJob });
-    dispatch({ type: ACTION.OPEN_MODAL });
   };
 
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
-    openModal,
     initiateWizard,
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,

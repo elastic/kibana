@@ -23,6 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
 import { newJobCapsService } from '../../../services/new_job_capabilities_service';
+import { ml } from '../../../services/ml_api_service';
+import { DataFrameAnalyticsId } from '../../common/analytics';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from '../analytics_management/components/create_analytics_advanced_editor';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
@@ -34,7 +36,11 @@ export enum ANALYTICS_STEPS {
   CREATE,
 }
 
-export const Page: FC = () => {
+interface Props {
+  jobId?: DataFrameAnalyticsId;
+}
+
+export const Page: FC<Props> = ({ jobId }) => {
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([true, false, false, false]);
 
@@ -44,7 +50,28 @@ export const Page: FC = () => {
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { isAdvancedEditorEnabled } = createAnalyticsForm.state;
   const { jobType } = createAnalyticsForm.state.form;
-  const { switchToAdvancedEditor } = createAnalyticsForm.actions;
+  const { initiateWizard, setJobClone, switchToAdvancedEditor } = createAnalyticsForm.actions;
+
+  useEffect(() => {
+    initiateWizard();
+
+    if (currentIndexPattern) {
+      (async function () {
+        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
+
+        if (jobId !== undefined) {
+          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+          if (
+            Array.isArray(analyticsConfigs.data_frame_analytics) &&
+            analyticsConfigs.data_frame_analytics.length > 0
+          ) {
+            const clonedJobConfig: any = analyticsConfigs.data_frame_analytics[0];
+            await setJobClone(clonedJobConfig);
+          }
+        }
+      })();
+    }
+  }, []);
 
   useEffect(() => {
     if (activatedSteps[currentStep] === false) {
@@ -52,14 +79,6 @@ export const Page: FC = () => {
       setActivatedSteps(activatedSteps);
     }
   }, [currentStep]);
-
-  useEffect(() => {
-    if (currentIndexPattern) {
-      (async function () {
-        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
-      })();
-    }
-  }, []);
 
   const analyticsWizardSteps = [
     {
