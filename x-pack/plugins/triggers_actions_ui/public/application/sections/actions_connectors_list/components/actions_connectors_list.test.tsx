@@ -62,7 +62,7 @@ describe('actions_connectors_list component empty', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
+        siem: {
           'actions:show': true,
           'actions:save': true,
           'actions:delete': true,
