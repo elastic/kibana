@@ -47,8 +47,7 @@ export const CommonAlertSeverityColorMap = {
 };
 
 export interface CommonAlertParamDetail {
-  rawLabel: string;
-  withValueLabel: string;
+  label: string;
   type: AlertParamType;
 }
 

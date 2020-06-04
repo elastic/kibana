@@ -74,6 +74,12 @@ export async function fetchCpuUsageNodeStats(
                 size: config.ui.max_bucket_size,
               },
               aggs: {
+                index: {
+                  terms: {
+                    field: '_index',
+                    size: 1,
+                  },
+                },
                 average_cpu: {
                   avg: {
                     field: 'node_stats.process.cpu.percent',
@@ -117,6 +123,7 @@ export async function fetchCpuUsageNodeStats(
   ) as ClusterBucketESResponse[];
   for (const clusterBucket of clusterBuckets) {
     for (const node of clusterBucket.nodes.buckets) {
+      const indexName = get(node, 'index.buckets[0].key', '');
       stats.push({
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
@@ -125,6 +132,7 @@ export async function fetchCpuUsageNodeStats(
         containerUsage: get(node, 'average_usage.value'),
         containerPeriods: get(node, 'average_periods.value'),
         containerQuota: get(node, 'average_quota.value'),
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
       });
     }
   }

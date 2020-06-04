@@ -24,6 +24,7 @@ import {
   KIBANA_CLUSTER_ALERTS_ENABLED,
 } from '../common/constants';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+import { createCpuUsageAlertType } from './alerts/cpu_usage';
 
 export class MonitoringPlugin
   implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
@@ -62,6 +63,8 @@ export class MonitoringPlugin
         }),
       });
     }
+
+    plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
 
     const app: App = {
       id,

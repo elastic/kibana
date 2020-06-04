@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient, Logger } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -15,8 +15,9 @@ import {
   AlertCpuUsageNodeStats,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
+  AlertStates,
 } from './types';
-import { AlertInstance } from '../../../alerting/server';
+import { AlertInstance, AlertServices } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CPU_USAGE,
@@ -52,31 +53,34 @@ interface CpuUsageParams {
 }
 
 export class CpuUsageAlert extends BaseAlert {
+  public static paramDetails = {
+    threshold: {
+      label: `Notify when CPU is over`,
+      type: AlertParamType.Percentage,
+    } as CommonAlertParamDetail,
+    duration: {
+      label: `Look at the average over`,
+      type: AlertParamType.Duration,
+    } as CommonAlertParamDetail,
+  };
+
   public type = ALERT_CPU_USAGE;
   public label = 'CPU Usage';
+
   protected defaultParams: CpuUsageParams = {
     threshold: DEFAULT_THRESHOLD,
     duration: DEFAULT_DURATION,
   };
-  public get paramDetails() {
-    if (!this.rawAlert) {
-      return {};
-    }
+  // public get paramDetails() {
+  //   if (!this.rawAlert) {
+  //     return {};
+  //   }
 
-    const params = this.rawAlert.params as CpuUsageParams;
-    return {
-      threshold: {
-        withValueLabel: `Notify when CPU is over ${params.threshold}`,
-        rawLabel: `Notify when CPU is over`,
-        type: AlertParamType.Number,
-      } as CommonAlertParamDetail,
-      duration: {
-        withValueLabel: `Look at the average over ${params.duration}`,
-        rawLabel: `Look at the average over`,
-        type: AlertParamType.Duration,
-      } as CommonAlertParamDetail,
-    };
-  }
+  //   const params = this.rawAlert.params as CpuUsageParams;
+  //   return {
+
+  //   };
+  // }
 
   protected async fetchData(
     params: CommonAlertParams,
@@ -116,6 +120,7 @@ export class CpuUsageAlert extends BaseAlert {
         shouldFire: cpuUsage > params.threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
+        ccs: stat.ccs,
       };
     });
   }
@@ -155,6 +160,7 @@ export class CpuUsageAlert extends BaseAlert {
     const stat = item.meta as AlertCpuUsageNodeStats;
     return {
       cluster,
+      ccs: item.ccs,
       cpuUsage: stat.cpuUsage,
       nodeId: stat.nodeId,
       nodeName: stat.nodeName,
@@ -177,7 +183,7 @@ export class CpuUsageAlert extends BaseAlert {
           defaultMessage: `The cpu usage on node {nodeName} is now under the threshold, currently reporting at {cpuUsage}% as of #resolved`,
           values: {
             nodeName: stat.nodeName,
-            cpuUsage: stat.cpuUsage,
+            cpuUsage: stat.cpuUsage.toFixed(2),
           },
         }),
         tokens: [
@@ -196,7 +202,7 @@ export class CpuUsageAlert extends BaseAlert {
         defaultMessage: `Node {nodeName} is reporting cpu usage of {cpuUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          cpuUsage: stat.cpuUsage,
+          cpuUsage: stat.cpuUsage.toFixed(2),
         },
       }),
       nextSteps: [
@@ -228,27 +234,90 @@ export class CpuUsageAlert extends BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    alertState: AlertState,
+    alertStates: AlertStates,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    const stat = item.meta as AlertCpuUsageNodeStats;
-    if (!alertState.ui.isFiring) {
+    const { states, isFiring } = alertStates;
+    const nodes = states
+      .map((_state) => {
+        const state = _state as AlertCpuUsageState;
+        return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
+      })
+      .join(',');
+
+    const ccs = states.reduce((accum: string, state): string => {
+      if (state.ccs) {
+        return state.ccs;
+      }
+      return accum;
+    }, '');
+
+    if (!isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,
-        cpuUsage: stat.cpuUsage,
-        nodeName: stat.nodeName,
+        nodes,
+        count: states.length,
         clusterName: cluster.clusterName,
       });
     } else {
-      const url = `${this.kibanaUrl}/app/monitoring#/alert/${this.type}`;
+      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
+      if (ccs) {
+        globalState.push(`ccs:${ccs}`);
+      }
+      const url = `${this.kibanaUrl}/app/monitoring#elasticsearch/nodes?_g=(${globalState.join(
+        ','
+      )})`;
       instance.scheduleActions('default', {
         state: FIRING,
-        cpuUsage: stat.cpuUsage,
-        nodeName: stat.nodeName,
+        nodes,
+        count: states.length,
         clusterName: cluster.clusterName,
-        action: `<a href="${url}">Investigate</a.`,
+        action: `[Investigate](${url})`,
       });
+    }
+  }
+
+  protected processData(
+    data: AlertData[],
+    clusters: AlertCluster[],
+    services: AlertServices,
+    logger: Logger
+  ) {
+    for (const cluster of clusters) {
+      const nodes = data.filter((_item) => _item.clusterUuid === cluster.clusterUuid);
+      if (nodes.length === 0) {
+        continue;
+      }
+
+      const alertState: AlertStates = {
+        states: [],
+        isFiring: false,
+      };
+      const instance = services.alertInstanceFactory(`${this.type}:${cluster.clusterUuid}`);
+      let shouldExecuteActions = false;
+      for (const node of nodes) {
+        const nodeState: AlertState = this.getDefaultAlertState(cluster, node);
+        if (node.shouldFire) {
+          nodeState.ui.triggeredMS = +new Date();
+          alertState.isFiring = nodeState.ui.isFiring = true;
+          nodeState.ui.message = this.getUiMessage(nodeState, node);
+          nodeState.ui.severity = node.severity;
+          nodeState.ui.resolvedMS = 0;
+          shouldExecuteActions = true;
+        } else if (!node.shouldFire && nodeState.ui.isFiring) {
+          nodeState.ui.isFiring = false;
+          nodeState.ui.resolvedMS = +new Date();
+          nodeState.ui.message = this.getUiMessage(nodeState, node);
+          shouldExecuteActions = true;
+        }
+        alertState.states.push(nodeState);
+      }
+
+      instance.replaceState(alertState);
+      if (shouldExecuteActions) {
+        this.executeActions(instance, alertState, null, cluster);
+      }
     }
   }
 
@@ -257,12 +326,11 @@ export class CpuUsageAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_EMAIL:
         return {
           subject: i18n.translate('xpack.monitoring.alerts.cpuUsage.emailSubject', {
-            defaultMessage: `CPU usage alert is {state} for {nodeName} in {clusterName}. CPU usage is {cpuUsage}`,
+            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}`,
+            // defaultMessage: `CPU usage alert is {state} for {nodeName} in {clusterName}. CPU usage is {cpuUsage}`,
             values: {
-              state: '{{context.state}}',
+              count: '{{context.count}}',
               clusterName: '{{context.clusterName}}',
-              nodeName: '{{context.nodeName}}',
-              cpuUsage: '{{context.cpuUsage}}',
             },
           }),
           message: i18n.translate('xpack.monitoring.alerts.cpuUsage.emailMessage', {
@@ -273,14 +341,13 @@ export class CpuUsageAlert extends BaseAlert {
           }),
         };
       case ALERT_ACTION_TYPE_LOG:
+        // Want to get other notifiations for this kind of issue? Visit the Stack Monitoring UI in Kibana to find out more.s
         return {
           message: i18n.translate('xpack.monitoring.alerts.cpuUsage.serverLog', {
-            defaultMessage: `CPU usage alert is {state} for {nodeName} in {clusterName}. CPU usage is {cpuUsage}. Want to get other notifiations for this kind of issue? Visit the Stack Monitoring UI in Kibana to find out more.`,
+            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}`,
             values: {
-              state: '{{context.state}}',
+              count: '{{context.count}}',
               clusterName: '{{context.clusterName}}',
-              nodeName: '{{context.nodeName}}',
-              cpuUsage: '{{context.cpuUsage}}',
             },
           }),
         };

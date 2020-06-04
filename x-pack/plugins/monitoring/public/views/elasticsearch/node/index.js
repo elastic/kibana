@@ -19,7 +19,7 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../common/constants';
-import { AlertRenderer } from '../../../components/alert/lib';
+import { AlertRenderer } from '../../../alerts/renderer';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,

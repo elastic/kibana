@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, ApplicationStart, HttpSetup } from 'kibana/public';
+import { CoreStart, ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
 import angular from 'angular';
 import { HttpRequestInit } from '../../../../src/core/public';
 import { MonitoringPluginDependencies } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
 
 export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
@@ -35,6 +39,9 @@ export interface IShims {
   docLinks: CoreStart['docLinks'];
   docTitle: CoreStart['chrome']['docTitle'];
   timefilter: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  uiSettings: IUiSettingsClient;
   http: HttpSetup;
   kfetch: (
     { pathname, ...options }: KFetchOptions,
@@ -65,6 +72,9 @@ export class Legacy {
       docLinks: core.docLinks,
       docTitle: core.chrome.docTitle,
       timefilter: data.query.timefilter.timefilter,
+      actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+      alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
+      uiSettings: core.uiSettings,
       http: core.http,
       kfetch: async (
         { pathname, ...options }: KFetchOptions,

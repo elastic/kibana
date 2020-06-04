@@ -40,7 +40,7 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_CPU_USAGE,
 } from '../../../../common/constants';
-import { AlertMenu } from '../../alert';
+import { AlertsList } from '../../../alerts/list';
 import { AlertSeverity } from '../../../../common/enums';
 import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
@@ -216,7 +216,7 @@ export function ElasticsearchPanel(props) {
   if (alerts[ALERT_CPU_USAGE] && alerts[ALERT_CPU_USAGE].states.length) {
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertMenu alerts={[alerts[ALERT_CPU_USAGE]]} />
+        <AlertsList alerts={[alerts[ALERT_CPU_USAGE]]} />
       </EuiFlexItem>
     );
     let severity;
@@ -236,7 +236,7 @@ export function ElasticsearchPanel(props) {
     const alertsList = [alerts[ALERT_CLUSTER_HEALTH], alerts[ALERT_LICENSE_EXPIRATION]];
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertMenu alerts={alertsList} />
+        <AlertsList alerts={alertsList} />
       </EuiFlexItem>
     );
     let severity;

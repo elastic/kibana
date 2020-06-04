@@ -23,5 +23,5 @@ export enum AlertMessageTokenType {
 
 export enum AlertParamType {
   Duration = 'duration',
-  Number = 'number',
+  Percentage = 'percentage',
 }

@@ -12,6 +12,7 @@ export interface AlertLicense {
   type: string;
   expiryDateMS: number;
   clusterUuid: string;
+  ccs: string;
 }
 
 export interface AlertClusterHealth {
@@ -21,7 +22,13 @@ export interface AlertClusterHealth {
 
 export interface AlertState {
   cluster: AlertCluster;
+  ccs: string | null;
   ui: AlertUiState;
+}
+
+export interface AlertStates {
+  states: AlertState[];
+  isFiring: boolean;
 }
 
 export interface AlertClusterHealthState extends AlertState {
@@ -99,6 +106,7 @@ export interface AlertCpuUsageNodeStats {
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
+  ccs: string | null;
 }
 
 export interface AlertCpuUsageActionable {
@@ -110,6 +118,7 @@ export interface AlertCpuUsageActionable {
 export interface AlertData {
   instanceKey: string;
   clusterUuid: string;
+  ccs: string | null;
   shouldFire: boolean;
   severity: AlertSeverity;
   meta: any;

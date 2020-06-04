@@ -13,7 +13,11 @@ export async function fetchLicenses(
 ): Promise<AlertLicense[]> {
   const params = {
     index,
-    filterPath: ['hits.hits._source.license.*', 'hits.hits._source.cluster_uuid'],
+    filterPath: [
+      'hits.hits._source.license.*',
+      'hits.hits._source.cluster_uuid',
+      'hits.hits._index',
+    ],
     body: {
       size: 1,
       sort: [{ timestamp: { order: 'desc' } }],
@@ -51,6 +55,7 @@ export async function fetchLicenses(
       type: rawLicense.type,
       expiryDateMS: rawLicense.expiry_date_in_millis,
       clusterUuid: get(hit, '_source.cluster_uuid'),
+      ccs: get(hit, '_index'),
     };
     return license;
   });

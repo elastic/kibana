@@ -20,7 +20,7 @@ import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
 } from '../../../../common/constants';
-import { AlertRenderer } from '../../../components/alert/lib';
+import { AlertRenderer } from '../../../alerts/renderer';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,

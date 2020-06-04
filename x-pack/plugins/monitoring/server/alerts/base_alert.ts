@@ -17,10 +17,11 @@ import {
   AlertExecutorOptions,
   AlertInstance,
   AlertsClient,
+  AlertServices,
 } from '../../../alerting/server';
 import { Alert, AlertAction, RawAlertInstance } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
-import { AlertState, AlertCluster, AlertMessage, AlertData } from './types';
+import { AlertState, AlertCluster, AlertMessage, AlertData, AlertStates } from './types';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -40,8 +41,8 @@ const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle', 
 export class BaseAlert {
   public type!: string;
   public label!: string;
-  public defaultThrottle: string = '1m';
-  public defaultInterval: string = '1m';
+  public defaultThrottle: string = '30s';
+  public defaultInterval: string = '30s';
   public rawAlert: Alert | undefined;
   public isLegacy: boolean = false;
 
@@ -297,6 +298,9 @@ export class BaseAlert {
     logger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
+    // console.log(
+    //   `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
+    // );
 
     const callCluster = this.monitoringCluster
       ? this.monitoringCluster.callAsInternalUser
@@ -313,43 +317,7 @@ export class BaseAlert {
       services.savedObjectsClient
     );
     const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
-
-    for (const item of data) {
-      const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
-      if (!cluster) {
-        logger.warn(`Unable to find cluster for clusterUuid='${item.clusterUuid}'`);
-        continue;
-      }
-
-      const instance = services.alertInstanceFactory(`${this.type}:${item.instanceKey}`);
-      const alertState: AlertState = this.getDefaultAlertState(cluster, item);
-
-      // custom shit
-
-      let shouldExecuteActions = false;
-      if (item.shouldFire) {
-        logger.debug(`${this.type} is firing`);
-        // alertState.cpuUsage = cpuUsage;
-        alertState.ui.triggeredMS = +new Date();
-        alertState.ui.isFiring = true;
-        alertState.ui.message = this.getUiMessage(alertState, item);
-        alertState.ui.severity = item.severity;
-        alertState.ui.resolvedMS = 0;
-        shouldExecuteActions = true;
-      } else if (!item.shouldFire && alertState.ui.isFiring) {
-        logger.debug(`${this.type} is not firing anymore`);
-        // alertState.cpuUsage = cpuUsage;
-        alertState.ui.isFiring = false;
-        alertState.ui.resolvedMS = +new Date();
-        alertState.ui.message = this.getUiMessage(alertState, item);
-        shouldExecuteActions = true;
-      }
-
-      instance.replaceState(alertState);
-      if (shouldExecuteActions) {
-        this.executeActions(instance, alertState, item, cluster);
-      }
-    }
+    this.processData(data, clusters, services, logger);
   }
 
   protected async fetchData(
@@ -361,6 +329,48 @@ export class BaseAlert {
   ): Promise<AlertData[]> {
     // Child should implement
     throw new Error('Child classes must implement `fetchData`');
+  }
+
+  protected processData(
+    data: AlertData[],
+    clusters: AlertCluster[],
+    services: AlertServices,
+    logger: Logger
+  ) {
+    for (const item of data) {
+      const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
+      if (!cluster) {
+        logger.warn(`Unable to find cluster for clusterUuid='${item.clusterUuid}'`);
+        continue;
+      }
+
+      const alertStates: AlertStates = { states: [], isFiring: false };
+      const instance = services.alertInstanceFactory(`${this.type}:${item.instanceKey}`);
+      const alertState: AlertState = this.getDefaultAlertState(cluster, item);
+      alertStates.states.push(alertState);
+
+      let shouldExecuteActions = false;
+      if (item.shouldFire) {
+        logger.debug(`${this.type} is firing`);
+        alertState.ui.triggeredMS = +new Date();
+        alertStates.isFiring = alertState.ui.isFiring = true;
+        alertState.ui.message = this.getUiMessage(alertState, item);
+        alertState.ui.severity = item.severity;
+        alertState.ui.resolvedMS = 0;
+        shouldExecuteActions = true;
+      } else if (!item.shouldFire && alertState.ui.isFiring) {
+        logger.debug(`${this.type} is not firing anymore`);
+        alertState.ui.isFiring = false;
+        alertState.ui.resolvedMS = +new Date();
+        alertState.ui.message = this.getUiMessage(alertState, item);
+        shouldExecuteActions = true;
+      }
+
+      instance.replaceState(alertState);
+      if (shouldExecuteActions) {
+        this.executeActions(instance, alertStates, item, cluster);
+      }
+    }
   }
 
   public getDefaultActionParams(actionTypeId: string): any {
@@ -378,6 +388,7 @@ export class BaseAlert {
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
     return {
       cluster,
+      ccs: item.ccs,
       ui: {
         isFiring: false,
         message: null,
@@ -395,7 +406,7 @@ export class BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    alertState: AlertState,
+    alertStates: AlertStates,
     item: AlertData,
     cluster: AlertCluster
   ) {

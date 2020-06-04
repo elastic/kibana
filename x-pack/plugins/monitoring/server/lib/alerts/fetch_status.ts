@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { AlertState } from '../../alerts/types';
+import { AlertState, AlertGroupedState, AlertStates } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
@@ -51,18 +51,20 @@ export async function fetchStatus(
       }
 
       result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
-        const state = instance.state as AlertState;
-        const meta = instance.meta;
-        if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {
-          return accum;
-        }
+        const alertStates = instance.state as AlertStates;
+        for (const state of alertStates.states) {
+          const meta = instance.meta;
+          if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {
+            return accum;
+          }
 
-        let firing = false;
-        const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
-        if (state.ui.isFiring || isInBetween) {
-          firing = true;
+          let firing = false;
+          const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
+          if (state.ui.isFiring || isInBetween) {
+            firing = true;
+          }
+          accum.push({ firing, state, meta });
         }
-        accum.push({ firing, state, meta });
         return accum;
       }, []);
     })
