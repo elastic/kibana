@@ -103,7 +103,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.bulkDeleteDestinationIndexTitle',
                 {
-                  defaultMessage: 'Delete destination index',
+                  defaultMessage: 'Delete destination indexes',
                 }
               )}
               checked={deleteDestIndex}
@@ -118,7 +118,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.bulkDeleteDestIndexPatternTitle',
                 {
-                  defaultMessage: 'Delete index pattern',
+                  defaultMessage: 'Delete destination index patterns',
                 }
               )}
               checked={deleteIndexPattern}
