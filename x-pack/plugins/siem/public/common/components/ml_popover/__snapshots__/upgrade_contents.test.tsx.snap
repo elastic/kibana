@@ -50,7 +50,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       grow={false}
     >
       <EuiButton
-        href="/test/base/path/app/kibana#/management/stack/license_management"
+        href="/test/base/path/app/management/stack/license_management"
         iconType="gear"
         target="_blank"
       >
