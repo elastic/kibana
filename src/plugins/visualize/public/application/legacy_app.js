@@ -234,8 +234,11 @@ export function initVisualizeApp(app, deps) {
       })
       .otherwise({
         template: '<span></span>',
-        controller: function () {
-          deps.kibanaLegacy.navigateToDefaultApp();
+        controller: function ($location) {
+          const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl($location.path());
+          if (!navigated) {
+            deps.kibanaLegacy.navigateToDefaultApp();
+          }
         },
       });
   });

@@ -36,7 +36,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -100,6 +100,7 @@ export interface DiscoverStartPlugins {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share?: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
 }

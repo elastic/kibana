@@ -31,6 +31,7 @@ import { getDashboardConfig } from './dashboard_config';
 import { navigateToDefaultApp } from './navigate_to_default_app';
 import { createLegacyUrlForwardApp } from './forward_app';
 import { injectHeaderStyle } from './utils/inject_header_style';
+import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
 
 interface LegacyAppAliasDefinition {
   legacyAppId: string;
@@ -217,6 +218,9 @@ export class KibanaLegacyPlugin {
           this.currentAppId,
           overwriteHash
         );
+      },
+      navigateToLegacyKibanaUrl: (hash: string) => {
+        return navigateToLegacyKibanaUrl(hash, this.forwardDefinitions, basePath, application);
       },
     };
   }

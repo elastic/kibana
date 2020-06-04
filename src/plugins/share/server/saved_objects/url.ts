@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectMigrationFn, SavedObjectsType } from 'kibana/server';
-import { flow } from 'lodash';
-import { migrateLegacyKibanaAppShortUrls } from './kibana_app_migration';
+import { SavedObjectsType } from 'kibana/server';
 
 export const url: SavedObjectsType = {
   name: 'url',
@@ -31,9 +29,6 @@ export const url: SavedObjectsType = {
     getTitle(obj) {
       return `/goto/${encodeURIComponent(obj.id)}`;
     },
-  },
-  migrations: {
-    '7.9.0': flow<SavedObjectMigrationFn>(migrateLegacyKibanaAppShortUrls),
   },
   mappings: {
     properties: {

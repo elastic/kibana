@@ -243,8 +243,11 @@ export function initDashboardApp(app, deps) {
       })
       .otherwise({
         template: '<span></span>',
-        controller: function () {
-          deps.navigateToDefaultApp();
+        controller: function ($location) {
+          const { navigated } = deps.navigateToLegacyKibanaUrl($location.path());
+          if (!navigated) {
+            deps.navigateToDefaultApp();
+          }
         },
       });
   });

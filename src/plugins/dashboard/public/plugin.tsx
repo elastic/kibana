@@ -242,7 +242,7 @@ export class DashboardPlugin
           navigation,
           share: shareStart,
           data: dataStart,
-          kibanaLegacy: { dashboardConfig, navigateToDefaultApp },
+          kibanaLegacy: { dashboardConfig, navigateToDefaultApp, navigateToLegacyKibanaUrl },
           savedObjects,
         } = pluginsStart;
 
@@ -251,6 +251,7 @@ export class DashboardPlugin
           core: coreStart,
           dashboardConfig,
           navigateToDefaultApp,
+          navigateToLegacyKibanaUrl,
           navigation,
           share: shareStart,
           data: dataStart,

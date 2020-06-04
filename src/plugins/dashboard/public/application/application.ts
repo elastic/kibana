@@ -71,6 +71,7 @@ export interface RenderDeps {
   config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
   navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
+  navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
 }
