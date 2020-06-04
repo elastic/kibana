@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 
 import './tree.scss';
@@ -135,43 +135,39 @@ export interface Props {
   onDuplicate: OnDuplicateHandler;
 }
 
-export const Tree: FunctionComponent<Props> = ({
-  processors,
-  baseSelector,
-  renderItem,
-  onDuplicate,
-  onMove,
-}) => {
-  const [treeMode, setTreeMode] = useState<TreeMode>('idle');
-  const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
-  return (
-    <PrivateTree
-      renderItem={renderItem}
-      privateOnAction={(action) => {
-        if (action.type === 'selectToMove') {
-          setTreeMode('move');
-          setSelectedProcessorInfo(action.payload);
-          return;
-        }
+export const Tree: FunctionComponent<Props> = memo(
+  ({ processors, baseSelector, renderItem, onDuplicate, onMove }) => {
+    const [treeMode, setTreeMode] = useState<TreeMode>('idle');
+    const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
+    return (
+      <PrivateTree
+        renderItem={renderItem}
+        privateOnAction={(action) => {
+          if (action.type === 'selectToMove') {
+            setTreeMode('move');
+            setSelectedProcessorInfo(action.payload);
+            return;
+          }
 
-        if (action.type === 'move') {
-          setTreeMode('idle');
-          onMove({ source: selectedProcessorInfo!.selector, destination: action.payload });
-          setSelectedProcessorInfo(undefined);
-          return;
-        }
+          if (action.type === 'move') {
+            setTreeMode('idle');
+            onMove({ source: selectedProcessorInfo!.selector, destination: action.payload });
+            setSelectedProcessorInfo(undefined);
+            return;
+          }
 
-        if (action.type === 'duplicate') {
-          setTreeMode('idle');
-          onDuplicate({ source: action.payload });
-          setSelectedProcessorInfo(undefined);
-          return;
-        }
-      }}
-      selectedProcessorInfo={selectedProcessorInfo}
-      processors={processors}
-      selector={baseSelector}
-      mode={treeMode}
-    />
-  );
-};
+          if (action.type === 'duplicate') {
+            setTreeMode('idle');
+            onDuplicate({ source: action.payload });
+            setSelectedProcessorInfo(undefined);
+            return;
+          }
+        }}
+        selectedProcessorInfo={selectedProcessorInfo}
+        processors={processors}
+        selector={baseSelector}
+        mode={treeMode}
+      />
+    );
+  }
+);

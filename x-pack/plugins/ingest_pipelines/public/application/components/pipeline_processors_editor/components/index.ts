@@ -8,7 +8,7 @@ export { SettingsFormFlyout } from './settings_form_flyout';
 
 export { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
 
-export { Tree, RenderTreeItemFunction } from './tree';
+export * from './tree';
 
 export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item';
 

@@ -18,6 +18,8 @@ import {
   Tree,
   SettingsFormFlyout,
   ProcessorRemoveModal,
+  OnMoveHandler,
+  OnDuplicateHandler,
 } from './components';
 
 import {
@@ -170,6 +172,20 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       [processorsDispatch, setSettingsFormMode, setProcessorToDeleteSelector]
     );
 
+    const onMove = useCallback<OnMoveHandler>(
+      (args) => {
+        processorsDispatch({ type: 'moveProcessor', payload: args });
+      },
+      [processorsDispatch]
+    );
+
+    const onDuplicate = useCallback<OnDuplicateHandler>(
+      (args) => {
+        processorsDispatch({ type: 'duplicateProcessor', payload: args });
+      },
+      [processorsDispatch]
+    );
+
     return (
       <>
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -192,12 +208,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                   baseSelector={PROCESSOR_STATE_SCOPE}
                   processors={processors}
                   renderItem={renderItem}
-                  onMove={(args) => {
-                    processorsDispatch({ type: 'moveProcessor', payload: args });
-                  }}
-                  onDuplicate={(args) => {
-                    processorsDispatch({ type: 'duplicateProcessor', payload: args });
-                  }}
+                  onMove={onMove}
+                  onDuplicate={onDuplicate}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -249,12 +261,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 <Tree
                   baseSelector={ON_FAILURE_STATE_SCOPE}
                   processors={onFailureProcessors}
-                  onMove={(args) => {
-                    processorsDispatch({ type: 'moveProcessor', payload: args });
-                  }}
-                  onDuplicate={(args) => {
-                    processorsDispatch({ type: 'duplicateProcessor', payload: args });
-                  }}
+                  onMove={onMove}
+                  onDuplicate={onDuplicate}
                   renderItem={renderItem}
                 />
               </EuiFlexItem>
