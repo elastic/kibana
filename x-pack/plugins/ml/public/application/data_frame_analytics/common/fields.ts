@@ -18,7 +18,7 @@ import { Field } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
-import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE } from './constants';
+import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -177,6 +177,7 @@ export const getDefaultFieldsFromJobCaps = (
 
   const featureImportanceFields = [];
   const featureInfluenceFields = [];
+  const topClassesFields = [];
   const allFields: any = [];
   let type: ES_FIELD_TYPES | undefined;
   let predictedField: string | undefined;
@@ -213,13 +214,22 @@ export const getDefaultFieldsFromJobCaps = (
       predictionFieldName ? predictionFieldName : defaultPredictionField
     }`;
 
-    if ((numTopFeatureImportanceValues ?? 0) > 0 && needsDestIndexFields === true) {
+    if ((numTopFeatureImportanceValues ?? 0) > 0) {
       featureImportanceFields.push({
         id: `${resultsField}.${FEATURE_IMPORTANCE}`,
         name: `${resultsField}.${FEATURE_IMPORTANCE}`,
         type: KBN_FIELD_TYPES.UNKNOWN,
       });
     }
+    // TODO: Will need to remove ml.top_classes.something and ml.feature_importance_values.something
+    // from results from field api - so we don't end up using those as columns.
+    // if ((numTopClasses ?? 0) > 0) {
+    topClassesFields.push({
+      id: `${resultsField}.${TOP_CLASSES}`,
+      name: `${resultsField}.${TOP_CLASSES}`,
+      type: KBN_FIELD_TYPES.UNKNOWN,
+    });
+    // }
 
     // Only need to add these fields if we didn't use dest index pattern to get the fields
     if (needsDestIndexFields === true) {
@@ -234,7 +244,12 @@ export const getDefaultFieldsFromJobCaps = (
     }
   }
 
-  allFields.push(...fields, ...featureImportanceFields, ...featureInfluenceFields);
+  allFields.push(
+    ...fields,
+    ...featureImportanceFields,
+    ...featureInfluenceFields,
+    ...topClassesFields
+  );
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
     sortExplorationResultsFields(a, b, jobConfig)
   );
