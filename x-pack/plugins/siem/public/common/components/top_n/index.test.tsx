@@ -17,13 +17,13 @@ import {
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { createStore, State } from '../../store';
-import {
-  TimelineContext,
-  TimelineTypeContext,
-} from '../../../timelines/components/timeline/timeline_context';
 
 import { Props } from './top_n';
 import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
+import {
+  ManageGlobalTimeline,
+  timelineDefaults,
+} from '../../../timelines/components/manage_timeline';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
@@ -163,13 +163,15 @@ describe('StatefulTopN', () => {
     beforeEach(() => {
       wrapper = mount(
         <TestProviders store={store}>
-          <StatefulTopN
-            browserFields={mockBrowserFields}
-            field={field}
-            toggleTopN={jest.fn()}
-            onFilterAdded={jest.fn()}
-            value={value}
-          />
+          <ManageGlobalTimeline>
+            <StatefulTopN
+              browserFields={mockBrowserFields}
+              field={field}
+              toggleTopN={jest.fn()}
+              onFilterAdded={jest.fn()}
+              value={value}
+            />
+          </ManageGlobalTimeline>
         </TestProviders>
       );
     });
@@ -241,20 +243,24 @@ describe('StatefulTopN', () => {
 
     beforeEach(() => {
       filterManager = new FilterManager(mockUiSettingsForFilterManager);
-
+      const manageTimelineForTesting = {
+        [ACTIVE_TIMELINE_REDUX_ID]: {
+          ...timelineDefaults,
+          id: ACTIVE_TIMELINE_REDUX_ID,
+          filterManager,
+        },
+      };
       wrapper = mount(
         <TestProviders store={store}>
-          <TimelineContext.Provider value={{ filterManager, isLoading: false }}>
-            <TimelineTypeContext.Provider value={{ id: ACTIVE_TIMELINE_REDUX_ID }}>
-              <StatefulTopN
-                browserFields={mockBrowserFields}
-                field={field}
-                toggleTopN={jest.fn()}
-                onFilterAdded={jest.fn()}
-                value={value}
-              />
-            </TimelineTypeContext.Provider>
-          </TimelineContext.Provider>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+            <StatefulTopN
+              browserFields={mockBrowserFields}
+              field={field}
+              toggleTopN={jest.fn()}
+              onFilterAdded={jest.fn()}
+              value={value}
+            />
+          </ManageGlobalTimeline>
         </TestProviders>
       );
     });
@@ -310,28 +316,34 @@ describe('StatefulTopN', () => {
     });
   });
 
-  test(`defaults to the 'Signals events' option when rendering in a NON-active timeline context (e.g. the Signals table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'signals'`, () => {
+  test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, () => {
     const filterManager = new FilterManager(mockUiSettingsForFilterManager);
+
+    const manageTimelineForTesting = {
+      [ACTIVE_TIMELINE_REDUX_ID]: {
+        ...timelineDefaults,
+        id: ACTIVE_TIMELINE_REDUX_ID,
+        filterManager,
+        documentType: 'alerts',
+      },
+    };
+
     const wrapper = mount(
       <TestProviders store={store}>
-        <TimelineContext.Provider value={{ filterManager, isLoading: false }}>
-          <TimelineTypeContext.Provider
-            value={{ documentType: 'signals', id: ACTIVE_TIMELINE_REDUX_ID }}
-          >
-            <StatefulTopN
-              browserFields={mockBrowserFields}
-              field={field}
-              toggleTopN={jest.fn()}
-              onFilterAdded={jest.fn()}
-              value={value}
-            />
-          </TimelineTypeContext.Provider>
-        </TimelineContext.Provider>
+        <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+          <StatefulTopN
+            browserFields={mockBrowserFields}
+            field={field}
+            toggleTopN={jest.fn()}
+            onFilterAdded={jest.fn()}
+            value={value}
+          />
+        </ManageGlobalTimeline>
       </TestProviders>
     );
 
     const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-    expect(props.defaultView).toEqual('signal');
+    expect(props.defaultView).toEqual('alert');
   });
 });
