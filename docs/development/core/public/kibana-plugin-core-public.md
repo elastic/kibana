@@ -90,6 +90,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
 |  [ImageValidation](./kibana-plugin-core-public.imagevalidation.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
+|  [LegacyApp](./kibana-plugin-core-public.legacyapp.md) |  |
 |  [LegacyCoreSetup](./kibana-plugin-core-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-core-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-core-public.legacynavlink.md) |  |
@@ -162,6 +163,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
+|  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
+|  [PublicLegacyAppInfo](./kibana-plugin-core-public.publiclegacyappinfo.md) | Information about a registered [legacy application](./kibana-plugin-core-public.legacyapp.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
 |  [RecursiveReadonly](./kibana-plugin-core-public.recursivereadonly.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |

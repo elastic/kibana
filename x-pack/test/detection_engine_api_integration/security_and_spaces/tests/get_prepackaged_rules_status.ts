@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_RULES_URL,
-} from '../../../../plugins/siem/common/constants';
+} from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

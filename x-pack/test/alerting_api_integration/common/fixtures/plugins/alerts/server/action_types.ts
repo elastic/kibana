@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import { ActionType, ActionTypeExecutorOptions } from '../../../../../../../plugins/actions/server';
@@ -13,7 +13,7 @@ export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
   { actions }: Pick<FixtureSetupDeps, 'actions'>
 ) {
-  const clusterClient = core.elasticsearch.adminClient;
+  const clusterClient = core.elasticsearch.legacy.client;
 
   // Action types
   const noopActionType: ActionType = {
