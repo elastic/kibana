@@ -38,6 +38,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   );
 
   const { form } = useForm({
+    defaultValue: processor?.options,
     onSubmit: handleSubmit,
   });
 
