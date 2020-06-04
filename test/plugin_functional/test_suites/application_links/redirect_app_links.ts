@@ -28,16 +28,10 @@ declare global {
   }
 }
 
-const getKibanaUrl = (pathname?: string, search?: string) =>
-  decodeURIComponent(
-    url.format({
-      protocol: 'http:',
-      hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-      port: process.env.TEST_KIBANA_PORT || '5620',
-      pathname,
-      search,
-    })
-  );
+const getPathWithHash = (absoluteUrl: string) => {
+  const parsed = url.parse(absoluteUrl);
+  return `${parsed.path}${parsed.hash ?? ''}`;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -45,13 +39,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
-  const setNonReloadedFlag = async () => {
+  const setNonReloadedFlag = () => {
     return browser.executeAsync(async (cb: Function) => {
       window.__nonReloadedFlag = true;
       cb();
     });
   };
-  const wasReloaded = async (): Promise<boolean> => {
+  const wasReloaded = (): Promise<boolean> => {
     return browser.executeAsync<boolean>(async (cb) => {
       const reloaded = window.__nonReloadedFlag !== true;
       cb(reloaded);
@@ -69,7 +63,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.click('applink-basic-test');
 
       expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/applink_end'));
+      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end');
       expect(await wasReloaded()).to.eql(false);
     });
 
@@ -77,7 +71,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.click('applink-path-test');
 
       expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/applink_end/some-path'));
+      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end/some-path');
       expect(await wasReloaded()).to.eql(false);
     });
 
@@ -85,8 +79,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.click('applink-hash-test');
 
       expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(
-        getKibanaUrl('/app/applink_end/some-path#/some/hash')
+      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql(
+        '/app/applink_end/some-path#/some/hash'
       );
       expect(await wasReloaded()).to.eql(false);
     });
@@ -95,7 +89,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.click('applink-nested-test');
 
       expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/applink_end#bang'));
+      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end#bang');
       expect(await wasReloaded()).to.eql(false);
     });
 
@@ -103,7 +97,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.click('applink-intra-test');
 
       expect(await testSubjects.exists('app-applink_start')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/applink_start/some-path'));
+      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_start/some-path');
       expect(await wasReloaded()).to.eql(false);
     });
   });

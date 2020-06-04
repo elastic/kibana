@@ -26,7 +26,7 @@ interface CreateCrossAppClickHandlerOptions {
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
-export const createCrossAppClickHandler = ({
+export const createNavigateToUrlClickHandler = ({
   container,
   navigateToUrl,
 }: CreateCrossAppClickHandlerOptions): React.MouseEventHandler<HTMLElement> => {

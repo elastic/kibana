@@ -19,7 +19,7 @@
 
 import { MouseEvent } from 'react';
 import { ApplicationStart } from 'src/core/public';
-import { createCrossAppClickHandler } from './click_handler';
+import { createNavigateToUrlClickHandler } from './click_handler';
 
 const createLink = ({
   href = '/base-path/app/targetApp',
@@ -53,12 +53,12 @@ const createEvent = ({
   } as unknown) as MouseEvent<HTMLElement>;
 };
 
-describe('createCrossAppClickHandler', () => {
+describe('createNavigateToUrlClickHandler', () => {
   let container: HTMLElement;
   let navigateToUrl: jest.MockedFunction<ApplicationStart['navigateToUrl']>;
 
   const createHandler = () =>
-    createCrossAppClickHandler({
+    createNavigateToUrlClickHandler({
       container,
       navigateToUrl,
     });
