@@ -12,6 +12,7 @@ import { getRandomString } from './random';
  */
 export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
+  let componentTemplatesCreated = [];
 
   const createIndex = (index = getRandomString(), body) => {
     indicesCreated.push(index);
@@ -34,12 +35,27 @@ export const initElasticsearchHelpers = (es) => {
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
 
-  const createComponentTemplate = (componentTemplate) => {
+  const createComponentTemplate = (componentTemplate, storeInMemory) => {
+    if (storeInMemory) {
+      componentTemplatesCreated.push(componentTemplate.name);
+    }
+
     return es.dataManagement.saveComponentTemplate(componentTemplate);
   };
 
   const deleteComponentTemplate = (componentTemplateName) => {
     return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+  };
+
+  const cleanUpComponentTemplates = () => {
+    Promise.all(componentTemplatesCreated.map(deleteComponentTemplate))
+      .then(() => {
+        componentTemplatesCreated = [];
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(`Error deleting ES resources: ${err.message}`);
+      });
   };
 
   return {
@@ -52,5 +68,6 @@ export const initElasticsearchHelpers = (es) => {
     catTemplate,
     createComponentTemplate,
     deleteComponentTemplate,
+    cleanUpComponentTemplates,
   };
 };
