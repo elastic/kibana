@@ -270,10 +270,48 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async addAggregationEntry(index: number, identifier: string, expectedLabel: string) {
+    async addAggregationEntry(
+      index: number,
+      identifier: string,
+      expectedLabel: string,
+      formData?: Record<string, any>
+    ) {
       await comboBox.set('transformAggregationSelection > comboBoxInput', identifier);
       await this.assertAggregationInputValue([]);
       await this.assertAggregationEntryExists(index, expectedLabel);
+
+      if (formData !== undefined) {
+        await this.fillPopoverForm(identifier, expectedLabel, formData);
+      }
+    },
+
+    async fillPopoverForm(
+      identifier: string,
+      expectedLabel: string,
+      formData: Record<string, any>
+    ) {
+      await testSubjects.existOrFail(`transformAggPopoverForm_${expectedLabel}`);
+
+      for (const [testObj, value] of Object.entries(formData)) {
+        switch (testObj) {
+          case 'transformFilterAggTypeSelector':
+            await this.selectFilerAggType(value);
+            break;
+          case 'transformFilterTermValueSelector':
+            await this.fillFilterTermValue(value);
+            break;
+        }
+      }
+      await testSubjects.clickWhenNotDisabled('transformApplyAggChanges');
+      await testSubjects.missingOrFail(`transformAggPopoverForm_${expectedLabel}`);
+    },
+
+    async selectFilerAggType(value: string) {
+      await testSubjects.selectValue('transformFilterAggTypeSelector', value);
+    },
+
+    async fillFilterTermValue(value: string) {
+      await comboBox.set('transformFilterTermValueSelector', value);
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
