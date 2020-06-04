@@ -132,8 +132,22 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
    *   toRemove: undefined,
    * });
    * ```
+   *
+   * How to override the schema's options
+   * ```ts
+   * const origin = schema.object({
+   *   initial: schema.string(),
+   * }, { defaultValue: { initial: 'foo' }});
+   *
+   * const extended = origin.extends({
+   *   added: schema.number(),
+   * }, { defaultValue: { initial: 'foo', added: 'bar' }});
+   * ```
    */
-  public extends<NP extends NullableProps>(newProps: NP): ExtendedObjectType<P, NP> {
+  public extends<NP extends NullableProps>(
+    newProps: NP,
+    newOptions?: ExtendedObjectTypeOptions<P, NP>
+  ): ExtendedObjectType<P, NP> {
     const extendedProps = Object.entries({
       ...this.props,
       ...newProps,
@@ -147,7 +161,12 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       return memo;
     }, {} as ExtendedProps<P, NP>);
 
-    return new ObjectType(extendedProps, this.options as ExtendedObjectTypeOptions<P, NP>);
+    const extendedOptions = {
+      ...this.options,
+      ...newOptions,
+    } as ExtendedObjectTypeOptions<P, NP>;
+
+    return new ObjectType(extendedProps, extendedOptions);
   }
 
   protected handleError(type: string, { reason, value }: Record<string, any>) {

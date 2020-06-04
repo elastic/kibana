@@ -481,4 +481,22 @@ describe('#extends', () => {
       mutated: 'bar',
     });
   });
+
+  it(`allows to override the original schema's options`, () => {
+    const origin = schema.object(
+      {
+        initial: schema.string(),
+      },
+      { defaultValue: { initial: 'foo' } }
+    );
+
+    const extended = origin.extends(
+      {
+        added: schema.number(),
+      },
+      { defaultValue: { initial: 'bar', added: 42 } }
+    );
+
+    expect(extended.validate(undefined)).toEqual({ initial: 'bar', added: 42 });
+  });
 });
