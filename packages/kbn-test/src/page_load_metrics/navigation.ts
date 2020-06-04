@@ -22,14 +22,13 @@ import Url from 'url';
 import _ from 'lodash';
 import puppeteer from 'puppeteer';
 import { resolve } from 'path';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { ResponseReceivedEvent, DataReceivedEvent } from './event';
-
-const failureDir = resolve(REPO_ROOT, 'x-pack/test/page_load_metrics/screenshots/failure');
 
 export interface NavigationOptions {
   headless: boolean;
   appConfig: { url: string; username: string; password: string };
+  screenshotsDir?: string;
 }
 
 export type NavigationResults = Map<string, Map<string, FrameResponse>>;
@@ -137,15 +136,24 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
             continue;
           }
 
-          await page.bringToFront();
+          const failureDir = options.screenshotsDir
+            ? resolve(options.screenshotsDir, 'failure')
+            : resolve(__dirname, 'screenshots/failure');
+          const screenshotPath = resolve(
+            failureDir,
+            `${app.path.slice(1).split('/').join('_')}_navigation.png`
+          );
           Fs.mkdirSync(failureDir, { recursive: true });
+
+          await page.bringToFront();
           await page.screenshot({
-            path: resolve(failureDir, `${app.path.split('/').join('_')}_navigation.png`),
+            path: screenshotPath,
             type: 'png',
             fullPage: true,
           });
+          log.debug(`Saving screenshot to ${screenshotPath}`);
 
-          throw error;
+          throw new Error(`Page load timeout: ${app.path} not loaded after 30 seconds`);
         }
       }
 
