@@ -65,10 +65,13 @@ const fullyMatchingIds = async (
     let matched = false;
     for (const locBucket of monBucket.location.buckets) {
       const location = locBucket.key;
-      const latestSource = locBucket.latest.hits.hits[0]._source;
-      const latestStillMatchingSource = locBucket.latest_matching.top.hits.hits[0]._source;
+      const latestSource = locBucket.summaries.latest.hits.hits[0]._source;
+      const latestStillMatchingSource = locBucket.latest_matching.top.hits.hits[0]?._source;
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
+      //
+      // We just check if the timestamp is greater. Note this may match an incomplete check group
+      // that has not yet sent a summary doc
       if (latestStillMatchingSource['@timestamp'] >= latestSource['@timestamp']) {
         matched = true;
       }
@@ -112,8 +115,6 @@ export const mostRecentCheckGroups = async (
           filter: [
             await queryContext.dateRangeFilter(),
             { terms: { 'monitor.id': potentialMatchMonitorIDs } },
-            // only match summary docs because we only want the latest *complete* check group.
-            { exists: { field: 'summary' } },
           ],
         },
       },
@@ -124,15 +125,27 @@ export const mostRecentCheckGroups = async (
             location: {
               terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
               aggs: {
-                latest: {
-                  top_hits: {
-                    sort: [{ '@timestamp': 'desc' }],
-                    _source: {
-                      includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+                summaries: {
+                  // only match summary docs because we only want the latest *complete* check group.
+                  filter: { exists: { field: 'summary' } },
+                  aggs: {
+                    latest: {
+                      top_hits: {
+                        sort: [{ '@timestamp': 'desc' }],
+                        _source: {
+                          includes: [
+                            'monitor.check_group',
+                            '@timestamp',
+                            'summary.up',
+                            'summary.down',
+                          ],
+                        },
+                        size: 1,
+                      },
                     },
-                    size: 1,
                   },
                 },
+                // We want to find the latest check group, even if it's not part of a summary
                 latest_matching: {
                   filter: queryContext.filterClause || { match_all: {} },
                   aggs: {

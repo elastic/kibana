@@ -71,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         const url = getBaseUrl(dateRangeStart, dateRangeEnd) + `&filters=${filters}`;
         const apiResponse = await supertest.get(url);
         const nonSummaryRes = apiResponse.body;
+        // expect(JSON.stringify(nonSummaryRes)).to.eql("foo");
         expect(nonSummaryRes.summaries.length).to.eql(1);
       });
 
