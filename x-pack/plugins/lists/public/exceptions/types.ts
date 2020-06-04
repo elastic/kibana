@@ -29,10 +29,6 @@ export interface ExceptionItemsAndPagination {
   pagination: Pagination;
 }
 
-export interface ExceptionListAndItems extends ExceptionListSchema {
-  exceptionItems: ExceptionItemsAndPagination;
-}
-
 export type AddExceptionList = ExceptionListSchema | CreateExceptionListSchemaPartial;
 
 export type AddExceptionListItem = CreateExceptionListItemSchemaPartial | ExceptionListItemSchema;
@@ -49,6 +45,11 @@ export interface UseExceptionListProps {
   namespaceType: NamespaceType;
   onError: (arg: Error) => void;
   pagination?: Pagination;
+}
+
+export interface UseExceptionListRefreshProps {
+  listId: string;
+  listNamespaceType: NamespaceType;
 }
 
 export interface ApiCallByListIdProps {

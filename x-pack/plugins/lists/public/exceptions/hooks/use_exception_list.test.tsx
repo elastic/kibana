@@ -10,7 +10,8 @@ import * as api from '../api';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { ExceptionListAndItems, UseExceptionListProps } from '../types';
+import { ExceptionListSchema } from '../../../common/schemas';
+import { ExceptionItemsAndPagination, UseExceptionListProps } from '../types';
 
 import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
 
@@ -41,8 +42,7 @@ describe('useExceptionList', () => {
       );
       await waitForNextUpdate();
 
-      expect(result.current).toEqual([true, null, result.current[2]]);
-      expect(typeof result.current[2]).toEqual('function');
+      expect(result.current).toEqual([true, null, null, null]);
     });
   });
 
@@ -62,19 +62,23 @@ describe('useExceptionList', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      const expectedResult: ExceptionListAndItems = {
-        ...getExceptionListSchemaMock(),
-        exceptionItems: {
-          items: [{ ...getExceptionListItemSchemaMock() }],
-          pagination: {
-            page: 1,
-            perPage: 20,
-            total: 1,
-          },
+      const expectedListResult: ExceptionListSchema = getExceptionListSchemaMock();
+
+      const expectedListItemsResult: ExceptionItemsAndPagination = {
+        items: [getExceptionListItemSchemaMock()],
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 1,
         },
       };
 
-      expect(result.current).toEqual([false, expectedResult, result.current[2]]);
+      expect(result.current).toEqual([
+        false,
+        expectedListResult,
+        expectedListItemsResult,
+        result.current[3],
+      ]);
     });
   });
 
@@ -128,7 +132,13 @@ describe('useExceptionList', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      result.current[2]();
+
+      expect(typeof result.current[3]).toEqual('function');
+
+      if (result.current[3] != null) {
+        result.current[3]({ listId: 'myListId', listNamespaceType: 'single' });
+      }
+
       await waitForNextUpdate();
 
       expect(spyOnfetchExceptionListById).toHaveBeenCalledTimes(2);

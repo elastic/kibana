@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchExceptionListById, fetchExceptionListItemsByListId } from '../api';
-import { ExceptionListAndItems, UseExceptionListProps } from '../types';
+import {
+  ExceptionItemsAndPagination,
+  UseExceptionListProps,
+  UseExceptionListRefreshProps,
+} from '../types';
+import { ExceptionListSchema } from '../../../common/schemas';
 
-export type ReturnExceptionListAndItems = [boolean, ExceptionListAndItems | null, () => void];
+type Func = (arg: UseExceptionListRefreshProps) => void;
+export type ReturnExceptionListAndItems = [
+  boolean,
+  ExceptionListSchema | null,
+  ExceptionItemsAndPagination | null,
+  Func | null
+];
 
 /**
  * Hook for using to get an ExceptionList and it's ExceptionListItems
@@ -37,64 +48,60 @@ export const useExceptionList = ({
   },
   onError,
 }: UseExceptionListProps): ReturnExceptionListAndItems => {
-  const [exceptionListAndItems, setExceptionList] = useState<ExceptionListAndItems | null>(null);
-  const [shouldRefresh, setRefresh] = useState<boolean>(true);
-  const refreshExceptionList = useCallback(() => setRefresh(true), [setRefresh]);
+  const [exceptionList, setExceptionList] = useState<ExceptionListSchema | null>(null);
+  const [exceptionItems, setExceptionListItems] = useState<ExceptionItemsAndPagination | null>(
+    null
+  );
+  const fetchExceptionList = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const tags = filterOptions.tags.sort().join();
+  const tags = useMemo(() => filterOptions.tags.sort().join(), [filterOptions.tags]);
 
   useEffect(
     () => {
       let isSubscribed = true;
       const abortCtrl = new AbortController();
 
-      const fetchData = async (idToFetch: string): Promise<void> => {
-        if (shouldRefresh) {
-          try {
-            setLoading(true);
+      const fetchData = async ({
+        listId,
+        listNamespaceType,
+      }: UseExceptionListRefreshProps): Promise<void> => {
+        try {
+          setLoading(true);
 
-            const {
+          const { list_id, namespace_type, ...restOfExceptionList } = await fetchExceptionListById({
+            http,
+            id: listId,
+            namespaceType: listNamespaceType,
+            signal: abortCtrl.signal,
+          });
+          const fetchListItemsResult = await fetchExceptionListItemsByListId({
+            filterOptions,
+            http,
+            listId: list_id,
+            namespaceType: namespace_type,
+            pagination,
+            signal: abortCtrl.signal,
+          });
+
+          if (isSubscribed) {
+            setExceptionList({
               list_id,
               namespace_type,
-              ...restOfExceptionList
-            } = await fetchExceptionListById({
-              http,
-              id: idToFetch,
-              namespaceType,
-              signal: abortCtrl.signal,
+              ...restOfExceptionList,
             });
-            const fetchListItemsResult = await fetchExceptionListItemsByListId({
-              filterOptions,
-              http,
-              listId: list_id,
-              namespaceType: namespace_type,
-              pagination,
-              signal: abortCtrl.signal,
+            setExceptionListItems({
+              items: [...fetchListItemsResult.data],
+              pagination: {
+                page: fetchListItemsResult.page,
+                perPage: fetchListItemsResult.per_page,
+                total: fetchListItemsResult.total,
+              },
             });
-
-            setRefresh(false);
-
-            if (isSubscribed) {
-              setExceptionList({
-                list_id,
-                namespace_type,
-                ...restOfExceptionList,
-                exceptionItems: {
-                  items: [...fetchListItemsResult.data],
-                  pagination: {
-                    page: fetchListItemsResult.page,
-                    perPage: fetchListItemsResult.per_page,
-                    total: fetchListItemsResult.total,
-                  },
-                },
-              });
-            }
-          } catch (error) {
-            setRefresh(false);
-            if (isSubscribed) {
-              setExceptionList(null);
-              onError(error);
-            }
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            setExceptionList(null);
+            onError(error);
           }
         }
 
@@ -103,25 +110,18 @@ export const useExceptionList = ({
         }
       };
 
-      if (id != null) {
-        fetchData(id);
+      if (id != null && namespaceType != null) {
+        fetchData({ listId: id, listNamespaceType: namespaceType });
       }
+
+      fetchExceptionList.current = fetchData;
       return (): void => {
         isSubscribed = false;
         abortCtrl.abort();
       };
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      http,
-      id,
-      onError,
-      shouldRefresh,
-      pagination.page,
-      pagination.perPage,
-      filterOptions.filter,
-      tags,
-    ]
+    [http, id, namespaceType, pagination.page, pagination.perPage, filterOptions.filter, tags]
   );
 
-  return [loading, exceptionListAndItems, refreshExceptionList];
+  return [loading, exceptionList, exceptionItems, fetchExceptionList.current];
 };
