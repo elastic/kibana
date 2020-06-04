@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
+import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../index';
 
 describe('LocationStatusTags component', () => {
@@ -37,9 +37,7 @@ describe('LocationStatusTags component', () => {
         downs: 0,
       },
     ];
-    const component = shallowWithIntl(
-      <LocationStatusTags locations={monitorLocations} ups={8} downs={1} />
-    );
+    const component = shallowWithIntl(<LocationStatusTags locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -102,9 +100,7 @@ describe('LocationStatusTags component', () => {
         downs: 0,
       },
     ];
-    const component = renderWithIntl(
-      <LocationStatusTags locations={monitorLocations} ups={10} downs={2} />
-    );
+    const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -125,9 +121,7 @@ describe('LocationStatusTags component', () => {
         downs: 0,
       },
     ];
-    const component = renderWithIntl(
-      <LocationStatusTags locations={monitorLocations} ups={10} downs={2} />
-    );
+    const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -148,9 +142,7 @@ describe('LocationStatusTags component', () => {
         downs: 0,
       },
     ];
-    const component = renderWithIntl(
-      <LocationStatusTags locations={monitorLocations} ups={10} downs={2} />
-    );
+    const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
     expect(component).toMatchSnapshot();
   });
 });

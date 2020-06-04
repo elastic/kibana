@@ -20,8 +20,6 @@ const TagContainer = styled.div`
 
 interface Props {
   locations: MonitorLocation[];
-  ups: number;
-  downs: number;
 }
 
 export interface StatusTag {
@@ -31,7 +29,7 @@ export interface StatusTag {
   availability: number;
 }
 
-export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
+export const LocationStatusTags = ({ locations }: Props) => {
   const {
     colors: { gray, danger },
   } = useContext(UptimeThemeContext);
@@ -68,7 +66,7 @@ export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
   return (
     <>
       <TagContainer>
-        <AvailabilityReporting ups={ups} downs={downs} allLocations={allLocations} />
+        <AvailabilityReporting allLocations={allLocations} />
       </TagContainer>
     </>
   );

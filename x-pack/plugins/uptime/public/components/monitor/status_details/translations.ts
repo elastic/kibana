@@ -48,3 +48,14 @@ export const timestampFromNowTextAriaLabel = i18n.translate(
 export const loadingMessage = i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
   defaultMessage: 'Loading…',
 });
+
+export const MonitorIDLabel = i18n.translate('xpack.uptime.monitorStatusBar.monitor.id', {
+  defaultMessage: 'Monitor ID',
+});
+
+export const OverallAvailability = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.availability',
+  {
+    defaultMessage: 'Overall availability',
+  }
+);

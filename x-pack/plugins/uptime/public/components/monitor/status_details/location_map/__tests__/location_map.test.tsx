@@ -7,14 +7,25 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { LocationMap } from '../location_map';
-import { MonitorLocations } from '../../../../../common/runtime_types';
+import { MonitorLocations } from '../../../../../../common/runtime_types';
 import { LocationMissingWarning } from '../location_missing';
 
 // Note For shallow test, we need absolute time strings
 describe('LocationMap component', () => {
   let monitorLocations: MonitorLocations;
+  let localStorageMock: any;
+
+  let selectedView = 'list';
 
   beforeEach(() => {
+    localStorageMock = {
+      getItem: jest.fn().mockImplementation(() => selectedView),
+      setItem: jest.fn(),
+    };
+
+    // @ts-ignore replacing a call to localStorage we use for monitor list size
+    global.localStorage = localStorageMock;
+
     monitorLocations = {
       monitorId: 'wapo',
       ups: 12,
@@ -51,6 +62,7 @@ describe('LocationMap component', () => {
   });
 
   it('shows warning if geo information is missing', () => {
+    selectedView = 'map';
     monitorLocations = {
       monitorId: 'wapo',
       ups: 8,

@@ -6,9 +6,9 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiBadge } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { Tls } from '../../../../../common/runtime_types';
-import { MonitorSSLCertificate } from '../monitor_status_bar';
+import { MonitorSSLCertificate } from '../status_bar';
 import * as redux from 'react-redux';
 import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../../lib';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
@@ -58,14 +58,12 @@ describe('SSL Certificate component', () => {
     };
     const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 
-    const badgeComponent = component.find(EuiBadge);
+    const lockIcon = component.find(EuiIcon);
 
-    expect(badgeComponent.props().color).toBe('warning');
+    expect(lockIcon.props().color).toBe('warning');
 
-    const badgeComponentText = component.find('.euiBadge__text');
-    expect(badgeComponentText.text()).toBe(moment(dateIn5Days).fromNow());
-
-    expect(badgeComponent.find('span.euiBadge--warning')).toBeTruthy();
+    const componentText = component.find('h4');
+    expect(componentText.text()).toBe('Expires soon ' + moment(dateIn5Days).fromNow());
   });
 
   it('does not render the expiration date with a warning state if expiry date is greater than a month', () => {
@@ -75,12 +73,10 @@ describe('SSL Certificate component', () => {
     };
     const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 
-    const badgeComponent = component.find(EuiBadge);
-    expect(badgeComponent.props().color).toBe('default');
+    const lockIcon = component.find(EuiIcon);
+    expect(lockIcon.props().color).toBe('success');
 
-    const badgeComponentText = component.find('.euiBadge__text');
-    expect(badgeComponentText.text()).toBe(moment(dateIn40Days).fromNow());
-
-    expect(badgeComponent.find('span.euiBadge--warning')).toHaveLength(0);
+    const componentText = component.find('h4');
+    expect(componentText.text()).toBe('Expires ' + moment(dateIn40Days).fromNow());
   });
 });

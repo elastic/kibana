@@ -30,6 +30,7 @@ import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
+import { URL_LABEL } from '../../common/translations';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -106,7 +107,7 @@ export const MonitorListComponent: React.FC<Props> = ({
     {
       align: 'left' as const,
       field: 'state.url.full',
-      name: labels.URL,
+      name: URL_LABEL,
       render: (url: string, summary: MonitorSummary) => (
         <TruncatedEuiLink href={url} target="_blank" color="text">
           {url} <EuiIcon size="s" type="popout" color="subbdued" />

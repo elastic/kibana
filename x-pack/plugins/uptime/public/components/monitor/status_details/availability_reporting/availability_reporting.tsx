@@ -5,21 +5,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBasicTable, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { Pagination } from '@elastic/eui/src/components/basic_table/pagination_bar';
 import { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
 
 interface Props {
-  ups: number;
-  downs: number;
   allLocations: StatusTag[];
 }
 
-export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocations }) => {
+export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
   const [pageIndex, setPageIndex] = useState(0);
-
-  const availability = (ups / (ups + downs)) * 100;
 
   const cols = [
     {
@@ -33,7 +29,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
     {
       field: 'availability',
       name: 'Availability',
-      width: '80px',
+      align: 'right' as const,
       render: (val: number) => {
         return <span>{val.toFixed(2)}%</span>;
       },
@@ -41,7 +37,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
     {
       name: 'Last check',
       field: 'timestamp',
-      width: '100px',
+      align: 'right' as const,
     },
   ];
 
@@ -61,11 +57,9 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>{availability.toFixed(2)}% Availability</h3>
-      </EuiTitle>
       <EuiSpacer size="s" />
-      {/* @ts-ignore weird TS issue*/}
+      {/*
+        // @ts-ignore */}
       <EuiBasicTable
         responsive={false}
         compressed={true}

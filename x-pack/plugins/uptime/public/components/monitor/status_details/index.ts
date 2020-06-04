@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorStatusBarComponent } from './monitor_status_bar';
 export { MonitorStatusDetailsComponent } from './status_details';
-export { StatusByLocations } from './monitor_status_bar/status_by_location';
+export { StatusByLocations } from './status_bar/status_by_location';
 
 export { MonitorStatusDetails } from './status_details_container';
-export { MonitorStatusBar } from './monitor_status_bar/status_bar_container';
+export { MonitorStatusBar } from './status_bar/status_bar';
 export { AvailabilityReporting } from './availability_reporting/availability_reporting';

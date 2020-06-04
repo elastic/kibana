@@ -4,24 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { monitorLocationsSelector, monitorStatusSelector } from '../../../../state/selectors';
-import { MonitorStatusBarComponent } from './index';
-import { getMonitorStatusAction } from '../../../../state/actions';
-import { useGetUrlParams } from '../../../../hooks';
 import { UptimeRefreshContext } from '../../../../contexts';
-import { MonitorIdParam } from '../../../../../common/types';
+import { useGetUrlParams, useMonitorId } from '../../../../hooks';
+import { monitorLocationsSelector, monitorStatusSelector } from '../../../../state/selectors';
 import { AppState } from '../../../../state';
+import { getMonitorStatusAction } from '../../../../state/actions';
+import { Ping } from '../../../../../common/runtime_types/ping';
+import { MonitorLocations } from '../../../../../common/runtime_types/monitor';
 
-export const MonitorStatusBar: React.FC<MonitorIdParam> = ({ monitorId }) => {
+interface MonitorStatusBarProps {
+  monitorId: string;
+  monitorStatus: Ping | null;
+  monitorLocations?: MonitorLocations;
+}
+
+export const useStatusBar = (): MonitorStatusBarProps => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
   const dispatch = useDispatch();
 
+  const monitorId = useMonitorId();
+
   const monitorStatus = useSelector(monitorStatusSelector);
+
   const monitorLocations = useSelector((state: AppState) =>
     monitorLocationsSelector(state, monitorId)
   );
@@ -30,11 +39,5 @@ export const MonitorStatusBar: React.FC<MonitorIdParam> = ({ monitorId }) => {
     dispatch(getMonitorStatusAction({ dateStart, dateEnd, monitorId }));
   }, [monitorId, dateStart, dateEnd, lastRefresh, dispatch]);
 
-  return (
-    <MonitorStatusBarComponent
-      monitorId={monitorId}
-      monitorStatus={monitorStatus}
-      monitorLocations={monitorLocations!}
-    />
-  );
+  return { monitorStatus, monitorLocations, monitorId };
 };

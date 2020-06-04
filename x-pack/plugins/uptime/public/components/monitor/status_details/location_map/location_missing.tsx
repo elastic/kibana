@@ -16,11 +16,12 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { LocationLink } from '../../common/location_link';
+import { LocationLink } from '../../../common/location_link';
 
 const EuiPopoverRight = styled(EuiFlexItem)`
   margin-left: auto;
   margin-bottom: 3px;
+  margin-right: 5px;
 `;
 
 export const LocationMissingWarning = () => {

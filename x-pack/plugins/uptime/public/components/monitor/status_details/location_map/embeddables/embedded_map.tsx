@@ -8,19 +8,22 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../legacy/plugins/maps/public';
+import {
+  MapEmbeddable,
+  MapEmbeddableInput,
+} from '../../../../../../../../legacy/plugins/maps/public';
 import * as i18n from './translations';
-import { GeoPoint } from '../../../../../common/runtime_types';
+import { GeoPoint } from '../../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
-import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../contexts';
+import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../../contexts';
 import {
   isErrorEmbeddable,
   ViewMode,
   ErrorEmbeddable,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/public';
+} from '../../../../../../../../../src/plugins/embeddable/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../maps/public';
 import { MapToolTipComponent } from './map_tool_tip';
-import { RenderTooltipContentParams } from '../../../../../../../legacy/plugins/maps/public';
+import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];

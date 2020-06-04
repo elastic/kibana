@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiErrorBoundary,
-  EuiHideFor,
   EuiButtonGroup,
-  EuiShowFor,
+  EuiTitle,
 } from '@elastic/eui';
-import { LocationStatusTags } from '../status_details/availability_reporting';
+import { LocationStatusTags } from '../availability_reporting';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
-import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
-import { UNNAMED_LOCATION } from '../../../../common/constants';
+import { MonitorLocations, MonitorLocation } from '../../../../../common/runtime_types';
+import { UNNAMED_LOCATION } from '../../../../../common/constants';
 import { LocationMissingWarning } from './location_missing';
+import { useSelectedView } from './use_selected_view';
 
 // These height/width values are used to make sure map is in center of panel
 // And to make sure, it doesn't take too much space
@@ -36,9 +36,7 @@ const MapPanel = styled.div`
 `;
 
 const EuiFlexItemTags = styled(EuiFlexItem)`
-  padding-top: 5px;
   width: 350px;
-  margin-top: 10px;
   @media (max-width: 1042px) {
     width: 100%;
   }
@@ -92,43 +90,47 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
     },
   ];
 
-  const [selectedView, setSelectedView] = useState<{ [x: string]: boolean }>({
-    listBtn: true,
-    mapBtn: false,
-  });
+  const { selectedView, setSelectedView } = useSelectedView();
 
   const onChangeView = (optionId: string) => {
-    setSelectedView({
-      [optionId]: !selectedView[optionId],
-    });
+    setSelectedView(optionId === 'listBtn' ? 'list' : 'map');
   };
 
   return (
     <EuiErrorBoundary>
-      <ToggleViewButtons>
-        <EuiButtonGroup
-          options={toggleButtons}
-          idToSelectedMap={selectedView}
-          onChange={(id) => onChangeView(id)}
-          type="multi"
-          isIconOnly
-          style={{ marginLeft: 'auto' }}
-        />
-      </ToggleViewButtons>
+      <EuiFlexGroup responsive={false} gutterSize={'none'} style={{ flexGrow: 0 }}>
+        {selectedView === 'list' && (
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3>Monitoring from</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
+        {selectedView === 'map' && (
+          <EuiFlexItem>{isGeoInfoMissing && <LocationMissingWarning />}</EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <ToggleViewButtons>
+            <EuiButtonGroup
+              options={toggleButtons}
+              idToSelectedMap={{ listBtn: selectedView === 'list', mapBtn: selectedView === 'map' }}
+              onChange={(id) => onChangeView(id)}
+              type="multi"
+              isIconOnly
+              style={{ marginLeft: 'auto' }}
+            />
+          </ToggleViewButtons>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <FlexGroup wrap={true} gutterSize="none" justifyContent="flexEnd">
-        {selectedView.listBtn && (
+        {selectedView === 'list' && (
           <EuiFlexItemTags grow={true}>
-            <LocationStatusTags
-              locations={monitorLocations?.locations || []}
-              ups={monitorLocations?.ups ?? 0}
-              downs={monitorLocations?.downs ?? 0}
-            />
+            <LocationStatusTags locations={monitorLocations?.locations || []} />
           </EuiFlexItemTags>
         )}
-        {selectedView.mapBtn && (
+        {selectedView === 'map' && (
           <EuiFlexItem grow={false}>
-            {isGeoInfoMissing && <LocationMissingWarning />}
             <MapPanel>
               <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
             </MapPanel>

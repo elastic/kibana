@@ -28,7 +28,5 @@ export const MonitorStatusDetails: React.FC<MonitorIdParam> = ({ monitorId }) =>
     dispatch(getMonitorLocationsAction({ dateStart, dateEnd, monitorId }));
   }, [monitorId, dateStart, dateEnd, lastRefresh, dispatch]);
 
-  return (
-    <MonitorStatusDetailsComponent monitorId={monitorId} monitorLocations={monitorLocations!} />
-  );
+  return <MonitorStatusDetailsComponent monitorLocations={monitorLocations!} />;
 };

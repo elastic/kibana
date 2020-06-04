@@ -3,72 +3,90 @@
 exports[`SSL Certificate component renders 1`] = `
 Array [
   .c0.c0.c0 {
-  width: 30%;
+  width: 35%;
 }
 
 <dt
     class="euiDescriptionList__title c0"
   >
-    Certificate:
+    TLS Certificate
   </dt>,
   <div
     class="euiSpacer euiSpacer--s"
   />,
   .c0.c0.c0 {
-  width: 70%;
+  width: 65%;
+  white-space: nowrap;
+}
+
+.c1.c1.c1 {
+  margin: 0 0 0 4px;
+  display: inline-block;
+  color: inherit;
 }
 
 <dd
     class="euiDescriptionList__description c0"
   >
-    <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+    <a
+      class="eui-displayInline"
+      href="/certificates"
     >
-      <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+      <span
+        class="euiToolTipAnchor"
       >
         <div
-          aria-label="Expires in 2 months"
-          class="euiText euiText--small eui-displayInline euiText--constrainedWidth"
-        >
-          Expires 
-          <span
-            class="euiBadge euiBadge--iconLeft"
-            style="background-color:#d3dae6;color:#000"
-          >
-            <span
-              class="euiBadge__content"
-            >
-              <span
-                class="euiBadge__text"
-              >
-                in 2 months
-              </span>
-            </span>
-          </span>
-        </div>
-      </div>
-      <div
-        class="euiFlexItem"
-      >
-        <a
-          class="eui-displayInline"
-          href="/certificates"
+          class="euiText euiText--small"
         >
           <div
-            class="euiText euiText--medium"
-            style="white-space:nowrap"
+            color="success"
+            data-euiicon-type="lock"
+          />
+          <h4
+            class="c1"
           >
-            Certificate overview
-          </div>
-        </a>
-      </div>
-    </div>
+            Expires in 2 months
+          </h4>
+        </div>
+      </span>
+    </a>
   </dd>,
 ]
 `;
 
-exports[`SSL Certificate component renders null if invalid date 1`] = `null`;
+exports[`SSL Certificate component renders null if invalid date 1`] = `
+Array [
+  .c0.c0.c0 {
+  width: 35%;
+}
+
+<dt
+    class="euiDescriptionList__title c0"
+  >
+    TLS Certificate
+  </dt>,
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  .c0.c0.c0 {
+  width: 65%;
+  white-space: nowrap;
+}
+
+<dd
+    class="euiDescriptionList__description c0"
+  >
+    <a
+      class="eui-displayInline"
+      href="/certificates"
+    >
+      <span>
+        --
+      </span>
+    </a>
+  </dd>,
+]
+`;
 
 exports[`SSL Certificate component shallow renders 1`] = `
 <ContextProvider

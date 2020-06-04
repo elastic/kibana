@@ -26,8 +26,6 @@ exports[`LocationStatusTags component renders properly against props 1`] = `
           },
         ]
       }
-      downs={1}
-      ups={8}
     />
   </styled.div>
 </Fragment>
@@ -46,7 +44,6 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
 .c0 {
   max-height: 246px;
   overflow: hidden;
-  margin-top: auto;
 }
 
 @media (max-width:1042px) {
@@ -59,21 +56,15 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
 <div
   class="c0"
 >
-  <h3
-    class="euiTitle euiTitle--small"
-  >
-    83.33% Availability
-  </h3>
   <div
     class="euiSpacer euiSpacer--s"
   />
-  // @ts-ignore weird TS issue
   <div
     class="euiBasicTable"
   >
     <div>
       <table
-        class="euiTable"
+        class="euiTable euiTable--compressed"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -101,10 +92,9 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               data-test-subj="tableHeaderCell_availability_1"
               role="columnheader"
               scope="col"
-              style="width:80px"
             >
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -118,10 +108,9 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               data-test-subj="tableHeaderCell_timestamp_2"
               role="columnheader"
               scope="col"
-              style="width:100px"
             >
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -161,7 +150,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -177,7 +166,6 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -185,7 +173,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -196,7 +184,6 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -204,7 +191,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -242,7 +229,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -258,7 +245,6 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -266,7 +252,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -277,7 +263,6 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -285,7 +270,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -315,7 +300,6 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
 .c0 {
   max-height: 246px;
   overflow: hidden;
-  margin-top: auto;
 }
 
 @media (max-width:1042px) {
@@ -328,21 +312,15 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
 <div
   class="c0"
 >
-  <h3
-    class="euiTitle euiTitle--small"
-  >
-    83.33% Availability
-  </h3>
   <div
     class="euiSpacer euiSpacer--s"
   />
-  // @ts-ignore weird TS issue
   <div
     class="euiBasicTable"
   >
     <div>
       <table
-        class="euiTable"
+        class="euiTable euiTable--compressed"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -370,10 +348,9 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               data-test-subj="tableHeaderCell_availability_1"
               role="columnheader"
               scope="col"
-              style="width:80px"
             >
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -387,10 +364,9 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               data-test-subj="tableHeaderCell_timestamp_2"
               role="columnheader"
               scope="col"
-              style="width:100px"
             >
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -430,7 +406,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -446,7 +422,6 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -454,7 +429,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -465,7 +440,6 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -473,7 +447,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -511,7 +485,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -527,7 +501,6 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -535,7 +508,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -546,7 +519,6 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -554,7 +526,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -584,7 +556,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
 .c0 {
   max-height: 246px;
   overflow: hidden;
-  margin-top: auto;
 }
 
 @media (max-width:1042px) {
@@ -597,21 +568,15 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
 <div
   class="c0"
 >
-  <h3
-    class="euiTitle euiTitle--small"
-  >
-    83.33% Availability
-  </h3>
   <div
     class="euiSpacer euiSpacer--s"
   />
-  // @ts-ignore weird TS issue
   <div
     class="euiBasicTable"
   >
     <div>
       <table
-        class="euiTable"
+        class="euiTable euiTable--compressed"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -639,10 +604,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               data-test-subj="tableHeaderCell_availability_1"
               role="columnheader"
               scope="col"
-              style="width:80px"
             >
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -656,10 +620,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               data-test-subj="tableHeaderCell_timestamp_2"
               role="columnheader"
               scope="col"
-              style="width:100px"
             >
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -699,7 +662,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -715,7 +678,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -723,7 +685,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -734,7 +696,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -742,7 +703,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -780,7 +741,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -796,7 +757,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -804,7 +764,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -815,7 +775,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -823,7 +782,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -861,7 +820,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         class="euiBadge__text"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <div
                             class="c2"
@@ -877,7 +836,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
             </td>
             <td
               class="euiTableRowCell"
-              style="width:80px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -885,7 +843,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 Availability
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
                 <span
                   class=""
@@ -896,7 +854,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
             </td>
             <td
               class="euiTableRowCell"
-              style="width:100px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -904,12 +861,91 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 Last check
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 >
                   1 Mon ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c1"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#bd271e;color:#fff"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <div
+                          class="euiText euiText--small"
+                        >
+                          <div
+                            class="c2"
+                          >
+                            Paris
+                          </div>
+                        </div>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00%
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  5 Yr ago
                 </span>
               </div>
             </td>
@@ -948,7 +984,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               />
             </button>
             <button
-              aria-label="Page 1 of 3"
+              aria-label="Page 1 of 2"
               class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
               data-test-subj="pagination-button-0"
               type="button"
@@ -964,7 +1000,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               </span>
             </button>
             <button
-              aria-label="Page 2 of 3"
+              aria-label="Page 2 of 2"
               class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
               data-test-subj="pagination-button-1"
               type="button"
@@ -976,22 +1012,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                   class="euiButtonEmpty__text"
                 >
                   2
-                </span>
-              </span>
-            </button>
-            <button
-              aria-label="Page 3 of 3"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
-              data-test-subj="pagination-button-2"
-              type="button"
-            >
-              <span
-                class="euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  3
                 </span>
               </span>
             </button>

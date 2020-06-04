@@ -6,10 +6,11 @@
 
 import moment from 'moment';
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
-import { MonitorStatusBarComponent } from '../monitor_status_bar';
+import { MonitorStatusBar } from '../status_bar';
 import { Ping } from '../../../../../common/runtime_types';
 import * as redux from 'react-redux';
+import { renderWithRouter } from '../../../../lib';
+import { createMemoryHistory } from 'history';
 
 describe('MonitorStatusBar component', () => {
   let monitorStatus: Ping;
@@ -49,18 +50,21 @@ describe('MonitorStatusBar component', () => {
     const spy = jest.spyOn(redux, 'useDispatch');
     spy.mockReturnValue(jest.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
-    spy1.mockReturnValue(true);
+    jest.spyOn(redux, 'useSelector').mockImplementation((fn, d) => {
+      if (fn.name === ' monitorStatusSelector') {
+        return monitorStatus;
+      } else {
+        return monitorLocations;
+      }
+    });
   });
 
-  it('renders duration in ms, not us', () => {
-    const component = renderWithIntl(
-      <MonitorStatusBarComponent
-        monitorStatus={monitorStatus}
-        monitorId="id1"
-        monitorLocations={monitorLocations}
-      />
-    );
+  it('renders', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/aWQx/'],
+    });
+    history.location.key = 'test';
+    const component = renderWithRouter(<MonitorStatusBar />, history);
     expect(component).toMatchSnapshot();
   });
 });

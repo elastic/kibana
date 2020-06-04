@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
+exports[`MonitorStatusBar component renders 1`] = `
 Array [
   <div>
     <div
@@ -15,21 +15,32 @@ Array [
     class="euiSpacer euiSpacer--l"
   />,
   .c0.c0.c0 {
-  width: 30%;
+  width: 35%;
 }
 
 .c1.c1.c1 {
-  width: 70%;
+  width: 65%;
+  white-space: nowrap;
 }
 
 <dl
-    class="euiDescriptionList euiDescriptionList--responsiveColumn euiDescriptionList--reverse euiDescriptionList--compressed"
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
     style="max-width:450px"
   >
     <dt
       class="euiDescriptionList__title c0"
     >
-      URL
+      Overall availability
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    >
+      NaN%
+    </dd>
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Url
     </dt>
     <dd
       class="euiDescriptionList__description c1"
@@ -37,11 +48,11 @@ Array [
       <a
         aria-label="Monitor URL link"
         class="euiLink euiLink--primary"
-        href="https://www.example.com/"
+        href=""
         rel="noopener noreferrer"
         target="_blank"
       >
-        https://www.example.com/
+         
         <div
           data-euiicon-type="popout"
         />
@@ -54,13 +65,8 @@ Array [
     </dt>
     <dd
       class="euiDescriptionList__description c1"
-    >
-      <h4
-        data-test-subj="monitor-page-title"
-      >
-        id1
-      </h4>
-    </dd>
+      data-test-subj="monitor-page-title"
+    />
   </dl>,
 ]
 `;

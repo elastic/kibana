@@ -8,66 +8,64 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   EuiLink,
+  EuiIcon,
   EuiSpacer,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiIcon,
 } from '@elastic/eui';
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
-import { Ping } from '../../../../../common/runtime_types';
-import { MonitorLocations } from '../../../../../common/runtime_types';
-
-interface MonitorStatusBarProps {
-  monitorId: string;
-  monitorStatus: Ping | null;
-  monitorLocations: MonitorLocations;
-}
+import { useStatusBar } from './use_status_bar';
+import { MonitorIDLabel, OverallAvailability } from '../translations';
+import { URL_LABEL } from '../../../common/translations';
+import { MonitorLocations } from '../../../../../common/runtime_types/monitor';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
-    width: 30%;
+    width: 35%;
   }
 `;
 
 export const MonListDescription = styled(EuiDescriptionListDescription)`
   &&& {
-    width: 70%;
+    width: 65%;
+    white-space: nowrap;
   }
 `;
 
-export const MonitorStatusBarComponent: React.FC<MonitorStatusBarProps> = ({
-  monitorId,
-  monitorStatus,
-  monitorLocations,
-}) => {
+export const MonitorStatusBar: React.FC = () => {
+  const { monitorId, monitorStatus, monitorLocations = {} } = useStatusBar();
+
+  const { locations, ups, downs } = monitorLocations as MonitorLocations;
+
   const full = monitorStatus?.url?.full ?? '';
+
+  const availability = ups === 0 && downs === 0 ? 0 : (ups / (ups + downs)) * 100;
 
   return (
     <>
       <div>
-        <StatusByLocations locations={monitorLocations?.locations ?? []} />
+        <StatusByLocations locations={locations ?? []} />
       </div>
       <EuiSpacer />
       <EuiDescriptionList
-        type="responsiveColumn"
+        type="column"
         compressed={true}
         textStyle="reverse"
         style={{ maxWidth: '450px' }}
       >
-        <MonListTitle>URL</MonListTitle>
+        <MonListTitle>{OverallAvailability}</MonListTitle>
+        <MonListDescription>{availability.toFixed(2)}%</MonListDescription>
+        <MonListTitle>{URL_LABEL}</MonListTitle>
         <MonListDescription>
           <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
-            {full}
-            <EuiIcon type={'popout'} size="s" />
+            {full} <EuiIcon type={'popout'} size="s" />
           </EuiLink>
         </MonListDescription>
-        <MonListTitle>Monitor ID</MonListTitle>
-        <MonListDescription>
-          <h4 data-test-subj="monitor-page-title">{monitorId}</h4>
-        </MonListDescription>
+        <MonListTitle>{MonitorIDLabel}</MonListTitle>
+        <MonListDescription data-test-subj="monitor-page-title">{monitorId}</MonListDescription>
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
       </EuiDescriptionList>
     </>

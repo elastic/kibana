@@ -9,13 +9,13 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { EuiOutsideClickDetector, EuiPopoverTitle, EuiStat, EuiText } from '@elastic/eui';
-import { TagLabel } from '../../status_details/availability_reporting';
-import { UptimeThemeContext } from '../../../../contexts';
-import { AppState } from '../../../../state';
-import { monitorLocationsSelector } from '../../../../state/selectors';
-import { useMonitorId } from '../../../../hooks';
-import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
-import { RenderTooltipContentParams } from '../../../../../../../legacy/plugins/maps/public';
+import { TagLabel } from '../../availability_reporting';
+import { UptimeThemeContext } from '../../../../../contexts';
+import { AppState } from '../../../../../state';
+import { monitorLocationsSelector } from '../../../../../state/selectors';
+import { useMonitorId } from '../../../../../hooks';
+import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
+import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 

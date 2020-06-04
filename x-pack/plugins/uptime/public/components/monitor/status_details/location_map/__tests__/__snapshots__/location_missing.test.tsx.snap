@@ -4,6 +4,7 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
 .c0 {
   margin-left: auto;
   margin-bottom: 3px;
+  margin-right: 5px;
 }
 
 <div

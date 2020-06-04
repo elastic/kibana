@@ -5,5 +5,4 @@
  */
 
 export { MonitorSSLCertificate } from './ssl_certificate';
-export { MonitorStatusBarComponent } from './status_bar';
-export { MonitorStatusBar } from './status_bar_container';
+export { MonitorStatusBar } from './status_bar';
