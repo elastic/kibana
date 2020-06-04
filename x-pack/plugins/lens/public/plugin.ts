@@ -37,10 +37,10 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
+  embeddable: EmbeddableStart;
 }
 
 export class LensPlugin {

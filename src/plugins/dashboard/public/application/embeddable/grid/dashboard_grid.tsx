@@ -115,6 +115,7 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
+  PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
   stateTransfer?: EmbeddableStart['stateTransfer'];
 }
@@ -272,15 +273,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           <EmbeddableChildPanel
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
-            getActions={this.props.kibana.services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={this.props.kibana.services.embeddable.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
-            overlays={this.props.kibana.services.overlays}
-            application={this.props.kibana.services.application}
-            notifications={this.props.kibana.services.notifications}
-            inspector={this.props.kibana.services.inspector}
-            SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}
-            stateTransfer={this.props.stateTransfer}
+            PanelComponent={this.props.PanelComponent}
           />
         </div>
       );

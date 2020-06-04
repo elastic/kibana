@@ -9,6 +9,7 @@ import React from 'react';
 import * as i18nCommon from '../../../common/translations';
 import { EmptyPage } from '../../../common/components/empty_page';
 import { useKibana } from '../../../common/lib/kibana';
+import { ADD_DATA_PATH } from '../../../../common/constants';
 
 const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
@@ -18,7 +19,7 @@ const OverviewEmptyComponent: React.FC = () => {
     <EmptyPage
       actionPrimaryIcon="gear"
       actionPrimaryLabel={i18nCommon.EMPTY_ACTION_PRIMARY}
-      actionPrimaryUrl={`${basePath}/app/home#/tutorial_directory/siem`}
+      actionPrimaryUrl={`${basePath}${ADD_DATA_PATH}`}
       actionSecondaryIcon="popout"
       actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
       actionSecondaryTarget="_blank"

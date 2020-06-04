@@ -29,7 +29,7 @@ import {
 import { Pager } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 
-const JOBS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 20;
 
 function getError(error) {
   if (error !== null) {
@@ -43,15 +43,18 @@ function getError(error) {
 }
 
 export function CustomSelectionTable({
+  checkboxDisabledCheck,
   columns,
   filterDefaultFields,
   filters,
   items,
+  itemsPerPage = ITEMS_PER_PAGE,
   onTableChange,
+  radioDisabledCheck,
   selectedIds,
   singleSelection,
   sortableProperties,
-  timeseriesOnly,
+  tableItemId = 'id',
 }) {
   const [itemIdToSelectedMap, setItemIdToSelectedMap] = useState(getCurrentlySelectedItemIdsMap());
   const [currentItems, setCurrentItems] = useState(items);
@@ -59,7 +62,7 @@ export function CustomSelectionTable({
   const [sortedColumn, setSortedColumn] = useState('');
   const [pager, setPager] = useState();
   const [pagerSettings, setPagerSettings] = useState({
-    itemsPerPage: JOBS_PER_PAGE,
+    itemsPerPage: itemsPerPage,
     firstItemIndex: 0,
     lastItemIndex: 1,
   });
@@ -77,9 +80,9 @@ export function CustomSelectionTable({
   }, [selectedIds]); // eslint-disable-line
 
   useEffect(() => {
-    const tablePager = new Pager(currentItems.length, JOBS_PER_PAGE);
+    const tablePager = new Pager(currentItems.length, itemsPerPage);
     setPagerSettings({
-      itemsPerPage: JOBS_PER_PAGE,
+      itemsPerPage: itemsPerPage,
       firstItemIndex: tablePager.getFirstItemIndex(),
       lastItemIndex: tablePager.getLastItemIndex(),
     });
@@ -100,7 +103,7 @@ export function CustomSelectionTable({
 
   function handleTableChange({ isSelected, itemId }) {
     const selectedMapIds = Object.getOwnPropertyNames(itemIdToSelectedMap);
-    const currentItemIds = currentItems.map((item) => item.id);
+    const currentItemIds = currentItems.map((item) => item[tableItemId]);
 
     let currentSelected = selectedMapIds.filter(
       (id) => itemIdToSelectedMap[id] === true && id !== itemId
@@ -124,11 +127,11 @@ export function CustomSelectionTable({
     onTableChange(currentSelected);
   }
 
-  function handleChangeItemsPerPage(itemsPerPage) {
-    pager.setItemsPerPage(itemsPerPage);
+  function handleChangeItemsPerPage(numItemsPerPage) {
+    pager.setItemsPerPage(numItemsPerPage);
     setPagerSettings({
       ...pagerSettings,
-      itemsPerPage,
+      itemsPerPage: numItemsPerPage,
       firstItemIndex: pager.getFirstItemIndex(),
       lastItemIndex: pager.getLastItemIndex(),
     });
@@ -161,7 +164,9 @@ export function CustomSelectionTable({
   }
 
   function areAllItemsSelected() {
-    const indexOfUnselectedItem = currentItems.findIndex((item) => !isItemSelected(item.id));
+    const indexOfUnselectedItem = currentItems.findIndex(
+      (item) => !isItemSelected(item[tableItemId])
+    );
     return indexOfUnselectedItem === -1;
   }
 
@@ -199,7 +204,7 @@ export function CustomSelectionTable({
   function toggleAll() {
     const allSelected = areAllItemsSelected() || itemIdToSelectedMap.all === true;
     const newItemIdToSelectedMap = {};
-    currentItems.forEach((item) => (newItemIdToSelectedMap[item.id] = !allSelected));
+    currentItems.forEach((item) => (newItemIdToSelectedMap[item[tableItemId]] = !allSelected));
     setItemIdToSelectedMap(newItemIdToSelectedMap);
     handleTableChange({ isSelected: !allSelected, itemId: 'all' });
   }
@@ -255,20 +260,23 @@ export function CustomSelectionTable({
             <EuiTableRowCellCheckbox key={column.id}>
               {!singleSelection && (
                 <EuiCheckbox
-                  id={`${item.id}-checkbox`}
-                  data-test-subj={`${item.id}-checkbox`}
-                  checked={isItemSelected(item.id)}
-                  onChange={() => toggleItem(item.id)}
+                  disabled={
+                    checkboxDisabledCheck !== undefined ? checkboxDisabledCheck(item) : undefined
+                  }
+                  id={`${item[tableItemId]}-checkbox`}
+                  data-test-subj={`${item[tableItemId]}-checkbox`}
+                  checked={isItemSelected(item[tableItemId])}
+                  onChange={() => toggleItem(item[tableItemId])}
                   type="inList"
                 />
               )}
               {singleSelection && (
                 <EuiRadio
-                  id={item.id}
-                  data-test-subj={`${item.id}-radio-button`}
-                  checked={isItemSelected(item.id)}
-                  onChange={() => toggleItem(item.id)}
-                  disabled={timeseriesOnly && item.isSingleMetricViewerJob === false}
+                  id={item[tableItemId]}
+                  data-test-subj={`${item[tableItemId]}-radio-button`}
+                  checked={isItemSelected(item[tableItemId])}
+                  onChange={() => toggleItem(item[tableItemId])}
+                  disabled={radioDisabledCheck !== undefined ? radioDisabledCheck(item) : undefined}
                 />
               )}
             </EuiTableRowCellCheckbox>
@@ -299,11 +307,11 @@ export function CustomSelectionTable({
 
       return (
         <EuiTableRow
-          key={item.id}
-          isSelected={isItemSelected(item.id)}
+          key={item[tableItemId]}
+          isSelected={isItemSelected(item[tableItemId])}
           isSelectable={true}
           hasActions={true}
-          data-test-subj="mlFlyoutJobSelectorTableRow"
+          data-test-subj="mlCustomSelectionTableRow"
         >
           {cells}
         </EuiTableRow>
@@ -331,7 +339,7 @@ export function CustomSelectionTable({
     <Fragment>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false} data-test-subj="mlFlyoutJobSelectorSearchBar">
+        <EuiFlexItem grow={false} data-test-subj="mlCustomSelectionTableSearchBar">
           <EuiSearchBar
             defaultQuery={query}
             box={{
@@ -359,7 +367,7 @@ export function CustomSelectionTable({
           <EuiFlexItem grow={false}>{renderSelectAll(true)}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableHeaderMobile>
-      <EuiTable data-test-subj="mlFlyoutJobSelectorTable">
+      <EuiTable data-test-subj="mlCustomSelectionTable">
         <EuiTableHeader>{renderHeaderCells()}</EuiTableHeader>
         <EuiTableBody>{renderRows()}</EuiTableBody>
       </EuiTable>
@@ -368,7 +376,7 @@ export function CustomSelectionTable({
         <EuiTablePagination
           activePage={pager.getCurrentPageIndex()}
           itemsPerPage={pagerSettings.itemsPerPage}
-          itemsPerPageOptions={[10, JOBS_PER_PAGE, 50]}
+          itemsPerPageOptions={[5, 10, 20, 50]}
           pageCount={pager.getTotalPages()}
           onChangeItemsPerPage={handleChangeItemsPerPage}
           onChangePage={(pageIndex) => handlePageChange(pageIndex)}
@@ -379,13 +387,16 @@ export function CustomSelectionTable({
 }
 
 CustomSelectionTable.propTypes = {
+  checkboxDisabledCheck: PropTypes.func,
   columns: PropTypes.array.isRequired,
   filterDefaultFields: PropTypes.array,
   filters: PropTypes.array,
   items: PropTypes.array.isRequired,
+  itemsPerPage: PropTypes.number,
   onTableChange: PropTypes.func.isRequired,
+  radioDisabledCheck: PropTypes.func,
   selectedId: PropTypes.array,
   singleSelection: PropTypes.bool,
   sortableProperties: PropTypes.object,
-  timeseriesOnly: PropTypes.bool,
+  tableItemId: PropTypes.string,
 };

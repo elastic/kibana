@@ -162,7 +162,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             {myStepData.throttle !== stepActionsDefaultValue.throttle ? (
               <>
                 <EuiSpacer />
-
                 <UseField
                   path="actions"
                   defaultValue={myStepData.actions}
@@ -170,11 +169,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                   componentProps={{
                     messageVariables: actionMessageParams,
                   }}
-                />
-                <UseField
-                  path="kibanaSiemAppUrl"
-                  defaultValue={kibanaAbsoluteUrl}
-                  component={GhostFormField}
                 />
               </>
             ) : (
@@ -184,6 +178,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 component={GhostFormField}
               />
             )}
+            <UseField
+              path="kibanaSiemAppUrl"
+              defaultValue={kibanaAbsoluteUrl}
+              component={GhostFormField}
+            />
             <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
           </EuiForm>
         </Form>
