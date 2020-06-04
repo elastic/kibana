@@ -12,7 +12,6 @@ import {
   TestBed,
   TestBedConfig,
   findTestSubject,
-  nextTick,
 } from '../../../../../test_utils';
 // NOTE: We have to use the Home component instead of the TemplateList component because we depend
 // upon react router to provide the name of the template to load in the detail panel.
@@ -112,12 +111,11 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
     const { rows } = table.getMetaData('legacyTemplateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
+    const { href } = templateLink.props();
     await act(async () => {
-      const { href } = templateLink.props();
       router.navigateTo(href!);
-      await nextTick();
-      component.update();
     });
+    component.update();
   };
 
   const clickCloseDetailsButton = () => {

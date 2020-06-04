@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
-import { setupEnvironment, nextTick, getRandomString } from '../helpers';
+import { setupEnvironment, getRandomString } from '../helpers';
 
 import { IndexTemplatesTabTestBed, setup } from './index_templates_tab.helpers';
 
@@ -31,13 +31,8 @@ describe('Index Templates tab', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-    testBed = await setup();
-
     await act(async () => {
-      const { component } = testBed;
-
-      await nextTick();
-      component.update();
+      testBed = await setup();
     });
   });
 
@@ -45,14 +40,12 @@ describe('Index Templates tab', () => {
     beforeEach(async () => {
       const { actions, component } = testBed;
 
-      httpRequestsMockHelpers.setLoadTemplatesResponse([]);
-
-      actions.goToTemplatesList();
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
       await act(async () => {
-        await nextTick();
-        component.update();
+        actions.goToTemplatesList();
       });
+      component.update();
     });
 
     test('should display an empty prompt', async () => {
@@ -64,6 +57,9 @@ describe('Index Templates tab', () => {
   });
 
   describe('when there are index templates', () => {
+    // Add a default loadIndexTemplate response
+    httpRequestsMockHelpers.setLoadTemplateResponse(fixtures.getTemplate());
+
     const template1 = fixtures.getTemplate({
       name: `a${getRandomString()}`,
       indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
@@ -78,37 +74,87 @@ describe('Index Templates tab', () => {
         },
       },
     });
+
     const template2 = fixtures.getTemplate({
       name: `b${getRandomString()}`,
       indexPatterns: ['template2Pattern1*'],
     });
+
     const template3 = fixtures.getTemplate({
       name: `.c${getRandomString()}`, // mock system template
       indexPatterns: ['template3Pattern1*', 'template3Pattern2', 'template3Pattern3'],
     });
 
+    const template4 = fixtures.getTemplate({
+      name: `a${getRandomString()}`,
+      indexPatterns: ['template4Pattern1*', 'template4Pattern2'],
+      template: {
+        settings: {
+          index: {
+            number_of_shards: '1',
+            lifecycle: {
+              name: 'my_ilm_policy',
+            },
+          },
+        },
+      },
+      isLegacy: true,
+    });
+
+    const template5 = fixtures.getTemplate({
+      name: `b${getRandomString()}`,
+      indexPatterns: ['template5Pattern1*'],
+      isLegacy: true,
+    });
+
+    const template6 = fixtures.getTemplate({
+      name: `.c${getRandomString()}`, // mock system template
+      indexPatterns: ['template6Pattern1*', 'template6Pattern2', 'template6Pattern3'],
+      isLegacy: true,
+    });
+
     const templates = [template1, template2, template3];
+    const legacyTemplates = [template4, template5, template6];
 
     beforeEach(async () => {
       const { actions, component } = testBed;
 
-      httpRequestsMockHelpers.setLoadTemplatesResponse(templates);
-
-      actions.goToTemplatesList();
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates, legacyTemplates });
 
       await act(async () => {
-        await nextTick();
-        component.update();
+        actions.goToTemplatesList();
       });
+      component.update();
     });
 
     test('should list them in the table', async () => {
       const { table } = testBed;
 
       const { tableCellsValues } = table.getMetaData('templateTable');
+      const { tableCellsValues: legacyTableCellsValues } = table.getMetaData('legacyTemplateTable');
 
+      // Test composable table content
       tableCellsValues.forEach((row, i) => {
         const template = templates[i];
+        const { name, indexPatterns, priority, ilmPolicy, composedOf } = template;
+
+        const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
+        const composedOfString = composedOf ? composedOf.join(',') : '';
+        const priorityFormatted = priority ? priority.toString() : '';
+
+        expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+          name,
+          indexPatterns.join(', '),
+          ilmPolicyName,
+          composedOfString,
+          priorityFormatted,
+          'MSA', // Mappings Settings Aliases badges
+        ]);
+      });
+
+      // Test legacy table content
+      legacyTableCellsValues.forEach((row, i) => {
+        const template = legacyTemplates[i];
         const { name, indexPatterns, order, ilmPolicy } = template;
 
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
@@ -129,15 +175,13 @@ describe('Index Templates tab', () => {
     });
 
     test('should have a button to reload the index templates', async () => {
-      const { component, exists, actions } = testBed;
+      const { exists, actions } = testBed;
       const totalRequests = server.requests.length;
 
       expect(exists('reloadButton')).toBe(true);
 
       await act(async () => {
         actions.clickReloadButton();
-        await nextTick();
-        component.update();
       });
 
       expect(server.requests.length).toBe(totalRequests + 1);
@@ -148,27 +192,23 @@ describe('Index Templates tab', () => {
 
     test('should have a button to create a new template', () => {
       const { exists } = testBed;
-      expect(exists('createTemplateButton')).toBe(true);
+      expect(exists('createLegacyTemplateButton')).toBe(true);
     });
 
     test('should have a switch to view system templates', async () => {
-      const { table, exists, component, form } = testBed;
-      const { rows } = table.getMetaData('templateTable');
+      const { table, exists, actions } = testBed;
+      const { rows } = table.getMetaData('legacyTemplateTable');
 
       expect(rows.length).toEqual(
-        templates.filter(template => !template.name.startsWith('.')).length
+        legacyTemplates.filter(template => !template.name.startsWith('.')).length
       );
 
-      expect(exists('systemTemplatesSwitch')).toBe(true);
+      expect(exists('viewButton')).toBe(true);
 
-      await act(async () => {
-        form.toggleEuiSwitch('systemTemplatesSwitch');
-        await nextTick();
-        component.update();
-      });
+      actions.toggleViewItem('system');
 
-      const { rows: updatedRows } = table.getMetaData('templateTable');
-      expect(updatedRows.length).toEqual(templates.length);
+      const { rows: updatedRows } = table.getMetaData('legacyTemplateTable');
+      expect(updatedRows.length).toEqual(legacyTemplates.length);
     });
 
     test('each row should have a link to the template details panel', async () => {
@@ -178,12 +218,12 @@ describe('Index Templates tab', () => {
 
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
-      expect(find('templateDetails.title').text()).toBe(template1.name);
+      expect(find('templateDetails.title').text()).toBe(legacyTemplates[0].name);
     });
 
     test('template actions column should have an option to delete', () => {
       const { actions, findAction } = testBed;
-      const { name: templateName } = template1;
+      const [{ name: templateName }] = legacyTemplates;
 
       actions.clickActionMenu(templateName);
 
@@ -194,7 +234,7 @@ describe('Index Templates tab', () => {
 
     test('template actions column should have an option to clone', () => {
       const { actions, findAction } = testBed;
-      const { name: templateName } = template1;
+      const [{ name: templateName }] = legacyTemplates;
 
       actions.clickActionMenu(templateName);
 
@@ -205,7 +245,7 @@ describe('Index Templates tab', () => {
 
     test('template actions column should have an option to edit', () => {
       const { actions, findAction } = testBed;
-      const { name: templateName } = template1;
+      const [{ name: templateName }] = legacyTemplates;
 
       actions.clickActionMenu(templateName);
 
@@ -217,7 +257,7 @@ describe('Index Templates tab', () => {
     describe('delete index template', () => {
       test('should show a confirmation when clicking the delete template button', async () => {
         const { actions } = testBed;
-        const { name: templateName } = template1;
+        const [{ name: templateName }] = legacyTemplates;
 
         await actions.clickTemplateAction(templateName, 'delete');
 
@@ -233,32 +273,28 @@ describe('Index Templates tab', () => {
       });
 
       test('should show a warning message when attempting to delete a system template', async () => {
-        const { component, form, actions } = testBed;
+        const { exists, actions } = testBed;
 
-        await act(async () => {
-          form.toggleEuiSwitch('systemTemplatesSwitch');
-          await nextTick();
-          component.update();
-        });
+        actions.toggleViewItem('system');
 
-        const { name: systemTemplateName } = template3;
+        const { name: systemTemplateName } = legacyTemplates[2];
         await actions.clickTemplateAction(systemTemplateName, 'delete');
 
-        expect(
-          document.body.querySelector('[data-test-subj="deleteSystemTemplateCallOut"]')
-        ).not.toBe(null);
+        expect(exists('deleteSystemTemplateCallOut')).toBe(true);
       });
 
       test('should send the correct HTTP request to delete an index template', async () => {
         const { component, actions, table } = testBed;
-        const { rows } = table.getMetaData('templateTable');
+        const { rows } = table.getMetaData('legacyTemplateTable');
 
         const templateId = rows[0].columns[2].value;
 
-        const {
-          name: templateName,
-          _kbnMeta: { formatVersion },
-        } = template1;
+        const [
+          {
+            name: templateName,
+            _kbnMeta: { isLegacy },
+          },
+        ] = legacyTemplates;
         await actions.clickTemplateAction(templateName, 'delete');
 
         const modal = document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]');
@@ -275,8 +311,6 @@ describe('Index Templates tab', () => {
 
         await act(async () => {
           confirmButton!.click();
-          await nextTick();
-          component.update();
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
@@ -284,7 +318,7 @@ describe('Index Templates tab', () => {
         expect(latestRequest.method).toBe('POST');
         expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-index-templates`);
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-          templates: [{ name: template1.name, formatVersion }],
+          templates: [{ name: legacyTemplates[0].name, isLegacy }],
         });
       });
     });
@@ -294,6 +328,7 @@ describe('Index Templates tab', () => {
         const template = fixtures.getTemplate({
           name: `a${getRandomString()}`,
           indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+          isLegacy: true,
         });
 
         httpRequestsMockHelpers.setLoadTemplateResponse(template);
@@ -318,7 +353,7 @@ describe('Index Templates tab', () => {
 
         test('should set the correct title', async () => {
           const { find } = testBed;
-          const { name } = template1;
+          const [{ name }] = legacyTemplates;
 
           expect(find('templateDetails.title').text()).toEqual(name);
         });
@@ -329,12 +364,10 @@ describe('Index Templates tab', () => {
           expect(exists('closeDetailsButton')).toBe(true);
           expect(exists('summaryTab')).toBe(true);
 
-          actions.clickCloseDetailsButton();
-
           await act(async () => {
-            await nextTick();
-            component.update();
+            actions.clickCloseDetailsButton();
           });
+          component.update();
 
           expect(exists('summaryTab')).toBe(false);
         });
@@ -374,6 +407,7 @@ describe('Index Templates tab', () => {
                 alias1: {},
               },
             },
+            isLegacy: true,
           });
 
           const { find, actions, exists } = testBed;
@@ -414,18 +448,14 @@ describe('Index Templates tab', () => {
           const templateWithNoOptionalFields = fixtures.getTemplate({
             name: `a${getRandomString()}`,
             indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+            isLegacy: true,
           });
 
-          const { actions, find, exists, component } = testBed;
+          const { actions, find, exists } = testBed;
 
           httpRequestsMockHelpers.setLoadTemplateResponse(templateWithNoOptionalFields);
 
           await actions.clickTemplateAt(0);
-
-          await act(async () => {
-            await nextTick();
-            component.update();
-          });
 
           expect(find('templateDetails.tab').length).toBe(4);
           expect(exists('summaryTab')).toBe(true);
