@@ -84,7 +84,7 @@ foo: bar
     });
   });
 
-  it('should support optionnal yaml values ar root level', () => {
+  it('should support optional yaml values at root level', () => {
     const streamTemplate = `
 input: logs
 {{custom}}
