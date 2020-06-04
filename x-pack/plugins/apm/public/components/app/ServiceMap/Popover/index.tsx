@@ -16,15 +16,17 @@ import React, {
   useState,
 } from 'react';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
+import { withTheme, EuiTheme } from '../../../../../../observability/public';
 import { CytoscapeContext } from '../Cytoscape';
-import { animationOptions } from '../cytoscapeOptions';
+import { getAnimationOptions } from '../cytoscapeOptions';
 import { Contents } from './Contents';
 
 interface PopoverProps {
   focusedServiceName?: string;
+  theme: EuiTheme;
 }
 
-export function Popover({ focusedServiceName }: PopoverProps) {
+export const Popover = withTheme(({ focusedServiceName, theme }: PopoverProps) => {
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
@@ -93,7 +95,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       event.preventDefault();
       if (cy) {
         cy.animate({
-          ...animationOptions,
+          ...getAnimationOptions(theme),
           center: { eles: cy.getElementById(selectedNodeServiceName) },
         });
       }
@@ -123,4 +125,4 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       />
     </EuiPopover>
   );
-}
+});

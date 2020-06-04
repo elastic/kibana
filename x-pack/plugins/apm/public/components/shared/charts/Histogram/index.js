@@ -21,9 +21,9 @@ import {
   makeWidthFlexible,
   VerticalGridLines,
 } from 'react-vis';
+import { withTheme, EuiTheme } from '../../../../../../observability/public';
 import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tint } from 'polished';
 import { getTimeTicksTZ, getDomainTZ } from '../helper/timezone';
 
@@ -67,7 +67,7 @@ export class HistogramInner extends PureComponent {
     this.setState({ hoveredBucket: {} });
   };
 
-  getChartData(items, selectedItem) {
+  getChartData(items, selectedItem, color) {
     const yMax = d3.max(items, (d) => d.y);
     const MINIMUM_BUCKET_SIZE = yMax * 0.02;
 
@@ -75,10 +75,7 @@ export class HistogramInner extends PureComponent {
       const padding = (item.x - item.x0) / 20;
       return {
         ...item,
-        color:
-          item === selectedItem
-            ? theme.euiColorVis1
-            : tint(0.5, theme.euiColorVis1),
+        color: item === selectedItem ? color : tint(0.5, color),
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0,
@@ -99,6 +96,7 @@ export class HistogramInner extends PureComponent {
       tooltipHeader,
       verticalLineHover,
       width: XY_WIDTH,
+      theme,
     } = this.props;
     const { hoveredBucket } = this.state;
     if (isEmpty(buckets) || XY_WIDTH === 0) {
@@ -113,7 +111,11 @@ export class HistogramInner extends PureComponent {
     const yMin = 0;
     const yMax = d3.max(buckets, (d) => d.y);
     const selectedBucket = buckets[bucketIndex];
-    const chartData = this.getChartData(buckets, selectedBucket);
+    const chartData = this.getChartData(
+      buckets,
+      selectedBucket,
+      theme.euiColorVis1
+    );
 
     const x = scaleLinear()
       .domain([xMin, xMax])
@@ -255,6 +257,7 @@ HistogramInner.propTypes = {
   verticalLineHover: PropTypes.func,
   width: PropTypes.number.isRequired,
   xType: PropTypes.string,
+  theme: EuiTheme,
 };
 
 HistogramInner.defaultProps = {
@@ -267,4 +270,4 @@ HistogramInner.defaultProps = {
   xType: 'linear',
 };
 
-export default makeWidthFlexible(HistogramInner);
+export default withTheme(makeWidthFlexible(HistogramInner));

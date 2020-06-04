@@ -11,14 +11,13 @@ import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
 import { units, px, unit } from '../../../../style/variables';
 import { tint } from 'polished';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const List = styled.ul`
   width: 100%;
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${px(units.quarter)};
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${tint(0.1, theme.euiColorFullShade)};
+    ${({ theme }) => tint(0.1, theme.eui.euiColorFullShade)};
   position: absolute;
   background: #fff;
   z-index: 10;

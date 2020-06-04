@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 import { EuiAccordion } from '@elastic/eui';
@@ -25,12 +24,12 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${borderRadius};
-  background: ${(props) =>
-    props.isLibraryFrame
-      ? theme.euiColorEmptyShade
-      : theme.euiColorLightestShade};
+  background: ${({ isLibraryFrame, theme }) =>
+    isLibraryFrame
+      ? theme.eui.euiColorEmptyShade
+      : theme.eui.euiColorLightestShade};
 `;
 
 interface Props {

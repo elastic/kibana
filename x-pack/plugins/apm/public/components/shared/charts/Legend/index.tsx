@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
+import { withTheme, EuiTheme } from '../../../../../../observability/public';
 import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {
@@ -24,7 +24,7 @@ const Container = styled.div<ContainerProps>`
   display: flex;
   align-items: center;
   font-size: ${(props) => props.fontSize};
-  color: ${theme.euiColorDarkShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
   cursor: ${(props) => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${(props) => (props.disabled ? 0.4 : 1)};
   user-select: none;
@@ -56,20 +56,24 @@ interface Props {
   clickable?: boolean;
   shape?: Shape;
   indicator?: () => React.ReactNode;
+  theme: EuiTheme;
 }
 
-export const Legend: React.FC<Props> = ({
+export const Legend: React.FC<Props> = withTheme(({
   onClick,
   text,
-  color = theme.euiColorVis1,
+  color,
   fontSize = fontSizes.small,
   radius = units.minus - 1,
   disabled = false,
   clickable = false,
   shape = Shape.circle,
   indicator,
+  theme,
   ...rest
 }) => {
+  const indicatorColor = color || theme.euiColorVis1;
+
   return (
     <Container
       onClick={onClick}
@@ -82,7 +86,7 @@ export const Legend: React.FC<Props> = ({
         indicator()
       ) : (
         <Indicator
-          color={color}
+          color={indicatorColor}
           radius={radius}
           shape={shape}
           withMargin={!!text}
@@ -91,4 +95,4 @@ export const Legend: React.FC<Props> = ({
       {text}
     </Container>
   );
-};
+});

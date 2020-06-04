@@ -5,29 +5,30 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
+import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import { px, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { Legend } from '../../Legend';
 import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 const NameContainer = styled.div`
-  border-bottom: 1px solid ${theme.euiColorMediumShade};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
   padding-bottom: ${px(units.half)};
 `;
 
 const TimeContainer = styled.div`
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
   padding-top: ${px(units.half)};
 `;
 
 interface Props {
   mark: AgentMark;
+  theme: EuiTheme;
 }
 
-export const AgentMarker: React.FC<Props> = ({ mark }) => {
+export const AgentMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
   return (
     <>
       <EuiToolTip
@@ -44,4 +45,4 @@ export const AgentMarker: React.FC<Props> = ({ mark }) => {
       </EuiToolTip>
     </>
   );
-};
+});

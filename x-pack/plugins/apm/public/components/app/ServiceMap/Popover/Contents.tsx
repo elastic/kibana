@@ -12,7 +12,6 @@ import {
   EuiIconTip,
   EuiHealth,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
@@ -25,6 +24,7 @@ import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink'
 import { getSeverityColor } from '../cytoscapeOptions';
 import { asInteger } from '../../../../utils/formatters';
 import { getMetricChangeDescription } from '../../../../../../ml/public';
+import { withTheme, EuiTheme } from '../../../../../../observability/public';
 
 const popoverMinWidth = 280;
 
@@ -34,6 +34,7 @@ interface ContentsProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   selectedNodeData: cytoscape.NodeDataDefinition;
   selectedNodeServiceName: string;
+  theme: EuiTheme;
 }
 
 const HealthStatusTitle = styled(EuiTitle)`
@@ -47,11 +48,11 @@ const VerticallyCentered = styled.div`
 `;
 
 const SubduedText = styled.span`
-  color: ${theme.euiTextSubduedColor};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
 `;
 
 const EnableText = styled.section`
-  color: ${theme.euiTextSubduedColor};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   line-height: 1.4;
   font-size: ${fontSize};
   width: ${px(popoverMinWidth)};
@@ -116,13 +117,14 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   }
 );
 
-export function Contents({
+export const Contents = withTheme(({
   selectedNodeData,
   isService,
   label,
   onFocusClick,
   selectedNodeServiceName,
-}: ContentsProps) {
+  theme,
+}: ContentProps) => {
   // Anomaly Detection
   const severity = selectedNodeData.severity;
   const maxScore = selectedNodeData.max_score;
@@ -170,7 +172,7 @@ export function Contents({
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <VerticallyCentered>
-                      <EuiHealth color={getSeverityColor(severity)} />
+                      <EuiHealth color={getSeverityColor(severity, theme)} />
                       <SubduedText>
                         {ANOMALY_DETECTION_SCORE_METRIC}
                       </SubduedText>
@@ -216,4 +218,4 @@ export function Contents({
       )}
     </FlexColumnGroup>
   );
-}
+});

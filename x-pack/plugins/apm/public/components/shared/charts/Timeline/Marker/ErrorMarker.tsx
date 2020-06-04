@@ -5,13 +5,13 @@
  */
 
 import { EuiPopover, EuiText } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
+import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
@@ -21,6 +21,7 @@ import { Legend, Shape } from '../../Legend';
 
 interface Props {
   mark: ErrorMark;
+  theme: EuiTheme;
 }
 
 const Popover = styled.div`
@@ -42,7 +43,7 @@ const Button = styled(Legend)`
   align-items: flex-end;
 `;
 
-export const ErrorMarker: React.FC<Props> = ({ mark }) => {
+export const ErrorMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -106,4 +107,4 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       </Popover>
     </EuiPopover>
   );
-};
+});

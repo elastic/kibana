@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { PureComponent } from 'react';
 import { VerticalGridLines, XYPlot } from 'react-vis';
+import { withTheme, EuiTheme } from '../../../../../../observability/public';
 import { Mark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks';
 import { PlotValues } from './plotUtils';
 
@@ -14,11 +14,12 @@ interface VerticalLinesProps {
   marks?: Mark[];
   plotValues: PlotValues;
   topTraceDuration: number;
+  theme: EuiTheme;
 }
 
-export class VerticalLines extends PureComponent<VerticalLinesProps> {
+class Lines extends PureComponent<VerticalLinesProps> {
   render() {
-    const { topTraceDuration, marks = [] } = this.props;
+    const { topTraceDuration, marks = [], theme } = this.props;
     const {
       width,
       height,
@@ -67,3 +68,5 @@ export class VerticalLines extends PureComponent<VerticalLinesProps> {
     );
   }
 }
+
+export const VerticalLines = withTheme(Lines);

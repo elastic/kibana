@@ -15,7 +15,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
@@ -24,6 +23,7 @@ import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { px, units } from '../../../../../style/variables';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
+import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import {
   createAgentConfigurationHref,
   editAgentConfigurationHref,
@@ -32,15 +32,19 @@ import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 type Config = AgentConfigurationListAPIResponse[0];
 
-export function AgentConfigurationList({
-  status,
-  data,
-  refetch,
-}: {
+interface Props {
   status: FETCH_STATUS;
   data: Config[];
   refetch: () => void;
-}) {
+  theme: EuiTheme;
+}
+
+export const AgentConfigurationList = withTheme(({
+  status,
+  data,
+  refetch,
+  theme,
+}: Props) => {
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
   );
@@ -218,4 +222,4 @@ export function AgentConfigurationList({
       />
     </>
   );
-}
+});

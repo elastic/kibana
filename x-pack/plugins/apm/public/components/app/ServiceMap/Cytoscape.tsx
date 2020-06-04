@@ -15,11 +15,11 @@ import React, {
 } from 'react';
 import { debounce } from 'lodash';
 import {
-  animationOptions,
-  cytoscapeOptions,
-  nodeHeight,
+  getAnimationOptions,
+  getCytoscapeOptions,
+  getNodeHeight,
 } from './cytoscapeOptions';
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker, withTheme, EuiTheme } from '../../../../../observability/public';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
@@ -32,6 +32,7 @@ interface CytoscapeProps {
   width: number;
   serviceName?: string;
   style?: CSSProperties;
+  theme: EuiTheme;
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {
@@ -73,7 +74,8 @@ function rotatePoint(
 function getLayoutOptions(
   selectedRoots: string[],
   height: number,
-  width: number
+  width: number,
+  nodeHeight: number,
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
@@ -102,18 +104,21 @@ function selectRoots(cy: cytoscape.Core): string[] {
     .map((el) => el.id());
 }
 
-export function Cytoscape({
+export const Cytoscape = withTheme(({
   children,
   elements,
   height,
   width,
   serviceName,
   style,
-}: CytoscapeProps) {
+  theme,
+}: CytoscapeProps) => {
   const [ref, cy] = useCytoscape({
-    ...cytoscapeOptions,
+    ...getCytoscapeOptions(theme),
     elements,
   });
+
+  const nodeHeight = getNodeHeight(theme);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
@@ -157,7 +162,7 @@ export function Cytoscape({
 
         const selectedRoots = selectRoots(event.cy);
         const layout = cy.layout(
-          getLayoutOptions(selectedRoots, height, width)
+          getLayoutOptions(selectedRoots, height, width, nodeHeight)
         );
 
         layout.run();
@@ -170,7 +175,7 @@ export function Cytoscape({
       layoutstopDelayTimeout = setTimeout(() => {
         if (serviceName) {
           event.cy.animate({
-            ...animationOptions,
+            ...getAnimationOptions(theme),
             fit: {
               eles: event.cy.elements(),
               padding: nodeHeight,
@@ -250,4 +255,4 @@ export function Cytoscape({
       </div>
     </CytoscapeContext.Provider>
   );
-}
+});

@@ -5,40 +5,39 @@
  */
 
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CytoscapeContext } from './Cytoscape';
-import { animationOptions, nodeHeight } from './cytoscapeOptions';
+import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
+import { withTheme, EuiTheme } from '../../../../../observability/public';
 
 const ControlsContainer = styled('div')`
-  left: ${theme.gutterTypes.gutterMedium};
+  left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
   position: absolute;
-  top: ${theme.gutterTypes.gutterSmall};
+  top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
 const Button = styled(EuiButtonIcon)`
   display: block;
-  margin: ${theme.paddingSizes.xs};
+  margin: ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
 
 const ZoomInButton = styled(Button)`
-  margin-bottom: ${theme.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 const Panel = styled(EuiPanel)`
-  margin-bottom: ${theme.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
-const duration = parseInt(theme.euiAnimSpeedFast, 10);
 const steps = 5;
 
-function doZoom(cy: cytoscape.Core | undefined, increment: number) {
+function doZoom(cy: cytoscape.Core | undefined, increment: number, duration: number) {
   if (cy) {
     const level = cy.zoom() + increment;
     // @ts-ignore `.position()` _does_ work on a NodeCollection. It returns the position of the first element in the collection.
@@ -56,11 +55,16 @@ function doZoom(cy: cytoscape.Core | undefined, increment: number) {
   }
 }
 
-export function Controls() {
+interface ControlProps {
+  theme: EuiTheme;
+}
+
+export const Controls = withTheme(({ theme }: ControlProps) => {
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
   const currentSearch = urlParams.kuery ?? '';
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
+  const duration = parseInt(theme.euiAnimSpeedFast, 10);
 
   useEffect(() => {
     if (cy) {
@@ -74,19 +78,19 @@ export function Controls() {
     if (cy) {
       const eles = cy.nodes();
       cy.animate({
-        ...animationOptions,
+        ...getAnimationOptions(theme),
         center: { eles },
-        fit: { eles, padding: nodeHeight },
+        fit: { eles, padding: getNodeHeight(theme) },
       });
     }
   }
 
   function zoomIn() {
-    doZoom(cy, increment);
+    doZoom(cy, increment, duration);
   }
 
   function zoomOut() {
-    doZoom(cy, -increment);
+    doZoom(cy, -increment, duration);
   }
 
   if (!cy) {
@@ -167,4 +171,4 @@ export function Controls() {
       )}
     </ControlsContainer>
   );
-}
+});

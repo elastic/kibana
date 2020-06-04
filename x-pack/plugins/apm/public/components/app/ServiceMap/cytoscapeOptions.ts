@@ -3,17 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
+import { EuiTheme } from '../../../../../observability/public';
 import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
 
-export const getSeverityColor = (nodeSeverity: string) => {
+export const getSeverityColor = (nodeSeverity: string, theme: EuiTheme) => {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.euiColorVis0;
@@ -75,23 +75,28 @@ const getBorderWidth = (el: cytoscape.NodeSingular) => {
 // @ts-ignore `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-export const animationOptions: cytoscape.AnimationOptions = {
+export const getAnimationOptions = (
+  theme: EuiTheme
+): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.euiAnimSpeedNormal, 10),
   // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.euiAnimSlightBounce,
-};
+});
+
 const lineColor = '#C5CCD7';
 const zIndexNode = 200;
 const zIndexEdge = 100;
 const zIndexEdgeHighlight = 110;
 const zIndexEdgeHover = 120;
-export const nodeHeight = parseInt(theme.avatarSizing.l.size, 10);
+
+export const getNodeHeight = (theme: EuiTheme): number =>
+  parseInt(theme.avatarSizing.l.size, 10);
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const style: cytoscape.Stylesheet[] = [
+const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
   {
     selector: 'node',
     style: {
@@ -122,7 +127,7 @@ const style: cytoscape.Stylesheet[] = [
       'ghost-offset-x': 0,
       'ghost-offset-y': 2,
       'ghost-opacity': 0.15,
-      height: nodeHeight,
+      height: getNodeHeight(theme),
       label: (el: cytoscape.NodeSingular) =>
         isService(el)
           ? el.data(SERVICE_NAME)
@@ -217,7 +222,7 @@ const style: cytoscape.Stylesheet[] = [
 
 // The CSS styles for the div containing the cytoscape element. Makes a
 // background grid of dots.
-export const cytoscapeDivStyle: CSSProperties = {
+export const getCytoscapeDivStyle = (theme: EuiTheme): CSSProperties => ({
   background: `linear-gradient(
   90deg,
   ${theme.euiPageBackgroundColor}
@@ -235,12 +240,14 @@ ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
   margin: `-${theme.gutterTypes.gutterLarge}`,
   marginTop: 0,
-};
+});
 
-export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
+export const getCytoscapeOptions = (
+  theme: EuiTheme
+): cytoscape.CytoscapeOptions => ({
   autoungrabify: true,
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style,
-};
+  style: getStyle(theme),
+});

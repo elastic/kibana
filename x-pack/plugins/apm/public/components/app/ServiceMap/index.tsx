@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import {
   invalidLicenseMessage,
@@ -18,18 +17,19 @@ import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
-import { cytoscapeDivStyle } from './cytoscapeOptions';
+import { getCytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 import { BetaBadge } from './BetaBadge';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useTrackPageview, withTheme, EuiTheme } from '../../../../../observability/public';
 
 interface ServiceMapProps {
   serviceName?: string;
+  theme: EuiTheme;
 }
 
-export function ServiceMap({ serviceName }: ServiceMapProps) {
+export const ServiceMap = withTheme(({ serviceName, theme }: ServiceMapProps) => {
   const license = useLicense();
   const { urlParams } = useUrlParams();
 
@@ -74,7 +74,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={data?.elements ?? []}
         height={height}
         serviceName={serviceName}
-        style={cytoscapeDivStyle}
+        style={getCytoscapeDivStyle(theme)}
         width={width}
       >
         <Controls />
@@ -98,4 +98,4 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});

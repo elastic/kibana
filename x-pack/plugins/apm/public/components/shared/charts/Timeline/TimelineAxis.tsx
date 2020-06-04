@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
 import { Sticky } from 'react-sticky';
 import { XAxis, XYPlot } from 'react-vis';
+import { withTheme, EuiTheme } from '../../../../../../observability/public';
 import { px } from '../../../../style/variables';
 import { getDurationFormatter } from '../../../../utils/formatters';
 import { Mark } from './';
@@ -40,13 +40,15 @@ interface TimelineAxisProps {
   plotValues: PlotValues;
   marks?: Mark[];
   topTraceDuration: number;
+  theme: EuiTheme;
 }
 
-export function TimelineAxis({
+export const TimelineAxis = withTheme(({
   plotValues,
   marks = [],
   topTraceDuration,
-}: TimelineAxisProps) {
+  theme,
+}: TimelineAxisProps) => {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
@@ -106,4 +108,4 @@ export function TimelineAxis({
       }}
     </Sticky>
   );
-}
+});

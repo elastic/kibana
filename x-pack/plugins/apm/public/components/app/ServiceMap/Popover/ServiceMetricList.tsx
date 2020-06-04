@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
@@ -30,7 +29,7 @@ export const ItemRow = styled('tr')`
 `;
 
 export const ItemTitle = styled('td')`
-  color: ${lightTheme.textColors.subdued};
+  color: ${({ theme }) => theme.eui.textColors.subdued};
   padding-right: 1rem;
 `;
 

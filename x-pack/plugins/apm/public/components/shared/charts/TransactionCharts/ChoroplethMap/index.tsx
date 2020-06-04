@@ -13,7 +13,6 @@ import React, {
 } from 'react';
 import { Map, NavigationControl, Popup } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { shade, tint } from 'polished';
 import { ChoroplethToolTip } from './ChoroplethToolTip';
 
