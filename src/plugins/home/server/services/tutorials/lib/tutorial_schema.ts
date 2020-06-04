@@ -26,7 +26,7 @@ const PARAM_TYPES = {
 
 const TUTORIAL_CATEGORY = {
   LOGGING: 'logging',
-  SIEM: 'siem',
+  SECURITY_SOLUTION: 'security solution',
   METRICS: 'metrics',
   OTHER: 'other',
 };
