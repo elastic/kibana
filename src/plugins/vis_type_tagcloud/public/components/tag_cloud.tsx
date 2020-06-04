@@ -20,14 +20,20 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
 import { EventEmitter } from 'events';
-import { D3ScalingFunction } from '../types';
+import {
+  D3ScalingFunction,
+  OrientationsFunction,
+  TagCloudVisParams,
+  TagType,
+  JobType,
+} from '../types';
 
-const ORIENTATIONS: any = {
+const ORIENTATIONS: OrientationsFunction = {
   single: () => 0,
-  'right angled': (tag: any) => {
+  'right angled': (tag: TagType) => {
     return hashWithinRange(tag.text, 2) * 90;
   },
-  multiple: (tag: any) => {
+  multiple: (tag: TagType) => {
     return hashWithinRange(tag.text, 12) * 15 - 90; // fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
   },
 };
@@ -39,7 +45,7 @@ const D3_SCALING_FUNCTIONS: D3ScalingFunction = {
 
 export class TagCloud extends EventEmitter {
   _element: HTMLElement;
-  _d3SvgContainer: any;
+  _d3SvgContainer: d3.Selection<void>;
   _svgGroup: any;
   _size: [number, number];
 
@@ -50,13 +56,13 @@ export class TagCloud extends EventEmitter {
   _timeInterval: number;
   _padding: number;
 
-  _orientation: string;
-  _minFontSize: number;
-  _maxFontSize: number;
-  _textScale: string;
+  _orientation: TagCloudVisParams['orientation'];
+  _minFontSize: TagCloudVisParams['minFontSize'];
+  _maxFontSize: TagCloudVisParams['maxFontSize'];
+  _textScale: TagCloudVisParams['scale'];
   _optionsAsString: string | null;
 
-  _words: any;
+  _words: string | null;
 
   _colorScale: string;
   _setTimeoutId: any;
@@ -68,7 +74,7 @@ export class TagCloud extends EventEmitter {
   _cloudWidth: number;
   _cloudHeight: number;
 
-  _completedJob: any;
+  _completedJob: Record<string, any> | null;
   tag: any;
 
   STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
@@ -118,7 +124,7 @@ export class TagCloud extends EventEmitter {
     this.STATUS.INCOMPLETE = 0;
   }
 
-  setOptions(options: any) {
+  setOptions(options: Record<string, any>) {
     if (JSON.stringify(options) === this._optionsAsString) {
       return;
     }
@@ -149,7 +155,7 @@ export class TagCloud extends EventEmitter {
     }
   }
 
-  setData(data: string) {
+  setData(data: any) {
     this._words = data;
     this._invalidate(false);
   }
@@ -184,7 +190,7 @@ export class TagCloud extends EventEmitter {
     }
 
     this._completedJob = null;
-    const job: any = await this._pickPendingJob();
+    const job: JobType = await this._pickPendingJob();
     if (job.words.length) {
       if (job.refreshLayout) {
         await this._updateLayout(job);
@@ -211,7 +217,7 @@ export class TagCloud extends EventEmitter {
   }
 
   async _pickPendingJob() {
-    return await new Promise(resolve => {
+    return await new Promise<object>(resolve => {
       this._setTimeoutId = setTimeout(async () => {
         const job = this._pendingJob;
         this._pendingJob = null;
@@ -229,7 +235,7 @@ export class TagCloud extends EventEmitter {
     this._DOMisUpdating = false;
   }
 
-  async _updateDOM(job: any) {
+  async _updateDOM(job: JobType) {
     const canSkipDomUpdate = this._pendingJob || this._setTimeoutId;
     if (canSkipDomUpdate) {
       this._DOMisUpdating = false;
@@ -309,14 +315,17 @@ export class TagCloud extends EventEmitter {
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
-    const range =
-      this._words.length === 1
-        ? [this._maxFontSize, this._maxFontSize]
-        : [this._minFontSize, this._maxFontSize];
-    mapSizeToFontSize.range(range);
-    if (this._words) {
-      mapSizeToFontSize.domain(d3.extent(this._words, getValue));
+    if (this._words != null) {
+      const range =
+        this._words.length === 1
+          ? [this._maxFontSize, this._maxFontSize]
+          : [this._minFontSize, this._maxFontSize];
+      mapSizeToFontSize.range(range);
+      if (this._words) {
+        mapSizeToFontSize.domain(d3.extent(this._words, getValue));
+      }
     }
+
     return mapSizeToFontSize;
   }
 
@@ -329,24 +338,26 @@ export class TagCloud extends EventEmitter {
   }
 
   _makeJobPreservingLayout() {
-    return {
-      refreshLayout: false,
-      size: this._size.slice(),
-      words: this._completedJob.words.map((tag: any) => {
-        return {
-          x: tag.x,
-          y: tag.y,
-          rotate: tag.rotate,
-          size: tag.size,
-          rawText: tag.rawText || tag.text,
-          displayText: tag.displayText,
-          meta: tag.meta,
-        };
-      }),
-    };
+    if (this._completedJob != null) {
+      return {
+        refreshLayout: false,
+        size: this._size.slice(),
+        words: this._completedJob.words.map((tag: TagType) => {
+          return {
+            x: tag.x,
+            y: tag.y,
+            rotate: tag.rotate,
+            size: tag.size,
+            rawText: tag.rawText || tag.text,
+            displayText: tag.displayText,
+            meta: tag.meta,
+          };
+        }),
+      };
+    }
   }
 
-  _invalidate(keepLayout: any) {
+  _invalidate(keepLayout: boolean) {
     if (!this._words) {
       return;
     }
@@ -358,7 +369,7 @@ export class TagCloud extends EventEmitter {
     this._processPendingJob();
   }
 
-  async _updateLayout(job: any) {
+  async _updateLayout(job: JobType) {
     if (job.size[0] <= 0 || job.size[1] <= 0) {
       // If either width or height isn't above 0 we don't relayout anything,
       // since the d3-cloud will be stuck in an infinite loop otherwise.
@@ -373,7 +384,7 @@ export class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize((tag: any) => mapSizeToFontSize(tag.value));
+    tagCloudLayoutGenerator.fontSize((tag: TagType): any => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
@@ -397,7 +408,7 @@ export class TagCloud extends EventEmitter {
   getDebugInfo(): any {
     const debug: any = {};
     debug.positions = this._completedJob
-      ? this._completedJob.words.map((tag: any) => {
+      ? this._completedJob.words.map((tag: TagType) => {
           return {
             displayText: tag.displayText,
             rawText: tag.rawText || tag.text,
@@ -414,7 +425,7 @@ export class TagCloud extends EventEmitter {
     return debug;
   }
 
-  getFill(tag: any): string {
+  getFill(tag: TagType): string {
     return this._colorScale(tag.text);
   }
 }
@@ -423,15 +434,15 @@ function seed(): number {
   return 0.5; // constant seed (not random) to ensure constant layouts for identical data
 }
 
-function getText(word: any): string {
+function getText(word: TagType): string {
   return word.rawText;
 }
 
-function getDisplayText(word: any): string {
+function getDisplayText(word: TagType): string {
   return word.displayText;
 }
 
-function positionWord(xTranslate: any, yTranslate: any, word: any): string {
+function positionWord(xTranslate: number, yTranslate: number, word: TagType): string {
   if (isNaN(word.x) || isNaN(word.y) || isNaN(word.rotate)) {
     // move off-screen
     return `translate(${xTranslate * 3}, ${yTranslate * 3})rotate(0)`;
@@ -440,11 +451,11 @@ function positionWord(xTranslate: any, yTranslate: any, word: any): string {
   return `translate(${word.x + xTranslate}, ${word.y + yTranslate})rotate(${word.rotate})`;
 }
 
-function getValue(tag: any) {
+function getValue(tag: TagType): string | number {
   return tag.value;
 }
 
-function getSizeInPixels(tag: any): string {
+function getSizeInPixels(tag: TagType): string {
   return `${tag.size}px`;
 }
 
