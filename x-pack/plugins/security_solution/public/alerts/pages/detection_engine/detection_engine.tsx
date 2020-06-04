@@ -36,8 +36,7 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-
-export const ALERTS_TABLE_ID = 'detections-page-alerts';
+import { ALERTS_TABLE_ID } from './constants';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,

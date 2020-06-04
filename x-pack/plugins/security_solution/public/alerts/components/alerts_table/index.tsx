@@ -307,7 +307,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     initializeTimeline({
-      id: ALERTS_TABLE_TIMELINE_ID,
+      id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       loadingText: i18n.LOADING_ALERTS,
@@ -317,7 +317,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, []);
   useEffect(() => {
     setTimelineRowActions({
-      id: ALERTS_TABLE_TIMELINE_ID,
+      id: timelineId,
       queryFields: requiredFieldsForActions,
       timelineRowActions: additionalActions,
     });

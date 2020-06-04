@@ -27,8 +27,10 @@ import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query
 import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
-import { ALERTS_TABLE_ID as DETECTION_ENGINE_TIMELINE_ID } from '../../alerts/pages/detection_engine/rules/details';
-import { ALERTS_TABLE_ID as DETECTION_ENGINE_RULES_TIMELINE_ID } from '../../alerts/pages/detection_engine/detection_engine';
+import {
+  ALERTS_TABLE_ID as DETECTION_ENGINE_TIMELINE_ID,
+  SINGLE_RULE_ALERTS_TABLE_ID as DETECTION_ENGINE_RULES_TIMELINE_ID,
+} from '../../alerts/pages/detection_engine/constants';
 
 const timelineIds = [DETECTION_ENGINE_TIMELINE_ID, DETECTION_ENGINE_RULES_TIMELINE_ID];
 

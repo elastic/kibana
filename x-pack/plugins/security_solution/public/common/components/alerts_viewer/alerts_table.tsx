@@ -63,7 +63,7 @@ const AlertsTableComponent: React.FC<Props> = ({ id, endDate, startDate, pageFil
 
   useEffect(() => {
     initializeTimeline({
-      id: ALERTS_TABLE_ID,
+      id,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,
