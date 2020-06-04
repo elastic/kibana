@@ -37,6 +37,19 @@ expect.addSnapshotSerializer({
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
 });
 
+const log = new ToolingLog({
+  level: 'error',
+  writeTo: {
+    write(chunk) {
+      if (chunk.endsWith('\n')) {
+        chunk = chunk.slice(0, -1);
+      }
+      // eslint-disable-next-line no-console
+      console.error(chunk);
+    },
+  },
+});
+
 beforeAll(async () => {
   await del(TMP_DIR);
   await cpy('**/*', MOCK_REPO_DIR, {
@@ -55,23 +68,11 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
-    dist: true,
+    dist: false,
   });
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 
-  const log = new ToolingLog({
-    level: 'error',
-    writeTo: {
-      write(chunk) {
-        if (chunk.endsWith('\n')) {
-          chunk = chunk.slice(0, -1);
-        }
-        // eslint-disable-next-line no-console
-        console.error(chunk);
-      },
-    },
-  });
   const msgs = await runOptimizer(config)
     .pipe(logOptimizerState(log, config), toArray())
     .toPromise();
@@ -128,13 +129,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
-  expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
-  expectFileMatchesSnapshotWithCompression(
-    'plugins/foo/target/public/1.plugin.js',
-    '1 async bundle'
-  );
-  expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
-
   const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
@@ -180,7 +174,7 @@ it('uses cache on second run and exist cleanly', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
-    dist: true,
+    dist: false,
   });
 
   const msgs = await runOptimizer(config)
@@ -204,6 +198,24 @@ it('uses cache on second run and exist cleanly', async () => {
       "success",
     ]
   `);
+});
+
+it('prepares assets for distribution', async () => {
+  const config = OptimizerConfig.create({
+    repoRoot: MOCK_REPO_DIR,
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    maxWorkerCount: 1,
+    dist: true,
+  });
+
+  await runOptimizer(config).pipe(logOptimizerState(log, config), toArray()).toPromise();
+
+  expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
+  expectFileMatchesSnapshotWithCompression(
+    'plugins/foo/target/public/1.plugin.js',
+    '1 async bundle'
+  );
+  expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
 
 /**
