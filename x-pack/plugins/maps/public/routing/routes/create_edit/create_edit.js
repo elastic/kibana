@@ -18,12 +18,12 @@ import {
   getCoreChrome,
 } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
-import { getInitialLayers } from '../../../angular/get_initial_layers';
+import { getInitialLayers } from '../../../bootstrap/get_initial_layers';
 import rison from 'rison-node';
-import { getInitialTimeFilters } from '../../../angular/get_initial_time_filters';
-import { getInitialRefreshConfig } from '../../../angular/get_initial_refresh_config';
-import { getInitialQuery } from '../../../angular/get_initial_query';
-import { getMapsSavedObjectLoader } from '../../../angular/services/gis_map_saved_object_loader';
+import { getInitialTimeFilters } from '../../../bootstrap/get_initial_time_filters';
+import { getInitialRefreshConfig } from '../../../bootstrap/get_initial_refresh_config';
+import { getInitialQuery } from '../../../bootstrap/get_initial_query';
+import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
 import { MapsTopNavMenu } from '../../page_elements/top_nav_menu';
 import {
   getGlobalState,

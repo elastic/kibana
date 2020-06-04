@@ -6,7 +6,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { getMapsSavedObjectLoader } from '../../angular/services/gis_map_saved_object_loader';
+import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
 import { getMapsCapabilities, getUiSettings, getToasts } from '../../kibana_services';
 import {
   EuiTitle,

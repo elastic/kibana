@@ -13,7 +13,7 @@ import { MapsCreateEditView } from './routes/create_edit';
 import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
-import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
+import { getMapsSavedObjectLoader } from '../bootstrap/services/gis_map_saved_object_loader';
 
 export let returnToMapsList;
 export let goToSpecifiedPath;
