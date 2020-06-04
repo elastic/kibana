@@ -66,6 +66,11 @@ export function getFilterAggConfig(
         ? this.aggConfig.aggTypeConfig.getAggName()
         : undefined;
     },
+    helperText() {
+      return this.aggConfig?.aggTypeConfig?.helperText
+        ? this.aggConfig.aggTypeConfig.helperText()
+        : undefined;
+    },
   };
 }
 
@@ -148,6 +153,14 @@ export function getFilterAggTypeConfig(
           }
 
           return true;
+        },
+        helperText() {
+          if (!this.isValid!()) return;
+          const { from, to, includeFrom, includeTo } = this.filterAggConfig!;
+
+          return `range: ${`${from !== undefined ? `${includeFrom ? '≥' : '>'} ${from}` : ''} ${
+            from !== undefined && to !== undefined ? '&' : ''
+          } ${to !== undefined ? `${includeTo ? '≤' : '<'} ${to}` : ''}`.trim()}`;
         },
       } as FilterAggConfigRange['aggTypeConfig'];
     case FILTERS.EXISTS:

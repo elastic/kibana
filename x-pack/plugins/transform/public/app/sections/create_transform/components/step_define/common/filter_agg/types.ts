@@ -29,6 +29,8 @@ interface FilterAggTypeConfig<U, R> {
   isValid?: () => boolean;
   /** Provides aggregation name generated based on the configuration */
   getAggName?: () => string | undefined;
+  /** Helper text for the aggregation reflecting some configuration info */
+  helperText?: () => string | undefined;
 }
 
 /** Filter agg type definition */

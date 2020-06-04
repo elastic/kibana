@@ -140,6 +140,8 @@ export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   isValid: () => boolean;
   /** Provides aggregation name generated based on the configuration */
   getAggName?: () => string | undefined;
+  /** Helper text for the aggregation reflecting some configuration info */
+  helperText?: () => string | undefined;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
