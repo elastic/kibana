@@ -114,7 +114,7 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
   signal,
 }): Promise<Blob> => {
   const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
-  const response = await KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
+  const response = await KibanaServices.get().http.fetch<{ body: Blob }>(`${TIMELINE_EXPORT_URL}`, {
     method: 'POST',
     body,
     query: {
@@ -122,7 +122,7 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
     },
   });
 
-  return response.body!;
+  return response.body;
 };
 
 export const getDraftTimeline = async ({
