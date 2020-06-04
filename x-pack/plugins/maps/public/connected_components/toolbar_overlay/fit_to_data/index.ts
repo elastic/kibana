@@ -20,7 +20,7 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     fitToBounds: () => {
-      dispatch(fitToDataBounds());
+      dispatch<any>(fitToDataBounds());
     },
   };
 }

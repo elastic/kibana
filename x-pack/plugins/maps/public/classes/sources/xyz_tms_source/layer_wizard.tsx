@@ -16,12 +16,12 @@ export const tmsLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Tile map service configured in interface',
   }),
   icon: 'grid',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: XYZTMSSourceConfig) => {
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: XYZTMSSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
   },

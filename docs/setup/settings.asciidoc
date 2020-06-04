@@ -216,7 +216,9 @@ on the {kib} index at startup. {kib} users still need to authenticate with
   | Enables use of interpreter in Visualize. *Default: `true`*
 
 | `kibana.defaultAppId:`
- | The default application to load. *Default: `"home"`*
+ | *deprecated* This setting is deprecated and will get removed in Kibana 8.0.
+Please use the `defaultRoute` advanced setting instead.
+The default application to load. *Default: `"home"`*
 
 | `kibana.index:`
  | {kib} uses an index in {es} to store saved searches, visualizations, and
@@ -627,17 +629,17 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
 |===
 
-include::{docdir}/settings/alert-action-settings.asciidoc[]
-include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/dev-settings.asciidoc[]
-include::{docdir}/settings/graph-settings.asciidoc[]
-include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{docdir}/settings/i18n-settings.asciidoc[]
-include::{docdir}/settings/logs-ui-settings.asciidoc[]
-include::{docdir}/settings/ml-settings.asciidoc[]
-include::{docdir}/settings/monitoring-settings.asciidoc[]
-include::{docdir}/settings/reporting-settings.asciidoc[]
+include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
+include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
+include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
+include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
+include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
+include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
+include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
+include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
 include::secure-settings.asciidoc[]
-include::{docdir}/settings/security-settings.asciidoc[]
-include::{docdir}/settings/spaces-settings.asciidoc[]
-include::{docdir}/settings/telemetry-settings.asciidoc[]
+include::{kib-repo-dir}/settings/security-settings.asciidoc[]
+include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
+include::{kib-repo-dir}/settings/telemetry-settings.asciidoc[]

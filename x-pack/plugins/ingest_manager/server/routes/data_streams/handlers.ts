@@ -11,7 +11,7 @@ import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
-  const callCluster = context.core.elasticsearch.dataClient.callAsCurrentUser;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 
   try {
     // Get stats (size on disk) of all potentially matching indices

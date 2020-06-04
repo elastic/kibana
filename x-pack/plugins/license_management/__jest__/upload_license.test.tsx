@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { httpServiceMock } from '../../../../src/core/public/mocks';
+import { LocationDescriptorObject } from 'history';
+import { httpServiceMock, scopedHistoryMock } from '../../../../src/core/public/mocks';
 import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
 
 // @ts-ignore
@@ -32,6 +33,10 @@ window.location.reload = () => {};
 
 let store: any = null;
 let component: any = null;
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
+  return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+});
 
 const appDependencies = {
   plugins: {
@@ -39,14 +44,15 @@ const appDependencies = {
       refresh: jest.fn(),
     },
   },
+  services: {
+    history,
+  },
   docLinks: {},
 };
 
 const thunkServices = {
   http: httpServiceMock.createSetupContract(),
-  history: {
-    replace: jest.fn(),
-  },
+  history,
   breadcrumbService: {
     setBreadcrumbs() {},
   },
@@ -59,7 +65,7 @@ describe('UploadLicense', () => {
     component = (
       <AppContextProvider value={appDependencies as any}>
         <Provider store={store}>
-          <UploadLicense />
+          <UploadLicense history={history} />
         </Provider>
       </AppContextProvider>
     );
