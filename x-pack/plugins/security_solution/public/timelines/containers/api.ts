@@ -97,7 +97,6 @@ export const persistTimeline = async ({
 
 export const importTimelines = async ({
   fileToImport,
-  signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
@@ -106,7 +105,6 @@ export const importTimelines = async ({
     method: 'POST',
     headers: { 'Content-Type': undefined },
     body: formData,
-    signal,
   });
 };
 
@@ -122,8 +120,6 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
     query: {
       file_name: filename,
     },
-    signal,
-    asResponse: true,
   });
 
   return response.body!;
