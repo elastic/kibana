@@ -25,16 +25,17 @@ import { ErrorEmbeddable } from './error_embeddable';
 
 /**
  * This type is needed for strict, one of, public api
+ * input is required only when rendering factory
  */
 export type EmeddableRendererProps<I extends EmbeddableInput> =
   | { input: I; onInputUpdated?: (newInput: I) => void; factory: EmbeddableFactory<I> }
-  | { input: I; onInputUpdated?: (newInput: I) => void; embeddable: IEmbeddable<I> };
+  | { input?: I; onInputUpdated?: (newInput: I) => void; embeddable: IEmbeddable<I> };
 
 /**
  * This one is for internal implementation
  */
 interface InnerProps {
-  input: EmbeddableInput;
+  input?: EmbeddableInput;
   onInputUpdated?: (newInput: EmbeddableInput) => void;
   factory?: EmbeddableFactory;
   embeddable?: IEmbeddable;
@@ -65,15 +66,16 @@ export const EmbeddableRenderer = <I extends EmbeddableInput>(
       setEmbeddable(undefined);
       setLoading(true);
       props.factory
-        .create(latestInput.current)
+        .create(latestInput.current!)
         .then((createdEmbeddable) => {
           if (canceled) {
             if (createdEmbeddable) {
               createdEmbeddable.destroy();
             }
+          } else {
+            createdEmbeddableRef = createdEmbeddable;
+            setEmbeddable(createdEmbeddable);
           }
-          createdEmbeddableRef = createdEmbeddable;
-          setEmbeddable(createdEmbeddable);
         })
         .catch((err) => {
           if (canceled) return;
