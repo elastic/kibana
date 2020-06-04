@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { StatefulEventsViewer } from '../events_viewer';
-import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';
-
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import * as i18n from './translations';
 export interface OwnProps {
   end: number;
   id: string;
@@ -59,16 +59,17 @@ interface Props {
 
 const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const timelineTypeContext = useMemo(
-    () => ({
+  const { initializeTimeline } = useManageTimeline();
+
+  useEffect(() => {
+    initializeTimeline({
+      id: ALERTS_TABLE_ID,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
-    }),
-    []
-  );
-
+    });
+  }, []);
   return (
     <StatefulEventsViewer
       pageFilters={alertsFilter}
@@ -76,7 +77,6 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
       end={endDate}
       id={ALERTS_TABLE_ID}
       start={startDate}
-      timelineTypeContext={timelineTypeContext}
     />
   );
 };

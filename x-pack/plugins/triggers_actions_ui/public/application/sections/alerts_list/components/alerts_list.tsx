@@ -439,7 +439,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       >
         <AlertAdd
-          consumer={'alerting'}
+          consumer={'alerts'}
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />

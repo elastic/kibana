@@ -5,7 +5,7 @@
  */
 
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 import { getRuleActionsFromSavedObject } from './utils';

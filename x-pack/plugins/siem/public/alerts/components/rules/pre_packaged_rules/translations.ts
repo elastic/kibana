@@ -17,7 +17,7 @@ export const PRE_BUILT_MSG = i18n.translate(
   'xpack.siem.detectionEngine.rules.prePackagedRules.emptyPromptMessage',
   {
     defaultMessage:
-      'Elastic SIEM comes with prebuilt detection rules that run in the background and create signals when their conditions are met. By default, all prebuilt rules are disabled and you select which rules you want to activate.',
+      'Elastic SIEM comes with prebuilt detection rules that run in the background and create alerts when their conditions are met. By default, all prebuilt rules are disabled and you select which rules you want to activate.',
   }
 );
 

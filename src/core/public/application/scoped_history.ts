@@ -197,7 +197,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
     prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>
   ): UnregisterCallback => {
     throw new Error(
-      `history.block is not supported. Please use the AppMountParams.onAppLeave API.`
+      `history.block is not supported. Please use the AppMountParameters.onAppLeave API.`
     );
   };
 

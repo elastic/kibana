@@ -125,7 +125,7 @@ export class JobDetails extends Component {
         },
       ];
 
-      if (showFullDetails) {
+      if (showFullDetails && datafeed.items.length) {
         // Datafeed should be at index 2 in tabs array for full details
         tabs.splice(2, 0, {
           id: 'datafeed',

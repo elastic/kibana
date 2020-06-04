@@ -10,7 +10,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../../alerts/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
 
