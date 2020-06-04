@@ -37,6 +37,7 @@ export const TabAliases: React.FunctionComponent<Props> = ({ componentTemplateDe
       }
       iconType="pin"
       data-test-subj="noAliasesCallout"
+      size="s"
     />
   );
 };

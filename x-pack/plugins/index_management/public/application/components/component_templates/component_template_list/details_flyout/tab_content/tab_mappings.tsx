@@ -37,6 +37,7 @@ export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateD
       }
       iconType="pin"
       data-test-subj="noMappingsCallout"
+      size="s"
     />
   );
 };

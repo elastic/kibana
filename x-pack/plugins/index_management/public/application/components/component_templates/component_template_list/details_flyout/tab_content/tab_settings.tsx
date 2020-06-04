@@ -37,6 +37,7 @@ export const TabSettings: React.FunctionComponent<Props> = ({ componentTemplateD
       }
       iconType="pin"
       data-test-subj="noSettingsCallout"
+      size="s"
     />
   );
 };
