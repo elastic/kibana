@@ -25,6 +25,9 @@ import { Type } from '@kbn/config-schema';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
+// @internal (undocumented)
+export function __kbnBootstrap__(): void;
+
 // @public
 export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;

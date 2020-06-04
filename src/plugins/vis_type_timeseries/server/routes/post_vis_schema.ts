@@ -50,6 +50,7 @@ const backgroundColorRulesItems = Joi.object({
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
   color: stringOptionalNullable,
+  operator: stringOptionalNullable,
 });
 
 const gaugeColorRulesItems = Joi.object({
@@ -57,7 +58,7 @@ const gaugeColorRulesItems = Joi.object({
   text: stringOptionalNullable,
   id: stringOptionalNullable,
   operator: stringOptionalNullable,
-  value: Joi.number(),
+  value: numberOptional.allow(null),
 });
 const metricsItems = Joi.object({
   field: stringOptionalNullable,

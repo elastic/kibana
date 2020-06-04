@@ -17,4 +17,13 @@
  * under the License.
  */
 
-module.exports = require('@elastic/numeral');
+import { ApmOssPlugin } from './plugin';
+
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new ApmOssPlugin();
+}
+export { ApmOssPluginSetup, ApmOssPluginStart } from './types';
+
+export { APM_STATIC_INDEX_PATTERN_ID } from '../common/index_pattern_constants';

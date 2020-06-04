@@ -23,6 +23,8 @@ APM_IT_DIR="./tmp/apm-integration-testing"
 
 cd ${E2E_DIR}
 
+KIBANA_VERSION=$(node -p "require('../../../package.json').version")
+
 #
 # Ask user to start Kibana
 ##################################################
@@ -60,7 +62,8 @@ fi
 
 # Start apm-integration-testing
 echo "Starting docker-compose"
-${APM_IT_DIR}/scripts/compose.py start master \
+echo "Using stack version: ${KIBANA_VERSION}"
+${APM_IT_DIR}/scripts/compose.py start $KIBANA_VERSION \
     --no-kibana \
     --elasticsearch-port $ELASTICSEARCH_PORT \
     --apm-server-port=$APM_SERVER_PORT \

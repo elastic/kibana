@@ -179,7 +179,7 @@ export class ApplicationService {
           throw new Error(
             `An application is already registered with the appRoute "${app.appRoute}"`
           );
-        } else if (basename && app.appRoute!.startsWith(basename)) {
+        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
@@ -198,6 +198,7 @@ export class ApplicationService {
           appBasePath: basePath.prepend(app.appRoute!),
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
+          legacy: false,
         });
       },
       registerLegacyApp: (app) => {
@@ -207,7 +208,7 @@ export class ApplicationService {
           throw new Error('Applications cannot be registered after "setup"');
         } else if (this.apps.has(app.id)) {
           throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (basename && appRoute!.startsWith(basename)) {
+        } else if (basename && appRoute!.startsWith(`${basename}/`)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
@@ -232,6 +233,7 @@ export class ApplicationService {
           appBasePath,
           mount,
           unmountBeforeMounting: true,
+          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>

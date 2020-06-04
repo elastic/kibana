@@ -17,27 +17,17 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../common';
-import { stubFields } from './field.stub';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const stubIndexPattern: IIndexPattern = {
-  id: 'logstash-*',
-  fields: stubFields,
-  title: 'logstash-*',
-  timeFieldName: '@timestamp',
-};
+export const configSchema = schema.object({
+  autocomplete: schema.object({
+    querySuggestions: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    valueSuggestions: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+});
 
-export const stubIndexPatternWithFields: IIndexPattern = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-};
+export type ConfigSchema = TypeOf<typeof configSchema>;

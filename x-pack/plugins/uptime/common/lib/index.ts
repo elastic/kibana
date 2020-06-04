@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+export * from './combine_filters_and_user_search';
+export * from './stringify_kueries';

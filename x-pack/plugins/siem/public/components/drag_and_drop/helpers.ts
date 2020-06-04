@@ -331,3 +331,6 @@ export const allowTopN = ({
 
   return isWhitelistedNonBrowserField || (isAggregatable && isAllowedType);
 };
+
+export const getTimelineIdFromColumnDroppableId = (droppableId: string) =>
+  droppableId.slice(droppableId.lastIndexOf('.') + 1);
