@@ -6,6 +6,7 @@
 
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+
 import {
   registerTestBed,
   TestBed,
@@ -13,10 +14,12 @@ import {
   findTestSubject,
   nextTick,
 } from '../../../../../test_utils';
+// NOTE: We have to use the Home component instead of the TemplateList component because we depend
+// upon react router to provide the name of the template to load in the detail panel.
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, services } from './setup_environment';
+import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
@@ -29,12 +32,11 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
-export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
+export interface IndexTemplatesTabTestBed extends TestBed<TestSubjects> {
   findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;
   actions: {
-    selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
+    goToTemplatesList: () => void;
     selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
-    selectIndexDetailsTab: (tab: 'settings' | 'mappings' | 'stats' | 'edit_settings') => void;
     clickReloadButton: () => void;
     clickTemplateAction: (
       name: TemplateDeserialized['name'],
@@ -43,12 +45,10 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
     clickActionMenu: (name: TemplateDeserialized['name']) => void;
-    getIncludeHiddenIndicesToggleStatus: () => boolean;
-    clickIncludeHiddenIndicesToggle: () => void;
   };
 }
 
-export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
+export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
   const testBed = await initTestBed();
 
   /**
@@ -65,8 +65,8 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
    * User Actions
    */
 
-  const selectHomeTab = (tab: 'indicesTab' | 'templatesTab') => {
-    testBed.find(tab).simulate('click');
+  const goToTemplatesList = () => {
+    testBed.find('templatesTab').simulate('click');
   };
 
   const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
@@ -119,82 +119,17 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const clickIncludeHiddenIndicesToggle = () => {
-    const { find } = testBed;
-    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
-  };
-
-  const getIncludeHiddenIndicesToggleStatus = () => {
-    const { find } = testBed;
-    const props = find('indexTableIncludeHiddenIndicesToggle').props();
-    return Boolean(props['aria-checked']);
-  };
-
-  const selectIndexDetailsTab = async (
-    tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
-  ) => {
-    const indexDetailsTabs = ['settings', 'mappings', 'stats', 'edit_settings'];
-    const { find, component } = testBed;
-    await act(async () => {
-      find('detailPanelTab').at(indexDetailsTabs.indexOf(tab)).simulate('click');
-    });
-    component.update();
-  };
-
   return {
     ...testBed,
     findAction,
     actions: {
-      selectHomeTab,
+      goToTemplatesList,
       selectDetailsTab,
-      selectIndexDetailsTab,
       clickReloadButton,
       clickTemplateAction,
       clickTemplateAt,
       clickCloseDetailsButton,
       clickActionMenu,
-      getIncludeHiddenIndicesToggleStatus,
-      clickIncludeHiddenIndicesToggle,
     },
   };
 };
-
-type IdxMgmtTestSubjects = TestSubjects;
-
-export type TestSubjects =
-  | 'aliasesTab'
-  | 'appTitle'
-  | 'cell'
-  | 'closeDetailsButton'
-  | 'createTemplateButton'
-  | 'deleteSystemTemplateCallOut'
-  | 'deleteTemplateButton'
-  | 'deleteTemplatesConfirmation'
-  | 'documentationLink'
-  | 'emptyPrompt'
-  | 'manageTemplateButton'
-  | 'mappingsTab'
-  | 'noAliasesCallout'
-  | 'noMappingsCallout'
-  | 'noSettingsCallout'
-  | 'indicesList'
-  | 'indicesTab'
-  | 'indexTableIncludeHiddenIndicesToggle'
-  | 'indexTableIndexNameLink'
-  | 'reloadButton'
-  | 'reloadIndicesButton'
-  | 'row'
-  | 'sectionError'
-  | 'sectionLoading'
-  | 'settingsTab'
-  | 'summaryTab'
-  | 'summaryTitle'
-  | 'systemTemplatesSwitch'
-  | 'templateDetails'
-  | 'templateDetails.manageTemplateButton'
-  | 'templateDetails.sectionLoading'
-  | 'templateDetails.tab'
-  | 'templateDetails.title'
-  | 'templateList'
-  | 'templateTable'
-  | 'templatesTab';

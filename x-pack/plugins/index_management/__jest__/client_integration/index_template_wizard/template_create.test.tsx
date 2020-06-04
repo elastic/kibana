@@ -3,23 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { TemplateFormTestBed } from './helpers/template_form.helpers';
+import { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../common';
+import { setupEnvironment, nextTick } from '../helpers';
+
 import {
   TEMPLATE_NAME,
   SETTINGS,
   MAPPINGS,
   ALIASES,
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
-} from './helpers/constants';
-
-const { setup } = pageHelpers.templateCreate;
-
-jest.mock('ui/new_platform');
+} from './constants';
+import { setup } from './template_create.helpers';
+import { TemplateFormTestBed } from './template_form.helpers';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
