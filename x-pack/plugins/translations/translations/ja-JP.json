@@ -1233,6 +1233,7 @@
     "home.addData.metrics.nameTitle": "メトリック",
     "home.addData.sampleDataLink": "データセットと Kibana ダッシュボードを読み込む",
     "home.addData.sampleDataTitle": "サンプルデータの追加",
+    "home.addData.securitySolution.addSecurityEventsButtonLabel": "イベントを追加",
     "home.addData.securitySolution.nameDescription": "即利用可能なビジュアライゼーションで、セキュリティイベントをまとめてインタラクティブな調査を可能にします。",
     "home.addData.securitySolution.nameTitle": "Security",
     "home.addData.title.observability": "オブザーバビリティ",
