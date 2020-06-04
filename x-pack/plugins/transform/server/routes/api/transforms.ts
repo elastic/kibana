@@ -287,11 +287,7 @@ async function getIndexPatternId(
     searchFields: ['title'],
     fields: ['title'],
   });
-
-  const ip = response.saved_objects.find(
-    (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
-  );
-
+  const ip = response.saved_objects.find((obj) => obj.attributes.title === indexName);
   return ip?.id;
 }
 
