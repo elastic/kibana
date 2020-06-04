@@ -16,8 +16,6 @@ export async function PuppeteerTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  const screenshotsDir = config.get('screenshots.directory');
-
   await esArchiver.load('default');
   const metrics = await capturePageLoadMetrics(log, {
     headless: true,
@@ -26,7 +24,7 @@ export async function PuppeteerTestRunner({ getService }: FtrProviderContext) {
       username: config.get('servers.kibana.username'),
       password: config.get('servers.kibana.password'),
     },
-    screenshotsDir,
+    screenshotsDir: config.get('screenshots.directory'),
   });
   const reporter = CiStatsReporter.fromEnv(log);
 
