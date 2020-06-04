@@ -8,7 +8,8 @@ export {
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
+  deleteExceptionListItemById,
   mockNewExceptionItem,
   mockNewExceptionList,
 } from '../../lists/public';
-export { ExceptionListItemSchema, Entries } from '../../lists/common/schemas';
+export { ExceptionListItemSchema, Entries, NamespaceType } from '../../lists/common/schemas';
