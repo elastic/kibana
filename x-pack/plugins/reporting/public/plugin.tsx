@@ -26,7 +26,7 @@ import {
 import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ConfigType, JobId, JobStatusBuckets } from '../common/types';
+import { ReportingConfigType, JobId, JobStatusBuckets } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';
@@ -37,7 +37,7 @@ import { csvReportingProvider } from './share_context_menu/register_csv_reportin
 import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
-  poll: ConfigType['poll'];
+  poll: ReportingConfigType['poll'];
 }
 
 function getStored(): JobId[] {
