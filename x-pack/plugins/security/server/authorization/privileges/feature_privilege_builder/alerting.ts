@@ -27,14 +27,16 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     const allOperationsWithinConsumer = (privileges: string[], consumer?: string) =>
       flatten(
-        privileges.map(type => [
-          ...allOperations.map(operation => this.actions.alerting.get(type, consumer, operation)),
+        privileges.map((type) => [
+          ...allOperations.map((operation) => this.actions.alerting.get(type, consumer, operation)),
         ])
       );
     const readOperationsWithinConsumer = (privileges: string[], consumer?: string) =>
       flatten(
-        privileges.map(type => [
-          ...readOperations.map(operation => this.actions.alerting.get(type, consumer, operation)),
+        privileges.map((type) => [
+          ...readOperations.map((operation) =>
+            this.actions.alerting.get(type, consumer, operation)
+          ),
         ])
       );
 
