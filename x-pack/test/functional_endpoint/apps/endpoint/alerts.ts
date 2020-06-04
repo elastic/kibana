@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe.skip('Endpoint Alert Page: when es has data and user has navigated to the page', function () {
+  describe('Endpoint Alert Page: when es has data and user has navigated to the page', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
