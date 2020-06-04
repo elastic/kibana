@@ -9,16 +9,49 @@ import {
   PluginSetupContract as AlertingSetup,
   AlertType,
 } from '../../../../../../plugins/alerts/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
   alerts: AlertingSetup;
+  features: FeaturesPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts }: AlertingExampleDeps) {
+  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
     createNoopAlertType(alerts);
     createAlwaysFiringAlertType(alerts);
+    features.registerFeature({
+      id: 'alerting_fixture',
+      name: 'alerting_fixture',
+      app: [],
+      privileges: {
+        all: {
+          alerting: {
+            globally: {
+              all: ['test.always-firing', 'test.noop'],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          alerting: {
+            globally: {
+              all: ['test.always-firing', 'test.noop'],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
   }
 
   public start() {}

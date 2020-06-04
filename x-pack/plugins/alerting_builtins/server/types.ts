@@ -5,6 +5,7 @@
  */
 
 import { Logger, ScopedClusterClient } from '../../../../src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { getService as getServiceIndexThreshold } from './alert_types/index_threshold';
 
@@ -19,6 +20,7 @@ export {
 // this plugin's dependendencies
 export interface AlertingBuiltinsDeps {
   alerts: AlertingSetup;
+  features: FeaturesPluginSetup;
 }
 
 // external service exposed through plugin setup/start
