@@ -35,6 +35,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/fea
 import { APM_FEATURE } from './feature';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
+import { createApmClient } from './lib/apm_client';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -119,6 +120,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       };
     });
     plugins.features.registerFeature(APM_FEATURE);
+
+    // TODO: is here the correct place to call it?
+    createApmClient(core);
 
     createApmApi().init(core, {
       config$: mergedConfig$,
