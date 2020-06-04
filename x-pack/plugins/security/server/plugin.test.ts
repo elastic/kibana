@@ -65,6 +65,9 @@ describe('Security Plugin', () => {
                 },
                 "authz": Object {
                   "actions": Actions {
+                    "alerting": AlertingActions {
+                      "prefix": "alerting:version:",
+                    },
                     "api": ApiActions {
                       "prefix": "api:version:",
                     },
