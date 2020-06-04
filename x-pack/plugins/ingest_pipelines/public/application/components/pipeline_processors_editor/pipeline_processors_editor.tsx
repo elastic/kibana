@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useCallback, memo, useState, useEffect, Dispatch } from 'react';
+import React, { FunctionComponent, useCallback, memo, useState, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import './pipeline_processors_editor.scss';
