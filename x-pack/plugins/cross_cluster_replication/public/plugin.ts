@@ -41,13 +41,14 @@ export class CrossClusterReplicationPlugin implements Plugin {
       id: MANAGEMENT_ID,
       title: PLUGIN.TITLE,
       order: 6,
-      mount: async ({ element, setBreadcrumbs }) => {
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const { mountApp } = await import('./app');
 
         const [coreStart] = await getStartServices();
         const {
           i18n: { Context: I18nContext },
           docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+          application: { getUrlForApp },
         } = coreStart;
 
         return mountApp({
@@ -56,12 +57,14 @@ export class CrossClusterReplicationPlugin implements Plugin {
           I18nContext,
           ELASTIC_WEBSITE_URL,
           DOC_LINK_VERSION,
+          history,
+          getUrlForApp,
         });
       },
     });
 
-    ccrApp.disable();
-
+    // NOTE: We enable the plugin by default instead of disabling it by default because this
+    // creates a race condition that causes functional tests to fail on CI (see #66781).
     licensing.license$
       .pipe(first())
       .toPromise()
@@ -76,8 +79,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
         const isCcrUiEnabled = config.ui.enabled && remoteClusters.isUiEnabled;
 
         if (isLicenseOk && isCcrUiEnabled) {
-          ccrApp.enable();
-
           if (indexManagement) {
             const propertyPath = 'isFollowerIndex';
 
@@ -94,6 +95,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
             indexManagement.extensionsService.addBadge(followerBadgeExtension);
           }
+        } else {
+          ccrApp.disable();
         }
       });
   }
