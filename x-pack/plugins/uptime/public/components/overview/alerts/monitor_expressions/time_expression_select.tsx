@@ -51,7 +51,8 @@ export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
 
   useEffect(() => {
     const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
-    setAlertParams('timerange', { from: `now-${numUnits}${timerangeUnit}`, to: 'now' });
+    setAlertParams('timerangeUnit', timerangeUnit);
+    setAlertParams('timerangeCount', numUnits);
   }, [numUnits, timerangeUnitOptions, setAlertParams]);
 
   return (
