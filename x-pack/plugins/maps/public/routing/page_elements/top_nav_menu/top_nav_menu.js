@@ -22,6 +22,7 @@ import {
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { updateBreadcrumbs } from '../breadcrumbs';
+import { goToSpecifiedPath } from '../../maps_router';
 
 /**
  * @return {null}
@@ -280,6 +281,9 @@ async function doSave(
   }
 
   if (id) {
+    goToSpecifiedPath(`/map/${id}${window.location.hash}`);
+    updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
+
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {
         defaultMessage: `Saved '{title}'`,
@@ -287,8 +291,6 @@ async function doSave(
       }),
       'data-test-subj': 'saveMapSuccess',
     });
-
-    updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
   }
   return { id };
 }

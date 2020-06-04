@@ -41,7 +41,6 @@ export const MapsCreateEditView = class extends React.Component {
   storeSyncUnsubscribe = null;
   globalSyncUnsubscribe = null;
   appSyncUnsubscribe = null;
-  unlisten = null;
   appStateManager = new AppStateManager();
 
   constructor(props) {
@@ -67,7 +66,7 @@ export const MapsCreateEditView = class extends React.Component {
   componentDidMount() {
     const { match, kbnUrlStateStorage } = this.props;
     this.setState({
-      currentPath: match.path,
+      currentPath: match.url,
     });
 
     // Init sync utils
@@ -84,12 +83,17 @@ export const MapsCreateEditView = class extends React.Component {
   }
 
   _initBreadcrumbUpdater = () => {
-    const { history } = this.props;
-    this.unlisten = history.listen(() => {
-      const { initialLayerListConfig, savedMap, currentPath } = this.state;
-      updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
-    });
+    const { initialLayerListConfig, savedMap, currentPath } = this.state;
+    updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    const { currentPath: prevCurrentPath } = prevState;
+    const { currentPath, initialLayerListConfig, savedMap } = this.state;
+    if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
+      updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
+    }
+  }
 
   componentWillUnmount() {
     if (this.storeSyncUnsubscribe) {
@@ -103,9 +107,6 @@ export const MapsCreateEditView = class extends React.Component {
     }
     if (this.visibleSubscription) {
       this.visibleSubscription.unsubscribe();
-    }
-    if (this.unlisten) {
-      this.unlisten();
     }
   }
 
