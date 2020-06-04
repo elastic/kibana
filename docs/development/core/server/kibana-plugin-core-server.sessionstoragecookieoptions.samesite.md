@@ -9,5 +9,5 @@ Defines SameSite attribute of the Set-Cookie Header. https://developer.mozilla.o
 <b>Signature:</b>
 
 ```typescript
-sameSite?: 'Strict' | 'Lax' | 'None' | false;
+sameSite?: 'Strict' | 'Lax' | 'None';
 ```
