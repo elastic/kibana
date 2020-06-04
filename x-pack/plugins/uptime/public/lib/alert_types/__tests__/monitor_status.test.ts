@@ -140,11 +140,11 @@ describe('monitor status alert type', () => {
         "name": <Provider
           store={
             Object {
-              "dispatch": [MockFunction],
-              "getState": [MockFunction],
-              "replaceReducer": [MockFunction],
-              "subscribe": [MockFunction],
-              Symbol(observable): [MockFunction],
+              "dispatch": [Function],
+              "getState": [Function],
+              "replaceReducer": [Function],
+              "subscribe": [Function],
+              Symbol(observable): [Function],
             }
           }
         >
