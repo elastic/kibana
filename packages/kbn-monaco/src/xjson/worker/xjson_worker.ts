@@ -16,18 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { XJsonMode } from '../../../public';
-import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
-const xJsonMode = new XJsonMode();
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { createParser } from '../grammar';
 
-interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {
-  xJsonMode: typeof xJsonMode;
+export class XJsonWorker {
+  constructor(private ctx: monaco.worker.IWorkerContext) {}
+  private parser: any;
+
+  async parse() {
+    if (!this.parser) {
+      this.parser = createParser();
+    }
+    const [model] = this.ctx.getMirrorModels();
+    return this.parser(model.getValue());
+  }
 }
-
-export const useXJsonMode = (json: Parameters<typeof useBaseXJsonMode>[0]): ReturnValue => {
-  return {
-    ...useBaseXJsonMode(json),
-    xJsonMode,
-  };
-};

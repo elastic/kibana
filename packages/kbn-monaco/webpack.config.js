@@ -17,18 +17,35 @@
  * under the License.
  */
 
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+const path = require('path');
 
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
+const createLangWorkerConfig = (lang) => ({
+  mode: 'production',
+  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
+  output: {
+    path: path.resolve(__dirname, 'target/public'),
+    filename: `${lang}.editor.worker.js`,
+  },
+  resolve: {
+    modules: ['node_modules'],
+    extensions: ['.js', '.ts', '.tsx'],
+  },
+  stats: 'errors-only',
+  module: {
+    rules: [
+      {
+        test: /\.(js|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+    ],
+  },
+});
 
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-
-import 'monaco-editor/esm/vs/editor/contrib/wordOperations/wordOperations.js'; // Needed for word-wise char navigation
-
-import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
-import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
-import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
-
-export { monaco };
+module.exports = [createLangWorkerConfig('xjson')];
