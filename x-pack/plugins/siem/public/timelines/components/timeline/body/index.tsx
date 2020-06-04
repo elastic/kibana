@@ -29,7 +29,7 @@ import { Events } from './events';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
-import { useTimelineTypeContext } from '../timeline_context';
+import { useManageTimeline } from '../../manage_timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -95,11 +95,25 @@ export const Body = React.memo<BodyProps>(
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
-    const timelineTypeContext = useTimelineTypeContext();
-    const additionalActionWidth = useMemo(
-      () => timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
-      [timelineTypeContext.timelineActions]
-    );
+    const { getManageTimelineById } = useManageTimeline();
+    const timelineActions = useMemo(() => getManageTimelineById(id).timelineRowActions, [
+      getManageTimelineById,
+      id,
+    ]);
+
+    const additionalActionWidth = useMemo(() => {
+      let hasContextMenu = false;
+      return (
+        timelineActions.reduce((acc, v) => {
+          if (v.displayType === 'icon') {
+            return acc + (v.width ?? 0);
+          }
+          const addWidth = hasContextMenu ? 0 : 26;
+          hasContextMenu = true;
+          return acc + addWidth;
+        }, 0) ?? 0
+      );
+    }, [timelineActions]);
     const actionsColumnWidth = useMemo(
       () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
       [isEventViewer, showCheckboxes, additionalActionWidth]
