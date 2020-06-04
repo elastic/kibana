@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { expectType } from 'tsd';
 import { schema } from '..';
 import { TypeOf } from './object_type';
 
@@ -360,19 +361,17 @@ test('handles optional properties', () => {
 
   type SchemaType = TypeOf<typeof type>;
 
-  let foo: SchemaType = {
+  expectType<SchemaType>({
     required: 'foo',
-  };
-  foo = {
+  });
+  expectType<SchemaType>({
     required: 'hello',
     optional: undefined,
-  };
-  foo = {
+  });
+  expectType<SchemaType>({
     required: 'hello',
     optional: 'bar',
-  };
-
-  expect(foo).toBeDefined();
+  });
 });
 
 describe('#extends', () => {
@@ -395,12 +394,10 @@ describe('#extends', () => {
       extended.validate({ initial: 'foo', added: 42 });
     }).not.toThrowError();
 
-    // asserting that the resulting type is valid
-    const value: TypeOf<typeof extended> = {
+    expectType<TypeOf<typeof extended>>({
       added: 12,
       initial: 'foo',
-    };
-    expect(value).toBeDefined();
+    });
   });
 
   it('allows to extend an existing schema by removing properties', () => {
@@ -419,11 +416,9 @@ describe('#extends', () => {
       extended.validate({ string: 'foo' });
     }).not.toThrowError();
 
-    // asserting that the resulting type is valid
-    const value: TypeOf<typeof extended> = {
+    expectType<TypeOf<typeof extended>>({
       string: 'foo',
-    };
-    expect(value).toBeDefined();
+    });
   });
 
   it('allows to extend an existing schema by overriding an existing properties', () => {
@@ -446,12 +441,10 @@ describe('#extends', () => {
       extended.validate({ string: 'foo', mutated: 'bar' });
     }).not.toThrowError();
 
-    // asserting that the resulting type is valid
-    const value: TypeOf<typeof extended> = {
+    expectType<TypeOf<typeof extended>>({
       string: 'foo',
       mutated: 'bar',
-    };
-    expect(value).toBeDefined();
+    });
   });
 
   it('properly infer the type from optional properties', () => {
@@ -480,14 +473,12 @@ describe('#extends', () => {
       extended.validate({ original: 'foo', mutated: 'bar' });
     }).not.toThrowError();
 
-    // asserting that the resulting type is valid
-    let value: TypeOf<typeof extended> = {
+    expectType<TypeOf<typeof extended>>({
       original: 'foo',
       mutated: 'bar',
-    };
-    value = {
+    });
+    expectType<TypeOf<typeof extended>>({
       mutated: 'bar',
-    };
-    expect(value).toBeDefined();
+    });
   });
 });
