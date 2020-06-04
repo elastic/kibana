@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
