@@ -11,13 +11,15 @@ export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
   name,
   phases: {
     hot: {
+      min_age: '1d',
       actions: {
+        set_priority: {
+          priority: 100,
+        },
+        unfollow: {},
         rollover: {
           max_age: '30d',
           max_size: '50gb',
-        },
-        set_priority: {
-          priority: 100,
         },
       },
     },
@@ -25,6 +27,26 @@ export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
       actions: {
         set_priority: {
           priority: 50,
+        },
+        unfollow: {},
+        readonly: {},
+        allocate: {
+          number_of_replicas: 5,
+          include: {
+            a: 'a',
+          },
+          exclude: {
+            b: 'b',
+          },
+          require: {
+            c: 'c',
+          },
+        },
+        shrink: {
+          number_of_shards: 1,
+        },
+        forcemerge: {
+          max_num_segments: 1,
         },
       },
     },
@@ -34,11 +56,28 @@ export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
         set_priority: {
           priority: 0,
         },
+        unfollow: {},
+        allocate: {
+          number_of_replicas: 5,
+          include: {
+            a: 'a',
+          },
+          exclude: {
+            b: 'b',
+          },
+          require: {
+            c: 'c',
+          },
+        },
+        freeze: {},
       },
     },
     delete: {
       min_age: '10d',
       actions: {
+        wait_for_snapshot: {
+          policy: 'policy',
+        },
         delete: {},
       },
     },
