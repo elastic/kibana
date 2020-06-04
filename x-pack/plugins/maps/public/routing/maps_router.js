@@ -24,7 +24,9 @@ export async function renderApp(context, { appBasePath, element, history }) {
 
   render(<App history={history} appBasePath={appBasePath} hasSavedMaps={hasSavedMaps} />, element);
 
-  return () => unmountComponentAtNode(element);
+  return () => {
+    unmountComponentAtNode(element);
+  };
 }
 
 const App = ({ history, appBasePath, hasSavedMaps }) => {

@@ -14,7 +14,7 @@ import { getStore } from '../store_operations';
 import { returnToMapsList } from '../maps_router';
 
 function hasUnsavedChanges(savedMap, initialLayerListConfig) {
-  const state = getStore.getState();
+  const state = getStore().getState();
   const layerList = getLayerListRaw(state);
   const layerListConfigOnly = copyPersistentState(layerList);
 
@@ -30,28 +30,31 @@ function hasUnsavedChanges(savedMap, initialLayerListConfig) {
       !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
 }
 
-export const updateBreadcrumbs = (savedMap, initialLayerListConfig, currentPath) => {
+export const updateBreadcrumbs = (savedMap, initialLayerListConfig, currentPath = '') => {
   const isOnMapNow = currentPath.startsWith(`/${MAP_SAVED_OBJECT_TYPE}`);
-  getCoreChrome().setBreadcrumbs([
-    {
-      text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
-        defaultMessage: 'Maps',
-      }),
-      onClick: () => {
-        if (isOnMapNow && hasUnsavedChanges(savedMap, initialLayerListConfig)) {
-          const navigateAway = window.confirm(
-            i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
-              defaultMessage: `Your unsaved changes might not be saved`,
-            })
-          );
-          if (navigateAway) {
-            returnToMapsList();
-          }
-        } else {
-          returnToMapsList();
-        }
-      },
-    },
-    { text: savedMap.title },
-  ]);
+  const breadCrumbs = isOnMapNow
+    ? [
+        {
+          text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+            defaultMessage: 'Maps',
+          }),
+          onClick: () => {
+            if (hasUnsavedChanges(savedMap, initialLayerListConfig)) {
+              const navigateAway = window.confirm(
+                i18n.translate('xpack.maps.breadCrumbs.unsavedChangesWarning', {
+                  defaultMessage: `Your unsaved changes might not be saved`,
+                })
+              );
+              if (navigateAway) {
+                returnToMapsList();
+              }
+            } else {
+              returnToMapsList();
+            }
+          },
+        },
+        { text: savedMap.title },
+      ]
+    : [];
+  getCoreChrome().setBreadcrumbs(breadCrumbs);
 };

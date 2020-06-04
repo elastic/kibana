@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../../help_menu_util';
 import { Link, withRouter } from 'react-router-dom';
+import { updateBreadcrumbs } from '../page_elements/breadcrumbs';
 
 export const EMPTY_FILTER = '';
 
@@ -49,6 +50,7 @@ export const MapsListView = withRouter(
 
     UNSAFE_componentWillMount() {
       this._isMounted = true;
+      updateBreadcrumbs();
     }
 
     componentWillUnmount() {

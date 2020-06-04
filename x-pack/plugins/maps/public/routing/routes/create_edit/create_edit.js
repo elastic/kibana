@@ -34,12 +34,14 @@ import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { useAppStateSyncing } from '../../state_syncing/app_sync';
 import { getStoreSyncSubscription } from '../../store_operations';
 import { MapsRoot } from '../../page_elements/maps_root';
+import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 
 export const MapsCreateEditView = class extends React.Component {
   visibleSubscription = null;
   storeSyncUnsubscribe = null;
   globalSyncUnsubscribe = null;
   appSyncUnsubscribe = null;
+  unlisten = null;
   appStateManager = new AppStateManager();
 
   constructor(props) {
@@ -57,6 +59,8 @@ export const MapsCreateEditView = class extends React.Component {
       isFullScreen: false,
       savedQuery: null,
       currentPath: '',
+      initialLayerListConfig: null,
+      savedMap: null,
     };
   }
 
@@ -79,6 +83,14 @@ export const MapsCreateEditView = class extends React.Component {
     this.initMap(savedMapId);
   }
 
+  _initBreadcrumbUpdater = () => {
+    const { history } = this.props;
+    this.unlisten = history.listen(() => {
+      const { initialLayerListConfig, savedMap, currentPath } = this.state;
+      updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
+    });
+  };
+
   componentWillUnmount() {
     if (this.storeSyncUnsubscribe) {
       this.storeSyncUnsubscribe();
@@ -91,6 +103,9 @@ export const MapsCreateEditView = class extends React.Component {
     }
     if (this.visibleSubscription) {
       this.visibleSubscription.unsubscribe();
+    }
+    if (this.unlisten) {
+      this.unlisten();
     }
   }
 
@@ -257,10 +272,13 @@ export const MapsCreateEditView = class extends React.Component {
       layerList = getInitialLayers(this.getInitialLayersFromUrlParam());
     }
     this.props.replaceLayerList(layerList);
-    this.setState({
-      initialLayerListConfig: copyPersistentState(layerList),
-      savedMap,
-    });
+    this.setState(
+      {
+        initialLayerListConfig: copyPersistentState(layerList),
+        savedMap,
+      },
+      this._initBreadcrumbUpdater
+    );
     return savedMap;
   }
 
