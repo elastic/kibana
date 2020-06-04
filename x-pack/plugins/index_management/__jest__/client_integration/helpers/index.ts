@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './mocks';
+
 export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
 
 export { setupEnvironment, WithAppDependencies, services } from './setup_environment';
