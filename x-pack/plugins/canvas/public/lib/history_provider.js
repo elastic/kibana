@@ -159,6 +159,12 @@ export const historyProvider = (win = getWindow()) => {
   return wrappedInstance;
 };
 
-export const destroyHistory = () => {
+export const destroyHistory = (win = getWindow()) => {
+  const instance = instances.get(win);
+
+  if (instance) {
+    instance.resetOnChange();
+  }
+
   instances = new WeakMap();
 };
