@@ -6,6 +6,7 @@
 
 import { APICaller, CoreSetup, Logger } from 'kibana/server';
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import moment from 'moment';
 import {
   RunContext,
@@ -188,7 +189,7 @@ export function telemetryTaskRunner(
 
     return {
       async run() {
-        const kibanaIndex = (await config.toPromise()).kibana.index;
+        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
 
         return Promise.all([
           getDailyEvents(kibanaIndex, callCluster),
