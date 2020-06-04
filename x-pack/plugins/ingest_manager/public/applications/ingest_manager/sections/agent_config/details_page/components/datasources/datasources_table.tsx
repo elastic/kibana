@@ -17,12 +17,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { AgentConfig, Datasource } from '../../../../../types';
-import { TableRowActions } from '../../../components/table_row_actions';
-import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
+import { PackageIcon, ContextMenuActions } from '../../../../../components';
+import { DatasourceDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
-import { DatasourceDeleteProvider } from '../../../components/datasource_delete_provider';
-import { useConfigRefresh } from '../../hooks/use_config';
-import { PackageIcon } from '../../../../../components/package_icon';
+import { useConfigRefresh } from '../../hooks';
 
 interface InMemoryDatasource extends Datasource {
   streams: { total: number; enabled: number };
@@ -197,7 +195,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (datasource: InMemoryDatasource) => (
-              <TableRowActions
+              <ContextMenuActions
                 items={[
                   // FIXME: implement View datasource action
                   // <EuiContextMenuItem
