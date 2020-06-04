@@ -6,14 +6,12 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import ApolloClient from 'apollo-client';
-import React from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
-  TimelineAction,
-  TimelineActionProps,
+  TimelineRowAction,
+  TimelineRowActionOnClick,
 } from '../../../timelines/components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
@@ -97,7 +95,7 @@ export const alertsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    width: DEFAULT_DATE_COLUMN_MIN_WIDTH + 5,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -110,7 +108,7 @@ export const alertsHeaders: ColumnHeaderOptions[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.version',
     label: i18n.ALERTS_HEADERS_VERSION,
-    width: 100,
+    width: 95,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -192,75 +190,59 @@ export const requiredFieldsForActions = [
 export const getAlertActions = ({
   apolloClient,
   canUserCRUD,
-  hasIndexWrite,
-  setEventsLoading,
-  setEventsDeleted,
   createTimeline,
+  hasIndexWrite,
+  onAlertStatusUpdateFailure,
+  onAlertStatusUpdateSuccess,
+  setEventsDeleted,
+  setEventsLoading,
   status,
   updateTimelineIsLoading,
-  onAlertStatusUpdateSuccess,
-  onAlertStatusUpdateFailure,
 }: {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
-  hasIndexWrite: boolean;
-  setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
-  setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
+  hasIndexWrite: boolean;
+  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
+  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+  setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
+  setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   status: 'open' | 'closed';
   updateTimelineIsLoading: UpdateTimelineLoading;
-  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
-  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
-}): TimelineAction[] => [
+}): TimelineRowAction[] => [
   {
-    getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
-      <EuiToolTip
-        data-test-subj="send-alert-to-timeline-tool-tip"
-        content={i18n.ACTION_INVESTIGATE_IN_TIMELINE}
-      >
-        <EuiButtonIcon
-          data-test-subj="send-alert-to-timeline-button"
-          onClick={() =>
-            sendAlertToTimelineAction({
-              apolloClient,
-              createTimeline,
-              ecsData,
-              updateTimelineIsLoading,
-            })
-          }
-          iconType="timeline"
-          aria-label="Next"
-        />
-      </EuiToolTip>
-    ),
+    ariaLabel: 'Send alert to timeline',
+    content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
+    dataTestSubj: 'send-alert-to-timeline',
+    displayType: 'icon',
+    iconType: 'timeline',
     id: 'sendAlertToTimeline',
+    onClick: ({ ecsData }: TimelineRowActionOnClick) =>
+      sendAlertToTimelineAction({
+        apolloClient,
+        createTimeline,
+        ecsData,
+        updateTimelineIsLoading,
+      }),
     width: 26,
   },
   {
-    getAction: ({ eventId }: TimelineActionProps): JSX.Element => (
-      <EuiToolTip
-        data-test-subj="update-alert-status-tool-tip"
-        content={status === FILTER_OPEN ? i18n.ACTION_OPEN_ALERT : i18n.ACTION_CLOSE_ALERT}
-      >
-        <EuiButtonIcon
-          data-test-subj={'update-alert-status-button'}
-          onClick={() =>
-            updateAlertStatusAction({
-              alertIds: [eventId],
-              status,
-              setEventsLoading,
-              setEventsDeleted,
-              onAlertStatusUpdateSuccess,
-              onAlertStatusUpdateFailure,
-            })
-          }
-          isDisabled={!canUserCRUD || !hasIndexWrite}
-          iconType={status === FILTER_OPEN ? 'securityAlertDetected' : 'securityAlertResolved'}
-          aria-label="Next"
-        />
-      </EuiToolTip>
-    ),
+    ariaLabel: 'Update alert status',
+    content: status === FILTER_OPEN ? i18n.ACTION_OPEN_ALERT : i18n.ACTION_CLOSE_ALERT,
+    dataTestSubj: 'update-alert-status',
+    displayType: 'icon',
+    iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
     id: 'updateAlertStatus',
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
+      updateAlertStatusAction({
+        alertIds: [eventId],
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted,
+        setEventsLoading,
+        status,
+      }),
     width: 26,
   },
 ];
