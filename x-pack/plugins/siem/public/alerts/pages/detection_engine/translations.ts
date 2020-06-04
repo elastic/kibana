@@ -7,27 +7,23 @@
 import { i18n } from '@kbn/i18n';
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.detectionsPageTitle', {
-  defaultMessage: 'Detections',
+  defaultMessage: 'Alerts',
 });
 
-export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignalTitle', {
-  defaultMessage: 'Last signal',
+export const LAST_ALERT = i18n.translate('xpack.siem.detectionEngine.lastAlertTitle', {
+  defaultMessage: 'Last alert',
 });
 
-export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSignalTitle', {
+export const TOTAL_ALERT = i18n.translate('xpack.siem.detectionEngine.totalAlertTitle', {
   defaultMessage: 'Total',
 });
 
-export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
-  defaultMessage: 'Detected signals',
-});
-
 export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
-  defaultMessage: 'External alerts',
+  defaultMessage: 'Detected alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate('xpack.siem.detectionEngine.buttonManageRules', {
-  defaultMessage: 'Manage signal detection rules',
+  defaultMessage: 'Manage detection rules',
 });
 
 export const PANEL_SUBTITLE_SHOWING = i18n.translate(

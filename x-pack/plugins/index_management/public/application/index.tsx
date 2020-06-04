@@ -27,7 +27,7 @@ export const renderApp = (
 
   const { i18n, docLinks, notifications } = core;
   const { Context: I18nContext } = i18n;
-  const { services } = dependencies;
+  const { services, history } = dependencies;
 
   const componentTemplateProviderValues = {
     httpClient: services.httpService.httpClient,
@@ -43,7 +43,7 @@ export const renderApp = (
       <Provider store={indexManagementStore(services)}>
         <AppContextProvider value={dependencies}>
           <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-            <App />
+            <App history={history} />
           </ComponentTemplatesProvider>
         </AppContextProvider>
       </Provider>

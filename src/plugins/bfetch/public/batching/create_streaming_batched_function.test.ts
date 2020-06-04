@@ -303,6 +303,47 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await promise3).toEqual({ foo: 'bar 2' });
     });
 
+    test('resolves falsy results', async () => {
+      const { fetchStreaming, stream } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+      });
+
+      const promise1 = fn({ a: '1' });
+      const promise2 = fn({ b: '2' });
+      const promise3 = fn({ c: '3' });
+      await new Promise((r) => setTimeout(r, 6));
+
+      stream.next(
+        JSON.stringify({
+          id: 0,
+          result: false,
+        }) + '\n'
+      );
+      stream.next(
+        JSON.stringify({
+          id: 1,
+          result: 0,
+        }) + '\n'
+      );
+      stream.next(
+        JSON.stringify({
+          id: 2,
+          result: '',
+        }) + '\n'
+      );
+
+      expect(await isPending(promise1)).toBe(false);
+      expect(await isPending(promise2)).toBe(false);
+      expect(await isPending(promise3)).toBe(false);
+      expect(await promise1).toEqual(false);
+      expect(await promise2).toEqual(0);
+      expect(await promise3).toEqual('');
+    });
+
     test('rejects promise on error response', async () => {
       const { fetchStreaming, stream } = setup();
       const fn = createStreamingBatchedFunction({

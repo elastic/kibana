@@ -34,8 +34,8 @@ export const RECENT_TIMELINES = i18n.translate('xpack.siem.overview.recentTimeli
   defaultMessage: 'Recent timelines',
 });
 
-export const SIGNAL_COUNT = i18n.translate('xpack.siem.overview.signalCountTitle', {
-  defaultMessage: 'Signal count',
+export const ALERT_COUNT = i18n.translate('xpack.siem.overview.alertCountTitle', {
+  defaultMessage: 'Alert count',
 });
 
 export const TOP = (fieldName: string) =>
