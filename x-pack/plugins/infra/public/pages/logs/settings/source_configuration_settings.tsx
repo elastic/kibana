@@ -42,6 +42,7 @@ export const LogsSettingsPage = () => {
 
   const availableFields = useMemo(
     () => sourceStatus?.logIndexFields.map((field) => field.name) ?? [],
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceStatus]
   );
 
