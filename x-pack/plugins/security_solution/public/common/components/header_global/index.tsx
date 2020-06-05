@@ -18,6 +18,7 @@ import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { ADD_DATA_PATH } from '../../../../common/constants';
 
 const Wrapper = styled.header`
   ${({ theme }) => css`
@@ -86,7 +87,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                   <FlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="add-data"
-                      href="home#/tutorial_directory/siem"
+                      href={ADD_DATA_PATH}
                       iconType="plusInCircle"
                     >
                       {i18n.BUTTON_ADD_DATA}

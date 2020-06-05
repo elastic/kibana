@@ -74,7 +74,8 @@ export function FilterItem(props: Props) {
           setIndexPatternExists(false);
         });
     } else {
-      setIndexPatternExists(false);
+      // Allow filters without an index pattern and don't validate them.
+      setIndexPatternExists(true);
     }
   }, [props.filter.meta.index]);
 
@@ -244,6 +245,9 @@ export function FilterItem(props: Props) {
    * This function makes this behavior explicit, but it needs to be revised.
    */
   function isFilterApplicable() {
+    // Any filter is applicable if no index patterns were provided to FilterBar.
+    if (!props.indexPatterns.length) return true;
+
     const ip = getIndexPatternFromFilter(filter, indexPatterns);
     if (ip) return true;
 
