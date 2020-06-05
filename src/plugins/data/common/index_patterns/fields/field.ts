@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 // import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
@@ -86,7 +86,6 @@ export class Field implements IFieldType {
     // find the type for this field, fallback to unknown type
     let type = getKbnFieldType(spec.type);
     if (spec.type && !type) {
-      /*
       const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
         values: { type: spec.type },
         defaultMessage: 'Unknown field type {type}',
@@ -95,12 +94,7 @@ export class Field implements IFieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
-
-      toastNotifications.addDanger({
-        title,
-        text,
-      });
-      */
+      onNotification({ title, text, color: 'danger' });
     }
 
     if (!type) type = getKbnFieldType('unknown');
