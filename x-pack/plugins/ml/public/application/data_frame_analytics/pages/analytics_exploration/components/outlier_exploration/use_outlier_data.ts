@@ -55,8 +55,12 @@ export const useOutlierData = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
-    d => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
+    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
   );
+
+  useEffect(() => {
+    dataGrid.resetPagination();
+  }, [JSON.stringify(searchQuery)]);
 
   // initialize sorting: reverse sort on outlier score column
   useEffect(() => {

@@ -92,7 +92,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     core: CoreStart,
     { uiActions, inspector }: EmbeddableStartDependencies
   ): EmbeddableStart {
-    this.embeddableFactoryDefinitions.forEach(def => {
+    this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
         def.type,
         this.customEmbeddableFactoryProvider
@@ -166,7 +166,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   // These two functions are only to support legacy plugins registering factories after the start lifecycle.
   private ensureFactoriesExist = () => {
-    this.embeddableFactoryDefinitions.forEach(def => this.ensureFactoryExists(def.type));
+    this.embeddableFactoryDefinitions.forEach((def) => this.ensureFactoryExists(def.type));
   };
 
   private ensureFactoryExists = (type: string) => {

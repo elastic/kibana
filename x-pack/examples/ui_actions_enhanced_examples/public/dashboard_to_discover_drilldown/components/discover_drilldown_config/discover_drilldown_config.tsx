@@ -71,7 +71,7 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
                   ...indexPatterns.map(({ id, title }) => ({ value: id, text: title })),
                 ]}
                 value={activeIndexPatternId || ''}
-                onChange={e => onIndexPatternSelect(e.target.value)}
+                onChange={(e) => onIndexPatternSelect(e.target.value)}
               />
             </EuiFormRow>
           )}

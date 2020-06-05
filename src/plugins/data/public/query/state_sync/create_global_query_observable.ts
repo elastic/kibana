@@ -32,7 +32,7 @@ export function createQueryStateObservable({
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
-  return new Observable(subscriber => {
+  return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
       time: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
@@ -53,8 +53,8 @@ export function createQueryStateObservable({
         currentChange.filters = true;
 
         const { filters } = state.get();
-        const globalOld = filters?.filter(f => isFilterPinned(f));
-        const appOld = filters?.filter(f => !isFilterPinned(f));
+        const globalOld = filters?.filter((f) => isFilterPinned(f));
+        const appOld = filters?.filter((f) => !isFilterPinned(f));
         const globalNew = filterManager.getGlobalFilters();
         const appNew = filterManager.getAppFilters();
 
@@ -73,7 +73,7 @@ export function createQueryStateObservable({
       }),
       state.state$
         .pipe(
-          map(newState => ({ state: newState, changes: currentChange })),
+          map((newState) => ({ state: newState, changes: currentChange })),
           tap(() => {
             currentChange = {};
           })
@@ -81,7 +81,7 @@ export function createQueryStateObservable({
         .subscribe(subscriber),
     ];
     return () => {
-      subs.forEach(s => s.unsubscribe());
+      subs.forEach((s) => s.unsubscribe());
     };
   });
 }

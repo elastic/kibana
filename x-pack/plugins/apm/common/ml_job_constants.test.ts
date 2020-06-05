@@ -10,7 +10,7 @@ import {
   getMlPrefix,
   getMlJobServiceName,
   getSeverity,
-  severity
+  severity,
 } from './ml_job_constants';
 
 describe('ml_job_constants', () => {

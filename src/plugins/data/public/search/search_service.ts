@@ -21,12 +21,7 @@ import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/publ
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
-import {
-  createSearchSourceFromJSON,
-  SearchSource,
-  SearchSourceDependencies,
-  SearchSourceFields,
-} from './search_source';
+import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './legacy';
@@ -107,12 +102,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       uiSettings: core.uiSettings,
       getInternalStartServices,
     });
-    aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
+    aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
+    aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
 
     // register expression functions for each agg type
     const aggFunctions = getAggTypesFunctions();
-    aggFunctions.forEach(fn => expressions.registerFunction(fn));
+    aggFunctions.forEach((fn) => expressions.registerFunction(fn));
 
     return {
       aggs: {
@@ -171,8 +166,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       search,
       searchSource: {
-        create: (fields?: SearchSourceFields) => new SearchSource(fields, searchSourceDependencies),
-        fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),
+        create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
+        createEmpty: () => {
+          return new SearchSource({}, searchSourceDependencies);
+        },
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an intercepror have a destroy method?

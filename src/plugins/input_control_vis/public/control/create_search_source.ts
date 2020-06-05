@@ -25,7 +25,7 @@ import {
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 
-export function createSearchSource(
+export async function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],
   initialState: SearchSourceFields | null,
   indexPattern: IndexPattern,
@@ -34,7 +34,7 @@ export function createSearchSource(
   filters: PhraseFilter[] = [],
   timefilter: TimefilterContract
 ) {
-  const searchSource = create(initialState || {});
+  const searchSource = await create(initialState || {});
 
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(undefined);

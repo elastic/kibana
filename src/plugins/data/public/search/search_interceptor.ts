@@ -67,7 +67,7 @@ export class SearchInterceptor {
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
     this.getPendingCount$()
-      .pipe(filter(count => count === 0))
+      .pipe(filter((count) => count === 0))
       .subscribe(this.hideToast);
   }
 

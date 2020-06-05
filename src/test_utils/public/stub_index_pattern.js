@@ -33,8 +33,8 @@ import { setFieldFormats } from '../../plugins/data/public/services';
 
 setFieldFormats({
   getDefaultInstance: () => ({
-    getConverterFor: () => value => value,
-    convert: value => JSON.stringify(value),
+    getConverterFor: () => (value) => value,
+    convert: (value) => JSON.stringify(value),
   }),
 });
 
@@ -45,7 +45,7 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   const createFieldList = getIndexPatternFieldListCreator({
     fieldFormats: {
       getDefaultInstance: () => ({
-        convert: val => String(val),
+        convert: (val) => String(val),
       }),
     },
     toastNotifications: {
@@ -65,7 +65,6 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.getSourceFiltering = sinon.stub();
   this.metaFields = ['_id', '_type', '_source'];
   this.fieldFormatMap = {};
-  this.routes = indexPatterns.getRoutes();
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);
@@ -76,11 +75,11 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
-  this._reindexFields = function() {
+  this._reindexFields = function () {
     this.fields = createFieldList(this, this.fields || fields, false);
   };
 
-  this.stubSetFieldFormat = function(fieldName, id, params) {
+  this.stubSetFieldFormat = function (fieldName, id, params) {
     const FieldFormat = registeredFieldFormats.getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();

@@ -6,16 +6,16 @@
 
 import { createWorkspace } from './graph_client_workspace';
 
-describe('graphui-workspace', function() {
-  describe('createWorkspace()', function() {
+describe('graphui-workspace', function () {
+  describe('createWorkspace()', function () {
     // var fooResource=null;
     let mockedResult = null;
     let init = null;
-    beforeEach(function() {
+    beforeEach(function () {
       //Setup logic here
       // fooResource={"foo":"bar"};
-      init = function() {
-        const callNodeProxy = function(indexName, query, responseHandler) {
+      init = function () {
+        const callNodeProxy = function (indexName, query, responseHandler) {
           responseHandler(mockedResult);
         };
         const options = {
@@ -45,11 +45,11 @@ describe('graphui-workspace', function() {
         };
       };
     });
-    it('initializeWorkspace', function() {
+    it('initializeWorkspace', function () {
       const { workspace } = init();
       expect(workspace.nodes.length).toEqual(0);
     });
-    it('simpleSearch', function() {
+    it('simpleSearch', function () {
       //Test that a graph is loaded from a free-text search
       const { workspace } = init();
 
@@ -91,7 +91,7 @@ describe('graphui-workspace', function() {
       expect(nodeD).toBe(undefined);
     });
 
-    it('expandTest', function() {
+    it('expandTest', function () {
       //Test that a graph can be expanded
       const { workspace } = init();
 
@@ -155,7 +155,7 @@ describe('graphui-workspace', function() {
       expect(workspace.edges.length).toEqual(2);
     });
 
-    it('selectionTest', function() {
+    it('selectionTest', function () {
       //Test selections on a graph
       const { workspace } = init();
       // graph is a1->a2 and b1->b2
@@ -237,7 +237,7 @@ describe('graphui-workspace', function() {
       expect(workspace.selectedNodes.length).toEqual(2);
     });
 
-    it('undoRedoDeletes', function() {
+    it('undoRedoDeletes', function () {
       const { workspace } = init();
       // graph is a1->a2
       mockedResult = {
@@ -293,7 +293,7 @@ describe('graphui-workspace', function() {
       expect(workspace.nodes.length).toEqual(2);
     });
 
-    it('undoRedoGroupings', function() {
+    it('undoRedoGroupings', function () {
       const { workspace } = init();
       // graph is a1->a2
       mockedResult = {

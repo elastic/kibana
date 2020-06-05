@@ -24,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
+import 'brace/theme/github';
+
 function RawJsonParamEditor({
   showValidation,
   value = '',

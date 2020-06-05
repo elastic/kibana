@@ -2,6 +2,7 @@
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
 doc-table {
+  @include euiScrollBar;
   overflow: auto;
   flex: 1 1 100%;
   flex-direction: column; /* 1 */

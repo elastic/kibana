@@ -39,7 +39,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find(c => c.type === CASE_SAVED_OBJECT);
+        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
         if (caseRef == null || (caseRef != null && caseRef.id !== request.params.case_id)) {
           throw Boom.notFound(
             `This comment ${request.params.comment_id} does not exist in ${request.params.case_id}).`

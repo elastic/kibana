@@ -9,18 +9,18 @@ import React from 'react';
 import { TransactionDurationAlertTrigger } from '.';
 import {
   MockApmPluginContextWrapper,
-  mockApmPluginContextValue
+  mockApmPluginContextValue,
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
 
 storiesOf('app/TransactionDurationAlertTrigger', module).add(
   'example',
-  context => {
+  (context) => {
     const params = {
       threshold: 1500,
       aggregationType: 'avg' as const,
-      window: '5m'
+      window: '5m',
     };
 
     const contextMock = (merge(cloneDeep(mockApmPluginContextValue), {
@@ -28,9 +28,9 @@ storiesOf('app/TransactionDurationAlertTrigger', module).add(
         http: {
           get: () => {
             return Promise.resolve({ transactionTypes: ['request'] });
-          }
-        }
-      }
+          },
+        },
+      },
     }) as unknown) as ApmPluginContextValue;
 
     return (

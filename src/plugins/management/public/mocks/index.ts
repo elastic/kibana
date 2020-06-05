@@ -18,30 +18,29 @@
  */
 
 import { ManagementSetup, ManagementStart } from '../types';
-import { ManagementSection } from '../management_section';
+import { ManagementSection } from '../index';
 
-const createManagementSectionMock = (): jest.Mocked<PublicMethodsOf<ManagementSection>> => {
-  return {
+const createManagementSectionMock = () =>
+  (({
+    disable: jest.fn(),
+    enable: jest.fn(),
     registerApp: jest.fn(),
     getApp: jest.fn(),
-    getAppsEnabled: jest.fn().mockReturnValue([]),
-  };
-};
+    getEnabledItems: jest.fn().mockReturnValue([]),
+  } as unknown) as ManagementSection);
 
 const createSetupContract = (): DeeplyMockedKeys<ManagementSetup> => ({
   sections: {
     register: jest.fn(),
     getSection: jest.fn().mockReturnValue(createManagementSectionMock()),
-    getAllSections: jest.fn().mockReturnValue([]),
   },
 });
 
 const createStartContract = (): DeeplyMockedKeys<ManagementStart> => ({
-  legacy: {},
   sections: {
     getSection: jest.fn(),
     getAllSections: jest.fn(),
-    navigateToApp: jest.fn(),
+    getSectionsEnabled: jest.fn(),
   },
 });
 

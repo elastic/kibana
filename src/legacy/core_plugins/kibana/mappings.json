@@ -1,9 +1,0 @@
-{
-  "server": {
-    "properties": {
-      "uuid": {
-        "type": "keyword"
-      }
-    }
-  }
-}

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './doc_viewer.scss';
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { getDocViewsRegistry } from '../../../kibana_services';
@@ -34,7 +35,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
     .getDocViewsSorted(renderProps.hit)
     .map(({ title, render, component }: DocView, idx: number) => {
       return {
-        id: title,
+        id: `kbn_doc_viewer_tab_${idx}`,
         name: title,
         content: (
           <DocViewerTab

@@ -60,6 +60,7 @@ export class JobDetails extends Component {
         datafeed,
         counts,
         modelSizeStats,
+        jobTimingStats,
         datafeedTimingStats,
       } = extractJobDetails(job);
 
@@ -102,7 +103,7 @@ export class JobDetails extends Component {
           content: (
             <JobDetailsPane
               data-test-subj="mlJobDetails-counts"
-              sections={[counts, modelSizeStats]}
+              sections={[counts, modelSizeStats, jobTimingStats]}
             />
           ),
         },
@@ -124,7 +125,7 @@ export class JobDetails extends Component {
         },
       ];
 
-      if (showFullDetails) {
+      if (showFullDetails && datafeed.items.length) {
         // Datafeed should be at index 2 in tabs array for full details
         tabs.splice(2, 0, {
           id: 'datafeed',

@@ -52,7 +52,7 @@ interface Props {
   onAssetDelete: (asset: AssetType) => void;
 }
 
-export const AssetModal: FunctionComponent<Props> = props => {
+export const AssetModal: FunctionComponent<Props> = (props) => {
   const {
     assetValues,
     isLoading,
@@ -114,7 +114,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
           <EuiSpacer />
           {assetValues.length ? (
             <EuiFlexGrid columns={4}>
-              {assetValues.map(asset => (
+              {assetValues.map((asset) => (
                 <Asset
                   asset={asset}
                   key={asset.id}

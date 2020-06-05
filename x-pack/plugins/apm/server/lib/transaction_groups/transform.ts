@@ -11,17 +11,17 @@ import { ESResponse } from './fetcher';
 function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
   const values = transactionGroups
     .map(({ impact }) => impact)
-    .filter(value => value !== null) as number[];
+    .filter((value) => value !== null) as number[];
 
   const max = Math.max(...values);
   const min = Math.min(...values);
 
-  return transactionGroups.map(bucket => ({
+  return transactionGroups.map((bucket) => ({
     ...bucket,
     impact:
       bucket.impact !== null
         ? ((bucket.impact - min) / (max - min)) * 100 || 0
-        : 0
+        : 0,
   }));
 }
 
@@ -52,14 +52,14 @@ function getTransactionGroup(
     p95: bucket.p95.values['95.0'],
     averageResponseTime,
     transactionsPerMinute,
-    impact
+    impact,
   };
 }
 
 export function transactionGroupsTransformer({
   response,
   start,
-  end
+  end,
 }: {
   response: ESResponse;
   start: number;
@@ -68,7 +68,7 @@ export function transactionGroupsTransformer({
   const buckets = getBuckets(response);
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
-  const transactionGroups = buckets.map(bucket =>
+  const transactionGroups = buckets.map((bucket) =>
     getTransactionGroup(bucket, minutes)
   );
 

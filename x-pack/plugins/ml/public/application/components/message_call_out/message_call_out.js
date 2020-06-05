@@ -14,8 +14,6 @@ import PropTypes from 'prop-types';
 
 import { EuiCallOut } from '@elastic/eui';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { MESSAGE_LEVEL } from '../../../../common/constants/message_levels';
 
 function getCallOutAttributes(message, status) {

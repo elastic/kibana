@@ -9,14 +9,14 @@ import { ROUTES, MONITORING } from '../../../common/constants';
 import { PipelineListItem } from '../../models/pipeline_list_item';
 
 export class MonitoringService {
-  constructor(http, monitoringUiEnabled, clusterService) {
+  constructor(http, isMonitoringEnabled, clusterService) {
     this.http = http;
-    this.monitoringUiEnabled = monitoringUiEnabled;
+    this._isMonitoringEnabled = isMonitoringEnabled;
     this.clusterService = clusterService;
   }
 
   isMonitoringEnabled() {
-    return this.monitoringUiEnabled;
+    return this._isMonitoringEnabled;
   }
 
   getPipelineList() {
@@ -26,7 +26,9 @@ export class MonitoringService {
 
     return this.clusterService
       .loadCluster()
-      .then(cluster => {
+      .then((cluster) => {
+        // This API call should live within the Monitoring plugin
+        // https://github.com/elastic/kibana/issues/63931
         const url = `${ROUTES.MONITORING_API_ROOT}/v1/clusters/${cluster.uuid}/logstash/pipeline_ids`;
         const now = moment.utc();
         const body = JSON.stringify({
@@ -37,8 +39,8 @@ export class MonitoringService {
         });
         return this.http.post(url, { body });
       })
-      .then(response =>
-        response.map(pipeline => PipelineListItem.fromUpstreamMonitoringJSON(pipeline))
+      .then((response) =>
+        response.map((pipeline) => PipelineListItem.fromUpstreamMonitoringJSON(pipeline))
       )
       .catch(() => []);
   }

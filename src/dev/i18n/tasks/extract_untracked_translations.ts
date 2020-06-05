@@ -67,10 +67,10 @@ export async function extractUntrackedMessagesTask({
     for (const [entries, extractFunction] of categorizedEntries) {
       const files = await Promise.all(
         filterEntries(entries, config.exclude)
-          .filter(entry => {
+          .filter((entry) => {
             const normalizedEntry = normalizePath(entry);
             return !availablePaths.some(
-              availablePath =>
+              (availablePath) =>
                 normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
                 normalizePath(availablePath) === normalizedEntry
             );
@@ -93,7 +93,7 @@ export async function extractUntrackedMessagesTask({
 }
 
 export function extractUntrackedMessages(inputPaths: string[]) {
-  return inputPaths.map(inputPath => ({
+  return inputPaths.map((inputPath) => ({
     title: `Checking untracked messages in ${inputPath}`,
     task: async (context: { reporter: ErrorReporter; config: I18nConfig }) => {
       const { reporter, config } = context;

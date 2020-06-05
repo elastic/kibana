@@ -499,7 +499,6 @@
         },
         "number_of_replicas": "1",
         "number_of_shards": "1",
-        "prefer_v2_templates": "true",
         "query": {
           "default_field": [
             "message"

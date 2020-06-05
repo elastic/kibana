@@ -14,7 +14,7 @@ import {
   validate,
 } from '../siem_server_deps';
 import {
-  ImportListItemSchema,
+  ImportListItemHapiFileSchema,
   importListItemQuerySchema,
   importListItemSchema,
   listSchema,
@@ -33,7 +33,7 @@ export const importListItemRoute = (router: IRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_import`,
       validate: {
-        body: buildRouteValidation<typeof importListItemSchema, ImportListItemSchema>(
+        body: buildRouteValidation<typeof importListItemSchema, ImportListItemHapiFileSchema>(
           importListItemSchema
         ),
         query: buildRouteValidation(importListItemQuerySchema),

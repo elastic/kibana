@@ -8,15 +8,17 @@ import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
+import {
+  MlCapabilitiesResponse,
+  DataRecognizerConfigResponse,
+  JobExistResult,
+} from '../../../../../plugins/ml/public';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
   MonitorIdParam,
   HeartbeatIndicesParam,
 } from '../actions/types';
-import { DataRecognizerConfigResponse } from '../../../../../plugins/ml/common/types/modules';
-import { JobExistResult } from '../../../../../plugins/ml/common/types/data_recognizer';
 
 const getJobPrefix = (monitorId: string) => {
   // ML App doesn't support upper case characters in job name
@@ -56,9 +58,7 @@ export const createMLJob = async ({
     prefix: `${getJobPrefix(monitorId)}`,
     useDedicatedIndex: false,
     startDatafeed: true,
-    start: moment()
-      .subtract(2, 'w')
-      .valueOf(),
+    start: moment().subtract(2, 'w').valueOf(),
     indexPatternName: heartbeatIndices,
     query: {
       bool: {

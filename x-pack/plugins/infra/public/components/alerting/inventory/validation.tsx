@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { isNumber } from 'lodash';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricExpressionParams } from '../../../../server/lib/alerting/metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
@@ -49,6 +51,21 @@ export function validateMetricThreshold({
           defaultMessage: 'Threshold is required.',
         })
       );
+    }
+
+    // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
+    // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
+    if (c.threshold && c.threshold.length && ![...c.threshold].every(isNumber)) {
+      [...c.threshold].forEach((v, i) => {
+        if (!isNumber(v)) {
+          const key = i === 0 ? 'threshold0' : 'threshold1';
+          errors[id][key].push(
+            i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
+              defaultMessage: 'Thresholds must contain a valid number.',
+            })
+          );
+        }
+      });
     }
 
     if (c.comparator === 'between' && (!c.threshold || c.threshold.length < 2)) {

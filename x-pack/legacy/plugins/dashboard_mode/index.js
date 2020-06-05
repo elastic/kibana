@@ -6,7 +6,6 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
 import { createDashboardModeRequestInterceptor } from './server';
 
@@ -14,7 +13,6 @@ import { createDashboardModeRequestInterceptor } from './server';
 // the standard kibana plugin. We don't want to include code for the other links (visualize, dev tools, etc)
 // since it's view only, but we want the urls to be the same, so we are using largely the same setup.
 export function dashboardMode(kibana) {
-  const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'dashboard_mode',
     publicDir: resolve(__dirname, 'public'),
@@ -44,37 +42,6 @@ export function dashboardMode(kibana) {
           },
         },
       },
-      app: {
-        id: 'dashboardViewer',
-        title: i18n.translate('xpack.dashboardMode.dashboardViewerTitle', {
-          defaultMessage: 'Dashboard Viewer',
-        }),
-        listed: false,
-        hidden: true,
-        description: i18n.translate('xpack.dashboardMode.dashboardViewerDescription', {
-          defaultMessage: 'view dashboards',
-        }),
-        main: 'plugins/dashboard_mode/dashboard_viewer',
-        links: [
-          {
-            id: 'kibana:dashboard',
-            title: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardTitle', {
-              defaultMessage: 'Dashboard',
-            }),
-            order: 1000,
-            url: `${kbnBaseUrl}#/dashboards`,
-            subUrlBase: `${kbnBaseUrl}#/dashboard`,
-            description: i18n.translate(
-              'xpack.dashboardMode.dashboardViewer.dashboardDescription',
-              {
-                defaultMessage: 'Dashboard Viewer',
-              }
-            ),
-            icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
-            category: DEFAULT_APP_CATEGORIES.kibana,
-          },
-        ],
-      },
     },
 
     config(Joi) {
@@ -90,9 +57,7 @@ export function dashboardMode(kibana) {
       );
 
       if (server.plugins.security) {
-        // extend the server to intercept requests
-        const dashboardViewerApp = server.getHiddenUiAppById('dashboardViewer');
-        server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
+        server.ext(createDashboardModeRequestInterceptor());
       }
     },
   });

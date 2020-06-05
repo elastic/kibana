@@ -38,6 +38,6 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
   <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns placeContext={{}} dynamicActionManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />
   </EuiFlyout>
 ));

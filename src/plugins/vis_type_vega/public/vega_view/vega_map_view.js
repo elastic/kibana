@@ -42,7 +42,7 @@ export class VegaMapView extends VegaBaseView {
       const mapStyle =
         mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
       const isDarkMode = getUISettings().get('theme:darkMode');
-      baseMapOpts = tmsServices.find(s => s.id === mapStyle);
+      baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
         ...baseMapOpts,
         ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),
@@ -102,6 +102,7 @@ export class VegaMapView extends VegaBaseView {
     // let maxBounds = null;
     // if (mapConfig.maxBounds) {
     //   const b = mapConfig.maxBounds;
+    // eslint-disable-next-line no-undef
     //   maxBounds = L.latLngBounds(L.latLng(b[1], b[0]), L.latLng(b[3], b[2]));
     // }
 

@@ -48,7 +48,7 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
     const objects = await savedObjectsClient.find<SavedObjectType>({
       type,
     });
-    return objects.savedObjects.filter(o => o.attributes.name === name).length > 0;
+    return objects.savedObjects.filter((o) => o.attributes.name === name).length > 0;
   };
 
   return {

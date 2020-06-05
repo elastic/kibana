@@ -10,41 +10,41 @@ import { ConfigSchema } from '../..';
 
 const mockCore = {
   chrome: {
-    setBreadcrumbs: () => {}
+    setBreadcrumbs: () => {},
   },
   docLinks: {
     DOC_LINK_VERSION: '0',
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/'
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
   },
   http: {
     basePath: {
-      prepend: (path: string) => `/basepath${path}`
-    }
+      prepend: (path: string) => `/basepath${path}`,
+    },
   },
   notifications: {
     toasts: {
       addWarning: () => {},
-      addDanger: () => {}
-    }
-  }
+      addDanger: () => {},
+    },
+  },
 };
 
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
   ui: {
-    enabled: false
-  }
+    enabled: false,
+  },
 };
 
 export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
-  plugins: {}
+  plugins: {},
 };
 
 export function MockApmPluginContextWrapper({
   children,
-  value = {} as ApmPluginContextValue
+  value = {} as ApmPluginContextValue,
 }: {
   children?: React.ReactNode;
   value?: ApmPluginContextValue;
@@ -56,7 +56,7 @@ export function MockApmPluginContextWrapper({
     <ApmPluginContext.Provider
       value={{
         ...mockApmPluginContextValue,
-        ...value
+        ...value,
       }}
     >
       {children}

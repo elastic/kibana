@@ -43,6 +43,7 @@ import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -66,23 +67,23 @@ export class VisualizeEmbeddableFactory
     name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
     includeFields: ['visState'],
     type: 'visualization',
-    getIconForSavedObject: savedObject => {
+    getIconForSavedObject: (savedObject) => {
       return (
         getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
       );
     },
-    getTooltipForSavedObject: savedObject => {
+    getTooltipForSavedObject: (savedObject) => {
       return `${savedObject.attributes.title} (${
         getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
       })`;
     },
-    showSavedObject: savedObject => {
+    showSavedObject: (savedObject) => {
       const typeName: string = JSON.parse(savedObject.attributes.visState).type;
       const visType = getTypes().get(typeName);
       if (!visType) {
         return false;
       }
-      if (getUISettings().get('visualize:enableLabs')) {
+      if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
         return true;
       }
       return visType.stage !== 'experimental';
@@ -122,7 +123,9 @@ export class VisualizeEmbeddableFactory
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
+      const visState = convertToSerializedVis(savedObject);
+      const vis = new Vis(savedObject.visState.type, visState);
+      await vis.setState(visState);
       return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
@@ -136,6 +139,7 @@ export class VisualizeEmbeddableFactory
     const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
       editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
+      outsideVisualizeApp: true,
     });
     return undefined;
   }

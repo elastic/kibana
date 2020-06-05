@@ -32,9 +32,9 @@ export interface ActionWizardProps {
 
   /**
    * Action factory selected changed
-   * null - means user click "change" and removed action factory selection
+   * empty - means user click "change" and removed action factory selection
    */
-  onActionFactoryChange: (actionFactory: ActionFactory | null) => void;
+  onActionFactoryChange: (actionFactory?: ActionFactory) => void;
 
   /**
    * current config for currently selected action factory
@@ -71,11 +71,11 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         actionFactory={currentActionFactory}
         showDeselect={actionFactories.length > 1}
         onDeselect={() => {
-          onActionFactoryChange(null);
+          onActionFactoryChange(undefined);
         }}
         context={context}
         config={config}
-        onConfigChange={newConfig => {
+        onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
       />
@@ -86,7 +86,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
     <ActionFactorySelector
       context={context}
       actionFactories={actionFactories}
-      onActionFactorySelected={actionFactory => {
+      onActionFactorySelected={(actionFactory) => {
         onActionFactoryChange(actionFactory);
       }}
     />
@@ -179,7 +179,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
       {[...actionFactories]
         .sort((f1, f2) => f2.order - f1.order)
-        .map(actionFactory => (
+        .map((actionFactory) => (
           <EuiFlexItem grow={false} key={actionFactory.id}>
             <EuiKeyPadMenuItem
               className="auaActionWizard__actionFactoryItem"

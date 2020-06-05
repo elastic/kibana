@@ -74,7 +74,7 @@ export class Flyout extends Component {
     };
   }
 
-  setEsMonitoringUrl = esMonitoringUrl => {
+  setEsMonitoringUrl = (esMonitoringUrl) => {
     storage.set(ES_MONITORING_URL_KEY, esMonitoringUrl);
     this.setState({ esMonitoringUrl });
   };
@@ -111,14 +111,14 @@ export class Flyout extends Component {
               <EuiFieldText
                 fullWidth
                 value={esMonitoringUrl}
-                onChange={e => this.setEsMonitoringUrl(e.target.value)}
+                onChange={(e) => this.setEsMonitoringUrl(e.target.value)}
               />
             </EuiFormRow>
           </EuiForm>
         );
       case INSTRUCTION_STEP_ENABLE_METRICBEAT:
       case INSTRUCTION_STEP_DISABLE_INTERNAL:
-        const esMonitoringUrls = esMonitoringUrl.split(',').map(url => `"${url}"`);
+        const esMonitoringUrls = esMonitoringUrl.split(',').map((url) => `"${url}"`);
         const instructionSteps = getInstructionSteps(productName, product, activeStep, meta, {
           doneWithMigration: onClose,
           esMonitoringUrl: esMonitoringUrls,
@@ -319,7 +319,7 @@ export class Flyout extends Component {
                 }
               )}
               checked={this.state.userAcknowledgedNoClusterUuidPrompt}
-              onChange={e =>
+              onChange={(e) =>
                 this.setState({ userAcknowledgedNoClusterUuidPrompt: e.target.checked })
               }
             />

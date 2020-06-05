@@ -7,7 +7,7 @@
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
+import { IHttpFetchError } from 'src/core/public';
 
 interface EmptyStateErrorProps {
   errors: IHttpFetchError[];

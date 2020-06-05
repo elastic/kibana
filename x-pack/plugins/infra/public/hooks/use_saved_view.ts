@@ -65,7 +65,7 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     ];
 
     savedObjects.forEach(
-      o =>
+      (o) =>
         o.type === viewType &&
         items.push({
           ...o.attributes,

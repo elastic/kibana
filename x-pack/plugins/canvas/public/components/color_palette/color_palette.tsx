@@ -42,14 +42,14 @@ export const ColorPalette: FunctionComponent<Props> = ({
     return null;
   }
 
-  colors = colors.filter(color => {
+  colors = colors.filter((color) => {
     return tinycolor(color).isValid();
   });
 
   return (
     <div className="canvasColorPalette">
       <ItemGrid items={colors} itemsPerRow={colorsPerRow}>
-        {color => {
+        {(color) => {
           const match = tinycolor.equals(color, value);
           const icon = match ? (
             <EuiIcon type="check" className="selected-color" color={readableColor(value)} />

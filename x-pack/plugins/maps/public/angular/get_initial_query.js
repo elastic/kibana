@@ -5,6 +5,7 @@
  */
 
 import { getUiSettings } from '../kibana_services';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 
 export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage }) {
   const settings = getUiSettings();
@@ -22,6 +23,6 @@ export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage
 
   return {
     query: '',
-    language: userQueryLanguage || settings.get('search:queryLanguage'),
+    language: userQueryLanguage || settings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
   };
 }

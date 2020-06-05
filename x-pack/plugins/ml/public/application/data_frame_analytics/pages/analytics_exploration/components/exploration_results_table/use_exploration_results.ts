@@ -48,8 +48,12 @@ export const useExplorationResults = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-importance columns and the doc id copy
-    d => !d.includes(`.${FEATURE_IMPORTANCE}.`) && d !== ML__ID_COPY
+    (d) => !d.includes(`.${FEATURE_IMPORTANCE}.`) && d !== ML__ID_COPY
   );
+
+  useEffect(() => {
+    dataGrid.resetPagination();
+  }, [JSON.stringify(searchQuery)]);
 
   useEffect(() => {
     getIndexData(jobConfig, dataGrid, searchQuery);

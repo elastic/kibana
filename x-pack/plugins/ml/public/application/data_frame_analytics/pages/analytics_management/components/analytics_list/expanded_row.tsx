@@ -25,7 +25,7 @@ import {
   Eval,
 } from '../../../../common';
 import { getTaskStateBadge } from './columns';
-import { isCompletedAnalyticsJob } from './common';
+import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
   ANALYSIS_CONFIG_TYPE,
@@ -171,14 +171,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     position: 'left',
   };
 
-  const totalSteps = item.stats.progress.length;
-  let step = 0;
-  for (const progressStep of item.stats.progress) {
-    step++;
-    if (progressStep.progress_percent < 100) {
-      break;
-    }
-  }
+  const { currentPhase, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
 
   const progress: SectionConfig = {
     title: i18n.translate(
@@ -188,12 +181,12 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     items: [
       {
         title: i18n.translate(
-          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.step',
-          { defaultMessage: 'Step' }
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.phase',
+          { defaultMessage: 'Phase' }
         ),
-        description: `${step}/${totalSteps}`,
+        description: `${currentPhase}/${totalPhases}`,
       },
-      ...item.stats.progress.map(s => {
+      ...item.stats.progress.map((s) => {
         return {
           title: s.phase,
           description: <ProgressBar progress={s.progress_percent} />,

@@ -13,9 +13,9 @@ import { LOGSTASH } from '../../../common/constants';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
 
-const getQueueTypes = queueBuckets => {
-  const memory = queueBuckets.find(bucket => bucket.key === MEMORY);
-  const persisted = queueBuckets.find(bucket => bucket.key === PERSISTED);
+const getQueueTypes = (queueBuckets) => {
+  const memory = queueBuckets.find((bucket) => bucket.key === MEMORY);
+  const persisted = queueBuckets.find((bucket) => bucket.key === PERSISTED);
   return {
     [MEMORY]: get(memory, 'num_pipelines.value', 0),
     [PERSISTED]: get(persisted, 'num_pipelines.value', 0),
@@ -42,7 +42,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
   const end = req.payload.timeRange.max;
   const config = req.server.config();
 
-  return Bluebird.map(clusters, cluster => {
+  return Bluebird.map(clusters, (cluster) => {
     const clusterUuid = cluster.cluster_uuid;
     const params = {
       index: lsIndexPattern,
@@ -177,7 +177,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
     };
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    return callWithRequest(req, 'search', params).then(result => {
+    return callWithRequest(req, 'search', params).then((result) => {
       const aggregations = get(result, 'aggregations', {});
       const logstashUuids = get(aggregations, 'logstash_uuids.buckets', []);
       const logstashVersions = get(aggregations, 'logstash_versions.buckets', []);
@@ -209,7 +209,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
           max_uptime: maxUptime,
           pipeline_count: get(aggregations, 'pipelines_nested.pipelines.value', 0),
           queue_types: getQueueTypes(get(aggregations, 'pipelines_nested.queue_types.buckets', [])),
-          versions: logstashVersions.map(versionBucket => versionBucket.key),
+          versions: logstashVersions.map((versionBucket) => versionBucket.key),
         },
       };
     });

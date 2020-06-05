@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import { ScopedHistory } from 'kibana/public';
+
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionsConnectorsList } from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -66,6 +68,7 @@ describe('actions_connectors_list component empty', () => {
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
@@ -91,10 +94,7 @@ describe('actions_connectors_list component empty', () => {
   });
 
   test('if click create button should render ConnectorAddFlyout', () => {
-    wrapper
-      .find('[data-test-subj="createFirstActionButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
     expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
   });
 });
@@ -165,12 +165,13 @@ describe('actions_connectors_list component with items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': true,
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -202,11 +203,9 @@ describe('actions_connectors_list component with items', () => {
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
   });
 
-  test('if select item for edit should render ConnectorEditFlyout', () => {
-    wrapper
-      .find('[data-test-subj="edit1"]')
-      .first()
-      .simulate('click');
+  test('if select item for edit should render ConnectorEditFlyout', async () => {
+    await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
+
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
   });
 });
@@ -249,12 +248,13 @@ describe('actions_connectors_list component empty with show only capability', ()
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': false,
           'actions:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -334,12 +334,13 @@ describe('actions_connectors_list with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': false,
           'actions:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -363,7 +364,7 @@ describe('actions_connectors_list with show only capability', () => {
   it('renders table of connectors with delete button disabled', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    wrapper.find('EuiTableRow').forEach(elem => {
+    wrapper.find('EuiTableRow').forEach((elem) => {
       const deleteButton = elem.find('[data-test-subj="deleteConnector"]').first();
       expect(deleteButton).toBeTruthy();
       expect(deleteButton.prop('isDisabled')).toBeTruthy();
@@ -431,12 +432,13 @@ describe('actions_connectors_list component with disabled items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': true,
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -462,18 +464,12 @@ describe('actions_connectors_list component with disabled items', () => {
   it('renders table of connectors', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    expect(
-      wrapper
-        .find('EuiTableRow')
-        .at(0)
-        .prop('className')
-    ).toEqual('actConnectorsList__tableRowDisabled');
-    expect(
-      wrapper
-        .find('EuiTableRow')
-        .at(1)
-        .prop('className')
-    ).toEqual('actConnectorsList__tableRowDisabled');
+    expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual(
+      'actConnectorsList__tableRowDisabled'
+    );
+    expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
+      'actConnectorsList__tableRowDisabled'
+    );
   });
 });
 

@@ -17,8 +17,6 @@ import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
@@ -27,6 +25,7 @@ import {
   getTickValues,
   numTicksForDateFormat,
   removeLabelOverlap,
+  chartExtendedLimits,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
@@ -94,13 +93,13 @@ export class ExplorerChartDistribution extends React.Component {
 
     const CHART_Y_ATTRIBUTE = chartType === CHART_TYPE.EVENT_DISTRIBUTION ? 'entity' : 'value';
 
-    let highlight = config.chartData.find(d => d.anomalyScore !== undefined);
+    let highlight = config.chartData.find((d) => d.anomalyScore !== undefined);
     highlight = highlight && highlight.entity;
 
     const filteredChartData = init(config);
     drawRareChart(filteredChartData);
 
-    function init({ chartData }) {
+    function init({ chartData, functionDescription }) {
       const $el = $('.ml-explorer-chart');
 
       // Clear any existing elements from the visualization,
@@ -120,7 +119,7 @@ export class ExplorerChartDistribution extends React.Component {
       const categoryLimit = 30;
       const scaleCategories = d3
         .nest()
-        .key(d => d.entity)
+        .key((d) => d.entity)
         .entries(chartData)
         .sort((a, b) => {
           return b.values.length - a.values.length;
@@ -132,29 +131,31 @@ export class ExplorerChartDistribution extends React.Component {
           }
           return true;
         })
-        .map(d => d.key);
+        .map((d) => d.key);
 
-      chartData = chartData.filter(d => {
+      chartData = chartData.filter((d) => {
         return scaleCategories.includes(d.entity);
       });
 
       if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
-        const focusData = chartData
-          .filter(d => {
-            return d.entity === highlight;
-          })
-          .map(d => d.value);
-        const focusExtent = d3.extent(focusData);
-
+        const focusData = chartData.filter((d) => {
+          return d.entity === highlight;
+        });
+        // calculate the max y domain based on value, typical, and actual
+        // also sets the min to be at least 0 if the series function type is `count`
+        const { min: yScaleDomainMin, max: yScaleDomainMax } = chartExtendedLimits(
+          focusData,
+          functionDescription
+        );
         // now again filter chartData to include only the data points within the domain
-        chartData = chartData.filter(d => {
-          return d.value <= focusExtent[1];
+        chartData = chartData.filter((d) => {
+          return d.value <= yScaleDomainMax;
         });
 
         lineChartYScale = d3.scale
           .linear()
           .range([chartHeight, 0])
-          .domain([0, focusExtent[1]])
+          .domain([yScaleDomainMin < 0 ? yScaleDomainMin : 0, yScaleDomainMax])
           .nice();
       } else if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         // avoid overflowing the border of the highlighted area
@@ -186,7 +187,7 @@ export class ExplorerChartDistribution extends React.Component {
         .data(tempLabelTextData)
         .enter()
         .append('text')
-        .text(d => {
+        .text((d) => {
           if (fieldFormat !== undefined) {
             return fieldFormat.convert(d, 'text');
           } else {
@@ -197,7 +198,7 @@ export class ExplorerChartDistribution extends React.Component {
           }
         })
         // Don't use an arrow function since we need access to `this`.
-        .each(function() {
+        .each(function () {
           maxYAxisLabelWidth = Math.max(
             this.getBBox().width + yAxis.tickPadding(),
             maxYAxisLabelWidth
@@ -227,9 +228,9 @@ export class ExplorerChartDistribution extends React.Component {
 
       lineChartValuesLine = d3.svg
         .line()
-        .x(d => lineChartXScale(d.date))
-        .y(d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
-        .defined(d => d.value !== null);
+        .x((d) => lineChartXScale(d.date))
+        .y((d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
+        .defined((d) => d.value !== null);
 
       lineChartGroup = svg
         .append('g')
@@ -282,7 +283,7 @@ export class ExplorerChartDistribution extends React.Component {
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .tickFormat(d => moment(d).format(xAxisTickFormat));
+        .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
       // With tooManyBuckets the chart would end up with no x-axis labels
       // because the ticks are based on the span of the emphasis section,
@@ -302,7 +303,7 @@ export class ExplorerChartDistribution extends React.Component {
         .tickPadding(10);
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat(d => fieldFormat.convert(d, 'text'));
+        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
       }
 
       const axes = lineChartGroup.append('g');
@@ -313,17 +314,14 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('transform', 'translate(0,' + chartHeight + ')')
         .call(xAxis);
 
-      axes
-        .append('g')
-        .attr('class', 'y axis')
-        .call(yAxis);
+      axes.append('g').attr('class', 'y axis').call(yAxis);
 
       // emphasize the y axis label this rare chart is actually about
       if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         axes
           .select('.y')
           .selectAll('text')
-          .each(function(d) {
+          .each(function (d) {
             d3.select(this).classed('ml-explorer-chart-axis-emphasis', d === highlight);
           });
       }
@@ -347,10 +345,10 @@ export class ExplorerChartDistribution extends React.Component {
         .enter()
         .append('circle')
         .classed('values-dots-circle', true)
-        .classed('values-dots-circle-blur', d => {
+        .classed('values-dots-circle-blur', (d) => {
           return d.entity !== highlight;
         })
-        .attr('r', d => (d.entity === highlight ? radius * 1.5 : radius));
+        .attr('r', (d) => (d.entity === highlight ? radius * 1.5 : radius));
 
       dots.attr('cx', rareChartValuesLine.x()).attr('cy', rareChartValuesLine.y());
 
@@ -384,7 +382,7 @@ export class ExplorerChartDistribution extends React.Component {
         .append('g')
         .attr('class', 'chart-markers')
         .selectAll('.metric-value')
-        .data(data.filter(d => d.value !== null));
+        .data(data.filter((d) => d.value !== null));
 
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
@@ -394,16 +392,16 @@ export class ExplorerChartDistribution extends React.Component {
         .append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
         // Don't use an arrow function since we need access to `this`.
-        .on('mouseover', function(d) {
+        .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
         .on('mouseout', () => tooltipService.hide());
 
       // Update all dots to new positions.
       dots
-        .attr('cx', d => lineChartXScale(d.date))
-        .attr('cy', d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
-        .attr('class', d => {
+        .attr('cx', (d) => lineChartXScale(d.date))
+        .attr('cy', (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
+        .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity) {
             markerClass += ' anomaly-marker ';
@@ -416,7 +414,7 @@ export class ExplorerChartDistribution extends React.Component {
       const scheduledEventMarkers = lineChartGroup
         .select('.chart-markers')
         .selectAll('.scheduled-event-marker')
-        .data(data.filter(d => d.scheduledEvents !== undefined));
+        .data(data.filter((d) => d.scheduledEvents !== undefined));
 
       // Remove markers that are no longer needed i.e. if number of chart points has decreased.
       scheduledEventMarkers.exit().remove();
@@ -432,8 +430,11 @@ export class ExplorerChartDistribution extends React.Component {
 
       // Update all markers to new positions.
       scheduledEventMarkers
-        .attr('x', d => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', d => lineChartYScale(d[CHART_Y_ATTRIBUTE]) - SCHEDULED_EVENT_MARKER_HEIGHT / 2);
+        .attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
+        .attr(
+          'y',
+          (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]) - SCHEDULED_EVENT_MARKER_HEIGHT / 2
+        );
     }
 
     function showLineChartTooltip(marker, circle) {

@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
@@ -29,10 +24,6 @@ function LoadingSpinner() {
     </EuiFlexGroup>
   );
 }
-
-const BadgeRow = styled(EuiFlexItem)`
-  padding-bottom: ${lightTheme.gutterTypes.gutterSmall};
-`;
 
 export const ItemRow = styled('tr')`
   line-height: 2;
@@ -57,92 +48,74 @@ export function ServiceMetricList({
   avgErrorsPerMinute,
   avgCpuUsage,
   avgMemoryUsage,
-  numInstances,
-  isLoading
+  isLoading,
 }: ServiceMetricListProps) {
   const listItems = [
     {
       title: i18n.translate(
         'xpack.apm.serviceMap.avgTransDurationPopoverMetric',
         {
-          defaultMessage: 'Trans. duration (avg.)'
+          defaultMessage: 'Trans. duration (avg.)',
         }
       ),
       description: isNumber(avgTransactionDuration)
         ? asDuration(avgTransactionDuration)
-        : null
+        : null,
     },
     {
       title: i18n.translate(
         'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
         {
-          defaultMessage: 'Req. per minute (avg.)'
+          defaultMessage: 'Req. per minute (avg.)',
         }
       ),
       description: isNumber(avgRequestsPerMinute)
         ? `${avgRequestsPerMinute.toFixed(2)} ${tpmUnit('request')}`
-        : null
+        : null,
     },
     {
       title: i18n.translate(
         'xpack.apm.serviceMap.avgErrorsPerMinutePopoverMetric',
         {
-          defaultMessage: 'Errors per minute (avg.)'
+          defaultMessage: 'Errors per minute (avg.)',
         }
       ),
-      description: avgErrorsPerMinute?.toFixed(2)
+      description: avgErrorsPerMinute?.toFixed(2),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
-        defaultMessage: 'CPU usage (avg.)'
+        defaultMessage: 'CPU usage (avg.)',
       }),
-      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : null
+      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : null,
     },
     {
       title: i18n.translate(
         'xpack.apm.serviceMap.avgMemoryUsagePopoverMetric',
         {
-          defaultMessage: 'Memory usage (avg.)'
+          defaultMessage: 'Memory usage (avg.)',
         }
       ),
       description: isNumber(avgMemoryUsage)
         ? asPercent(avgMemoryUsage, 1)
-        : null
-    }
+        : null,
+    },
   ];
-  const showBadgeRow = numInstances > 1;
 
   return isLoading ? (
     <LoadingSpinner />
   ) : (
-    <>
-      {showBadgeRow && (
-        <BadgeRow>
-          <EuiFlexGroup gutterSize="none">
-            {numInstances > 1 && (
-              <EuiBadge iconType="apps" color="hollow">
-                {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
-                  values: { numInstances },
-                  defaultMessage: '{numInstances} instances'
-                })}
-              </EuiBadge>
-            )}
-          </EuiFlexGroup>
-        </BadgeRow>
-      )}
-      <table>
-        <tbody>
-          {listItems.map(
-            ({ title, description }) =>
-              description && (
-                <ItemRow key={title}>
-                  <ItemTitle>{title}</ItemTitle>
-                  <ItemDescription>{description}</ItemDescription>
-                </ItemRow>
-              )
-          )}
-        </tbody>
-      </table>
-    </>
+    <table>
+      <tbody>
+        {listItems.map(
+          ({ title, description }) =>
+            description && (
+              <ItemRow key={title}>
+                <ItemTitle>{title}</ItemTitle>
+                <ItemDescription>{description}</ItemDescription>
+              </ItemRow>
+            )
+        )}
+      </tbody>
+    </table>
   );
 }

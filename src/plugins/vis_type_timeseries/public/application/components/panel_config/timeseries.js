@@ -85,7 +85,7 @@ class TimeseriesPanelConfigUi extends Component {
         value: 'left',
       },
     ];
-    const selectedPositionOption = positionOptions.find(option => {
+    const selectedPositionOption = positionOptions.find((option) => {
       return model.axis_position === option.value;
     });
     const scaleOptions = [
@@ -104,7 +104,7 @@ class TimeseriesPanelConfigUi extends Component {
         value: 'log',
       },
     ];
-    const selectedAxisScaleOption = scaleOptions.find(option => {
+    const selectedAxisScaleOption = scaleOptions.find((option) => {
       return model.axis_scale === option.value;
     });
     const legendPositionOptions = [
@@ -130,7 +130,7 @@ class TimeseriesPanelConfigUi extends Component {
         value: 'bottom',
       },
     ];
-    const selectedLegendPosOption = legendPositionOptions.find(option => {
+    const selectedLegendPosOption = legendPositionOptions.find((option) => {
       return model.legend_position === option.value;
     });
 
@@ -192,7 +192,7 @@ class TimeseriesPanelConfigUi extends Component {
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>

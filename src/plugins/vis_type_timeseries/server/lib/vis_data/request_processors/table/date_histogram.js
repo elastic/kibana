@@ -27,7 +27,7 @@ import { search } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const meta = {
       timeField,
@@ -38,7 +38,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
       const { from, to } = getTimerange(req);
       const timezone = capabilities.searchTimezone;
 
-      panel.series.forEach(column => {
+      panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
         overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
@@ -61,7 +61,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
     };
 
     const getDateHistogramForEntireTimerangeMode = () => {
-      panel.series.forEach(column => {
+      panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
         overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {

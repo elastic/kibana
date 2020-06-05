@@ -12,7 +12,7 @@ import {
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
-} from '../../../actions/map_actions';
+} from '../../../actions';
 import { MAX_ZOOM } from '../../../../common/constants';
 
 function mapStateToProps(state = {}) {

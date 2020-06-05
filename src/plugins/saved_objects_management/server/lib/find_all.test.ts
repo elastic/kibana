@@ -90,6 +90,6 @@ describe('findAll', () => {
       page: 3,
     });
 
-    expect(results).toEqual(times(6, num => createObj(num + 1)));
+    expect(results).toEqual(times(6, (num) => createObj(num + 1)));
   });
 });

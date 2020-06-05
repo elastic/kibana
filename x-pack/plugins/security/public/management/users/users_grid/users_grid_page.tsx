@@ -23,19 +23,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
 import { isUserReserved, getExtendedUserDeprecationNotice, isUserDeprecated } from '../user_utils';
 import { DisabledBadge, ReservedBadge, DeprecatedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { UserAPIClient } from '..';
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
+  history: ScopedHistory;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -70,6 +73,7 @@ export class UsersGridPage extends Component<Props, State> {
 
   public render() {
     const { users, roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
+
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
@@ -97,7 +101,6 @@ export class UsersGridPage extends Component<Props, State> {
         </EuiFlexGroup>
       );
     }
-    const path = '#/management/security/';
     const columns: Array<EuiBasicTableColumn<User>> = [
       {
         field: 'username',
@@ -107,7 +110,10 @@ export class UsersGridPage extends Component<Props, State> {
         sortable: true,
         truncateText: true,
         render: (username: string) => (
-          <EuiLink data-test-subj="userRowUserName" href={`${path}users/edit/${username}`}>
+          <EuiLink
+            data-test-subj="userRowUserName"
+            {...reactRouterNavigate(this.props.history, `/edit/${username}`)}
+          >
             {username}
           </EuiLink>
         ),
@@ -143,8 +149,14 @@ export class UsersGridPage extends Component<Props, State> {
         width: '30%',
         render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
-            const roleDefinition = roles?.find(role => role.name === rolename) ?? rolename;
-            return <RoleTableDisplay role={roleDefinition} key={rolename} />;
+            const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
+            return (
+              <RoleTableDisplay
+                role={roleDefinition}
+                key={rolename}
+                navigateToApp={this.props.navigateToApp}
+              />
+            );
           });
           return <div data-test-subj="userRowRoles">{roleLinks}</div>;
         },
@@ -219,7 +231,10 @@ export class UsersGridPage extends Component<Props, State> {
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButton data-test-subj="createUserButton" href="#/management/security/users/edit">
+              <EuiButton
+                data-test-subj="createUserButton"
+                {...reactRouterNavigate(this.props.history, `/edit/`)}
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"
                   defaultMessage="Create user"
@@ -231,7 +246,7 @@ export class UsersGridPage extends Component<Props, State> {
             {showDeleteConfirmation ? (
               <ConfirmDeleteUsers
                 onCancel={this.onCancelDelete}
-                usersToDelete={selection.map(user => user.username)}
+                usersToDelete={selection.map((user) => user.username)}
                 callback={this.handleDelete}
                 userAPIClient={this.props.userAPIClient}
                 notifications={this.props.notifications}

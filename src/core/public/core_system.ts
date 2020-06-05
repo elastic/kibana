@@ -160,6 +160,7 @@ export class CoreSystem {
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
+      const docLinks = this.docLinks.setup({ injectedMetadata });
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
@@ -180,6 +181,7 @@ export class CoreSystem {
       const core: InternalCoreSetup = {
         application,
         context,
+        docLinks,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -211,7 +213,7 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
-      const docLinks = await this.docLinks.start({ injectedMetadata });
+      const docLinks = this.docLinks.start();
       const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();

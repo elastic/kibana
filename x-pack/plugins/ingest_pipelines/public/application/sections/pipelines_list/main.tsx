@@ -61,7 +61,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   useEffect(() => {
     if (pipelineNameFromLocation && data?.length) {
-      const pipeline = data.find(p => p.name === pipelineNameFromLocation);
+      const pipeline = data.find((p) => p.name === pipelineNameFromLocation);
       setSelectedPipeline(pipeline);
       setShowFlyout(true);
     }
@@ -80,11 +80,15 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     history.push(BASE_PATH);
   };
 
+  if (data && data.length === 0) {
+    return <EmptyList />;
+  }
+
   let content: React.ReactNode;
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <SectionLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.ingestPipelines.list.loadingMessage"
           defaultMessage="Loading pipelines..."
@@ -101,8 +105,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         pipelines={data}
       />
     );
-  } else {
-    return <EmptyList />;
   }
 
   const renderFlyout = (): React.ReactNode => {
@@ -148,6 +150,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
                   href={services.documentation.getIngestNodeUrl()}
                   target="_blank"
                   iconType="help"
+                  data-test-subj="documentationLink"
                 >
                   <FormattedMessage
                     id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
@@ -172,6 +175,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             <EuiCallOut
               iconType="faceSad"
               color="danger"
+              data-test-subj="pipelineLoadError"
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.list.loadErrorTitle"
@@ -197,7 +201,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       {renderFlyout()}
       {pipelinesToDelete?.length > 0 ? (
         <PipelineDeleteModal
-          callback={deleteResponse => {
+          callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedPipelines) {
               // reload pipelines list
               sendRequest();

@@ -65,7 +65,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
      * Sets commonly used time
      * @param option 'Today' | 'This_week' | 'Last_15 minutes' | 'Last_24 hours' ...
      */
-    async setCommonlyUsedTime(option: CommonlyUsed) {
+    async setCommonlyUsedTime(option: CommonlyUsed | string) {
       await testSubjects.click('superDatePickerToggleQuickMenuButton');
       await testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
     }
@@ -179,7 +179,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       const select = await testSubjects.find('superDatePickerRefreshIntervalUnitsSelect');
       const options = await find.allDescendantDisplayedByCssSelector('option', select);
       await Promise.all(
-        options.map(async optionElement => {
+        options.map(async (optionElement) => {
           const isSelected = await optionElement.isSelected();
           if (isSelected) {
             selectedUnit = await optionElement.getVisibleText();

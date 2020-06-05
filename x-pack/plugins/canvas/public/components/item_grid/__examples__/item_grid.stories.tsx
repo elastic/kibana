@@ -12,17 +12,17 @@ import { ItemGrid } from '../item_grid';
 
 storiesOf('components/ItemGrid', module)
   .add('simple grid', () => (
-    <ItemGrid items={['a', 'b', 'c']} children={item => <div key={item}>{item}</div>} />
+    <ItemGrid items={['a', 'b', 'c']} children={(item) => <div key={item}>{item}</div>} />
   ))
   .add('icon grid', () => (
     <ItemGrid
       items={['plusInCircle', 'minusInCircle', 'check']}
-      children={item => <EuiIcon key={item} type={item} />}
+      children={(item) => <EuiIcon key={item} type={item} />}
     />
   ))
   .add('color dot grid', () => (
     <ItemGrid items={['#fff', '#666', '#000']}>
-      {item => <ColorDot key={item} value={item} />}
+      {(item) => <ColorDot key={item} value={item} />}
     </ItemGrid>
   ))
   .add('complex grid', () => (
@@ -35,7 +35,7 @@ storiesOf('components/ItemGrid', module)
         ] as Array<{ color: string; icon: IconType }>
       }
     >
-      {item => (
+      {(item) => (
         <ColorDot key={item.color} value={item.color}>
           <EuiIcon type={item.icon} color={readableColor(item.color)} />
         </ColorDot>

@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
@@ -52,15 +52,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
           security.user.delete('global_infrastructure_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Metrics', 'Stack Management']);
       });
 
@@ -168,15 +168,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
           security.user.delete('global_infrastructure_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Metrics', 'Stack Management']);
       });
 
@@ -419,7 +419,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show metrics navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.not.contain(['Metrics']);
       });
 

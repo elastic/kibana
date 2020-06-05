@@ -12,6 +12,7 @@ import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ActionType } from './types';
+import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
   ActionsPluginsSetup,
@@ -31,33 +32,11 @@ describe('Actions Plugin', () => {
     let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
-      context = coreMock.createPluginInitializerContext({
-        preconfigured: [
-          {
-            id: 'my-slack1',
-            actionTypeId: '.slack',
-            name: 'Slack #xyz',
-            description: 'Send a message to the #xyz channel',
-            config: {
-              webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-            },
-          },
-          {
-            id: 'custom-system-abc-connector',
-            actionTypeId: 'system-abc-action-type',
-            description: 'Send a notification to system ABC',
-            name: 'System ABC',
-            config: {
-              xyzConfig1: 'value1',
-              xyzConfig2: 'value2',
-              listOfThings: ['a', 'b', 'c', 'd'],
-            },
-            secrets: {
-              xyzSecret1: 'credential1',
-              xyzSecret2: 'credential2',
-            },
-          },
-        ],
+      context = coreMock.createPluginInitializerContext<ActionsConfig>({
+        enabled: true,
+        enabledActionTypes: ['*'],
+        whitelistedHosts: ['*'],
+        preconfigured: {},
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -104,7 +83,9 @@ describe('Actions Plugin', () => {
                 client: {},
               },
               elasticsearch: {
-                adminClient: jest.fn(),
+                legacy: {
+                  client: jest.fn(),
+                },
               },
             },
           } as unknown) as RequestHandlerContext,
@@ -192,6 +173,7 @@ describe('Actions Plugin', () => {
       });
     });
   });
+
   describe('start()', () => {
     let plugin: ActionsPlugin;
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -200,8 +182,18 @@ describe('Actions Plugin', () => {
     let pluginsStart: jest.Mocked<ActionsPluginsStart>;
 
     beforeEach(() => {
-      const context = coreMock.createPluginInitializerContext({
-        preconfigured: [],
+      const context = coreMock.createPluginInitializerContext<ActionsConfig>({
+        enabled: true,
+        enabledActionTypes: ['*'],
+        whitelistedHosts: ['*'],
+        preconfigured: {
+          preconfiguredServerLog: {
+            actionTypeId: '.server-log',
+            name: 'preconfigured-server-log',
+            config: {},
+            secrets: {},
+          },
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -220,6 +212,15 @@ describe('Actions Plugin', () => {
     });
 
     describe('getActionsClientWithRequest()', () => {
+      it('should handle preconfigured actions', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
+      });
+
       it('should not throw error when ESO plugin not using a generated key', async () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -8,7 +8,7 @@ import uuid from 'uuid';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
-    [undefined, null].forEach(val => {
+    [undefined, null].forEach((val) => {
       expect(() => {
         throwIfAbsent('OMG no value')(val);
       }).toThrowErrorMatchingInlineSnapshot(`"OMG no value"`);
@@ -16,7 +16,7 @@ describe('throwIfAbsent', () => {
   });
 
   test('doesnt throws if value is present but falsey', () => {
-    [false, ''].forEach(val => {
+    [false, ''].forEach((val) => {
       expect(throwIfAbsent('OMG no value')(val)).toEqual(val);
     });
   });
@@ -29,7 +29,7 @@ describe('throwIfAbsent', () => {
 describe('throwIfIsntContained', () => {
   test('throws if value is absent', () => {
     expect(() => {
-      throwIfIsntContained<string>(new Set([uuid.v4()]), 'OMG no value', val => val)([uuid.v4()]);
+      throwIfIsntContained<string>(new Set([uuid.v4()]), 'OMG no value', (val) => val)([uuid.v4()]);
     }).toThrowErrorMatchingInlineSnapshot(`"OMG no value"`);
   });
 
@@ -39,7 +39,7 @@ describe('throwIfIsntContained', () => {
       throwIfIsntContained<string>(
         new Set([id]),
         (value: string) => `OMG no ${value}`,
-        val => val
+        (val) => val
       )([uuid.v4()]);
     }).toThrow(`OMG no ${id}`);
   });
@@ -47,16 +47,20 @@ describe('throwIfIsntContained', () => {
   test('returns values if value is present', () => {
     const id = uuid.v4();
     const values = [uuid.v4(), uuid.v4(), id, uuid.v4()];
-    expect(throwIfIsntContained<string>(new Set([id]), 'OMG no value', val => val)(values)).toEqual(
-      values
-    );
+    expect(
+      throwIfIsntContained<string>(new Set([id]), 'OMG no value', (val) => val)(values)
+    ).toEqual(values);
   });
 
   test('returns values if multiple values is present', () => {
     const [firstId, secondId] = [uuid.v4(), uuid.v4()];
     const values = [uuid.v4(), uuid.v4(), secondId, uuid.v4(), firstId];
     expect(
-      throwIfIsntContained<string>(new Set([firstId, secondId]), 'OMG no value', val => val)(values)
+      throwIfIsntContained<string>(
+        new Set([firstId, secondId]),
+        'OMG no value',
+        (val) => val
+      )(values)
     ).toEqual(values);
   });
 

@@ -10,12 +10,12 @@ require('@babel/register')({
   extensions: ['.ts'],
   plugins: [
     '@babel/plugin-proposal-optional-chaining',
-    '@babel/plugin-proposal-nullish-coalescing-operator'
+    '@babel/plugin-proposal-nullish-coalescing-operator',
   ],
   presets: [
     '@babel/typescript',
-    ['@babel/preset-env', { targets: { node: 'current' } }]
-  ]
+    ['@babel/preset-env', { targets: { node: 'current' } }],
+  ],
 });
 
 require('./upload-telemetry-data/index.ts');

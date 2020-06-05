@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge, omit, times, chunk, isEmpty } from 'lodash';
+import { merge, omit, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect/expect.js';
 import moment from 'moment';
@@ -12,16 +12,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/64723
-  // FLAKY: https://github.com/elastic/kibana/issues/64812
-  describe.skip('Event Log public API', () => {
+  describe('Event Log public API', () => {
     it('should allow querying for events by Saved Object', async () => {
       const id = uuid.v4();
 
@@ -45,11 +43,7 @@ export default function({ getService }: FtrProviderContext) {
     it('should support pagination for events', async () => {
       const id = uuid.v4();
 
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
-
-      // run one first to create the SO and avoid clashes
-      await logTestEvent(id, firstExpectedEvent);
-      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+      const expectedEvents = await logFakeEvents(id, 6);
 
       await retry.try(async () => {
         const {
@@ -59,10 +53,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(foundEvents.length).to.be(6);
       });
 
-      const [expectedFirstPage, expectedSecondPage] = chunk(
-        [firstExpectedEvent, ...expectedEvents],
-        3
-      );
+      const [expectedFirstPage, expectedSecondPage] = chunk(expectedEvents, 3);
 
       const {
         body: { data: firstPage },
@@ -157,10 +148,7 @@ export default function({ getService }: FtrProviderContext) {
             .join('&')}`
     }`;
     log.debug(`calling ${uri}`);
-    return await supertest
-      .get(uri)
-      .set('kbn-xsrf', 'foo')
-      .expect(200);
+    return await supertest.get(uri).set('kbn-xsrf', 'foo').expect(200);
   }
 
   function assertEventsFromApiMatchCreatedEvents(

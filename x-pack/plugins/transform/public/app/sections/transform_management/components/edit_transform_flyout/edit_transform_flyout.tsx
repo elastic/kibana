@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,10 +19,9 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiOverlayMask,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { getErrorMessage } from '../../../../../shared_imports';
 
@@ -30,8 +30,7 @@ import {
   TransformPivotConfig,
   REFRESH_TRANSFORM_LIST_STATE,
 } from '../../../../common';
-import { ToastNotificationText } from '../../../../components';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 
 import { useApi } from '../../../../hooks/use_api';
 
@@ -48,13 +47,14 @@ interface EditTransformFlyoutProps {
 }
 
 export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {
-  const { overlays } = useAppDependencies();
   const api = useApi();
   const toastNotifications = useToastNotifications();
 
   const [state, dispatch] = useEditTransformFlyout(config);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   async function submitFormHandler() {
+    setErrorMessage(undefined);
     const requestConfig = applyFormFieldsToTransformConfig(config, state.formFields);
     const transformId = config.id;
 
@@ -69,12 +69,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
       closeFlyout();
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
     } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.transformList.editTransformGenericErrorMessage', {
-          defaultMessage: 'An error occurred calling the API endpoint to update transforms.',
-        }),
-        text: toMountPoint(<ToastNotificationText overlays={overlays} text={getErrorMessage(e)} />),
-      });
+      setErrorMessage(getErrorMessage(e));
     }
   }
 
@@ -97,6 +92,24 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
         </EuiFlyoutHeader>
         <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
           <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} />
+          {errorMessage !== undefined && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.transform.transformList.editTransformGenericErrorMessage',
+                  {
+                    defaultMessage:
+                      'An error occurred calling the API endpoint to update transforms.',
+                  }
+                )}
+                color="danger"
+                iconType="alert"
+              >
+                <p>{errorMessage}</p>
+              </EuiCallOut>
+            </>
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

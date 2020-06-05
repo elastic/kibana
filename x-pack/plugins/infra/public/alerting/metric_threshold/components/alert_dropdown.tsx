@@ -35,7 +35,7 @@ export const MetricsAlertDropdown = () => {
         icon="tableOfContents"
         key="manageLink"
         href={kibana.services?.application?.getUrlForApp(
-          'kibana#/management/kibana/triggersActions/alerts'
+          'management/insightsAndAlerting/triggersActions/alerts'
         )}
       >
         <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />

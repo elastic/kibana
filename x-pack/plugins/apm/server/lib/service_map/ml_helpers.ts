@@ -7,12 +7,13 @@
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import {
   getMlJobServiceName,
-  getSeverity
+  getSeverity,
 } from '../../../common/ml_job_constants';
-import { AnomaliesResponse, ServicesResponse } from './get_service_map';
+import { ConnectionNode } from '../../../common/service_map';
+import { AnomaliesResponse } from './get_service_map';
 
-export function addAnomaliesToServicesData(
-  servicesData: ServicesResponse,
+export function addAnomaliesDataToNodes(
+  nodes: ConnectionNode[],
   anomaliesResponse: AnomaliesResponse
 ) {
   const anomaliesMap = (
@@ -47,12 +48,12 @@ export function addAnomaliesToServicesData(
         max_score: maxScore,
         actual_value: actualValue,
         typical_value: typicalValue,
-        job_id: jobId
-      }
+        job_id: jobId,
+      },
     };
   }, {});
 
-  const servicesDataWithAnomalies = servicesData.map(service => {
+  const servicesDataWithAnomalies = nodes.map((service) => {
     const serviceAnomalies = anomaliesMap[service[SERVICE_NAME]];
     if (serviceAnomalies) {
       const maxScore = serviceAnomalies.max_score;
@@ -62,7 +63,7 @@ export function addAnomaliesToServicesData(
         severity: getSeverity(maxScore),
         actual_value: serviceAnomalies.actual_value,
         typical_value: serviceAnomalies.typical_value,
-        job_id: serviceAnomalies.job_id
+        job_id: serviceAnomalies.job_id,
       };
     }
     return service;

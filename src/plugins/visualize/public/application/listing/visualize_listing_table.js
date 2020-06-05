@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '../../../../kibana_react/public';
 
-import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiIcon, EuiBetaBadge, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { getServices } from '../../kibana_services';
 
@@ -45,7 +45,8 @@ class VisualizeListingTable extends Component {
         editItem={visualizeCapabilities.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
-        selectable={item => item.canDelete}
+        initialPageSize={this.props.initialPageSize}
+        selectable={(item) => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={i18n.translate('visualize.listing.table.entityName', {
@@ -71,14 +72,7 @@ class VisualizeListingTable extends Component {
           defaultMessage: 'Title',
         }),
         sortable: true,
-        render: (field, record) => (
-          <EuiLink
-            href={this.props.getViewUrl(record)}
-            data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
-          >
-            {field}
-          </EuiLink>
-        ),
+        render: (field, record) => this.props.getViewElement(field, record),
       },
       {
         field: 'typeTitle',
@@ -225,12 +219,12 @@ VisualizeListingTable.propTypes = {
   deleteItems: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   createItem: PropTypes.func.isRequired,
-  getViewUrl: PropTypes.func.isRequired,
+  getViewElement: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
 };
 
-const withI18nContext = I18nContext => props => (
+const withI18nContext = (I18nContext) => (props) => (
   <I18nContext>
     <VisualizeListingTable {...props} />
   </I18nContext>
