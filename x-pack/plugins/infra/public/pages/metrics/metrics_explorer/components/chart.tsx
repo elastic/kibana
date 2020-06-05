@@ -86,6 +86,7 @@ export const MetricsExplorerChart = ({
       [dateFormat]
     ),
   };
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
   const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
   const domain =
