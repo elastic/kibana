@@ -27,7 +27,7 @@ export const cleanDraftTimelinesRoute = (
         body: buildRouteValidation(cleanDraftTimelineSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
