@@ -104,7 +104,7 @@ describe('StatefulTimeline', () => {
         wrapper.update();
         const timeline = wrapper.find(Timeline);
         expect(timeline.props().indexToAdd).toEqual([
-          'unknown-049FC71A-4C2C-446F-9901-3770C5024C51-index',
+          'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51',
         ]);
       });
     });
