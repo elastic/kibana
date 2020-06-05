@@ -10,24 +10,14 @@ import { first, last } from 'lodash';
 import {
   InfraSnapshotMetricInput,
   InfraNodeType,
-  InfraTimerangeInput,
-  InfraSnapshotGroupbyInput,
 } from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   SnapshotNodeResponse,
   SnapshotMetricInput,
+  SnapshotRequest,
 } from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { DATES } from './constants';
-
-interface SnapshotRequest {
-  filterQuery?: string | null;
-  metric: SnapshotMetricInput;
-  groupBy: InfraSnapshotGroupbyInput[];
-  nodeType: InfraNodeType;
-  sourceId: string;
-  timerange: InfraTimerangeInput;
-}
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -196,6 +186,74 @@ export default function ({ getService }: FtrProviderContext) {
               max: 0.0038333333333333336,
               avg: 0.0027944444444444444,
             });
+          }
+        });
+      });
+
+      it('should allow for overrides for interval and ignoring lookback', () => {
+        const resp = fetchSnapshot({
+          sourceId: 'default',
+          timerange: {
+            to: max,
+            from: min,
+            interval: '10s',
+            forceInterval: true,
+            ignoreLookback: true,
+          },
+          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          nodeType: 'host' as InfraNodeType,
+          groupBy: [],
+          includeTimeseries: true,
+        });
+        return resp.then((data) => {
+          const snapshot = data;
+          expect(snapshot).to.have.property('nodes');
+          if (snapshot) {
+            const { nodes } = snapshot;
+            expect(nodes.length).to.equal(1);
+            const firstNode = first(nodes);
+            expect(firstNode).to.have.property('path');
+            expect(firstNode.path.length).to.equal(1);
+            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+            expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+            expect(firstNode).to.have.property('metric');
+            expect(firstNode.metric).to.have.property('timeseries');
+            expect(firstNode.metric.timeseries?.rows.length).to.equal(58);
+            const rows = firstNode.metric.timeseries?.rows;
+            const rowInterval = (rows?.[1]?.timestamp || 0) - (rows?.[0]?.timestamp || 0);
+            expect(rowInterval).to.equal(10000);
+          }
+        });
+      });
+
+      it('should allow for overrides for lookback', () => {
+        const resp = fetchSnapshot({
+          sourceId: 'default',
+          timerange: {
+            to: max,
+            from: min,
+            interval: '1m',
+            lookbackSize: 6,
+          },
+          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          nodeType: 'host' as InfraNodeType,
+          groupBy: [],
+          includeTimeseries: true,
+        });
+        return resp.then((data) => {
+          const snapshot = data;
+          expect(snapshot).to.have.property('nodes');
+          if (snapshot) {
+            const { nodes } = snapshot;
+            expect(nodes.length).to.equal(1);
+            const firstNode = first(nodes);
+            expect(firstNode).to.have.property('path');
+            expect(firstNode.path.length).to.equal(1);
+            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+            expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+            expect(firstNode).to.have.property('metric');
+            expect(firstNode.metric).to.have.property('timeseries');
+            expect(firstNode.metric.timeseries?.rows.length).to.equal(7);
           }
         });
       });
