@@ -16,6 +16,7 @@ export type TestSubjects =
   | 'cell'
   | 'closeDetailsButton'
   | 'createTemplateButton'
+  | 'createLegacyTemplateButton'
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
   | 'deleteTemplatesConfirmation'
@@ -46,4 +47,7 @@ export type TestSubjects =
   | 'templateDetails.title'
   | 'templateList'
   | 'templateTable'
-  | 'templatesTab';
+  | 'templatesTab'
+  | 'legacyTemplateTable'
+  | 'viewButton'
+  | 'filterList.filterItem';
