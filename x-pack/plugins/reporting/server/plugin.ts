@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
@@ -20,26 +21,13 @@ export class ReportingPlugin
   private logger: LevelLogger;
   private reportingCore?: ReportingCore;
 
-  private setupDone: (val?: unknown) => void = () => {};
-  private startDone: (val?: unknown) => void = () => {};
-  private setupPromise: Promise<unknown>;
-  private startPromise: Promise<unknown>;
+  // Setup some observables for modules that need to await setup/start
+  public readonly setup$ = new Rx.Subject<boolean>();
+  public readonly start$ = new Rx.Subject<boolean>();
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
     this.logger = new LevelLogger(context.logger.get());
     this.initializerContext = context;
-
-    // Setup some promises for modules that need to await setup/start
-    this.setupPromise = new Promise((r) => (this.setupDone = r));
-    this.startPromise = new Promise((r) => (this.startDone = r));
-  }
-
-  public async setupReady() {
-    return this.setupPromise;
-  }
-
-  public async startReady() {
-    return this.startPromise;
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
@@ -66,7 +54,7 @@ export class ReportingPlugin
       this.reportingCore = reportingCore;
 
       this.logger.debug('Setup complete');
-      this.setupDone();
+      this.setup$.next(true);
     });
 
     return {};
@@ -99,7 +87,7 @@ export class ReportingPlugin
       runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
       this.logger.debug('Start complete');
-      this.startDone();
+      this.start$.next(true);
     });
 
     return {};

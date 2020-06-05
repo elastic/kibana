@@ -12,13 +12,14 @@ jest.mock('../lib/enqueue_job');
 jest.mock('../lib/validate');
 
 import { of } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { coreMock } from 'src/core/server/mocks';
-import {
-  initializeBrowserDriverFactory,
-  HeadlessChromiumDriverFactory,
-  chromium,
-} from '../browsers';
 import { ReportingConfig, ReportingCore } from '../';
+import {
+  chromium,
+  HeadlessChromiumDriverFactory,
+  initializeBrowserDriverFactory,
+} from '../browsers';
 import { ReportingInternalSetup } from '../core';
 import { ReportingPlugin } from '../plugin';
 import { ReportingSetupDeps, ReportingStartDeps } from '../types';
@@ -68,9 +69,9 @@ const createMockReportingPlugin = async (config: ReportingConfig): Promise<Repor
   };
 
   plugin.setup(setupMock, createMockSetupDeps(setupMock));
-  await plugin.setupReady();
+  await plugin.setup$.pipe(first()).toPromise();
   plugin.start(startMock, createMockStartDeps(startMock));
-  await plugin.startReady();
+  await plugin.start$.pipe(first()).toPromise();
 
   return plugin;
 };
