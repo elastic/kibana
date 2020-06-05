@@ -12,8 +12,6 @@ export const AUTHENTICATIONS_TAB = '[data-test-subj="navigation-authentications"
 
 export const EVENTS_TAB = '[data-test-subj="navigation-events"]';
 
-export const EXTERNAL_ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
-
 export const KQL_SEARCH_BAR = '[data-test-subj="queryInput"]';
 
 export const UNCOMMON_PROCESSES_TAB = '[data-test-subj="navigation-uncommonProcesses"]';

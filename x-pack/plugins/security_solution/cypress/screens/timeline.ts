@@ -8,16 +8,10 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
-export const COLUMNS = '[data-test-subj="data-driven-columns"]';
-
 export const DRAGGABLE_HEADER =
   '[data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
 
-export const FIELDS_MENU = '[data-test-subj="show-field-browser-gear"]';
-
 export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
-
-export const HEADER_SORT_BUTTON = '[data-test-subj="header-sort-button"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
@@ -25,21 +19,12 @@ export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
-export const ITEMS_PER_PAGE = '[data-test-subj="local-events-count"]';
-
-export const ITEMS_PER_PAGE_BUTTON = '[data-test-subj="local-events-count-button"]';
-
-export const EVENTS_PER_PAGE_BUTTON = (itemsPerPage: number) =>
-  `[data-test-subj="items-per-page-option-${itemsPerPage}"]`;
-
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
 export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
 
 export const RESET_FIELDS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';
-
-export const ROWS = '[data-test-subj="event"]';
 
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
