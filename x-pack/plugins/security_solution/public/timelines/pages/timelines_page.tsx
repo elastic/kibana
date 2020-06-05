@@ -42,8 +42,7 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
   }, [setImportDataModalToggle]);
 
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
 
   return (
     <>
