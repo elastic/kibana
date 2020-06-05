@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+import { act } from 'react-dom/test-utils';
+
+import {
+  registerTestBed,
+  TestBed,
+  TestBedConfig,
+  findTestSubject,
+} from '../../../../../test_utils';
 import { DataStream } from '../../../common';
-// NOTE: We have to use the Home component instead of the DataStreamList component because we depend
-// upon react router to provide the name of the template to load in the detail panel.
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -27,6 +32,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
     goToDataStreamsList: () => void;
     clickReloadButton: () => void;
+    clickIndicesAt: (index: number) => void;
   };
 }
 
@@ -46,11 +52,24 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     find('reloadButton').simulate('click');
   };
 
+  const clickIndicesAt = async (index: number) => {
+    const { component, table, router } = testBed;
+    const { rows } = table.getMetaData('dataStreamTable');
+    const indicesLink = findTestSubject(rows[index].reactWrapper, 'indicesLink');
+
+    await act(async () => {
+      router.navigateTo(indicesLink.props().href!);
+    });
+
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
       goToDataStreamsList,
       clickReloadButton,
+      clickIndicesAt,
     },
   };
 };

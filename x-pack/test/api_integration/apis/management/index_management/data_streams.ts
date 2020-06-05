@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const createDataStream = (name) => {
+  const createDataStream = (name: string) => {
     // A data stream requires an index template before it can be created.
     return supertest
       .post(`${API_BASE_PATH}/index-templates`)
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
   };
 
-  const deleteDataStream = (name) => {
+  const deleteDataStream = (name: string) => {
     return supertest
       .post(`${API_BASE_PATH}/delete-index-templates`)
       .set('kbn-xsrf', 'xxx')

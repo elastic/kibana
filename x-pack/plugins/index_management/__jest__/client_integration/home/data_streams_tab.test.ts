@@ -20,7 +20,31 @@ describe('Data Streams tab', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadIndicesResponse([]);
+    httpRequestsMockHelpers.setLoadIndicesResponse([
+      {
+        health: '',
+        status: '',
+        primary: '',
+        replica: '',
+        documents: '',
+        documents_deleted: '',
+        size: '',
+        primary_size: '',
+        name: 'data-stream-index',
+        data_stream: 'dataStream1',
+      },
+      {
+        health: 'green',
+        status: 'open',
+        primary: 1,
+        replica: 1,
+        documents: 10000,
+        documents_deleted: 100,
+        size: '156kb',
+        primary_size: '156kb',
+        name: 'non-data-stream-index',
+      },
+    ]);
 
     await act(async () => {
       testBed = await setup();
@@ -40,7 +64,7 @@ describe('Data Streams tab', () => {
       component.update();
     });
 
-    test('should display an empty prompt', async () => {
+    test('displays an empty prompt', async () => {
       const { exists } = testBed;
 
       expect(exists('sectionLoading')).toBe(false);
@@ -64,7 +88,7 @@ describe('Data Streams tab', () => {
       component.update();
     });
 
-    test('should list them in the table', async () => {
+    test('lists them in the table', async () => {
       const { table } = testBed;
 
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
@@ -75,7 +99,7 @@ describe('Data Streams tab', () => {
       ]);
     });
 
-    test('should have a button to reload the data streams', async () => {
+    test('has a button to reload the data streams', async () => {
       const { exists, actions } = testBed;
       const totalRequests = server.requests.length;
 
@@ -87,6 +111,16 @@ describe('Data Streams tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+    });
+
+    test('clicking the indices count navigates to the backing indices', async () => {
+      const { table, actions } = testBed;
+
+      await actions.clickIndicesAt(0);
+
+      expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
+        ['', '', '', '', '', '', '', 'dataStream1'],
+      ]);
     });
   });
 });

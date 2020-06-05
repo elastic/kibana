@@ -274,6 +274,7 @@ export class IndexTable extends Component {
     } else if (fieldName === 'data_stream') {
       return (
         <EuiLink
+          data-test-subj="dataStreamLink"
           {...reactRouterNavigate(history, {
             pathname: `/data_streams/${encodePathForReactRouter(value)}`,
           })}
@@ -607,7 +608,7 @@ export class IndexTable extends Component {
 
               {indices.length > 0 ? (
                 <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                  <EuiTable className="indTable">
+                  <EuiTable className="indTable" data-test-subj="indexTable">
                     <EuiScreenReaderOnly>
                       <caption role="status" aria-relevant="text" aria-live="polite">
                         <FormattedMessage

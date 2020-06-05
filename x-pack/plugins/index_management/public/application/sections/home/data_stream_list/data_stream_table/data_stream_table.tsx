@@ -46,6 +46,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (indices: DataStream['indices'], dataStream) => (
         <EuiLink
+          data-test-subj="indicesLink"
           {...reactRouterNavigate(history, {
             pathname: '/indices',
             search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
