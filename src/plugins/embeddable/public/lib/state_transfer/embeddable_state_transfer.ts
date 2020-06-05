@@ -26,9 +26,22 @@ import {
   isEmbeddablePackageState,
 } from './types';
 
+/**
+ * A wrapper around the state object in {@link ScopedHistory | core scoped history} which provides
+ * strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure.
+ *
+ * @public
+ */
 export class EmbeddableStateTransfer {
   constructor(private navigateToApp: ApplicationStart['navigateToApp']) {}
 
+  /**
+   * Fetches an {@link EmbeddableOriginatingAppState | originating app} argument from the scoped
+   * history's location state.
+   *
+   * @param history - the scoped history to fetch from
+   * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
+   */
   public getIncomingOriginatingApp(
     history: ScopedHistory,
     removeAfterFetch: boolean = false
@@ -40,6 +53,13 @@ export class EmbeddableStateTransfer {
     );
   }
 
+  /**
+   * Fetches an {@link EmbeddablePackageState | embeddable package} argument from the scoped
+   * history's location state.
+   *
+   * @param history - the scoped history to fetch from
+   * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
+   */
   public getIncomingEmbeddablePackage(
     history: ScopedHistory,
     removeAfterFetch: boolean = false
@@ -51,6 +71,10 @@ export class EmbeddableStateTransfer {
     );
   }
 
+  /**
+   * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
+   * with {@link EmbeddableOriginatingAppState | originating app state}
+   */
   public async navigateToWithOriginatingApp(
     appId: string,
     options: { path?: string; state: EmbeddableOriginatingAppState }
@@ -58,6 +82,10 @@ export class EmbeddableStateTransfer {
     await this.navigateToWithState<EmbeddableOriginatingAppState>(appId, options);
   }
 
+  /**
+   * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
+   * with {@link EmbeddablePackageState | embeddable package state}
+   */
   public async navigateToWithEmbeddablePackage(
     appId: string,
     options: { path?: string; state: EmbeddablePackageState }
@@ -77,6 +105,7 @@ export class EmbeddableStateTransfer {
       Object.keys(castState).forEach((key: string) => {
         delete (history.location.state as { [key: string]: unknown })[key];
       });
+      history.push(history.location);
     }
     return castState;
   }

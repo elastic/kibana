@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/**
+ * Represents a state package that contains the last active app id.
+ * @public
+ */
 export interface EmbeddableOriginatingAppState {
   originatingApp: string;
 }
@@ -27,6 +31,10 @@ export function isEmbeddableOriginatingAppState(
   return ensureFieldOfTypeExists('originatingApp', state, 'string');
 }
 
+/**
+ * Represents a state package that contains all fields necessary to create an embeddable in a container.
+ * @public
+ */
 export interface EmbeddablePackageState {
   type: string;
   id: string;

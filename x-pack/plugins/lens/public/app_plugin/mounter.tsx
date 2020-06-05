@@ -37,7 +37,7 @@ export async function mountApp(
   );
 
   const { originatingApp } =
-    embeddable?.stateTransfer.getIncomingOriginatingApp(params.history) || {};
+    embeddable?.stateTransfer.getIncomingOriginatingApp(params.history, true) || {};
 
   const instance = await createEditorFrame();
 
