@@ -129,7 +129,7 @@ export function DiscoverField({
             size="xs"
             data-test-subj={`field-${field.name}`}
             className="eui-textTruncate"
-            title={field.displayName}
+            title={field.name}
           >
             {useShortDots ? shortenDottedString(field.name) : field.displayName}
           </EuiText>
