@@ -81,5 +81,51 @@ export interface components {
       status: string;
       savedObject?: { [key: string]: any };
     };
+    AgentStatus: 'offline' | 'error' | 'online' | 'inactive' | 'warning';
+    Agent: {
+      type: components['schemas']['AgentType'];
+      active: boolean;
+      enrolled_at: string;
+      shared_id?: string;
+      access_api_key_id?: string;
+      default_api_key_id?: string;
+      config_id?: string;
+      config_revision?: { [key: string]: any };
+      config_newest_revision?: number;
+      last_checkin?: string;
+      user_provided_metadata?: components['schemas']['AgentMetadata'];
+      local_metadata?: components['schemas']['AgentMetadata'];
+      id: string;
+      current_error_events: Array<components['schemas']['AgentEvent']>;
+      access_api_key?: string;
+      status: components['schemas']['AgentStatus'];
+      default_api_key?: string;
+    };
+    AgentType: 'PERMANENT' | 'EPHEMERAL' | 'TEMPORARY';
+    AgentMetadata: { [key: string]: any };
+    NewAgentEvent: {
+      type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
+      subtype:
+        | 'RUNNING'
+        | 'STARTING'
+        | 'IN_PROGRESS'
+        | 'CONFIG'
+        | 'FAILED'
+        | 'STOPPING'
+        | 'STOPPED'
+        | 'DATA_DUMP'
+        | 'ACKNOWLEDGED'
+        | 'UNKNOWN';
+      timestamp: string;
+      message: string;
+      payload?: string;
+      agent_id: string;
+      config_id?: string;
+      stream_id?: string;
+      action_id?: string;
+    };
+    AgentEvent: { id: string } & components['schemas']['NewAgentEvent'];
+    AccessApiKey: string;
+    EnrollmentApiKey: string;
   };
 }

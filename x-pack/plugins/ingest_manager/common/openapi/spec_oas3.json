@@ -1450,7 +1450,12 @@
             }
           }
         },
-        "operationId": "get-fleet-setup"
+        "operationId": "get-fleet-setup",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
       },
       "post": {
         "summary": "Fleet setup - Create",
@@ -1975,6 +1980,661 @@
                   "items": {
                     "$ref": "#/components/schemas/SearchResult"
                   }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "response": [
+                        {
+                          "description": "aws Integration",
+                          "download": "/epr/aws/aws-0.0.3.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "title": "logo aws",
+                              "size": "32x32",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "aws",
+                          "path": "/package/aws/0.0.3",
+                          "title": "aws",
+                          "type": "integration",
+                          "version": "0.0.3",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "This is the Elastic Endpoint package.",
+                          "download": "/epr/endpoint/endpoint-0.1.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "size": "16x16",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "endpoint",
+                          "path": "/package/endpoint/0.1.0",
+                          "title": "Elastic Endpoint",
+                          "type": "solution",
+                          "version": "0.1.0",
+                          "status": "installed",
+                          "savedObject": {
+                            "type": "epm-packages",
+                            "id": "endpoint",
+                            "attributes": {
+                              "installed": [
+                                {
+                                  "id": "826759f0-7074-11ea-9bc8-6b38f4d29a16",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "55387750-729c-11ea-9bc8-6b38f4d29a16",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "92b1edc0-706a-11ea-9bc8-6b38f4d29a16",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "1cfceda0-728b-11ea-9bc8-6b38f4d29a16",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "1e525190-7074-11ea-9bc8-6b38f4d29a16",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "a3a3bd10-706b-11ea-9bc8-6b38f4d29a16",
+                                  "type": "map"
+                                },
+                                {
+                                  "id": "events-endpoint",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-endpoint",
+                                  "type": "index-template"
+                                }
+                              ],
+                              "es_index_patterns": {
+                                "events": "events-endpoint-*",
+                                "metadata": "metrics-endpoint-*"
+                              },
+                              "name": "endpoint",
+                              "version": "0.1.0",
+                              "internal": false,
+                              "removable": false
+                            },
+                            "references": [],
+                            "updated_at": "2020-05-15T20:08:11.739Z",
+                            "version": "WzEwOCwxXQ=="
+                          }
+                        },
+                        {
+                          "description": "The log package should be used to create data sources for all type of logs for which an package doesn't exist yet.\n",
+                          "download": "/epr/log/log-0.9.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/log/0.9.0/img/icon.svg",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "log",
+                          "path": "/package/log/0.9.0",
+                          "title": "Log Package",
+                          "type": "integration",
+                          "version": "0.9.0",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "This integration contains pretty long documentation.\nIt is used to show the different visualisations inside a documentation to test how we handle it.\nThe integration does not contain any assets except the documentation page.\n",
+                          "download": "/epr/longdocs/longdocs-1.0.4.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/longdocs/1.0.4/img/icon.svg",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "longdocs",
+                          "path": "/package/longdocs/1.0.4",
+                          "title": "Long Docs",
+                          "type": "integration",
+                          "version": "1.0.4",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "This is an integration with only the metrics category.\n",
+                          "download": "/epr/metricsonly/metricsonly-2.0.1.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "metricsonly",
+                          "path": "/package/metricsonly/2.0.1",
+                          "title": "Metrics Only",
+                          "type": "integration",
+                          "version": "2.0.1",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "Multiple versions of this integration exist.\n",
+                          "download": "/epr/multiversion/multiversion-1.1.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/multiversion/1.1.0/img/icon.svg",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "multiversion",
+                          "path": "/package/multiversion/1.1.0",
+                          "title": "Multi Version",
+                          "type": "integration",
+                          "version": "1.1.0",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "MySQL Integration",
+                          "download": "/epr/mysql/mysql-0.1.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "title": "logo mysql",
+                              "size": "32x32",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "mysql",
+                          "path": "/package/mysql/0.1.0",
+                          "title": "MySQL",
+                          "type": "integration",
+                          "version": "0.1.0",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "Nginx Integration",
+                          "download": "/epr/nginx/nginx-0.1.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "title": "logo nginx",
+                              "size": "32x32",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "nginx",
+                          "path": "/package/nginx/0.1.0",
+                          "title": "Nginx",
+                          "type": "integration",
+                          "version": "0.1.0",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "Redis Integration",
+                          "download": "/epr/redis/redis-0.1.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "title": "logo redis",
+                              "size": "32x32",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "redis",
+                          "path": "/package/redis/0.1.0",
+                          "title": "Redis",
+                          "type": "integration",
+                          "version": "0.1.0",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "This package is used for defining all the properties of a package, the possible assets etc. It serves as a reference on all the config options which are possible.\n",
+                          "download": "/epr/reference/reference-1.0.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/reference/1.0.0/img/icon.svg",
+                              "size": "32x32",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "reference",
+                          "path": "/package/reference/1.0.0",
+                          "title": "Reference package",
+                          "type": "integration",
+                          "version": "1.0.0",
+                          "status": "not_installed"
+                        },
+                        {
+                          "description": "System Integration",
+                          "download": "/epr/system/system-0.1.0.tar.gz",
+                          "icons": [
+                            {
+                              "src": "/package/system/0.1.0/img/system.svg",
+                              "title": "system",
+                              "size": "1000x1000",
+                              "type": "image/svg+xml"
+                            }
+                          ],
+                          "name": "system",
+                          "path": "/package/system/0.1.0",
+                          "title": "System",
+                          "type": "integration",
+                          "version": "0.1.0",
+                          "status": "installed",
+                          "savedObject": {
+                            "type": "epm-packages",
+                            "id": "system",
+                            "attributes": {
+                              "installed": [
+                                {
+                                  "id": "c431f410-f9ac-11e9-90e8-1fb18e796788",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "Metricbeat-system-overview-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "277876d0-fa2c-11e6-bbd3-29c986c96e5a-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "0d3f2380-fa78-11e6-ae9b-81e5311e8cab-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "CPU-slash-Memory-per-container-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "79ffd6e0-faa0-11e6-947f-177f697178b8-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "Filebeat-syslog-dashboard-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "5517a150-f9ce-11e6-8115-a7c18106d86a-ecs",
+                                  "type": "dashboard"
+                                },
+                                {
+                                  "id": "9c69cad0-f9b0-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "855899e0-1b1c-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "a30871f0-f98f-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "e121b140-fa78-11e6-a1df-a78bd7504d38-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "f398d2f0-fa77-11e6-ae9b-81e5311e8cab-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "c5e3cf90-4d60-11e7-9a4c-ed99bbcaa42b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "d3166e80-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "346bb290-fa80-11e6-a1df-a78bd7504d38-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "Container-Block-IO-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "590a60f0-5d87-11e7-8884-1bb4c3b890e4-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "341ffe70-f9ce-11e6-8115-a7c18106d86a-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "System-Navigation-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "089b85d0-1b16-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "99381c80-4d60-11e7-9a4c-ed99bbcaa42b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "c6f2ffd0-4d17-11e7-a196-69b9a7a020a9-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "d56ee420-fa79-11e6-a1df-a78bd7504d38-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "1aae9140-1b93-11e7-8ada-3df93aab833e-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "e0f001c0-1b18-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "dc589770-fa2b-11e6-bbd3-29c986c96e5a-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "96976150-4d5d-11e7-aa29-87a97a796de6-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "8c071e20-f999-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "d3f51850-f9b6-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "5c7af030-fa2a-11e6-bbd3-29c986c96e5a-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "e6e639e0-f992-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "bfa5e400-1b16-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "7cdb1330-4d1a-11e7-a196-69b9a7a020a9-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "78b74f30-f9cd-11e6-8115-a7c18106d86a-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "Syslog-events-by-hostname-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "3d65d450-a9c3-11e7-af20-67db8aecb295-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "ab2d1e90-1b1a-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "825fdb80-4d1d-11e7-b5f2-2b7c1895bf32-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "26732e20-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "Syslog-hostnames-and-processes-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "522ee670-1b92-11e7-bec4-a5e9ec5cab8b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "51164310-fa2b-11e6-bbd3-29c986c96e5a-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "bb3a8720-f991-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "Container-Memory-stats-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "5dd15c00-fa78-11e6-ae9b-81e5311e8cab-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "327417e0-8462-11e7-bab8-bd2f0fb42c54-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "d2e80340-4d5c-11e7-aa29-87a97a796de6-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "19e123b0-4d5a-11e7-aee5-fdc812cc3bec-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "3cec3eb0-f9d3-11e6-8a3e-2b904044ea1d-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "2e224660-1b19-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "12667040-fa80-11e6-a1df-a78bd7504d38-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "d16bb400-f9cc-11e6-8115-a7c18106d86a-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "34f97ee0-1b96-11e7-8ada-3df93aab833e-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "fe064790-1b1f-11e7-bec4-a5e9ec5cab8b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "83e12df0-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "4e4bb1e0-1b1b-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "4b254630-f998-11e9-90e8-1fb18e796788",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "6b7b9a40-faa1-11e6-86b1-cd7735ff7e23-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "4d546850-1b15-11e7-b09e-037021c4f8df-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "Container-CPU-usage-ecs",
+                                  "type": "visualization"
+                                },
+                                {
+                                  "id": "b6f321e0-fa25-11e6-bbd3-29c986c96e5a-ecs",
+                                  "type": "search"
+                                },
+                                {
+                                  "id": "62439dc0-f9c9-11e6-a747-6121780e0414-ecs",
+                                  "type": "search"
+                                },
+                                {
+                                  "id": "8030c1b0-fa77-11e6-ae9b-81e5311e8cab-ecs",
+                                  "type": "search"
+                                },
+                                {
+                                  "id": "Syslog-system-logs-ecs",
+                                  "type": "search"
+                                },
+                                {
+                                  "id": "eb0039f0-fa7f-11e6-a1df-a78bd7504d38-ecs",
+                                  "type": "search"
+                                },
+                                {
+                                  "id": "logs-system.auth-0.1.0",
+                                  "type": "ingest-pipeline"
+                                },
+                                {
+                                  "id": "logs-system.auth-0.1.0",
+                                  "type": "ingest-pipeline"
+                                },
+                                {
+                                  "id": "logs-system.syslog-0.1.0",
+                                  "type": "ingest-pipeline"
+                                },
+                                {
+                                  "id": "logs-system.syslog-0.1.0",
+                                  "type": "ingest-pipeline"
+                                },
+                                {
+                                  "id": "logs-system.auth",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.core",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.cpu",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.diskio",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.entropy",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.filesystem",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.fsstat",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.load",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.memory",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.network",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.network_summary",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.process",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.process_summary",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.raid",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.service",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.socket",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.socket_summary",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "logs-system.syslog",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.uptime",
+                                  "type": "index-template"
+                                },
+                                {
+                                  "id": "metrics-system.users",
+                                  "type": "index-template"
+                                }
+                              ],
+                              "es_index_patterns": {
+                                "auth": "logs-system.auth-*",
+                                "core": "metrics-system.core-*",
+                                "cpu": "metrics-system.cpu-*",
+                                "diskio": "metrics-system.diskio-*",
+                                "entropy": "metrics-system.entropy-*",
+                                "filesystem": "metrics-system.filesystem-*",
+                                "fsstat": "metrics-system.fsstat-*",
+                                "load": "metrics-system.load-*",
+                                "memory": "metrics-system.memory-*",
+                                "network": "metrics-system.network-*",
+                                "network_summary": "metrics-system.network_summary-*",
+                                "process": "metrics-system.process-*",
+                                "process_summary": "metrics-system.process_summary-*",
+                                "raid": "metrics-system.raid-*",
+                                "service": "metrics-system.service-*",
+                                "socket": "metrics-system.socket-*",
+                                "socket_summary": "metrics-system.socket_summary-*",
+                                "syslog": "logs-system.syslog-*",
+                                "uptime": "metrics-system.uptime-*",
+                                "users": "metrics-system.users-*"
+                              },
+                              "name": "system",
+                              "version": "0.1.0",
+                              "internal": false,
+                              "removable": false
+                            },
+                            "references": [],
+                            "updated_at": "2020-05-15T20:08:08.708Z",
+                            "version": "Wzk4LDFd"
+                          }
+                        },
+                        {
+                          "description": "This package contains a yaml pipeline.\n",
+                          "download": "/epr/yamlpipeline/yamlpipeline-1.0.0.tar.gz",
+                          "name": "yamlpipeline",
+                          "path": "/package/yamlpipeline/1.0.0",
+                          "title": "Yaml Pipeline package",
+                          "type": "integration",
+                          "version": "1.0.0",
+                          "status": "not_installed"
+                        }
+                      ],
+                      "success": true
+                    }
+                  }
                 }
               }
             }
@@ -2105,7 +2765,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
       }
     },
     "/fleet/agents/{agentId}": {
@@ -2203,13 +2868,480 @@
       "post": {
         "summary": "Fleet - Agent - Check In",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "checkin"
+                      ]
+                    },
+                    "success": {
+                      "type": "string"
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_id": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "type": "object"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "agent_id",
+                          "data",
+                          "id",
+                          "created_at",
+                          "type"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "action": "checkin",
+                      "success": true,
+                      "actions": [
+                        {
+                          "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
+                          "type": "CONFIG_CHANGE",
+                          "data": {
+                            "config": {
+                              "id": "2fe89350-a5e0-11ea-a587-5f886c8a849f",
+                              "outputs": {
+                                "default": {
+                                  "type": "elasticsearch",
+                                  "hosts": [
+                                    "http://localhost:9200"
+                                  ],
+                                  "api_key": "Z-XkgHIBvwtjzIKtSCTh:AejRqdKpQx6z-6dqSI1LHg"
+                                }
+                              },
+                              "datasources": [
+                                {
+                                  "id": "33d6bd70-a5e0-11ea-a587-5f886c8a849f",
+                                  "name": "system-1",
+                                  "namespace": "default",
+                                  "enabled": true,
+                                  "use_output": "default",
+                                  "inputs": [
+                                    {
+                                      "type": "logs",
+                                      "enabled": true,
+                                      "streams": [
+                                        {
+                                          "id": "logs-system.auth",
+                                          "enabled": true,
+                                          "dataset": "system.auth",
+                                          "paths": [
+                                            "/var/log/auth.log*",
+                                            "/var/log/secure*"
+                                          ],
+                                          "exclude_files": [
+                                            ".gz$"
+                                          ],
+                                          "multiline": {
+                                            "pattern": "^\\s",
+                                            "match": "after"
+                                          },
+                                          "processors": [
+                                            {
+                                              "add_locale": null
+                                            },
+                                            {
+                                              "add_fields": {
+                                                "target": "",
+                                                "fields": {
+                                                  "ecs.version": "1.5.0"
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "id": "logs-system.syslog",
+                                          "enabled": true,
+                                          "dataset": "system.syslog",
+                                          "paths": [
+                                            "/var/log/messages*",
+                                            "/var/log/syslog*"
+                                          ],
+                                          "exclude_files": [
+                                            ".gz$"
+                                          ],
+                                          "multiline": {
+                                            "pattern": "^\\s",
+                                            "match": "after"
+                                          },
+                                          "processors": [
+                                            {
+                                              "add_locale": null
+                                            },
+                                            {
+                                              "add_fields": {
+                                                "target": "",
+                                                "fields": {
+                                                  "ecs.version": "1.5.0"
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "system/metrics",
+                                      "enabled": true,
+                                      "streams": [
+                                        {
+                                          "id": "system/metrics-system.core",
+                                          "enabled": true,
+                                          "dataset": "system.core",
+                                          "metricsets": [
+                                            "core"
+                                          ],
+                                          "core.metrics": "percentages"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.cpu",
+                                          "enabled": true,
+                                          "dataset": "system.cpu",
+                                          "metricsets": [
+                                            "cpu"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.diskio",
+                                          "enabled": true,
+                                          "dataset": "system.diskio",
+                                          "metricsets": [
+                                            "diskio"
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.entropy",
+                                          "enabled": true,
+                                          "dataset": "system.entropy",
+                                          "metricsets": [
+                                            "entropy"
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.filesystem",
+                                          "enabled": true,
+                                          "dataset": "system.filesystem",
+                                          "metricsets": [
+                                            "filesystem"
+                                          ],
+                                          "period": "1m",
+                                          "processors": [
+                                            {
+                                              "drop_event.when.regexp": {
+                                                "system.filesystem.mount_point": "^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)"
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.fsstat",
+                                          "enabled": true,
+                                          "dataset": "system.fsstat",
+                                          "metricsets": [
+                                            "fsstat"
+                                          ],
+                                          "period": "1m",
+                                          "processors": [
+                                            {
+                                              "drop_event.when.regexp": {
+                                                "system.filesystem.mount_point": "^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)"
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.load",
+                                          "enabled": true,
+                                          "dataset": "system.load",
+                                          "metricsets": [
+                                            "load"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.memory",
+                                          "enabled": true,
+                                          "dataset": "system.memory",
+                                          "metricsets": [
+                                            "memory"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.network",
+                                          "enabled": true,
+                                          "dataset": "system.network",
+                                          "metricsets": [
+                                            "network"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.network_summary",
+                                          "enabled": true,
+                                          "dataset": "system.network_summary",
+                                          "metricsets": [
+                                            "network_summary"
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.process",
+                                          "enabled": true,
+                                          "dataset": "system.process",
+                                          "metricsets": [
+                                            "process"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.process_summary",
+                                          "enabled": true,
+                                          "dataset": "system.process_summary",
+                                          "metricsets": [
+                                            "process_summary"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.raid",
+                                          "enabled": true,
+                                          "dataset": "system.raid",
+                                          "metricsets": [
+                                            "raid"
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.service",
+                                          "enabled": true,
+                                          "dataset": "system.service",
+                                          "metricsets": [
+                                            "service"
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.socket",
+                                          "enabled": true,
+                                          "dataset": "system.socket",
+                                          "metricsets": [
+                                            "socket"
+                                          ]
+                                        },
+                                        {
+                                          "id": "system/metrics-system.socket_summary",
+                                          "enabled": true,
+                                          "dataset": "system.socket_summary",
+                                          "metricsets": [
+                                            "socket_summary"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "process.include_top_n.by_cpu": 5,
+                                          "process.include_top_n.by_memory": 5,
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.uptime",
+                                          "enabled": true,
+                                          "dataset": "system.uptime",
+                                          "metricsets": [
+                                            "uptime"
+                                          ],
+                                          "core.metrics": "percentages",
+                                          "cpu.metrics": "percentages,normalized_percentages",
+                                          "period": "10s",
+                                          "processes": ".*"
+                                        },
+                                        {
+                                          "id": "system/metrics-system.users",
+                                          "enabled": true,
+                                          "dataset": "system.users",
+                                          "metricsets": [
+                                            "users"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "package": {
+                                    "name": "system",
+                                    "version": "0.1.0"
+                                  }
+                                },
+                                {
+                                  "id": "fdb1fea0-a5f6-11ea-ad52-534e35d3cd6f",
+                                  "name": "endpoint-1",
+                                  "namespace": "default",
+                                  "enabled": true,
+                                  "use_output": "default",
+                                  "inputs": [],
+                                  "package": {
+                                    "name": "endpoint",
+                                    "version": "0.2.0"
+                                  }
+                                },
+                                {
+                                  "id": "2d792280-a5f7-11ea-ad52-534e35d3cd6f",
+                                  "name": "endpoint-2",
+                                  "namespace": "default",
+                                  "enabled": true,
+                                  "use_output": "default",
+                                  "inputs": [],
+                                  "package": {
+                                    "name": "endpoint",
+                                    "version": "0.2.0"
+                                  }
+                                }
+                              ],
+                              "revision": 4,
+                              "settings": {
+                                "monitoring": {
+                                  "use_output": "default",
+                                  "enabled": true,
+                                  "logs": true,
+                                  "metrics": true
+                                }
+                              }
+                            }
+                          },
+                          "id": "51c6ad1e-a9c0-4c70-80da-99a5c51eedaf",
+                          "created_at": "2020-06-04T19:52:24.667Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "operationId": "post-fleet-agents-agentId-checkin",
         "parameters": [
           {
             "$ref": "#/components/parameters/xsrfHeader"
           }
-        ]
+        ],
+        "security": [
+          {
+            "Access API Key": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "local_metadata": {
+                    "$ref": "#/components/schemas/AgentMetadata"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/NewAgentEvent"
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "stoped to starting": {
+                  "value": {
+                    "events": [
+                      {
+                        "type": "STATE",
+                        "subtype": "STARTING",
+                        "message": "state changed from STOPPED to STARTING",
+                        "timestamp": "2019-10-01T13:42:54.323Z",
+                        "payload": {},
+                        "agent_id": "bee40627-8cbd-45df-add9-98c390f9db10"
+                      }
+                    ]
+                  }
+                },
+                "running": {
+                  "value": {
+                    "events": [
+                      {
+                        "type": "STATE",
+                        "subtype": "RUNNING",
+                        "message": "state changed from STOPPED to RUNNING",
+                        "timestamp": "2020-05-26T20:44:57.480Z",
+                        "payload": {
+                          "random": "data",
+                          "state": "RUNNING",
+                          "previous_state": "STOPPED"
+                        },
+                        "agent_id": "bee40627-8cbd-45df-add9-98c390f9db10"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/fleet/agents/{agentId}/acks": {
@@ -2226,24 +3358,199 @@
       "post": {
         "summary": "Fleet - Agent - Acks",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "acks"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "action"
+                  ]
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "action": "checkin",
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "operationId": "post-fleet-agents-agentId-acks",
         "parameters": [
           {
             "$ref": "#/components/parameters/xsrfHeader"
           }
-        ]
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "events": [
+                      {
+                        "type": "ACTION_RESULT",
+                        "subtype": "CONFIG",
+                        "timestamp": "2019-01-04T14:32:03.36764-05:00",
+                        "action_id": "51c6ad1e-a9c0-4c70-80da-99a5c51eedaf",
+                        "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
+                        "message": "acknowledge"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/fleet/agents/enroll": {
       "post": {
         "summary": "Fleet - Agent - Enroll",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "item": {
+                      "$ref": "#/components/schemas/Agent"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "action": "created",
+                      "success": true,
+                      "item": {
+                        "id": "8086fb1a-72ca-4a67-8533-09300c1639fa",
+                        "active": true,
+                        "config_id": "2fe89350-a5e0-11ea-a587-5f886c8a849f",
+                        "type": "PERMANENT",
+                        "enrolled_at": "2020-06-04T13:03:57.856Z",
+                        "user_provided_metadata": {
+                          "dev_agent_version": "0.0.1",
+                          "region": "us-east"
+                        },
+                        "local_metadata": {
+                          "host": "localhost",
+                          "ip": "127.0.0.1",
+                          "system": "Darwin 18.7.0",
+                          "memory": 34359738368
+                        },
+                        "current_error_events": [],
+                        "access_api_key": "cU9KdWYzSUJ2d3RqeklLdFdnNF86ZW05ZjFrMThUWW1GRW13OHMwRGZvdw==",
+                        "status": "error"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "operationId": "post-fleet-agents-enroll",
         "parameters": [
           {
             "$ref": "#/components/parameters/xsrfHeader"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "PERMANENT",
+                      "EPHEMERAL",
+                      "TEMPORARY"
+                    ]
+                  },
+                  "shared_id": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "required": [
+                      "local",
+                      "user_provided"
+                    ],
+                    "properties": {
+                      "local": {
+                        "$ref": "#/components/schemas/AgentMetadata"
+                      },
+                      "user_provided": {
+                        "$ref": "#/components/schemas/AgentMetadata"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "metadata"
+                ]
+              },
+              "examples": {
+                "good": {
+                  "value": {
+                    "type": "PERMANENT",
+                    "metadata": {
+                      "local": {
+                        "host": "localhost",
+                        "ip": "127.0.0.1",
+                        "system": "Darwin 18.7.0",
+                        "memory": 34359738368
+                      },
+                      "user_provided": {
+                        "dev_agent_version": "0.0.1",
+                        "region": "us-east"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Enrollment API Key": []
           }
         ]
       }
@@ -2332,7 +3639,46 @@
       "post": {
         "summary": "Ingest Manager - Setup",
         "tags": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isInitialized": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "isInitialized": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {}
+              }
+            }
+          }
+        },
         "operationId": "post-setup",
         "parameters": [
           {
@@ -2801,6 +4147,188 @@
           "version",
           "status"
         ]
+      },
+      "AgentStatus": {
+        "type": "string",
+        "title": "AgentStatus",
+        "enum": [
+          "offline",
+          "error",
+          "online",
+          "inactive",
+          "warning"
+        ]
+      },
+      "Agent": {
+        "title": "Agent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/AgentType"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "enrolled_at": {
+            "type": "string"
+          },
+          "shared_id": {
+            "type": "string"
+          },
+          "access_api_key_id": {
+            "type": "string"
+          },
+          "default_api_key_id": {
+            "type": "string"
+          },
+          "config_id": {
+            "type": "string"
+          },
+          "config_revision": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "config_newest_revision": {
+            "type": "number"
+          },
+          "last_checkin": {
+            "type": "string"
+          },
+          "user_provided_metadata": {
+            "$ref": "#/components/schemas/AgentMetadata"
+          },
+          "local_metadata": {
+            "$ref": "#/components/schemas/AgentMetadata"
+          },
+          "id": {
+            "type": "string"
+          },
+          "current_error_events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentEvent"
+            }
+          },
+          "access_api_key": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AgentStatus"
+          },
+          "default_api_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "active",
+          "enrolled_at",
+          "id",
+          "current_error_events",
+          "status"
+        ]
+      },
+      "AgentType": {
+        "type": "string",
+        "title": "AgentType",
+        "enum": [
+          "PERMANENT",
+          "EPHEMERAL",
+          "TEMPORARY"
+        ]
+      },
+      "AgentMetadata": {
+        "title": "AgentMetadata",
+        "type": "object"
+      },
+      "NewAgentEvent": {
+        "title": "NewAgentEvent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "STATE",
+              "ERROR",
+              "ACTION_RESULT",
+              "ACTION"
+            ]
+          },
+          "subtype": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "STARTING",
+              "IN_PROGRESS",
+              "CONFIG",
+              "FAILED",
+              "STOPPING",
+              "STOPPED",
+              "DATA_DUMP",
+              "ACKNOWLEDGED",
+              "UNKNOWN"
+            ]
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "config_id": {
+            "type": "string"
+          },
+          "stream_id": {
+            "type": "string"
+          },
+          "action_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "subtype",
+          "timestamp",
+          "message",
+          "agent_id"
+        ]
+      },
+      "AgentEvent": {
+        "title": "AgentEvent",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/NewAgentEvent"
+          }
+        ]
+      },
+      "AccessApiKey": {
+        "type": "string",
+        "title": "AccessApiKey",
+        "format": "byte"
+      },
+      "EnrollmentApiKey": {
+        "type": "string",
+        "title": "EnrollmentApiKey",
+        "format": "byte"
       }
     },
     "parameters": {
@@ -2844,6 +4372,18 @@
       "basicAuth": {
         "type": "http",
         "scheme": "basic"
+      },
+      "Enrollment API Key": {
+        "name": "Authorization",
+        "type": "apiKey",
+        "in": "header",
+        "description": "e.g. Authorization: ApiKey base64EnrollmentApiKey"
+      },
+      "Access API Key": {
+        "name": "Authorization",
+        "type": "apiKey",
+        "in": "header",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
       }
     }
   },
