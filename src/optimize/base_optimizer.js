@@ -45,6 +45,10 @@ const STATS_WARNINGS_FILTER = new RegExp(
   ].join('')
 );
 
+const LEGACY_PRESETS = {
+  plugins: [require.resolve('@babel/plugin-transform-modules-commonjs')],
+};
+
 function recursiveIssuer(m) {
   if (m.issuer) {
     return recursiveIssuer(m.issuer);
@@ -119,7 +123,7 @@ export default class BaseOptimizer {
   }
 
   warmupThreadLoaderPool() {
-    const baseModules = ['babel-loader', BABEL_PRESET_PATH];
+    const baseModules = ['babel-loader', BABEL_PRESET_PATH, LEGACY_PRESETS];
 
     threadLoader.warmup(
       // pool options, like passed to loader options

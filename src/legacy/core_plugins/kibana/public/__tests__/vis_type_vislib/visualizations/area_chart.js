@@ -26,12 +26,18 @@ import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/pub
 import { getVis } from '../_vis_fixture';
 
 const dataTypesArray = {
-  'series pos': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series'),
-  'series pos neg': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg'),
-  'series neg': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg'),
-  'term columns': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns'),
-  'range rows': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/range/_rows'),
-  stackedSeries: require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series'),
+  'series pos': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series')
+    .default,
+  'series pos neg': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg')
+    .default,
+  'series neg': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg')
+    .default,
+  'term columns': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns')
+    .default,
+  'range rows': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/range/_rows')
+    .default,
+  stackedSeries: require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series')
+    .default,
 };
 
 const visLibParams = {

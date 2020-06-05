@@ -19,12 +19,13 @@
 
 import _ from 'lodash';
 import { move } from 'ui/utils/collection';
+import { uiModules } from 'ui/modules';
 
 require('angular-sortable-view');
 require('plugins/timelion/directives/chart/chart');
 require('plugins/timelion/directives/timelion_grid');
 
-const app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);
+const app = uiModules.get('apps/timelion', ['angular-sortable-view']);
 import html from './cells.html';
 
 app.directive('timelionCells', function () {
