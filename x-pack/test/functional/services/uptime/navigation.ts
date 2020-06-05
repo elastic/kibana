@@ -81,5 +81,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
       await this.goToMonitor(monitorId);
     },
+
+    async isOnDetailsPage() {
+      return await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
+    },
   };
 }
