@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { useTheme } from 'styled-components';
 import {
   invalidLicenseMessage,
   isValidPlatinumLicense,
@@ -22,14 +23,14 @@ import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 import { BetaBadge } from './BetaBadge';
-import { useTrackPageview, withTheme, EuiTheme } from '../../../../../observability/public';
+import { useTrackPageview } from '../../../../../observability/public';
 
 interface ServiceMapProps {
   serviceName?: string;
-  theme: EuiTheme;
 }
 
-export const ServiceMap = withTheme(({ serviceName, theme }: ServiceMapProps) => {
+export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
+  const theme = useTheme();
   const license = useLicense();
   const { urlParams } = useUrlParams();
 
@@ -67,14 +68,14 @@ export const ServiceMap = withTheme(({ serviceName, theme }: ServiceMapProps) =>
 
   return isValidPlatinumLicense(license) ? (
     <div
-      style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }}
+      style={{ height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10) }}
       ref={ref}
     >
       <Cytoscape
         elements={data?.elements ?? []}
         height={height}
         serviceName={serviceName}
-        style={getCytoscapeDivStyle(theme)}
+        style={getCytoscapeDivStyle(theme.eui)}
         width={width}
       >
         <Controls />
@@ -98,4 +99,4 @@ export const ServiceMap = withTheme(({ serviceName, theme }: ServiceMapProps) =>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-});
+};

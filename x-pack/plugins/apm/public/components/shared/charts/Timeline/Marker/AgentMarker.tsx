@@ -6,8 +6,7 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
+import styled, { useTheme } from 'styled-components';
 import { px, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { Legend } from '../../Legend';
@@ -25,10 +24,11 @@ const TimeContainer = styled.div`
 
 interface Props {
   mark: AgentMark;
-  theme: EuiTheme;
 }
 
-export const AgentMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
+export const AgentMarker: React.FC<Props> = ({ mark }) => {
+  const theme = useTheme();
+
   return (
     <>
       <EuiToolTip
@@ -41,8 +41,8 @@ export const AgentMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
           </div>
         }
       >
-        <Legend clickable color={theme.euiColorMediumShade} />
+        <Legend clickable color={theme.eui.euiColorMediumShade} />
       </EuiToolTip>
     </>
   );
-});
+};

@@ -6,12 +6,11 @@
 
 import { EuiPopover, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
@@ -21,7 +20,6 @@ import { Legend, Shape } from '../../Legend';
 
 interface Props {
   mark: ErrorMark;
-  theme: EuiTheme;
 }
 
 const Popover = styled.div`
@@ -43,7 +41,8 @@ const Button = styled(Legend)`
   align-items: flex-end;
 `;
 
-export const ErrorMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
+export const ErrorMarker: React.FC<Props> = ({ mark }) => {
+  const theme = useTheme();
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -53,7 +52,7 @@ export const ErrorMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
     <Button
       data-test-subj="popover"
       clickable
-      color={theme.euiColorDanger}
+      color={theme.eui.euiColorDanger}
       shape={Shape.square}
       onClick={togglePopover}
     />
@@ -107,4 +106,4 @@ export const ErrorMarker: React.FC<Props> = withTheme(({ mark, theme }) => {
       </Popover>
     </EuiPopover>
   );
-});
+};

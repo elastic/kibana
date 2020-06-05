@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { fontSize, px } from '../../../../style/variables';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
@@ -24,7 +24,6 @@ import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink'
 import { getSeverityColor } from '../cytoscapeOptions';
 import { asInteger } from '../../../../utils/formatters';
 import { getMetricChangeDescription } from '../../../../../../ml/public';
-import { withTheme, EuiTheme } from '../../../../../../observability/public';
 
 const popoverMinWidth = 280;
 
@@ -34,7 +33,6 @@ interface ContentsProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   selectedNodeData: cytoscape.NodeDataDefinition;
   selectedNodeServiceName: string;
-  theme: EuiTheme;
 }
 
 const HealthStatusTitle = styled(EuiTitle)`
@@ -117,13 +115,12 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   }
 );
 
-export const Contents = withTheme(({
+export const Contents = ({
   selectedNodeData,
   isService,
   label,
   onFocusClick,
   selectedNodeServiceName,
-  theme,
 }: ContentProps) => {
   // Anomaly Detection
   const severity = selectedNodeData.severity;
@@ -172,7 +169,7 @@ export const Contents = withTheme(({
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <VerticallyCentered>
-                      <EuiHealth color={getSeverityColor(severity, theme)} />
+                      <EuiHealth color={getSeverityColor(severity, theme.eui)} />
                       <SubduedText>
                         {ANOMALY_DETECTION_SCORE_METRIC}
                       </SubduedText>
@@ -218,4 +215,4 @@ export const Contents = withTheme(({
       )}
     </FlexColumnGroup>
   );
-});
+};

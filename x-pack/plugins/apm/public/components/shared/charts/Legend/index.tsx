@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
-import { withTheme, EuiTheme } from '../../../../../../observability/public';
+import styled, { useTheme } from 'styled-components';
 import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {
@@ -20,6 +19,7 @@ interface ContainerProps {
   clickable: boolean;
   disabled: boolean;
 }
+
 const Container = styled.div<ContainerProps>`
   display: flex;
   align-items: center;
@@ -36,6 +36,7 @@ interface IndicatorProps {
   shape: Shape;
   withMargin: boolean;
 }
+
 export const Indicator = styled.span<IndicatorProps>`
   width: ${(props) => px(props.radius)};
   height: ${(props) => px(props.radius)};
@@ -56,10 +57,9 @@ interface Props {
   clickable?: boolean;
   shape?: Shape;
   indicator?: () => React.ReactNode;
-  theme: EuiTheme;
 }
 
-export const Legend: React.FC<Props> = withTheme(({
+export const Legend: React.FC<Props> = ({
   onClick,
   text,
   color,
@@ -69,10 +69,10 @@ export const Legend: React.FC<Props> = withTheme(({
   clickable = false,
   shape = Shape.circle,
   indicator,
-  theme,
   ...rest
 }) => {
-  const indicatorColor = color || theme.euiColorVis1;
+  const theme = useTheme();
+  const indicatorColor = color || theme.eui.euiColorVis1;
 
   return (
     <Container
@@ -95,4 +95,4 @@ export const Legend: React.FC<Props> = withTheme(({
       {text}
     </Container>
   );
-});
+};

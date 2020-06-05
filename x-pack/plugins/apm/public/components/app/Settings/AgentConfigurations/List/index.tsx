@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { useTheme } from 'styled-components';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
@@ -23,7 +24,6 @@ import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { px, units } from '../../../../../style/variables';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
 import {
   createAgentConfigurationHref,
   editAgentConfigurationHref,
@@ -36,15 +36,14 @@ interface Props {
   status: FETCH_STATUS;
   data: Config[];
   refetch: () => void;
-  theme: EuiTheme;
 }
 
-export const AgentConfigurationList = withTheme(({
+export const AgentConfigurationList = ({
   status,
   data,
   refetch,
-  theme,
 }: Props) => {
+  const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
   );
@@ -132,7 +131,7 @@ export const AgentConfigurationList = withTheme(({
                 )
           }
         >
-          <EuiHealth color={isApplied ? 'success' : theme.euiColorLightShade} />
+          <EuiHealth color={isApplied ? 'success' : theme.eui.euiColorLightShade} />
         </EuiToolTip>
       ),
     },
@@ -222,4 +221,4 @@ export const AgentConfigurationList = withTheme(({
       />
     </>
   );
-});
+};

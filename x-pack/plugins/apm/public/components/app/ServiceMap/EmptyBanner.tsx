@@ -7,10 +7,9 @@
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
-import { withTheme, EuiTheme } from '../../../../../observability/public';
 
 const EmptyBannerContainer = styled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
@@ -23,11 +22,8 @@ const EmptyBannerContainer = styled.div`
   z-index: 1;
 `;
 
-interface Props {
-  theme: EuiTheme;
-}
-
-export const EmptyBanner = withTheme(({ theme }: Props) => {
+export const EmptyBanner = () => {
+  const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
 
@@ -55,8 +51,8 @@ export const EmptyBanner = withTheme(({ theme }: Props) => {
   // subtract the space for controls and margins.
   const width =
     cy.width() -
-    parseInt(theme.gutterTypes.gutterExtraLarge, 10) -
-    parseInt(theme.gutterTypes.gutterLarge, 10);
+    parseInt(theme.eui.gutterTypes.gutterExtraLarge, 10) -
+    parseInt(theme.eui.gutterTypes.gutterLarge, 10);
 
   return (
     <EmptyBannerContainer style={{ width }}>
@@ -80,4 +76,4 @@ export const EmptyBanner = withTheme(({ theme }: Props) => {
       </EuiCallOut>
     </EmptyBannerContainer>
   );
-});
+};

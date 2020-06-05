@@ -7,13 +7,12 @@
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
-import { withTheme, EuiTheme } from '../../../../../observability/public';
 
 const ControlsContainer = styled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
@@ -55,16 +54,13 @@ function doZoom(cy: cytoscape.Core | undefined, increment: number, duration: num
   }
 }
 
-interface ControlProps {
-  theme: EuiTheme;
-}
-
-export const Controls = withTheme(({ theme }: ControlProps) => {
+export const Controls = () => {
+  const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
   const currentSearch = urlParams.kuery ?? '';
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
-  const duration = parseInt(theme.euiAnimSpeedFast, 10);
+  const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
 
   useEffect(() => {
     if (cy) {
@@ -78,9 +74,9 @@ export const Controls = withTheme(({ theme }: ControlProps) => {
     if (cy) {
       const eles = cy.nodes();
       cy.animate({
-        ...getAnimationOptions(theme),
+        ...getAnimationOptions(theme.eui),
         center: { eles },
-        fit: { eles, padding: getNodeHeight(theme) },
+        fit: { eles, padding: getNodeHeight(theme.eui) },
       });
     }
   }
@@ -171,4 +167,4 @@ export const Controls = withTheme(({ theme }: ControlProps) => {
       )}
     </ControlsContainer>
   );
-});
+};

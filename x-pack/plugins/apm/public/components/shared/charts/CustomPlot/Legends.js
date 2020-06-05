@@ -6,7 +6,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { Legend } from '../Legend';
 import {
   unit,
@@ -15,7 +15,6 @@ import {
   px,
   truncate,
 } from '../../../../style/variables';
-import { withTheme, EuiTheme } from '../../../../../../observability/public';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
@@ -69,84 +68,82 @@ function MoreSeries({ hiddenSeriesCount }) {
   );
 }
 
-const Legends = withTheme(
-  ({
-    clickLegend,
-    hiddenSeriesCount,
-    noHits,
-    series,
-    seriesEnabledState,
-    truncateLegends,
-    hasAnnotations,
-    showAnnotations,
-    onAnnotationsToggle,
-    theme,
-  }) => {
-    if (noHits && !hasAnnotations) {
-      return null;
-    }
+export default function Legends({
+  clickLegend,
+  hiddenSeriesCount,
+  noHits,
+  series,
+  seriesEnabledState,
+  truncateLegends,
+  hasAnnotations,
+  showAnnotations,
+  onAnnotationsToggle,
+}) => {
+  const theme = useTheme();
 
-    return (
-      <Container>
-        {series.map((serie, i) => {
-          if (serie.hideLegend) {
-            return null;
-          }
-          const text = (
-            <LegendContent>
-              {truncateLegends ? (
-                <TruncatedLabel title={serie.title}>
-                  {serie.title}
-                </TruncatedLabel>
-              ) : (
-                serie.title
-              )}
-              {serie.legendValue && (
-                <SeriesValue>{serie.legendValue}</SeriesValue>
-              )}
-            </LegendContent>
-          );
-          return (
-            <Legend
-              key={i}
-              onClick={() => clickLegend(i)}
-              disabled={seriesEnabledState[i]}
-              text={text}
-              color={serie.color}
-            />
-          );
-        })}
-        {hasAnnotations && (
-          <Legend
-            key="annotations"
-            onClick={() => {
-              if (onAnnotationsToggle) {
-                onAnnotationsToggle();
-              }
-            }}
-            text={
-              <LegendContent>
-                {i18n.translate('xpack.apm.serviceVersion', {
-                  defaultMessage: 'Service version',
-                })}
-              </LegendContent>
-            }
-            indicator={() => (
-              <div style={{ marginRight: px(units.quarter) }}>
-                <EuiIcon type="annotation" color={theme.euiColorSecondary} />
-              </div>
-            )}
-            disabled={!showAnnotations}
-            color={theme.euiColorSecondary}
-          />
-        )}
-        <MoreSeries hiddenSeriesCount={hiddenSeriesCount} />
-      </Container>
-    );
+  if (noHits && !hasAnnotations) {
+    return null;
   }
-);
 
-export default Legends;
+  return (
+    <Container>
+      {series.map((serie, i) => {
+        if (serie.hideLegend) {
+          return null;
+        }
+
+        const text = (
+          <LegendContent>
+            {truncateLegends ? (
+              <TruncatedLabel title={serie.title}>
+                {serie.title}
+              </TruncatedLabel>
+            ) : (
+              serie.title
+            )}
+            {serie.legendValue && (
+              <SeriesValue>{serie.legendValue}</SeriesValue>
+            )}
+          </LegendContent>
+        );
+        return (
+          <Legend
+            key={i}
+            onClick={() => clickLegend(i)}
+            disabled={seriesEnabledState[i]}
+            text={text}
+            color={serie.color}
+          />
+        );
+      })}
+      {hasAnnotations && (
+        <Legend
+          key="annotations"
+          onClick={() => {
+            if (onAnnotationsToggle) {
+              onAnnotationsToggle();
+            }
+          }}
+          text={
+            <LegendContent>
+              {i18n.translate('xpack.apm.serviceVersion', {
+                defaultMessage: 'Service version',
+              })}
+            </LegendContent>
+          }
+          indicator={() => (
+            <div style={{ marginRight: px(units.quarter) }}>
+              <EuiIcon type="annotation" color={theme.eui.euiColorSecondary} />
+            </div>
+          )}
+          disabled={!showAnnotations}
+          color={theme.eui.euiColorSecondary}
+        />
+      )}
+      <MoreSeries hiddenSeriesCount={hiddenSeriesCount} />
+    </Container>
+  );
+};
 
 Legends.propTypes = {
   clickLegend: PropTypes.func.isRequired,
@@ -158,5 +155,4 @@ Legends.propTypes = {
   hasAnnotations: PropTypes.bool,
   showAnnotations: PropTypes.bool,
   onAnnotationsToggle: PropTypes.func,
-  theme: EuiTheme,
 };

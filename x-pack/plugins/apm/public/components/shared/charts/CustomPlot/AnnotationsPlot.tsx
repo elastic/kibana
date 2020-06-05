@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { VerticalGridLines } from 'react-vis';
+import { useTheme } from 'styled-components';
 import {
   EuiIcon,
   EuiToolTip,
@@ -13,7 +14,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { withTheme, EuiTheme } from '../../../../../observability/public';
 import { Maybe } from '../../../../../typings/common';
 import { Annotation } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
@@ -24,18 +24,17 @@ interface Props {
   plotValues: PlotValues;
   width: number;
   overlay: Maybe<HTMLElement>;
-  theme: EuiTheme;
 }
 
-export const AnnotationsPlot = withTheme(({
+export const AnnotationsPlot = ({
   plotValues,
   annotations,
-  theme,
 }: Props) => {
+  const theme = useTheme();
   const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
   const style = {
-    stroke: theme.euiColorSecondary,
+    stroke: theme.eui.euiColorSecondary,
     strokeDasharray: 'none',
   };
 
@@ -68,10 +67,10 @@ export const AnnotationsPlot = withTheme(({
               </EuiFlexGroup>
             }
           >
-            <EuiIcon type="dot" color={theme.euiColorSecondary} />
+            <EuiIcon type="dot" color={theme.eui.euiColorSecondary} />
           </EuiToolTip>
         </div>
       ))}
     </>
   );
-});
+};
