@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable complexity */
 
 /* eslint-disable complexity */
 
@@ -126,7 +125,6 @@ export const signalRulesAlertType = ({
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
-        // console.log('GAP', gap.humanize());
         const gapString = gap.humanize();
         const gapMessage = buildRuleMessage(
           `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
