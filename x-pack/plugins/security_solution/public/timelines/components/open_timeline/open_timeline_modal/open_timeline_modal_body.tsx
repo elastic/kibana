@@ -42,7 +42,8 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
-    tabs,
+    timelineFilter = [],
+    templateTimelineFilter = [],
     title,
     totalSearchResultsCount,
   }) => {
@@ -53,6 +54,11 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
           : ['duplicate'];
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
+
+    const SearchRowContent = useMemo(() => <>{[...timelineFilter, ...templateTimelineFilter]}</>, [
+      timelineFilter,
+      templateTimelineFilter,
+    ]);
 
     return (
       <>
@@ -71,9 +77,10 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
                 query={query}
-                tabs={tabs}
                 totalSearchResultsCount={totalSearchResultsCount}
-              />
+              >
+                {SearchRowContent}
+              </SearchRow>
             </>
           </HeaderContainer>
         </EuiModalHeader>

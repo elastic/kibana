@@ -255,6 +255,12 @@
                 "description": "",
                 "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "status",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TimelineStatus", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {

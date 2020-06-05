@@ -51,11 +51,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortDirection,
     setImportDataModalToggle,
     sortField,
-    tabs,
+    timelineFilter,
+    templateTimelineFilter,
     totalSearchResultsCount,
   }) => {
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
-
     const {
       actionItem,
       enableExportTimelineDownloader,
@@ -124,6 +124,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [onDeleteSelected, deleteTimelines]
     );
 
+    const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
+
     return (
       <>
         <EditOneTimelineAction
@@ -151,7 +153,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          {!!tabs && tabs}
+          {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"
             onlyFavorites={onlyFavorites}
@@ -159,7 +161,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query={query}
             totalSearchResultsCount={totalSearchResultsCount}
-          />
+          >
+            {SearchRowContent}
+          </SearchRow>
 
           <UtilityBar border>
             <UtilityBarSection>

@@ -345,6 +345,7 @@ export enum TlsFields {
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutiable = 'immutiable',
 }
 
 export enum TimelineType {
@@ -2246,6 +2247,8 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
+
+  status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -4307,6 +4310,7 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
+    status?: Maybe<TimelineStatus>;
   };
 
   export type Query = {
@@ -4341,6 +4345,8 @@ export namespace GetAllTimeline {
     pinnedEventIds: Maybe<string[]>;
 
     title: Maybe<string>;
+
+    status: Maybe<TimelineStatus>;
 
     timelineType: Maybe<TimelineType>;
 

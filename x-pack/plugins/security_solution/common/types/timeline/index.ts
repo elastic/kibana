@@ -153,6 +153,29 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
+/**
+ * Template timeline type
+ */
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  customized = 'customized',
+}
+
+export const TemplateTimelineTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TemplateTimelineType.elastic),
+  runtimeTypes.literal(TemplateTimelineType.customized),
+]);
+
+export const TemplateTimelineTypeLiteralWithNullRt = unionWithNullType(
+  TemplateTimelineTypeLiteralRt
+);
+
+export type TemplateTimelineTypeLiteral = runtimeTypes.TypeOf<typeof TemplateTimelineTypeLiteralRt>;
+export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
+  typeof TemplateTimelineTypeLiteralWithNullRt
+>;
+
 /*
  *  Timeline Types
  */

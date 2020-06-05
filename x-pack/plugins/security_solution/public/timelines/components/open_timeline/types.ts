@@ -8,7 +8,11 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineTypeLiteral, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineStatus,
+  TemplateTimelineTypeLiteral,
+} from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -161,8 +165,10 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
+  /** when timelineType === template, templatetimelineFilter is a JSX.Element */
+  templateTimelineFilter: JSX.Element[] | null;
   /** timeline / template timeline */
-  tabs?: JSX.Element;
+  timelineFilter?: JSX.Element | JSX.Element[] | null;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */
@@ -201,4 +207,10 @@ export interface TimelineTab {
   name: string;
   disabled: boolean;
   href: string;
+}
+
+export interface TemplateTimelineFilter {
+  id: TemplateTimelineTypeLiteral;
+  name: string;
+  disabled: boolean;
 }

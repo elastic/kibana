@@ -14,6 +14,7 @@ import {
   SavedTimeline,
   TimelineSavedObject,
   TimelineTypeLiteralWithNull,
+  TimelineStatusLiteralWithNull,
 } from '../../../common/types/timeline';
 import {
   ResponseTimeline,
@@ -55,7 +56,8 @@ export interface Timeline {
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null,
-    timelineType: TimelineTypeLiteralWithNull
+    timelineType: TimelineTypeLiteralWithNull,
+    status: TimelineStatusLiteralWithNull
   ) => Promise<ResponseTimelines>;
 
   persistFavorite: (
@@ -106,7 +108,7 @@ export const getTimelineByTemplateTimelineId = async (
  * which has no timelineType exists in the savedObject */
 const getTimelineTypeFilter = (
   timelineType: TimelineTypeLiteralWithNull,
-  includeDraft: boolean
+  status: TimelineStatusLiteralWithNull
 ) => {
   const typeFilter =
     timelineType === TimelineType.template
@@ -119,11 +121,17 @@ const getTimelineTypeFilter = (
   /** Show me every timeline whose status is not "draft".
    * which includes status === 'active' and
    * those status doesn't exists */
-  const draftFilter = includeDraft
-    ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
-    : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
+  const draftFilter =
+    status === TimelineStatus.draft
+      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
+      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
 
-  return `${typeFilter} and ${draftFilter}`;
+  const immutiableFilter =
+    status === TimelineStatus.immutiable
+      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.immutiable}`
+      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutiable}`;
+
+  return `${typeFilter} and ${draftFilter} and ${immutiableFilter}`;
 };
 
 export const getAllTimeline = async (
@@ -132,6 +140,7 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline | null,
   search: string | null,
   sort: SortTimeline | null,
+  status: TimelineStatusLiteralWithNull,
   timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
@@ -147,7 +156,10 @@ export const getAllTimeline = async (
      * Remove the comment here to enable template timeline and apply the change below
      * filter: getTimelineTypeFilter(timelineType, false)
      */
-    filter: getTimelineTypeFilter(disableTemplate ? TimelineType.default : timelineType, false),
+    filter: getTimelineTypeFilter(
+      disableTemplate ? TimelineType.default : timelineType,
+      disableTemplate ? null : status
+    ),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
@@ -161,7 +173,7 @@ export const getDraftTimeline = async (
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: getTimelineTypeFilter(timelineType, true),
+    filter: getTimelineTypeFilter(timelineType, TimelineStatus.draft),
     sortField: 'created',
     sortOrder: 'desc',
   };

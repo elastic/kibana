@@ -22,7 +22,10 @@ import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../pages/translations';
-import { TimelineTypeLiteralWithNull } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteralWithNull,
+  TimelineStatusLiteral,
+} from '../../../../common/types/timeline';
 
 export interface AllTimelinesArgs {
   fetchAllTimeline: ({
@@ -42,6 +45,7 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
+  status: TimelineStatusLiteral;
   timelineType: TimelineTypeLiteralWithNull;
 }
 
@@ -94,7 +98,14 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   });
 
   const fetchAllTimeline = useCallback(
-    async ({ onlyUserFavorite, pageInfo, search, sort, timelineType }: AllTimelinesVariables) => {
+    async ({
+      onlyUserFavorite,
+      pageInfo,
+      search,
+      sort,
+      status,
+      timelineType,
+    }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
@@ -111,6 +122,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               pageInfo,
               search,
               sort,
+              status,
               timelineType,
             };
             const response = await apolloClient.query<

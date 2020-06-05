@@ -35,7 +35,7 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 type Props = Pick<
   OpenTimelineProps,
   'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'query' | 'totalSearchResultsCount'
-> & { tabs?: JSX.Element };
+> & { children?: JSX.Element | null };
 
 const searchBox = {
   placeholder: i18n.SEARCH_PLACEHOLDER,
@@ -52,7 +52,7 @@ export const SearchRow = React.memo<Props>(
     onToggleOnlyFavorites,
     query,
     totalSearchResultsCount,
-    tabs,
+    children,
   }) => {
     return (
       <SearchRowContainer>
@@ -71,7 +71,7 @@ export const SearchRow = React.memo<Props>(
                 >
                   {i18n.ONLY_FAVORITES}
                 </EuiFilterButton>
-                {tabs}
+                {!!children && children}
               </>
             </EuiFilterGroup>
           </EuiFlexItem>

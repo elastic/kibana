@@ -13,6 +13,7 @@ export const allTimelinesQuery = gql`
     $sort: SortTimeline
     $onlyUserFavorite: Boolean
     $timelineType: TimelineType
+    $status: TimelineStatus
   ) {
     getAllTimeline(
       pageInfo: $pageInfo
@@ -20,6 +21,7 @@ export const allTimelinesQuery = gql`
       sort: $sort
       onlyUserFavorite: $onlyUserFavorite
       timelineType: $timelineType
+      status: $status
     ) {
       totalCount
       timeline {

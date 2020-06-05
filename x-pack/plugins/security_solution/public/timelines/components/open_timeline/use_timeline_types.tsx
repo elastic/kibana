@@ -18,7 +18,7 @@ import { TimelineTabsStyle, TimelineTab } from './types';
 export const useTimelineTypes = (): {
   timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
-  timelineFilters: JSX.Element;
+  timelineFilters: JSX.Element[];
 } => {
   const urlSearch = useGetUrlSearch(navTabs.timelines);
   const { tabName } = useParams<{ pageName: string; tabName: string }>();
@@ -82,19 +82,15 @@ export const useTimelineTypes = (): {
   }, [tabName]);
 
   const timelineFilters = useMemo(() => {
-    return (
-      <>
-        {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
-          <EuiFilterButton
-            hasActiveFilters={tab.id === timelineType}
-            key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
-            onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
-          >
-            {tab.name}
-          </EuiFilterButton>
-        ))}
-      </>
-    );
+    return getFilterOrTabs(TimelineTabsStyle.filter).map((tab: TimelineTab) => (
+      <EuiFilterButton
+        hasActiveFilters={tab.id === timelineType}
+        key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
+        onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
+      >
+        {tab.name}
+      </EuiFilterButton>
+    ));
   }, [timelineType]);
 
   return {

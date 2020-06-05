@@ -220,6 +220,20 @@ export const TAB_TEMPLATES = i18n.translate(
   }
 );
 
+export const FILTER_ELASTIC_TIMELINES = i18n.translate(
+  'xpack.securitySolution.timelines.components.templateFilter.elasticTitle',
+  {
+    defaultMessage: 'Elastic',
+  }
+);
+
+export const FILTER_CUSTOMISED_TIMELINES = i18n.translate(
+  'xpack.securitySolution.timelines.components.templateFilter.customizedTitle',
+  {
+    defaultMessage: 'Customized',
+  }
+);
+
 export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importTimelineTitle',
   {
