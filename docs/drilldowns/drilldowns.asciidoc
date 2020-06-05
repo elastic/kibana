@@ -27,7 +27,7 @@ the default action and your drilldowns. See the <<drilldowns-example, Try it sec
 for instructions on how to create this drilldown.
 
 [role="screenshot"]
-image::images/drilldown_on_piechart.png[Drilldown on pie chart that navigates to another dashboard]
+image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
 
 Third-party developers can create drilldowns.
 See https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples[this example plugin]
