@@ -174,7 +174,7 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
   const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
   const [processEvent] = useMemo(()=>{
     return [...processNodePositions.keys()].filter(processEvent=>event.entityId(processEvent)===selectedDescendantProcessId);  
-  },[]);
+  },[processNodePositions, selectedDescendantProcessId]);
   const processName = processEvent && event.eventName(processEvent);
   const processInfoEntry = useMemo(() =>{
     let dateTime = '';
