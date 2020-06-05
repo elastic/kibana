@@ -76,6 +76,7 @@ export const Layout = () => {
   const intervalAsString = convertIntervalToString(interval);
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
 
   return (
