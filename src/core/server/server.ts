@@ -195,12 +195,13 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
+    const elasticsearchStart = await this.elasticsearch.start();
     const savedObjectsStart = await this.savedObjects.start({
+      elasticsearch: elasticsearchStart,
       pluginsInitialized: this.pluginsInitialized,
     });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-    const elasticsearchStart = await this.elasticsearch.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,

@@ -47,6 +47,52 @@ import {
   LegacyAPI,
   LegacyRequest,
 } from './types';
+import {
+ PluginStartContract as AlertingPluginStartContract,
+  PluginSetupContract as AlertingPluginSetupContract,
+} from '../../alerts/server';
+import { getLicenseExpiration } from './alerts/license_expiration';
+import { getClusterState } from './alerts/cluster_state';
+import { InfraPluginSetup } from '../../infra/server';
+
+export interface LegacyAPI {
+  getServerStatus: () => string;
+}
+
+interface PluginsSetup {
+  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetupContract;
+  alerts: AlertingPluginSetupContract;
+  infra: InfraPluginSetup;
+}
+
+interface PluginsStart {
+  alerts: AlertingPluginStartContract;
+}
+
+interface MonitoringCoreConfig {
+  get: (key: string) => string | undefined;
+}
+
+interface MonitoringCore {
+  config: () => MonitoringCoreConfig;
+  log: Logger;
+  route: (options: any) => void;
+}
+
+interface LegacyShimDependencies {
+  router: IRouter;
+  instanceUuid: string;
+  esDataClient: IClusterClient;
+  kibanaStatsCollector: any;
+}
+
+interface IBulkUploader {
+  setKibanaStatusGetter: (getter: () => string | undefined) => void;
+  getKibanaStats: () => any;
+}
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -89,7 +135,7 @@ export class Plugin {
     this.legacyShimDependencies = {
       router,
       instanceUuid: core.uuid.getInstanceUuid(),
-      esDataClient: core.elasticsearch.dataClient,
+      esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
@@ -100,7 +146,7 @@ export class Plugin {
     const cluster = (this.cluster = instantiateClient(
       config.ui.elasticsearch,
       this.log,
-      core.elasticsearch.createClient
+      core.elasticsearch.legacy.createClient
     ));
 
     // Start our license service which will ensure
