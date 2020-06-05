@@ -75,5 +75,8 @@ export function installBrowser(
   };
 
   backgroundInstall();
-  return { binaryPath$ };
+
+  return {
+    binaryPath$,
+  };
 }
