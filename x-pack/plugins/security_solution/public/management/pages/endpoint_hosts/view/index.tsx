@@ -22,17 +22,19 @@ import { createStructuredSelector } from 'reselect';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useHostSelector } from './hooks';
-import { urlFromQueryParams } from './url_from_query_params';
 import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
-import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { CreateStructuredSelector } from '../../common/store';
-import { Immutable, HostInfo } from '../../../common/endpoint/types';
-import { PageView } from '../../common/components/endpoint/page_view';
+import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { CreateStructuredSelector } from '../../../../common/store';
+import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
+import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { ManagementPageView } from '../../../components/management_page_view';
+import { getManagementUrl } from '../../..';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 
 const HostLink = memo<{
   name: string;
   href: string;
-  route: ReturnType<typeof urlFromQueryParams>;
+  route: string;
 }>(({ name, href, route }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
 
@@ -77,8 +79,11 @@ export const HostList = () => {
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
+      // FIXME: PT: if host details is open, table is not displaying correct number of rows
       history.push(
-        urlFromQueryParams({
+        getManagementUrl({
+          name: 'endpointList',
+          excludePrefix: true,
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -89,22 +94,34 @@ export const HostList = () => {
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
+    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
+      defaultMessage: 'Last Active',
+    });
+
     return [
       {
         field: 'metadata.host',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.hostname', {
+        name: i18n.translate('xpack.securitySolution.endpointList.hostname', {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const newQueryParams = urlFromQueryParams({ ...queryParams, selected_host: id });
-          return (
-            <HostLink name={hostname} href={`?${newQueryParams.search}`} route={newQueryParams} />
-          );
+          const toRoutePath = getManagementUrl({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_host: id,
+            excludePrefix: true,
+          });
+          const toRouteUrl = getManagementUrl({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_host: id,
+          });
+          return <HostLink name={hostname} href={toRouteUrl} route={toRoutePath} />;
         },
       },
       {
         field: 'host_status',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.hostStatus', {
+        name: i18n.translate('xpack.securitySolution.endpointList.hostStatus', {
           defaultMessage: 'Host Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -116,7 +133,7 @@ export const HostList = () => {
               className="eui-textTruncate"
             >
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.host.list.hostStatusValue"
+                id="xpack.securitySolution.endpointList.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
                 values={{ hostStatus }}
               />
@@ -126,7 +143,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.policy', {
+        name: i18n.translate('xpack.securitySolution.endpointList.policy', {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
@@ -137,7 +154,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.policyStatus', {
+        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -145,7 +162,7 @@ export const HostList = () => {
           return (
             <EuiHealth color="success" className="eui-textTruncate">
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.host.list.policyStatus"
+                id="xpack.securitySolution.endpointList.policyStatus"
                 defaultMessage="Policy Status"
               />
             </EuiHealth>
@@ -154,7 +171,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.alerts', {
+        name: i18n.translate('xpack.securitySolution.endpointList.alerts', {
           defaultMessage: 'Alerts',
         }),
         dataType: 'number',
@@ -164,14 +181,14 @@ export const HostList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.os', {
+        name: i18n.translate('xpack.securitySolution.endpointList.os', {
           defaultMessage: 'Operating System',
         }),
         truncateText: true,
       },
       {
         field: 'metadata.host.ip',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.ip', {
+        name: i18n.translate('xpack.securitySolution.endpointList.ip', {
           defaultMessage: 'IP Address',
         }),
         // eslint-disable-next-line react/display-name
@@ -189,35 +206,38 @@ export const HostList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.endpointVersion', {
+        name: i18n.translate('xpack.securitySolution.endpointList.endpointVersion', {
           defaultMessage: 'Version',
         }),
       },
       {
-        field: '',
-        name: i18n.translate('xpack.securitySolution.endpoint.host.list.lastActive', {
-          defaultMessage: 'Last Active',
-        }),
-        dataType: 'date',
-        render: () => {
-          return 'xxxx';
+        field: 'metadata.@timestamp',
+        name: lastActiveColumnName,
+        render(dateValue: HostInfo['metadata']['@timestamp']) {
+          return (
+            <FormattedDate
+              fieldName={lastActiveColumnName}
+              value={dateValue}
+              className="eui-textTruncate"
+            />
+          );
         },
       },
     ];
   }, [queryParams]);
 
   return (
-    <PageView
+    <ManagementPageView
       viewType="list"
       data-test-subj="hostPage"
-      headerLeft={i18n.translate('xpack.securitySolution.endpoint.host.hosts', {
-        defaultMessage: 'Hosts',
+      headerLeft={i18n.translate('xpack.securitySolution.endpointLis.pageTitle', {
+        defaultMessage: 'Endpoints',
       })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
       <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.host.list.totalCount"
+          id="xpack.securitySolution.endpointList.totalCount"
           defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
           values={{ totalItemCount }}
         />
@@ -232,6 +252,7 @@ export const HostList = () => {
         pagination={paginationSetup}
         onChange={onTableChange}
       />
-    </PageView>
+      <SpyRoute />
+    </ManagementPageView>
   );
 };

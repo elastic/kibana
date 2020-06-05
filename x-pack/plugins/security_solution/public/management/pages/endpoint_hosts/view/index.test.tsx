@@ -9,14 +9,14 @@ import * as reactTestingLibrary from '@testing-library/react';
 
 import { HostList } from './index';
 import { mockHostDetailsApiResult, mockHostResultList } from '../store/mock_host_result_list';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
   HostStatus,
   HostPolicyResponseActionStatus,
-} from '../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { AppAction } from '../../common/store/actions';
+} from '../../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { AppAction } from '../../../../common/store/actions';
 
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -202,7 +202,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '#/management/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
     it('should update the URL when policy status link is clicked', async () => {
@@ -381,7 +381,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '?page_index=0&page_size=10&selected_host=1'
+          '#/management/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
       it('should update URL when back to details link is clicked', async () => {

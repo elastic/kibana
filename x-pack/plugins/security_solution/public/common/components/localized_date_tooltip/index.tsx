@@ -13,9 +13,11 @@ export const LocalizedDateTooltip = React.memo<{
   children: React.ReactNode;
   date: Date;
   fieldName?: string;
-}>(({ children, date, fieldName }) => (
+  className?: string;
+}>(({ children, date, fieldName, className = '' }) => (
   <EuiToolTip
     data-test-subj="localized-date-tool-tip"
+    anchorClassName={className}
     content={
       <EuiFlexGroup data-test-subj="dates-container" direction="column" gutterSize="none">
         {fieldName != null ? (

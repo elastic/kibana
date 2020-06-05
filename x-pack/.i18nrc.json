@@ -38,7 +38,7 @@
     "xpack.reporting": ["plugins/reporting"],
     "xpack.rollupJobs": ["legacy/plugins/rollup", "plugins/rollup"],
     "xpack.searchProfiler": "plugins/searchprofiler",
-    "xpack.security": ["legacy/plugins/security", "plugins/security"],
+    "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
     "xpack.securitySolution": "plugins/security_solution",
     "xpack.snapshotRestore": "plugins/snapshot_restore",

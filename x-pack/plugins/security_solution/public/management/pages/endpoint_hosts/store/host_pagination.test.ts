@@ -8,10 +8,10 @@ import { CoreStart, HttpSetup } from 'kibana/public';
 import { History, createBrowserHistory } from 'history';
 import { applyMiddleware, Store, createStore } from 'redux';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
-import { HostResultList, AppLocation } from '../../../common/endpoint/types';
-import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
+import { HostResultList, AppLocation } from '../../../../../common/endpoint/types';
+import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
 import { hostMiddlewareFactory } from './middleware';
 
@@ -20,8 +20,11 @@ import { hostListReducer } from './reducer';
 import { uiQueryParams } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
 import { HostState, HostIndexUIQueryParams } from '../types';
-import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../common/store/test_utils';
-import { urlFromQueryParams } from '../view/url_from_query_params';
+import {
+  MiddlewareActionSpyHelper,
+  createSpyMiddleware,
+} from '../../../../common/store/test_utils';
+import { getManagementUrl } from '../../..';
 
 describe('host list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -53,7 +56,9 @@ describe('host list pagination: ', () => {
     queryParams = () => uiQueryParams(store.getState());
 
     historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
-      return history.push(urlFromQueryParams(nextQueryParams));
+      return history.push(
+        getManagementUrl({ name: 'endpointList', excludePrefix: true, ...nextQueryParams })
+      );
     };
   });
 
@@ -67,7 +72,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: '/endpoint-hosts',
+          pathname: getManagementUrl({ name: 'endpointList', excludePrefix: true }),
         },
       });
       await waitForAction('serverReturnedHostList');
