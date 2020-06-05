@@ -47,6 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(headingText).to.be('Ingest Node Pipelines');
     });
 
+    // TODO: Re-enable this test
     // it('Creates a pipeline', async () => {
     //   await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
     //
