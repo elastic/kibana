@@ -288,6 +288,7 @@ export const Expressions: React.FC<Props> = (props) => {
         />
       </div>
 
+      <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
           color={'primary'}
