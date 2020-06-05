@@ -275,7 +275,7 @@ async function getIndexPatternId(
 ) {
   const response = await savedObjectsClient.find<IIndexPattern>({
     type: 'index-pattern',
-    perPage: 10,
+    perPage: 1,
     search: `"${indexName}"`,
     searchFields: ['title'],
     fields: ['title'],

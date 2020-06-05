@@ -6,7 +6,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'kibana/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import {
   TransformEndpointRequest,
@@ -18,16 +17,7 @@ import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
-import { API_BASE_PATH } from '../../../common/constants';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
-
-export const canDeleteIndex = async (http: CoreSetup['http']) => {
-  const privilege = await http.get(`${API_BASE_PATH}privileges`);
-  if (!privilege) {
-    return false;
-  }
-  return privilege.hasAllPrivileges;
-};
+import { indexService } from '../services/es_index_service';
 
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const { http, savedObjects } = useAppDependencies();
@@ -43,22 +33,11 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const toggleDeleteIndexPattern = useCallback(() => setDeleteIndexPattern(!deleteIndexPattern), [
     deleteIndexPattern,
   ]);
-  const savedObjectsClient = savedObjects.client;
 
   const checkIndexPatternExists = useCallback(
     async (indexName: string) => {
       try {
-        const response = await savedObjectsClient.find<IIndexPattern>({
-          type: 'index-pattern',
-          perPage: 10,
-          search: `"${indexName}"`,
-          searchFields: ['title'],
-          fields: ['title'],
-        });
-        const ip = response.savedObjects.find(
-          (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
-        );
-        if (ip !== undefined) {
+        if (await indexService.indexPatternExists(savedObjects.client, indexName)) {
           setIndexPatternExists(true);
         }
       } catch (e) {
@@ -76,12 +55,12 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         );
       }
     },
-    [savedObjectsClient, toastNotifications]
+    [savedObjects.client, toastNotifications]
   );
 
   const checkUserIndexPermission = useCallback(async () => {
     try {
-      const userCanDelete = await canDeleteIndex(http);
+      const userCanDelete = await indexService.canDeleteIndex(http);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
