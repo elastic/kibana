@@ -70,19 +70,19 @@ function getHomeTabs({
       render: () => <ServiceMap />,
       name: 'service-map',
     });
-
-    homeTabs.push({
-      link: (
-        <RumOverviewLink>
-          {i18n.translate('xpack.apm.home.rumTabLabel', {
-            defaultMessage: 'Real User Monitoring',
-          })}
-        </RumOverviewLink>
-      ),
-      render: () => <RumOverview />,
-      name: 'rum-overview',
-    });
   }
+
+  homeTabs.push({
+    link: (
+      <RumOverviewLink>
+        {i18n.translate('xpack.apm.home.rumTabLabel', {
+          defaultMessage: 'Real User Monitoring',
+        })}
+      </RumOverviewLink>
+    ),
+    render: () => <RumOverview />,
+    name: 'rum-overview',
+  });
 
   return homeTabs;
 }
