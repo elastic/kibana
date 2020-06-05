@@ -14,7 +14,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { Authentication } from '../authentication';
-import { Authorization } from '../authorization';
+import { AuthorizationServiceSetup } from '../authorization';
 import { ConfigType } from '../config';
 
 import { defineAuthenticationRoutes } from './authentication';
@@ -37,7 +37,7 @@ export interface RouteDefinitionParams {
   clusterClient: IClusterClient;
   config: ConfigType;
   authc: Authentication;
-  authz: Authorization;
+  authz: AuthorizationServiceSetup;
   license: SecurityLicense;
   getFeatures: () => Promise<Feature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
