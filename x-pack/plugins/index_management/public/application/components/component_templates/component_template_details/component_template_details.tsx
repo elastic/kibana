@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -17,9 +16,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiPopover,
-  EuiButton,
-  EuiContextMenu,
   EuiCallOut,
 } from '@elastic/eui';
 
@@ -28,6 +24,7 @@ import { ComponentTemplateDeserialized } from '../types';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { TabSummary, TabSettings, TabAliases, TabMappings } from './tab_content';
 import { ComponentTemplateTabs, TabType, Tab } from './tabs';
+import { ManageButton, ManageAction } from './manage_button';
 
 const tabToComponentMap: {
   [key: string]: React.FunctionComponent<{
@@ -43,15 +40,14 @@ const tabToComponentMap: {
 interface Props {
   componentTemplateName: string;
   onClose: () => void;
-  onDeleteClick: (componentTemplateName: string[]) => void;
   showFooter?: boolean;
+  actions?: ManageAction[];
 }
 
 export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
   componentTemplateName,
   onClose,
-  onDeleteClick,
-  showFooter,
+  actions,
 }) => {
   const { api } = useComponentTemplatesContext();
 
@@ -60,7 +56,6 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
   );
 
   const [activeTab, setActiveTab] = useState<Tab>(TabType.Summary);
-  const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
   let content: React.ReactNode | undefined;
 
@@ -103,87 +98,6 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
     );
   }
 
-  const footer: React.ReactNode = (
-    <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {/* "Close" link */}
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="cross"
-            flush="left"
-            onClick={onClose}
-            data-test-subj="closeDetailsButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateDetails.closeButtonLabel"
-              defaultMessage="Close"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-
-        {/* "Manage" context menu */}
-        {componentTemplateDetails && (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="manageComponentTemplatePanel"
-              button={
-                <EuiButton
-                  fill
-                  data-test-subj="manageComponentTemplateButton"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={() => setIsPopOverOpen((prevBoolean) => !prevBoolean)}
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.componentTemplateDetails.manageButtonLabel"
-                    defaultMessage="Manage"
-                  />
-                </EuiButton>
-              }
-              isOpen={isPopoverOpen}
-              closePopover={() => setIsPopOverOpen(false)}
-              panelPaddingSize="none"
-              withTitle
-              anchorPosition="rightUp"
-              repositionOnScroll
-            >
-              <EuiContextMenu
-                initialPanelId={0}
-                panels={[
-                  {
-                    id: 0,
-                    title: i18n.translate(
-                      'xpack.idxMgmt.componentTemplateDetails.manageContextMenuPanelTitle',
-                      {
-                        defaultMessage: 'Options',
-                      }
-                    ),
-                    items: [
-                      {
-                        name: i18n.translate(
-                          'xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel',
-                          {
-                            defaultMessage: 'Delete',
-                          }
-                        ),
-                        icon: 'trash',
-                        disabled: componentTemplateDetails._kbnMeta.usedBy.length > 0,
-                        onClick: () => {
-                          setIsPopOverOpen(false);
-                          onDeleteClick([componentTemplateName]);
-                        },
-                      },
-                    ],
-                  },
-                ]}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
-  );
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -202,7 +116,36 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
 
-      {showFooter ? footer : null}
+      {actions && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            {/* "Close" link */}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                flush="left"
+                onClick={onClose}
+                data-test-subj="closeDetailsButton"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateDetails.closeButtonLabel"
+                  defaultMessage="Close"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            {/* "Manage" context menu */}
+            {componentTemplateDetails && (
+              <EuiFlexItem grow={false}>
+                <ManageButton
+                  actions={actions}
+                  componentTemplateDetails={componentTemplateDetails}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

@@ -6,11 +6,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 
 import { SectionLoading } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+import { ComponentTemplateDeserialized } from '../types';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplateDetailsFlyout } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
@@ -95,9 +97,21 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
       {componentTemplateName && (
         <ComponentTemplateDetailsFlyout
           onClose={goToList}
-          onDeleteClick={setComponentTemplatesToDelete}
           componentTemplateName={componentTemplateName}
-          showFooter
+          actions={[
+            {
+              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
+                defaultMessage: 'Delete',
+              }),
+              icon: 'trash',
+              getIsDisabled: (details: ComponentTemplateDeserialized) =>
+                details._kbnMeta.usedBy.length > 0,
+              closePopoverOnClick: true,
+              handleActionClick: () => {
+                setComponentTemplatesToDelete([componentTemplateName]);
+              },
+            },
+          ]}
         />
       )}
     </div>
