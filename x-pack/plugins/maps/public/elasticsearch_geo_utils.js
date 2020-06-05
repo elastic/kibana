@@ -397,16 +397,6 @@ export function getBoundingBoxGeometry(geometry) {
   return formatEnvelopeAsPolygon(extent);
 }
 
-export function makeGeotileGridDsl(field, bounds, precision, options = {}) {
-  const esBbox = makeESBbox(bounds);
-  return {
-    bounds: esBbox,
-    field,
-    precision,
-    ...options,
-  };
-}
-
 export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
