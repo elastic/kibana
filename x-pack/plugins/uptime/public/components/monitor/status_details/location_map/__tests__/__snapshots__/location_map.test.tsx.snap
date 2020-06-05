@@ -28,12 +28,14 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
           options={
             Array [
               Object {
+                "data-test-subj": "uptimeMonitorToggleListBtn",
                 "iconType": "list",
                 "id": "listBtn",
                 "label": "Bold",
                 "name": "bold",
               },
               Object {
+                "data-test-subj": "uptimeMonitorToggleMapBtn",
                 "iconType": "mapMarker",
                 "id": "mapBtn",
                 "label": "Italic",
@@ -123,12 +125,14 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
           options={
             Array [
               Object {
+                "data-test-subj": "uptimeMonitorToggleListBtn",
                 "iconType": "list",
                 "id": "listBtn",
                 "label": "Bold",
                 "name": "bold",
               },
               Object {
+                "data-test-subj": "uptimeMonitorToggleMapBtn",
                 "iconType": "mapMarker",
                 "id": "mapBtn",
                 "label": "Italic",
@@ -239,12 +243,14 @@ exports[`LocationMap component renders named locations that have missing geo dat
           options={
             Array [
               Object {
+                "data-test-subj": "uptimeMonitorToggleListBtn",
                 "iconType": "list",
                 "id": "listBtn",
                 "label": "Bold",
                 "name": "bold",
               },
               Object {
+                "data-test-subj": "uptimeMonitorToggleMapBtn",
                 "iconType": "mapMarker",
                 "id": "mapBtn",
                 "label": "Italic",
@@ -311,12 +317,14 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
           options={
             Array [
               Object {
+                "data-test-subj": "uptimeMonitorToggleListBtn",
                 "iconType": "list",
                 "id": "listBtn",
                 "label": "Bold",
                 "name": "bold",
               },
               Object {
+                "data-test-subj": "uptimeMonitorToggleMapBtn",
                 "iconType": "mapMarker",
                 "id": "mapBtn",
                 "label": "Italic",
