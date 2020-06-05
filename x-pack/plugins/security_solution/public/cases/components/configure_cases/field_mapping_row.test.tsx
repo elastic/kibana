@@ -51,7 +51,7 @@ describe('FieldMappingRow', () => {
   const props: RowProps = {
     id: 'title',
     disabled: false,
-    siemField: 'title',
+    securitySolutionField: 'title',
     thirdPartyOptions,
     actionTypeOptions,
     onChangeActionType,
