@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, lazy } from 'react';
+import React, { Fragment } from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
@@ -19,11 +19,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('action_form', () => {
   let deps: any;
 
-  const mockedActionParamsFields = lazy(async () => ({
-    default() {
-      return <Fragment />;
-    },
-  }));
+  const mockedActionParamsFields = () => <Fragment />;
 
   const alertType = {
     id: 'my-alert-type',
