@@ -436,7 +436,6 @@ export const AllCases = React.memo<AllCasesProps>(
                   isModal
                     ? {
                         onClick: () => onRowClick(item.id),
-                        tabIndex: 0,
                       }
                     : {}
                 }

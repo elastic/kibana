@@ -6,7 +6,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import {
@@ -15,16 +14,15 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
-import { useThrottledResizeObserver } from '../../../../common/components/utils';
+import { TestProviders } from '../../../../common/mock/test_providers';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-
-jest.mock('../../../../common/lib/kibana');
-
-let mockedWidth = 1000;
-jest.mock('../../../../common/components/utils');
-(useThrottledResizeObserver as jest.Mock).mockImplementation(() => ({
-  width: mockedWidth,
-}));
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useGetUserSavedObjectPermissions: jest.fn().mockReturnValue({ crud: true }),
+  };
+});
 
 jest.mock('react-redux', () => {
   const originalModule = jest.requireActual('react-redux');
@@ -32,6 +30,7 @@ jest.mock('react-redux', () => {
   return {
     ...originalModule,
     useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
+    useHistory: jest.fn(),
   };
 });
 
@@ -41,6 +40,15 @@ jest.mock('react-router-dom', () => {
   return {
     ...originalModule,
     useHistory: jest.fn(),
+  };
+});
+let mockedWidth = 1000;
+jest.mock('../../../../common/components/utils', () => {
+  const originalModule = jest.requireActual('../../../../common/components/utils');
+
+  return {
+    ...originalModule,
+    useThrottledResizeObserver: jest.fn().mockReturnValue({ width: mockedWidth }),
   };
 });
 
@@ -58,7 +66,7 @@ describe('Properties', () => {
 
   test('renders correctly', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -78,7 +86,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
@@ -91,7 +99,7 @@ describe('Properties', () => {
 
   test('renders correctly draft timeline', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -111,7 +119,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
@@ -123,7 +131,7 @@ describe('Properties', () => {
 
   test('it renders an empty star icon when it is NOT a favorite', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -143,7 +151,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="timeline-favorite-empty-star"]').exists()).toEqual(true);
@@ -151,7 +159,7 @@ describe('Properties', () => {
 
   test('it renders a filled star icon when it is a favorite', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -171,7 +179,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="timeline-favorite-filled-star"]').exists()).toEqual(true);
@@ -181,7 +189,7 @@ describe('Properties', () => {
     const title = 'foozle';
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -201,7 +209,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="timeline-title"]').first().props().value).toEqual(title);
@@ -209,7 +217,7 @@ describe('Properties', () => {
 
   test('it renders the date picker with the lock icon', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -229,7 +237,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(
@@ -242,7 +250,7 @@ describe('Properties', () => {
 
   test('it renders the lock icon when isDatepickerLocked is true', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -262,7 +270,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
     expect(
       wrapper
@@ -274,7 +282,7 @@ describe('Properties', () => {
 
   test('it renders the unlock icon when isDatepickerLocked is false', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -294,7 +302,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
     expect(
       wrapper
@@ -309,7 +317,7 @@ describe('Properties', () => {
     mockedWidth = showDescriptionThreshold;
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -329,7 +337,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(
@@ -346,7 +354,7 @@ describe('Properties', () => {
     mockedWidth = showDescriptionThreshold - 1;
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -366,7 +374,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(
@@ -381,7 +389,7 @@ describe('Properties', () => {
     mockedWidth = showNotesThreshold;
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -401,7 +409,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(
@@ -416,7 +424,7 @@ describe('Properties', () => {
     mockedWidth = showNotesThreshold - 1;
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -436,7 +444,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(
@@ -449,7 +457,7 @@ describe('Properties', () => {
 
   test('it renders a settings icon', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -469,7 +477,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toEqual(true);
@@ -479,7 +487,7 @@ describe('Properties', () => {
     const title = 'port scan';
 
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -499,7 +507,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(true);
@@ -507,7 +515,7 @@ describe('Properties', () => {
 
   test('it does NOT render an avatar for the current user viewing the timeline when it does NOT have a title', () => {
     const wrapper = mount(
-      <ReduxStoreProvider store={store}>
+      <TestProviders store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
@@ -527,7 +535,7 @@ describe('Properties', () => {
           updateNote={jest.fn()}
           usersViewing={usersViewing}
         />
-      </ReduxStoreProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);

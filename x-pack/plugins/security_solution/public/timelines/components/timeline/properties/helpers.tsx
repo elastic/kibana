@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import { Note } from '../../../../common/lib/note';
@@ -33,6 +33,7 @@ import * as i18n from './translations';
 import { SiemPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { State } from '../../../../common/store';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -127,22 +128,24 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const history = useHistory();
+    const dispatch = useDispatch();
     const { savedObjectId } = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
+
     const handleClick = useCallback(() => {
       onClosePopover();
       history.push({
         pathname: `/${SiemPageName.case}/create`,
-        state: {
-          insertTimeline: {
-            timelineId,
-            timelineSavedObjectId: savedObjectId,
-            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-          },
-        },
       });
-    }, [onClosePopover, history, timelineId, timelineTitle]);
+      dispatch(
+        setInsertTimeline({
+          timelineId,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        })
+      );
+    }, [dispatch, onClosePopover, history, timelineId, timelineTitle]);
 
     return (
       <EuiButtonEmpty

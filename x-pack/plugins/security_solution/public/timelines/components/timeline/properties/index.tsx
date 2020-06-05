@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
@@ -22,6 +22,7 @@ import { SiemPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../store/timeline';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -38,7 +39,6 @@ interface Props {
   isDatepickerLocked: boolean;
   isFavorite: boolean;
   noteIds: string[];
-  onClose: () => void;
   timelineId: string;
   status: TimelineStatus;
   title: string;
@@ -72,7 +72,6 @@ export const Properties = React.memo<Props>(
     isDatepickerLocked,
     isFavorite,
     noteIds,
-    onClose,
     status,
     timelineId,
     title,
@@ -87,6 +86,7 @@ export const Properties = React.memo<Props>(
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);
+    const dispatch = useDispatch();
 
     const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
     const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
@@ -110,16 +110,16 @@ export const Properties = React.memo<Props>(
         onCloseCaseModal();
         history.push({
           pathname: `/${SiemPageName.case}/${id}`,
-          state: {
-            insertTimeline: {
-              timelineId,
-              timelineSavedObjectId: currentTimeline.savedObjectId,
-              timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
-            },
-          },
         });
+        dispatch(
+          setInsertTimeline({
+            timelineId,
+            timelineSavedObjectId: currentTimeline.savedObjectId,
+            timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
+          })
+        );
       },
-      [currentTimeline, history, timelineId, title]
+      [currentTimeline, dispatch, history, timelineId, title]
     );
 
     const datePickerWidth = useMemo(

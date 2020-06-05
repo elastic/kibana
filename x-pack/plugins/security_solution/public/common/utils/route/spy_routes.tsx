@@ -14,7 +14,7 @@ import { useRouteSpy } from './use_route_spy';
 
 export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
   ({
-    location: { pathname, search, state: locationState },
+    location: { pathname, search },
     history,
     match: {
       params: { pageName, detailName, tabName, flowTarget },
@@ -36,7 +36,6 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
     useEffect(() => {
       if (pageName && !deepEqual(route.pathName, pathname)) {
         if (isInitializing && detailName == null) {
-          console.log('here1');
           dispatch({
             type: 'updateRouteWithOutSearch',
             route: {
@@ -51,7 +50,6 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           });
           setIsInitializing(false);
         } else {
-          console.log('here2', { state, locationState, history });
           dispatch({
             type: 'updateRoute',
             route: {
@@ -68,7 +66,6 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
         }
       } else {
         if (pageName && !deepEqual(state, route.state)) {
-          console.log('here3');
           dispatch({
             type: 'updateRoute',
             route: {
@@ -84,79 +81,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           });
         }
       }
-    }, [pathname, search, pageName, detailName, tabName, flowTarget, state, locationState]);
-
-    // useEffect(() => {
-    //   console.log('STATE', state);
-    //   if (pageName && !deepEqual(route.pathName, pathname)) {
-    //     if (isInitializing && detailName == null) {
-    //       console.log('here1');
-    //       dispatch({
-    //         type: 'updateRouteWithOutSearch',
-    //         route: {
-    //           detailName,
-    //           flowTarget,
-    //           history,
-    //           pageName,
-    //           pathName: pathname,
-    //           state: { ...state, ...locationState },
-    //           tabName,
-    //         },
-    //       });
-    //       setIsInitializing(false);
-    //     } else {
-    //       console.log('here2', { state, locationState, history });
-    //       dispatch({
-    //         type: 'updateRoute',
-    //         route: {
-    //           detailName,
-    //           flowTarget,
-    //           history: {
-    //             ...history,
-    //             location: {
-    //               ...history.location,
-    //               state: {
-    //                 ...history.location.state,
-    //                 ...locationState,
-    //               },
-    //             },
-    //           },
-    //           pageName,
-    //           pathName: pathname,
-    //           search,
-    //           state: { ...state, ...locationState },
-    //           tabName,
-    //         },
-    //       });
-    //     }
-    //   } else {
-    //     if (pageName && !deepEqual(state, route.state)) {
-    //       console.log('here3');
-    //       dispatch({
-    //         type: 'updateRoute',
-    //         route: {
-    //           detailName,
-    //           flowTarget,
-    //           history: {
-    //             ...history,
-    //             location: {
-    //               ...history.location,
-    //               state: {
-    //                 ...history.location.state,
-    //                 ...locationState,
-    //               },
-    //             },
-    //           },
-    //           pageName,
-    //           pathName: pathname,
-    //           search,
-    //           state: { ...state, ...locationState },
-    //           tabName,
-    //         },
-    //       });
-    //     }
-    //   }
-    // }, [pathname, search, pageName, detailName, tabName, flowTarget, state, locationState]);
+    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
     return null;
   }
 );

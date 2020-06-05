@@ -53,7 +53,7 @@ import {
   updateIsLoading,
   setSavedQueryId,
   setFilters,
-  updateEventType,
+  updateEventType, setInsertTimeline,
 } from './actions';
 import {
   addNewTimeline,
@@ -106,6 +106,7 @@ export const initialTimelineState: TimelineState = {
     newTimelineModel: null,
   },
   showCallOutUnauthorizedMsg: false,
+  insertTimeline: null,
 };
 
 /** The reducer for all timeline actions  */
@@ -482,5 +483,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       filters,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
   }))
   .build();
