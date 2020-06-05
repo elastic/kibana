@@ -28,12 +28,13 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { FieldFormatMethods, OnNotification } from '../types';
+import { OnNotification } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
-  fieldFormats: FieldFormatMethods;
+  fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
 }
 

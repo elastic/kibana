@@ -38,7 +38,8 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { FieldFormatMethods, OnNotification, OnError } from '../types';
+import { OnNotification, OnError } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -53,7 +54,7 @@ export class IndexPatternsService {
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
-  private fieldFormats: FieldFormatMethods;
+  private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
@@ -68,7 +69,7 @@ export class IndexPatternsService {
     core: CoreStart,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpStart,
-    fieldFormats: FieldFormatMethods,
+    fieldFormats: FieldFormatsStartCommon,
     onNotification: OnNotification,
     onError: OnError,
     onRedirectNoIndexPattern: (core: CoreStart) => void

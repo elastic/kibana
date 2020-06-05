@@ -21,12 +21,13 @@ import { findIndex } from 'lodash';
 import { IIndexPattern } from '../../types';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
-import { FieldFormatMethods, OnNotification } from '../types';
+import { OnNotification } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 type FieldMap = Map<Field['name'], Field>;
 
 interface FieldListDependencies {
-  fieldFormats: FieldFormatMethods;
+  fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
 }
 

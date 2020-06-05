@@ -28,7 +28,7 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
 
-import { FieldFormatMethods } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 jest.mock('../../../../kibana_utils/common', () => {
   const originalModule = jest.requireActual('../../../../kibana_utils/common');
@@ -100,7 +100,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     savedObjectsClient as any,
     apiClient,
     patternCache,
-    ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatMethods,
+    ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
     () => {},
     () => {}
   );
@@ -366,7 +366,7 @@ describe('IndexPattern', () => {
       savedObjectsClient as any,
       apiClient,
       patternCache,
-      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatMethods,
+      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
       () => {},
       () => {}
     );
@@ -381,7 +381,7 @@ describe('IndexPattern', () => {
       savedObjectsClient as any,
       apiClient,
       patternCache,
-      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatMethods,
+      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
       () => {},
       () => {}
     );

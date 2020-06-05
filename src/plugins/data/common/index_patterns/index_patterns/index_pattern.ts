@@ -43,7 +43,8 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from '.';
 import { TypeMeta } from '.';
-import { FieldFormatMethods, OnNotification, OnError } from '../types';
+import { OnNotification, OnError } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -71,7 +72,7 @@ export class IndexPattern implements IIndexPattern {
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
-  private fieldFormats: FieldFormatMethods;
+  private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
 
@@ -103,7 +104,7 @@ export class IndexPattern implements IIndexPattern {
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
     patternCache: any,
-    fieldFormats: FieldFormatMethods,
+    fieldFormats: FieldFormatsStartCommon,
     onNotification: OnNotification,
     onError: OnError
   ) {
