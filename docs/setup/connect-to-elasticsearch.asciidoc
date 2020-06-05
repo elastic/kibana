@@ -5,9 +5,9 @@ To start working with your data in {kib}, you can:
 
 * Upload a CSV, JSON, or log file with the File Data Visualizer.
 
-* Upload geo data the with GeoJSON Upload feature.
+* Upload geospatial data with the GeoJSON Upload feature.
 
-* Set up a Beats module to index logs, metrics, events, or application data.
+* Index logs, metrics, events, or application data by setting up a Beats module.
 
 * Connect {kib} with existing {es} indices.
 
@@ -16,7 +16,7 @@ to see all that you can do in {kib}.
 
 [float]
 [[upload-data-kibana]]
-=== Upload CSV, JSON, or log files
+=== Upload a CSV, JSON, or log file
 
 To visualize data in a CSV, JSON, or log file, you can
 upload it using the File Data Visualizer.  On the home page,
@@ -24,7 +24,7 @@ click *Import a CSV, NDSON, or log file*, and then drag your file into the
 File Data Visualizer.
 
 You can upload a file up to 100 MB.  This value is configurable up to 1 GB in
-<<advanced-options, Advanced Settings>>.
+<<kibana-ml-settings, Advanced Settings>>.
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
@@ -37,9 +37,9 @@ repeated production process, but rather for the initial exploration of your data
 
 [float]
 [[upload-geoipdata-kibana]]
-=== Upload geo data
+=== Upload geospatial data
 
-To visualize geo data in a point or shape file, you can upload it using the <<geojson-upload, GeoJSON Upload>>
+To visualize geospatial data in a point or shape file, you can upload it using the <<geojson-upload, GeoJSON Upload>>
 feature in *Elastic Maps*, and then use that data as a layer in a map.
 The data is also available for use in the broader Kibana ecosystem, for example,
 in visualizations and Canvas workpads.
@@ -51,10 +51,10 @@ image::images/fu_gs_select_source_file_upload.png[]
 
 [float]
 [[add-data-tutorial-kibana]]
-===  Set up a Beats module
+===  Index metrics, log, security, and application data
 
 The built-in data tutorials can help you quickly get up and running with
-metrics data, log analytics, and security events.
+metrics data, log analytics, security events, and application data.
 These tutorials walk you through installing and configuring a
 Beats data shipper to periodically collect and send data to {es}.
 You can then use the pre-built dashboards to explore and analyze the data.
@@ -71,10 +71,10 @@ image::images/add-data-tutorials.png[Add Data tutorials]
 [[connect-to-es]]
 === Connect with {es} indices
 
-To visualize data in existing {es} indices, you
-create index patterns that match the names of the indices you want to explore.
-When you add data with the File Data Visualizer, GeoJSON Upload,
-or an built-in tutorial, an index pattern is created for you.
+To visualize data in existing {es} indices, you must
+create an index pattern that matches the names of the indices that you want to explore.
+When you add data with the File Data Visualizer, GeoJSON Upload feature,
+or built-in tutorial, an index pattern is created for you.
 
 . Go to *Stack Management*, and then click *Index Patterns*.
 
@@ -102,4 +102,4 @@ You’ll see a list of fields configured for the matching index.
 You can designate your index pattern as the default by clicking the star icon on this page.
 +
 When searching in *Discover* and creating visualizations, you choose a pattern
-from the index pattern menu to specify the {es} indices that contain the data you want to work with.
+from the index pattern menu to specify the {es} indices that contain the data you want to explore.
