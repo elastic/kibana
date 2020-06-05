@@ -18,17 +18,16 @@
  */
 
 import { findIndex } from 'lodash';
-// import { ToastsStart } from 'kibana/public';
 import { IIndexPattern } from '../../types';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
-import { FieldFormatMethods } from './types';
+import { FieldFormatMethods, OnNotification } from '../types';
 
 type FieldMap = Map<Field['name'], Field>;
 
 interface FieldListDependencies {
   fieldFormats: FieldFormatMethods;
-  // toastNotifications: ToastsStart;
+  onNotification: OnNotification;
 }
 
 export interface IIndexPatternFieldList extends Array<Field> {
@@ -47,8 +46,8 @@ export type CreateIndexPatternFieldList = (
 
 export const getIndexPatternFieldListCreator = ({
   fieldFormats,
-}: // toastNotifications,
-FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
+  onNotification,
+}: FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
   class FieldList extends Array<Field> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<Field['type'], FieldMap> = new Map();
@@ -76,7 +75,7 @@ FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
     add = (field: FieldSpec) => {
       const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
         fieldFormats,
-        // toastNotifications,
+        onNotification,
       });
       this.push(newField);
       this.setByName(newField);
@@ -94,7 +93,7 @@ FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
     update = (field: FieldSpec) => {
       const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
         fieldFormats,
-        // toastNotifications,
+        onNotification,
       });
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);

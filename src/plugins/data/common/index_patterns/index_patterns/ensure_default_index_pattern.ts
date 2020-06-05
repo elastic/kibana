@@ -30,7 +30,10 @@ import { IndexPatternsContract } from './index_patterns';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 
-export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
+export const createEnsureDefaultIndexPattern = (
+  core: CoreStart,
+  onRedirectNoIndexPattern: (core: CoreStart) => void
+) => {
   // let bannerId: string;
   // let timeoutId: NodeJS.Timeout | undefined;
 
@@ -62,43 +65,8 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
       defaultId = patterns[0];
       core.uiSettings.set('defaultIndex', defaultId);
     } else {
-      /*
-      const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
-      const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
+      onRedirectNoIndexPattern(core);
 
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
-      const bannerMessage = i18n.translate(
-        'data.indexPatterns.ensureDefaultIndexPattern.bannerLabel',
-        {
-          defaultMessage:
-            "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
-        }
-      );
-
-      // Avoid being hostile to new users who don't have an index pattern setup yet
-      // give them a friendly info message instead of a terse error message
-      bannerId = core.overlays.banners.replace(
-        bannerId,
-        toMountPoint(<EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage} />)
-      );
-
-      // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
-      timeoutId = setTimeout(() => {
-        core.overlays.banners.remove(bannerId);
-        timeoutId = undefined;
-      }, 15000);
-
-      if (redirectTarget === '/home') {
-        core.application.navigateToApp('home');
-      } else {
-        core.application.navigateToApp('management', {
-          path: `/kibana/indexPatterns?bannerMessage=${bannerMessage}`,
-        });
-      }
-*/
       // return never-resolving promise to stop resolving and wait for the url change
       return new Promise(() => {});
     }

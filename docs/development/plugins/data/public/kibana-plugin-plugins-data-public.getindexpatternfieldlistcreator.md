@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-getIndexPatternFieldListCreator: ({ fieldFormats, }: FieldListDependencies) => CreateIndexPatternFieldList
+getIndexPatternFieldListCreator: ({ fieldFormats, onNotification, }: FieldListDependencies) => CreateIndexPatternFieldList
 ```

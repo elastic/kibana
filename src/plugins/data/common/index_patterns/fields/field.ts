@@ -29,13 +29,13 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { FieldFormatMethods } from './types';
+import { FieldFormatMethods, OnNotification } from '../types';
 
 export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
   fieldFormats: FieldFormatMethods;
-  // toastNotifications: ToastsStart;
+  onNotification: OnNotification;
 }
 
 export class Field implements IFieldType {
@@ -67,6 +67,7 @@ export class Field implements IFieldType {
     shortDotsEnable: boolean,
     {
       fieldFormats,
+      onNotification,
     }: // toastNotifications
     FieldDependencies
   ) {

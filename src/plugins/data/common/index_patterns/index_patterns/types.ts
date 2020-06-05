@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { FieldFormatsRegistry } from '../../../common';
-
 export type AggregationRestrictions = Record<
   string,
   {
@@ -35,5 +33,3 @@ export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
   [key: string]: any;
 }
-
-export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;

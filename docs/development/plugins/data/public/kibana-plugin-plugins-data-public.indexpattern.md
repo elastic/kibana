@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats)](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification)](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 

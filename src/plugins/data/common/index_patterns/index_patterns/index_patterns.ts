@@ -38,7 +38,7 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { FieldFormatMethods } from './types';
+import { FieldFormatMethods, OnNotification } from '../types';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -54,6 +54,7 @@ export class IndexPatternsService {
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
   private fieldFormats: FieldFormatMethods;
+  private onNotification: OnNotification;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
   createFieldList: CreateIndexPatternFieldList;
   createField: (
@@ -66,21 +67,27 @@ export class IndexPatternsService {
     core: CoreStart,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpStart,
-    fieldFormats: FieldFormatMethods
+    fieldFormats: FieldFormatMethods,
+    onNotification: OnNotification,
+    onRedirectNoIndexPattern: (core: CoreStart) => void
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
-    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
+    this.onNotification = onNotification;
+    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
+      core,
+      onRedirectNoIndexPattern
+    );
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats,
-      // toastNotifications: core.notifications.toasts,
+      onNotification,
     });
     this.createField = (indexPattern, spec, shortDotsEnable) => {
       return new Field(indexPattern, spec, shortDotsEnable, {
         fieldFormats,
-        // toastNotifications: core.notifications.toasts,
+        onNotification,
       });
     };
   }
@@ -181,7 +188,8 @@ export class IndexPatternsService {
       this.savedObjectsClient,
       this.apiClient,
       indexPatternCache,
-      this.fieldFormats
+      this.fieldFormats,
+      this.onNotification
     );
 
     return indexPattern.init();

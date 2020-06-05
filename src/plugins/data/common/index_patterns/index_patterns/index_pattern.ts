@@ -18,7 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
 import {
   DuplicateField,
@@ -42,9 +42,8 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from '.';
-// import { getNotifications, getFieldFormats } from '../../services';
 import { TypeMeta } from '.';
-import { FieldFormatMethods } from './types';
+import { FieldFormatMethods, OnNotification } from '../types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -73,6 +72,7 @@ export class IndexPattern implements IIndexPattern {
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatMethods;
+  private onNotification: OnNotification;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -102,7 +102,8 @@ export class IndexPattern implements IIndexPattern {
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
     patternCache: any,
-    fieldFormats: FieldFormatMethods
+    fieldFormats: FieldFormatMethods,
+    onNotification: OnNotification
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -111,13 +112,14 @@ export class IndexPattern implements IIndexPattern {
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
     this.fieldFormats = fieldFormats;
+    this.onNotification = onNotification;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats,
-      // toastNotifications: getNotifications().toasts,
+      onNotification,
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
@@ -294,7 +296,7 @@ export class IndexPattern implements IIndexPattern {
         false,
         {
           fieldFormats: this.fieldFormats,
-          // toastNotifications: getNotifications().toasts,
+          onNotification: this.onNotification,
         }
       )
     );
@@ -398,7 +400,8 @@ export class IndexPattern implements IIndexPattern {
           this.savedObjectsClient,
           this.patternCache,
           this.fieldsFetcher,
-          this.fieldFormats
+          this.fieldFormats,
+          this.onNotification
         );
         await duplicatePattern.destroy();
       }
@@ -448,7 +451,8 @@ export class IndexPattern implements IIndexPattern {
             this.savedObjectsClient,
             this.patternCache,
             this.fieldsFetcher,
-            this.fieldFormats
+            this.fieldFormats,
+            this.onNotification
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -473,16 +477,12 @@ export class IndexPattern implements IIndexPattern {
             }
 
             if (unresolvedCollision) {
-              /*
-              const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
+              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
                 defaultMessage:
                   'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
               });
-              const { toasts } = getNotifications();
 
-              toasts.addDanger(message);
-              */
-
+              this.onNotification({ title, color: 'danger' });
               throw err;
             }
 
@@ -524,7 +524,7 @@ export class IndexPattern implements IIndexPattern {
 
         if (err instanceof IndexPatternMissingIndices) {
           // toasts.addDanger((err as any).message);
-
+          this.onNotification({ title: (err as any).message, color: 'danger' });
           return [];
         }
 
@@ -539,6 +539,16 @@ export class IndexPattern implements IIndexPattern {
           }),
         });
         */
+        this.onNotification({
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            values: {
+              id: this.id,
+              title: this.title,
+            },
+          }),
+          color: 'danger',
+        }); // was addError
       });
   }
 

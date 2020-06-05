@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { FieldFormatsRegistry } from '../../field_formats';
-
 export interface IFieldSubType {
   multi?: { parent: string };
   nested?: { path: string };
@@ -44,5 +42,3 @@ export interface IFieldType {
   displayName?: string;
   format?: any;
 }
-
-export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;

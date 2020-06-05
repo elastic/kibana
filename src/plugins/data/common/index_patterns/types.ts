@@ -17,7 +17,9 @@
  * under the License.
  */
 
+import { ToastInputFields } from 'src/core/public/notifications';
 import { IFieldType } from './fields';
+import { FieldFormatsRegistry } from '../../common';
 
 export interface IIndexPattern {
   [key: string]: any;
@@ -47,3 +49,6 @@ export interface IndexPatternAttributes {
   typeMeta: string;
   timeFieldName?: string;
 }
+
+export type OnNotification = (toastInputFields: ToastInputFields) => void;
+export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;

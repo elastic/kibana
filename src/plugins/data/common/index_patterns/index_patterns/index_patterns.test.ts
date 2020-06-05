@@ -62,7 +62,14 @@ describe('IndexPatterns', () => {
         }) as Promise<SavedObjectsFindResponsePublic<any>>
     );
 
-    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http, fieldFormats);
+    indexPatterns = new IndexPatternsService(
+      core,
+      savedObjectsClient,
+      http,
+      fieldFormats,
+      () => {},
+      () => {}
+    );
   });
 
   test('does cache gets for the same id', async () => {
