@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { TSearchStrategyProvider } from '../../../src/plugins/data/server';
+import { ISearchStrategy } from '../../../src/plugins/data/server';
 import { DEMO_SEARCH_STRATEGY } from '../common';
 
-export const demoSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = () => {
+export const demoSearchStrategyProvider = (): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
   return {
-    search: (request) => {
+    search: (context, request) => {
       return Promise.resolve({
         greeting:
           request.mood === 'happy'

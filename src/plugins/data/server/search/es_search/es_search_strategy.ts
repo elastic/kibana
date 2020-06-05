@@ -17,19 +17,18 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { APICaller } from 'kibana/server';
+import { RequestHandlerContext, SharedGlobalConfig } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
+import { Observable } from 'rxjs';
 import { ES_SEARCH_STRATEGY } from '../../../common/search';
-import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
-import { getDefaultSearchParams, getTotalLoaded, ISearchContext } from '..';
+import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
-export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  caller: APICaller
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+export const esSearchStrategyProvider = async (
+  config$: Observable<SharedGlobalConfig>
+): Promise<ISearchStrategy<typeof ES_SEARCH_STRATEGY>> => {
+  const config = await config$.pipe(first()).toPromise();
   return {
-    search: async (request, options) => {
-      const config = await context.config$.pipe(first()).toPromise();
+    search: async (context: RequestHandlerContext, request, options) => {
       const defaultParams = getDefaultSearchParams(config);
 
       // Only default index pattern type is supported here.
@@ -42,7 +41,12 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
         ...defaultParams,
         ...request.params,
       };
-      const rawResponse = (await caller('search', params, options)) as SearchResponse<any>;
+
+      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+        'search',
+        params,
+        options
+      )) as SearchResponse<any>;
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.

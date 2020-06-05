@@ -17,82 +17,50 @@
  * under the License.
  */
 
+import { Plugin, PluginInitializerContext, CoreSetup } from '../../../../core/server';
 import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  IContextContainer,
-} from '../../../../core/server';
-import { registerSearchRoute } from './routes';
-import { ISearchSetup } from './i_search_setup';
-import { createApi } from './create_api';
-import {
+  ISearchSetup,
+  ISearchStart,
   TSearchStrategiesMap,
-  TSearchStrategyProvider,
-  TRegisterSearchStrategyProvider,
-} from './i_search_strategy';
-import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
+  TRegisterSearchStrategy,
+  TGetSearchStrategy,
+} from './types';
+import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
-
 import { searchSavedObjectType } from '../saved_objects';
+import { DataPluginStart } from '../plugin';
 
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    search?: IRouteHandlerSearchContext;
-  }
-}
-
-export class SearchService implements Plugin<ISearchSetup, void> {
+export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: TSearchStrategiesMap = {};
-
-  private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ISearchSetup {
-    const router = core.http.createRouter();
-    registerSearchRoute(router);
-
-    this.contextContainer = core.context.createContextContainer();
-
+  public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
     core.savedObjects.registerType(searchSavedObjectType);
 
-    core.http.registerRouteHandlerContext<'search'>('search', (context) => {
-      return createApi({
-        caller: context.core.elasticsearch.legacy.client.callAsCurrentUser,
-        searchStrategies: this.searchStrategies,
-      });
-    });
-
-    const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = (
-      plugin,
-      name,
-      strategyProvider
-    ) => {
-      this.searchStrategies[name] = this.contextContainer!.createHandler(plugin, strategyProvider);
+    const registerSearchStrategy: TRegisterSearchStrategy = async (name, strategy) => {
+      this.searchStrategies[name] = await strategy;
     };
 
-    const api: ISearchSetup = {
-      registerSearchStrategyContext: this.contextContainer!.registerContext,
-      registerSearchStrategyProvider,
-    };
-
-    api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
-    api.registerSearchStrategyContext(
-      this.initializerContext.opaqueId,
-      'config$',
-      () => this.initializerContext.config.legacy.globalConfig$
-    );
-
-    api.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
+    registerSearchStrategy(
       ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider
+      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
     );
 
-    return api;
+    registerSearchRoute(core);
+
+    return { registerSearchStrategy };
   }
 
-  public start() {}
+  public start(): ISearchStart {
+    const getSearchStrategy: TGetSearchStrategy = (name) => {
+      if (!this.searchStrategies.hasOwnProperty(name)) {
+        throw new Error('No strategy registered for `${name}`.');
+      }
+      return this.searchStrategies[name];
+    };
+
+    return { getSearchStrategy };
+  }
   public stop() {}
 }
