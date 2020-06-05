@@ -7,8 +7,6 @@
 import React, { FunctionComponent, useState, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 
-import './tree.scss';
-
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { TreeNode } from './tree_node';

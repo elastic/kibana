@@ -41,13 +41,12 @@ export const TreeNode: FunctionComponent<Props> = ({
   return (
     <EuiPanel paddingSize="s">
       <EuiFlexGroup
-        className="processorsEditor__tree__treeLeaf__itemContainer"
         alignItems="center"
         justifyContent="flexStart"
         responsive={false}
         gutterSize="none"
       >
-        <EuiFlexItem className="processorsEditor__tree__treeLeaf__itemLeft" grow={false}>
+        <EuiFlexItem grow={false}>
           {renderItem({ processor, selector: processorInfo.selector })}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
