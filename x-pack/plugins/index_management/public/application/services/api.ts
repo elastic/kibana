@@ -39,6 +39,7 @@ import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
 import { TemplateDeserialized, TemplateListItem } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
+import { doMappingsHaveType } from '../components/mappings_editor';
 
 // Temporary hack to provide the uiMetricService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
