@@ -688,7 +688,7 @@ To include your PRs in the Release Notes:
     * For a breaking change, use `release_note:breaking`.
     * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
 
-We also produce a blog post that details more important breaking API changes in every major and minor release. When your PR includes a breaking API change, add the `release_note:dev_docs` label . Additionally add a brief summary of the break at the bottom of the PR using the format below:
+We also produce a blog post that details more important breaking API changes in every major and minor release. When your PR includes a breaking API change, add the `release_note:dev_docs` label, and add a brief summary of the break at the bottom of the PR using the format below:
 
 ```
 # Dev Docs
