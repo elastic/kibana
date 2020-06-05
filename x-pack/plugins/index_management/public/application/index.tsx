@@ -24,13 +24,13 @@ export const renderApp = (
 
   const { i18n } = core;
   const { Context: I18nContext } = i18n;
-  const { services } = dependencies;
+  const { services, history } = dependencies;
 
   render(
     <I18nContext>
       <Provider store={indexManagementStore(services)}>
         <AppContextProvider value={dependencies}>
-          <App />
+          <App history={history} />
         </AppContextProvider>
       </Provider>
     </I18nContext>,
