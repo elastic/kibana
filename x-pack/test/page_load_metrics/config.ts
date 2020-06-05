@@ -26,6 +26,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       directory: resolve(__dirname, 'es_archives'),
     },
 
+    screenshots: {
+      directory: resolve(__dirname, 'screenshots'),
+    },
+
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs')],

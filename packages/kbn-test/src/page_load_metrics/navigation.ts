@@ -28,7 +28,7 @@ import { ResponseReceivedEvent, DataReceivedEvent } from './event';
 export interface NavigationOptions {
   headless: boolean;
   appConfig: { url: string; username: string; password: string };
-  screenshotsDir?: string;
+  screenshotsDir: string;
 }
 
 export type NavigationResults = Map<string, Map<string, FrameResponse>>;
@@ -136,9 +136,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
             continue;
           }
 
-          const failureDir = options.screenshotsDir
-            ? resolve(options.screenshotsDir, 'failure')
-            : resolve(__dirname, 'screenshots/failure');
+          const failureDir = resolve(options.screenshotsDir, 'failure');
           const screenshotPath = resolve(
             failureDir,
             `${app.path.slice(1).split('/').join('_')}_navigation.png`

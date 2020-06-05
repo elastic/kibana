@@ -20,7 +20,10 @@
 import Url from 'url';
 
 import { run, createFlagError } from '@kbn/dev-utils';
+import { resolve, basename } from 'path';
 import { capturePageLoadMetrics } from './capture_page_load_metrics';
+
+const defaultScreenshotsDir = resolve(__dirname, 'screenshots');
 
 export function runPageLoadMetricsCli() {
   run(
@@ -44,6 +47,12 @@ export function runPageLoadMetricsCli() {
 
       const headless = !flags.head;
 
+      const screenshotsDir = flags.screenshotsDir || defaultScreenshotsDir;
+
+      if (typeof screenshotsDir !== 'string' || screenshotsDir === basename(screenshotsDir)) {
+        throw createFlagError('Expect screenshotsDir to be valid path string');
+      }
+
       const metrics = await capturePageLoadMetrics(log, {
         headless,
         appConfig: {
@@ -51,6 +60,7 @@ export function runPageLoadMetricsCli() {
           username,
           password,
         },
+        screenshotsDir,
       });
       for (const metric of metrics) {
         log.info(`${metric.id}: ${metric.value}`);
@@ -59,14 +69,20 @@ export function runPageLoadMetricsCli() {
     {
       description: `Loads several pages with Puppeteer to capture the size of assets`,
       flags: {
-        string: ['kibana-url', 'username', 'password'],
+        string: ['kibana-url', 'username', 'password', 'screenshotsDir'],
         boolean: ['head'],
-        default: { username: 'elastic', password: 'changeme', debug: true },
+        default: {
+          username: 'elastic',
+          password: 'changeme',
+          debug: true,
+          screenshotsDir: defaultScreenshotsDir,
+        },
         help: `
           --kibana-url       Url for Kibana we should connect to, can include login info
           --head             Run puppeteer with graphical user interface
           --username         Set username, defaults to 'elastic'
           --password         Set password, defaults to 'changeme'
+          --screenshotsDir   Set screenshots directory, defaults to '${defaultScreenshotsDir}'
         `,
       },
     }
