@@ -37,8 +37,10 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { healthToColor } from '../../../../services';
+import { encodePathForReactRouter } from '../../../../services/routing';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, PageErrorForbidden } from '../../../../components';
@@ -117,6 +119,7 @@ export class IndexTable extends Component {
       }
     }
   }
+
   componentWillUnmount() {
     clearInterval(this.interval);
   }
@@ -146,11 +149,14 @@ export class IndexTable extends Component {
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     sortChanged(column, newIsSortAscending);
   };
+
   renderFilterError() {
     const { filterError } = this.state;
+
     if (!filterError) {
       return;
     }
+
     return (
       <>
         <EuiSpacer />
@@ -169,6 +175,7 @@ export class IndexTable extends Component {
       </>
     );
   }
+
   onFilterChanged = ({ query, error }) => {
     if (error) {
       this.setState({ filterError: error });
@@ -177,6 +184,7 @@ export class IndexTable extends Component {
       this.setState({ filterError: null });
     }
   };
+
   getFilters = (extensionsService) => {
     const { allIndices } = this.props;
     return extensionsService.filters.reduce((accum, filterExtension) => {
@@ -184,6 +192,7 @@ export class IndexTable extends Component {
       return [...accum, ...filtersToAdd];
     }, []);
   };
+
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
     if (allSelected) {
@@ -243,7 +252,8 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { openDetailPanel, filterChanged } = this.props;
+    const { openDetailPanel, filterChanged, history } = this.props;
+
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
     } else if (fieldName === 'name') {
@@ -261,7 +271,18 @@ export class IndexTable extends Component {
           {renderBadges(index, filterChanged, appServices.extensionsService)}
         </Fragment>
       );
+    } else if (fieldName === 'data_stream') {
+      return (
+        <EuiLink
+          {...reactRouterNavigate(history, {
+            pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+          })}
+        >
+          {value}
+        </EuiLink>
+      );
     }
+
     return value;
   }
 
@@ -480,12 +501,14 @@ export class IndexTable extends Component {
                     </EuiText>
                   </EuiTitle>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
                       {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
+
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
@@ -504,9 +527,13 @@ export class IndexTable extends Component {
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
+
               <EuiSpacer size="l" />
+
               {this.renderBanners(extensionsService)}
+
               {indicesError && this.renderError()}
+
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
@@ -523,6 +550,7 @@ export class IndexTable extends Component {
                     />
                   </EuiFlexItem>
                 ) : null}
+
                 {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                   <Fragment>
                     <EuiFlexItem>
@@ -572,8 +600,11 @@ export class IndexTable extends Component {
                   </Fragment>
                 )}
               </EuiFlexGroup>
+
               {this.renderFilterError()}
+
               <EuiSpacer size="m" />
+
               {indices.length > 0 ? (
                 <div style={{ maxWidth: '100%', overflow: 'auto' }}>
                   <EuiTable className="indTable">
@@ -586,6 +617,7 @@ export class IndexTable extends Component {
                         />
                       </caption>
                     </EuiScreenReaderOnly>
+
                     <EuiTableHeader>
                       <EuiTableHeaderCellCheckbox>
                         <EuiCheckbox
@@ -603,13 +635,16 @@ export class IndexTable extends Component {
                       </EuiTableHeaderCellCheckbox>
                       {this.buildHeader()}
                     </EuiTableHeader>
+
                     <EuiTableBody>{this.buildRows(services)}</EuiTableBody>
                   </EuiTable>
                 </div>
               ) : (
                 emptyState
               )}
+
               <EuiSpacer size="m" />
+
               {indices.length > 0 ? this.renderPager() : null}
             </Fragment>
           );

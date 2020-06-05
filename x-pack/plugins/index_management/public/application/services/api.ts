@@ -53,6 +53,14 @@ export function useLoadDataStreams() {
   });
 }
 
+// TODO: Implement this API endpoint once we have content to surface in the detail panel.
+export function useLoadDataStream(name: string) {
+  return useRequest<DataStream[]>({
+    path: `${API_BASE_PATH}/data_stream/${encodeURIComponent(name)}`,
+    method: 'get',
+  });
+}
+
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
   return response.data ? response.data : response;

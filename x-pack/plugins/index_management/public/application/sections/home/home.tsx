@@ -116,7 +116,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path="/data_streams" component={DataStreamList} />
+          <Route
+            exact
+            path={['/data_streams', '/data_streams/:dataStreamName?']}
+            component={DataStreamList}
+          />
           <Route exact path="/indices" component={IndexList} />
           <Route exact path="/indices/filter/:filter?" component={IndexList} />
           <Route

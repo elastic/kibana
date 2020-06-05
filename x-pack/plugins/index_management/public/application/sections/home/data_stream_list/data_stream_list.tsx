@@ -5,14 +5,25 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { DataStreamTable } from './data_stream_table';
 
-export const DataStreamList = () => {
+interface MatchParams {
+  dataStreamName?: string;
+}
+
+export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+  match: {
+    params: { dataStreamName },
+  },
+  history,
+}) => {
   const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams();
 
   let content;
@@ -65,8 +76,25 @@ export const DataStreamList = () => {
             />
           </EuiText>
         </EuiTitle>
+
         <EuiSpacer size="l" />
-        <DataStreamTable dataStreams={dataStreams} reload={reload} />
+
+        <DataStreamTable
+          filters={dataStreamName !== undefined ? `name=${dataStreamName}` : ''}
+          dataStreams={dataStreams}
+          reload={reload}
+          history={history as ScopedHistory}
+        />
+
+        {/* TODO: Implement this once we have something to put in here, e.g. storage size, docs count */}
+        {/* dataStreamName && (
+          <DataStreamDetailPanel
+            dataStreamName={decodePathFromReactRouter(dataStreamName)}
+            onClose={() => {
+              history.push('/data_streams');
+            }}
+          />
+        )*/}
       </>
     );
   }

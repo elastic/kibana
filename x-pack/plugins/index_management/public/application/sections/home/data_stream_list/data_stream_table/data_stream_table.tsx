@@ -7,16 +7,26 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { DataStream } from '../../../../../../common/types';
+import { reactRouterNavigate } from '../../../../../shared_imports';
+import { encodePathForReactRouter } from '../../../../services/routing';
 
 interface Props {
   dataStreams?: DataStream[];
   reload: () => {};
+  history: ScopedHistory;
+  filters?: string;
 }
 
-export const DataStreamTable: React.FunctionComponent<Props> = ({ dataStreams, reload }) => {
+export const DataStreamTable: React.FunctionComponent<Props> = ({
+  dataStreams,
+  reload,
+  history,
+  filters,
+}) => {
   const columns: Array<EuiBasicTableColumn<DataStream>> = [
     {
       field: 'name',
@@ -34,8 +44,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({ dataStreams, r
       }),
       truncateText: true,
       sortable: true,
-      // TODO: Render as a deep-link into the indices tab
-      render: (indices: DataStream['indices']) => indices.length,
+      render: (indices: DataStream['indices'], dataStream) => (
+        <EuiLink
+          {...reactRouterNavigate(history, {
+            pathname: '/indices',
+            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
+              dataStream.name
+            )}`,
+          })}
+        >
+          {indices.length}
+        </EuiLink>
+      ),
     },
     {
       field: 'timeStampField',
@@ -68,6 +88,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({ dataStreams, r
   } as const;
 
   const searchConfig = {
+    query: filters,
     box: {
       incremental: true,
     },
