@@ -66,6 +66,7 @@ interface Props {
     alertOnNoData?: boolean;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
+  alertInterval: string;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
 }
@@ -95,7 +96,7 @@ async function getAlertPreview({
 }
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertsContext } = props;
+  const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -276,13 +277,13 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const previewIntervalError = useMemo(() => {
-    const intervalInSeconds = getIntervalInSeconds(`${timeSize}${timeUnit}`);
+    const intervalInSeconds = getIntervalInSeconds(alertInterval);
     const lookbackInSeconds = getIntervalInSeconds(`1${previewLookbackInterval}`);
     if (intervalInSeconds >= lookbackInSeconds) {
       return true;
     }
     return false;
-  }, [previewLookbackInterval, timeSize, timeUnit]);
+  }, [previewLookbackInterval, alertInterval]);
 
   const isPreviewDisabled = useMemo(() => {
     const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
@@ -463,6 +464,7 @@ export const Expressions: React.FC<Props> = (props) => {
                         ...pick(alertParams, 'criteria', 'groupBy', 'filterQuery'),
                         sourceId: alertParams.sourceId,
                         lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
+                        alertInterval,
                       },
                     });
                     setPreviewResult(result);
@@ -480,7 +482,7 @@ export const Expressions: React.FC<Props> = (props) => {
             </EuiFlexItem>
             <EuiSpacer size={'s'} />
           </EuiFlexGroup>
-          {previewResult && !previewResult.resultTotals.tooManyBuckets && (
+          {previewResult && !previewIntervalError && !previewResult.resultTotals.tooManyBuckets && (
             <>
               <EuiSpacer size={'s'} />
               <EuiText>

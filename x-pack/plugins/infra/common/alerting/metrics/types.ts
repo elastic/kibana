@@ -41,10 +41,11 @@ const baseAlertRequestParamsRT = rt.intersection([
   rt.type({
     lookback: rt.union([rt.literal('h'), rt.literal('d'), rt.literal('w'), rt.literal('M')]),
     criteria: rt.array(rt.any),
+    alertInterval: rt.string,
   }),
 ]);
 
-const metricThresholdAlertRequestParamsRT = rt.intersection([
+const metricThresholdAlertPreviewRequestParamsRT = rt.intersection([
   baseAlertRequestParamsRT,
   rt.partial({
     groupBy: rt.union([rt.string, rt.array(rt.string), rt.undefined]),
@@ -53,11 +54,11 @@ const metricThresholdAlertRequestParamsRT = rt.intersection([
     alertType: rt.literal(METRIC_THRESHOLD_ALERT_TYPE_ID),
   }),
 ]);
-export type MetricThresholdAlertRequestParams = rt.TypeOf<
-  typeof metricThresholdAlertRequestParamsRT
+export type MetricThresholdAlertPreviewRequestParams = rt.TypeOf<
+  typeof metricThresholdAlertPreviewRequestParamsRT
 >;
 
-const inventoryAlertRequestParamsRT = rt.intersection([
+const inventoryAlertPreviewRequestParamsRT = rt.intersection([
   baseAlertRequestParamsRT,
   rt.type({
     nodeType: rt.string,
@@ -66,8 +67,8 @@ const inventoryAlertRequestParamsRT = rt.intersection([
 ]);
 
 export const alertPreviewRequestParamsRT = rt.union([
-  metricThresholdAlertRequestParamsRT,
-  inventoryAlertRequestParamsRT,
+  metricThresholdAlertPreviewRequestParamsRT,
+  inventoryAlertPreviewRequestParamsRT,
 ]);
 
 export const alertPreviewSuccessResponsePayloadRT = rt.type({

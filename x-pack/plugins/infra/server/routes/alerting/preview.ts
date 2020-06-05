@@ -11,7 +11,7 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
-  MetricThresholdAlertRequestParams,
+  MetricThresholdAlertPreviewRequestParams,
 } from '../../../common/alerting/metrics';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { previewMetricThresholdAlert } from '../../lib/alerting/metric_threshold/preview_metric_threshold_alert';
@@ -28,7 +28,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const { criteria, filterQuery, lookback, sourceId, alertType } = request.body;
+      const { criteria, filterQuery, lookback, sourceId, alertType, alertInterval } = request.body;
 
       const callCluster = (endpoint: string, opts: Record<string, any>) => {
         return callWithRequest(requestContext, endpoint, opts);
@@ -42,12 +42,13 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       try {
         switch (alertType) {
           case METRIC_THRESHOLD_ALERT_TYPE_ID: {
-            const { groupBy } = request.body as MetricThresholdAlertRequestParams;
+            const { groupBy } = request.body as MetricThresholdAlertPreviewRequestParams;
             const previewResult = await previewMetricThresholdAlert({
               callCluster,
               params: { criteria, filterQuery, groupBy },
               lookback,
               config: source.configuration,
+              alertInterval,
             });
 
             const numberOfGroups = previewResult.length;
