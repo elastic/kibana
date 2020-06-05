@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SCRIPT=$0
-DIR="$(dirname "${SCRIPT}")/.."
+DIR="$(dirname "${SCRIPT}")/../../.."
 CONFIG_DIR=${KIBANA_PATH_CONF:-"$DIR/config"}
 
 # Setup node dev options file to node.dev.options

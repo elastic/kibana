@@ -3,7 +3,7 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 
 set SCRIPT_DIR=%~dp0
-for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
+for %%I in ("%SCRIPT_DIR%..\..\..") do set DIR=%%~dpfI
 
 set CONFIG_DIR=%KIBANA_PATH_CONF%
 If [%KIBANA_PATH_CONF%] == [] (

@@ -26,7 +26,13 @@ const args = process.argv.slice(2);
 const stdio = [0, 1, 2];
 
 if (os.platform() === 'win32') {
-  execFileSync(`${__dirname}/node_with_options.bat`, args, { stdio });
+  execFileSync(
+    `${__dirname}/../src/dev/node_with_options_bin_scripts/node_with_options.bat`,
+    args,
+    { stdio }
+  );
 } else {
-  execFileSync(`${__dirname}/node_with_options`, args, { stdio });
+  execFileSync(`${__dirname}/../src/dev/node_with_options_bin_scripts/node_with_options.sh`, args, {
+    stdio,
+  });
 }
