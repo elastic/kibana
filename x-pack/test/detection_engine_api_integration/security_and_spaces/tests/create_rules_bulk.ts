@@ -6,7 +6,10 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_STATUS_URL,
+} from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -66,6 +69,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+      });
+
+      it('should create a single rule with a rule_id and validate it ran successfully', async () => {
+        const simpleRule = getSimpleRule();
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .set('kbn-xsrf', 'true')
+          .send([simpleRule])
+          .expect(200);
+
+        // wait for Task Manager to execute the rule and update status
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body[0].id] })
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body[0]);
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        expect(statusBody[body[0].id].current_status.status).to.eql('succeeded');
       });
 
       it('should create a single rule without a rule_id', async () => {

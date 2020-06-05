@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import expect from '@kbn/expect';
 
 import {
