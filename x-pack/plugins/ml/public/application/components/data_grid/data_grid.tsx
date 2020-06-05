@@ -10,6 +10,7 @@ import React, { memo, useEffect, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
@@ -81,7 +82,12 @@ export const DataGrid: FC<Props> = memo(
       indexPatternTitle,
     } = props;
 
-    const { refFn, columnResizeHandler } = useColumnCharts(
+    const {
+      columnResizeHandler,
+      histogramVisible,
+      refFn,
+      toggleHistogramVisibility,
+    } = useColumnCharts(
       columns.filter((c) => visibleColumns.includes(c.id)),
       api,
       indexPatternTitle
@@ -196,7 +202,24 @@ export const DataGrid: FC<Props> = memo(
             rowCount={rowCount}
             renderCellValue={renderCellValue}
             sorting={{ columns: sortingColumns, onSort }}
-            toolbarVisibility={euiDataGridToolbarSettings}
+            toolbarVisibility={{
+              ...euiDataGridToolbarSettings,
+              additionalControls: (
+                <EuiButtonEmpty
+                  className={`euiDataGrid__controlBtn${
+                    histogramVisible ? ' euiDataGrid__controlBtn--active' : ''
+                  }`}
+                  size="xs"
+                  iconType="visBarVertical"
+                  color="text"
+                  onClick={toggleHistogramVisibility}
+                >
+                  {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
+                    defaultMessage: 'Histogram Charts',
+                  })}
+                </EuiButtonEmpty>
+              ),
+            }}
             pagination={{
               ...pagination,
               pageSizeOptions: [5, 10, 25],

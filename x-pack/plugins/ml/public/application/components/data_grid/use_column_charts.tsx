@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeHandler } from '@elastic/eui';
@@ -17,6 +17,12 @@ const mlDataGridChartRowClassName = `${mlDataGridChartClassName}Row`;
 type RefValue = HTMLElement | null;
 
 export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPatternTitle: string) {
+  const [histogramVisible, setHistogramVisible] = useState(false);
+
+  const toggleHistogramVisibility = () => {
+    setHistogramVisible(!histogramVisible);
+  };
+
   const ref = useRef<RefValue>(null);
 
   const refFn = (node: RefValue) => {
@@ -29,11 +35,17 @@ export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPat
       let chartRow;
       if (chartRows.length > 0) {
         chartRow = chartRows[0];
-      } else {
+        if (!histogramVisible) {
+          chartRow.remove();
+          return;
+        }
+      } else if (histogramVisible) {
         chartRow = document.createElement('div');
         chartRow.classList.add(mlDataGridChartRowClassName);
         chartRow.classList.add('euiDataGridRow');
         tBody.insertBefore(chartRow, tBody.childNodes[0]);
+      } else {
+        return;
       }
 
       const query = { match_all: {} };
@@ -72,5 +84,5 @@ export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPat
     }
   };
 
-  return { refFn, columnResizeHandler };
+  return { columnResizeHandler, histogramVisible, refFn, toggleHistogramVisibility };
 }
