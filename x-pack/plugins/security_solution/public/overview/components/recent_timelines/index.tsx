@@ -69,7 +69,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
     const timelineType = TimelineType.default;
-    const { timelineStatus } = usePrepackageTimelineFilter(timelineType);
+    const { timelineStatus } = usePrepackageTimelineFilter({ timelineType });
     useEffect(() => {
       fetchAllTimeline({
         pageInfo: {

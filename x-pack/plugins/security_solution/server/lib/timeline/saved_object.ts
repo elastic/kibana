@@ -56,8 +56,8 @@ export interface Timeline {
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null,
-    timelineType: TimelineTypeLiteralWithNull,
-    status: TimelineStatusLiteralWithNull
+    status: TimelineStatusLiteralWithNull,
+    timelineType: TimelineTypeLiteralWithNull
   ) => Promise<ResponseTimelines>;
 
   persistFavorite: (

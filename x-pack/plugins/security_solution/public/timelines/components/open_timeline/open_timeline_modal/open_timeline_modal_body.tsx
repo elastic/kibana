@@ -42,8 +42,8 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
-    timelineFilter = [],
-    templateTimelineFilter = [],
+    timelineFilter,
+    templateTimelineFilter,
     title,
     totalSearchResultsCount,
   }) => {
@@ -55,10 +55,15 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
 
-    const SearchRowContent = useMemo(() => <>{[...timelineFilter, ...templateTimelineFilter]}</>, [
-      timelineFilter,
-      templateTimelineFilter,
-    ]);
+    const SearchRowContent = useMemo(
+      () => (
+        <>
+          {!!timelineFilter && timelineFilter}
+          {!!templateTimelineFilter && templateTimelineFilter}
+        </>
+      ),
+      [timelineFilter, templateTimelineFilter]
+    );
 
     return (
       <>

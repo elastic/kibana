@@ -18,9 +18,15 @@ import {
 import * as i18n from './translations';
 import { TimelineTabsStyle, TemplateTimelineFilter } from './types';
 
-export const usePrepackageTimelineFilter = (
-  timelineType: TimelineTypeLiteralWithNull
-): {
+export const usePrepackageTimelineFilter = ({
+  timelineType,
+  elasticTemplateTimelineCount,
+  customizedTemplateTimelineCount,
+}: {
+  timelineType: TimelineTypeLiteralWithNull;
+  elasticTemplateTimelineCount?: number | null;
+  customizedTemplateTimelineCount?: number | null;
+}): {
   timelineStatus: TimelineStatusLiteral;
   templateTimelineFilter: JSX.Element[] | null;
 } => {
@@ -35,11 +41,15 @@ export const usePrepackageTimelineFilter = (
       id: TemplateTimelineType.elastic,
       name: i18n.FILTER_ELASTIC_TIMELINES,
       disabled: false,
+      withNext: true,
+      count: elasticTemplateTimelineCount ?? undefined,
     },
     {
       id: TemplateTimelineType.customized,
       name: i18n.FILTER_CUSTOMISED_TIMELINES,
       disabled: false,
+      withNext: false,
+      count: customizedTemplateTimelineCount ?? undefined,
     },
   ];
 
@@ -60,6 +70,7 @@ export const usePrepackageTimelineFilter = (
           <EuiFilterButton
             hasActiveFilters={tab.id === templateTimelineType}
             key={`template-timeline-filter-${tab.id}`}
+            numFilters={tab.count}
             onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
           >
             {tab.name}

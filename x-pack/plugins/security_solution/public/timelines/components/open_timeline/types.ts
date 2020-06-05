@@ -207,10 +207,14 @@ export interface TimelineTab {
   name: string;
   disabled: boolean;
   href: string;
+  withNext: boolean;
+  count: number | undefined;
 }
 
 export interface TemplateTimelineFilter {
   id: TemplateTimelineTypeLiteral;
   name: string;
   disabled: boolean;
+  withNext: boolean;
+  count: number | undefined;
 }

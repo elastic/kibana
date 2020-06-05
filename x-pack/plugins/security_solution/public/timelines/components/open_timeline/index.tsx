@@ -112,9 +112,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes();
     const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
-    const { timelineStatus, templateTimelineFilter } = usePrepackageTimelineFilter(timelineType);
+    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes({});
+    const { timelineStatus, templateTimelineFilter } = usePrepackageTimelineFilter({
+      timelineType,
+    });
 
     const refetch = useCallback(() => {
       fetchAllTimeline({

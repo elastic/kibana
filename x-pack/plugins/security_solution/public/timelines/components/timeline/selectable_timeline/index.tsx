@@ -115,7 +115,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
-  const { timelineStatus } = usePrepackageTimelineFilter(timelineType);
+  const { timelineStatus } = usePrepackageTimelineFilter({ timelineType });
 
   const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);

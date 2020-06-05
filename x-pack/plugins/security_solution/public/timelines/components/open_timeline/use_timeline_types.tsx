@@ -15,7 +15,13 @@ import { useGetUrlSearch } from '../../../common/components/navigation/use_get_u
 import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
 
-export const useTimelineTypes = (): {
+export const useTimelineTypes = ({
+  defaultTimelineCount,
+  templateTimelineCount,
+}: {
+  defaultTimelineCount?: number | null;
+  templateTimelineCount?: number | null;
+}): {
   timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element[];
@@ -37,6 +43,8 @@ export const useTimelineTypes = (): {
           : i18n.TAB_TIMELINES,
       href: getTimelineTabsUrl(TimelineType.default, urlSearch),
       disabled: false,
+      withNext: true,
+      count: defaultTimelineCount ?? undefined,
     },
     {
       id: TimelineType.template,
@@ -46,6 +54,8 @@ export const useTimelineTypes = (): {
           : i18n.TAB_TEMPLATES,
       href: getTimelineTabsUrl(TimelineType.template, urlSearch),
       disabled: false,
+      withNext: false,
+      count: templateTimelineCount ?? undefined,
     },
   ];
 
@@ -86,7 +96,9 @@ export const useTimelineTypes = (): {
       <EuiFilterButton
         hasActiveFilters={tab.id === timelineType}
         key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
+        numFilters={tab.count}
         onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
+        withNext={tab.withNext}
       >
         {tab.name}
       </EuiFilterButton>
