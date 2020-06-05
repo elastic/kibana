@@ -101,7 +101,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           alertsClient,
           anomalyThreshold,
           description,
-          enabled,
+          enabled: false, // enable the rule down the line, so it doesn't start running until after notifications / actions have had api keys updated
           falsePositives,
           from,
           immutable: false,
@@ -141,6 +141,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           throttle,
           name,
         });
+
+        // enable rule here.
+        await alertsClient.enable({ id: createdRule.id });
 
         const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
           perPage: 1,

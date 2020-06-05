@@ -118,7 +118,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 alertsClient,
                 anomalyThreshold,
                 description,
-                enabled,
+                enabled: false,
                 falsePositives,
                 from,
                 immutable: false,
@@ -158,6 +158,8 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 throttle,
                 name,
               });
+
+              await alertsClient.enable({ id: createdRule.id });
 
               return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {

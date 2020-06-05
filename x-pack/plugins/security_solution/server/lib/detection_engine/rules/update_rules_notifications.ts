@@ -46,7 +46,7 @@ export const updateRulesNotifications = async ({
   });
 
   // TODO: Workaround for https://github.com/elastic/kibana/issues/67290
-  // await alertsClient.updateApiKey({ id: ruleAlertId });
+  await alertsClient.updateApiKey({ id: ruleAlertId });
 
   return ruleActions;
 };
