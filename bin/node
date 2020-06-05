@@ -24,15 +24,20 @@ const os = require('os');
 
 const args = process.argv.slice(2);
 const stdio = [0, 1, 2];
+const maxBuffer = 100 * 1024 * 1024;
 
 if (os.platform() === 'win32') {
   execFileSync(
     `${__dirname}/../src/dev/node_with_options_bin_scripts/node_with_options.bat`,
     args,
-    { stdio }
+    {
+      maxBuffer,
+      stdio,
+    }
   );
 } else {
   execFileSync(`${__dirname}/../src/dev/node_with_options_bin_scripts/node_with_options.sh`, args, {
+    maxBuffer,
     stdio,
   });
 }
