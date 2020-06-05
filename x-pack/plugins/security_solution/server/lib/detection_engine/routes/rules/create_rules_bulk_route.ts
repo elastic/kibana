@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   CreateRulesBulkSchemaDecoded,
@@ -93,6 +94,15 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               exceptions_list,
             } = payloadRule;
             try {
+              const validationErrors = createRuleValidateTypeDependents(payloadRule);
+              if (validationErrors.length) {
+                return createBulkErrorObject({
+                  ruleId,
+                  statusCode: 400,
+                  message: validationErrors.join(),
+                });
+              }
+
               const query =
                 type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
 

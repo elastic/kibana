@@ -358,7 +358,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule2 = getSimpleRule();
         delete rule2.rule_id;
-        rule2.id = 'fake_id';
+        rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
         const { body } = await supertest

@@ -44,6 +44,9 @@ import {
   MetaOrUndefined,
   Description,
   Enabled,
+  VersionOrUndefined,
+  IdOrUndefined,
+  RuleIdOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
@@ -177,11 +180,6 @@ export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
-export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'throttle'> & {
-  id: string | undefined | null;
-  savedObjectsClient: SavedObjectsClientContract;
-} & Clients;
-
 export type DeleteRuleParams = Clients & {
   id: string | undefined;
   ruleId: string | undefined | null;
@@ -250,6 +248,42 @@ export interface CreateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: Version;
+  exceptions_list: ListsDefaultArraySchema;
+  actions: RuleAlertAction[];
+}
+
+export interface UpdateRulesOptions {
+  id: IdOrUndefined;
+  savedObjectsClient: SavedObjectsClientContract;
+  alertsClient: AlertsClient;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+  description: Description;
+  enabled: Enabled;
+  falsePositives: FalsePositives;
+  from: From;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  ruleId: RuleIdOrUndefined;
+  index: IndexOrUndefined;
+  interval: Interval;
+  maxSignals: MaxSignals;
+  riskScore: RiskScore;
+  outputIndex: OutputIndex;
+  name: Name;
+  severity: Severity;
+  tags: Tags;
+  threat: Threat;
+  to: To;
+  type: Type;
+  references: References;
+  note: NoteOrUndefined;
+  version: VersionOrUndefined;
   exceptions_list: ListsDefaultArraySchema;
   actions: RuleAlertAction[];
 }

@@ -42,7 +42,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       const siemResponse = buildSiemResponse(response);
       const validationErrors = createRuleValidateTypeDependents(request.body);
       if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 404, body: validationErrors });
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       const {
         actions: actionsRest,

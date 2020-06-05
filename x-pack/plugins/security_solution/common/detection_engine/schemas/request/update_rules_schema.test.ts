@@ -5,25 +5,25 @@
  */
 
 import {
-  createRulesSchema,
-  CreateRulesSchema,
-  CreateRulesSchemaDecoded,
-} from './create_rules_schema';
+  updateRulesSchema,
+  UpdateRulesSchema,
+  UpdateRulesSchemaDecoded,
+} from './update_rules_schema';
 import { exactCheck } from '../../../exact_check';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { foldLeftRight, getPaths } from '../../../test_utils';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import {
-  getCreateRulesSchemaMock,
-  getCreateRulesSchemaDecodedMock,
-} from './create_rules_schema.mock';
+  getUpdateRulesSchemaMock,
+  getUpdateRulesSchemaDecodedMock,
+} from './update_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
-describe('create rules schema', () => {
+describe('update rules schema', () => {
   test('empty objects do not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {};
+    const payload: Partial<UpdateRulesSchema> = {};
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -37,12 +37,12 @@ describe('create rules schema', () => {
   });
 
   test('made up values do not validate', () => {
-    const payload: CreateRulesSchema & { madeUp: string } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema & { madeUp: string } = {
+      ...getUpdateRulesSchemaMock(),
       madeUp: 'hi',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
@@ -50,11 +50,11 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -68,12 +68,12 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -86,13 +86,13 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -105,14 +105,14 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
       to: 'now',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -125,7 +125,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -133,7 +133,7 @@ describe('create rules schema', () => {
       name: 'some-name',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -145,7 +145,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -154,7 +154,7 @@ describe('create rules schema', () => {
       severity: 'low',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -165,7 +165,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -175,7 +175,7 @@ describe('create rules schema', () => {
       type: 'query',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -185,7 +185,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -196,7 +196,7 @@ describe('create rules schema', () => {
       type: 'query',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -206,7 +206,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -218,7 +218,7 @@ describe('create rules schema', () => {
       index: ['index-1'],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -228,7 +228,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
-    const payload: CreateRulesSchema = {
+    const payload: UpdateRulesSchema = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -242,11 +242,11 @@ describe('create rules schema', () => {
       interval: '5m',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
+    const expected: UpdateRulesSchemaDecoded = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -266,14 +266,13 @@ describe('create rules schema', () => {
       tags: [],
       threat: [],
       throttle: null,
-      version: 1,
       exceptions_list: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
-    const payload: Partial<CreateRulesSchema> = {
+    const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -287,7 +286,7 @@ describe('create rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -297,7 +296,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
-    const payload: CreateRulesSchema = {
+    const payload: UpdateRulesSchema = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -312,11 +311,11 @@ describe('create rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
+    const expected: UpdateRulesSchemaDecoded = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -337,14 +336,13 @@ describe('create rules schema', () => {
       tags: [],
       threat: [],
       throttle: null,
-      version: 1,
       exceptions_list: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
-    const payload: CreateRulesSchema = {
+    const payload: UpdateRulesSchema = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -360,11 +358,11 @@ describe('create rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
+    const expected: UpdateRulesSchemaDecoded = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -386,14 +384,13 @@ describe('create rules schema', () => {
       tags: [],
       threat: [],
       throttle: null,
-      version: 1,
       exceptions_list: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
-    const payload: CreateRulesSchema = {
+    const payload: UpdateRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -406,11 +403,11 @@ describe('create rules schema', () => {
       risk_score: 50,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
+    const expected: UpdateRulesSchemaDecoded = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -429,14 +426,13 @@ describe('create rules schema', () => {
       tags: [],
       threat: [],
       throttle: null,
-      version: 1,
       exceptions_list: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
-    const payload: CreateRulesSchema = {
+    const payload: UpdateRulesSchema = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -450,11 +446,11 @@ describe('create rules schema', () => {
       type: 'query',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
+    const expected: UpdateRulesSchemaDecoded = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -474,31 +470,30 @@ describe('create rules schema', () => {
       tags: [],
       threat: [],
       throttle: null,
-      version: 1,
       exceptions_list: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('You can send in an empty array to threat', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       threat: [],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       threat: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
-    const payload: CreateRulesSchema = {
+    const payload: UpdateRulesSchema = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -529,11 +524,11 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
+    const expected: UpdateRulesSchemaDecoded = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -569,93 +564,133 @@ describe('create rules schema', () => {
       max_signals: DEFAULT_MAX_SIGNALS,
       tags: [],
       throttle: null,
-      version: 1,
       exceptions_list: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('allows references to be sent as valid', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       references: ['index-1'],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       references: ['index-1'],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('defaults references to an array if it is not sent in', () => {
-    const { references, ...noReferences } = getCreateRulesSchemaMock();
-    const decoded = createRulesSchema.decode(noReferences);
+    const { references, ...noReferences } = getUpdateRulesSchemaMock();
+    const decoded = updateRulesSchema.decode(noReferences);
     const checked = exactCheck(noReferences, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       references: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('references cannot be numbers', () => {
-    const payload: Omit<CreateRulesSchema, 'references'> & { references: number[] } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'references'> & { references: number[] } = {
+      ...getUpdateRulesSchemaMock(),
       references: [5],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
     expect(message.schema).toEqual({});
   });
 
   test('indexes cannot be numbers', () => {
-    const payload: Omit<CreateRulesSchema, 'index'> & { index: number[] } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'index'> & { index: number[] } = {
+      ...getUpdateRulesSchemaMock(),
       index: [5],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
     expect(message.schema).toEqual({});
   });
 
-  test('saved_query type can have filters with it', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      filters: [],
+  test('defaults interval to 5 min', () => {
+    const { interval, ...noInterval } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
+      ...noInterval,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+
+    const { interval: expectedInterval, ...expectedNoInterval } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
+      ...expectedNoInterval,
+      interval: '5m',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('defaults max signals to 100', () => {
+    const { max_signals, ...noMaxSignals } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
+      ...noMaxSignals,
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const {
+      max_signals: expectedMaxSignals,
+      ...expectedNoMaxSignals
+    } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
+      ...expectedNoMaxSignals,
+      max_signals: 100,
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('saved_query type can have filters with it', () => {
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
+      filters: [],
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       filters: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('filters cannot be a string', () => {
-    const payload: Omit<CreateRulesSchema, 'filters'> & { filters: string } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'filters'> & { filters: string } = {
+      ...getUpdateRulesSchemaMock(),
       filters: 'some string',
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "some string" supplied to "filters"',
@@ -664,47 +699,47 @@ describe('create rules schema', () => {
   });
 
   test('language validates with kuery', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       language: 'kuery',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       language: 'kuery',
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('language validates with lucene', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       language: 'lucene',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       language: 'lucene',
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('language does not validate with something made up', () => {
-    const payload: Omit<CreateRulesSchema, 'language'> & { language: string } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'language'> & { language: string } = {
+      ...getUpdateRulesSchemaMock(),
       language: 'something-made-up',
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "something-made-up" supplied to "language"',
@@ -713,12 +748,12 @@ describe('create rules schema', () => {
   });
 
   test('max_signals cannot be negative', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       max_signals: -1,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
@@ -726,12 +761,12 @@ describe('create rules schema', () => {
   });
 
   test('max_signals cannot be zero', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       max_signals: 0,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
@@ -739,47 +774,47 @@ describe('create rules schema', () => {
   });
 
   test('max_signals can be 1', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       max_signals: 1,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       max_signals: 1,
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of tags', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       tags: ['tag_1', 'tag_2'],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       tags: ['tag_1', 'tag_2'],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
-    const payload: Omit<CreateRulesSchema, 'tags'> & { tags: number[] } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'tags'> & { tags: number[] } = {
+      ...getUpdateRulesSchemaMock(),
       tags: [0, 1, 2],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "0" supplied to ""',
@@ -790,10 +825,10 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
-    const payload: Omit<CreateRulesSchema, 'threat'> & {
-      threat: Array<Partial<Omit<CreateRulesSchema['threat'], 'framework'>>>;
+    const payload: Omit<UpdateRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<UpdateRulesSchema['threat'], 'framework'>>>;
     } = {
-      ...getCreateRulesSchemaMock(),
+      ...getUpdateRulesSchemaMock(),
       threat: [
         {
           tactic: {
@@ -812,8 +847,8 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "framework"',
@@ -822,10 +857,10 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
-    const payload: Omit<CreateRulesSchema, 'threat'> & {
-      threat: Array<Partial<Omit<CreateRulesSchema['threat'], 'tactic'>>>;
+    const payload: Omit<UpdateRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<UpdateRulesSchema['threat'], 'tactic'>>>;
     } = {
-      ...getCreateRulesSchemaMock(),
+      ...getUpdateRulesSchemaMock(),
       threat: [
         {
           framework: 'fake',
@@ -840,8 +875,8 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "tactic"',
@@ -850,10 +885,10 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of threat that are missing "technique"', () => {
-    const payload: Omit<CreateRulesSchema, 'threat'> & {
-      threat: Array<Partial<Omit<CreateRulesSchema['threat'], 'technique'>>>;
+    const payload: Omit<UpdateRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<UpdateRulesSchema['threat'], 'technique'>>>;
     } = {
-      ...getCreateRulesSchemaMock(),
+      ...getUpdateRulesSchemaMock(),
       threat: [
         {
           framework: 'fake',
@@ -866,8 +901,8 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "technique"',
@@ -876,30 +911,30 @@ describe('create rules schema', () => {
   });
 
   test('You can optionally send in an array of false positives', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       false_positives: ['false_1', 'false_2'],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       false_positives: ['false_1', 'false_2'],
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
-    const payload: Omit<CreateRulesSchema, 'false_positives'> & { false_positives: number[] } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'false_positives'> & { false_positives: number[] } = {
+      ...getUpdateRulesSchemaMock(),
       false_positives: [5, 4],
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "5" supplied to ""',
@@ -908,27 +943,27 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot set the immutable to a number when trying to create a rule', () => {
-    const payload: Omit<CreateRulesSchema, 'immutable'> & { immutable: number } = {
-      ...getCreateRulesSchemaMock(),
+  test('You cannot set the immutable to a number when trying to update a rule', () => {
+    const payload: Omit<UpdateRulesSchema, 'immutable'> & { immutable: number } = {
+      ...getUpdateRulesSchemaMock(),
       immutable: 5,
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
     expect(message.schema).toEqual({});
   });
 
   test('You cannot set the risk_score to 101', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       risk_score: 101,
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "101" supplied to "risk_score"',
@@ -937,66 +972,66 @@ describe('create rules schema', () => {
   });
 
   test('You cannot set the risk_score to -1', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       risk_score: -1,
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
     expect(message.schema).toEqual({});
   });
 
   test('You can set the risk_score to 0', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       risk_score: 0,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       risk_score: 0,
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('You can set the risk_score to 100', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       risk_score: 100,
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       risk_score: 100,
     };
     expect(message.schema).toEqual(expected);
   });
 
   test('You can set meta to any object you want', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       meta: {
         somethingMadeUp: { somethingElse: true },
       },
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       meta: {
         somethingMadeUp: { somethingElse: true },
       },
@@ -1004,14 +1039,14 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual(expected);
   });
 
-  test('You cannot create meta as a string', () => {
-    const payload: Omit<CreateRulesSchema, 'meta'> & { meta: string } = {
-      ...getCreateRulesSchemaMock(),
+  test('You cannot update meta as a string', () => {
+    const payload: Omit<UpdateRulesSchema, 'meta'> & { meta: string } = {
+      ...getUpdateRulesSchemaMock(),
       meta: 'should not work',
     };
 
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "should not work" supplied to "meta"',
@@ -1020,19 +1055,19 @@ describe('create rules schema', () => {
   });
 
   test('You can omit the query string when filters are present', () => {
-    const { query, ...noQuery } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
+    const { query, ...noQuery } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
       ...noQuery,
       filters: [],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const { query: expectedQuery, ...expectedNoQuery } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
+    const { query: expectedQuery, ...expectedNoQuery } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
       ...expectedNoQuery,
       filters: [],
     };
@@ -1040,44 +1075,101 @@ describe('create rules schema', () => {
   });
 
   test('validates with timeline_id and timeline_title', () => {
-    const payload: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
+    const payload: UpdateRulesSchema = {
+      ...getUpdateRulesSchemaMock(),
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      ...getCreateRulesSchemaDecodedMock(),
+    const expected: UpdateRulesSchemaDecoded = {
+      ...getUpdateRulesSchemaDecodedMock(),
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
     };
     expect(message.schema).toEqual(expected);
   });
 
+  test('The default for "from" will be "now-6m"', () => {
+    const { from, ...noFrom } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
+      ...noFrom,
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { from: expectedFrom, ...expectedNoFrom } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
+      ...expectedNoFrom,
+      from: 'now-6m',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('The default for "to" will be "now"', () => {
+    const { to, ...noTo } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
+      ...noTo,
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { to: expectedTo, ...expectedNoTo } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
+      ...expectedNoTo,
+      to: 'now',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
-    const payload: Omit<CreateRulesSchema, 'severity'> & { severity: string } = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema, 'severity'> & { severity: string } = {
+      ...getUpdateRulesSchemaMock(),
       severity: 'junk',
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
     expect(message.schema).toEqual({});
   });
 
+  test('The default for "actions" will be an empty array', () => {
+    const { actions, ...noActions } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
+      ...noActions,
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { actions: expectedActions, ...expectedNoActions } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
+      ...expectedNoActions,
+      actions: [],
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
   test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload: Omit<CreateRulesSchema['actions'], 'group'> = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema['actions'], 'group'> = {
+      ...getUpdateRulesSchemaMock(),
       actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1087,12 +1179,12 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of actions that are missing "id"', () => {
-    const payload: Omit<CreateRulesSchema['actions'], 'id'> = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema['actions'], 'id'> = {
+      ...getUpdateRulesSchemaMock(),
       actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
@@ -1100,12 +1192,12 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
-    const payload: Omit<CreateRulesSchema['actions'], 'action_type_id'> = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema['actions'], 'action_type_id'> = {
+      ...getUpdateRulesSchemaMock(),
       actions: [{ group: 'group', id: 'id', params: {} }],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1115,12 +1207,12 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
-    const payload: Omit<CreateRulesSchema['actions'], 'params'> = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema['actions'], 'params'> = {
+      ...getUpdateRulesSchemaMock(),
       actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1130,8 +1222,8 @@ describe('create rules schema', () => {
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
-    const payload: Omit<CreateRulesSchema['actions'], 'actions'> = {
-      ...getCreateRulesSchemaMock(),
+    const payload: Omit<UpdateRulesSchema['actions'], 'actions'> = {
+      ...getUpdateRulesSchemaMock(),
       actions: [
         {
           group: 'group',
@@ -1142,7 +1234,7 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = createRulesSchema.decode(payload);
+    const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1151,51 +1243,84 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('The default for "throttle" will be null', () => {
+    const { throttle, ...noThrottle } = getUpdateRulesSchemaMock();
+    const payload: UpdateRulesSchema = {
+      ...noThrottle,
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { throttle: expectedThrottle, ...expectedNoThrottle } = getUpdateRulesSchemaDecodedMock();
+    const expected: UpdateRulesSchemaDecoded = {
+      ...expectedNoThrottle,
+      throttle: null,
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
   describe('note', () => {
     test('You can set note to a string', () => {
-      const payload: CreateRulesSchema = {
-        ...getCreateRulesSchemaMock(),
+      const payload: UpdateRulesSchema = {
+        ...getUpdateRulesSchemaMock(),
         note: '# documentation markdown here',
       };
 
-      const decoded = createRulesSchema.decode(payload);
+      const decoded = updateRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: CreateRulesSchemaDecoded = {
-        ...getCreateRulesSchemaDecodedMock(),
+      const expected: UpdateRulesSchemaDecoded = {
+        ...getUpdateRulesSchemaDecodedMock(),
         note: '# documentation markdown here',
       };
       expect(message.schema).toEqual(expected);
     });
 
     test('You can set note to an empty string', () => {
-      const payload: CreateRulesSchema = {
-        ...getCreateRulesSchemaMock(),
+      const payload: UpdateRulesSchema = {
+        ...getUpdateRulesSchemaMock(),
         note: '',
       };
 
-      const decoded = createRulesSchema.decode(payload);
+      const decoded = updateRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: CreateRulesSchemaDecoded = {
-        ...getCreateRulesSchemaDecodedMock(),
+      const expected: UpdateRulesSchemaDecoded = {
+        ...getUpdateRulesSchemaDecodedMock(),
         note: '',
       };
       expect(message.schema).toEqual(expected);
     });
 
-    test('You cannot create note as an object', () => {
-      const payload: Omit<CreateRulesSchema, 'note'> & { note: {} } = {
-        ...getCreateRulesSchemaMock(),
+    // Note: If you're looking to remove `note`, omit `note` entirely
+    test('You cannot set note to null', () => {
+      const payload: Omit<UpdateRulesSchema, 'note'> & { note: null } = {
+        ...getUpdateRulesSchemaMock(),
+        note: null,
+      };
+
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "null" supplied to "note"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('You cannot set note as an object', () => {
+      const payload: Omit<UpdateRulesSchema, 'note'> & { note: {} } = {
+        ...getUpdateRulesSchemaMock(),
         note: {
           somethingHere: 'something else',
         },
       };
 
-      const decoded = createRulesSchema.decode(payload);
-      const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
         // TODO: Fix/Change the formatErrors to be better able to handle objects
@@ -1205,7 +1330,7 @@ describe('create rules schema', () => {
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
-      const payload: CreateRulesSchema = {
+      const payload: UpdateRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1219,11 +1344,11 @@ describe('create rules schema', () => {
         note: '# some markdown',
       };
 
-      const decoded = createRulesSchema.decode(payload);
+      const decoded = updateRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: CreateRulesSchemaDecoded = {
+      const expected: UpdateRulesSchemaDecoded = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1243,193 +1368,10 @@ describe('create rules schema', () => {
         tags: [],
         threat: [],
         throttle: null,
-        version: 1,
         exceptions_list: [],
       };
       expect(message.schema).toEqual(expected);
     });
-  });
-
-  test('defaults interval to 5 min', () => {
-    const { interval, ...noInterval } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
-      ...noInterval,
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { interval: expectedInterval, ...expectedNoInterval } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
-      ...expectedNoInterval,
-      interval: '5m',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('defaults max signals to 100', () => {
-    const { max_signals, ...noMaxSignals } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
-      ...noMaxSignals,
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const {
-      max_signals: expectedMaxSignals,
-      ...expectedNoMaxSignals
-    } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
-      ...expectedNoMaxSignals,
-      max_signals: 100,
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('The default for "from" will be "now-6m"', () => {
-    const { from, ...noFrom } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
-      ...noFrom,
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { from: expectedFrom, ...expectedNoFrom } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
-      ...expectedNoFrom,
-      from: 'now-6m',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('The default for "to" will be "now"', () => {
-    const { to, ...noTo } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
-      ...noTo,
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { to: expectedTo, ...expectedNoTo } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
-      ...expectedNoTo,
-      to: 'now',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('The default for "actions" will be an empty array', () => {
-    const { actions, ...noActions } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
-      ...noActions,
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { actions: expectedActions, ...expectedNoActions } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
-      ...expectedNoActions,
-      actions: [],
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('The default for "throttle" will be null', () => {
-    const { throttle, ...noThrottle } = getCreateRulesSchemaMock();
-    const payload: CreateRulesSchema = {
-      ...noThrottle,
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { throttle: expectedThrottle, ...expectedNoThrottle } = getCreateRulesSchemaDecodedMock();
-    const expected: CreateRulesSchemaDecoded = {
-      ...expectedNoThrottle,
-      throttle: null,
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('machine_learning type does validate', () => {
-    const payload: CreateRulesSchema = {
-      type: 'machine_learning',
-      anomaly_threshold: 50,
-      machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
-      false_positives: [],
-      references: [],
-      risk_score: 50,
-      threat: [],
-      name: 'ss',
-      description: 'ss',
-      severity: 'low',
-      tags: [],
-      interval: '5m',
-      from: 'now-360s',
-      to: 'now',
-      meta: { from: '1m' },
-      actions: [],
-      enabled: true,
-      throttle: 'no_actions',
-      rule_id: 'rule-1',
-    };
-
-    const decoded = createRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: CreateRulesSchemaDecoded = {
-      type: 'machine_learning',
-      anomaly_threshold: 50,
-      machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
-      false_positives: [],
-      references: [],
-      risk_score: 50,
-      threat: [],
-      name: 'ss',
-      description: 'ss',
-      severity: 'low',
-      tags: [],
-      interval: '5m',
-      from: 'now-360s',
-      to: 'now',
-      meta: { from: '1m' },
-      actions: [],
-      enabled: true,
-      throttle: 'no_actions',
-      exceptions_list: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      version: 1,
-      rule_id: 'rule-1',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('it generates a uuid v4 whenever you omit the rule_id', () => {
-    const { rule_id, ...noRuleId } = getCreateRulesSchemaMock();
-    const decoded = createRulesSchema.decode(noRuleId);
-    const checked = exactCheck(noRuleId, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as CreateRulesSchemaDecoded).rule_id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-    );
   });
 
   // TODO: The exception_list tests are skipped and empty until we re-integrate it from the lists plugin
@@ -1443,3 +1385,175 @@ describe('create rules schema', () => {
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {});
   });
 });
+
+/*
+  TODO: Add this to the validator checks and create a validators check for update_rules
+  test('[id] and [rule_id] does not validate', () => {
+    expect(
+      updateRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
+        id: 'id-1',
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: ['index-1'],
+        interval: '5m',
+      }).error.message
+    ).toEqual('"value" contains a conflict between exclusive peers [id, rule_id]');
+  });
+
+  test('saved_id is required when type is saved_query and will not validate without out', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'saved_query',
+      }).error.message
+    ).toEqual('child "saved_id" fails because ["saved_id" is required]');
+  });
+
+  test('saved_id is required when type is saved_query and validates with it', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        output_index: '.siem-signals',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'saved_query',
+        saved_id: 'some id',
+      }).error
+    ).toBeFalsy();
+  });
+
+  test('You cannot omit timeline_title when timeline_id is present', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'some_id',
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" is required]');
+  });
+
+  test('You cannot have a null value for timeline_title when timeline_id is present', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'some_id',
+        timeline_title: null,
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" must be a string]');
+  });
+
+  test('You cannot have empty string for timeline_title when timeline_id is present', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'some_id',
+        timeline_title: '',
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed to be empty]');
+  });
+
+  test('You cannot have timeline_title with an empty timeline_id', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: '',
+        timeline_title: 'some-title',
+      }).error.message
+    ).toEqual('child "timeline_id" fails because ["timeline_id" is not allowed to be empty]');
+  });
+
+  test('You cannot have timeline_title without timeline_id', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_title: 'some-title',
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed]');
+  });
+*/

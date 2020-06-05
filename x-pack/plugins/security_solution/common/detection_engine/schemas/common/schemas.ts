@@ -65,7 +65,12 @@ export type Immutable = t.TypeOf<typeof immutable>;
 export const rule_id = t.string;
 export type RuleId = t.TypeOf<typeof rule_id>;
 
+export const ruleIdOrUndefined = t.union([rule_id, t.undefined]);
+export type RuleIdOrUndefined = t.TypeOf<typeof ruleIdOrUndefined>;
+
 export const id = UUID;
+export const idOrUndefined = t.union([id, t.undefined]);
+export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 
 export const index = t.array(t.string);
 export type Index = t.TypeOf<typeof index>;
@@ -222,6 +227,9 @@ export const created_by = t.string;
 
 export const version = PositiveIntegerGreaterThanZero;
 export type Version = t.TypeOf<typeof version>;
+
+export const versionOrUndefined = t.union([version, t.undefined]);
+export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
 
 export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
