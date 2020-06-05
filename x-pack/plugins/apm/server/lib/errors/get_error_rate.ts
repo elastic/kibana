@@ -3,19 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ESFilter } from '../../../typings/elasticsearch';
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
+  ERROR_GROUP_ID,
   SERVICE_NAME,
   PROCESSOR_EVENT,
-  ERROR_GROUP_ID,
 } from '../../../common/elasticsearch_fieldnames';
+import { getBucketSize } from '../helpers/get_bucket_size';
+import { rangeFilter } from '../helpers/range_filter';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { rangeFilter } from '../helpers/range_filter';
-import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getErrorRate({
   serviceName,
@@ -30,24 +30,9 @@ export async function getErrorRate({
   const { intervalString } = getBucketSize(start, end, 'auto');
   const groupIdTerm = groupId ? [{ term: { [ERROR_GROUP_ID]: groupId } }] : [];
 
-  const filter: ESFilter[] = [
+  const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    {
-      bool: {
-        should: [
-          { term: { [PROCESSOR_EVENT]: 'transaction' } },
-          {
-            bool: {
-              filter: [
-                { term: { [PROCESSOR_EVENT]: 'error' } },
-                ...groupIdTerm,
-              ],
-            },
-          },
-        ],
-      },
-    },
     ...uiFiltersES,
   ];
 
@@ -59,42 +44,62 @@ export async function getErrorRate({
         min_doc_count: 0,
         extended_bounds: { min: start, max: end },
       },
-      aggs: {
-        processorEventCount: {
-          terms: {
-            field: PROCESSOR_EVENT,
-            size: 10,
+    },
+  };
+
+  const getTransactionBucketAggregation = async () => {
+    const resp = await client.search({
+      index: indices['apm_oss.transactionIndices'],
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...filter,
+              { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+            ],
           },
         },
+        aggs,
       },
-    },
+    });
+    return resp.aggregations?.response_times.buckets;
+  };
+  const getErrorBucketAggregation = async () => {
+    const resp = await client.search({
+      index: indices['apm_oss.errorIndices'],
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...filter,
+              ...groupIdTerm,
+              { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+            ],
+          },
+        },
+        aggs,
+      },
+    });
+    return resp.aggregations?.response_times.buckets;
   };
 
-  const params = {
-    index: [
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
-    body: {
-      size: 0,
-      query: { bool: { filter } },
-      aggs,
-    },
-  };
+  // Needed to the wrap the call to client.search in a function to avoid "Type instantiation is excessively deep and possibly infinite"
+  const [transactionsCount, errorsCount] = await Promise.all([
+    getTransactionBucketAggregation(),
+    getErrorBucketAggregation(),
+  ]);
 
-  const resp = await client.search(params);
-  return resp.aggregations?.response_times.buckets.map((responseTime) => {
-    const {
-      transaction: transactionCount = 1,
-      error: errorCount = 0,
-    } = responseTime.processorEventCount.buckets.reduce(
-      (acc, { key, doc_count }) => ({ ...acc, [key]: doc_count }),
-      {} as { transaction?: number; error?: number }
-    );
+  const transactionByTimestamp: Record<number, number> = {};
+  if (transactionsCount) {
+    transactionsCount.forEach((bucket) => {
+      transactionByTimestamp[bucket.key] = bucket.doc_count;
+    });
+  }
 
-    return {
-      x: responseTime.key,
-      y: errorCount / transactionCount,
-    };
+  return errorsCount?.map((bucket) => {
+    const { key, doc_count: errorCount } = bucket;
+    return { x: key, y: errorCount / (transactionByTimestamp[key] || 1) };
   });
 }

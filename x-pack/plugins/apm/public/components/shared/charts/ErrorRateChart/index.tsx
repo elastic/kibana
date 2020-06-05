@@ -74,6 +74,7 @@ export const ErrorRateChart = () => {
             legendValue: average,
             title: 'Avg.',
             type: 'linemark',
+            hideTooltipValue: true,
           },
           {
             data: errorRateData,
@@ -89,6 +90,7 @@ export const ErrorRateChart = () => {
           return asPercent(y, 1);
         }}
         height={unit * 10}
+        xAxisTickSizeOuter={10}
       />
     </>
   );

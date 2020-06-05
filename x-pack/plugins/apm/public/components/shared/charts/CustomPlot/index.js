@@ -124,7 +124,13 @@ export class InnerCustomPlot extends PureComponent {
   }
 
   render() {
-    const { series, truncateLegends, width, annotations } = this.props;
+    const {
+      series,
+      truncateLegends,
+      width,
+      annotations,
+      xAxisTickSizeOuter,
+    } = this.props;
 
     if (!width) {
       return null;
@@ -166,6 +172,7 @@ export class InnerCustomPlot extends PureComponent {
             series={enabledSeries}
             tickFormatY={this.props.tickFormatY}
             tickFormatX={this.props.tickFormatX}
+            xAxisTickSizeOuter={xAxisTickSizeOuter}
           />
 
           {this.state.showAnnotations && !isEmpty(annotations) && (
@@ -227,6 +234,7 @@ InnerCustomPlot.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number,
   stackBy: PropTypes.string,
+  xAxisTickSizeOuter: PropTypes.number,
   annotations: PropTypes.arrayOf(
     PropTypes.shape({
       type: PropTypes.string,
@@ -241,6 +249,7 @@ InnerCustomPlot.defaultProps = {
   tickFormatX: undefined,
   tickFormatY: (y) => y,
   truncateLegends: false,
+  xAxisTickSizeOuter: 0,
 };
 
 export default makeWidthFlexible(InnerCustomPlot);
