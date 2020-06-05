@@ -305,6 +305,7 @@ export function EditorFrame(props: EditorFrameProps) {
               dispatch={dispatch}
               ExpressionRenderer={props.ExpressionRenderer}
               stagedPreview={state.stagedPreview}
+              plugins={props.plugins}
             />
           )
         }

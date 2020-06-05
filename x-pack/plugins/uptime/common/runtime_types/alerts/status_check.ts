@@ -6,7 +6,30 @@
 
 import * as t from 'io-ts';
 
-export const StatusCheckExecutorParamsType = t.intersection([
+export const StatusCheckFiltersType = t.type({
+  'monitor.type': t.array(t.string),
+  'observer.geo.name': t.array(t.string),
+  tags: t.array(t.string),
+  'url.port': t.array(t.string),
+});
+
+export type StatusCheckFilters = t.TypeOf<typeof StatusCheckFiltersType>;
+
+export const AtomicStatusCheckParamsType = t.intersection([
+  t.type({
+    numTimes: t.number,
+    timerangeCount: t.number,
+    timerangeUnit: t.string,
+  }),
+  t.partial({
+    search: t.string,
+    filters: StatusCheckFiltersType,
+  }),
+]);
+
+export type AtomicStatusCheckParams = t.TypeOf<typeof AtomicStatusCheckParamsType>;
+
+export const StatusCheckParamsType = t.intersection([
   t.partial({
     filters: t.string,
   }),
@@ -20,4 +43,4 @@ export const StatusCheckExecutorParamsType = t.intersection([
   }),
 ]);
 
-export type StatusCheckExecutorParams = t.TypeOf<typeof StatusCheckExecutorParamsType>;
+export type StatusCheckParams = t.TypeOf<typeof StatusCheckParamsType>;
