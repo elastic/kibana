@@ -101,7 +101,7 @@ include::targz-running.asciidoc[]
 
 
 [[targz-configuring]]
-==== Configuring Kibana via config file
+==== Configure Kibana via the config file
 
 Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
 file by default.  The format of this config file is explained in

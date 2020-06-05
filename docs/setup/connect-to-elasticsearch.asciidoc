@@ -1,5 +1,5 @@
 [[connect-to-elasticsearch]]
-== Adding data
+== Add data
 
 To start working with your data in {kib}, you can:
 
