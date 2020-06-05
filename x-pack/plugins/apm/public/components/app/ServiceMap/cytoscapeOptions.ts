@@ -100,7 +100,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
   {
     selector: 'node',
     style: {
-      'background-color': 'white',
+      'background-color': theme.euiColorEmptyShade,
       // The DefinitelyTyped definitions don't specify that a function can be
       // used here.
       //
