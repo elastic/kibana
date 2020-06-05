@@ -79,7 +79,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
 
       const activeDataProvidersQueryMatch = activeDataProvidersQueries.join(' and ');
 
-      return [...queries, `${activeDataProvidersQueryMatch}`];
+      return [...queries, activeDataProvidersQueryMatch];
     }, [])
     .filter((queriesItem) => !isEmpty(queriesItem))
     .reduce((globalQuery: string, queryMatch: string, index: number, queries: string[]) => {
