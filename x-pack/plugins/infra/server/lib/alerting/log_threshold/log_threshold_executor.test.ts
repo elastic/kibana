@@ -55,7 +55,7 @@ services.alertInstanceFactory.mockImplementation((instanceId: string) => {
  * Helper functions
  */
 function getAlertState(instanceId: string): AlertStates {
-  const alert = alertInstances.get(instanceId);
+  const alert = alertInstances.get(`${instanceId}-*`);
   if (alert) {
     return alert.state.alertState;
   } else {
@@ -73,11 +73,18 @@ const executor = (createLogThresholdExecutor('test', libsMock) as unknown) as (o
 
 // Wrapper to test
 type Comparison = [number, Comparator, number];
+
 async function callExecutor(
   [value, comparator, threshold]: Comparison,
   criteria: Criterion[] = []
 ) {
-  services.callCluster.mockImplementationOnce(async (..._) => ({ count: value }));
+  services.callCluster.mockImplementationOnce(async (..._) => ({
+    hits: {
+      total: {
+        value,
+      },
+    },
+  }));
 
   return await executor({
     services,
@@ -90,222 +97,224 @@ async function callExecutor(
   });
 }
 
-describe('Comparators trigger alerts correctly', () => {
-  it('does not alert when counts do not reach the threshold', async () => {
-    await callExecutor([0, Comparator.GT, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
+describe('Ungrouped alerts', () => {
+  describe('Comparators trigger alerts correctly', () => {
+    it('does not alert when counts do not reach the threshold', async () => {
+      await callExecutor([0, Comparator.GT, 1]);
+      expect(getAlertState('test')).toBe(AlertStates.OK);
 
-    await callExecutor([0, Comparator.GT_OR_EQ, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
+      await callExecutor([0, Comparator.GT_OR_EQ, 1]);
+      expect(getAlertState('test')).toBe(AlertStates.OK);
 
-    await callExecutor([1, Comparator.LT, 0]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
+      await callExecutor([1, Comparator.LT, 0]);
+      expect(getAlertState('test')).toBe(AlertStates.OK);
 
-    await callExecutor([1, Comparator.LT_OR_EQ, 0]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
-  });
+      await callExecutor([1, Comparator.LT_OR_EQ, 0]);
+      expect(getAlertState('test')).toBe(AlertStates.OK);
+    });
 
-  it('alerts when counts reach the threshold', async () => {
-    await callExecutor([2, Comparator.GT, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
+    it('alerts when counts reach the threshold', async () => {
+      await callExecutor([2, Comparator.GT, 1]);
+      expect(getAlertState('test')).toBe(AlertStates.ALERT);
 
-    await callExecutor([1, Comparator.GT_OR_EQ, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
+      await callExecutor([1, Comparator.GT_OR_EQ, 1]);
+      expect(getAlertState('test')).toBe(AlertStates.ALERT);
 
-    await callExecutor([1, Comparator.LT, 2]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
+      await callExecutor([1, Comparator.LT, 2]);
+      expect(getAlertState('test')).toBe(AlertStates.ALERT);
 
-    await callExecutor([2, Comparator.LT_OR_EQ, 2]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
-  });
-});
-
-describe('Comparators create the correct ES queries', () => {
-  beforeEach(() => {
-    services.callCluster.mockReset();
-  });
-
-  it('Works with `Comparator.EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.EQ, value: 'bar' }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ term: { foo: { value: 'bar' } } }],
-        },
-      },
+      await callExecutor([2, Comparator.LT_OR_EQ, 2]);
+      expect(getAlertState('test')).toBe(AlertStates.ALERT);
     });
   });
 
-  it('works with `Comparator.NOT_EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.NOT_EQ, value: 'bar' }]
-    );
+  describe('Comparators create the correct ES queries', () => {
+    beforeEach(() => {
+      services.callCluster.mockReset();
+    });
 
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must_not: [{ term: { foo: { value: 'bar' } } }],
+    it('Works with `Comparator.EQ`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.EQ, value: 'bar' }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ term: { foo: { value: 'bar' } } }],
+          },
         },
-      },
+      });
+    });
+
+    it('works with `Comparator.NOT_EQ`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.NOT_EQ, value: 'bar' }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must_not: [{ term: { foo: { value: 'bar' } } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.MATCH`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.MATCH, value: 'bar' }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ match: { foo: 'bar' } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.NOT_MATCH`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.NOT_MATCH, value: 'bar' }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must_not: [{ match: { foo: 'bar' } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.MATCH_PHRASE`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.MATCH_PHRASE, value: 'bar' }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ match_phrase: { foo: 'bar' } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.NOT_MATCH_PHRASE`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.NOT_MATCH_PHRASE, value: 'bar' }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must_not: [{ match_phrase: { foo: 'bar' } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.GT`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.GT, value: 1 }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ range: { foo: { gt: 1 } } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.GT_OR_EQ`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.GT_OR_EQ, value: 1 }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ range: { foo: { gte: 1 } } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.LT`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.LT, value: 1 }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ range: { foo: { lt: 1 } } }],
+          },
+        },
+      });
+    });
+
+    it('works with `Comparator.LT_OR_EQ`', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [{ field: 'foo', comparator: Comparator.LT_OR_EQ, value: 1 }]
+      );
+
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ range: { foo: { lte: 1 } } }],
+          },
+        },
+      });
     });
   });
 
-  it('works with `Comparator.MATCH`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.MATCH, value: 'bar' }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ match: { foo: 'bar' } }],
-        },
-      },
+  describe('Multiple criteria create the right ES query', () => {
+    beforeEach(() => {
+      services.callCluster.mockReset();
     });
-  });
+    it('works', async () => {
+      await callExecutor(
+        [2, Comparator.GT, 1], // Not relevant
+        [
+          { field: 'foo', comparator: Comparator.EQ, value: 'bar' },
+          { field: 'http.status', comparator: Comparator.LT, value: 400 },
+        ]
+      );
 
-  it('works with `Comparator.NOT_MATCH`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.NOT_MATCH, value: 'bar' }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must_not: [{ match: { foo: 'bar' } }],
+      const query = services.callCluster.mock.calls[0][1]!;
+      expect(query.body).toMatchObject({
+        query: {
+          bool: {
+            must: [{ term: { foo: { value: 'bar' } } }, { range: { 'http.status': { lt: 400 } } }],
+          },
         },
-      },
-    });
-  });
-
-  it('works with `Comparator.MATCH_PHRASE`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.MATCH_PHRASE, value: 'bar' }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ match_phrase: { foo: 'bar' } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.NOT_MATCH_PHRASE`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.NOT_MATCH_PHRASE, value: 'bar' }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must_not: [{ match_phrase: { foo: 'bar' } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.GT`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.GT, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { gt: 1 } } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.GT_OR_EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.GT_OR_EQ, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { gte: 1 } } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.LT`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.LT, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { lt: 1 } } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.LT_OR_EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.LT_OR_EQ, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { lte: 1 } } }],
-        },
-      },
-    });
-  });
-});
-
-describe('Multiple criteria create the right ES query', () => {
-  beforeEach(() => {
-    services.callCluster.mockReset();
-  });
-  it('works', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [
-        { field: 'foo', comparator: Comparator.EQ, value: 'bar' },
-        { field: 'http.status', comparator: Comparator.LT, value: 400 },
-      ]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ term: { foo: { value: 'bar' } } }, { range: { 'http.status': { lt: 400 } } }],
-        },
-      },
+      });
     });
   });
 });
