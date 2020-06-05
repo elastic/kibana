@@ -9,13 +9,7 @@ import { useCallback, useState } from 'react';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
-import {
-  AggName,
-  DropDownLabel,
-  isPivotAggsConfigWithUiSupport,
-  PivotAggsConfig,
-  PivotGroupByConfig,
-} from '../../../../../common';
+import { AggName, DropDownLabel, PivotAggsConfig, PivotGroupByConfig } from '../../../../../common';
 
 import {
   getAggNameConflictToastMessages,
@@ -23,6 +17,12 @@ import {
   StepDefineExposedState,
 } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
+
+function subAggActionsCheck(aggItem: PivotAggsConfig) {
+  if (!aggItem.isSubAggsSupported) {
+    throw new Error(`Aggregation "${aggItem.agg}" does not support sub-aggregations`);
+  }
+}
 
 export const usePivotConfig = (
   defaults: StepDefineExposedState,
@@ -125,18 +125,14 @@ export const usePivotConfig = (
    */
   const addSubAggregation = useCallback(
     (item: PivotAggsConfig, d: DropDownLabel[]) => {
+      subAggActionsCheck(item);
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
-
       const updatedItem = { ...item };
-
-      if (isPivotAggsConfigWithUiSupport(updatedItem)) {
-        updatedItem.subAggs = {
-          ...updatedItem.subAggs,
-          [label]: config,
-        };
-      }
-
+      updatedItem.subAggs = {
+        ...updatedItem.subAggs,
+        [config.aggName]: config,
+      };
       updateAggregation(updatedItem.aggName, updatedItem);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,18 +144,31 @@ export const usePivotConfig = (
    */
   const updateSubAggregation = useCallback(
     (item: PivotAggsConfig, prevSubItemName: AggName, subItem: PivotAggsConfig) => {
+      subAggActionsCheck(item);
       const updatedItem = { ...item };
+      const itemSubAggs = updatedItem.subAggs !== undefined ? { ...updatedItem.subAggs } : {};
+      delete itemSubAggs[prevSubItemName];
+      updatedItem.subAggs = {
+        ...itemSubAggs,
+        [subItem.aggName]: subItem,
+      };
+      updateAggregation(updatedItem.aggName, updatedItem);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aggOptionsData]
+  );
 
-      if (isPivotAggsConfigWithUiSupport(updatedItem)) {
-        const itemSubAggs = updatedItem.subAggs !== undefined ? { ...updatedItem.subAggs } : {};
-        delete itemSubAggs[prevSubItemName];
-
-        updatedItem.subAggs = {
-          ...itemSubAggs,
-          [subItem.aggName]: subItem,
-        };
+  /**
+   * Deletes sub-aggregation of the aggregation item
+   */
+  const deleteSubAggregation = useCallback(
+    (item: PivotAggsConfig, subAggName: string) => {
+      subAggActionsCheck(item);
+      const updatedItem = { ...item };
+      if (updatedItem.subAggs === undefined || updatedItem.subAggs[subAggName] === undefined) {
+        return;
       }
-
+      delete updatedItem.subAggs[subAggName];
       updateAggregation(updatedItem.aggName, updatedItem);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,6 +194,7 @@ export const usePivotConfig = (
       addGroupBy,
       addSubAggregation,
       updateSubAggregation,
+      deleteSubAggregation,
       deleteAggregation,
       deleteGroupBy,
       setAggList,

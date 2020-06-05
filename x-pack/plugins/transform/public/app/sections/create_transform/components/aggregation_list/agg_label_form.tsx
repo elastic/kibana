@@ -59,16 +59,23 @@ export const AggLabelForm: React.FC<Props> = ({
     setPopoverVisibility(false);
   }
 
-  const sugAggAddHandler = useCallback(
+  const addSubAggHandler = useCallback(
     (d: EuiComboBoxOptionOption[]) => {
       actions.addSubAggregation(item, d);
     },
     [actions, item]
   );
 
-  const sugAggUpdateHandler = useCallback(
+  const updateSubAggHandler = useCallback(
     (prevSubItemName: string, subItem: PivotAggsConfig) => {
       actions.updateSubAggregation(item, prevSubItemName, subItem);
+    },
+    [actions, item]
+  );
+
+  const deleteSubAggHandler = useCallback(
+    (subAggName: string) => {
+      actions.deleteSubAggregation(item, subAggName);
     },
     [actions, item]
   );
@@ -144,14 +151,14 @@ export const AggLabelForm: React.FC<Props> = ({
           {isPivotAggsConfigWithUiSupport(item) && item.subAggs && (
             <AggListForm
               aggOptions={aggOptions}
-              onChange={sugAggUpdateHandler}
-              deleteHandler={() => {}}
+              onChange={updateSubAggHandler}
+              deleteHandler={deleteSubAggHandler}
               list={item.subAggs}
               options={options}
             />
           )}
           <DropDown
-            changeHandler={sugAggAddHandler}
+            changeHandler={addSubAggHandler}
             options={aggOptions}
             placeholder={i18n.translate(
               'xpack.transform.stepDefineForm.subAggregationsPlaceholder',
