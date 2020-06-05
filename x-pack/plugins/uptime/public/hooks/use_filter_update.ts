@@ -20,19 +20,14 @@ interface SelectedFilters {
   selectedFilters: Map<string, string[]>;
 }
 
-export const useFilterUpdate = (
-  fieldName?: string,
-  values?: string[],
-  shouldUpdateUrl?: boolean,
-  alertParamFilters?: any
-): SelectedFilters => {
+export const useFilterUpdate = (fieldName?: string, values?: string[]): SelectedFilters => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
   const { filters: currentFilters } = getUrlParams();
 
   // update filters in the URL from filter group
   const onFilterUpdate = (filtersKuery: string) => {
-    if (currentFilters !== filtersKuery && shouldUpdateUrl) {
+    if (currentFilters !== filtersKuery) {
       updateUrl({ filters: filtersKuery, pagination: '' });
     }
   };
@@ -62,7 +57,7 @@ export const useFilterUpdate = (
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertParamFilters, fieldName, values]);
+  }, [fieldName, values]);
 
   return {
     selectedTags: filterKueries.get('tags') || [],
