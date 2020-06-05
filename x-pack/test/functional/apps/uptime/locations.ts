@@ -48,6 +48,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await uptimePage.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
     });
 
+    it('displays the overall availability', async () => {
+      await monitor().displayOverallAvailability();
+    });
+
+    it('can change the view to map', async () => {
+      await monitor().toggleToMapView();
+    });
+
     it('renders the location panel and canvas', async () => {
       await monitor().locationMapIsRendered();
     });

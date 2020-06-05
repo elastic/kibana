@@ -57,7 +57,9 @@ export const MonitorStatusBar: React.FC = () => {
         style={{ maxWidth: '450px' }}
       >
         <MonListTitle>{OverallAvailability}</MonListTitle>
-        <MonListDescription>{availability.toFixed(2)}%</MonListDescription>
+        <MonListDescription data-test-subj="uptimeOverallAvailability">
+          {availability.toFixed(2)}%
+        </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
         <MonListDescription>
           <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">

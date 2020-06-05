@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
@@ -15,6 +16,13 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
     async locationMissingExists() {
       return await testSubjects.existOrFail('xpack.uptime.locationMap.locationMissing', {
         timeout: 3000,
+      });
+    },
+    async displayOverallAvailability() {
+      return retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('uptimeOverallAvailability');
+        const availability = await testSubjects.getVisibleText('uptimeOverallAvailability');
+        expect(availability).to.be('100.00%');
       });
     },
     async locationMapIsRendered() {
@@ -44,6 +52,9 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
           )
         );
       });
+    },
+    async toggleToMapView() {
+      await testSubjects.click('uptimeMonitorToggleMapBtn');
     },
   };
 }

@@ -81,12 +81,14 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
       label: 'Bold',
       name: 'bold',
       iconType: 'list',
+      'data-test-subj': 'uptimeMonitorToggleListBtn',
     },
     {
       id: `mapBtn`,
       label: 'Italic',
       name: 'italic',
       iconType: 'mapMarker',
+      'data-test-subj': 'uptimeMonitorToggleMapBtn',
     },
   ];
 
