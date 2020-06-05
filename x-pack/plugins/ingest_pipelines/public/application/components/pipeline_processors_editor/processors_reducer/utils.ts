@@ -6,7 +6,7 @@
 
 import { State } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from '../types';
-import { DragAndDropSpecialLocations } from '../constants';
+import { DropSpecialLocations } from '../constants';
 import { checkIfSamePath, getValue } from '../utils';
 
 export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
@@ -46,11 +46,11 @@ export const unsafeProcessorMove = (
 
   const lastDestItem = destination[destination.length - 1];
   let destIndex: number;
-  if (lastDestItem === DragAndDropSpecialLocations.top) {
+  if (lastDestItem === DropSpecialLocations.top) {
     destIndex = 0;
-  } else if (lastDestItem === DragAndDropSpecialLocations.bottom) {
+  } else if (lastDestItem === DropSpecialLocations.bottom) {
     destIndex = Infinity;
-  } else if (/^[0-9]+$/.test(lastDestItem)) {
+  } else if (/^-?[0-9]+$/.test(lastDestItem)) {
     destIndex = parseInt(lastDestItem, 10);
   } else {
     throw new Error(`Expected number but received "${lastDestItem}"`);

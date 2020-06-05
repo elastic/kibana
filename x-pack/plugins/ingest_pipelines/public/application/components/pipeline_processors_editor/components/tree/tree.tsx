@@ -11,6 +11,7 @@ import { ProcessorInternal, ProcessorSelector } from '../../types';
 import './tree.scss';
 import { TreeNode } from './tree_node';
 import { DropZoneButton } from './drop_zone_button';
+import { DropSpecialLocations } from '../../constants';
 
 export type TreeMode = 'copy' | 'move' | 'idle';
 
@@ -83,8 +84,8 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                   privateOnAction({
                     type: 'move',
                     payload: {
-                      source: selector.concat(String(idx)),
-                      destination: selectedProcessorInfo!.selector,
+                      destination: selector.concat(DropSpecialLocations.top),
+                      source: selectedProcessorInfo!.selector,
                     },
                   });
                 }}
