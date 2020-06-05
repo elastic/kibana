@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IVectorStyle } from '../vector_style';
-
 jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
@@ -24,7 +22,7 @@ import { MockMbMap } from './__tests__/test_util';
 
 import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
 
-const makeProperty = (options: object, mockStyle: IVectorStyle, field: IField = mockField) => {
+const makeProperty = (options: object, mockStyle: MockStyle, field: IField = mockField) => {
   return new DynamicSizeProperty(
     options,
     VECTOR_STYLES.ICON_SIZE,

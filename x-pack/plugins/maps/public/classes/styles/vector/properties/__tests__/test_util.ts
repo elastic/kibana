@@ -31,11 +31,11 @@ export class MockMbMap {
   constructor() {
     this._paintPropertyCalls = [];
   }
-  setPaintProperty(...args) {
+  setPaintProperty(...args: unknown[]) {
     this._paintPropertyCalls.push([...args]);
   }
 
-  getPaintPropertyCalls() {
+  getPaintPropertyCalls(): unknown[] {
     return this._paintPropertyCalls;
   }
 }
