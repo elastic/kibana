@@ -17,7 +17,4 @@
  * under the License.
  */
 
-// export * from './index_patterns_api_client';
-export * from '../../../common/index_patterns/index_patterns';
-// export { IIndexPattern } from '../../../common/index_patterns';
 export * from './redirect_no_index_pattern';

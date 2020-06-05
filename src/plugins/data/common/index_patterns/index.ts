@@ -19,3 +19,4 @@
 
 export * from './fields';
 export * from './types';
+export * from './index_patterns';
