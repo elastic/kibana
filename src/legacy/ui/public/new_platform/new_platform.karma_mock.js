@@ -236,7 +236,9 @@ export const npSetup = {
     },
     share: {
       register: () => {},
-      registerUrlGenerator: () => {},
+      urlGenerators: {
+        registerUrlGenerator: () => {},
+      },
     },
     devTools: {
       register: () => {},
