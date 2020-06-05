@@ -46,11 +46,13 @@ function joinPath(pathA: string, pathB: string) {
 
 export function createUrl(path: string, url: string) {
   const baseUrl = Url.parse(url);
+
   return Url.format({
     protocol: baseUrl.protocol,
     hostname: baseUrl.hostname,
     port: baseUrl.port,
-    pathname: joinPath(baseUrl.pathname || '', path),
+    pathname: joinPath(baseUrl.pathname || '', path.includes('#') ? path.split('#')[0] : path),
+    hash: path.includes('#') ? path.split('#')[1] : undefined,
   });
 }
 
@@ -77,7 +79,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
   const devToolsResponses: NavigationResults = new Map();
   const apps = [
     { path: 'app/kibana#/discover', locator: '[data-test-subj="discover-sidebar"]' },
-    { path: '/app/home', locator: '[data-test-subj="homeApp"]' },
+    { path: '/app/kibana#/home', locator: '[data-test-subj="homeApp"]' },
     { path: '/app/canvas', locator: '[data-test-subj="create-workpad-button"]' },
     { path: '/app/maps', locator: '[title="Maps"]' },
     { path: '/app/apm', locator: '[data-test-subj="apmMainContainer"]' },
