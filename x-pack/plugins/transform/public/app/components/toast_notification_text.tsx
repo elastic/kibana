@@ -51,7 +51,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
 
   const unformattedText = text.message ? text.message : text;
   const formattedText = typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : text;
-  const textLength = previewTextLength || 140;
+  const textLength = previewTextLength ?? 140;
   const previewText = `${formattedText.substring(0, textLength)}${
     formattedText.length > textLength ? ' ...' : ''
   }`;

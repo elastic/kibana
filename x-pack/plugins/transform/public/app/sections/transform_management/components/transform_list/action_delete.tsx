@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TRANSFORM_STATE } from '../../../../../../common';
@@ -99,11 +100,10 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
           {
             <EuiSwitch
               data-test-subj="transformBulkDeleteIndexSwitch"
-              style={{ paddingBottom: 10 }}
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.bulkDeleteDestinationIndexTitle',
                 {
-                  defaultMessage: 'Delete destination indexes',
+                  defaultMessage: 'Delete destination indices',
                 }
               )}
               checked={deleteDestIndex}
@@ -111,6 +111,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
             />
           }
         </EuiFlexItem>
+        <EuiSpacer size="s" />
         <EuiFlexItem>
           {
             <EuiSwitch
@@ -143,7 +144,6 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
           {userCanDeleteIndex && (
             <EuiSwitch
               data-test-subj="transformDeleteIndexSwitch"
-              style={{ paddingBottom: 10 }}
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.deleteDestinationIndexTitle',
                 {
@@ -156,8 +156,9 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
             />
           )}
         </EuiFlexItem>
-        <EuiFlexItem>
-          {userCanDeleteIndex && indexPatternExists && (
+        {userCanDeleteIndex && indexPatternExists && (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
             <EuiSwitch
               data-test-subj="transformDeleteIndexPatternSwitch"
               label={i18n.translate(
@@ -170,8 +171,8 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
               checked={deleteIndexPattern}
               onChange={toggleDeleteIndexPattern}
             />
-          )}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

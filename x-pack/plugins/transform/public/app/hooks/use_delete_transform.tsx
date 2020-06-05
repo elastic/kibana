@@ -157,7 +157,7 @@ export const useDeleteTransforms = () => {
           const destinationIndex = status.destinationIndex;
 
           // if we are only deleting one transform, show the success toast messages
-          if (!isBulk) {
+          if (!isBulk && status.transformDeleted) {
             if (status.transformDeleted?.success) {
               toastNotifications.addSuccess(
                 i18n.translate('xpack.transform.transformList.deleteTransformSuccessMessage', {
