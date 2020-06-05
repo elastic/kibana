@@ -8,6 +8,8 @@ import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { ADD_DATA_PATH } from '../../../common/constants';
+
 import { useKibana } from '../../common/lib/kibana';
 
 export const Summary = React.memo(() => {
@@ -37,7 +39,7 @@ export const Summary = React.memo(() => {
                 </EuiLink>
               ),
               data: (
-                <EuiLink href="kibana#home/tutorial_directory/siem">
+                <EuiLink href={ADD_DATA_PATH}>
                   <FormattedMessage
                     id="xpack.securitySolution.overview.startedText.dataLinkText"
                     defaultMessage="ingesting data"

@@ -182,16 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
         });
 
-        it('should start the clone analytics job', async () => {
-          await ml.dataFrameAnalyticsCreation.assertStartButtonExists();
-          await ml.dataFrameAnalyticsCreation.startAnalyticsJob();
-        });
-
-        it('should close the create job flyout', async () => {
-          await ml.dataFrameAnalyticsCreation.assertCloseButtonExists();
-          await ml.dataFrameAnalyticsCreation.closeCreateAnalyticsJobFlyout();
-        });
-
         it('finishes analytics processing', async () => {
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
         });
