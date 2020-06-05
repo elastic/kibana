@@ -14,14 +14,14 @@ import { ElasticsearchConfigType } from '../../../../src/core/server/elasticsear
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
+const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.extends({
+  logFetchCount: schema.number({ defaultValue: 10 }),
+  hosts: schema.maybe(schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })])),
+});
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  elasticsearch: elasticsearchConfigSchema.extends({
-    logFetchCount: schema.number({ defaultValue: 10 }),
-    hosts: schema.maybe(
-      schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })])
-    ),
-  }),
+  elasticsearch: monitoringElasticsearchConfigSchema,
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     ccs: schema.object({
@@ -31,12 +31,7 @@ export const configSchema = schema.object({
       index: schema.string({ defaultValue: 'filebeat-*' }),
     }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
-    elasticsearch: elasticsearchConfigSchema.extends({
-      logFetchCount: schema.number({ defaultValue: 10 }),
-      hosts: schema.maybe(
-        schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })])
-      ),
-    }),
+    elasticsearch: monitoringElasticsearchConfigSchema,
     container: schema.object({
       elasticsearch: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
@@ -78,14 +73,23 @@ export const configSchema = schema.object({
   }),
 });
 
+class MonitoringElasticsearchConfig extends ElasticsearchConfig {
+  public readonly logFetchCount?: number;
+
+  constructor(rawConfig: TypeOf<typeof monitoringElasticsearchConfigSchema>) {
+    super(rawConfig as ElasticsearchConfigType);
+    this.logFetchCount = rawConfig.logFetchCount;
+  }
+}
+
 export type MonitoringConfig = ReturnType<typeof createConfig>;
 export function createConfig(config: TypeOf<typeof configSchema>) {
   return {
     ...config,
-    elasticsearch: new ElasticsearchConfig(config.elasticsearch as ElasticsearchConfigType),
+    elasticsearch: new MonitoringElasticsearchConfig(config.elasticsearch),
     ui: {
       ...config.ui,
-      elasticsearch: new ElasticsearchConfig(config.ui.elasticsearch as ElasticsearchConfigType),
+      elasticsearch: new MonitoringElasticsearchConfig(config.ui.elasticsearch),
     },
   };
 }
