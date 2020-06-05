@@ -30,6 +30,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
+      data-test-subj={`xpack.uptime.alerts.tls.expressionPopover.${id}`}
       id={id}
       anchorPosition="downLeft"
       button={

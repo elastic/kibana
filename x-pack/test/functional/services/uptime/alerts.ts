@@ -23,6 +23,16 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     async openMonitorStatusAlertType(alertType: string) {
       return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);
     },
+    async assertTlsFieldExists(id: string) {
+      return testSubjects.existOrFail(`xpack.uptime.alerts.tls.expressionPopover.${id}`, {
+        timeout: 15 * 1000,
+      });
+    },
+    async assertMonitorStatusFlyoutSearchBarExists() {
+      return testSubjects.existOrFail('xpack.uptime.alerts.monitorStatus.filterBar', {
+        timeout: 15 * 1000,
+      });
+    },
     async setAlertTags(tags: string[]) {
       for (let i = 0; i < tags.length; i += 1) {
         await testSubjects.click('comboBoxSearchInput', 5000);

@@ -29,6 +29,10 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       }
     }
 
+    public async goToUptimeOverview() {
+      return navigation.goToUptime();
+    }
+
     public async goToUptimeOverviewAndLoadData(
       dateStart: string,
       dateEnd: string,
