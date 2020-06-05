@@ -11,6 +11,10 @@ import { checkIfSamePath, getValue } from '../utils';
 
 export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
 
+export const isChildPath = (a: ProcessorSelector, b: ProcessorSelector) => {
+  return a.every((pathSegment, idx) => pathSegment === b[idx]);
+};
+
 /**
  * Unsafe!
  *
@@ -31,7 +35,7 @@ export const unsafeProcessorMove = (
 ): State => {
   const pathToSourceArray = source.slice(0, -1);
   const pathToDestArray = destination.slice(0, -1);
-  if (source.every((pathSegment, idx) => pathSegment === destination[idx])) {
+  if (isChildPath(source, destination)) {
     throw new Error(PARENT_CHILD_NEST_ERROR);
   }
   const isXArrayMove = !checkIfSamePath(pathToSourceArray, pathToDestArray);

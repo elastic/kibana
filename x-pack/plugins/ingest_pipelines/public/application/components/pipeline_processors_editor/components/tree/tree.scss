@@ -7,8 +7,13 @@
     border: 2px dashed $euiColorLightShade;
     visibility: hidden;
 
+    transition: border .5s;
+
     &--active {
       visibility: visible;
+      &:hover {
+        border: 2px dashed $euiColorMediumShade;
+      }
     }
   }
 
@@ -21,12 +26,6 @@
       cursor: default !important;
       & > * {
         cursor: default !important;
-      }
-    }
-
-    &--active {
-      &:hover {
-        opacity: 100%;
       }
     }
   }

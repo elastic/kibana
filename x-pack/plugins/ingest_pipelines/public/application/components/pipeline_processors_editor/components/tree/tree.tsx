@@ -7,6 +7,7 @@ import React, { FunctionComponent, useState, memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
+import { isChildPath } from '../../processors_reducer';
 
 import './tree.scss';
 import { TreeNode } from './tree_node';
@@ -46,14 +47,17 @@ export interface PrivateProps {
 const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
   return Boolean(
     // Is the selected node first in a list?
-    !selectedProcessor.aboveId &&
-      // Is the selected processor the current processor?
-      processor.id === selectedProcessor.id
+    (!selectedProcessor.aboveId && selectedProcessor.id === processor.id) ||
+      isChildPath(selectedProcessor.selector, processor.selector)
   );
 };
 
 const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
-  return processor.id === selectedProcessor.id || processor.belowId === selectedProcessor.id;
+  return (
+    processor.id === selectedProcessor.id ||
+    processor.belowId === selectedProcessor.id ||
+    isChildPath(selectedProcessor.selector, processor.selector)
+  );
 };
 
 export const PrivateTree: FunctionComponent<PrivateProps> = ({

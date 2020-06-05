@@ -11,3 +11,5 @@ export {
   ProcessorsDispatch,
   Action,
 } from './processors_reducer';
+
+export { isChildPath } from './utils';

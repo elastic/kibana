@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 export interface Props {
   isDisabled: boolean;
@@ -34,9 +34,7 @@ export const DropZoneButton: FunctionComponent<Props> = ({ isDisabled, onClick }
         disabled={isDisabled}
         onClick={onClick}
       >
-        <EuiText size="s" color="subdued">
-          {MOVE_HERE_COPY}
-        </EuiText>
+        &nbsp;
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
