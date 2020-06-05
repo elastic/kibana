@@ -7,32 +7,32 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const PIPELINE = {
-  name: 'test_pipeline',
-  description: 'My pipeline description.',
-  version: 1,
-  processors: JSON.stringify([
-    {
-      set: {
-        field: 'foo',
-        value: 'new',
-      },
-    },
-  ]),
-  onFailureProcessors: JSON.stringify([
-    {
-      set: {
-        field: '_index',
-        value: 'failed-{{ _index }}',
-      },
-    },
-  ]),
-};
+// const PIPELINE = {
+//   name: 'test_pipeline',
+//   description: 'My pipeline description.',
+//   version: 1,
+//   processors: JSON.stringify([
+//     {
+//       set: {
+//         field: 'foo',
+//         value: 'new',
+//       },
+//     },
+//   ]),
+//   onFailureProcessors: JSON.stringify([
+//     {
+//       set: {
+//         field: '_index',
+//         value: 'failed-{{ _index }}',
+//       },
+//     },
+//   ]),
+// };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines']);
   const log = getService('log');
-  const es = getService('legacyEs');
+  // const es = getService('legacyEs');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
