@@ -76,7 +76,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
         };
 
         return (
-          <React.Fragment key={idx}>
+          <React.Fragment key={processor.id}>
             {idx === 0 ? (
               <DropZoneButton
                 onClick={() => {

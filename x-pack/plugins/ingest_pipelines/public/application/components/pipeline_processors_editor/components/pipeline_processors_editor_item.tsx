@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiButtonIcon, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ProcessorInternal } from '../types';
@@ -92,15 +92,50 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = ({
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonLabel',
+                {
+                  defaultMessage: 'Duplicate this processor',
+                }
+              )}
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonAriaLabel',
+                  {
+                    defaultMessage: 'Duplicate this processor',
+                  }
+                )}
+                disabled={moving}
+                iconType="copy"
+                size="s"
+                onClick={onDuplicate}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             {selected ? (
-              <EuiButtonEmpty size="s" onClick={onCancelMove}>
-                {i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.cancelMoveProcessorButtonLabel',
                   {
                     defaultMessage: 'Cancel Move',
                   }
                 )}
-              </EuiButtonEmpty>
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ingestPipelines.pipelineEditor.cancelMoveProcessorButtonArialLabel',
+                    {
+                      defaultMessage: 'Cancel Move',
+                    }
+                  )}
+                  iconType="crossInACircleFilled"
+                  size="s"
+                  onClick={onCancelMove}
+                />
+              </EuiToolTip>
             ) : (
               <EuiToolTip
                 content={i18n.translate(
@@ -124,29 +159,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = ({
                 />
               </EuiToolTip>
             )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonLabel',
-                {
-                  defaultMessage: 'Duplicate this processor',
-                }
-              )}
-            >
-              <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonAriaLabel',
-                  {
-                    defaultMessage: 'Duplicate this processor',
-                  }
-                )}
-                disabled={moving}
-                iconType="copy"
-                size="s"
-                onClick={onDuplicate}
-              />
-            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

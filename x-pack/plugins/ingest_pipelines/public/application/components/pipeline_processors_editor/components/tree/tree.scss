@@ -2,7 +2,9 @@
 
 .processorsEditor__tree {
   &__dropZoneContainer {
-    height: $euiSize;
+    height: 10px;
+    margin: 2px;
+    border-radius: 2px;
     border: 2px dashed $euiColorLightShade;
     visibility: hidden;
 
