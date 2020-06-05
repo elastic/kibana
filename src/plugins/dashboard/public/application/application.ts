@@ -74,6 +74,7 @@ export interface RenderDeps {
   navigateToLegacyKibanaUrl: KibanaLegacyStart['navigateToLegacyKibanaUrl'];
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
+  restorePreviousUrl: () => void;
 }
 
 let angularModuleInstance: IModule | null = null;

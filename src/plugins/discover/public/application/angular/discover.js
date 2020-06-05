@@ -114,7 +114,7 @@ app.config(($routeProvider) => {
       };
     },
   };
-  $routeProvider.when('/:id?', {
+  const discoverRoute = {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -177,7 +177,10 @@ app.config(($routeProvider) => {
         });
       },
     },
-  });
+  };
+
+  $routeProvider.when('/view/:id?', discoverRoute);
+  $routeProvider.when('/', discoverRoute);
 });
 
 app.directive('discoverApp', function () {
@@ -415,7 +418,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: (searchId) => `#/${encodeURIComponent(searchId)}`,
+          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -747,7 +750,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/${encodeURIComponent(savedSearch.id)}`);
+            history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());

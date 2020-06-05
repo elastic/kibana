@@ -242,12 +242,14 @@ export function initDashboardApp(app, deps) {
         },
       })
       .otherwise({
-        template: '<span></span>',
-        controller: function ($location) {
-          const { navigated } = deps.navigateToLegacyKibanaUrl($location.path());
+        redirectTo: function () {
+          deps.restorePreviousUrl();
+          const { navigated } = deps.navigateToLegacyKibanaUrl(window.location.hash.substr(1));
           if (!navigated) {
             deps.navigateToDefaultApp();
           }
+          // prevent angular from completing the route change
+          throw new Error();
         },
       });
   });

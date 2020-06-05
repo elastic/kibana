@@ -16,17 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getAngularModule, getServices, getUrlTracker } from '../../kibana_services';
 
 getAngularModule().config(($routeProvider: any) => {
   $routeProvider.otherwise({
-    template: '<span></span>',
-    controller($location: any) {
+    redirectTo() {
+      getUrlTracker().restorePreviousUrl();
       const { kibanaLegacy } = getServices();
-      const { navigated } = kibanaLegacy.navigateToLegacyKibanaUrl($location.path());
+      const { navigated } = kibanaLegacy.navigateToLegacyKibanaUrl(window.location.hash.substr(1));
       if (!navigated) {
         kibanaLegacy.navigateToDefaultApp();
       }
+      // prevent angular from completing the route change
+      throw new Error();
     },
   });
 });

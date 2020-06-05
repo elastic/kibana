@@ -233,12 +233,16 @@ export function initVisualizeApp(app, deps) {
         },
       })
       .otherwise({
-        template: '<span></span>',
-        controller: function ($location) {
-          const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl($location.path());
+        redirectTo: function () {
+          deps.restorePreviousUrl();
+          const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl(
+            window.location.hash.substr(1)
+          );
           if (!navigated) {
             deps.kibanaLegacy.navigateToDefaultApp();
           }
+          // prevent angular from completing the route change
+          throw new Error();
         },
       });
   });

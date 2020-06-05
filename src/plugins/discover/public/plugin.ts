@@ -100,7 +100,7 @@ export interface DiscoverStartPlugins {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart
+  kibanaLegacy: KibanaLegacyStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
 }
@@ -154,6 +154,7 @@ export class DiscoverPlugin
       appUnMounted,
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
+      restorePreviousUrl,
     } = createKbnUrlTracker({
       // we pass getter here instead of plain `history`,
       // so history is lazily created (when app is mounted)
@@ -179,7 +180,7 @@ export class DiscoverPlugin
         },
       ],
     });
-    setUrlTracker({ setTrackedUrl });
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -219,7 +220,13 @@ export class DiscoverPlugin
       },
     });
 
-    plugins.kibanaLegacy.forwardApp('discover', 'discover');
+    plugins.kibanaLegacy.forwardApp('discover', 'discover', (path) => {
+      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
+      if (!id) {
+        return `#${path.replace('/discover', '') || '/'}`;
+      }
+      return `#/view/${id}${tail || ''}`;
+    });
 
     if (plugins.home) {
       registerFeature(plugins.home);

@@ -197,7 +197,13 @@ export class DashboardPlugin
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
-    const { appMounted, appUnMounted, stop: stopUrlTracker, getActiveUrl } = createKbnUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      getActiveUrl,
+      restorePreviousUrl,
+    } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
@@ -272,6 +278,7 @@ export class DashboardPlugin
           usageCollection,
           scopedHistory: () => this.currentHistory!,
           savedObjects,
+          restorePreviousUrl,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -289,6 +296,15 @@ export class DashboardPlugin
 
     core.application.register(app);
     kibanaLegacy.forwardApp(
+      DashboardConstants.DASHBOARDS_ID,
+      DashboardConstants.DASHBOARDS_ID,
+      (path) => {
+        const [, tail] = /(\?.*)/.exec(path) || [];
+        // carry over query if it exists
+        return `#/list${tail || ''}`;
+      }
+    );
+    kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
       (path) => {
@@ -303,15 +319,6 @@ export class DashboardPlugin
         }
         // persisted dashboard, probably with url state
         return `#/view/${id}${tail || ''}`;
-      }
-    );
-    kibanaLegacy.forwardApp(
-      DashboardConstants.DASHBOARDS_ID,
-      DashboardConstants.DASHBOARDS_ID,
-      (path) => {
-        const [, tail] = /(\?.*)/.exec(path) || [];
-        // carry over query if it exists
-        return `#/list${tail || ''}`;
       }
     );
 
