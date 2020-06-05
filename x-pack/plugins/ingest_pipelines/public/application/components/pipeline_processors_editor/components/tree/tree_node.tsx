@@ -6,7 +6,14 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiAccordion,
+  EuiText,
+} from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
 import { PrivateTree, TreeMode, ProcessorInfo, PrivateOnActionHandler } from './tree';
@@ -18,6 +25,7 @@ export interface Props {
   privateOnAction: PrivateOnActionHandler;
   mode: TreeMode;
   renderItem: RenderTreeItemFunction;
+  level: number;
   selectedProcessorInfo?: ProcessorInfo;
 }
 
@@ -27,6 +35,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   privateOnAction,
   mode,
   selectedProcessorInfo,
+  level,
   renderItem,
 }) => {
   const onMove = () => {
@@ -76,14 +85,30 @@ export const TreeNode: FunctionComponent<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {processor.onFailure?.length && (
-        <PrivateTree
-          renderItem={renderItem}
-          selectedProcessorInfo={selectedProcessorInfo}
-          privateOnAction={privateOnAction}
-          selector={processorInfo.selector.concat('onFailure')}
-          processors={processor.onFailure}
-          mode={mode}
-        />
+        <div style={{ marginLeft: `${level * 30}px` }}>
+          <EuiAccordion
+            className="processorsEditor__tree__onFailureHandlerContainer"
+            id={`onFailureHandlers-${processor.id}`}
+            initialIsOpen
+            buttonContent={
+              <EuiText className="processorsEditor__tree__onFailureHandlerLabel" color="subdued">
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
+                  defaultMessage: 'Failure Handlers',
+                })}
+              </EuiText>
+            }
+          >
+            <PrivateTree
+              level={level + 1}
+              renderItem={renderItem}
+              selectedProcessorInfo={selectedProcessorInfo}
+              privateOnAction={privateOnAction}
+              selector={processorInfo.selector.concat('onFailure')}
+              processors={processor.onFailure}
+              mode={mode}
+            />
+          </EuiAccordion>
+        </div>
       )}
     </EuiPanel>
   );

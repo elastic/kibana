@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import React, { FunctionComponent, useState, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
+import './tree.scss';
 import { TreeNode } from './tree_node';
 import { RenderTreeItemFunction } from './types';
+import { DropZoneButton } from './drop_zone_button';
 
 export type TreeMode = 'copy' | 'move' | 'idle';
 
@@ -41,6 +42,7 @@ export interface PrivateProps {
   privateOnAction: PrivateOnActionHandler;
   mode: TreeMode;
   selectedProcessorInfo?: ProcessorInfo;
+  level: number;
 }
 
 const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
@@ -63,6 +65,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   privateOnAction,
   renderItem,
   mode,
+  level,
 }) => {
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
@@ -75,26 +78,22 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
           aboveId: above?.id,
           belowId: below?.id,
         };
+
         return (
           <React.Fragment key={idx}>
             {idx === 0 ? (
-              <EuiFlexItem>
-                <EuiButtonIcon
-                  aria-label="temp"
-                  iconType="pin"
-                  disabled={
-                    mode !== 'move' || isDropZoneAboveDisabled(info, selectedProcessorInfo!)
-                  }
-                  onClick={() => {
-                    privateOnAction({ type: 'move', payload: selector.concat(String(idx)) });
-                  }}
-                >
-                  Move Here
-                </EuiButtonIcon>
-              </EuiFlexItem>
+              <DropZoneButton
+                onClick={() => {
+                  privateOnAction({ type: 'move', payload: selector.concat(String(idx)) });
+                }}
+                isDisabled={
+                  mode !== 'move' || isDropZoneAboveDisabled(info, selectedProcessorInfo!)
+                }
+              />
             ) : undefined}
             <EuiFlexItem>
               <TreeNode
+                level={level}
                 mode={mode}
                 processor={processor}
                 processorInfo={info}
@@ -103,18 +102,12 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                 renderItem={renderItem}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonIcon
-                aria-label="temp"
-                iconType="pin"
-                disabled={mode !== 'move' || isDropZoneBelowDisabled(info, selectedProcessorInfo!)}
-                onClick={() => {
-                  privateOnAction({ type: 'move', payload: selector.concat(String(idx + 1)) });
-                }}
-              >
-                Move Here
-              </EuiButtonIcon>
-            </EuiFlexItem>
+            <DropZoneButton
+              isDisabled={mode !== 'move' || isDropZoneBelowDisabled(info, selectedProcessorInfo!)}
+              onClick={() => {
+                privateOnAction({ type: 'move', payload: selector.concat(String(idx + 1)) });
+              }}
+            />
           </React.Fragment>
         );
       })}
@@ -142,6 +135,7 @@ export const Tree: FunctionComponent<Props> = memo(
     const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
     return (
       <PrivateTree
+        level={1}
         renderItem={renderItem}
         privateOnAction={(action) => {
           if (action.type === 'selectToMove') {

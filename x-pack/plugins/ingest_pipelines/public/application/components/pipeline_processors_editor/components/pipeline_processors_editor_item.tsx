@@ -20,7 +20,9 @@ export interface Props {
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = ({ processor, onClick }) => {
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>{processor.type}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <b>{processor.type}</b>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty size="s" onClick={() => onClick('edit')}>
           {i18n.translate('xpack.ingestPipelines.pipelineEditor.editProcessorButtonLabel', {
