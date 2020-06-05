@@ -5,7 +5,7 @@
  */
 
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getNetworkRoutes } from './routes';
+import { NetworkRoutes } from './routes';
 import { initialNetworkState, networkReducer, NetworkState } from './store';
 
 export class Network {
@@ -13,7 +13,7 @@ export class Network {
 
   public start(): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
-      routes: getNetworkRoutes(),
+      SubPluginRoutes: NetworkRoutes,
       store: {
         initialState: { network: initialNetworkState },
         reducer: { network: networkReducer },

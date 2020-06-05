@@ -6,7 +6,7 @@
 
 import { CoreStart } from 'kibana/public';
 import { Reducer, CombinedState } from 'redux';
-import { managementRoutes } from './routes';
+import { ManagementRoutes } from './routes';
 import { StartPlugins } from '../types';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { managementReducer } from './store/reducer';
@@ -40,7 +40,7 @@ export class Management {
     plugins: StartPlugins
   ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      routes: managementRoutes(),
+      SubPluginRoutes: ManagementRoutes,
       store: {
         initialState: {
           management: undefined,

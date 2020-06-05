@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { Timelines } from './pages';
 import { SiemPageName } from '../app/types';
 
-export const getTimelinesRoutes = () => [
-  <Route path={`/:pageName(${SiemPageName.timelines})`} render={() => <Timelines />} />,
-];
+export const TimelinesRoutes = () => (
+  <Switch>
+    <Route path={`/:pageName(${SiemPageName.timelines})`} render={() => <Timelines />} />
+  </Switch>
+);

@@ -5,19 +5,35 @@
  */
 
 import React from 'react';
+import { Store, Action } from 'redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppMountParameters } from '../../../../../src/core/public';
+import { State } from '../common/store';
 import { StartServices } from '../types';
 import { SiemApp } from './app';
-import { SecuritySubPlugins } from './types';
+import { AppFrontendLibs } from '../common/lib/lib';
 
-export const renderApp = (
-  services: StartServices,
-  { element }: AppMountParameters,
-  subPlugins: SecuritySubPlugins
-) => {
-  render(<SiemApp services={services} subPlugins={subPlugins} />, element);
+interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
+  services: StartServices;
+  store: Store<State, Action>;
+  SubPluginRoutes: React.FC;
+}
+
+export const renderApp = ({
+  apolloClient,
+  element,
+  history,
+  services,
+  store,
+  SubPluginRoutes,
+}: RenderAppProps) => {
+  render(
+    <SiemApp apolloClient={apolloClient} history={history} services={services} store={store}>
+      <SubPluginRoutes />
+    </SiemApp>,
+    element
+  );
   return () => unmountComponentAtNode(element);
 };

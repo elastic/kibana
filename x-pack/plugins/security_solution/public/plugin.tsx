@@ -5,6 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Store, Action } from 'redux';
+import { BehaviorSubject } from 'rxjs';
+import { pluck } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -19,14 +22,18 @@ import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
-import { APP_ID, APP_NAME, APP_ICON, APP_PATH } from '../common/constants';
+import { APP_ID, APP_ICON, APP_PATH } from '../common/constants';
 import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
+
+import { State, createStore, createInitialState } from './common/store';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
+  private store: Store<State, Action> | null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.store = null;
   }
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
@@ -49,82 +56,206 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
-    const mountSecurityApp = async (params: AppMountParameters) => {
+    const mountSecurityFactory = async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
-      const { renderApp } = await import('./app');
+      if (this.store == null) {
+        await this.buildStore(coreStart, startPlugins);
+      }
+
       const services = {
         ...coreStart,
         ...startPlugins,
         security: plugins.security,
       } as StartServices;
-
-      const alertsSubPlugin = new (await import('./alerts')).Alerts();
-      const casesSubPlugin = new (await import('./cases')).Cases();
-      const hostsSubPlugin = new (await import('./hosts')).Hosts();
-      const networkSubPlugin = new (await import('./network')).Network();
-      const overviewSubPlugin = new (await import('./overview')).Overview();
-      const timelinesSubPlugin = new (await import('./timelines')).Timelines();
-      const endpointAlertsSubPlugin = new (await import('./endpoint_alerts')).EndpointAlerts();
-      const endpointHostsSubPlugin = new (await import('./endpoint_hosts')).EndpointHosts();
-      const managementSubPlugin = new (await import('./management')).Management();
-
-      const alertsStart = alertsSubPlugin.start();
-      const casesStart = casesSubPlugin.start();
-      const hostsStart = hostsSubPlugin.start();
-      const networkStart = networkSubPlugin.start();
-      const overviewStart = overviewSubPlugin.start();
-      const timelinesStart = timelinesSubPlugin.start();
-      const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
-      const endpointHostsStart = endpointHostsSubPlugin.start(coreStart, startPlugins);
-      const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
-
-      return renderApp(services, params, {
-        routes: [
-          ...alertsStart.routes,
-          ...casesStart.routes,
-          ...hostsStart.routes,
-          ...networkStart.routes,
-          ...overviewStart.routes,
-          ...timelinesStart.routes,
-          ...endpointAlertsStart.routes,
-          ...endpointHostsStart.routes,
-          ...managementSubPluginStart.routes,
-        ],
-        store: {
-          initialState: {
-            ...hostsStart.store.initialState,
-            ...networkStart.store.initialState,
-            ...timelinesStart.store.initialState,
-            ...endpointAlertsStart.store.initialState,
-            ...endpointHostsStart.store.initialState,
-            ...managementSubPluginStart.store.initialState,
-          },
-          reducer: {
-            ...hostsStart.store.reducer,
-            ...networkStart.store.reducer,
-            ...timelinesStart.store.reducer,
-            ...endpointAlertsStart.store.reducer,
-            ...endpointHostsStart.store.reducer,
-            ...managementSubPluginStart.store.reducer,
-          },
-          middlewares: [
-            ...(endpointAlertsStart.store.middleware ?? []),
-            ...(endpointHostsStart.store.middleware ?? []),
-            ...(managementSubPluginStart.store.middleware ?? []),
-          ],
-        },
-      });
+      return { coreStart, startPlugins, services, store: this.store };
     };
 
     core.application.register({
-      id: APP_ID,
-      title: APP_NAME,
+      id: `${APP_ID}:overview`,
+      title: 'Overview',
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_PATH,
+      appRoute: `${APP_PATH}/overview`,
       async mount(params: AppMountParameters) {
-        return mountSecurityApp(params);
+        const [
+          { coreStart, startPlugins, services },
+          { renderApp, composeLibs },
+          { overviewSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store: this.getStore(coreStart, startPlugins),
+          SubPluginRoutes: overviewSubPlugin.start().SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: `${APP_ID}:alerts`,
+      title: 'Alerts',
+      order: 9001,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: `${APP_PATH}/alerts`,
+      async mount(params: AppMountParameters) {
+        const [
+          { coreStart, store, services },
+          { renderApp, composeLibs },
+          { alertsSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: alertsSubPlugin.start().SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: `${APP_ID}:hosts`,
+      title: 'Hosts',
+      order: 9002,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: `${APP_PATH}/hosts`,
+      async mount(params: AppMountParameters) {
+        const [
+          { coreStart, store, services },
+          { renderApp, composeLibs },
+          { hostsSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: hostsSubPlugin.start().SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: `${APP_ID}:network`,
+      title: 'Network',
+      order: 9002,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: `${APP_PATH}/network`,
+      async mount(params: AppMountParameters) {
+        const [
+          { coreStart, store, services },
+          { renderApp, composeLibs },
+          { networkSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: networkSubPlugin.start().SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: `${APP_ID}:timelines`,
+      title: 'Timelines',
+      order: 9002,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: `${APP_PATH}/timelines`,
+      async mount(params: AppMountParameters) {
+        const [
+          { coreStart, store, services },
+          { renderApp, composeLibs },
+          { networkSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: networkSubPlugin.start().SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: `${APP_ID}:cases`,
+      title: 'Cases',
+      order: 9002,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: `${APP_PATH}/cases`,
+      async mount(params: AppMountParameters) {
+        const [
+          { coreStart, store, services },
+          { renderApp, composeLibs },
+          { networkSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: networkSubPlugin.start().SubPluginRoutes,
+        });
+      },
+    });
+
+    core.application.register({
+      id: `${APP_ID}:management`,
+      title: 'Management',
+      order: 9002,
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: `${APP_PATH}/management`,
+      async mount(params: AppMountParameters) {
+        const [
+          { coreStart, store, services },
+          { renderApp, composeLibs },
+          { managementSubPlugin },
+        ] = await Promise.all([
+          mountSecurityFactory(),
+          this.downloadAssets(),
+          this.downloadSubPlugins(),
+        ]);
+        return renderApp({
+          ...composeLibs(coreStart),
+          ...params,
+          services,
+          store,
+          SubPluginRoutes: managementSubPlugin.start().SubPluginRoutes,
+        });
       },
     });
 
@@ -140,5 +271,100 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public stop() {
     return {};
+  }
+
+  private async downloadAssets() {
+    const [{ renderApp }, { composeLibs }] = await Promise.all([
+      import('./app'),
+      import('./common/lib/compose/kibana_compose'),
+    ]);
+
+    return {
+      renderApp,
+      composeLibs,
+    };
+  }
+
+  private async downloadSubPlugins() {
+    const [
+      AlertsSubPlugin,
+      CasesSubPlugin,
+      HostsSubPlugin,
+      NetworkSubPlugin,
+      OverviewSubPlugin,
+      TimelinesSubPlugin,
+      EndpointAlertsSubPlugin,
+      EndpointHostsSubPlugin,
+      ManagementSubPlugin,
+    ] = await Promise.all([
+      import('./alerts'),
+      import('./cases'),
+      import('./hosts'),
+      import('./network'),
+      import('./overview'),
+      import('./timelines'),
+      import('./endpoint_alerts'),
+      import('./endpoint_hosts'),
+      import('./management'),
+    ]);
+
+    return {
+      alertsSubPlugin: new AlertsSubPlugin.Alerts(),
+      casesSubPlugin: new CasesSubPlugin.Cases(),
+      hostsSubPlugin: new HostsSubPlugin.Hosts(),
+      networkSubPlugin: new NetworkSubPlugin.Network(),
+      overviewSubPlugin: new OverviewSubPlugin.Overview(),
+      timelinesSubPlugin: new TimelinesSubPlugin.Timelines(),
+      endpointAlertsSubPlugin: new EndpointAlertsSubPlugin.EndpointAlerts(),
+      endpointHostsSubPlugin: new EndpointHostsSubPlugin.EndpointHosts(),
+      managementSubPlugin: new ManagementSubPlugin.Management(),
+    };
+  }
+
+  private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins) {
+    const { composeLibs } = await this.downloadAssets();
+
+    const {
+      hostsSubPlugin,
+      networkSubPlugin,
+      timelinesSubPlugin,
+      endpointAlertsSubPlugin,
+      endpointHostsSubPlugin,
+      managementSubPlugin,
+    } = await this.downloadSubPlugins();
+
+    const libs$ = new BehaviorSubject(composeLibs(coreStart));
+
+    const hostsStart = hostsSubPlugin.start();
+    const networkStart = networkSubPlugin.start();
+    const timelinesStart = timelinesSubPlugin.start();
+    const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
+    const endpointHostsStart = endpointHostsSubPlugin.start(coreStart, startPlugins);
+    const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
+
+    this.store = createStore(
+      createInitialState({
+        ...hostsStart.store.initialState,
+        ...networkStart.store.initialState,
+        ...timelinesStart.store.initialState,
+        ...endpointAlertsStart.store.initialState,
+        ...endpointHostsStart.store.initialState,
+        ...managementSubPluginStart.store.initialState,
+      }),
+      {
+        ...hostsStart.store.reducer,
+        ...networkStart.store.reducer,
+        ...timelinesStart.store.reducer,
+        ...endpointAlertsStart.store.reducer,
+        ...endpointHostsStart.store.reducer,
+        ...managementSubPluginStart.store.reducer,
+      },
+      libs$.pipe(pluck('apolloClient')),
+      [
+        ...(endpointAlertsStart.store.middleware ?? []),
+        ...(endpointHostsStart.store.middleware ?? []),
+        ...(managementSubPluginStart.store.middleware ?? []),
+      ]
+    );
   }
 }

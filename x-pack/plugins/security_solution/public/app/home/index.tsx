@@ -52,10 +52,10 @@ const calculateFlyoutHeight = ({
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
 interface HomePageProps {
-  subPlugins: JSX.Element[];
+  children: React.ReactNode;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ subPlugins }) => {
+export const HomePage: React.FC<HomePageProps> = ({ children }) => {
   const { ref: measureRef, height: windowHeight = 0 } = useThrottledResizeObserver();
   const flyoutHeight = useMemo(
     () =>
@@ -90,7 +90,7 @@ export const HomePage: React.FC<HomePageProps> = ({ subPlugins }) => {
 
               <Switch>
                 <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                {subPlugins}
+                {children}
                 <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
                 <Route
                   path="/ml-hosts"

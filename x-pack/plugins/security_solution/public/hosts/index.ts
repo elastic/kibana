@@ -5,7 +5,7 @@
  */
 
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getHostsRoutes } from './routes';
+import { HostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
 
 export class Hosts {
@@ -13,7 +13,7 @@ export class Hosts {
 
   public start(): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
-      routes: getHostsRoutes(),
+      SubPluginRoutes: HostsRoutes,
       store: {
         initialState: { hosts: initialHostsState },
         reducer: { hosts: hostsReducer },

@@ -6,7 +6,7 @@
 
 import { Reducer } from 'redux';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { endpointHostsRoutes } from './routes';
+import { EndpointHostsRoutes } from './routes';
 import { hostListReducer } from './store/reducer';
 import { HostState } from './types';
 import { hostMiddlewareFactory } from './store/middleware';
@@ -46,7 +46,7 @@ export class EndpointHosts {
       ),
     ];
     return {
-      routes: endpointHostsRoutes(),
+      SubPluginRoutes: EndpointHostsRoutes,
       store: {
         initialState: { hostList: undefined },
         /**

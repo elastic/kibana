@@ -20,10 +20,10 @@ import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 
 export enum SiemPageName {
+  alerts = 'alerts',
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
-  detections = 'detections',
   timelines = 'timelines',
   case = 'case',
   management = 'management',
@@ -33,7 +33,7 @@ export type SiemNavTabKey =
   | SiemPageName.overview
   | SiemPageName.hosts
   | SiemPageName.network
-  | SiemPageName.detections
+  | SiemPageName.alerts
   | SiemPageName.timelines
   | SiemPageName.case
   | SiemPageName.management;
@@ -47,7 +47,7 @@ export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> 
 }
 
 export interface SecuritySubPlugin {
-  routes: React.ReactElement[];
+  SubPluginRoutes: React.FC;
 }
 
 type SecuritySubPluginKeyStore =
