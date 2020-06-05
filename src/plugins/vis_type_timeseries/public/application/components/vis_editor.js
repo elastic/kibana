@@ -215,6 +215,7 @@ export class VisEditor extends Component {
   }
 
   componentDidMount() {
+    this.props.eventEmitter && this.updateVisState();
     this.props.renderComplete();
   }
 
