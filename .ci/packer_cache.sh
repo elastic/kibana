@@ -40,7 +40,7 @@ echo "Creating bootstrap_cache archive"
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
-  x-pack/legacy/plugins/reporting/.chromium \
+  x-pack/plugins/reporting/.chromium \
   .es \
   .chromedriver \
   .geckodriver;

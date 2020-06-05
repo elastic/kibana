@@ -11,6 +11,7 @@ import {
   ISearchContext,
   ISearch,
   getEsPreference,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { IEnhancedEsSearchRequest, EnhancedSearchParams } from '../../common';
 import { ASYNC_SEARCH_STRATEGY } from './async_search_strategy';
@@ -27,7 +28,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     options
   ) => {
     const params: EnhancedSearchParams = {
-      ignoreThrottled: !context.core.uiSettings.get<boolean>('search:includeFrozen'),
+      ignoreThrottled: !context.core.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
       preference: getEsPreference(context.core.uiSettings),
       ...request.params,
     };

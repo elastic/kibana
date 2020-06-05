@@ -5,6 +5,7 @@
  */
 import { resolve } from 'path';
 import fs from 'fs';
+import { KIBANA_ROOT } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -26,7 +27,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     // list paths to the files that contain your plugins tests
-    testFiles: [resolve(__dirname, './test_suites/resolver')],
+    testFiles: [
+      resolve(__dirname, './test_suites/resolver'),
+      resolve(__dirname, './test_suites/global_search'),
+    ],
 
     services,
     pageObjects,
@@ -40,6 +44,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
+        `--plugin-path=${resolve(
+          KIBANA_ROOT,
+          'test/plugin_functional/plugins/core_provider_plugin'
+        )}`,
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
       ],
