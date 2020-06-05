@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToastInputFields } from 'src/core/public/notifications';
+import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 import { IFieldType } from './fields';
 import { FieldFormatsRegistry } from '../../common';
 
@@ -51,4 +51,5 @@ export interface IndexPatternAttributes {
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
+export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
 export type FieldFormatMethods = Pick<FieldFormatsRegistry, 'getDefaultInstance' | 'getType'>;

@@ -38,7 +38,7 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { FieldFormatMethods, OnNotification } from '../types';
+import { FieldFormatMethods, OnNotification, OnError } from '../types';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -55,6 +55,7 @@ export class IndexPatternsService {
   private apiClient: IndexPatternsApiClient;
   private fieldFormats: FieldFormatMethods;
   private onNotification: OnNotification;
+  private onError: OnError;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
   createFieldList: CreateIndexPatternFieldList;
   createField: (
@@ -69,6 +70,7 @@ export class IndexPatternsService {
     http: HttpStart,
     fieldFormats: FieldFormatMethods,
     onNotification: OnNotification,
+    onError: OnError,
     onRedirectNoIndexPattern: (core: CoreStart) => void
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
@@ -76,6 +78,7 @@ export class IndexPatternsService {
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
+    this.onError = onError;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       core,
       onRedirectNoIndexPattern
@@ -189,7 +192,8 @@ export class IndexPatternsService {
       this.apiClient,
       indexPatternCache,
       this.fieldFormats,
-      this.onNotification
+      this.onNotification,
+      this.onError
     );
 
     return indexPattern.init();

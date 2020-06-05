@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { IIndexPattern } from '../../types';
@@ -65,11 +64,7 @@ export class Field implements IFieldType {
     indexPattern: IIndexPattern,
     spec: FieldSpec | Field,
     shortDotsEnable: boolean,
-    {
-      fieldFormats,
-      onNotification,
-    }: // toastNotifications
-    FieldDependencies
+    { fieldFormats, onNotification }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -94,7 +89,7 @@ export class Field implements IFieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
-      onNotification({ title, text, color: 'danger' });
+      onNotification({ title, text, color: 'danger', iconType: 'alert' });
     }
 
     if (!type) type = getKbnFieldType('unknown');

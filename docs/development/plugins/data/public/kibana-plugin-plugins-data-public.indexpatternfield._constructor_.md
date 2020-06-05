@@ -9,7 +9,7 @@ Constructs a new instance of the `Field` class
 <b>Signature:</b>
 
 ```typescript
-constructor(indexPattern: IIndexPattern, spec: FieldSpec | Field, shortDotsEnable: boolean, { fieldFormats, onNotification, }: FieldDependencies);
+constructor(indexPattern: IIndexPattern, spec: FieldSpec | Field, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
 ```
 
 ## Parameters
@@ -19,5 +19,5 @@ constructor(indexPattern: IIndexPattern, spec: FieldSpec | Field, shortDotsEnabl
 |  indexPattern | <code>IIndexPattern</code> |  |
 |  spec | <code>FieldSpec &#124; Field</code> |  |
 |  shortDotsEnable | <code>boolean</code> |  |
-|  { fieldFormats, onNotification, } | <code>FieldDependencies</code> |  |
+|  { fieldFormats, onNotification } | <code>FieldDependencies</code> |  |
 

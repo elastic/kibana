@@ -68,6 +68,7 @@ describe('IndexPatterns', () => {
       http,
       fieldFormats,
       () => {},
+      () => {},
       () => {}
     );
   });

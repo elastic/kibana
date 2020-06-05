@@ -9,7 +9,7 @@ Constructs a new instance of the `IndexPattern` class
 <b>Signature:</b>
 
 ```typescript
-constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any, fieldFormats: FieldFormatMethods, onNotification: OnNotification);
+constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any, fieldFormats: FieldFormatMethods, onNotification: OnNotification, onError: OnError);
 ```
 
 ## Parameters
@@ -23,4 +23,5 @@ constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObj
 |  patternCache | <code>any</code> |  |
 |  fieldFormats | <code>FieldFormatMethods</code> |  |
 |  onNotification | <code>OnNotification</code> |  |
+|  onError | <code>OnError</code> |  |
 

@@ -168,6 +168,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
       },
+      notifications.toasts.addError,
       onRedirectNoIndexPattern
     );
     setIndexPatterns(indexPatterns);

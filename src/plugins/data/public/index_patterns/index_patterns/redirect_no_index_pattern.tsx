@@ -59,4 +59,7 @@ export function onRedirectNoIndexPattern(core: CoreStart) {
       path: `/kibana/indexPatterns?bannerMessage=${bannerMessage}`,
     });
   }
+
+  // return never-resolving promise to stop resolving and wait for the url change
+  return new Promise(() => {});
 }

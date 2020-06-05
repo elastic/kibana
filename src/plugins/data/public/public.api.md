@@ -15,6 +15,7 @@ import { CoreSetup } from 'src/core/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
+import { ErrorToastOptions } from 'src/core/public/notifications';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -844,7 +845,8 @@ export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternsApiClient" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "FieldFormatMethods" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any, fieldFormats: FieldFormatMethods, onNotification: OnNotification);
+    // Warning: (ae-forgotten-export) The symbol "OnError" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any, fieldFormats: FieldFormatMethods, onNotification: OnNotification, onError: OnError);
     // (undocumented)
     [key: string]: any;
     // (undocumented)
@@ -972,7 +974,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     $$spec: FieldSpec;
     // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IIndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification, }: FieldDependencies);
+    constructor(indexPattern: IIndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
