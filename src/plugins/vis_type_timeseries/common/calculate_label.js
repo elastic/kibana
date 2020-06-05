@@ -116,7 +116,7 @@ export function calculateLabel(metric, metrics) {
 
   const field =
     metric.field === SCRIPTED_FIELD_VALUE
-      ? i18n.translate('visTypeTimeSeries.calculateLabel.scriptLabel', { defaultMessage: 'Script' })
+      ? i18n.translate('visTypeTimeseries.calculateLabel.scriptLabel', { defaultMessage: 'Script' })
       : metric.field;
   return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
