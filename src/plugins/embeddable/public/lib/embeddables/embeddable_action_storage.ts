@@ -80,7 +80,7 @@ export class EmbeddableActionStorage implements ActionStorage {
   async remove(eventId: string) {
     const input = this.embbeddable.getInput();
     const events = (input.events || []) as SerializedEvent[];
-    const index = events.findIndex(event => eventId === event.eventId);
+    const index = events.findIndex((event) => eventId === event.eventId);
 
     if (index === -1) {
       throw new Error(
@@ -99,7 +99,7 @@ export class EmbeddableActionStorage implements ActionStorage {
   async read(eventId: string): Promise<SerializedEvent> {
     const input = this.embbeddable.getInput();
     const events = (input.events || []) as SerializedEvent[];
-    const event = events.find(ev => eventId === ev.eventId);
+    const event = events.find((ev) => eventId === ev.eventId);
 
     if (!event) {
       throw new Error(

@@ -25,7 +25,7 @@ import {
 
 import { getFatalErrors } from '../../../kibana_services';
 
-export const createJob = jobConfig => async dispatch => {
+export const createJob = (jobConfig) => async (dispatch) => {
   dispatch({
     type: CREATE_JOB_START,
   });
@@ -36,7 +36,7 @@ export const createJob = jobConfig => async dispatch => {
     [newJob] = await Promise.all([
       sendCreateJobRequest(serializeJob(jobConfig)),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
-      new Promise(resolve => setTimeout(resolve, 500)),
+      new Promise((resolve) => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
     if (error) {
@@ -107,7 +107,7 @@ export const createJob = jobConfig => async dispatch => {
   });
 };
 
-export const clearCreateJobErrors = () => dispatch => {
+export const clearCreateJobErrors = () => (dispatch) => {
   dispatch({
     type: CLEAR_CREATE_JOB_ERRORS,
   });

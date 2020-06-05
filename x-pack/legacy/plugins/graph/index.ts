@@ -11,7 +11,7 @@ import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
 
-export const graph: LegacyPluginInitializer = kibana => {
+export const graph: LegacyPluginInitializer = (kibana) => {
   return new kibana.Plugin({
     id: 'graph',
     configPrefix: 'xpack.graph',

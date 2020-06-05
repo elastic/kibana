@@ -47,7 +47,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       }
 
       const rules = await Promise.all(
-        request.body.map(async payloadRule => {
+        request.body.map(async (payloadRule) => {
           const {
             actions,
             description,

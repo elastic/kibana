@@ -23,7 +23,7 @@ import expect from '@kbn/expect';
 
 import { layoutTypes } from '../../../../lib/layout/layout_types';
 
-describe('Vislib Column Layout Test Suite', function() {
+describe('Vislib Column Layout Test Suite', function () {
   let columnLayout;
   let el;
   const data = {
@@ -85,25 +85,22 @@ describe('Vislib Column Layout Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(function() {
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'visualization');
+  beforeEach(function () {
+    el = d3.select('body').append('div').attr('class', 'visualization');
     columnLayout = layoutTypes.point_series(el, data);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     el.remove();
   });
 
-  it('should return an array of objects', function() {
+  it('should return an array of objects', function () {
     expect(Array.isArray(columnLayout)).to.be(true);
     expect(_.isObject(columnLayout[0])).to.be(true);
   });
 
-  it('should throw an error when the wrong number or no arguments provided', function() {
-    expect(function() {
+  it('should throw an error when the wrong number or no arguments provided', function () {
+    expect(function () {
       layoutTypes.point_series(el);
     }).to.throwError();
   });

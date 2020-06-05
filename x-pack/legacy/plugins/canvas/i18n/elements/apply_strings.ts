@@ -18,7 +18,7 @@ import { TagStrings } from '../../i18n';
 export const applyElementStrings = (elements: ElementFactory[]) => {
   const elementStrings = getElementStrings();
 
-  return elements.map(spec => {
+  return elements.map((spec) => {
     const result = spec();
     const { name } = result;
     const strings = elementStrings[name];
@@ -37,7 +37,7 @@ export const applyElementStrings = (elements: ElementFactory[]) => {
 
       // Set translated tags
       if (result.tags) {
-        result.tags = result.tags.map(tag => {
+        result.tags = result.tags.map((tag) => {
           if (tag in TagStrings) {
             return TagStrings[tag]();
           }

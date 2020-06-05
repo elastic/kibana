@@ -70,9 +70,9 @@ export class ManagementSection {
     return app;
   }
   getApp(id: ManagementApp['id']) {
-    return this.apps.find(app => app.id === id);
+    return this.apps.find((app) => app.id === id);
   }
   getAppsEnabled() {
-    return this.apps.filter(app => app.enabled).sort((a, b) => a.order - b.order);
+    return this.apps.filter((app) => app.enabled).sort((a, b) => a.order - b.order);
   }
 }

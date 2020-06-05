@@ -112,7 +112,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
               id,
               eventIds: getEventIdToDataMapping(
                 data,
-                data.map(event => event._id),
+                data.map((event) => event._id),
                 timelineTypeContext.queryFields ?? []
               ),
               isSelected,
@@ -123,14 +123,14 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     );
 
     const onColumnSorted: OnColumnSorted = useCallback(
-      sorted => {
+      (sorted) => {
         updateSort!({ id, sort: sorted });
       },
       [id]
     );
 
     const onColumnRemoved: OnColumnRemoved = useCallback(
-      columnId => removeColumn!({ id, columnId }),
+      (columnId) => removeColumn!({ id, columnId }),
       [id]
     );
 
@@ -139,14 +139,14 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [id]
     );
 
-    const onPinEvent: OnPinEvent = useCallback(eventId => pinEvent!({ id, eventId }), [id]);
+    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [id]);
 
-    const onUnPinEvent: OnUnPinEvent = useCallback(eventId => unPinEvent!({ id, eventId }), [id]);
+    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [id]);
 
     const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
 
     const onUpdateColumns: OnUpdateColumns = useCallback(
-      columns => updateColumns!({ id, columns }),
+      (columns) => updateColumns!({ id, columns }),
       [id]
     );
 

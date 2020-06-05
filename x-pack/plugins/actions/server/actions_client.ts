@@ -238,7 +238,7 @@ async function injectExtraFindData(
       },
     },
   });
-  return actionResults.map(actionResult => ({
+  return actionResults.map((actionResult) => ({
     ...actionResult,
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));

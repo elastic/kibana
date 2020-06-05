@@ -30,7 +30,7 @@ export const getInfraHref = ({
   app,
   basePath,
   query,
-  path
+  path,
 }: {
   app: InfraAppId;
   basePath: AppMountContextBasePath;
@@ -40,7 +40,7 @@ export const getInfraHref = ({
   const nextSearch = fromQuery(query);
   return url.format({
     pathname: basePath.prepend(`/app/${app}${path || ''}`),
-    search: nextSearch
+    search: nextSearch,
   });
 };
 

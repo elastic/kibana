@@ -84,7 +84,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     );
   },
 
-  getPersistableState: state => state,
+  getPersistableState: (state) => state,
 
   getConfiguration(props) {
     return {

@@ -33,7 +33,7 @@ jest.mock('../search_strategy', () => {
       search: jest.fn(({ searchRequests }: SearchStrategySearchParams) => {
         return {
           searching: Promise.resolve(
-            searchRequests.map(req => {
+            searchRequests.map((req) => {
               return {
                 id: req._searchStrategyId,
               };

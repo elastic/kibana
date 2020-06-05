@@ -38,15 +38,15 @@ class Modules {
     angular.module('monitoring/filters', []);
     angular.module('monitoring/directives', []);
 
-    this._services.forEach(args => {
+    this._services.forEach((args) => {
       angular.module('monitoring/services').service.apply(null, args as any);
     });
 
-    this._filters.forEach(args => {
+    this._filters.forEach((args) => {
       angular.module('monitoring/filters').filter.apply(null, args as any);
     });
 
-    this._directives.forEach(args => {
+    this._directives.forEach((args) => {
       angular.module('monitoring/directives').directive.apply(null, args as any);
     });
   };

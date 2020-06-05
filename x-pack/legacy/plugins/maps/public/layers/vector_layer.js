@@ -69,7 +69,7 @@ export class VectorLayer extends AbstractLayer {
     if (this.getSource()) {
       this.getSource().destroy();
     }
-    this.getJoins().forEach(joinSource => {
+    this.getJoins().forEach((joinSource) => {
       joinSource.destroy();
     });
   }
@@ -79,7 +79,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getValidJoins() {
-    return this.getJoins().filter(join => {
+    return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
   }
@@ -120,7 +120,9 @@ export class VectorLayer extends AbstractLayer {
 
     if (
       this.getJoins().length &&
-      !featureCollection.features.some(feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME])
+      !featureCollection.features.some(
+        (feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
+      )
     ) {
       return {
         icon: noResultsIcon,
@@ -160,7 +162,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const visibleFeatures = featureCollection.features.filter(
-      feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
+      (feature) => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
     );
     const bbox = turf.bbox({
       type: 'FeatureCollection',
@@ -195,7 +197,7 @@ export class VectorLayer extends AbstractLayer {
 
   _getJoinFields() {
     const joinFields = [];
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       const fields = join.getJoinFields();
       joinFields.push(...fields);
     });
@@ -214,7 +216,7 @@ export class VectorLayer extends AbstractLayer {
 
   getIndexPatternIds() {
     const indexPatternIds = this.getSource().getIndexPatternIds();
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       indexPatternIds.push(...join.getIndexPatternIds());
     });
     return indexPatternIds;
@@ -222,7 +224,7 @@ export class VectorLayer extends AbstractLayer {
 
   getQueryableIndexPatternIds() {
     const indexPatternIds = this.getSource().getQueryableIndexPatternIds();
-    this.getValidJoins().forEach(join => {
+    this.getValidJoins().forEach((join) => {
       indexPatternIds.push(...join.getQueryableIndexPatternIds());
     });
     return indexPatternIds;
@@ -288,7 +290,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncJoins(syncContext, style) {
-    const joinSyncs = this.getValidJoins().map(async join => {
+    const joinSyncs = this.getValidJoins().map(async (join) => {
       await this._syncJoinStyleMeta(syncContext, join, style);
       await this._syncJoinFormatters(syncContext, join, style);
       return this._syncJoin({ join, ...syncContext });
@@ -301,7 +303,7 @@ export class VectorLayer extends AbstractLayer {
     const fieldNames = [
       ...source.getFieldNames(),
       ...style.getSourceFieldNames(),
-      ...this.getValidJoins().map(join => join.getLeftField().getName()),
+      ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
     return {
@@ -321,7 +323,7 @@ export class VectorLayer extends AbstractLayer {
     //-- visibility of any of the features has changed
 
     let shouldUpdateStore =
-      sourceResult.refreshed || joinStates.some(joinState => joinState.dataHasChanged);
+      sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
 
     if (!shouldUpdateStore) {
       return;
@@ -415,7 +417,7 @@ export class VectorLayer extends AbstractLayer {
       style,
       sourceQuery: this.getQuery(),
       dataRequestId: SOURCE_META_ID_ORIGIN,
-      dynamicStyleProps: style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+      dynamicStyleProps: style.getDynamicPropertiesArray().filter((dynamicStyleProp) => {
         return (
           dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE &&
           dynamicStyleProp.isFieldMetaEnabled()
@@ -434,7 +436,7 @@ export class VectorLayer extends AbstractLayer {
       dataRequestId: join.getSourceMetaDataRequestId(),
       dynamicStyleProps: this.getCurrentStyle()
         .getDynamicPropertiesArray()
-        .filter(dynamicStyleProp => {
+        .filter((dynamicStyleProp) => {
           const matchingField = joinSource.getMetricFieldForName(
             dynamicStyleProp.getField().getName()
           );
@@ -464,7 +466,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const dynamicStyleFields = dynamicStyleProps.map(dynamicStyleProp => {
+    const dynamicStyleFields = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getField().getName();
     });
 
@@ -509,10 +511,10 @@ export class VectorLayer extends AbstractLayer {
       dataRequestId: SOURCE_FORMATTERS_ID_ORIGIN,
       fields: style
         .getDynamicPropertiesArray()
-        .filter(dynamicStyleProp => {
+        .filter((dynamicStyleProp) => {
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE;
         })
-        .map(dynamicStyleProp => {
+        .map((dynamicStyleProp) => {
           return dynamicStyleProp.getField();
         }),
       ...syncContext,
@@ -526,13 +528,13 @@ export class VectorLayer extends AbstractLayer {
       dataRequestId: join.getSourceFormattersDataRequestId(),
       fields: style
         .getDynamicPropertiesArray()
-        .filter(dynamicStyleProp => {
+        .filter((dynamicStyleProp) => {
           const matchingField = joinSource.getMetricFieldForName(
             dynamicStyleProp.getField().getName()
           );
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
         })
-        .map(dynamicStyleProp => {
+        .map((dynamicStyleProp) => {
           return dynamicStyleProp.getField();
         }),
       ...syncContext,
@@ -544,7 +546,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const fieldNames = fields.map(field => {
+    const fieldNames = fields.map((field) => {
       return field.getName();
     });
     const nextMeta = {
@@ -562,10 +564,10 @@ export class VectorLayer extends AbstractLayer {
 
       const formatters = {};
       const promises = fields
-        .filter(field => {
+        .filter((field) => {
           return field.canValueBeFormatted();
         })
-        .map(async field => {
+        .map(async (field) => {
           formatters[field.getName()] = await source.createFieldFormatter(field);
         });
       await Promise.all(promises);
@@ -857,11 +859,7 @@ export class VectorLayer extends AbstractLayer {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
       for (let j = 0; j < this.getJoins().length; j++) {
-        if (
-          this.getJoins()
-            [j].getLeftField()
-            .getName() === tooltipProperty.getPropertyKey()
-        ) {
+        if (this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
           matchingJoins.push(this.getJoins()[j]);
         }
       }
@@ -896,7 +894,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    return featureCollection.features.find(feature => {
+    return featureCollection.features.find((feature) => {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
   }

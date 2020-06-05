@@ -57,7 +57,7 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
 
       expect(
-        shallow(<MetricChart data={data} args={args} formatFactory={x => x as IFieldFormat} />)
+        shallow(<MetricChart data={data} args={args} formatFactory={(x) => x as IFieldFormat} />)
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
@@ -98,7 +98,7 @@ describe('metric_expression', () => {
           <MetricChart
             data={data}
             args={{ ...args, mode: 'reduced' }}
-            formatFactory={x => x as IFieldFormat}
+            formatFactory={(x) => x as IFieldFormat}
           />
         )
       ).toMatchInlineSnapshot(`

@@ -27,7 +27,7 @@ export function ObjDefine(defaults, prototype) {
   this.prototype = prototype || Object.prototype;
 }
 
-ObjDefine.REDEFINE_SUPPORTED = (function() {
+ObjDefine.REDEFINE_SUPPORTED = (function () {
   const a = Object.create(Object.prototype, {
     prop: {
       configurable: true,
@@ -49,7 +49,7 @@ ObjDefine.REDEFINE_SUPPORTED = (function() {
  * @param  {any} v - value
  * @return {object} - property descriptor
  */
-ObjDefine.prototype.writ = function(name, val) {
+ObjDefine.prototype.writ = function (name, val) {
   this._define(name, val, true, true);
 };
 
@@ -59,7 +59,7 @@ ObjDefine.prototype.writ = function(name, val) {
  * @param  {any} v - value
  * @return {object} - property descriptor
  */
-ObjDefine.prototype.fact = function(name, val) {
+ObjDefine.prototype.fact = function (name, val) {
   this._define(name, val, true);
 };
 
@@ -69,7 +69,7 @@ ObjDefine.prototype.fact = function(name, val) {
  * @param  {any} v - value
  * @return {object} - property descriptor
  */
-ObjDefine.prototype.comp = function(name, val) {
+ObjDefine.prototype.comp = function (name, val) {
   this._define(name, val);
 };
 
@@ -84,7 +84,7 @@ ObjDefine.prototype.comp = function(name, val) {
  *
  * @return {object} - created object
  */
-ObjDefine.prototype.create = function() {
+ObjDefine.prototype.create = function () {
   const self = this;
   self.obj = Object.create(this.prototype, self.descs);
 
@@ -94,10 +94,10 @@ ObjDefine.prototype.create = function() {
     // to include or trim manually. This is currently only in use in PhantomJS
     // due to https://github.com/ariya/phantomjs/issues/11856
     // TODO: remove this: https://github.com/elastic/kibana/issues/27136
-    self.obj.toJSON = function() {
+    self.obj.toJSON = function () {
       return _.transform(
         self.obj,
-        function(json, val, key) {
+        function (json, val, key) {
           const desc = self.descs[key];
           if (desc && desc.enumerable && val == null) return;
           json[key] = val;
@@ -114,12 +114,12 @@ ObjDefine.prototype.create = function() {
  * Private APIS
  */
 
-ObjDefine.prototype._define = function(name, val, exported, changeable) {
+ObjDefine.prototype._define = function (name, val, exported, changeable) {
   val = val != null ? val : this.defaults[name];
   this.descs[name] = this._describe(name, val, !!exported, !!changeable);
 };
 
-ObjDefine.prototype._describe = function(name, val, exported, changeable) {
+ObjDefine.prototype._describe = function (name, val, exported, changeable) {
   const self = this;
   const exists = val != null;
 
@@ -128,7 +128,7 @@ ObjDefine.prototype._describe = function(name, val, exported, changeable) {
       enumerable: exists,
       configurable: true,
       get: _.constant(val),
-      set: function(update) {
+      set: function (update) {
         if (!changeable) return false;
 
         // change the descriptor, since the value now exists.

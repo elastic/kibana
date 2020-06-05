@@ -29,7 +29,7 @@ import { wrapInI18nContext } from '../../legacy_imports';
 import { syncQueryStateWithUrl } from '../../../../../../../plugins/data/public';
 
 export function initListingDirective(app) {
-  app.directive('visualizeListingTable', reactDirective =>
+  app.directive('visualizeListingTable', (reactDirective) =>
     reactDirective(wrapInI18nContext(VisualizeListingTable))
   );
 }
@@ -91,26 +91,28 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     });
   }
 
-  this.fetchItems = filter => {
+  this.fetchItems = (filter) => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
     return savedVisualizations
       .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
-      .then(result => {
+      .then((result) => {
         this.totalItems = result.total;
 
         return {
           total: result.total,
-          hits: result.hits.filter(result => isLabsEnabled || result.type.stage !== 'experimental'),
+          hits: result.hits.filter(
+            (result) => isLabsEnabled || result.type.stage !== 'experimental'
+          ),
         };
       });
   };
 
   this.deleteSelectedItems = function deleteSelectedItems(selectedItems) {
     return Promise.all(
-      selectedItems.map(item => {
+      selectedItems.map((item) => {
         return savedObjectsClient.delete(item.savedObjectType, item.id);
       })
-    ).catch(error => {
+    ).catch((error) => {
       toastNotifications.addError(error, {
         title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
           defaultMessage: 'Error deleting visualization',

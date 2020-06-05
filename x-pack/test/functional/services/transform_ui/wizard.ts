@@ -88,11 +88,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           $(tr)
             .find('.euiDataGridRowCell__truncate')
             .toArray()
-            .map(cell =>
-              $(cell)
-                .text()
-                .trim()
-            )
+            .map((cell) => $(cell).text().trim())
         );
       }
 
@@ -110,7 +106,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
-          .map(row => row[column])
+          .map((row) => row[column])
           .flat()
           .filter((v, i, a) => a.indexOf(v) === i);
 

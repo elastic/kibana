@@ -28,7 +28,7 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
-const getProps = async field => {
+const getProps = async (field) => {
   return new Promise(async (resolve, reject) => {
     try {
       const label = await field.getLabel();
@@ -98,21 +98,21 @@ export class TooltipSelector extends Component {
     }
   }
 
-  _getPropertyLabel = propertyName => {
+  _getPropertyLabel = (propertyName) => {
     if (!this.state.fieldProps.length) {
       return propertyName;
     }
-    const prop = this.state.fieldProps.find(field => {
+    const prop = this.state.fieldProps.find((field) => {
       return field.name === propertyName;
     });
     return prop.label ? prop.label : propertyName;
   };
 
   _getTooltipProperties() {
-    return this.props.tooltipFields.map(field => field.getName());
+    return this.props.tooltipFields.map((field) => field.getName());
   }
 
-  _onAdd = properties => {
+  _onAdd = (properties) => {
     if (!this.props.tooltipFields) {
       this.props.onChange([...properties]);
     } else {
@@ -121,7 +121,7 @@ export class TooltipSelector extends Component {
     }
   };
 
-  _removeProperty = index => {
+  _removeProperty = (index) => {
     if (!this.props.tooltipFields) {
       this.props.onChange([]);
     } else {

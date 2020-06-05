@@ -92,7 +92,7 @@ export class Field extends PureComponent<FieldProps> {
             name={name}
             id={this.fieldId}
             value={currentValue}
-            onChange={e => this.onFieldChange(e.target.value)}
+            onChange={(e) => this.onFieldChange(e.target.value)}
             disabled={disabled}
             data-test-subj={`savedObjects-editField-${name}`}
           />
@@ -110,7 +110,7 @@ export class Field extends PureComponent<FieldProps> {
               )
             }
             checked={!!currentValue}
-            onChange={e => this.onFieldChange(e.target.checked)}
+            onChange={(e) => this.onFieldChange(e.target.checked)}
             disabled={disabled}
             data-test-subj={`savedObjects-editField-${name}`}
           />
@@ -120,6 +120,7 @@ export class Field extends PureComponent<FieldProps> {
         return (
           <div data-test-subj={`savedObjects-editField-${name}`}>
             <EuiCodeEditor
+              name={`savedObjects-editField-${name}-aceEditor`}
               mode="json"
               theme="textmate"
               value={currentValue}
@@ -147,7 +148,7 @@ export class Field extends PureComponent<FieldProps> {
             id={this.fieldId}
             name={name}
             value={currentValue}
-            onChange={e => this.onFieldChange(e.target.value)}
+            onChange={(e) => this.onFieldChange(e.target.value)}
             disabled={disabled}
             data-test-subj={`savedObjects-editField-${name}`}
           />

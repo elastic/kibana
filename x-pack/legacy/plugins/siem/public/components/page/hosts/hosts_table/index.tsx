@@ -92,7 +92,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     updateTableLimit,
   }) => {
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateTableLimit({
           hostsType: type,
           limit: newLimit,
@@ -102,7 +102,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,

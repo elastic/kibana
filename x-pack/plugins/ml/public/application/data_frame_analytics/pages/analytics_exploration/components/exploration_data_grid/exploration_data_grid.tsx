@@ -120,8 +120,8 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
   }, [resultsField, rowCount, tableItems, pagination.pageIndex, pagination.pageSize]);
 
   const onChangeItemsPerPage = useCallback(
-    pageSize => {
-      setPagination(p => {
+    (pageSize) => {
+      setPagination((p) => {
         const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
         return { pageIndex, pageSize };
       });
@@ -129,11 +129,11 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
     [setPagination]
   );
 
-  const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
+  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
     setPagination,
   ]);
 
-  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
+  const onSort = useCallback((sc) => setSortingColumns(sc), [setSortingColumns]);
 
   return (
     <EuiDataGrid

@@ -44,11 +44,11 @@ const findMe = {
 
 describe('findInObject', () => {
   it('Finds object matching a function', () => {
-    expect(findInObject(findMe, obj => obj.bar === 5).length).to.eql(5);
-    expect(findInObject(findMe, obj => obj.bar === 5)[0].id).to.eql(0);
-    expect(findInObject(findMe, obj => obj.bar === 5)[1].id).to.eql(2);
+    expect(findInObject(findMe, (obj) => obj.bar === 5).length).to.eql(5);
+    expect(findInObject(findMe, (obj) => obj.bar === 5)[0].id).to.eql(0);
+    expect(findInObject(findMe, (obj) => obj.bar === 5)[1].id).to.eql(2);
 
-    expect(findInObject(findMe, obj => obj.id === 4).length).to.eql(1);
-    expect(findInObject(findMe, obj => obj.id === 10000).length).to.eql(0);
+    expect(findInObject(findMe, (obj) => obj.id === 4).length).to.eql(1);
+    expect(findInObject(findMe, (obj) => obj.id === 10000).length).to.eql(0);
   });
 });

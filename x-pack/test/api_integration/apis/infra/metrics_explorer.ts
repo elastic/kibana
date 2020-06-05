@@ -14,7 +14,7 @@ import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
 
 const { min, max } = DATES['7.0.0'].hosts;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -181,9 +181,7 @@ export default function({ getService }: FtrProviderContext) {
           timerange: {
             field: '@timestamp',
             to: moment().valueOf(),
-            from: moment()
-              .subtract(15, 'm')
-              .valueOf(),
+            from: moment().subtract(15, 'm').valueOf(),
             interval: '>=1m',
           },
           indexPattern: 'metricbeat-*',
@@ -214,9 +212,7 @@ export default function({ getService }: FtrProviderContext) {
           timerange: {
             field: '@timestamp',
             to: moment().valueOf(),
-            from: moment()
-              .subtract(15, 'm')
-              .valueOf(),
+            from: moment().subtract(15, 'm').valueOf(),
             interval: '>=1m',
           },
           groupBy: 'host.name',

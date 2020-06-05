@@ -68,7 +68,7 @@ export async function getFields(
       return await framework.globalConfig$
         .pipe(
           first(),
-          map(config => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },
@@ -84,8 +84,8 @@ export async function getFields(
     indexPatternString,
     capabilities
   )) as IndexPatternFieldDescriptor[]).filter(
-    field => field.aggregatable && !indexPatterns.isNestedField(field)
+    (field) => field.aggregatable && !indexPatterns.isNestedField(field)
   );
 
-  return uniq(fields, field => field.name);
+  return uniq(fields, (field) => field.name);
 }

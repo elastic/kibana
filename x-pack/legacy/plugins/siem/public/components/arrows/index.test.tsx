@@ -31,12 +31,7 @@ describe('arrows', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="arrow-icon"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="arrow-icon"]').first().exists()).toBe(true);
     });
   });
 });

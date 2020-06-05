@@ -58,7 +58,7 @@ describe('stateful_body', () => {
           width: 180,
         },
       ];
-      const mockHeader = defaultHeaders.filter(h =>
+      const mockHeader = defaultHeaders.filter((h) =>
         ['@timestamp', 'source.ip', 'destination.ip'].includes(h.id)
       );
       expect(getColumnHeaders(mockHeader, mockBrowserFields)).toEqual(expectedData);

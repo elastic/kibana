@@ -435,7 +435,7 @@ describe('AggConfig', () => {
           getConverterFor: (t?: string) => t || identity,
         })) as any,
       });
-      indexPattern.fields.getByName = name =>
+      indexPattern.fields.getByName = (name) =>
         ({
           format: {
             getConverterFor: (t?: string) => t || identity,
@@ -460,10 +460,7 @@ describe('AggConfig', () => {
 
     it("returns the field's formatter", () => {
       expect(aggConfig.fieldFormatter().toString()).toBe(
-        aggConfig
-          .getField()
-          .format.getConverterFor()
-          .toString()
+        aggConfig.getField().format.getConverterFor().toString()
       );
     });
 

@@ -9,7 +9,7 @@ import { pageHelpers, mockHttpRequest } from './helpers';
 
 jest.mock('ui/new_platform');
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobCreate;
 

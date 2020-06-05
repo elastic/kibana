@@ -86,13 +86,7 @@ import _ from 'lodash';
 const nextId = _.partial(_.uniqueId, 'privateProvider#');
 
 function name(fn) {
-  return (
-    fn.name ||
-    fn
-      .toString()
-      .split('\n')
-      .shift()
-  );
+  return fn.name || fn.toString().split('\n').shift();
 }
 
 export function PrivateProvider() {
@@ -112,12 +106,12 @@ export function PrivateProvider() {
     else return (fn.$$id = nextId());
   }
 
-  provider.stub = function(fn, instance) {
+  provider.stub = function (fn, instance) {
     cache[identify(fn)] = instance;
     return instance;
   };
 
-  provider.swap = function(fn, prov) {
+  provider.swap = function (fn, prov) {
     const id = identify(fn);
     swaps[id] = prov;
   };
@@ -127,7 +121,7 @@ export function PrivateProvider() {
     function PrivateFactory($injector) {
       // prevent circular deps by tracking where we came from
       const privPath = [];
-      const pathToString = function() {
+      const pathToString = function () {
         return privPath.map(name).join(' -> ');
       };
 

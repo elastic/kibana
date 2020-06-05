@@ -23,7 +23,7 @@ import { shallow } from 'enzyme';
 import { ScriptingWarningCallOut } from './warning_call_out';
 
 jest.mock('ui/documentation_links', () => ({
-  getDocLink: doc => `(docLink for ${doc})`,
+  getDocLink: (doc) => `(docLink for ${doc})`,
 }));
 
 describe('ScriptingWarningCallOut', () => {

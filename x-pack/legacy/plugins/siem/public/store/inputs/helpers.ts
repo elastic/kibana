@@ -71,7 +71,7 @@ export const upsertQuery = ({
   refetch,
   state,
 }: UpdateQueryParams): InputsModel => {
-  const queryIndex = state[inputId].queries.findIndex(q => q.id === id);
+  const queryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   return {
     ...state,
     [inputId]: {
@@ -113,7 +113,7 @@ export const setIsInspected = ({
   selectedInspectIndex,
   state,
 }: SetIsInspectedParams): InputsModel => {
-  const myQueryIndex = state[inputId].queries.findIndex(q => q.id === id);
+  const myQueryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   const myQuery = myQueryIndex > -1 ? state[inputId].queries[myQueryIndex] : null;
 
   return {
@@ -171,7 +171,7 @@ export interface DeleteOneQueryParams {
 }
 
 export const deleteOneQuery = ({ inputId, id, state }: DeleteOneQueryParams): InputsModel => {
-  const queryIndex = state[inputId].queries.findIndex(q => q.id === id);
+  const queryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   return {
     ...state,
     [inputId]: {

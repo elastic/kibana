@@ -97,7 +97,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     () => ({
       ...histogramConfigs,
       defaultStackByOption:
-        eventsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
+        eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
       legendPosition: Position.Right,
       subtitle: (totalCount: number) =>
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,

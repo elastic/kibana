@@ -86,7 +86,7 @@ export const AreaChartBaseComponent = ({
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
         <Settings {...settings} />
-        {data.map(series => {
+        {data.map((series) => {
           const seriesKey = series.key;
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
             <AreaSeries

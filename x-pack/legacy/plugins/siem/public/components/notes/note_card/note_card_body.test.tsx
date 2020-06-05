@@ -33,11 +33,6 @@ describe('NoteCardBody', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('h1')
-        .first()
-        .text()
-    ).toEqual(noteText);
+    expect(wrapper.find('h1').first().text()).toEqual(noteText);
   });
 });

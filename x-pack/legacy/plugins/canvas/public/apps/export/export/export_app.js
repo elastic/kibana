@@ -27,7 +27,8 @@ export class ExportApp extends React.PureComponent {
   render() {
     const { workpad, selectedPageId } = this.props;
     const { pages, height, width } = workpad;
-    const activePage = pages.find(page => page.id === selectedPageId);
+    const activePage = pages.find((page) => page.id === selectedPageId);
+    const pageElementCount = activePage.elements.length;
 
     return (
       <div className="canvasExport">
@@ -39,7 +40,7 @@ export class ExportApp extends React.PureComponent {
           </div>
           {Style.it(
             workpad.css,
-            <div className="canvasExport__stageContent">
+            <div className="canvasExport__stageContent" data-shared-items-count={pageElementCount}>
               <WorkpadPage
                 isSelected
                 key={activePage.id}

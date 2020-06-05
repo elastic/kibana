@@ -16,5 +16,5 @@ export const checkIfRowsHaveFormulas = (flattened: IFlattened, fields: string[])
   const pruned = _.pick(flattened, fields);
   const csvValues = [..._.keys(pruned), ...(_.values(pruned) as string[])];
 
-  return _.some(csvValues, cell => _.some(formulaValues, char => _.startsWith(cell, char)));
+  return _.some(csvValues, (cell) => _.some(formulaValues, (char) => _.startsWith(cell, char)));
 };

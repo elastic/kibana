@@ -145,12 +145,11 @@ function isLoginAttemptWithProviderType(
 }
 
 /**
- * Determines if session value was created by the previous Kibana versions which had a different
- * session value format.
+ * Determines if session value was created by the current Kibana version. Previous versions had a different session value format.
  * @param sessionValue The session value to check.
  */
-function isLegacyProviderSession(sessionValue: any) {
-  return typeof sessionValue?.provider === 'string';
+function isSupportedProviderSession(sessionValue: any): sessionValue is ProviderSession {
+  return typeof sessionValue?.provider?.name === 'string';
 }
 
 /**
@@ -454,7 +453,7 @@ export class Authenticator {
    * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
    */
   isProviderTypeEnabled(providerType: string) {
-    return [...this.providers.values()].some(provider => provider.type === providerType);
+    return [...this.providers.values()].some((provider) => provider.type === providerType);
   }
 
   /**
@@ -464,7 +463,7 @@ export class Authenticator {
    */
   private setupHTTPAuthenticationProvider(options: AuthenticationProviderOptions) {
     const supportedSchemes = new Set(
-      this.options.config.authc.http.schemes.map(scheme => scheme.toLowerCase())
+      this.options.config.authc.http.schemes.map((scheme) => scheme.toLowerCase())
     );
 
     // If `autoSchemesEnabled` is set we should allow schemes that other providers use to
@@ -522,7 +521,7 @@ export class Authenticator {
     // we should clear session entirely.
     if (
       sessionValue &&
-      (isLegacyProviderSession(sessionValue) ||
+      (!isSupportedProviderSession(sessionValue) ||
         this.providers.get(sessionValue.provider.name)?.type !== sessionValue.provider.type)
     ) {
       sessionStorage.clear();

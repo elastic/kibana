@@ -33,7 +33,7 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
       return response.ok({
         body: allFeatures
           .filter(
-            feature =>
+            (feature) =>
               request.query.ignoreValidLicenses ||
               !feature.validLicenses ||
               !feature.validLicenses.length ||
@@ -43,7 +43,7 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
             (f1, f2) =>
               (f1.order ?? Number.MAX_SAFE_INTEGER) - (f2.order ?? Number.MAX_SAFE_INTEGER)
           )
-          .map(feature => feature.toRaw()),
+          .map((feature) => feature.toRaw()),
       });
     }
   );

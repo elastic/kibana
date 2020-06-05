@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 
 describe('integerRt', () => {
   describe('it should not accept', () => {
-    [undefined, null, '', 'foo', 0, 55, NaN].map(input => {
+    [undefined, null, '', 'foo', 0, 55, NaN].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(integerRt.decode(input))).toBe(false);
       });
@@ -17,7 +17,7 @@ describe('integerRt', () => {
   });
 
   describe('it should accept', () => {
-    ['-1234', '-1', '0', '1000', '32000', '100000'].map(input => {
+    ['-1234', '-1', '0', '1000', '32000', '100000'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(integerRt.decode(input))).toBe(true);
       });
@@ -29,7 +29,7 @@ describe('getIntegerRt', () => {
   const customIntegerRt = getIntegerRt({ min: 0, max: 32000 });
   describe('it should not accept', () => {
     [undefined, null, '', 'foo', 0, 55, '-1', '-55', '33000', NaN].map(
-      input => {
+      (input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customIntegerRt.decode(input))).toBe(false);
         });
@@ -38,7 +38,7 @@ describe('getIntegerRt', () => {
   });
 
   describe('it should accept', () => {
-    ['0', '1000', '32000'].map(input => {
+    ['0', '1000', '32000'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(customIntegerRt.decode(input))).toBe(true);
       });

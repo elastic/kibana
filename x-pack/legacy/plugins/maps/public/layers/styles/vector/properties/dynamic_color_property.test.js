@@ -75,14 +75,14 @@ class MockLayer {
   }
 }
 
-const makeProperty = options => {
+const makeProperty = (options) => {
   return new DynamicColorProperty(
     options,
     VECTOR_STYLES.LINE_COLOR,
     mockField,
     new MockLayer(),
     () => {
-      return x => x + '_format';
+      return (x) => x + '_format';
     }
   );
 };
@@ -126,7 +126,7 @@ test('Should render ordinal legend with breaks', async () => {
   const component = shallow(legendRow);
 
   // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
+  await new Promise((resolve) => process.nextTick(resolve));
   // Ensure the state changes are reflected
   component.update();
 
@@ -145,7 +145,7 @@ test('Should render categorical legend with breaks from default', async () => {
   const component = shallow(legendRow);
 
   // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
+  await new Promise((resolve) => process.nextTick(resolve));
   // Ensure the state changes are reflected
   component.update();
 
@@ -180,7 +180,7 @@ test('Should render categorical legend with breaks from custom', async () => {
 });
 
 function makeFeatures(foobarPropValues) {
-  return foobarPropValues.map(value => {
+  return foobarPropValues.map((value) => {
     return {
       type: 'Feature',
       properties: {

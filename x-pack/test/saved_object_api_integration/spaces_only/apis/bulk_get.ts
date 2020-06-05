@@ -8,7 +8,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { bulkGetTestSuiteFactory } from '../../common/suites/bulk_get';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

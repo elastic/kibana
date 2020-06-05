@@ -41,11 +41,11 @@ export const getUpdateSignalsQuery = (eventIds: Readonly<string[]>) => {
 export const getFilterAndRuleBounds = (
   data: TimelineNonEcsData[][]
 ): [string[], number, number] => {
-  const stringFilter = data?.[0].filter(d => d.field === 'signal.rule.filters')?.[0]?.value ?? [];
+  const stringFilter = data?.[0].filter((d) => d.field === 'signal.rule.filters')?.[0]?.value ?? [];
 
   const eventTimes = data
-    .flatMap(signal => signal.filter(d => d.field === 'signal.original_time')?.[0]?.value ?? [])
-    .map(d => moment(d));
+    .flatMap((signal) => signal.filter((d) => d.field === 'signal.original_time')?.[0]?.value ?? [])
+    .map((d) => moment(d));
 
   return [stringFilter, moment.min(eventTimes).valueOf(), moment.max(eventTimes).valueOf()];
 };

@@ -40,8 +40,8 @@ export class KqlTelemetryService implements Plugin<void> {
       this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
         .toPromise()
-        .then(config => makeKQLUsageCollector(usageCollection, config.kibana.index))
-        .catch(e => {
+        .then((config) => makeKQLUsageCollector(usageCollection, config.kibana.index))
+        .catch((e) => {
           this.initializerContext.logger
             .get('kql-telemetry')
             .warn(`Registering KQL telemetry collector failed: ${e}`);

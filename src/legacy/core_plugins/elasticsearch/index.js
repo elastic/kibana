@@ -22,7 +22,7 @@ import { createProxy } from './lib/create_proxy';
 import { handleESError } from './lib/handle_es_error';
 import { versionHealthCheck } from './lib/version_health_check';
 
-export default function(kibana) {
+export default function (kibana) {
   let defaultVars;
 
   return new kibana.Plugin({
@@ -49,7 +49,7 @@ export default function(kibana) {
       };
 
       const clusters = new Map();
-      server.expose('getCluster', name => {
+      server.expose('getCluster', (name) => {
         if (name === 'admin') {
           return adminCluster;
         }

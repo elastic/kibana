@@ -15,7 +15,7 @@ import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  SERVICE_NODE_NAME
+  SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 
@@ -34,14 +34,14 @@ interface TaskParameters {
 export async function getServiceMapServiceNodeInfo({
   serviceName,
   environment,
-  setup
+  setup,
 }: Options & { serviceName: string; environment?: string }) {
   const { start, end } = setup;
 
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...(environment ? [{ term: { [SERVICE_ENVIRONMENT]: environment } }] : [])
+    ...(environment ? [{ term: { [SERVICE_ENVIRONMENT]: environment } }] : []),
   ];
 
   const minutes = Math.abs((end - start) / (1000 * 60));
@@ -49,7 +49,7 @@ export async function getServiceMapServiceNodeInfo({
   const taskParams = {
     setup,
     minutes,
-    filter
+    filter,
   };
 
   const [
@@ -57,13 +57,13 @@ export async function getServiceMapServiceNodeInfo({
     transactionMetrics,
     cpuMetrics,
     memoryMetrics,
-    instanceMetrics
+    instanceMetrics,
   ] = await Promise.all([
     getErrorMetrics(taskParams),
     getTransactionMetrics(taskParams),
     getCpuMetrics(taskParams),
     getMemoryMetrics(taskParams),
-    getNumInstances(taskParams)
+    getNumInstances(taskParams),
   ]);
 
   return {
@@ -71,7 +71,7 @@ export async function getServiceMapServiceNodeInfo({
     ...transactionMetrics,
     ...cpuMetrics,
     ...memoryMetrics,
-    ...instanceMetrics
+    ...instanceMetrics,
   };
 }
 
@@ -86,25 +86,27 @@ async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
         bool: {
           filter: filter.concat({
             term: {
-              [PROCESSOR_EVENT]: 'error'
-            }
-          })
-        }
+              [PROCESSOR_EVENT]: 'error',
+            },
+          }),
+        },
       },
-      track_total_hits: true
-    }
+      track_total_hits: true,
+    },
   });
 
   return {
     avgErrorsPerMinute:
-      response.hits.total.value > 0 ? response.hits.total.value / minutes : null
+      response.hits.total.value > 0
+        ? response.hits.total.value / minutes
+        : null,
   };
 }
 
 async function getTransactionMetrics({
   setup,
   filter,
-  minutes
+  minutes,
 }: TaskParameters): Promise<{
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
@@ -119,32 +121,34 @@ async function getTransactionMetrics({
         bool: {
           filter: filter.concat({
             term: {
-              [PROCESSOR_EVENT]: 'transaction'
-            }
-          })
-        }
+              [PROCESSOR_EVENT]: 'transaction',
+            },
+          }),
+        },
       },
       track_total_hits: true,
       aggs: {
         duration: {
           avg: {
-            field: TRANSACTION_DURATION
-          }
-        }
-      }
-    }
+            field: TRANSACTION_DURATION,
+          },
+        },
+      },
+    },
   });
 
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
     avgRequestsPerMinute:
-      response.hits.total.value > 0 ? response.hits.total.value / minutes : null
+      response.hits.total.value > 0
+        ? response.hits.total.value / minutes
+        : null,
   };
 }
 
 async function getCpuMetrics({
   setup,
-  filter
+  filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
   const { indices, client } = setup;
 
@@ -157,35 +161,35 @@ async function getCpuMetrics({
           filter: filter.concat([
             {
               term: {
-                [PROCESSOR_EVENT]: 'metric'
-              }
+                [PROCESSOR_EVENT]: 'metric',
+              },
             },
             {
               exists: {
-                field: METRIC_SYSTEM_CPU_PERCENT
-              }
-            }
-          ])
-        }
+                field: METRIC_SYSTEM_CPU_PERCENT,
+              },
+            },
+          ]),
+        },
       },
       aggs: {
         avgCpuUsage: {
           avg: {
-            field: METRIC_SYSTEM_CPU_PERCENT
-          }
-        }
-      }
-    }
+            field: METRIC_SYSTEM_CPU_PERCENT,
+          },
+        },
+      },
+    },
   });
 
   return {
-    avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null
+    avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null,
   };
 }
 
 async function getMemoryMetrics({
   setup,
-  filter
+  filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
   const { client, indices } = setup;
   const response = await client.search({
@@ -196,40 +200,40 @@ async function getMemoryMetrics({
           filter: filter.concat([
             {
               term: {
-                [PROCESSOR_EVENT]: 'metric'
-              }
+                [PROCESSOR_EVENT]: 'metric',
+              },
             },
             {
               exists: {
-                field: METRIC_SYSTEM_FREE_MEMORY
-              }
+                field: METRIC_SYSTEM_FREE_MEMORY,
+              },
             },
             {
               exists: {
-                field: METRIC_SYSTEM_TOTAL_MEMORY
-              }
-            }
-          ])
-        }
+                field: METRIC_SYSTEM_TOTAL_MEMORY,
+              },
+            },
+          ]),
+        },
       },
       aggs: {
         avgMemoryUsage: {
           avg: {
-            script: percentMemoryUsedScript
-          }
-        }
-      }
-    }
+            script: percentMemoryUsedScript,
+          },
+        },
+      },
+    },
   });
 
   return {
-    avgMemoryUsage: response.aggregations?.avgMemoryUsage.value ?? null
+    avgMemoryUsage: response.aggregations?.avgMemoryUsage.value ?? null,
   };
 }
 
 async function getNumInstances({
   setup,
-  filter
+  filter,
 }: TaskParameters): Promise<{ numInstances: number }> {
   const { client, indices } = setup;
   const response = await client.search({
@@ -240,33 +244,33 @@ async function getNumInstances({
           filter: filter.concat([
             {
               term: {
-                [PROCESSOR_EVENT]: 'transaction'
-              }
+                [PROCESSOR_EVENT]: 'transaction',
+              },
             },
             {
               exists: {
-                field: SERVICE_NODE_NAME
-              }
+                field: SERVICE_NODE_NAME,
+              },
             },
             {
               exists: {
-                field: METRIC_SYSTEM_TOTAL_MEMORY
-              }
-            }
-          ])
-        }
+                field: METRIC_SYSTEM_TOTAL_MEMORY,
+              },
+            },
+          ]),
+        },
       },
       aggs: {
         instances: {
           cardinality: {
-            field: SERVICE_NODE_NAME
-          }
-        }
-      }
-    }
+            field: SERVICE_NODE_NAME,
+          },
+        },
+      },
+    },
   });
 
   return {
-    numInstances: response.aggregations?.instances.value || 1
+    numInstances: response.aggregations?.instances.value || 1,
   };
 }

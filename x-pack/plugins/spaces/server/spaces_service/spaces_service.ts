@@ -71,7 +71,7 @@ export class SpacesService {
     const getScopedClient = async (request: KibanaRequest) => {
       return config$
         .pipe(
-          map(config => {
+          map((config) => {
             const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
               elasticsearch.adminClient.callAsInternalUser,
               ['space']

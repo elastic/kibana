@@ -103,8 +103,8 @@ export function initPushCaseUserActionApi({
           caseService.patchComments({
             client,
             comments: comments.saved_objects
-              .filter(comment => comment.attributes.pushed_at == null)
-              .map(comment => ({
+              .filter((comment) => comment.attributes.pushed_at == null)
+              .map((comment) => ({
                 commentId: comment.id,
                 updatedAttributes: {
                   pushed_at: pushedDate,
@@ -149,9 +149,9 @@ export function initPushCaseUserActionApi({
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
               },
-              comments.saved_objects.map(origComment => {
+              comments.saved_objects.map((origComment) => {
                 const updatedComment = updatedComments.saved_objects.find(
-                  c => c.id === origComment.id
+                  (c) => c.id === origComment.id
                 );
                 return {
                   ...origComment,

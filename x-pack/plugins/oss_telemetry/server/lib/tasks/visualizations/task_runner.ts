@@ -7,6 +7,8 @@
 import { Observable } from 'rxjs';
 import _, { countBy, groupBy, mapValues } from 'lodash';
 import { APICaller, CoreSetup } from 'kibana/server';
+import { first } from 'rxjs/operators';
+
 import { getNextMidnight } from '../../get_next_midnight';
 import { TaskInstance } from '../../../../../task_manager/server';
 import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
@@ -56,7 +58,7 @@ async function getStats(callCluster: APICaller, index: string) {
   const visTypes = groupBy(visSummaries, 'type');
 
   // get the final result
-  return mapValues(visTypes, curr => {
+  return mapValues(visTypes, (curr) => {
     const total = curr.length;
     const spacesBreakdown = countBy(curr, 'space');
     const spaceCounts: number[] = _.values(spacesBreakdown);
@@ -82,7 +84,7 @@ export function visualizationsTaskRunner(
     let error;
 
     try {
-      const index = (await config.toPromise()).kibana.index;
+      const index = (await config.pipe(first()).toPromise()).kibana.index;
       stats = await getStats(callCluster, index);
     } catch (err) {
       if (err.constructor === Error) {

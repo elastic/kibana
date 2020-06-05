@@ -119,8 +119,5 @@ const mockNewsfeed = (version: string) => ({
 });
 
 function htmlResponse(h: any, code: number, text: string) {
-  return h
-    .response(text)
-    .type('application/json')
-    .code(code);
+  return h.response(text).type('application/json').code(code);
 }

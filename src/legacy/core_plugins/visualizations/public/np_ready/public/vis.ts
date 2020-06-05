@@ -151,7 +151,7 @@ export class Vis {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map(agg => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
     const indexPattern = this.data.searchSource && this.data.searchSource.getField('index');
     return {
       id: this.id,
@@ -190,7 +190,9 @@ export class Vis {
     const newConfigs = [...configStates];
     schemas
       .filter((schema: any) => Array.isArray(schema.defaults) && schema.defaults.length > 0)
-      .filter((schema: any) => !configStates.find(agg => agg.schema && agg.schema === schema.name))
+      .filter(
+        (schema: any) => !configStates.find((agg) => agg.schema && agg.schema === schema.name)
+      )
       .forEach((schema: any) => {
         const defaultSchemaConfig = schema.defaults.slice(0, schema.max);
         defaultSchemaConfig.forEach((d: any) => newConfigs.push(d));

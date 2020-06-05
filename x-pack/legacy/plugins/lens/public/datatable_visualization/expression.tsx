@@ -131,7 +131,7 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  firstTable.columns.forEach(column => {
+  firstTable.columns.forEach((column) => {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
@@ -141,8 +141,8 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
         columns={props.args.columns.columnIds
-          .map(field => {
-            const col = firstTable.columns.find(c => c.id === field);
+          .map((field) => {
+            const col = firstTable.columns.find((c) => c.id === field);
             return {
               field,
               name: (col && col.name) || '',
@@ -151,7 +151,7 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
           .filter(({ field }) => !!field)}
         items={
           firstTable
-            ? firstTable.rows.map(row => {
+            ? firstTable.rows.map((row) => {
                 const formattedRow: Record<string, unknown> = {};
                 Object.entries(formatters).forEach(([columnId, formatter]) => {
                   formattedRow[columnId] = formatter.convert(row[columnId]);

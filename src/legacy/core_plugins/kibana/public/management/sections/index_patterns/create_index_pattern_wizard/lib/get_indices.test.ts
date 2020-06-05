@@ -92,7 +92,7 @@ function esClientFactory(search: (params: any) => any): LegacyApiCaller {
     search,
     msearch: () => ({
       abort: () => {},
-      ...new Promise(resolve => resolve({})),
+      ...new Promise((resolve) => resolve({})),
     }),
   };
 }
@@ -120,7 +120,7 @@ describe('getIndices', () => {
   it('should trim the input', async () => {
     let index;
     const esClient = esClientFactory(
-      jest.fn().mockImplementation(params => {
+      jest.fn().mockImplementation((params) => {
         index = params.index;
       })
     );
@@ -132,7 +132,7 @@ describe('getIndices', () => {
   it('should use the limit', async () => {
     let limit;
     const esClient = esClientFactory(
-      jest.fn().mockImplementation(params => {
+      jest.fn().mockImplementation((params) => {
         limit = params.body.aggs.indices.terms.size;
       })
     );

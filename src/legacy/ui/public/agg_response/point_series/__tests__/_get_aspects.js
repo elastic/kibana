@@ -20,14 +20,12 @@
 import expect from '@kbn/expect';
 import { getAspects } from '../_get_aspects';
 
-describe('getAspects', function() {
+describe('getAspects', function () {
   let table;
   let dimensions;
 
   function validate(aspect, i) {
-    expect(aspect)
-      .to.be.an('object')
-      .and.have.property('accessor', i);
+    expect(aspect).to.be.an('object').and.have.property('accessor', i);
   }
 
   function init(group, x, y) {
@@ -50,7 +48,7 @@ describe('getAspects', function() {
     };
   }
 
-  it('produces an aspect object for each of the aspect types found in the columns', function() {
+  it('produces an aspect object for each of the aspect types found in the columns', function () {
     init(1, 0, 2);
 
     const aspects = getAspects(table, dimensions);
@@ -59,7 +57,7 @@ describe('getAspects', function() {
     validate(aspects.y[0], '2');
   });
 
-  it('creates a fake x aspect if the column does not exist', function() {
+  it('creates a fake x aspect if the column does not exist', function () {
     init(0, null, 1);
 
     const aspects = getAspects(table, dimensions);

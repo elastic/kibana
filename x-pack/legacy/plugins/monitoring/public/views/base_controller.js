@@ -20,7 +20,7 @@ import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
  *
  * @param {string} timezone
  */
-const getOffsetInMS = timezone => {
+const getOffsetInMS = (timezone) => {
   if (timezone === 'Browser') {
     return 0;
   }
@@ -184,7 +184,7 @@ export class MonitoringViewBaseController {
       deferTimer = setTimeout(() => addPopstateHandler(), 10);
     };
 
-    this.setTitle = title => titleService($scope.cluster, title);
+    this.setTitle = (title) => titleService($scope.cluster, title);
   }
 
   renderReact(component) {

@@ -248,7 +248,7 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart
   ): (request: KibanaRequest) => Services {
     const { adminClient } = this;
-    return request => ({
+    return (request) => ({
       callCluster: adminClient!.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
     });

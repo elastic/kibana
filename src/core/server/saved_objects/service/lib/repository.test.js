@@ -342,13 +342,13 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     callAdminCluster = jest.fn();
     migrator = {
-      migrateDocument: jest.fn(doc => doc),
+      migrateDocument: jest.fn((doc) => doc),
       runMigrations: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(typeRegistry);
-    const allTypes = typeRegistry.getAllTypes().map(type => type.name);
-    const allowedTypes = [...new Set(allTypes.filter(type => !typeRegistry.isHidden(type)))];
+    const allTypes = typeRegistry.getAllTypes().map((type) => type.name);
+    const allowedTypes = [...new Set(allTypes.filter((type) => !typeRegistry.isHidden(type)))];
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
@@ -469,7 +469,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('migrates the doc', async () => {
-      migrator.migrateDocument = doc => {
+      migrator.migrateDocument = (doc) => {
         doc.attributes.title = doc.attributes.title + '!!';
         doc.migrationVersion = { foo: '2.3.4' };
         doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
@@ -819,7 +819,7 @@ describe('SavedObjectsRepository', () => {
         ],
       });
 
-      migrator.migrateDocument = doc => {
+      migrator.migrateDocument = (doc) => {
         doc.attributes.title = doc.attributes.title + '!!';
         doc.migrationVersion = { foo: '2.3.4' };
         doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
@@ -2202,9 +2202,9 @@ describe('SavedObjectsRepository', () => {
       reset();
     });
 
-    const mockValidResponse = objects =>
+    const mockValidResponse = (objects) =>
       callAdminCluster.mockReturnValue({
-        items: objects.map(items => ({
+        items: objects.map((items) => ({
           update: {
             _id: `${items.type}:${items.id}`,
             _type: '_doc',
@@ -2264,8 +2264,8 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockReturnValue({
         items: objects
           // remove invalid from mocks
-          .filter(item => item.id !== 'invalid')
-          .map(items => {
+          .filter((item) => item.id !== 'invalid')
+          .map((items) => {
             switch (items.id) {
               case 'version_clash':
                 return {
@@ -2730,7 +2730,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('migrates the doc if an upsert is required', async () => {
-      migrator.migrateDocument = doc => {
+      migrator.migrateDocument = (doc) => {
         doc.attributes.buildNum = 42;
         doc.migrationVersion = { foo: '2.3.4' };
         doc.references = [{ name: 'search_0', type: 'search', id: '123' }];

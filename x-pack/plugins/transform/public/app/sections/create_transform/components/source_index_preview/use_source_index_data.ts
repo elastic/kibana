@@ -87,7 +87,7 @@ export const useSourceIndexData = (
     setPagination(defaultPagination);
   }, [query]);
 
-  const getSourceIndexData = async function() {
+  const getSourceIndexData = async function () {
     setErrorMessage('');
     setStatus(SOURCE_INDEX_STATUS.LOADING);
 
@@ -110,7 +110,7 @@ export const useSourceIndexData = (
     try {
       const resp: SourceIndexSearchResponse = await api.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map(d => d._source);
+      const docs = resp.hits.hits.map((d) => d._source);
 
       setRowCount(resp.hits.total.value);
       setTableItems(docs);

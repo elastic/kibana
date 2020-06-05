@@ -111,7 +111,7 @@ export const createLegacyServerEndpoints = (
    * Register an endpoint that executes a batch of functions, and streams the
    * results back using ND-JSON.
    */
-  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, request => {
+  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, (request) => {
     const scopedClient = core.elasticsearch.dataClient.asScoped(request);
     const handlers = {
       environment: 'server',

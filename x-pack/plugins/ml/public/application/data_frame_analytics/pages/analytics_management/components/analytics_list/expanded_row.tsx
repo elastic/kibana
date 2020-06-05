@@ -176,7 +176,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.progress',
       { defaultMessage: 'Progress' }
     ),
-    items: item.stats.progress.map(s => {
+    items: item.stats.progress.map((s) => {
       return {
         title: s.phase,
         description: <ProgressBar progress={s.progress_percent} />,

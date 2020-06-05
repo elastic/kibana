@@ -33,7 +33,7 @@ import { vislibSeriesResponseHandler } from '../response_handler';
  * Fixing them would require changes to the response handler logic.
  */
 
-describe.skip('Basic Response Handler', function() {
+describe.skip('Basic Response Handler', function () {
   beforeEach(ngMock.module('kibana'));
 
   it('returns empty object if conversion failed', () => {
@@ -52,9 +52,9 @@ describe.skip('Basic Response Handler', function() {
   });
 });
 
-describe.skip('renderbot#buildChartData', function() {
-  describe('for hierarchical vis', function() {
-    it('defers to hierarchical aggResponse converter', function() {
+describe.skip('renderbot#buildChartData', function () {
+  describe('for hierarchical vis', function () {
+    it('defers to hierarchical aggResponse converter', function () {
       const football = {};
       const stub = sinon.stub(aggResponseIndex, 'hierarchical').returns(football);
       expect(vislibSeriesResponseHandler(football)).to.be(football);
@@ -63,8 +63,8 @@ describe.skip('renderbot#buildChartData', function() {
     });
   });
 
-  describe('for point plot', function() {
-    it('calls tabify to simplify the data into a table', function() {
+  describe('for point plot', function () {
+    it('calls tabify to simplify the data into a table', function () {
       const football = { tables: [], hits: { total: 1 } };
       const stub = sinon.stub(aggResponseIndex, 'tabify').returns(football);
       expect(vislibSeriesResponseHandler(football)).to.eql({ rows: [], hits: 1 });
@@ -72,7 +72,7 @@ describe.skip('renderbot#buildChartData', function() {
       expect(stub.firstCall.args[1]).to.be(football);
     });
 
-    it('returns a single chart if the tabify response contains only a single table', function() {
+    it('returns a single chart if the tabify response contains only a single table', function () {
       const chart = { hits: 1, rows: [], columns: [] };
       const esResp = { hits: { total: 1 } };
       const tabbed = { tables: [{}] };
@@ -81,7 +81,7 @@ describe.skip('renderbot#buildChartData', function() {
       expect(vislibSeriesResponseHandler(esResp)).to.eql(chart);
     });
 
-    it('converts table groups into rows/columns wrappers for charts', function() {
+    it('converts table groups into rows/columns wrappers for charts', function () {
       const converter = sinon.stub().returns('chart');
       const esResp = { hits: { total: 1 } };
       const tables = [{}, {}, {}, {}];
@@ -128,7 +128,7 @@ describe.skip('renderbot#buildChartData', function() {
 
       expect(chartData).to.have.property('rows');
       expect(chartData.rows).to.have.length(2);
-      chartData.rows.forEach(function(row) {
+      chartData.rows.forEach(function (row) {
         expect(row).to.have.property('columns');
         expect(row.columns).to.eql(['chart', 'chart']);
       });

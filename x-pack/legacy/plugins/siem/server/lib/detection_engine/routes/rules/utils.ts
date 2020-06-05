@@ -94,7 +94,7 @@ export const getIdBulkError = ({
 };
 
 export const transformTags = (tags: string[]): string[] => {
-  return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
+  return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 // Transforms the data but will remove any null or undefined it encounters and not include
@@ -154,7 +154,7 @@ export const transformAlertToRule = (
 
 export const transformDataToNdjson = (data: unknown[]): string => {
   if (data.length !== 0) {
-    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
+    const dataString = data.map((rule) => JSON.stringify(rule)).join('\n');
     return `${dataString}\n`;
   } else {
     return '';
@@ -164,7 +164,7 @@ export const transformDataToNdjson = (data: unknown[]): string => {
 export const transformAlertsToRules = (
   alerts: RuleAlertType[]
 ): Array<Partial<OutputRuleAlertRest>> => {
-  return alerts.map(alert => transformAlertToRule(alert));
+  return alerts.map((alert) => transformAlertToRule(alert));
 };
 
 export const transformFindAlerts = (
@@ -255,11 +255,11 @@ export const transformOrImportError = (
 export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
   const mappedDuplicates = countBy(
     by,
-    ruleDefinitions.filter(r => r[by] != null)
+    ruleDefinitions.filter((r) => r[by] != null)
   );
-  const hasDuplicates = Object.values(mappedDuplicates).some(i => i > 1);
+  const hasDuplicates = Object.values(mappedDuplicates).some((i) => i > 1);
   if (hasDuplicates) {
-    return Object.keys(mappedDuplicates).filter(key => mappedDuplicates[key] > 1);
+    return Object.keys(mappedDuplicates).filter((key) => mappedDuplicates[key] > 1);
   }
   return [];
 };

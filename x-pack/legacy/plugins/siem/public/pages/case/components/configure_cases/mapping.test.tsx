@@ -28,38 +28,20 @@ describe('Mapping', () => {
   });
 
   test('it shows mapping form group', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-mapping-form-group"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-mapping-form-group"]').first().exists()).toBe(true);
   });
 
   test('it shows mapping form row', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-mapping-form-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-mapping-form-row"]').first().exists()).toBe(true);
   });
 
   test('it shows the update button', () => {
     expect(
-      wrapper
-        .find('[data-test-subj="case-mapping-update-connector-button"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="case-mapping-update-connector-button"]').first().exists()
     ).toBe(true);
   });
 
   test('it shows the field mapping', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-mapping-field"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-mapping-field"]').first().exists()).toBe(true);
   });
 });

@@ -106,8 +106,10 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
-      .filter(factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew())
-      .map(factory => (
+      .filter(
+        (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
+      )
+      .map((factory) => (
         <EuiContextMenuItem
           key={factory.type}
           data-test-subj={`createNew-${factory.type}`}
@@ -126,7 +128,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         onChoose={this.onAddPanel}
         savedObjectMetaData={[...this.props.getAllFactories()]
           .filter(
-            embeddableFactory =>
+            (embeddableFactory) =>
               Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
           )
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}

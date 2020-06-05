@@ -77,13 +77,13 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         >
           <EuiSelect
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map(format => {
+            options={format.type.inputFormats.map((format) => {
               return {
                 value: format.kind,
                 text: format.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ inputFormat: e.target.value });
             }}
             isInvalid={!!error}
@@ -100,13 +100,13 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         >
           <EuiSelect
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map(format => {
+            options={format.type.outputFormats.map((format) => {
               return {
                 value: format.method,
                 text: format.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ outputFormat: e.target.value });
             }}
             isInvalid={!!error}
@@ -127,7 +127,7 @@ export class DurationFormatEditor extends DefaultFormatEditor {
               value={formatParams.outputPrecision}
               min={0}
               max={20}
-              onChange={e => {
+              onChange={(e) => {
                 this.onChange({ outputPrecision: e.target.value ? Number(e.target.value) : null });
               }}
               isInvalid={!!error}

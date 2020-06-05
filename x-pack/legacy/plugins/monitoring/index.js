@@ -19,7 +19,7 @@ const deps = ['kibana', 'elasticsearch', 'xpack_main'];
 if (KIBANA_ALERTING_ENABLED) {
   deps.push(...['alerting', 'actions']);
 }
-export const monitoring = kibana => {
+export const monitoring = (kibana) => {
   return new kibana.Plugin({
     require: deps,
     id: 'monitoring',

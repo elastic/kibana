@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('spaces', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('spaces', function () {
     this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./get_active_space'));

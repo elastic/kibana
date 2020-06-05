@@ -68,7 +68,7 @@ uiRoutes.when('/', {
   controller($scope) {
     $scope.$$postDigest(() => {
       rendered = true;
-      onRenderCompleteListeners.forEach(listener => listener());
+      onRenderCompleteListeners.forEach((listener) => listener());
     });
   },
 });

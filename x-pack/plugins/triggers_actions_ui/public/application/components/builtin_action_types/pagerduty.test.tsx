@@ -90,7 +90,7 @@ describe('pagerduty action params validation', () => {
       summary: '2323',
       source: 'source',
       severity: 'critical',
-      timestamp: '234654564654',
+      timestamp: new Date().toISOString(),
       component: 'test',
       group: 'group',
       class: 'test class',
@@ -99,6 +99,7 @@ describe('pagerduty action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         summary: [],
+        timestamp: [],
       },
     });
   });
@@ -131,12 +132,9 @@ describe('PagerDutyActionConnectorFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="pagerdutyApiUrlInput"]')
-        .first()
-        .prop('value')
-    ).toBe('http:\\test');
+    expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').first().prop('value')).toBe(
+      'http:\\test'
+    );
     expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
   });
 });
@@ -156,7 +154,7 @@ describe('PagerDutyParamsFields renders', () => {
       summary: '2323',
       source: 'source',
       severity: SeverityActionOptions.CRITICAL,
-      timestamp: '234654564654',
+      timestamp: new Date().toISOString(),
       component: 'test',
       group: 'group',
       class: 'test class',
@@ -164,18 +162,15 @@ describe('PagerDutyParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ParamsFields
         actionParams={actionParams}
-        errors={{ summary: [] }}
+        errors={{ summary: [], timestamp: [] }}
         editAction={() => {}}
         index={0}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="severitySelect"]')
-        .first()
-        .prop('value')
-    ).toStrictEqual('critical');
+    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
+      'critical'
+    );
     expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeTruthy();

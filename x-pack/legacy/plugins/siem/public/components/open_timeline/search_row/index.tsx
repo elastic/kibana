@@ -20,14 +20,14 @@ import { OpenTimelineProps } from '../types';
 
 const SearchRowContainer = styled.div`
   &:not(:last-child) {
-    margin-bottom: ${props => props.theme.eui.euiSizeL};
+    margin-bottom: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 
 SearchRowContainer.displayName = 'SearchRowContainer';
 
 const SearchRowFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: ${props => props.theme.eui.euiSizeXS};
+  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';

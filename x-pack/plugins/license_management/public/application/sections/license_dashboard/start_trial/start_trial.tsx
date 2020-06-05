@@ -266,7 +266,7 @@ export class StartTrial extends Component<Props, State> {
     );
     return (
       <AppContextConsumer>
-        {dependencies => (
+        {(dependencies) => (
           <EuiFlexItem>
             {this.acknowledgeModal(dependencies!.docLinks)}
             <EuiCard

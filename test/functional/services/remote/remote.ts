@@ -64,20 +64,12 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver
-      .manage()
-      .window()
-      .setRect({ width: 1600, height: 1000 });
+    await driver.manage().window().setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
-    windowSizeStack.unshift(
-      await driver
-        .manage()
-        .window()
-        .getRect()
-    );
+    windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
   lifecycle.beforeEachTest.add(async () => {
@@ -86,10 +78,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await driver
-      .manage()
-      .window()
-      .setRect({ width, height });
+    await driver.manage().window().setRect({ width, height });
     await clearBrowserStorage('sessionStorage');
     await clearBrowserStorage('localStorage');
   });

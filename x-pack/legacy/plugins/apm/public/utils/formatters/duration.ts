@@ -41,38 +41,38 @@ type TimeFormatterBuilder = (max: number) => TimeFormatter;
 const durationUnit: DurationUnit = {
   hours: {
     label: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
-      defaultMessage: 'h'
+      defaultMessage: 'h',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asHours())
+      asDecimal(moment.duration(value / 1000).asHours()),
   },
   minutes: {
     label: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
-      defaultMessage: 'min'
+      defaultMessage: 'min',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asMinutes())
+      asDecimal(moment.duration(value / 1000).asMinutes()),
   },
   seconds: {
     label: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
-      defaultMessage: 's'
+      defaultMessage: 's',
     }),
     convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asSeconds())
+      asDecimal(moment.duration(value / 1000).asSeconds()),
   },
   milliseconds: {
     label: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
-      defaultMessage: 'ms'
+      defaultMessage: 'ms',
     }),
     convert: (value: number) =>
-      asInteger(moment.duration(value / 1000).asMilliseconds())
+      asInteger(moment.duration(value / 1000).asMilliseconds()),
   },
   microseconds: {
     label: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
-      defaultMessage: 'μs'
+      defaultMessage: 'μs',
     }),
-    convert: (value: number) => asInteger(value)
-  }
+    convert: (value: number) => asInteger(value),
+  },
 };
 
 /**
@@ -86,7 +86,7 @@ const durationUnit: DurationUnit = {
 export function convertTo({
   unit,
   microseconds,
-  defaultValue = NOT_AVAILABLE_LABEL
+  defaultValue = NOT_AVAILABLE_LABEL,
 }: {
   unit: DurationTimeUnit;
   microseconds: Maybe<number>;
@@ -101,7 +101,7 @@ export function convertTo({
   return {
     value: convertedValue,
     unit: duration.label,
-    formatted: `${convertedValue} ${duration.label}`
+    formatted: `${convertedValue} ${duration.label}`,
   };
 }
 

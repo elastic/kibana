@@ -20,7 +20,7 @@ interface ESResponse {
 export async function getMlBucketSize({
   serviceName,
   transactionType,
-  setup
+  setup,
 }: IOptions): Promise<number> {
   const { client, start, end } = setup;
   const params = {
@@ -37,14 +37,14 @@ export async function getMlBucketSize({
                 timestamp: {
                   gte: start,
                   lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
   };
 
   try {

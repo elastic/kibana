@@ -34,7 +34,7 @@ export const parseNdjsonStrings = (): Transform => {
 
 export const filterExportedCounts = (): Transform => {
   return createFilterStream<ImportRuleAlertRest | RulesObjectsExportResultDetails>(
-    obj => obj != null && !has('exported_count', obj)
+    (obj) => obj != null && !has('exported_count', obj)
   );
 };
 

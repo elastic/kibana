@@ -47,7 +47,7 @@ const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
 }>`
   position: relative;
-  z-index: ${props => props.zindex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
+  z-index: ${(props) => props.zindex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
 
   > .euiAccordion > .euiAccordion__triggerWrapper {
     .euiAccordion__button {
@@ -121,7 +121,7 @@ const CreateRulePageComponent: React.FC = () => {
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
       if (isValid) {
-        const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
+        const stepRuleIdx = stepsRuleOrder.findIndex((item) => step === item);
         if ([0, 1, 2].includes(stepRuleIdx)) {
           if (isStepRuleInReadOnlyView[stepsRuleOrder[stepRuleIdx + 1]]) {
             setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
@@ -223,8 +223,8 @@ const CreateRulePageComponent: React.FC = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageAccordions = useCallback(
     (id: RuleStep, isOpen: boolean) => {
-      const activeRuleIdx = stepsRuleOrder.findIndex(step => step === openAccordionId);
-      const stepRuleIdx = stepsRuleOrder.findIndex(step => step === id);
+      const activeRuleIdx = stepsRuleOrder.findIndex((step) => step === openAccordionId);
+      const stepRuleIdx = stepsRuleOrder.findIndex((step) => step === id);
 
       if ((id === openAccordionId || stepRuleIdx < activeRuleIdx) && !isOpen) {
         openCloseAccordion(id);

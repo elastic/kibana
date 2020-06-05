@@ -36,7 +36,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig) => {
       const descriptor = EMSTMSSource.createDescriptor(sourceConfig);
       const source = new EMSTMSSource(descriptor, inspectorAdapters);
       onPreviewSource(source);
@@ -84,7 +84,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     const emsClient = getEMSClient();
     const emsTMSServices = await emsClient.getTMSServices();
     const emsTileLayerId = this.getTileLayerId();
-    const tmsService = emsTMSServices.find(tmsService => tmsService.getId() === emsTileLayerId);
+    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
     if (!tmsService) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsTile.errorMessage', {

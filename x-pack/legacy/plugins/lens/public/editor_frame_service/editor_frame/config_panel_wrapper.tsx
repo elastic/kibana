@@ -118,7 +118,7 @@ function LayerPanels(
       props.dispatch({
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
-        updater: prevState => {
+        updater: (prevState) => {
           return {
             ...prevState,
             datasourceStates: {
@@ -143,7 +143,7 @@ function LayerPanels(
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map(layerId => (
+      {layerIds.map((layerId) => (
         <LayerPanel
           {...props}
           key={layerId}
@@ -159,7 +159,7 @@ function LayerPanels(
             dispatch({
               type: 'UPDATE_STATE',
               subType: 'REMOVE_OR_CLEAR_LAYER',
-              updater: state =>
+              updater: (state) =>
                 removeLayer({
                   activeVisualization,
                   layerId,
@@ -196,7 +196,7 @@ function LayerPanels(
                 dispatch({
                   type: 'UPDATE_STATE',
                   subType: 'ADD_LAYER',
-                  updater: state =>
+                  updater: (state) =>
                     appendLayer({
                       activeVisualization,
                       generateId,
@@ -275,7 +275,7 @@ function LayerPanel(
   });
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
-  const isEmptyLayer = !groups.some(d => d.accessors.length > 0);
+  const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
 
   function wrapInPopover(
     id: string,
@@ -283,7 +283,7 @@ function LayerPanel(
     trigger: React.ReactElement,
     panel: React.ReactElement
   ) {
-    const noMatch = popoverState.isOpen ? !groups.some(d => d.accessors.includes(id)) : false;
+    const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(id)) : false;
     return (
       <EuiPopover
         className="lnsConfigPanel__popover"
@@ -342,9 +342,9 @@ function LayerPanel(
                     const removed = datasourcePublicAPI
                       .getTableSpec()
                       .map(({ columnId }) => columnId)
-                      .filter(columnId => !nextTable.has(columnId));
+                      .filter((columnId) => !nextTable.has(columnId));
                     let nextVisState = props.visualizationState;
-                    removed.forEach(columnId => {
+                    removed.forEach((columnId) => {
                       nextVisState = activeVisualization.removeDimension({
                         layerId,
                         columnId,
@@ -380,7 +380,7 @@ function LayerPanel(
               }
             >
               <>
-                {group.accessors.map(accessor => (
+                {group.accessors.map((accessor) => (
                   <DragDrop
                     key={accessor}
                     className="lnsConfigPanel__dimension"
@@ -393,7 +393,7 @@ function LayerPanel(
                         filterOperations: group.filterOperations,
                       })
                     }
-                    onDrop={droppedItem => {
+                    onDrop={(droppedItem) => {
                       layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,
@@ -483,7 +483,7 @@ function LayerPanel(
                         filterOperations: group.filterOperations,
                       })
                     }
-                    onDrop={droppedItem => {
+                    onDrop={(droppedItem) => {
                       const dropSuccess = layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,

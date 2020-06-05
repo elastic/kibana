@@ -39,7 +39,7 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
   if (field.hasMultiFields && !Boolean(parentField?.hasMultiFields)) {
     isChainedMultifieldsWarningVisible = field
       .childFields!.map(getField)
-      .some(childField => Boolean(childField?.hasMultiFields));
+      .some((childField) => Boolean(childField?.hasMultiFields));
   }
 
   const childFieldsArray = useMemo(

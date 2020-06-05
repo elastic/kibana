@@ -9,7 +9,7 @@ import { useDelayedVisibility } from '../components/shared/useDelayedVisibility'
 
 export const LoadingIndicatorContext = React.createContext({
   statuses: {},
-  dispatchStatus: (action: Action) => undefined as void
+  dispatchStatus: (action: Action) => undefined as void,
 });
 
 interface State {
@@ -33,11 +33,11 @@ function reducer(statuses: State, action: Action) {
 }
 
 function getIsAnyLoading(statuses: State) {
-  return Object.values(statuses).some(isLoading => isLoading);
+  return Object.values(statuses).some((isLoading) => isLoading);
 }
 
 export function LoadingIndicatorProvider({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
@@ -45,7 +45,7 @@ export function LoadingIndicatorProvider({
   const isLoading = useMemo(() => getIsAnyLoading(statuses), [statuses]);
   const shouldShowLoadingIndicator = useDelayedVisibility(isLoading);
   const contextValue = React.useMemo(() => ({ statuses, dispatchStatus }), [
-    statuses
+    statuses,
   ]);
 
   return (

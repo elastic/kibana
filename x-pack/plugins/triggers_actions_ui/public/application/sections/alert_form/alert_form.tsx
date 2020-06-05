@@ -159,7 +159,7 @@ export const AlertForm = ({
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
+  const alertTypeNodes = alertTypeRegistry.list().map(function (item, index) {
     return (
       <EuiKeyPadMenuItem
         key={index}
@@ -230,7 +230,9 @@ export const AlertForm = ({
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(av => av.name)
+              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(
+                  (av) => av.name
+                )
               : undefined
           }
           defaultActionGroupId={defaultActionGroupId}
@@ -306,7 +308,7 @@ export const AlertForm = ({
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
-              onChange={e => {
+              onChange={(e) => {
                 setAlertProperty('name', e.target.value);
               }}
               onBlur={() => {
@@ -337,13 +339,13 @@ export const AlertForm = ({
                 const newOptions = [...tagsOptions, { label: searchValue }];
                 setAlertProperty(
                   'tags',
-                  newOptions.map(newOption => newOption.label)
+                  newOptions.map((newOption) => newOption.label)
                 );
               }}
               onChange={(selectedOptions: Array<{ label: string }>) => {
                 setAlertProperty(
                   'tags',
-                  selectedOptions.map(selectedOption => selectedOption.label)
+                  selectedOptions.map((selectedOption) => selectedOption.label)
                 );
               }}
               onBlur={() => {
@@ -375,7 +377,7 @@ export const AlertForm = ({
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     const interval =
                       e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
                     setAlertInterval(interval);
@@ -389,7 +391,7 @@ export const AlertForm = ({
                   compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions(alertInterval ?? 1)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
@@ -409,19 +411,19 @@ export const AlertForm = ({
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     pipe(
                       some(e.target.value.trim()),
-                      filter(value => value !== ''),
-                      map(value => parseInt(value, 10)),
-                      filter(value => !isNaN(value)),
+                      filter((value) => value !== ''),
+                      map((value) => parseInt(value, 10)),
+                      filter((value) => !isNaN(value)),
                       fold(
                         () => {
                           // unset throttle
                           setAlertThrottle(null);
                           setAlertProperty('throttle', null);
                         },
-                        throttle => {
+                        (throttle) => {
                           setAlertThrottle(throttle);
                           setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
                         }
@@ -435,7 +437,7 @@ export const AlertForm = ({
                   compressed
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setAlertThrottleUnit(e.target.value);
                     if (alertThrottle) {
                       setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);

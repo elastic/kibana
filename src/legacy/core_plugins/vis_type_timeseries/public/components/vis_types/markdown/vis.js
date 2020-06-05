@@ -28,7 +28,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
-const getMarkdownId = id => `markdown-${id}`;
+const getMarkdownId = (id) => `markdown-${id}`;
 
 export function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;

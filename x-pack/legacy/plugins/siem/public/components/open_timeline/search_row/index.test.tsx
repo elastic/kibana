@@ -30,12 +30,10 @@ describe('SearchRow', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('input')
-        .first()
-        .props()
-    ).toHaveProperty('placeholder', i18n.SEARCH_PLACEHOLDER);
+    expect(wrapper.find('input').first().props()).toHaveProperty(
+      'placeholder',
+      i18n.SEARCH_PLACEHOLDER
+    );
   });
 
   describe('Only Favorites Button', () => {
@@ -52,12 +50,9 @@ describe('SearchRow', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="only-favorites-toggle"]')
-          .first()
-          .text()
-      ).toEqual(i18n.ONLY_FAVORITES);
+      expect(wrapper.find('[data-test-subj="only-favorites-toggle"]').first().text()).toEqual(
+        i18n.ONLY_FAVORITES
+      );
     });
 
     test('it invokes onToggleOnlyFavorites when clicked', () => {
@@ -75,10 +70,7 @@ describe('SearchRow', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[data-test-subj="only-favorites-toggle"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="only-favorites-toggle"]').first().simulate('click');
 
       expect(onToggleOnlyFavorites).toHaveBeenCalled();
     });

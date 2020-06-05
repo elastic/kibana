@@ -19,7 +19,7 @@ jest.mock('../../services', () => {
   const services = require.requireActual('../../services');
   return {
     ...services,
-    getRouterLinkProps: link => ({ href: link }),
+    getRouterLinkProps: (link) => ({ href: link }),
   };
 });
 
@@ -35,7 +35,7 @@ const defaultProps = {
 const services = {
   setBreadcrumbs: startMock.chrome.setBreadcrumbs,
 };
-const Component = props => (
+const Component = (props) => (
   <KibanaContextProvider services={services}>
     <JobList {...props} />
   </KibanaContextProvider>
@@ -74,11 +74,7 @@ describe('<JobList />', () => {
 
     it('should display a callout with the status and the message', () => {
       expect(exists('jobListError')).toBeTruthy();
-      expect(
-        find('jobListError')
-          .find('EuiText')
-          .text()
-      ).toEqual('400 Houston we got a problem.');
+      expect(find('jobListError').find('EuiText').text()).toEqual('400 Houston we got a problem.');
     });
   });
 

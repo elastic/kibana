@@ -20,7 +20,7 @@ import template from './templates/index.html';
 chrome.setRootTemplate(template);
 
 const checkForRoot = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const ready = !!document.getElementById(REACT_APP_ROOT_ID);
     if (ready) {
       resolve();

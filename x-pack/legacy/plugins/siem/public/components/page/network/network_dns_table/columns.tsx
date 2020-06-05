@@ -32,7 +32,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: dnsName => {
+    render: (dnsName) => {
       if (dnsName != null) {
         const id = escapeDataProviderId(`networkDns-table--name-${dnsName}`);
         return (
@@ -74,7 +74,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: queryCount => {
+    render: (queryCount) => {
       if (queryCount != null) {
         return numeral(queryCount).format('0');
       } else {
@@ -89,7 +89,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: uniqueDomains => {
+    render: (uniqueDomains) => {
       if (uniqueDomains != null) {
         return numeral(uniqueDomains).format('0');
       } else {
@@ -104,7 +104,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: dnsBytesIn => {
+    render: (dnsBytesIn) => {
       if (dnsBytesIn != null) {
         return <PreferenceFormattedBytes value={dnsBytesIn} />;
       } else {
@@ -119,7 +119,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: dnsBytesOut => {
+    render: (dnsBytesOut) => {
       if (dnsBytesOut != null) {
         return <PreferenceFormattedBytes value={dnsBytesOut} />;
       } else {

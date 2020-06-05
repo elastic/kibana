@@ -127,7 +127,7 @@ export class ObjectsTable extends Component {
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
     const filteredTypes = this.savedObjectTypes.filter(
-      type => !visibleTypes || visibleTypes.includes(type)
+      (type) => !visibleTypes || visibleTypes.includes(type)
     );
 
     // These are the saved objects visible in the table.
@@ -140,7 +140,7 @@ export class ObjectsTable extends Component {
     const exportAllOptions = [];
     const exportAllSelectedOptions = {};
 
-    Object.keys(filteredSavedObjectCounts).forEach(id => {
+    Object.keys(filteredSavedObjectCounts).forEach((id) => {
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
@@ -159,7 +159,7 @@ export class ObjectsTable extends Component {
       queryText
     );
 
-    this.setState(state => ({
+    this.setState((state) => ({
       ...state,
       savedObjectCounts,
       exportAllOptions,
@@ -186,7 +186,7 @@ export class ObjectsTable extends Component {
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: this.savedObjectTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
+      type: this.savedObjectTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -233,7 +233,7 @@ export class ObjectsTable extends Component {
     await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
   };
 
-  onSelectionChanged = selection => {
+  onSelectionChanged = (selection) => {
     this.setState({ selectedSavedObjects: selection });
   };
 
@@ -253,7 +253,7 @@ export class ObjectsTable extends Component {
     );
   };
 
-  onTableChange = async table => {
+  onTableChange = async (table) => {
     const { index: page, size: perPage } = table.page || {};
 
     this.setState(
@@ -266,7 +266,7 @@ export class ObjectsTable extends Component {
     );
   };
 
-  onShowRelationships = object => {
+  onShowRelationships = (object) => {
     this.setState({
       isShowingRelationships: true,
       relationshipObject: object,
@@ -280,9 +280,9 @@ export class ObjectsTable extends Component {
     });
   };
 
-  onExport = async includeReferencesDeep => {
+  onExport = async (includeReferencesDeep) => {
     const { selectedSavedObjects } = this.state;
-    const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
+    const objectsToExport = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
 
     let blob;
     try {
@@ -335,7 +335,7 @@ export class ObjectsTable extends Component {
     this.setState({ isShowingExportAllOptionsModal: false });
   };
 
-  showExportSuccessMessage = exportDetails => {
+  showExportSuccessMessage = (exportDetails) => {
     if (exportDetails && exportDetails.missingReferences.length > 0) {
       toastNotifications.addWarning({
         title: i18n.translate(
@@ -385,13 +385,13 @@ export class ObjectsTable extends Component {
 
     this.setState({ isDeleting: true });
 
-    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
+    const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
     if (indexPatterns.length) {
       await this.props.indexPatterns.clearCache();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map(object =>
+    const deletes = objects.savedObjects.map((object) =>
       savedObjectsClient.delete(object.type, object.id)
     );
     await Promise.all(deletes);
@@ -558,7 +558,7 @@ export class ObjectsTable extends Component {
   }
 
   changeIncludeReferencesDeep = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
   };
@@ -607,7 +607,7 @@ export class ObjectsTable extends Component {
               <EuiCheckboxGroup
                 options={exportAllOptions}
                 idToSelectedMap={exportAllSelectedOptions}
-                onChange={optionId => {
+                onChange={(optionId) => {
                   const newExportAllSelectedOptions = {
                     ...exportAllSelectedOptions,
                     ...{
@@ -678,7 +678,7 @@ export class ObjectsTable extends Component {
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = this.savedObjectTypes.map(type => ({
+    const filterOptions = this.savedObjectTypes.map((type) => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,

@@ -94,10 +94,7 @@ describe('ValueAxesPanel component', () => {
 
   it('should call removeAgg', () => {
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
-    comp
-      .find('[data-test-subj="removeValueAxisBtn"] button')
-      .first()
-      .simulate('click');
+    comp.find('[data-test-subj="removeValueAxisBtn"] button').first().simulate('click');
 
     expect(removeValueAxis).toBeCalledWith(axisLeft);
   });
@@ -113,10 +110,7 @@ describe('ValueAxesPanel component', () => {
     it('should show when one serie matches value axis', () => {
       const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
       expect(
-        comp
-          .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
-          .first()
-          .text()
+        comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').first().text()
       ).toBe(seriesParamCount.data.label);
     });
 
@@ -124,10 +118,7 @@ describe('ValueAxesPanel component', () => {
       defaultProps.seriesParams[1].valueAxis = 'ValueAxis-1';
       const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
       expect(
-        comp
-          .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
-          .first()
-          .text()
+        comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').first().text()
       ).toBe(`${seriesParamCount.data.label}, ${seriesParamAverage.data.label}`);
     });
 
@@ -135,10 +126,7 @@ describe('ValueAxesPanel component', () => {
       defaultProps.seriesParams[0].valueAxis = 'ValueAxis-2';
       const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
       expect(
-        comp
-          .find('.visEditorSidebar__aggGroupAccordionButtonContent span')
-          .first()
-          .text()
+        comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').first().text()
       ).toBe('');
     });
   });

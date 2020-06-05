@@ -81,12 +81,7 @@ describe('#getActionsColumns', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="open-duplicate"]')
-        .first()
-        .text()
-    ).toEqual('');
+    expect(wrapper.find('[data-test-subj="open-duplicate"]').first().text()).toEqual('');
   });
 
   test('it does NOT render the duplicate timeline when actionTimelineToShow is NOT including the action duplicate)', () => {
@@ -168,10 +163,7 @@ describe('#getActionsColumns', () => {
       </ThemeProvider>
     );
 
-    wrapper
-      .find('[data-test-subj="open-duplicate"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
     expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
   });
@@ -236,10 +228,7 @@ describe('#getActionsColumns', () => {
       </ThemeProvider>
     );
 
-    wrapper
-      .find('[data-test-subj="export-timeline"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="export-timeline"]').first().simulate('click');
 
     expect(enableExportTimelineDownloader).toBeCalledWith(mockResults[0]);
   });

@@ -47,7 +47,7 @@ export const mlJobsReducer = handleActions<MLJobState>(
     ...handleAsyncAction<MLJobState, Payload>('deleteJob', deleteMLJobAction),
     ...handleAsyncAction<MLJobState, Payload>('anomalies', getAnomalyRecordsAction),
     ...{
-      [String(resetMLState)]: state => ({
+      [String(resetMLState)]: (state) => ({
         ...state,
         mlJob: {
           loading: false,

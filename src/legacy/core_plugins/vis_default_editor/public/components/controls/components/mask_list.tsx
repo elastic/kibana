@@ -82,7 +82,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
           fullWidth
           isInvalid={showValidation ? mask.isInvalid : false}
           placeholder="*"
-          onChange={ev => {
+          onChange={(ev) => {
             onChangeValue(index, ev.target.value, 'mask');
           }}
           value={mask.value}

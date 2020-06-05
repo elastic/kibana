@@ -22,7 +22,7 @@ interface Props {
 const stringifyJson = (json: { [key: string]: any }) =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
-const formSerializer: SerializerFunc<MappingsTemplates> = formData => {
+const formSerializer: SerializerFunc<MappingsTemplates> = (formData) => {
   const { dynamicTemplates } = formData;
 
   let parsedTemplates;

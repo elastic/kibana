@@ -32,7 +32,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
     return getSupportedUrlParams(params);
   };
 
-  const updateUrlParams: UpdateUrlParams = updatedParams => {
+  const updateUrlParams: UpdateUrlParams = (updatedParams) => {
     if (!history || !location) return;
     const { pathname, search } = location;
     const currentParams = parse(search[0] === '?' ? search.slice(1) : search, { sort: false });

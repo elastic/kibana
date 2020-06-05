@@ -48,7 +48,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return fieldFormats.UrlFormat;
     });
-    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(mapping => {
+    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation((mapping) => {
       return new fieldFormats.UrlFormat(mapping ? mapping.params : {});
     });
   });
@@ -116,7 +116,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
 
     const links = $(el)
       .find('a[href]')
-      .filter(function() {
+      .filter(function () {
         // @ts-ignore
         return this.href.includes('ip.info');
       });

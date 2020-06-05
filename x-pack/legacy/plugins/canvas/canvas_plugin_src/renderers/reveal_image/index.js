@@ -23,7 +23,7 @@ export const revealImage = () => ({
     domNode.className = 'revealImage';
 
     // set up the overlay image
-    img.onload = function() {
+    img.onload = function () {
       setSize();
       finish();
     };

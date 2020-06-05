@@ -12,7 +12,7 @@ import { registerLogstashClusterRoutes } from './server/routes/api/cluster';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 
-export const logstash = kibana =>
+export const logstash = (kibana) =>
   new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
@@ -30,7 +30,7 @@ export const logstash = kibana =>
       ],
       home: ['plugins/logstash/lib/register_home_feature'],
     },
-    init: server => {
+    init: (server) => {
       registerLicenseChecker(server);
       registerLogstashPipelinesRoutes(server);
       registerLogstashPipelineRoutes(server);

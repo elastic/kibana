@@ -6,7 +6,7 @@
 
 import { ReportingAPIProvider } from '../services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 

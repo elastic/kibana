@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { Snapshot } from './snapshot';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const RecoveryIndex = props => {
+export const RecoveryIndex = (props) => {
   const { name, shard, relocationType } = props;
 
   return (

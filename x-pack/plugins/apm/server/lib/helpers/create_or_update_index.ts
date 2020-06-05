@@ -26,7 +26,7 @@ export async function createOrUpdateIndex({
   index,
   mappings,
   esClient,
-  logger
+  logger,
 }: {
   index: string;
   mappings: Mappings;
@@ -49,12 +49,12 @@ export async function createOrUpdateIndex({
         ? await updateExistingIndex({
             index,
             callAsInternalUser,
-            mappings
+            mappings,
           })
         : await createNewIndex({
             index,
             callAsInternalUser,
-            mappings
+            mappings,
           });
 
       if (!result.acknowledged) {
@@ -73,7 +73,7 @@ export async function createOrUpdateIndex({
 function createNewIndex({
   index,
   callAsInternalUser,
-  mappings
+  mappings,
 }: {
   index: string;
   callAsInternalUser: CallCluster;
@@ -84,15 +84,15 @@ function createNewIndex({
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
       settings: { 'index.auto_expand_replicas': '0-1' },
-      mappings
-    }
+      mappings,
+    },
   });
 }
 
 function updateExistingIndex({
   index,
   callAsInternalUser,
-  mappings
+  mappings,
 }: {
   index: string;
   callAsInternalUser: CallCluster;
@@ -100,6 +100,6 @@ function updateExistingIndex({
 }) {
   return callAsInternalUser('indices.putMapping', {
     index,
-    body: mappings
+    body: mappings,
   });
 }

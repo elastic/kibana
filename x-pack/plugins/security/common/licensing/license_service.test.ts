@@ -8,7 +8,7 @@ import { of, BehaviorSubject } from 'rxjs';
 import { licensingMock } from '../../../licensing/public/mocks';
 import { SecurityLicenseService } from './license_service';
 
-describe('license features', function() {
+describe('license features', function () {
   it('should display error when ES is unavailable', () => {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(undefined as any),

@@ -45,7 +45,7 @@ export class EditSettingsJson extends React.PureComponent {
     const newSettings = { ...filteredDefaults, ...flattenedSettings };
     //store these to be used as autocomplete values later
     this.settingsKeys = Object.keys(newSettings);
-    readOnlySettings.forEach(e => delete newSettings[e]);
+    readOnlySettings.forEach((e) => delete newSettings[e]);
     //can't change codec on open index
     if (isOpen) {
       delete newSettings['index.codec'];
@@ -80,7 +80,7 @@ export class EditSettingsJson extends React.PureComponent {
     const json = this.editor.getValue();
     const settings = JSON.parse(json);
     //don't set if the values have not changed
-    Object.keys(this.originalSettings).forEach(key => {
+    Object.keys(this.originalSettings).forEach((key) => {
       if (_.isEqual(this.originalSettings[key], settings[key])) {
         delete settings[key];
       }
@@ -148,7 +148,7 @@ export class EditSettingsJson extends React.PureComponent {
         <EuiSpacer />
         <div
           data-test-subj="indexJsonEditor"
-          ref={aceDiv => {
+          ref={(aceDiv) => {
             this.aceDiv = aceDiv;
           }}
         />

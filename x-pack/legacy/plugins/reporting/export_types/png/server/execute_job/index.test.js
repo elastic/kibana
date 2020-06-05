@@ -37,7 +37,7 @@ beforeEach(async () => {
       protocol: 'http',
     },
   };
-  mockServer.config().get.mockImplementation(key => {
+  mockServer.config().get.mockImplementation((key) => {
     return config[key];
   });
 
@@ -54,7 +54,7 @@ const mockElasticsearch = {
 
 const getMockLogger = () => new LevelLogger();
 
-const encryptHeaders = async headers => {
+const encryptHeaders = async (headers) => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
 };

@@ -33,7 +33,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
 
       const links = $.findTestSubjects('navDrawerAppsMenuLink')
         .toArray()
-        .map(link => {
+        .map((link) => {
           return {
             text: $(link).text(),
             href: $(link).attr('href'),
@@ -49,7 +49,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      * @param name
      */
     public async getLink(name: string) {
-      return (await this.readLinks()).find(nl => nl.text === name);
+      return (await this.readLinks()).find((nl) => nl.text === name);
     }
 
     /**
@@ -57,7 +57,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      * @param name
      */
     public async linkExists(name: string) {
-      return (await this.readLinks()).some(nl => nl.text === name);
+      return (await this.readLinks()).some((nl) => nl.text === name);
     }
 
     /**

@@ -72,7 +72,7 @@ describe('UrlStateContainer', () => {
               pageName,
               detailName,
             }).relativeTimeSearch.undefinedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 11223344556677,
@@ -101,7 +101,7 @@ describe('UrlStateContainer', () => {
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .absoluteTimeSearch.undefinedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 1556736012685,
@@ -126,7 +126,7 @@ describe('UrlStateContainer', () => {
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .relativeTimeSearch.undefinedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
               id: 'global',
@@ -150,7 +150,7 @@ describe('UrlStateContainer', () => {
               pageName,
               detailName,
             }).noSearch.definedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(
               mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
@@ -178,7 +178,7 @@ describe('UrlStateContainer', () => {
           detailName,
         }).relativeTimeSearch.undefinedQuery;
         const wrapper = mount(
-          <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
+          <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
         );
 
         wrapper.setProps({

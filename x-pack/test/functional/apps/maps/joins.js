@@ -22,7 +22,7 @@ const CIRCLE_STYLE_LAYER_INDEX = 0;
 const FILL_STYLE_LAYER_INDEX = 2;
 const LINE_STYLE_LAYER_INDEX = 3;
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
@@ -82,7 +82,7 @@ export default function({ getPageObjects, getService }) {
 
     it('should style fills, points and lines independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      const layersForVectorSource = mapboxStyle.layers.filter(mbLayer => {
+      const layersForVectorSource = mapboxStyle.layers.filter((mbLayer) => {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
       });
 
@@ -108,7 +108,7 @@ export default function({ getPageObjects, getService }) {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
-      const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
+      const visibilitiesOfFeatures = vectorSource.data.features.map((feature) => {
         return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
@@ -174,7 +174,7 @@ export default function({ getPageObjects, getService }) {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
         const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
-        const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
+        const visibilitiesOfFeatures = vectorSource.data.features.map((feature) => {
           return feature.properties.__kbn_isvisibleduetojoin__;
         });
 

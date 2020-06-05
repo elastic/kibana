@@ -162,7 +162,7 @@ export function createInstallRoute(
         logger.warn(errMsg);
         return res.internalError({ body: errMsg });
       }
-      const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
+      const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
         return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {

@@ -30,7 +30,7 @@ const tableVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({}),
+      injectDefaultVars: (server) => ({}),
     },
     init: (server: Legacy.Server) => ({}),
     config(Joi: any) {

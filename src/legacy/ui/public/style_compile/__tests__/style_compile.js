@@ -20,19 +20,19 @@
 import $ from 'jquery';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-describe('styleCompile directive', function() {
+describe('styleCompile directive', function () {
   let config;
   let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function($injector) {
+    ngMock.inject(function ($injector) {
       config = $injector.get('config');
       $rootScope = $injector.get('$rootScope');
     })
   );
 
-  it('exports a few config values as css', function() {
+  it('exports a few config values as css', function () {
     const $style = $('#style-compile');
 
     config.set('truncate:maxHeight', 0);

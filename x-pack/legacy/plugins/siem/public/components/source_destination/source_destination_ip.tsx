@@ -38,8 +38,8 @@ export const isIpFieldPopulated = ({
   sourceIp?: string[] | null;
   type: SourceDestinationType;
 }): boolean =>
-  (type === 'source' && sourceIp != null && sourceIp.some(ip => !isEmpty(ip))) ||
-  (type === 'destination' && destinationIp != null && destinationIp.some(ip => !isEmpty(ip)));
+  (type === 'source' && sourceIp != null && sourceIp.some((ip) => !isEmpty(ip))) ||
+  (type === 'destination' && destinationIp != null && destinationIp.some((ip) => !isEmpty(ip)));
 
 /**
  * Returns an array of ports, filtered such that `null` entries are removed. If
@@ -63,9 +63,9 @@ export const getPorts = ({
       : [];
 
   return ports
-    .filter(p => p != null)
-    .map(p => `${p}`)
-    .filter(p => !isEmpty(p));
+    .filter((p) => p != null)
+    .map((p) => `${p}`)
+    .filter((p) => !isEmpty(p));
 };
 
 /**
@@ -109,7 +109,7 @@ const IpAdressesWithPorts = React.memo<{
           ip: address,
           port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
         }))
-      : ip.map(address => ({
+      : ip.map((address) => ({
           ip: address,
           port: null, // drop the port, because the length of the parallel ip and port arrays is different
         }));
@@ -117,7 +117,7 @@ const IpAdressesWithPorts = React.memo<{
   return (
     <EuiFlexGroup gutterSize="none">
       {uniqWith(deepEqual, ipPortPairs).map(
-        ipPortPair =>
+        (ipPortPair) =>
           ipPortPair.ip != null && (
             <EuiFlexItem grow={false} key={ipPortPair.ip}>
               <IpWithPort

@@ -34,7 +34,7 @@ function findTopLeftMostOpenSpace(
 ) {
   let maxY = -1;
 
-  currentPanels.forEach(panel => {
+  currentPanels.forEach((panel) => {
     maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
   });
 
@@ -48,7 +48,7 @@ function findTopLeftMostOpenSpace(
     grid[y] = new Array(DASHBOARD_GRID_COLUMN_COUNT).fill(0);
   }
 
-  currentPanels.forEach(panel => {
+  currentPanels.forEach((panel) => {
     for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
       for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
         const row = grid[y];

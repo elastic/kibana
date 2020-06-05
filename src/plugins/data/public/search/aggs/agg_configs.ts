@@ -91,7 +91,7 @@ export class AggConfigs {
     this.timeRange = timeRange;
 
     const updateAggTimeRange = (agg: AggConfig) => {
-      _.each(agg.params, param => {
+      _.each(agg.params, (param) => {
         if (param instanceof AggConfig) {
           updateAggTimeRange(param);
         }
@@ -167,10 +167,10 @@ export class AggConfigs {
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
       nestedMetrics = this.aggs
-        .filter(function(agg) {
+        .filter(function (agg) {
           return agg.type.type === 'metrics' && agg.type.name !== 'count';
         })
-        .map(agg => {
+        .map((agg) => {
           return {
             config: agg,
             dsl: agg.toDsl(this),
@@ -230,15 +230,15 @@ export class AggConfigs {
   }
 
   byId(id: string) {
-    return this.aggs.find(agg => agg.id === id);
+    return this.aggs.find((agg) => agg.id === id);
   }
 
   byName(name: string) {
-    return this.aggs.filter(agg => agg.type?.name === name);
+    return this.aggs.filter((agg) => agg.type?.name === name);
   }
 
   byType(type: string) {
-    return this.aggs.filter(agg => agg.type?.type === type);
+    return this.aggs.filter((agg) => agg.type?.type === type);
   }
 
   byTypeName(type: string) {
@@ -246,13 +246,13 @@ export class AggConfigs {
   }
 
   bySchemaName(schema: string) {
-    return this.aggs.filter(agg => agg.schema === schema);
+    return this.aggs.filter((agg) => agg.schema === schema);
   }
 
   getRequestAggs(): AggConfig[] {
     // collect all the aggregations
     const aggregations = this.aggs
-      .filter(agg => agg.enabled && agg.type)
+      .filter((agg) => agg.enabled && agg.type)
       .reduce((requestValuesAggs, agg: AggConfig) => {
         const aggs = agg.getRequestAggs();
         return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
@@ -279,7 +279,7 @@ export class AggConfigs {
    * @return {array[AggConfig]}
    */
   getResponseAggs(): AggConfig[] {
-    return this.getRequestAggs().reduce(function(responseValuesAggs, agg: AggConfig) {
+    return this.getRequestAggs().reduce(function (responseValuesAggs, agg: AggConfig) {
       const aggs = agg.getResponseAggs();
       return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
     }, [] as AggConfig[]);
@@ -294,7 +294,7 @@ export class AggConfigs {
    */
   getResponseAggById(id: string): AggConfig | undefined {
     id = String(id);
-    const reqAgg = _.find(this.getRequestAggs(), function(agg: AggConfig) {
+    const reqAgg = _.find(this.getRequestAggs(), function (agg: AggConfig) {
       return id.substr(0, String(agg.id).length) === agg.id;
     });
     if (!reqAgg) return;

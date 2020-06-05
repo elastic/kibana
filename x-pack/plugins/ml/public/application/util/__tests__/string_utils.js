@@ -104,7 +104,7 @@ describe('ML - string utils', () => {
       elephant: 'trunk',
     };
 
-    const valueComparator = function(value) {
+    const valueComparator = function (value) {
       return value;
     };
 

@@ -48,7 +48,7 @@ function getFilteredTasks(tasks: string[], search?: string) {
   const filteredTasks: string[] = [];
   if (search === undefined) return tasks;
 
-  tasks.forEach(task => {
+  tasks.forEach((task) => {
     if (task.match(search)) {
       filteredTasks.push(task);
     }

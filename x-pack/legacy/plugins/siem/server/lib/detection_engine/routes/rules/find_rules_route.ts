@@ -49,7 +49,7 @@ export const findRulesRoute = (router: IRouter) => {
           filter: query.filter,
         });
         const ruleStatuses = await Promise.all(
-          rules.data.map(async rule => {
+          rules.data.map(async (rule) => {
             const results = await savedObjectsClient.find<
               IRuleSavedAttributesSavedObjectAttributes
             >({
@@ -64,7 +64,7 @@ export const findRulesRoute = (router: IRouter) => {
           })
         );
         const ruleActions = await Promise.all(
-          rules.data.map(async rule => {
+          rules.data.map(async (rule) => {
             const results = await getRuleActionsSavedObject({
               savedObjectsClient,
               ruleAlertId: rule.id,

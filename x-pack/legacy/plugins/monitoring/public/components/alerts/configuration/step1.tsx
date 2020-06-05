@@ -178,7 +178,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
   );
 
   const options = [
-    ...props.emailActions.map(action => {
+    ...props.emailActions.map((action) => {
       const actionLabel = i18n.translate(
         'xpack.monitoring.alerts.configuration.selectAction.inputDisplay',
         {
@@ -207,7 +207,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     <EuiSuperSelect
       options={options}
       valueOfSelected={props.selectedEmailActionId}
-      onChange={id => props.setSelectedEmailActionId(id)}
+      onChange={(id) => props.setSelectedEmailActionId(id)}
       hasDividers
     />
   );
@@ -238,7 +238,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
   let manageConfiguration = null;
   const selectedEmailAction = props.emailActions.find(
-    action => action.id === props.selectedEmailActionId
+    (action) => action.id === props.selectedEmailActionId
   );
 
   if (
@@ -288,7 +288,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
               iconType="pencil"
               onClick={() => {
                 const editAction =
-                  props.emailActions.find(action => action.id === props.selectedEmailActionId) ||
+                  props.emailActions.find((action) => action.id === props.selectedEmailActionId) ||
                   null;
                 props.setEditAction(editAction);
               }}

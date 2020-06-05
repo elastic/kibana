@@ -21,12 +21,9 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="title"]')
-        .first()
-        .text()
-    ).toEqual('Delete "Privilege Escalation"?');
+    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+      'Delete "Privilege Escalation"?'
+    );
   });
 
   test('it trims leading whitespace around the title', () => {
@@ -38,12 +35,9 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="title"]')
-        .first()
-        .text()
-    ).toEqual('Delete "Leading and trailing whitespace"?');
+    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+      'Delete "Leading and trailing whitespace"?'
+    );
   });
 
   test('it displays `Untitled Timeline` in the title when title is undefined', () => {
@@ -51,12 +45,9 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal onDelete={jest.fn()} closeModal={jest.fn()} />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="title"]')
-        .first()
-        .text()
-    ).toEqual('Delete "Untitled timeline"?');
+    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+      'Delete "Untitled timeline"?'
+    );
   });
 
   test('it displays `Untitled Timeline` in the title when title is null', () => {
@@ -64,12 +55,9 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal onDelete={jest.fn()} title={null} closeModal={jest.fn()} />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="title"]')
-        .first()
-        .text()
-    ).toEqual('Delete "Untitled timeline"?');
+    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+      'Delete "Untitled timeline"?'
+    );
   });
 
   test('it displays `Untitled Timeline` in the title when title is just whitespace', () => {
@@ -77,12 +65,9 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal onDelete={jest.fn()} title={'    '} closeModal={jest.fn()} />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="title"]')
-        .first()
-        .text()
-    ).toEqual('Delete "Untitled timeline"?');
+    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+      'Delete "Untitled timeline"?'
+    );
   });
 
   test('it renders a deletion warning', () => {
@@ -94,12 +79,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="warning"]')
-        .first()
-        .text()
-    ).toEqual(i18n.DELETE_WARNING);
+    expect(wrapper.find('[data-test-subj="warning"]').first().text()).toEqual(i18n.DELETE_WARNING);
   });
 
   test('it invokes closeModal when the Cancel button is clicked', () => {
@@ -113,10 +93,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="confirmModalCancelButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
 
     expect(closeModal).toBeCalled();
   });
@@ -132,10 +109,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="confirmModalConfirmButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
     expect(onDelete).toBeCalled();
   });

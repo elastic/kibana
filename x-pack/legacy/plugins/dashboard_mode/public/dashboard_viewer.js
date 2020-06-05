@@ -43,13 +43,13 @@ localApplicationService.attachToAngular(routes);
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
-chrome.setRootController('kibana', function() {
+chrome.setRootController('kibana', function () {
   npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
 });
 
 uiModules
   .get('kibana')
-  .run($location => showAppRedirectNotification($location, npStart.core.notifications.toasts));
+  .run(($location) => showAppRedirectNotification($location, npStart.core.notifications.toasts));
 
 /**
  * If there is a configured `kibana.defaultAppId`, and it is a dashboard ID, we'll

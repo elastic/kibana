@@ -159,7 +159,7 @@ class PipelineEditorUi extends React.Component {
     });
   };
 
-  onPipelineChange = e => {
+  onPipelineChange = (e) => {
     this.setState({
       pipeline: {
         ...this.state.pipeline,
@@ -173,12 +173,12 @@ class PipelineEditorUi extends React.Component {
     this.handleSettingChange(settingName, isNaN(numberValue) ? value : numberValue);
   };
 
-  handleMaxByteNumberChange = value => {
+  handleMaxByteNumberChange = (value) => {
     this.setState({ maxBytesNumber: parseInt(value, 10) });
     this.handleSettingChange('queue.max_bytes', value + this.state.maxBytesUnit);
   };
 
-  handleMaxByteUnitChange = value => {
+  handleMaxByteUnitChange = (value) => {
     this.setState({ maxBytesUnit: value });
     this.handleSettingChange('queue.max_bytes', this.state.maxBytesNumber + value);
   };
@@ -194,7 +194,7 @@ class PipelineEditorUi extends React.Component {
     });
   };
 
-  notifyOnError = err => {
+  notifyOnError = (err) => {
     const { licenseService, toastNotifications } = this.props;
 
     return licenseService.checkValidity().then(() => {
@@ -366,7 +366,7 @@ class PipelineEditorUi extends React.Component {
             >
               <EuiFieldNumber
                 data-test-subj="inputWorkers"
-                onChange={e => this.handleNumberChange('pipeline.workers', e.target.value)}
+                onChange={(e) => this.handleNumberChange('pipeline.workers', e.target.value)}
                 value={this.state.pipeline.settings['pipeline.workers']}
               />
             </EuiFormRow>
@@ -381,7 +381,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputBatchSize"
-                  onChange={e => this.handleNumberChange('pipeline.batch.size', e.target.value)}
+                  onChange={(e) => this.handleNumberChange('pipeline.batch.size', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.size']}
                 />
               </FlexItemSetting>
@@ -394,7 +394,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputBatchDelay"
-                  onChange={e => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
+                  onChange={(e) => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.delay']}
                 />
               </FlexItemSetting>
@@ -409,7 +409,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiSelect
                   data-test-subj="selectQueueType"
-                  onChange={e => this.handleSettingChange('queue.type', e.target.value)}
+                  onChange={(e) => this.handleSettingChange('queue.type', e.target.value)}
                   options={PIPELINE_EDITOR.QUEUE_TYPES}
                   value={this.state.pipeline.settings['queue.type']}
                 />
@@ -423,14 +423,14 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueMaxBytesNumber"
-                  onChange={e => this.handleMaxByteNumberChange(e.target.value)}
+                  onChange={(e) => this.handleMaxByteNumberChange(e.target.value)}
                   value={this.state.maxBytesNumber}
                 />
               </FlexItemSetting>
               <FlexItemSetting>
                 <EuiSelect
                   data-test-subj="selectQueueMaxBytesUnits"
-                  onChange={e => this.handleMaxByteUnitChange(e.target.value)}
+                  onChange={(e) => this.handleMaxByteUnitChange(e.target.value)}
                   options={PIPELINE_EDITOR.UNITS}
                   value={this.state.maxBytesUnit}
                 />
@@ -444,7 +444,9 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueCheckpointWrites"
-                  onChange={e => this.handleNumberChange('queue.checkpoint.writes', e.target.value)}
+                  onChange={(e) =>
+                    this.handleNumberChange('queue.checkpoint.writes', e.target.value)
+                  }
                   value={this.state.pipeline.settings['queue.checkpoint.writes']}
                 />
               </FlexItemSetting>

@@ -19,8 +19,9 @@
 
 import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
-  Pick<SavedObjectTypeRegistry, 'registerType'>> => {
+const createRegistryMock = (): jest.Mocked<
+  ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
+> => {
   const mock = {
     registerType: jest.fn(),
     getType: jest.fn(),

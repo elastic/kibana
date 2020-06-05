@@ -159,7 +159,7 @@ export const Providers = React.memo<Props>(
                     draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
                     index={i}
                   >
-                    {provided => (
+                    {(provided) => (
                       <div
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}

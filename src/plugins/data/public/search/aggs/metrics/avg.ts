@@ -29,7 +29,7 @@ const averageTitle = i18n.translate('data.search.aggs.metrics.averageTitle', {
 export const avgMetricAgg = new MetricAggType({
   name: METRIC_TYPES.AVG,
   title: averageTitle,
-  makeLabel: aggConfig => {
+  makeLabel: (aggConfig) => {
     return i18n.translate('data.search.aggs.metrics.averageLabel', {
       defaultMessage: 'Average {field}',
       values: { field: aggConfig.getFieldDisplayName() },

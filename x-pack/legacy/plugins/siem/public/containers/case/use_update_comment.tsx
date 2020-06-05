@@ -37,13 +37,13 @@ const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpd
     case 'FETCH_SUCCESS':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter(id => action.payload.commentId !== id),
+        isLoadingIds: state.isLoadingIds.filter((id) => action.payload.commentId !== id),
         isError: false,
       };
     case 'FETCH_FAILURE':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter(id => action.payload !== id),
+        isLoadingIds: state.isLoadingIds.filter((id) => action.payload !== id),
         isError: true,
       };
     default:

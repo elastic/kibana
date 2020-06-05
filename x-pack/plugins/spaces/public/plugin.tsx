@@ -83,7 +83,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           managementSetup: {
             savedObjects: {
               registry: {
-                register: action => legacyAPI.registerSavedObjectsManagementAction(action),
+                register: (action) => legacyAPI.registerSavedObjectsManagementAction(action),
                 has: () => {
                   throw new Error('not available in legacy shim');
                 },

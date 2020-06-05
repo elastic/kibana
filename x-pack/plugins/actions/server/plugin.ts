@@ -99,10 +99,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private readonly telemetryLogger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config
-      .create<ActionsConfig>()
-      .pipe(first())
-      .toPromise();
+    this.config = initContext.config.create<ActionsConfig>().pipe(first()).toPromise();
 
     this.kibanaIndex = initContext.config.legacy.globalConfig$
       .pipe(
@@ -256,7 +253,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         getBasePath: this.getBasePath,
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
       }),
-      isActionTypeEnabled: id => {
+      isActionTypeEnabled: (id) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
       // Ability to get an actions client from legacy code
@@ -280,7 +277,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     savedObjects: SavedObjectsServiceStart
   ): (request: KibanaRequest) => Services {
     const { adminClient } = this;
-    return request => ({
+    return (request) => ({
       callCluster: adminClient!.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
     });

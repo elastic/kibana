@@ -88,7 +88,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
           onActionFactoryChange(null);
         }}
         config={config}
-        onConfigChange={newConfig => {
+        onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
       />
@@ -98,7 +98,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   return (
     <ActionFactorySelector
       actionFactories={actionFactories}
-      onActionFactorySelected={actionFactory => {
+      onActionFactorySelected={(actionFactory) => {
         onActionFactoryChange(actionFactory);
       }}
     />
@@ -179,7 +179,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
 
   return (
     <EuiFlexGroup wrap>
-      {actionFactories.map(actionFactory => (
+      {actionFactories.map((actionFactory) => (
         <EuiKeyPadMenuItemButton
           className="auaActionWizard__actionFactoryItem"
           key={actionFactory.type}

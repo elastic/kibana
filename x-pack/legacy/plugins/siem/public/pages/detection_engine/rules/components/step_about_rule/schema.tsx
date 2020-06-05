@@ -106,7 +106,7 @@ export const schema: FormSchema = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path }] = args;
           let hasError = false;
-          (value as string[]).forEach(url => {
+          (value as string[]).forEach((url) => {
             if (isUrlInvalid(url)) {
               hasError = true;
             }
@@ -146,7 +146,7 @@ export const schema: FormSchema = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path }] = args;
           let hasError = false;
-          (value as IMitreEnterpriseAttack[]).forEach(v => {
+          (value as IMitreEnterpriseAttack[]).forEach((v) => {
             if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
               hasError = true;
             }

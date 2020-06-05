@@ -103,13 +103,13 @@ export class Table extends PureComponent {
   };
 
   toggleExportPopoverVisibility = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isExportPopoverOpen: !state.isExportPopoverOpen,
     }));
   };
 
   toggleIsIncludeReferencesDeepChecked = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
   };
@@ -231,8 +231,8 @@ export class Table extends PureComponent {
             ),
             type: 'icon',
             icon: 'inspect',
-            onClick: object => goInspectObject(object),
-            available: object => !!object.meta.editUrl,
+            onClick: (object) => goInspectObject(object),
+            available: (object) => !!object.meta.editUrl,
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -249,14 +249,14 @@ export class Table extends PureComponent {
             ),
             type: 'icon',
             icon: 'kqlSelector',
-            onClick: object => onShowRelationships(object),
+            onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
-          ...this.extraActions.map(action => {
+          ...this.extraActions.map((action) => {
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
-              onClick: object => {
+              onClick: (object) => {
                 this.setState({
                   activeAction: action,
                 });
@@ -378,7 +378,7 @@ export class Table extends PureComponent {
             pagination={pagination}
             selection={selection}
             onChange={onTableChange}
-            rowProps={item => ({
+            rowProps={(item) => ({
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
             })}
           />

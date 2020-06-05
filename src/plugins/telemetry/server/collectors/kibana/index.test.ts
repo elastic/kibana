@@ -28,7 +28,7 @@ describe('telemetry_kibana', () => {
   let collector: CollectorOptions;
 
   const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeUsageCollector: jest.fn().mockImplementation(config => (collector = config)),
+    makeUsageCollector: jest.fn().mockImplementation((config) => (collector = config)),
     registerCollector: jest.fn(),
   } as any;
 

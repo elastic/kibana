@@ -22,9 +22,7 @@ export function initRoutes(server, performanceState) {
         payload: Joi.object({
           tasksToSpawn: Joi.number().required(),
           durationInSeconds: Joi.number().required(),
-          trackExecutionTimeline: Joi.boolean()
-            .default(false)
-            .required(),
+          trackExecutionTimeline: Joi.boolean().default(false).required(),
         }),
       },
     },
@@ -34,9 +32,9 @@ export function initRoutes(server, performanceState) {
       const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = request.payload;
       const startAt = millisecondsFromNow(5000).getTime();
       await chunk(range(tasksToSpawn), 200)
-        .map(chunkOfTasksToSpawn => () =>
+        .map((chunkOfTasksToSpawn) => () =>
           Promise.all(
-            chunkOfTasksToSpawn.map(taskIndex =>
+            chunkOfTasksToSpawn.map((taskIndex) =>
               taskManager.schedule(
                 {
                   taskType: 'performanceTestTask',
@@ -57,7 +55,7 @@ export function initRoutes(server, performanceState) {
           return chain.then(() => nextExecutor());
         }, Promise.resolve());
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           performanceState.endCapture().then(resolve);
         }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);

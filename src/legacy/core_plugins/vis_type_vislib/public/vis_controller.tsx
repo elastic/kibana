@@ -73,7 +73,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
         this.destroy();
       }
 
-      return new Promise(async resolve => {
+      return new Promise(async (resolve) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
           return resolve();
         }

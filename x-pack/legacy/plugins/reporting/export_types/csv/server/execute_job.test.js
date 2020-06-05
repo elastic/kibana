@@ -14,14 +14,14 @@ import { LevelLogger } from '../../../server/lib/level_logger';
 import { executeJobFactory } from './execute_job';
 import { setFieldFormats } from '../../../server/services';
 
-const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
 const puid = new Puid();
 const getRandomScrollId = () => {
   return puid.generate();
 };
 
-describe('CSV Execute Job', function() {
+describe('CSV Execute Job', function () {
   const encryptionKey = 'testEncryptionKey';
   const headers = {
     sid: 'test',
@@ -51,12 +51,12 @@ describe('CSV Execute Job', function() {
     get: sinon.stub(),
   };
 
-  beforeAll(async function() {
+  beforeAll(async function () {
     const crypto = nodeCrypto({ encryptionKey });
     encryptedHeaders = await crypto.encrypt(headers);
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     mockReportingPlugin = await createMockReportingCore();
     mockReportingPlugin.getUiSettingsServiceFactory = () => mockUiSettingsClient;
     cancellationToken = new CancellationToken();
@@ -68,7 +68,7 @@ describe('CSV Execute Job', function() {
       _scroll_id: 'defaultScrollId',
     };
     clusterStub = {
-      callAsCurrentUser: function() {},
+      callAsCurrentUser: function () {},
     };
 
     callAsCurrentUserStub = sinon
@@ -80,7 +80,7 @@ describe('CSV Execute Job', function() {
     mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
 
     setFieldFormats({
-      fieldFormatServiceFactory: function() {
+      fieldFormatServiceFactory: function () {
         const uiConfigMock = {};
         uiConfigMock['format:defaultTypeMap'] = {
           _default_: { id: 'string', params: {} },
@@ -88,35 +88,29 @@ describe('CSV Execute Job', function() {
 
         const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
 
-        fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
+        fieldFormatsRegistry.init((key) => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
 
         return fieldFormatsRegistry;
       },
     });
 
     mockServer = {
-      config: function() {
+      config: function () {
         return {
           get: configGetStub,
         };
       },
     };
-    mockServer
-      .config()
-      .get.withArgs('xpack.reporting.encryptionKey')
-      .returns(encryptionKey);
+    mockServer.config().get.withArgs('xpack.reporting.encryptionKey').returns(encryptionKey);
     mockServer
       .config()
       .get.withArgs('xpack.reporting.csv.maxSizeBytes')
       .returns(1024 * 1000); // 1mB
-    mockServer
-      .config()
-      .get.withArgs('xpack.reporting.csv.scroll')
-      .returns({});
+    mockServer.config().get.withArgs('xpack.reporting.csv.scroll').returns({});
   });
 
-  describe('basic Elasticsearch call behavior', function() {
-    it('should decrypt encrypted headers and pass to callAsCurrentUser', async function() {
+  describe('basic Elasticsearch call behavior', function () {
+    it('should decrypt encrypted headers and pass to callAsCurrentUser', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -132,7 +126,7 @@ describe('CSV Execute Job', function() {
       expect(callAsCurrentUserStub.firstCall.args[0]).toEqual('search');
     });
 
-    it('should pass the index and body to execute the initial search', async function() {
+    it('should pass the index and body to execute the initial search', async function () {
       const index = 'index';
       const body = {
         testBody: true,
@@ -161,7 +155,7 @@ describe('CSV Execute Job', function() {
       expect(searchCall.args[1].body).toBe(body);
     });
 
-    it('should pass the scrollId from the initial search to the subsequent scroll', async function() {
+    it('should pass the scrollId from the initial search to the subsequent scroll', async function () {
       const scrollId = getRandomScrollId();
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
@@ -188,7 +182,7 @@ describe('CSV Execute Job', function() {
       expect(scrollCall.args[1].scrollId).toBe(scrollId);
     });
 
-    it('should not execute scroll if there are no hits from the search', async function() {
+    it('should not execute scroll if there are no hits from the search', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -210,7 +204,7 @@ describe('CSV Execute Job', function() {
       expect(clearScrollCall.args[0]).toBe('clearScroll');
     });
 
-    it('should stop executing scroll if there are no hits', async function() {
+    it('should stop executing scroll if there are no hits', async function () {
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
@@ -248,7 +242,7 @@ describe('CSV Execute Job', function() {
       expect(clearScroll.args[0]).toBe('clearScroll');
     });
 
-    it('should call clearScroll with scrollId when there are no more hits', async function() {
+    it('should call clearScroll with scrollId when there are no more hits', async function () {
       const lastScrollId = getRandomScrollId();
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
@@ -281,7 +275,7 @@ describe('CSV Execute Job', function() {
       expect(lastCall.args[1].scrollId).toEqual([lastScrollId]);
     });
 
-    it('calls clearScroll when there is an error iterating the hits', async function() {
+    it('calls clearScroll when there is an error iterating the hits', async function () {
       const lastScrollId = getRandomScrollId();
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
@@ -320,11 +314,8 @@ describe('CSV Execute Job', function() {
   });
 
   describe('Cells with formula values', () => {
-    it('returns `csv_contains_formulas` when cells contain formulas', async function() {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(true);
+    it('returns `csv_contains_formulas` when cells contain formulas', async function () {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: '=SUM(A1:A2)', two: 'bar' } }],
@@ -353,11 +344,8 @@ describe('CSV Execute Job', function() {
       expect(csvContainsFormulas).toEqual(true);
     });
 
-    it('returns warnings when headings contain formulas', async function() {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(true);
+    it('returns warnings when headings contain formulas', async function () {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { '=SUM(A1:A2)': 'foo', two: 'bar' } }],
@@ -386,11 +374,8 @@ describe('CSV Execute Job', function() {
       expect(csvContainsFormulas).toEqual(true);
     });
 
-    it('returns no warnings when cells have no formulas', async function() {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(true);
+    it('returns no warnings when cells have no formulas', async function () {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -420,10 +405,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('returns no warnings when configured not to', async () => {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(false);
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(false);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: '=SUM(A1:A2)', two: 'bar' } }],
@@ -453,8 +435,8 @@ describe('CSV Execute Job', function() {
     });
   });
 
-  describe('Elasticsearch call errors', function() {
-    it('should reject Promise if search call errors out', async function() {
+  describe('Elasticsearch call errors', function () {
+    it('should reject Promise if search call errors out', async function () {
       callAsCurrentUserStub.rejects(new Error());
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
@@ -472,7 +454,7 @@ describe('CSV Execute Job', function() {
       ).rejects.toMatchInlineSnapshot(`[Error]`);
     });
 
-    it('should reject Promise if scroll call errors out', async function() {
+    it('should reject Promise if scroll call errors out', async function () {
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
@@ -497,8 +479,8 @@ describe('CSV Execute Job', function() {
     });
   });
 
-  describe('invalid responses', function() {
-    it('should reject Promise if search returns hits but no _scroll_id', async function() {
+  describe('invalid responses', function () {
+    it('should reject Promise if search returns hits but no _scroll_id', async function () {
       callAsCurrentUserStub.resolves({
         hits: {
           hits: [{}],
@@ -524,7 +506,7 @@ describe('CSV Execute Job', function() {
       );
     });
 
-    it('should reject Promise if search returns no hits and no _scroll_id', async function() {
+    it('should reject Promise if search returns no hits and no _scroll_id', async function () {
       callAsCurrentUserStub.resolves({
         hits: {
           hits: [],
@@ -550,7 +532,7 @@ describe('CSV Execute Job', function() {
       );
     });
 
-    it('should reject Promise if scroll returns hits but no _scroll_id', async function() {
+    it('should reject Promise if scroll returns hits but no _scroll_id', async function () {
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
@@ -583,7 +565,7 @@ describe('CSV Execute Job', function() {
       );
     });
 
-    it('should reject Promise if scroll returns no hits and no _scroll_id', async function() {
+    it('should reject Promise if scroll returns no hits and no _scroll_id', async function () {
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{}],
@@ -618,17 +600,17 @@ describe('CSV Execute Job', function() {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/43069
-  describe.skip('cancellation', function() {
+  describe.skip('cancellation', function () {
     const scrollId = getRandomScrollId();
 
-    beforeEach(function() {
+    beforeEach(function () {
       // We have to "re-stub" the callAsCurrentUser stub here so that we can use the fakeFunction
       // that delays the Promise resolution so we have a chance to call cancellationToken.cancel().
       // Otherwise, we get into an endless loop, and don't have a chance to call cancel
       callAsCurrentUserStub.restore();
       callAsCurrentUserStub = sinon
         .stub(clusterStub, 'callAsCurrentUser')
-        .callsFake(async function() {
+        .callsFake(async function () {
           await delay(1);
           return {
             hits: {
@@ -639,7 +621,7 @@ describe('CSV Execute Job', function() {
         });
     });
 
-    it('should stop calling Elasticsearch when cancellationToken.cancel is called', async function() {
+    it('should stop calling Elasticsearch when cancellationToken.cancel is called', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -659,7 +641,7 @@ describe('CSV Execute Job', function() {
       expect(callAsCurrentUserStub.callCount).toBe(callCount + 1); // last call is to clear the scroll
     });
 
-    it(`shouldn't call clearScroll if it never got a scrollId`, async function() {
+    it(`shouldn't call clearScroll if it never got a scrollId`, async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -678,7 +660,7 @@ describe('CSV Execute Job', function() {
       }
     });
 
-    it('should call clearScroll if it got a scrollId', async function() {
+    it('should call clearScroll if it got a scrollId', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -700,8 +682,8 @@ describe('CSV Execute Job', function() {
     });
   });
 
-  describe('csv content', function() {
-    it('should write column headers to output, even if there are no results', async function() {
+  describe('csv content', function () {
+    it('should write column headers to output, even if there are no results', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -717,7 +699,7 @@ describe('CSV Execute Job', function() {
       expect(content).toBe(`one,two\n`);
     });
 
-    it('should use custom uiSettings csv:separator for header', async function() {
+    it('should use custom uiSettings csv:separator for header', async function () {
       mockUiSettingsClient.get.withArgs('csv:separator').returns(';');
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
@@ -734,7 +716,7 @@ describe('CSV Execute Job', function() {
       expect(content).toBe(`one;two\n`);
     });
 
-    it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
+    it('should escape column headers if uiSettings csv:quoteValues is true', async function () {
       mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
@@ -751,7 +733,7 @@ describe('CSV Execute Job', function() {
       expect(content).toBe(`"one and a half",two,"three-and-four","five & six"\n`);
     });
 
-    it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
+    it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function () {
       mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(false);
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
@@ -768,7 +750,7 @@ describe('CSV Execute Job', function() {
       expect(content).toBe(`one and a half,two,three-and-four,five & six\n`);
     });
 
-    it('should write column headers to output, when there are results', async function() {
+    it('should write column headers to output, when there are results', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -793,7 +775,7 @@ describe('CSV Execute Job', function() {
       expect(headerLine).toBe('one,two');
     });
 
-    it('should use comma separated values of non-nested fields from _source', async function() {
+    it('should use comma separated values of non-nested fields from _source', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -819,7 +801,7 @@ describe('CSV Execute Job', function() {
       expect(valuesLine).toBe('foo,bar');
     });
 
-    it('should concatenate the hits from multiple responses', async function() {
+    it('should concatenate the hits from multiple responses', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -852,7 +834,7 @@ describe('CSV Execute Job', function() {
       expect(lines[2]).toBe('baz,qux');
     });
 
-    it('should use field formatters to format fields', async function() {
+    it('should use field formatters to format fields', async function () {
       const executeJob = await executeJobFactory(
         mockReportingPlugin,
         mockServer,
@@ -888,20 +870,17 @@ describe('CSV Execute Job', function() {
     });
   });
 
-  describe('maxSizeBytes', function() {
+  describe('maxSizeBytes', function () {
     // The following tests use explicitly specified lengths. UTF-8 uses between one and four 8-bit bytes for each
     // code-point. However, any character that can be represented by ASCII requires one-byte, so a majority of the
     // tests use these 'simple' characters to make the math easier
 
-    describe('when only the headers exceed the maxSizeBytes', function() {
+    describe('when only the headers exceed the maxSizeBytes', function () {
       let content;
       let maxSizeReached;
 
-      beforeEach(async function() {
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(1);
+      beforeEach(async function () {
+        mockServer.config().get.withArgs('xpack.reporting.csv.maxSizeBytes').returns(1);
 
         const executeJob = await executeJobFactory(
           mockReportingPlugin,
@@ -922,24 +901,21 @@ describe('CSV Execute Job', function() {
         ));
       });
 
-      it('should return max_size_reached', function() {
+      it('should return max_size_reached', function () {
         expect(maxSizeReached).toBe(true);
       });
 
-      it('should return empty content', function() {
+      it('should return empty content', function () {
         expect(content).toBe('');
       });
     });
 
-    describe('when headers are equal to maxSizeBytes', function() {
+    describe('when headers are equal to maxSizeBytes', function () {
       let content;
       let maxSizeReached;
 
-      beforeEach(async function() {
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(9);
+      beforeEach(async function () {
+        mockServer.config().get.withArgs('xpack.reporting.csv.maxSizeBytes').returns(9);
 
         const executeJob = await executeJobFactory(
           mockReportingPlugin,
@@ -960,24 +936,21 @@ describe('CSV Execute Job', function() {
         ));
       });
 
-      it(`shouldn't return max_size_reached`, function() {
+      it(`shouldn't return max_size_reached`, function () {
         expect(maxSizeReached).toBe(false);
       });
 
-      it(`should return content`, function() {
+      it(`should return content`, function () {
         expect(content).toBe('one,two\n');
       });
     });
 
-    describe('when the data exceeds the maxSizeBytes', function() {
+    describe('when the data exceeds the maxSizeBytes', function () {
       let content;
       let maxSizeReached;
 
-      beforeEach(async function() {
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(9);
+      beforeEach(async function () {
+        mockServer.config().get.withArgs('xpack.reporting.csv.maxSizeBytes').returns(9);
 
         callAsCurrentUserStub.onFirstCall().returns({
           hits: {
@@ -1006,25 +979,22 @@ describe('CSV Execute Job', function() {
         ));
       });
 
-      it(`should return max_size_reached`, function() {
+      it(`should return max_size_reached`, function () {
         expect(maxSizeReached).toBe(true);
       });
 
-      it(`should return the headers in the content`, function() {
+      it(`should return the headers in the content`, function () {
         expect(content).toBe('one,two\n');
       });
     });
 
-    describe('when headers and data equal the maxSizeBytes', function() {
+    describe('when headers and data equal the maxSizeBytes', function () {
       let content;
       let maxSizeReached;
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         mockReportingPlugin.getUiSettingsServiceFactory = () => mockUiSettingsClient;
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(18);
+        mockServer.config().get.withArgs('xpack.reporting.csv.maxSizeBytes').returns(18);
 
         callAsCurrentUserStub.onFirstCall().returns({
           hits: {
@@ -1053,18 +1023,18 @@ describe('CSV Execute Job', function() {
         ));
       });
 
-      it(`shouldn't return max_size_reached`, async function() {
+      it(`shouldn't return max_size_reached`, async function () {
         expect(maxSizeReached).toBe(false);
       });
 
-      it('should return headers and data in content', function() {
+      it('should return headers and data in content', function () {
         expect(content).toBe('one,two\nfoo,bar\n');
       });
     });
   });
 
-  describe('scroll settings', function() {
-    it('passes scroll duration to initial search call', async function() {
+  describe('scroll settings', function () {
+    it('passes scroll duration to initial search call', async function () {
       const scrollDuration = 'test';
       mockServer
         .config()
@@ -1098,12 +1068,9 @@ describe('CSV Execute Job', function() {
       expect(searchCall.args[1].scroll).toBe(scrollDuration);
     });
 
-    it('passes scroll size to initial search call', async function() {
+    it('passes scroll size to initial search call', async function () {
       const scrollSize = 100;
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.scroll')
-        .returns({ size: scrollSize });
+      mockServer.config().get.withArgs('xpack.reporting.csv.scroll').returns({ size: scrollSize });
 
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
@@ -1132,7 +1099,7 @@ describe('CSV Execute Job', function() {
       expect(searchCall.args[1].size).toBe(scrollSize);
     });
 
-    it('passes scroll duration to subsequent scroll call', async function() {
+    it('passes scroll duration to subsequent scroll call', async function () {
       const scrollDuration = 'test';
       mockServer
         .config()

@@ -58,7 +58,7 @@ const DropTargetDataProvidersContainer = styled.div`
 
 const DropTargetDataProviders = styled.div`
   position: relative;
-  border: 0.2rem dashed ${props => props.theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${(props) => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -66,7 +66,7 @@ const DropTargetDataProviders = styled.div`
   margin: 5px 0 5px 0;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${props => props.theme.eui.euiFormBackgroundColor};
+  background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
@@ -109,7 +109,7 @@ export const DataProviders = React.memo<Props>(
         data-test-subj="dataProviders"
       >
         <TimelineContext.Consumer>
-          {isLoading => (
+          {(isLoading) => (
             <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
               {dataProviders != null && dataProviders.length ? (
                 <Providers

@@ -10,7 +10,7 @@ import { ApolloConsumer } from 'react-apollo';
 import { TimelinesPage } from './timelines_page';
 
 export const Timelines = React.memo(() => (
-  <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
+  <ApolloConsumer>{(client) => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
 ));
 
 Timelines.displayName = 'Timelines';

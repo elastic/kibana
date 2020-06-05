@@ -171,7 +171,7 @@ export class ListControlEditor extends PureComponent<
           <EuiSelect
             options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
-            onChange={event => {
+            onChange={(event) => {
               this.props.handleParentChange(this.props.controlIndex, event.target.value);
             }}
           />
@@ -198,7 +198,7 @@ export class ListControlEditor extends PureComponent<
             />
           }
           checked={this.props.controlParams.options.multiselect ?? true}
-          onChange={event => {
+          onChange={(event) => {
             this.props.handleOptionsChange(
               this.props.controlIndex,
               'multiselect',
@@ -235,7 +235,7 @@ export class ListControlEditor extends PureComponent<
             />
           }
           checked={this.props.controlParams.options.dynamicOptions ?? false}
-          onChange={event => {
+          onChange={(event) => {
             this.props.handleOptionsChange(
               this.props.controlIndex,
               'dynamicOptions',
@@ -270,7 +270,7 @@ export class ListControlEditor extends PureComponent<
           <EuiFieldNumber
             min={1}
             value={this.props.controlParams.options.size}
-            onChange={event => {
+            onChange={(event) => {
               this.props.handleOptionsChange(
                 this.props.controlIndex,
                 'size',

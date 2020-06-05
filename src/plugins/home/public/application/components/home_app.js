@@ -44,7 +44,7 @@ export function HomeApp({ directories }) {
 
   const defaultAppId = config.defaultAppId || 'discover';
 
-  const renderTutorialDirectory = props => {
+  const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
@@ -54,7 +54,7 @@ export function HomeApp({ directories }) {
     );
   };
 
-  const renderTutorial = props => {
+  const renderTutorial = (props) => {
     return (
       <Tutorial
         addBasePath={addBasePath}

@@ -11,7 +11,7 @@ import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobCreate;
 
@@ -79,7 +79,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect')
         .find('option')
-        .map(option => option.text());
+        .map((option) => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields);
     });
 
@@ -91,7 +91,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect')
         .find('option')
-        .map(option => option.text());
+        .map((option) => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields.sort());
     });
   });
@@ -101,7 +101,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
       await goToStep(2);
 
       const timeZoneSelect = find('rollupJobCreateTimeZoneSelect');
-      const options = timeZoneSelect.find('option').map(option => option.text());
+      const options = timeZoneSelect.find('option').map((option) => option.text());
       expect(options).toEqual(moment.tz.names());
     });
   });

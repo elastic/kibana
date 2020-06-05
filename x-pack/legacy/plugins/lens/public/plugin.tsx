@@ -12,7 +12,7 @@ import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage, removeQueryParam } from '../../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
 import { addHelpMenuToAppChrome } from './help_menu_util';
@@ -135,8 +135,8 @@ export class LensPlugin {
         };
         const redirectTo = (
           routeProps: RouteComponentProps<{ id?: string }>,
-          addToDashboardMode: boolean,
-          id?: string
+          id?: string,
+          addToDashboardMode?: boolean
         ) => {
           if (!id) {
             routeProps.history.push('/lens');
@@ -178,6 +178,9 @@ export class LensPlugin {
           trackUiEvent('loaded');
           const addToDashboardMode =
             !!routeProps.location.search && routeProps.location.search.includes('addToDashboard');
+          if (addToDashboardMode) {
+            removeQueryParam(routeProps.history, 'addToDashboard');
+          }
           return (
             <App
               core={coreStart}
@@ -186,7 +189,9 @@ export class LensPlugin {
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}
               docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-              redirectTo={id => redirectTo(routeProps, addToDashboardMode, id)}
+              redirectTo={(id?: string, isAddToDashMode?: boolean) =>
+                redirectTo(routeProps, id, isAddToDashMode)
+              }
               addToDashboardMode={addToDashboardMode}
             />
           );

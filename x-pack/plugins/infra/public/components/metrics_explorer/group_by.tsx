@@ -19,7 +19,7 @@ interface Props {
 
 export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
   const handleChange = useCallback(
-    selectedOptions => {
+    (selectedOptions) => {
       const groupBy = (selectedOptions.length === 1 && selectedOptions[0].label) || null;
       onChange(groupBy);
     },
@@ -38,8 +38,8 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
       singleSelection={true}
       selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
       options={fields
-        .filter(f => f.aggregatable && f.type === 'string')
-        .map(f => ({ label: f.name }))}
+        .filter((f) => f.aggregatable && f.type === 'string')
+        .map((f) => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}
     />

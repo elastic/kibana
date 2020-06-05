@@ -19,7 +19,7 @@ const defaultValues: Arguments = {
 class Interactive extends React.Component<{}, Arguments> {
   public state = defaultValues;
 
-  _getArgValue: <T extends Argument>(arg: T) => Arguments[T] = arg => {
+  _getArgValue: <T extends Argument>(arg: T) => Arguments[T] = (arg) => {
     return this.state[arg];
   };
 
@@ -39,18 +39,18 @@ class Interactive extends React.Component<{}, Arguments> {
   }
 }
 
-const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = arg => {
+const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) => {
   return defaultValues[arg];
 };
 
 storiesOf('arguments/ContainerStyle', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('simple', () => <Interactive />);
 
 storiesOf('arguments/ContainerStyle/components', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('simple template', () => (

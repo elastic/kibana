@@ -162,7 +162,7 @@ export const RestoreList: React.FunctionComponent = () => {
                 anchorPosition="downLeft"
               >
                 <EuiContextMenuPanel
-                  items={INTERVAL_OPTIONS.map(interval => (
+                  items={INTERVAL_OPTIONS.map((interval) => (
                     <EuiContextMenuItem
                       key={interval}
                       icon="empty"
@@ -202,7 +202,7 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map(name => `index.${name}`)}>
+    <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map((name) => `index.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="restoreList">{content}</section>

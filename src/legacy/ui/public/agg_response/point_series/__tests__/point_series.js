@@ -17,7 +17,7 @@
  * under the License.
  */
 
-describe('Point Series Agg Response', function() {
+describe('Point Series Agg Response', function () {
   require('./_main');
   require('./_add_to_siri');
   require('./_fake_x_aspect');

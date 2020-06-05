@@ -45,7 +45,7 @@ class VisualizeListingTable extends Component {
         editItem={visualizeCapabilities.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
-        selectable={item => item.canDelete}
+        selectable={(item) => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={i18n.translate('kbn.visualize.listing.table.entityName', {

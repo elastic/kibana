@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
 import { capabilities } from '../../np_imports/ui/capabilities';
 
-const getFormattedDateTimeLocal = timestamp => {
+const getFormattedDateTimeLocal = (timestamp) => {
   const injector = chrome.dangerouslyGetActiveInjector();
   const timezone = injector.get('config').get('dateFormat:tz');
   return formatDateTimeLocal(timestamp, timezone);
@@ -49,7 +49,7 @@ const columns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => getFormattedDateTimeLocal(timestamp),
+    render: (timestamp) => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -60,7 +60,7 @@ const columns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: type => capitalize(type),
+    render: (type) => capitalize(type),
   },
   {
     field: 'message',
@@ -79,7 +79,7 @@ const clusterColumns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => getFormattedDateTimeLocal(timestamp),
+    render: (timestamp) => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -90,7 +90,7 @@ const clusterColumns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: type => capitalize(type),
+    render: (type) => capitalize(type),
   },
   {
     field: 'message',

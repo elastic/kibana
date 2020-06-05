@@ -84,52 +84,44 @@ describe('Signal detection rules, custom', () => {
     fillAboutRuleAndContinue(newRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN)
-      .invoke('text')
-      .should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
     const expectedNumberOfRules = totalNumberOfPrebuiltRules + 1;
-    cy.get(RULES_TABLE).then($table => {
+    cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
     filterByCustomRules();
 
-    cy.get(RULES_TABLE).then($table => {
+    cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME)
-      .invoke('text')
-      .should('eql', newRule.name);
-    cy.get(RISK_SCORE)
-      .invoke('text')
-      .should('eql', newRule.riskScore);
-    cy.get(SEVERITY)
-      .invoke('text')
-      .should('eql', newRule.severity);
+    cy.get(RULE_NAME).invoke('text').should('eql', newRule.name);
+    cy.get(RISK_SCORE).invoke('text').should('eql', newRule.riskScore);
+    cy.get(SEVERITY).invoke('text').should('eql', newRule.severity);
     cy.get('[data-test-subj="rule-switch"]').should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
     let expectedUrls = '';
-    newRule.referenceUrls.forEach(url => {
+    newRule.referenceUrls.forEach((url) => {
       expectedUrls = expectedUrls + url;
     });
     let expectedFalsePositives = '';
-    newRule.falsePositivesExamples.forEach(falsePositive => {
+    newRule.falsePositivesExamples.forEach((falsePositive) => {
       expectedFalsePositives = expectedFalsePositives + falsePositive;
     });
     let expectedTags = '';
-    newRule.tags.forEach(tag => {
+    newRule.tags.forEach((tag) => {
       expectedTags = expectedTags + tag;
     });
     let expectedMitre = '';
-    newRule.mitre.forEach(mitre => {
+    newRule.mitre.forEach((mitre) => {
       expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach(technique => {
+      mitre.techniques.forEach((technique) => {
         expectedMitre = expectedMitre + technique;
       });
     });
@@ -142,50 +134,25 @@ describe('Signal detection rules, custom', () => {
       'winlogbeat-*',
     ];
 
-    cy.get(RULE_NAME_HEADER)
-      .invoke('text')
-      .should('eql', `${newRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${newRule.name} Beta`);
 
-    cy.get(ABOUT_RULE_DESCRIPTION)
-      .invoke('text')
-      .should('eql', newRule.description);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_SEVERITY)
-      .invoke('text')
-      .should('eql', newRule.severity);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_RISK)
-      .invoke('text')
-      .should('eql', newRule.riskScore);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_URLS)
-      .invoke('text')
-      .should('eql', expectedUrls);
+    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', newRule.description);
+    cy.get(ABOUT_STEP).eq(ABOUT_SEVERITY).invoke('text').should('eql', newRule.severity);
+    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', newRule.riskScore);
+    cy.get(ABOUT_STEP).eq(ABOUT_URLS).invoke('text').should('eql', expectedUrls);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_FALSE_POSITIVES)
       .invoke('text')
       .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_MITRE)
-      .invoke('text')
-      .should('eql', expectedMitre);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_TAGS)
-      .invoke('text')
-      .should('eql', expectedTags);
+    cy.get(ABOUT_STEP).eq(ABOUT_MITRE).invoke('text').should('eql', expectedMitre);
+    cy.get(ABOUT_STEP).eq(ABOUT_TAGS).invoke('text').should('eql', expectedTags);
 
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE)
-      .eq(INVESTIGATION_NOTES_TOGGLE)
-      .click({ force: true });
-    cy.get(ABOUT_INVESTIGATION_NOTES)
-      .invoke('text')
-      .should('eql', INVESTIGATION_NOTES_MARKDOWN);
+    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
 
-    cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
+    cy.get(DEFINITION_INDEX_PATTERNS).then((patterns) => {
       cy.wrap(patterns).each((pattern, index) => {
-        cy.wrap(pattern)
-          .invoke('text')
-          .should('eql', expectedIndexPatterns[index]);
+        cy.wrap(pattern).invoke('text').should('eql', expectedIndexPatterns[index]);
       });
     });
     cy.get(DEFINITION_STEP)
@@ -197,14 +164,8 @@ describe('Signal detection rules, custom', () => {
       .invoke('text')
       .should('eql', 'Default blank timeline');
 
-    cy.get(SCHEDULE_STEP)
-      .eq(SCHEDULE_RUNS)
-      .invoke('text')
-      .should('eql', '5m');
-    cy.get(SCHEDULE_STEP)
-      .eq(SCHEDULE_LOOPBACK)
-      .invoke('text')
-      .should('eql', '1m');
+    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
+    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
   });
 });
 
@@ -224,7 +185,7 @@ describe('Deletes custom rules', () => {
   it('Deletes one rule', () => {
     cy.get(RULES_TABLE)
       .find(RULES_ROW)
-      .then(rules => {
+      .then((rules) => {
         const initialNumberOfRules = rules.length;
         const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
@@ -235,7 +196,7 @@ describe('Deletes custom rules', () => {
         deleteFirstRule();
         waitForRulesToBeLoaded();
 
-        cy.get(RULES_TABLE).then($table => {
+        cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
         });
         cy.get(SHOWING_RULES_TEXT)
@@ -250,7 +211,7 @@ describe('Deletes custom rules', () => {
   it('Deletes more than one rule', () => {
     cy.get(RULES_TABLE)
       .find(RULES_ROW)
-      .then(rules => {
+      .then((rules) => {
         const initialNumberOfRules = rules.length;
         const numberOfRulesToBeDeleted = 3;
         const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - numberOfRulesToBeDeleted;
@@ -259,7 +220,7 @@ describe('Deletes custom rules', () => {
         deleteSelectedRules();
         waitForRulesToBeLoaded();
 
-        cy.get(RULES_TABLE).then($table => {
+        cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
         });
         cy.get(SHOWING_RULES_TEXT)

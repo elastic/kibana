@@ -9,7 +9,7 @@ import { featureCatalogueEntry } from './new-platform/featureCatalogueEntry';
 
 const {
   core,
-  plugins: { home }
+  plugins: { home },
 } = npSetup;
 const apmUiEnabled = core.injectedMetadata.getInjectedVar(
   'apmUiEnabled'
@@ -20,5 +20,5 @@ if (apmUiEnabled) {
 }
 
 home.environment.update({
-  apmUi: apmUiEnabled
+  apmUi: apmUiEnabled,
 });

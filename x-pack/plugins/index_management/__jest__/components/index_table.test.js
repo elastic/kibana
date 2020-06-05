@@ -66,7 +66,7 @@ const status = (rendered, row = 0) => {
     .text();
 };
 
-const snapshot = rendered => {
+const snapshot = (rendered) => {
   expect(rendered).toMatchSnapshot();
 };
 const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
@@ -99,11 +99,11 @@ const testAction = (buttonIndex, done, rowIndex = 0) => {
   openMenuAndClickButton(rendered, rowIndex, buttonIndex);
   snapshot(status(rendered, rowIndex));
 };
-const names = rendered => {
+const names = (rendered) => {
   return findTestSubject(rendered, 'indexTableIndexNameLink');
 };
-const namesText = rendered => {
-  return names(rendered).map(button => button.text());
+const namesText = (rendered) => {
+  return names(rendered).map((button) => button.text());
 };
 
 describe('index table', () => {
@@ -194,14 +194,14 @@ describe('index table', () => {
     snapshot(
       rendered
         .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
-        .map(span => span.text())
+        .map((span) => span.text())
     );
     const switchControl = rendered.find('.euiSwitch__button');
     switchControl.simulate('click');
     snapshot(
       rendered
         .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
-        .map(span => span.text())
+        .map((span) => span.text())
     );
   });
   test('should filter based on content of search input', () => {
@@ -238,7 +238,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
   });
   test('should show the right context menu options when one index is selected and closed', () => {
     const rendered = mountWithIntl(component);
@@ -248,7 +248,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
   });
   test('should show the right context menu options when one open and one closed index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -259,7 +259,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
   });
   test('should show the right context menu options when more than one open index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -270,7 +270,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
   });
   test('should show the right context menu options when more than one closed index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -281,18 +281,18 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
   });
-  test('flush button works from context menu', done => {
+  test('flush button works from context menu', (done) => {
     testAction(8, done);
   });
-  test('clear cache button works from context menu', done => {
+  test('clear cache button works from context menu', (done) => {
     testAction(7, done);
   });
-  test('refresh button works from context menu', done => {
+  test('refresh button works from context menu', (done) => {
     testAction(6, done);
   });
-  test('force merge button works from context menu', done => {
+  test('force merge button works from context menu', (done) => {
     const rendered = mountWithIntl(component);
     const rowIndex = 0;
     openMenuAndClickButton(rendered, rowIndex, 5);
@@ -313,8 +313,8 @@ describe('index table', () => {
   });
   // Commenting the following 2 tests as it works in the browser (status changes to "closed" or "open") but the
   // snapshot say the contrary. Need to be investigated.
-  test('close index button works from context menu', done => {
-    const modifiedIndices = indices.map(index => {
+  test('close index button works from context menu', (done) => {
+    const modifiedIndices = indices.map((index) => {
       return {
         ...index,
         status: index.name === 'testy0' ? 'close' : index.status,
@@ -328,8 +328,8 @@ describe('index table', () => {
     ]);
     testAction(4, done);
   });
-  test('open index button works from context menu', done => {
-    const modifiedIndices = indices.map(index => {
+  test('open index button works from context menu', (done) => {
+    const modifiedIndices = indices.map((index) => {
       return {
         ...index,
         status: index.name === 'testy1' ? 'open' : index.status,
@@ -345,7 +345,7 @@ describe('index table', () => {
   test('show settings button works from context menu', () => {
     testEditor(0);
   });
-  test('show mapping button works from context menu', () => {
+  test('show mappings button works from context menu', () => {
     testEditor(1);
   });
   test('show stats button works from context menu', () => {

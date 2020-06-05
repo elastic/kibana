@@ -20,19 +20,15 @@
 import expect from '@kbn/expect';
 const Joi = require('joi');
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   const GENERIC_RESPONSE_SCHEMA = Joi.array().items(
     Joi.object().keys({
-      id: Joi.string()
-        .uuid()
-        .required(),
+      id: Joi.string().uuid().required(),
       type: Joi.string().required(),
-      relationship: Joi.string()
-        .valid('parent', 'child')
-        .required(),
+      relationship: Joi.string().valid('parent', 'child').required(),
       meta: Joi.object()
         .keys({
           title: Joi.string().required(),
@@ -54,10 +50,10 @@ export default function({ getService }) {
     after(() => esArchiver.unload('management/saved_objects'));
 
     const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
-    const coerceToArray = itemOrItems => [].concat(itemOrItems);
-    const getSavedObjectTypesQuery = types =>
+    const coerceToArray = (itemOrItems) => [].concat(itemOrItems);
+    const getSavedObjectTypesQuery = (types) =>
       coerceToArray(types)
-        .map(type => `savedObjectTypes=${type}`)
+        .map((type) => `savedObjectTypes=${type}`)
         .join('&');
     const defaultQuery = getSavedObjectTypesQuery([
       'visualization',
@@ -71,7 +67,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
@@ -81,7 +77,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -125,7 +121,7 @@ export default function({ getService }) {
             )}`
           )
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -174,7 +170,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
@@ -184,7 +180,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: 'add810b0-3224-11e8-a572-ffca06da1357',
@@ -228,7 +224,7 @@ export default function({ getService }) {
             )}`
           )
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: 'add810b0-3224-11e8-a572-ffca06da1357',
@@ -277,7 +273,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
@@ -287,7 +283,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
@@ -331,7 +327,7 @@ export default function({ getService }) {
             )}`
           )
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
@@ -364,7 +360,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
@@ -374,7 +370,7 @@ export default function({ getService }) {
         await supertest
           .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
@@ -418,7 +414,7 @@ export default function({ getService }) {
             )}`
           )
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql([
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',

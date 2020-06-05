@@ -64,7 +64,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     const store = createMapStore();
     let queryableIndexPatternIds;
     try {
-      layerList.forEach(layerDescriptor => {
+      layerList.forEach((layerDescriptor) => {
         store.dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
       queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
@@ -76,7 +76,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
       );
     }
 
-    const promises = queryableIndexPatternIds.map(async indexPatternId => {
+    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
       try {
         return await getIndexPatternService().get(indexPatternId);
       } catch (error) {

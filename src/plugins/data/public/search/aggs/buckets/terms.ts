@@ -229,7 +229,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('data.search.aggs.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
-      shouldShow: agg => agg.getParam('otherBucket'),
+      shouldShow: (agg) => agg.getParam('otherBucket'),
       write: noop,
     },
     {
@@ -248,7 +248,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
-      shouldShow: agg => agg.getParam('missingBucket'),
+      shouldShow: (agg) => agg.getParam('missingBucket'),
       write: noop,
     },
     {

@@ -40,8 +40,8 @@ const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
       },
       ...routeOptions,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -88,7 +88,7 @@ uiRoutes.when('/logstash/pipelines', {
         cluster_uuid: globalState.cluster_uuid,
       });
 
-      const renderReact = pageData => {
+      const renderReact = (pageData) => {
         if (!pageData) {
           return;
         }
@@ -106,7 +106,7 @@ uiRoutes.when('/logstash/pipelines', {
           <I18nContext>
             <PipelineListing
               className="monitoringLogstashPipelinesTable"
-              onBrush={xaxis => this.onBrush({ xaxis })}
+              onBrush={(xaxis) => this.onBrush({ xaxis })}
               stats={pageData.clusterStatus}
               data={pageData.pipelines}
               {...this.getPaginationTableProps(pagination)}
@@ -123,7 +123,7 @@ uiRoutes.when('/logstash/pipelines', {
 
       $scope.$watch(
         () => this.data,
-        pageData => {
+        (pageData) => {
           renderReact(pageData);
         }
       );

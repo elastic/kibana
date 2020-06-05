@@ -12,7 +12,7 @@ import { appReady, appError } from '../../state/actions/app';
 import { App as Component } from './app';
 import { trackRouteChange } from './track_route_change';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   // appReady could be an error object
   const appState = getAppReady(state);
 
@@ -22,7 +22,7 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   setAppReady: () => async () => {
     try {
       // set app state to ready
@@ -31,7 +31,7 @@ const mapDispatchToProps = dispatch => ({
       dispatch(appError(e));
     }
   },
-  setAppError: payload => dispatch(appError(payload)),
+  setAppError: (payload) => dispatch(appError(payload)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {

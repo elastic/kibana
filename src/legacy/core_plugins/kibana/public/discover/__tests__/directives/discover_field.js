@@ -27,7 +27,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 // Load the kibana app dependencies.
 
-describe('discoverField', function() {
+describe('discoverField', function () {
   let $scope;
   let indexPattern;
   let $elem;
@@ -35,7 +35,7 @@ describe('discoverField', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(
-    ngMock.inject(function(Private, $rootScope, $compile) {
+    ngMock.inject(function (Private, $rootScope, $compile) {
       $elem = angular.element(`
       <discover-field
         field="field"
@@ -61,17 +61,17 @@ describe('discoverField', function() {
     })
   );
 
-  afterEach(function() {
+  afterEach(function () {
     $scope.toggleDetails.restore();
     $scope.$destroy();
   });
 
-  describe('toggleDisplay', function() {
-    it('should exist', function() {
+  describe('toggleDisplay', function () {
+    it('should exist', function () {
       expect($scope.toggleDisplay).to.be.a(Function);
     });
 
-    it('should call onAddField or onRemoveField depending on the display state', function() {
+    it('should call onAddField or onRemoveField depending on the display state', function () {
       $scope.toggleDisplay($scope.field);
       expect($scope.onAddField.callCount).to.be(1);
       expect($scope.onAddField.firstCall.args).to.eql([$scope.field.name]);
@@ -81,15 +81,15 @@ describe('discoverField', function() {
       expect($scope.onRemoveField.firstCall.args).to.eql([$scope.field.name]);
     });
 
-    it('should call toggleDetails when currently showing the details', function() {
+    it('should call toggleDetails when currently showing the details', function () {
       $scope.toggleDetails($scope.field);
       $scope.toggleDisplay($scope.field);
       expect($scope.toggleDetails.callCount).to.be(2);
     });
   });
 
-  describe('toggleDetails', function() {
-    it('should notify the parent when showing the details', function() {
+  describe('toggleDetails', function () {
+    it('should notify the parent when showing the details', function () {
       $scope.toggleDetails($scope.field);
       expect($scope.onShowDetails.callCount).to.be(1);
     });

@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "7.7.0",
+  "version": "7.7.2",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -268,7 +268,7 @@
     "io-ts": "^2.0.5",
     "isbinaryfile": "4.0.2",
     "joi": "^13.5.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "js-search": "^1.4.3",
     "js-yaml": "3.13.1",
     "json-stable-stringify": "^1.0.1",

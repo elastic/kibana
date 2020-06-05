@@ -112,7 +112,7 @@ export class WorkpadZoom extends PureComponent<Props> {
   );
 
   _getScaleMenuItems = (): EuiContextMenuPanelItemDescriptor[] =>
-    QUICK_ZOOM_LEVELS.map(scale => ({
+    QUICK_ZOOM_LEVELS.map((scale) => ({
       name: strings.getZoomPercentage(scale),
       icon: 'empty',
       onClick: () => this.props.setZoomScale(scale),

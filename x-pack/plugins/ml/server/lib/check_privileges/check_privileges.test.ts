@@ -34,13 +34,13 @@ const mlIsNotEnabled = async () => false;
 
 describe('check_privileges', () => {
   describe('getPrivileges() - right number of capabilities', () => {
-    test('es capabilities count', async done => {
+    test('es capabilities count', async (done) => {
       const count = mlPrivileges.cluster.length;
       expect(count).toBe(27);
       done();
     });
 
-    test('kibana capabilities count', async done => {
+    test('kibana capabilities count', async (done) => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -55,7 +55,7 @@ describe('check_privileges', () => {
   });
 
   describe('getPrivileges() with security', () => {
-    test('ml_user capabilities only', async done => {
+    test('ml_user capabilities only', async (done) => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -90,7 +90,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('full capabilities', async done => {
+    test('full capabilities', async (done) => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -125,7 +125,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('upgrade in progress with full capabilities', async done => {
+    test('upgrade in progress with full capabilities', async (done) => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -160,7 +160,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('upgrade in progress with partial capabilities', async done => {
+    test('upgrade in progress with partial capabilities', async (done) => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -195,7 +195,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('ml_user capabilities with security with basic license', async done => {
+    test('ml_user capabilities with security with basic license', async (done) => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -230,7 +230,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('full user with security with basic license', async done => {
+    test('full user with security with basic license', async (done) => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -265,7 +265,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('full capabilities, ml disabled in space', async done => {
+    test('full capabilities, ml disabled in space', async (done) => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -302,7 +302,7 @@ describe('check_privileges', () => {
   });
 
   describe('getPrivileges() without security', () => {
-    test('ml_user capabilities only', async done => {
+    test('ml_user capabilities only', async (done) => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -337,7 +337,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('upgrade in progress with full capabilities', async done => {
+    test('upgrade in progress with full capabilities', async (done) => {
       const callWithRequest = callWithRequestProvider('upgradeWithFullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -372,7 +372,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('upgrade in progress with partial capabilities', async done => {
+    test('upgrade in progress with partial capabilities', async (done) => {
       const callWithRequest = callWithRequestProvider('upgradeWithPartialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -407,7 +407,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('ml_user capabilities without security with basic license', async done => {
+    test('ml_user capabilities without security with basic license', async (done) => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -442,7 +442,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('full user without security with basic license', async done => {
+    test('full user without security with basic license', async (done) => {
       const callWithRequest = callWithRequestProvider('fullPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,
@@ -477,7 +477,7 @@ describe('check_privileges', () => {
       done();
     });
 
-    test('ml_user capabilities only, ml disabled in space', async done => {
+    test('ml_user capabilities only, ml disabled in space', async (done) => {
       const callWithRequest = callWithRequestProvider('partialPrivileges');
       const { getPrivileges } = privilegesProvider(
         callWithRequest,

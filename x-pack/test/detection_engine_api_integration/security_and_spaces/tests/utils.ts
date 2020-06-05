@@ -197,15 +197,24 @@ export const deleteAllAlerts = async (es: any): Promise<void> => {
 };
 
 /**
+ * Remove all rules statuses from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllRulesStatuses = async (es: any): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-status',
+    waitForCompletion: true,
+    refresh: 'wait_for',
+  });
+};
+
+/**
  * Creates the signals index for use inside of beforeEach blocks of tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (supertest: any): Promise<void> => {
-  await supertest
-    .post(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
 
 /**
@@ -213,11 +222,7 @@ export const createSignalsIndex = async (supertest: any): Promise<void> => {
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (supertest: any): Promise<void> => {
-  await supertest
-    .delete(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
 
 /**
@@ -226,7 +231,7 @@ export const deleteSignalsIndex = async (supertest: any): Promise<void> => {
  * @param ruleIds Array of strings of rule_ids
  */
 export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
-  const stringOfRules = ruleIds.map(ruleId => {
+  const stringOfRules = ruleIds.map((ruleId) => {
     const simpleRule = getSimpleRule(ruleId);
     return JSON.stringify(simpleRule);
   });

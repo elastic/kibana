@@ -22,7 +22,7 @@ import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 
-describe('AggTypesMetricsPercentileRanksProvider class', function() {
+describe('AggTypesMetricsPercentileRanksProvider class', function () {
   let aggConfigs: IAggConfigs;
 
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
             field: {
               displayName: 'bytes',
               format: {
-                convert: jest.fn(x => x),
+                convert: jest.fn((x) => x),
               },
             },
             customLabel: 'my custom field label',
@@ -64,7 +64,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
     );
   });
 
-  it('uses the custom label if it is set', function() {
+  it('uses the custom label if it is set', function () {
     const responseAggs: any = percentileRanksMetricAgg.getResponseAggs(
       aggConfigs.aggs[0] as IPercentileRanksAggConfig
     );

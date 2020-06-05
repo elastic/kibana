@@ -37,11 +37,11 @@ export function createDiscoverFieldDirective($compile) {
       onRemoveField: '=',
       onShowDetails: '=',
     },
-    link: function($scope, $elem) {
+    link: function ($scope, $elem) {
       let detailsElem;
       let detailScope;
 
-      const init = function() {
+      const init = function () {
         if ($scope.field.details) {
           $scope.toggleDetails($scope.field, true);
         }
@@ -55,7 +55,7 @@ export function createDiscoverFieldDirective($compile) {
             });
       };
 
-      const getWarnings = function(field) {
+      const getWarnings = function (field) {
         let warnings = [];
 
         if (field.scripted) {
@@ -70,7 +70,7 @@ export function createDiscoverFieldDirective($compile) {
         }
 
         if (warnings.length > 1) {
-          warnings = warnings.map(function(warning, i) {
+          warnings = warnings.map(function (warning, i) {
             return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
           });
         }
@@ -80,7 +80,7 @@ export function createDiscoverFieldDirective($compile) {
 
       $scope.canVisualize = getServices().capabilities.visualize.show;
 
-      $scope.toggleDisplay = function(field) {
+      $scope.toggleDisplay = function (field) {
         if (field.display) {
           $scope.onRemoveField(field.name);
         } else {
@@ -101,12 +101,12 @@ export function createDiscoverFieldDirective($compile) {
         $scope.toggleDetails(field);
       };
 
-      $scope.toggleDetails = function(field, recompute) {
+      $scope.toggleDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
           $scope.onShowDetails(field, recompute);
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
-          detailScope.getBucketAriaLabel = bucket => {
+          detailScope.getBucketAriaLabel = (bucket) => {
             return i18n.translate('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
               defaultMessage: 'Value: {value}',
               values: {

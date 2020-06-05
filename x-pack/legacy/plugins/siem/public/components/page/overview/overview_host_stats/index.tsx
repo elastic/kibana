@@ -214,7 +214,7 @@ const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading
   return (
     <HostStatsContainer data-test-subj="overview-hosts-stats">
       {hostStatGroups.map((statGroup, i) => {
-        const statsForGroup = allHostStats.filter(s => statGroup.statIds.includes(s.id));
+        const statsForGroup = allHostStats.filter((s) => statGroup.statIds.includes(s.id));
         const statsForGroupCount = statsForGroup.reduce((total, stat) => total + stat.count, 0);
 
         return (
@@ -240,7 +240,7 @@ const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading
               buttonContentClassName="accordion-button"
             >
               <AccordionContent>
-                {statsForGroup.map(stat => (
+                {statsForGroup.map((stat) => (
                   <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="s">

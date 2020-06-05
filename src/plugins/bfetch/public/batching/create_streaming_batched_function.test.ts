@@ -24,17 +24,17 @@ import { Subject } from 'rxjs';
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
-    new Promise<any>(resolve =>
+    new Promise<any>((resolve) =>
       promise.then(
         () => resolve('resolved'),
         () => resolve('rejected')
       )
     ),
-    new Promise<'pending'>(resolve => resolve()).then(() => 'pending'),
+    new Promise<'pending'>((resolve) => resolve()).then(() => 'pending'),
   ]);
 
 const isPending = (promise: Promise<unknown>): Promise<boolean> =>
-  getPromiseState(promise).then(state => state === 'pending');
+  getPromiseState(promise).then((state) => state === 'pending');
 
 const setup = () => {
   const xhr = ({} as unknown) as XMLHttpRequest;
@@ -93,7 +93,7 @@ describe('createStreamingBatchedFunction()', () => {
       fn({ baz: 'quix' });
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
 
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
       expect(fetchStreaming).toHaveBeenCalledTimes(1);
     });
 
@@ -107,7 +107,7 @@ describe('createStreamingBatchedFunction()', () => {
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
     });
 
@@ -121,7 +121,7 @@ describe('createStreamingBatchedFunction()', () => {
       });
 
       fn({ foo: 'bar' });
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
 
       expect(fetchStreaming.mock.calls[0][0]).toMatchObject({
         url: '/test',
@@ -141,7 +141,7 @@ describe('createStreamingBatchedFunction()', () => {
       fn({ foo: 'bar' });
       fn({ baz: 'quix' });
 
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
       const { body } = fetchStreaming.mock.calls[0][0];
       expect(JSON.parse(body)).toEqual({
         batch: [{ foo: 'bar' }, { baz: 'quix' }],
@@ -205,7 +205,7 @@ describe('createStreamingBatchedFunction()', () => {
       fn({ c: '3' });
       expect(fetchStreaming).toHaveBeenCalledTimes(1);
       fn({ d: '4' });
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
       expect(fetchStreaming).toHaveBeenCalledTimes(2);
     });
   });
@@ -222,7 +222,7 @@ describe('createStreamingBatchedFunction()', () => {
 
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
 
       expect(await isPending(promise1)).toBe(true);
       expect(await isPending(promise2)).toBe(true);
@@ -240,7 +240,7 @@ describe('createStreamingBatchedFunction()', () => {
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
       const promise3 = fn({ c: '3' });
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
 
       expect(await isPending(promise1)).toBe(true);
       expect(await isPending(promise2)).toBe(true);
@@ -281,7 +281,7 @@ describe('createStreamingBatchedFunction()', () => {
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
       const promise3 = fn({ c: '3' });
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
 
       stream.next(
         JSON.stringify({
@@ -313,7 +313,7 @@ describe('createStreamingBatchedFunction()', () => {
       });
 
       const promise = fn({ a: '1' });
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
 
       expect(await isPending(promise)).toBe(true);
 
@@ -344,7 +344,7 @@ describe('createStreamingBatchedFunction()', () => {
       const promise2 = of(fn({ a: '2' }));
       const promise3 = of(fn({ a: '3' }));
 
-      await new Promise(r => setTimeout(r, 6));
+      await new Promise((r) => setTimeout(r, 6));
 
       stream.next(
         JSON.stringify({
@@ -353,7 +353,7 @@ describe('createStreamingBatchedFunction()', () => {
         }) + '\n'
       );
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
 
       stream.next(
         JSON.stringify({
@@ -362,7 +362,7 @@ describe('createStreamingBatchedFunction()', () => {
         }) + '\n'
       );
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
 
       stream.next(
         JSON.stringify({
@@ -371,7 +371,7 @@ describe('createStreamingBatchedFunction()', () => {
         }) + '\n'
       );
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
 
       const [result1] = await promise1;
       const [, error2] = await promise2;
@@ -395,11 +395,11 @@ describe('createStreamingBatchedFunction()', () => {
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise(r => setTimeout(r, 6));
+        await new Promise((r) => setTimeout(r, 6));
 
         stream.complete();
 
-        await new Promise(r => setTimeout(r, 1));
+        await new Promise((r) => setTimeout(r, 1));
 
         const [, error1] = await promise1;
         const [, error2] = await promise2;
@@ -425,7 +425,7 @@ describe('createStreamingBatchedFunction()', () => {
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise(r => setTimeout(r, 6));
+        await new Promise((r) => setTimeout(r, 6));
 
         stream.next(
           JSON.stringify({
@@ -435,7 +435,7 @@ describe('createStreamingBatchedFunction()', () => {
         );
         stream.complete();
 
-        await new Promise(r => setTimeout(r, 1));
+        await new Promise((r) => setTimeout(r, 1));
 
         const [, error1] = await promise1;
         const [result1] = await promise2;
@@ -462,13 +462,13 @@ describe('createStreamingBatchedFunction()', () => {
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise(r => setTimeout(r, 6));
+        await new Promise((r) => setTimeout(r, 6));
 
         stream.error({
           message: 'something went wrong',
         });
 
-        await new Promise(r => setTimeout(r, 1));
+        await new Promise((r) => setTimeout(r, 1));
 
         const [, error1] = await promise1;
         const [, error2] = await promise2;
@@ -494,7 +494,7 @@ describe('createStreamingBatchedFunction()', () => {
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise(r => setTimeout(r, 6));
+        await new Promise((r) => setTimeout(r, 6));
 
         stream.next(
           JSON.stringify({
@@ -504,7 +504,7 @@ describe('createStreamingBatchedFunction()', () => {
         );
         stream.error('oops');
 
-        await new Promise(r => setTimeout(r, 1));
+        await new Promise((r) => setTimeout(r, 1));
 
         const [, error1] = await promise1;
         const [result1] = await promise2;

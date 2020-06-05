@@ -8,7 +8,7 @@ import { Legacy } from 'kibana';
 import { Plugin } from './server/plugin';
 import { createSetupShim } from './server/shim';
 
-export const init = async function(server: Legacy.Server) {
+export const init = async function (server: Legacy.Server) {
   const { coreSetup, pluginsSetup } = await createSetupShim(server);
   const serverPlugin = new Plugin();
 

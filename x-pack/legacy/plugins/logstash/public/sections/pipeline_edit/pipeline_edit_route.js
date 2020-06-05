@@ -35,12 +35,12 @@ routes
     },
     controllerAs: 'pipelineEditRoute',
     resolve: {
-      logstashTabs: $injector => {
+      logstashTabs: ($injector) => {
         const $route = $injector.get('$route');
         const pipelineId = $route.current.params.id;
         updateLogstashSections(pipelineId);
       },
-      pipeline: function($injector) {
+      pipeline: function ($injector) {
         const $route = $injector.get('$route');
         const pipelineService = $injector.get('pipelineService');
         const licenseService = $injector.get('logstashLicenseService');
@@ -52,8 +52,8 @@ routes
 
         return pipelineService
           .loadPipeline(pipelineId)
-          .then(pipeline => (!!$route.current.params.clone ? pipeline.clone : pipeline))
-          .catch(err => {
+          .then((pipeline) => (!!$route.current.params.clone ? pipeline.clone : pipeline))
+          .catch((err) => {
             return licenseService.checkValidity().then(() => {
               if (err.status !== 403) {
                 toastNotifications.addDanger(
@@ -71,11 +71,11 @@ routes
             });
           });
       },
-      checkLicense: $injector => {
+      checkLicense: ($injector) => {
         const licenseService = $injector.get('logstashLicenseService');
         return licenseService.checkValidity();
       },
-      isUpgraded: $injector => {
+      isUpgraded: ($injector) => {
         const upgradeService = $injector.get('upgradeService');
         return upgradeService.executeUpgrade();
       },

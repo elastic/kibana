@@ -44,10 +44,10 @@ const SuggestionItemContainer = euiStyled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${props => props.theme.eui.euiFontSizeS};
-  height: ${props => props.theme.eui.euiSizeXL};
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+  height: ${(props) => props.theme.eui.euiSizeXL};
   white-space: nowrap;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
 `;
 
@@ -58,26 +58,26 @@ const SuggestionItemField = euiStyled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.euiSizeXL};
-  padding: ${props => props.theme.eui.euiSizeXS};
+  height: ${(props) => props.theme.eui.euiSizeXL};
+  padding: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 SuggestionItemField.displayName = 'SuggestionItemField';
 
 const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: string }>`
-  background-color: ${props =>
+  background-color: ${(props) =>
     transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
-  color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
+  color: ${(props) => getEuiIconColor(props.theme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.euiSizeXL};
+  width: ${(props) => props.theme.eui.euiSizeXL};
 `;
 
 SuggestionItemIconField.displayName = 'SuggestionItemIconField';
 
 const SuggestionItemTextField = styled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
 `;
 
 SuggestionItemTextField.displayName = 'SuggestionItemTextField';
@@ -89,7 +89,7 @@ const SuggestionItemDescriptionField = styled(SuggestionItemField)`
     display: inline;
 
     span {
-      font-family: ${props => props.theme.eui.euiCodeFontFamily};
+      font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
     }
   }
 `;

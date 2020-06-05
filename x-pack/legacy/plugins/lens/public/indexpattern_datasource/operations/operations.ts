@@ -59,7 +59,7 @@ export function getOperationDisplay() {
 export function getOperationTypesForField(field: IndexPatternField) {
   return operationDefinitions
     .filter(
-      operationDefinition =>
+      (operationDefinition) =>
         'getPossibleOperationForField' in operationDefinition &&
         operationDefinition.getPossibleOperationForField(field)
     )
@@ -131,8 +131,8 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
     }
   };
 
-  operationDefinitions.forEach(operationDefinition => {
-    indexPattern.fields.forEach(field => {
+  operationDefinitions.forEach((operationDefinition) => {
+    indexPattern.fields.forEach((field) => {
       addToMap(
         {
           type: 'field',
@@ -217,7 +217,7 @@ export function buildColumn({
   if (op) {
     operationDefinition = operationDefinitionMap[op];
   } else if (field) {
-    operationDefinition = getDefinition(definition =>
+    operationDefinition = getDefinition((definition) =>
       Boolean(getPossibleOperationForField(definition, field))
     );
   }

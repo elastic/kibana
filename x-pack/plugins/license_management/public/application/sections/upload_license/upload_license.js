@@ -34,10 +34,10 @@ export class UploadLicense extends React.PureComponent {
     this.props.setBreadcrumb('upload');
     this.props.addUploadErrorMessage('');
   }
-  onOptInChange = isOptingInToTelemetry => {
+  onOptInChange = (isOptingInToTelemetry) => {
     this.setState({ isOptingInToTelemetry });
   };
-  send = acknowledge => {
+  send = (acknowledge) => {
     const file = this.file;
     const fr = new FileReader();
 
@@ -87,7 +87,7 @@ export class UploadLicense extends React.PureComponent {
             <EuiText>{firstLine}</EuiText>
             <EuiText>
               <ul>
-                {messages.map(message => (
+                {messages.map((message) => (
                   <li key={message}>{message}</li>
                 ))}
               </ul>
@@ -110,7 +110,7 @@ export class UploadLicense extends React.PureComponent {
     }
     this.file = file;
   };
-  submit = event => {
+  submit = (event) => {
     event.preventDefault();
     if (this.file) {
       this.send();

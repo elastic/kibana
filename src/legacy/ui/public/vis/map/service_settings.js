@@ -34,7 +34,7 @@ const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 uiModules
   .get('kibana', ['ngSanitize'])
-  .service('serviceSettings', function($sanitize, mapConfig, tilemapsConfig, kbnVersion) {
+  .service('serviceSettings', function ($sanitize, mapConfig, tilemapsConfig, kbnVersion) {
     const attributionFromConfig = $sanitize(
       markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || '')
     );
@@ -84,7 +84,7 @@ uiModules
         }
 
         const fileLayers = await this._emsClient.getFileLayers();
-        return fileLayers.map(fileLayer => {
+        return fileLayers.map((fileLayer) => {
           //backfill to older settings
           const format = fileLayer.getDefaultFormatType();
           const meta = fileLayer.getDefaultFormatMeta();
@@ -120,8 +120,8 @@ uiModules
           const servicesFromManifest = await this._emsClient.getTMSServices();
           const strippedServiceFromManifest = await Promise.all(
             servicesFromManifest
-              .filter(tmsService => tmsService.getId() === mapConfig.emsTileLayerId.bright)
-              .map(async tmsService => {
+              .filter((tmsService) => tmsService.getId() === mapConfig.emsTileLayerId.bright)
+              .map(async (tmsService) => {
                 //shim for compatibility
                 const shim = {
                   origin: tmsService.getOrigin(),
@@ -150,7 +150,7 @@ uiModules
 
       async getEMSHotLink(fileLayerConfig) {
         const fileLayers = await this._emsClient.getFileLayers();
-        const layer = fileLayers.find(fileLayer => {
+        const layer = fileLayers.find((fileLayer) => {
           const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
           const hasIdById = fileLayer.hasId(fileLayerConfig.id);
           return hasIdByName || hasIdById;
@@ -171,7 +171,7 @@ uiModules
             serviceId = emsTileLayerId.bright;
           }
         }
-        const tmsService = tmsServices.find(service => {
+        const tmsService = tmsServices.find((service) => {
           return service.getId() === serviceId;
         });
         return {
@@ -205,7 +205,7 @@ uiModules
 
       async _getFileUrlFromEMS(fileLayerConfig) {
         const fileLayers = await this._emsClient.getFileLayers();
-        const layer = fileLayers.find(fileLayer => {
+        const layer = fileLayers.find((fileLayer) => {
           const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
           const hasIdById = fileLayer.hasId(fileLayerConfig.id);
           return hasIdByName || hasIdById;

@@ -43,31 +43,31 @@ const indexPattern2 = ({
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
 
-describe('SearchSource', function() {
+describe('SearchSource', function () {
   beforeEach(() => {
     mockDataServices();
   });
 
-  describe('#setField()', function() {
-    it('sets the value for the property', function() {
+  describe('#setField()', function () {
+    it('sets the value for the property', function () {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
   });
 
-  describe('#getField()', function() {
-    it('gets the value for the property', function() {
+  describe('#getField()', function () {
+    it('gets the value for the property', function () {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
   });
 
-  describe(`#setField('index')`, function() {
-    describe('auto-sourceFiltering', function() {
-      describe('new index pattern assigned', function() {
-        it('generates a searchSource filter', async function() {
+  describe(`#setField('index')`, function () {
+    describe('auto-sourceFiltering', function () {
+      describe('new index pattern assigned', function () {
+        it('generates a searchSource filter', async function () {
           const searchSource = new SearchSource();
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
@@ -77,7 +77,7 @@ describe('SearchSource', function() {
           expect(request._source).toBe(mockSource);
         });
 
-        it('removes created searchSource filter on removal', async function() {
+        it('removes created searchSource filter on removal', async function () {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', undefined);
@@ -86,8 +86,8 @@ describe('SearchSource', function() {
         });
       });
 
-      describe('new index pattern assigned over another', function() {
-        it('replaces searchSource filter with new', async function() {
+      describe('new index pattern assigned over another', function () {
+        it('replaces searchSource filter with new', async function () {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
@@ -96,7 +96,7 @@ describe('SearchSource', function() {
           expect(request._source).toBe(mockSource2);
         });
 
-        it('removes created searchSource filter on removal', async function() {
+        it('removes created searchSource filter on removal', async function () {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);

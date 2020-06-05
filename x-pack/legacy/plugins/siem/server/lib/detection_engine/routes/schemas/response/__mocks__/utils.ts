@@ -131,7 +131,7 @@ export const getPaths = <A>(validation: t.Validation<A>): string[] => {
   return pipe(
     validation,
     fold(
-      errors => formatErrors(errors),
+      (errors) => formatErrors(errors),
       () => ['no errors']
     )
   );

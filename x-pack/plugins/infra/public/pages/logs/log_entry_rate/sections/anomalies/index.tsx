@@ -58,8 +58,8 @@ export const AnomaliesResults: React.FunctionComponent<{
 }) => {
   const hasAnomalies = useMemo(() => {
     return results && results.histogramBuckets
-      ? results.histogramBuckets.some(bucket => {
-          return bucket.partitions.some(partition => {
+      ? results.histogramBuckets.some((bucket) => {
+          return bucket.partitions.some((partition) => {
             return partition.anomalies.length > 0;
           });
         })

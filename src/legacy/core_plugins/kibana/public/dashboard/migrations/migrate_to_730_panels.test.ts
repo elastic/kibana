@@ -156,7 +156,7 @@ test('6.0 migrates old panel data in the right order', () => {
     false,
     {}
   ) as SavedDashboardPanel730ToLatest[];
-  const foo8Panel = newPanels.find(panel => panel.id === 'foo8');
+  const foo8Panel = newPanels.find((panel) => panel.id === 'foo8');
 
   expect(foo8Panel).toBeDefined();
   expect((foo8Panel! as any).row).toBe(undefined);
@@ -217,7 +217,7 @@ test('6.0 migrates old panel data in the right order without margins', () => {
     false,
     {}
   ) as SavedDashboardPanel730ToLatest[];
-  const foo8Panel = newPanels.find(panel => panel.id === 'foo8');
+  const foo8Panel = newPanels.find((panel) => panel.id === 'foo8');
 
   expect(foo8Panel).toBeDefined();
   expect((foo8Panel! as any).row).toBe(undefined);
@@ -261,7 +261,7 @@ test('6.0 migrates old panel data in the right order with margins', () => {
     true,
     {}
   ) as SavedDashboardPanel730ToLatest[];
-  const foo8Panel = newPanels.find(panel => panel.id === 'foo8');
+  const foo8Panel = newPanels.find((panel) => panel.id === 'foo8');
 
   expect(foo8Panel).toBeDefined();
   expect((foo8Panel! as any).row).toBe(undefined);

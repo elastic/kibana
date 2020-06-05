@@ -17,7 +17,7 @@ jest.mock('../../../privilege/check_privilege', () => ({
 }));
 
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: node => {
+  withKibana: (node) => {
     return node;
   },
 }));

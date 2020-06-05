@@ -11,7 +11,7 @@ const registerAlertTypes = (alertingPlugin: PluginSetupContract) => {
   if (alertingPlugin) {
     const registerFns = [registerMetricThresholdAlertType];
 
-    registerFns.forEach(fn => {
+    registerFns.forEach((fn) => {
       fn(alertingPlugin);
     });
   }

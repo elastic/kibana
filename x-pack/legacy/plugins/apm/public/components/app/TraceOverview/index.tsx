@@ -17,7 +17,7 @@ export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
   const { status, data = [] } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (start && end) {
         return callApmApi({
           pathname: '/api/apm/traces',
@@ -25,9 +25,9 @@ export function TraceOverview() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -40,7 +40,7 @@ export function TraceOverview() {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
-      projection: PROJECTION.TRACES
+      projection: PROJECTION.TRACES,
     };
 
     return config;

@@ -58,7 +58,7 @@ export const getSimpleRuleWithId = (id = 'rule-1'): Partial<OutputRuleAlertRest>
  * @param rules Array of rule objects with which to generate rule JSON
  */
 export const rulesToNdJsonString = (rules: Array<Partial<OutputRuleAlertRest>>) => {
-  return rules.map(rule => JSON.stringify(rule)).join('\r\n');
+  return rules.map((rule) => JSON.stringify(rule)).join('\r\n');
 };
 
 /**
@@ -67,7 +67,7 @@ export const rulesToNdJsonString = (rules: Array<Partial<OutputRuleAlertRest>>) 
  * @param ruleIds Array of ruleIds with which to generate rule JSON
  */
 export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
-  const rules = ruleIds.map(ruleId => getSimpleRule(ruleId));
+  const rules = ruleIds.map((ruleId) => getSimpleRule(ruleId));
   return rulesToNdJsonString(rules);
 };
 

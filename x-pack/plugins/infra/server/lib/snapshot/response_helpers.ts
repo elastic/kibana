@@ -90,7 +90,7 @@ export const getNodePath = (
   options: InfraSnapshotRequestOptions
 ): SnapshotNodePath[] => {
   const node = groupBucket.key;
-  const path = options.groupBy.map(gb => {
+  const path = options.groupBy.map((gb) => {
     return { value: node[`${gb.field}`], label: node[`${gb.field}`] } as SnapshotNodePath;
   });
   const ip = getIPFromBucket(options.nodeType, groupBucket);
@@ -158,9 +158,9 @@ const getMetricValueFromBucket = (type: SnapshotMetricType, bucket: InfraSnapsho
 };
 
 function calculateMax(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
-  return max(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) || 0;
+  return max(buckets.map((bucket) => getMetricValueFromBucket(type, bucket))) || 0;
 }
 
 function calculateAvg(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
-  return sum(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
+  return sum(buckets.map((bucket) => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
 }

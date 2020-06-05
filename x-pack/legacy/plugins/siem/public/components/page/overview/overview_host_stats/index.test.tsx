@@ -27,10 +27,7 @@ describe('Overview Host Stat Data', () => {
       );
 
       // click the accordion to expand it
-      wrapper
-        .find('button')
-        .first()
-        .simulate('click');
+      wrapper.find('button').first().simulate('click');
       wrapper.update();
 
       expect(
@@ -50,10 +47,7 @@ describe('Overview Host Stat Data', () => {
       );
 
       // click the accordion to expand it
-      wrapper
-        .find('button')
-        .first()
-        .simulate('click');
+      wrapper.find('button').first().simulate('click');
       wrapper.update();
 
       expect(

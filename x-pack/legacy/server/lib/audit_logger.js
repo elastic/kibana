@@ -17,7 +17,7 @@ export class AuditLogger {
     this._enabled =
       config.get('xpack.security.enabled') && config.get('xpack.security.audit.enabled');
     this._licensed = false;
-    this._checkLicense = xPackInfo => {
+    this._checkLicense = (xPackInfo) => {
       this._licensed =
         checkLicense(FEATURE.ID, LICENSE_TYPE_STANDARD, xPackInfo).status === LICENSE_STATUS_VALID;
     };

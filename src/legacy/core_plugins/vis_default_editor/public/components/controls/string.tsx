@@ -37,7 +37,7 @@ function StringParamEditor({
     setValidity(isValid);
   }, [isValid]);
 
-  const onChange = useCallback(ev => setValue(ev.target.value), [setValue]);
+  const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
 
   return (
     <EuiFormRow

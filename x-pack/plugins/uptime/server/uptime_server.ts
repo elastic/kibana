@@ -16,16 +16,16 @@ export const initUptimeServer = (
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
 ) => {
-  restApiRoutes.forEach(route =>
+  restApiRoutes.forEach((route) =>
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
   );
 
-  uptimeAlertTypeFactories.forEach(alertTypeFactory =>
+  uptimeAlertTypeFactories.forEach((alertTypeFactory) =>
     plugins.alerting.registerType(alertTypeFactory(server, libs))
   );
 
   const graphQLSchema = makeExecutableSchema({
-    resolvers: resolvers.map(createResolversFn => createResolversFn(libs)),
+    resolvers: resolvers.map((createResolversFn) => createResolversFn(libs)),
     typeDefs,
   });
   libs.framework.registerGraphQLEndpoint(DEFAULT_GRAPHQL_PATH, graphQLSchema);

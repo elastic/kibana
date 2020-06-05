@@ -14,6 +14,7 @@ import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_o
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock } from '../../../actions/server/mocks';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 const alertType = {
   id: 'test',
@@ -495,6 +496,38 @@ describe('Task Runner', () => {
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
         "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
+    savedObjectsClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": undefined,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },

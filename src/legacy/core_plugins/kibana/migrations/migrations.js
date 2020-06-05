@@ -60,7 +60,7 @@ function migrateIndexPattern(doc) {
 
 export const migrations = {
   dashboard: {
-    '7.0.0': doc => {
+    '7.0.0': (doc) => {
       // Set new "references" attribute
       doc.references = doc.references || [];
 

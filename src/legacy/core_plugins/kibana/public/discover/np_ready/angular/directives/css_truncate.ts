@@ -30,13 +30,13 @@ export function createCssTruncateDirective() {
 
       if (attrs.cssTruncateExpandable != null) {
         $scope.$watch(
-          function() {
+          function () {
             return $elem.html();
           },
-          function() {
+          function () {
             if ($elem[0].offsetWidth < $elem[0].scrollWidth) {
               $elem.css({ cursor: 'pointer' });
-              $elem.bind('click', function() {
+              $elem.bind('click', function () {
                 $scope.toggle();
               });
             }
@@ -44,7 +44,7 @@ export function createCssTruncateDirective() {
         );
       }
 
-      $scope.toggle = function() {
+      $scope.toggle = function () {
         if ($elem.css('white-space') !== 'normal') {
           $elem.css({ 'white-space': 'normal' });
         } else {
@@ -52,7 +52,7 @@ export function createCssTruncateDirective() {
         }
       };
 
-      $scope.$on('$destroy', function() {
+      $scope.$on('$destroy', function () {
         $elem.unbind('click');
         $elem.unbind('mouseenter');
       });

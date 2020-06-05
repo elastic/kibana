@@ -21,8 +21,8 @@ describe('bytesRt', () => {
       'mb',
       '0kb',
       '5gb',
-      '6tb'
-    ].map(input => {
+      '6tb',
+    ].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(bytesRt.decode(input))).toBe(false);
       });
@@ -30,7 +30,7 @@ describe('bytesRt', () => {
   });
 
   describe('it should accept', () => {
-    ['1b', '2kb', '3mb'].map(input => {
+    ['1b', '2kb', '3mb'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(bytesRt.decode(input))).toBe(true);
       });

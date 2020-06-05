@@ -66,7 +66,9 @@ export const getIndexFields = memoizeOne(
   (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
       ? {
-          fields: fields.map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
+          fields: fields.map((field) =>
+            pick(['name', 'searchable', 'type', 'aggregatable'], field)
+          ),
           title,
         }
       : { fields: [], title }
@@ -147,7 +149,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
           },
         })
         .then(
-          result => {
+          (result) => {
             updateLoading(false);
             updateErrorMessage(null);
             setIndicesExist(get('data.source.status.indicesExist', result));
@@ -158,7 +160,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
               getIndexFields(indices.join(), get('data.source.status.indexFields', result))
             );
           },
-          error => {
+          (error) => {
             updateLoading(false);
             updateErrorMessage(error.message);
           }

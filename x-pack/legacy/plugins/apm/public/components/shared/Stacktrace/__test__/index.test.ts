@@ -20,23 +20,23 @@ describe('Stacktrace/index', () => {
         {
           library_frame: false,
           exclude_from_grouping: false,
-          filename: 'file-a.txt'
+          filename: 'file-a.txt',
         },
         {
           library_frame: false,
           exclude_from_grouping: false,
-          filename: 'file-b.txt'
+          filename: 'file-b.txt',
         },
         {
           library_frame: true,
           exclude_from_grouping: false,
-          filename: 'file-c.txt'
+          filename: 'file-c.txt',
         },
         {
           library_frame: true,
           exclude_from_grouping: false,
-          filename: 'file-d.txt'
-        }
+          filename: 'file-d.txt',
+        },
       ] as IStackframe[];
 
       const result = getGroupedStackframes(stackframes);
@@ -49,14 +49,14 @@ describe('Stacktrace/index', () => {
             {
               exclude_from_grouping: false,
               filename: 'file-a.txt',
-              library_frame: false
+              library_frame: false,
             },
             {
               exclude_from_grouping: false,
               filename: 'file-b.txt',
-              library_frame: false
-            }
-          ]
+              library_frame: false,
+            },
+          ],
         },
         {
           excludeFromGrouping: false,
@@ -65,15 +65,15 @@ describe('Stacktrace/index', () => {
             {
               exclude_from_grouping: false,
               filename: 'file-c.txt',
-              library_frame: true
+              library_frame: true,
             },
             {
               exclude_from_grouping: false,
               filename: 'file-d.txt',
-              library_frame: true
-            }
-          ]
-        }
+              library_frame: true,
+            },
+          ],
+        },
       ]);
     });
 
@@ -82,13 +82,13 @@ describe('Stacktrace/index', () => {
         {
           library_frame: false,
           exclude_from_grouping: false,
-          filename: 'file-a.txt'
+          filename: 'file-a.txt',
         },
         {
           library_frame: true,
           exclude_from_grouping: false,
-          filename: 'file-b.txt'
-        }
+          filename: 'file-b.txt',
+        },
       ] as IStackframe[];
       const result = getGroupedStackframes(stackframes);
       expect(result).toEqual([
@@ -99,9 +99,9 @@ describe('Stacktrace/index', () => {
             {
               exclude_from_grouping: false,
               filename: 'file-a.txt',
-              library_frame: false
-            }
-          ]
+              library_frame: false,
+            },
+          ],
         },
         {
           excludeFromGrouping: false,
@@ -110,10 +110,10 @@ describe('Stacktrace/index', () => {
             {
               exclude_from_grouping: false,
               filename: 'file-b.txt',
-              library_frame: true
-            }
-          ]
-        }
+              library_frame: true,
+            },
+          ],
+        },
       ]);
     });
 
@@ -122,13 +122,13 @@ describe('Stacktrace/index', () => {
         {
           library_frame: false,
           exclude_from_grouping: false,
-          filename: 'file-a.txt'
+          filename: 'file-a.txt',
         },
         {
           library_frame: false,
           exclude_from_grouping: true,
-          filename: 'file-b.txt'
-        }
+          filename: 'file-b.txt',
+        },
       ] as IStackframe[];
       const result = getGroupedStackframes(stackframes);
       expect(result).toEqual([
@@ -139,9 +139,9 @@ describe('Stacktrace/index', () => {
             {
               exclude_from_grouping: false,
               filename: 'file-a.txt',
-              library_frame: false
-            }
-          ]
+              library_frame: false,
+            },
+          ],
         },
         {
           excludeFromGrouping: true,
@@ -150,10 +150,10 @@ describe('Stacktrace/index', () => {
             {
               exclude_from_grouping: true,
               filename: 'file-b.txt',
-              library_frame: false
-            }
-          ]
-        }
+              library_frame: false,
+            },
+          ],
+        },
       ]);
     });
 
@@ -164,7 +164,7 @@ describe('Stacktrace/index', () => {
 
     it('should handle one stackframe', () => {
       const result = getGroupedStackframes([
-        stacktracesMock[0]
+        stacktracesMock[0],
       ] as IStackframe[]);
       expect(result).toHaveLength(1);
       expect(result[0].stackframes).toHaveLength(1);

@@ -66,11 +66,11 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       registerApmAlerts({
         alerting: plugins.alerting,
         actions: plugins.actions,
-        config$: mergedConfig$
+        config$: mergedConfig$,
       });
     }
 
-    this.legacySetup$.subscribe(__LEGACY => {
+    this.legacySetup$.subscribe((__LEGACY) => {
       createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
     });
 
@@ -86,7 +86,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         config$: mergedConfig$,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
-        logger
+        logger,
       });
     }
 
@@ -94,13 +94,13 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     createApmAgentConfigurationIndex({
       esClient: core.elasticsearch.dataClient,
       config: currentConfig,
-      logger
+      logger,
     });
     // create custom action index without blocking setup lifecycle
     createApmCustomLinkIndex({
       esClient: core.elasticsearch.dataClient,
       config: currentConfig,
-      logger
+      logger,
     });
 
     plugins.home.tutorials.registerTutorial(
@@ -113,8 +113,8 @@ export class APMPlugin implements Plugin<APMPluginContract> {
           metricsIndices: currentConfig['apm_oss.metricsIndices'],
           onboardingIndices: currentConfig['apm_oss.onboardingIndices'],
           sourcemapIndices: currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: currentConfig['apm_oss.transactionIndices']
-        }
+          transactionIndices: currentConfig['apm_oss.transactionIndices'],
+        },
       })
     );
 
@@ -127,8 +127,8 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       getApmIndices: async () =>
         getApmIndices({
           savedObjectsClient: await getInternalSavedObjectsClient(core),
-          config: currentConfig
-        })
+          config: currentConfig,
+        }),
     };
   }
 

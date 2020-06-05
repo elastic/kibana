@@ -69,7 +69,7 @@ export function ui(state = INITIAL_STATE, action) {
     case HIDE_TOC_DETAILS:
       return {
         ...state,
-        openTOCDetails: state.openTOCDetails.filter(layerId => {
+        openTOCDetails: state.openTOCDetails.filter((layerId) => {
           return layerId !== action.layerId;
         }),
       };

@@ -25,12 +25,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="avatar"]')
-          .first()
-          .text()
-      ).toEqual('a');
+      expect(wrapper.find('[data-test-subj="avatar"]').first().text()).toEqual('a');
     });
 
     test('it renders an avatar with a "?" when updatedBy is undefined', () => {
@@ -40,12 +35,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="avatar"]')
-          .first()
-          .text()
-      ).toEqual('?');
+      expect(wrapper.find('[data-test-subj="avatar"]').first().text()).toEqual('?');
     });
 
     test('it renders an avatar with a "?" when updatedBy is null', () => {
@@ -55,12 +45,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="avatar"]')
-          .first()
-          .text()
-      ).toEqual('?');
+      expect(wrapper.find('[data-test-subj="avatar"]').first().text()).toEqual('?');
     });
   });
 
@@ -72,12 +57,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated-by"]')
-          .first()
-          .text()
-      ).toEqual('admin');
+      expect(wrapper.find('[data-test-subj="updated-by"]').first().text()).toEqual('admin');
     });
 
     test('it renders placeholder text when updatedBy is undefined', () => {
@@ -87,12 +67,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated-by"]')
-          .first()
-          .text()
-      ).toEqual(getEmptyValue());
+      expect(wrapper.find('[data-test-subj="updated-by"]').first().text()).toEqual(getEmptyValue());
     });
 
     test('it renders placeholder text when updatedBy is null', () => {
@@ -102,12 +77,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated-by"]')
-          .first()
-          .text()
-      ).toEqual(getEmptyValue());
+      expect(wrapper.find('[data-test-subj="updated-by"]').first().text()).toEqual(getEmptyValue());
     });
   });
 
@@ -121,13 +91,9 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="posted"]')
-          .first()
-          .text()
-          .startsWith(i18n.POSTED)
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="posted"]').first().text().startsWith(i18n.POSTED)).toBe(
+        true
+      );
     });
 
     test('it renders the relative date when updated is provided', () => {
@@ -137,12 +103,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="updated"]').first().exists()).toBe(true);
     });
 
     test('it does NOT render the relative date when updated is undefined', () => {
@@ -152,12 +113,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="updated"]').first().exists()).toBe(false);
     });
 
     test('it does NOT render the relative date when updated is null', () => {
@@ -167,12 +123,7 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="updated"]').first().exists()).toBe(false);
     });
 
     test('it renders placeholder text when updated is undefined', () => {
@@ -182,12 +133,9 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="posted"]')
-          .first()
-          .text()
-      ).toEqual(`Posted: ${getEmptyValue()}`);
+      expect(wrapper.find('[data-test-subj="posted"]').first().text()).toEqual(
+        `Posted: ${getEmptyValue()}`
+      );
     });
 
     test('it renders placeholder text when updated is null', () => {
@@ -197,12 +145,9 @@ describe('NotePreview', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="posted"]')
-          .first()
-          .text()
-      ).toEqual(`Posted: ${getEmptyValue()}`);
+      expect(wrapper.find('[data-test-subj="posted"]').first().text()).toEqual(
+        `Posted: ${getEmptyValue()}`
+      );
     });
   });
 });

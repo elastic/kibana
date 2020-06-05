@@ -23,7 +23,7 @@ export function registerStatusPage(kbnServer, server, config) {
   const allowAnonymous = config.get('status.allowAnonymous');
   const wrapAuth = wrapAuthConfig(allowAnonymous);
 
-  server.decorate('toolkit', 'renderStatusPage', async function() {
+  server.decorate('toolkit', 'renderStatusPage', async function () {
     const app = server.getHiddenUiAppById('status_page');
     const h = this;
 

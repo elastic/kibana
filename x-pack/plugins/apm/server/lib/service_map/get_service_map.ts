@@ -8,7 +8,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
@@ -27,12 +27,12 @@ export interface IEnvOptions {
 async function getConnectionData({
   setup,
   serviceName,
-  environment
+  environment,
 }: IEnvOptions) {
   const { traceIds } = await getTraceSampleIds({
     setup,
     serviceName,
-    environment
+    environment,
   });
 
   const chunks = chunk(
@@ -42,7 +42,7 @@ async function getConnectionData({
 
   const init = {
     connections: [],
-    discoveredServices: []
+    discoveredServices: [],
   };
 
   if (!traceIds.length) {
@@ -50,12 +50,12 @@ async function getConnectionData({
   }
 
   const chunkedResponses = await Promise.all(
-    chunks.map(traceIdsChunk =>
+    chunks.map((traceIdsChunk) =>
       getServiceMapFromTraceIds({
         setup,
         serviceName,
         environment,
-        traceIds: traceIdsChunk
+        traceIds: traceIdsChunk,
       })
     )
   );
@@ -65,7 +65,7 @@ async function getConnectionData({
       connections: prev.connections.concat(current.connections),
       discoveredServices: prev.discoveredServices.concat(
         current.discoveredServices
-      )
+      ),
     };
   });
 }
@@ -74,7 +74,7 @@ async function getServicesData(options: IEnvOptions) {
   const { setup } = options;
 
   const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] }
+    setup: { ...setup, uiFiltersES: [] },
   });
 
   const { filter } = projection.body.query.bool;
@@ -88,33 +88,33 @@ async function getServicesData(options: IEnvOptions) {
           filter: options.serviceName
             ? filter.concat({
                 term: {
-                  [SERVICE_NAME]: options.serviceName
-                }
+                  [SERVICE_NAME]: options.serviceName,
+                },
               })
-            : filter
-        }
+            : filter,
+        },
       },
       aggs: {
         services: {
           terms: {
             field: projection.body.aggs.services.terms.field,
-            size: 500
+            size: 500,
           },
           aggs: {
             agent_name: {
               terms: {
-                field: AGENT_NAME
-              }
+                field: AGENT_NAME,
+              },
             },
             service_framework_name: {
               terms: {
-                field: SERVICE_FRAMEWORK_NAME
-              }
-            }
-          }
-        }
-      }
-    }
+                field: SERVICE_FRAMEWORK_NAME,
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   const { client } = setup;
@@ -122,7 +122,7 @@ async function getServicesData(options: IEnvOptions) {
   const response = await client.search(params);
 
   return (
-    response.aggregations?.services.buckets.map(bucket => {
+    response.aggregations?.services.buckets.map((bucket) => {
       return {
         [SERVICE_NAME]: bucket.key as string,
         [AGENT_NAME]:
@@ -131,7 +131,7 @@ async function getServicesData(options: IEnvOptions) {
         [SERVICE_FRAMEWORK_NAME]:
           (bucket.service_framework_name.buckets[0]?.key as
             | string
-            | undefined) || null
+            | undefined) || null,
       };
     }) || []
   );
@@ -145,11 +145,11 @@ export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 export async function getServiceMap(options: IEnvOptions) {
   const [connectionData, servicesData] = await Promise.all([
     getConnectionData(options),
-    getServicesData(options)
+    getServicesData(options),
   ]);
 
   return dedupeConnections({
     ...connectionData,
-    services: servicesData
+    services: servicesData,
   });
 }

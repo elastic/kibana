@@ -57,7 +57,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
 
     core.savedObjects.registerType(searchSavedObjectType);
 
-    core.http.registerRouteHandlerContext<'search'>('search', context => {
+    core.http.registerRouteHandlerContext<'search'>('search', (context) => {
       return createApi({
         caller: context.core.elasticsearch.dataClient.callAsCurrentUser,
         searchStrategies: this.searchStrategies,

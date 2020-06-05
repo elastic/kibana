@@ -49,7 +49,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig) => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;

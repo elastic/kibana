@@ -27,7 +27,7 @@ const UNKNOWN = 'unknown';
 
 export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSchema[]) => {
   router.get({ path: '/api/sample_data', validate: false }, async (context, req, res) => {
-    const registeredSampleDatasets = sampleDatasets.map(sampleDataset => {
+    const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
       return {
         id: sampleDataset.id,
         name: sampleDataset.name,
@@ -42,7 +42,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         statusMsg: sampleDataset.statusMsg,
       };
     });
-    const isInstalledPromises = registeredSampleDatasets.map(async sampleDataset => {
+    const isInstalledPromises = registeredSampleDatasets.map(async (sampleDataset) => {
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);

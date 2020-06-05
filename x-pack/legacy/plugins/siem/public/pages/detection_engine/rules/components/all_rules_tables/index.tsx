@@ -69,7 +69,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   const tabs = useMemo(
     () => (
       <EuiTabs>
-        {allRulesTabs.map(tab => (
+        {allRulesTabs.map((tab) => (
           <EuiTab
             onClick={() => setAllRulesTab(tab.id)}
             isSelected={tab.id === allRulesTab}

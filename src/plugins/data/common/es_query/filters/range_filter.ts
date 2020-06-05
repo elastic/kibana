@@ -112,7 +112,7 @@ export const buildRangeFilter = (
     filter.meta.formattedValue = formattedValue;
   }
 
-  params = mapValues(params, value => (field.type === 'number' ? parseFloat(value) : value));
+  params = mapValues(params, (value) => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');

@@ -46,7 +46,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => (
       {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
     </EuiFlexItem>
     {action.newValue != null &&
-      action.newValue.split(',').map(tag => (
+      action.newValue.split(',').map((tag) => (
         <EuiFlexItem grow={false} key={tag}>
           <EuiBadge color="default">{tag}</EuiBadge>
         </EuiFlexItem>

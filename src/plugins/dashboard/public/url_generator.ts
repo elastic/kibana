@@ -58,7 +58,7 @@ export const createDirectAccessDashboardLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean }>
 ): UrlGeneratorsDefinition<typeof DASHBOARD_APP_URL_GENERATOR> => ({
   id: DASHBOARD_APP_URL_GENERATOR,
-  createUrl: async state => {
+  createUrl: async (state) => {
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;

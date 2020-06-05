@@ -43,7 +43,7 @@ import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
  * @param [Object|Function] definition.link - either a post link function or an object with pre and/or
  *                                          post link functions.
  */
-uiModules.get('kibana').directive('renderDirective', function(Private) {
+uiModules.get('kibana').directive('renderDirective', function (Private) {
   const applyScopeBindings = Private(ApplyScopeBindingsProvider);
 
   return {
@@ -51,10 +51,10 @@ uiModules.get('kibana').directive('renderDirective', function(Private) {
     scope: {
       definition: '=',
     },
-    template: function($el) {
+    template: function ($el) {
       return $el.html();
     },
-    controller: function($scope, $element, $attrs, $transclude, $injector) {
+    controller: function ($scope, $element, $attrs, $transclude, $injector) {
       if (!$scope.definition) throw new Error('render-directive must have a definition attribute');
 
       const { controller, controllerAs, scope } = $scope.definition;

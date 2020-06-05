@@ -43,7 +43,7 @@ export function getTime(
   }
 
   const timefield: IFieldType | undefined = indexPattern.fields.find(
-    field => field.name === indexPattern.timeFieldName
+    (field) => field.name === indexPattern.timeFieldName
   );
 
   if (!timefield) {

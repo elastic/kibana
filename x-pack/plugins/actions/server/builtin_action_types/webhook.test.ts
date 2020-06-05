@@ -83,7 +83,7 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid methods are provided', () => {
-    ['post', 'put'].forEach(method => {
+    ['post', 'put'].forEach((method) => {
       const config: Record<string, any> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
@@ -165,7 +165,7 @@ describe('config validation', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: _ => {
+        ensureWhitelistedUri: (_) => {
           throw new Error(`target url is not whitelisted`);
         },
       },

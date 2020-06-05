@@ -49,7 +49,7 @@ export const Map: React.FC<Props> = ({
         return (
           <WaffleMapOuterContainer ref={(el: any) => measureRef(el)} data-test-subj="waffleMap">
             <WaffleMapInnerContainer>
-              {groupsWithLayout.map(group => {
+              {groupsWithLayout.map((group) => {
                 if (isWaffleMapGroupWithGroups(group)) {
                   return (
                     <GroupOfGroups

@@ -15,7 +15,7 @@ import {
 } from '../../../plugins/lens/common';
 import { migrations } from './migrations';
 
-export const lens: LegacyPluginInitializer = kibana => {
+export const lens: LegacyPluginInitializer = (kibana) => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,

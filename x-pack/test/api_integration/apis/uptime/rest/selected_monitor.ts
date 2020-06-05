@@ -7,7 +7,7 @@
 import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('get selected monitor by ID', () => {
     const monitorId = '0002-up';
 

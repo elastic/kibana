@@ -57,10 +57,10 @@ run(async function getChangedFiles({ log }) {
   const changedFiles = changedFileStatuses
     .split('\n')
     // Ignore blank lines
-    .filter(line => line.trim().length > 0)
+    .filter((line) => line.trim().length > 0)
     // git diff --name-status outputs lines with two OR three parts
     // separated by a tab character
-    .map(line => line.trim().split('\t'))
+    .map((line) => line.trim().split('\t'))
     .map(([status, ...paths]) => {
       // ignore deleted files
       if (status === 'D') {
@@ -75,7 +75,7 @@ run(async function getChangedFiles({ log }) {
     })
     .filter((file): file is File => Boolean(file));
 
-  const pathsToLint = Eslint.pickFilesToLint(log, changedFiles).map(f => f.getAbsolutePath());
+  const pathsToLint = Eslint.pickFilesToLint(log, changedFiles).map((f) => f.getAbsolutePath());
 
   if (pathsToLint.length > 0) {
     log.debug('[prettier] run on %j files: ', pathsToLint.length, pathsToLint);

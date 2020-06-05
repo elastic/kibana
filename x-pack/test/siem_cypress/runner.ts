@@ -19,7 +19,7 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
   await esArchiver.load('empty_kibana');
   await esArchiver.load('auditbeat');
 
-  await withProcRunner(log, async procs => {
+  await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
       args: ['cypress:run'],

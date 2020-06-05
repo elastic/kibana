@@ -190,7 +190,7 @@ const PropertiesRightComponent: React.FC<Props> = ({
     </EuiFlexItem>
 
     {showUsersView
-      ? usersViewing.map(user => (
+      ? usersViewing.map((user) => (
           // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
           // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
           <HiddenFlexItem key={user}>

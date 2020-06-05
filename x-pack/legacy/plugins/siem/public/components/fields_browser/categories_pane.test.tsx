@@ -34,12 +34,9 @@ describe('CategoriesPane', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="categories-pane-title"]')
-        .first()
-        .text()
-    ).toEqual(i18n.CATEGORIES);
+    expect(wrapper.find('[data-test-subj="categories-pane-title"]').first().text()).toEqual(
+      i18n.CATEGORIES
+    );
   });
 
   test('it renders a "No fields match" message when filteredBrowserFields is empty', () => {
@@ -57,11 +54,8 @@ describe('CategoriesPane', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="categories-container"] tbody')
-        .first()
-        .text()
-    ).toEqual(i18n.NO_FIELDS_MATCH);
+    expect(wrapper.find('[data-test-subj="categories-container"] tbody').first().text()).toEqual(
+      i18n.NO_FIELDS_MATCH
+    );
   });
 });

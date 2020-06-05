@@ -47,12 +47,9 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} inputId="timeline" title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
-      expect(
-        wrapper
-          .find('button[data-test-subj="inspect-empty-button"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
+        true
+      );
     });
 
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
@@ -61,12 +58,9 @@ describe('Inspect Button', () => {
           <InspectButton compact={true} queryId={newQuery.id} inputId="timeline" title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
-      expect(
-        wrapper
-          .find('button[data-test-subj="inspect-empty-button"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
+        false
+      );
     });
 
     test('Eui Icon Button', () => {
@@ -75,12 +69,9 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
-      expect(
-        wrapper
-          .find('button[data-test-subj="inspect-icon-button"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
+        true
+      );
     });
 
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
@@ -89,12 +80,9 @@ describe('Inspect Button', () => {
           <InspectButton compact={true} inputId="timeline" queryId={newQuery.id} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
-      expect(
-        wrapper
-          .find('button[data-test-subj="inspect-icon-button"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
+        true
+      );
     });
 
     test('Eui Empty Button disabled', () => {
@@ -165,20 +153,14 @@ describe('Inspect Button', () => {
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
-      wrapper
-        .find('button[data-test-subj="inspect-icon-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
       wrapper.update();
 
       expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
-      expect(
-        wrapper
-          .find('button[data-test-subj="modal-inspect-close"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
+        true
+      );
     });
 
     test('Close Inspect Modal', () => {
@@ -189,27 +171,18 @@ describe('Inspect Button', () => {
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
       );
-      wrapper
-        .find('button[data-test-subj="inspect-icon-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
       wrapper.update();
 
-      wrapper
-        .find('button[data-test-subj="modal-inspect-close"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="modal-inspect-close"]').first().simulate('click');
 
       wrapper.update();
 
       expect(store.getState().inputs.global.queries[0].isInspected).toBe(false);
-      expect(
-        wrapper
-          .find('button[data-test-subj="modal-inspect-close"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
+        false
+      );
     });
 
     test('Do not Open Inspect Modal if it is loading', () => {
@@ -219,20 +192,14 @@ describe('Inspect Button', () => {
         </TestProviderWithoutDragAndDrop>
       );
       store.getState().inputs.global.queries[0].loading = true;
-      wrapper
-        .find('button[data-test-subj="inspect-icon-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
       wrapper.update();
 
       expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
-      expect(
-        wrapper
-          .find('button[data-test-subj="modal-inspect-close"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
+        false
+      );
     });
   });
 });

@@ -22,7 +22,7 @@ function getMockUsageCollection() {
     }
   }
   return {
-    makeUsageCollector: options => {
+    makeUsageCollector: (options) => {
       return new MockUsageCollector(this, options);
     },
   };
@@ -51,7 +51,7 @@ function getServerMock(customization) {
     },
     log: () => {},
     config: () => ({
-      get: key => {
+      get: (key) => {
         if (key === 'xpack.reporting.enabled') {
           return true;
         } else if (key === 'xpack.reporting.index') {

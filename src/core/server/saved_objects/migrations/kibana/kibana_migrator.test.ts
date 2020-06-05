@@ -24,7 +24,7 @@ import { SavedObjectsType } from '../../types';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       namespaceAgnostic: false,
@@ -76,7 +76,7 @@ describe('KibanaMigrator', () => {
       // and should only be done once
       const callClusterCommands = clusterStub.mock.calls
         .map(([callClusterPath]) => callClusterPath)
-        .filter(callClusterPath => callClusterPath === 'cat.templates');
+        .filter((callClusterPath) => callClusterPath === 'cat.templates');
       expect(callClusterCommands.length).toBe(1);
     });
   });

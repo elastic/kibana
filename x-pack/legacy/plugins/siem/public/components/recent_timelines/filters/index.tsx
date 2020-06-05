@@ -31,7 +31,7 @@ export const Filters = React.memo<{
   <EuiButtonGroup
     options={toggleButtonIcons}
     idSelected={filterBy}
-    onChange={f => {
+    onChange={(f) => {
       setFilterBy(f as FilterMode);
     }}
     isIconOnly

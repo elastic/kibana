@@ -46,10 +46,10 @@ export function createFieldChooserDirective($location) {
       onRemoveField: '=',
     },
     template: fieldChooserTemplate,
-    link: function($scope) {
+    link: function ($scope) {
       $scope.showFilter = false;
       $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
-      $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
+      $scope.indexPatternList = _.sortBy($scope.indexPatternList, (o) => o.get('title'));
       const config = getServices().uiSettings;
 
       const filter = ($scope.filter = {
@@ -64,23 +64,23 @@ export function createFieldChooserDirective($location) {
           { label: 'yes', value: true },
           { label: 'no', value: false },
         ],
-        reset: function() {
+        reset: function () {
           filter.vals = _.clone(filter.defaults);
         },
         /**
          * filter for fields that are displayed / selected for the data table
          */
-        isFieldFilteredAndDisplayed: function(field) {
+        isFieldFilteredAndDisplayed: function (field) {
           return field.display && isFieldFiltered(field);
         },
         /**
          * filter for fields that are not displayed / selected for the data table
          */
-        isFieldFilteredAndNotDisplayed: function(field) {
+        isFieldFilteredAndNotDisplayed: function (field) {
           return !field.display && isFieldFiltered(field) && field.type !== '_source';
         },
-        getActive: function() {
-          return _.some(filter.props, function(prop) {
+        getActive: function () {
+          return _.some(filter.props, function (prop) {
             return filter.vals[prop] !== filter.defaults[prop];
           });
         },
@@ -108,11 +108,11 @@ export function createFieldChooserDirective($location) {
       // set the initial values to the defaults
       filter.reset();
 
-      $scope.$watchCollection('filter.vals', function() {
+      $scope.$watchCollection('filter.vals', function () {
         filter.active = filter.getActive();
         if (filter.vals) {
           let count = 0;
-          Object.keys(filter.vals).forEach(key => {
+          Object.keys(filter.vals).forEach((key) => {
             if (key === 'missing' || key === 'name') {
               return;
             }
@@ -125,7 +125,7 @@ export function createFieldChooserDirective($location) {
         }
       });
 
-      $scope.$watchMulti(['[]fieldCounts', '[]columns', '[]hits'], function(cur, prev) {
+      $scope.$watchMulti(['[]fieldCounts', '[]columns', '[]hits'], function (cur, prev) {
         const newHits = cur[2] !== prev[2];
         let fields = $scope.fields;
         const columns = $scope.columns || [];
@@ -139,19 +139,19 @@ export function createFieldChooserDirective($location) {
 
         // group the fields into popular and up-popular lists
         _.chain(fields)
-          .each(function(field) {
+          .each(function (field) {
             field.displayOrder = _.indexOf(columns, field.name) + 1;
             field.display = !!field.displayOrder;
             field.rowCount = fieldCounts[field.name];
           })
-          .sortBy(function(field) {
+          .sortBy(function (field) {
             return (field.count || 0) * -1;
           })
-          .groupBy(function(field) {
+          .groupBy(function (field) {
             if (field.display) return 'selected';
             return field.count > 0 ? 'popular' : 'unpopular';
           })
-          .tap(function(groups) {
+          .tap(function (groups) {
             groups.selected = _.sortBy(groups.selected || [], 'displayOrder');
 
             groups.popular = groups.popular || [];
@@ -161,7 +161,7 @@ export function createFieldChooserDirective($location) {
             const extras = groups.popular.splice(config.get('fields:popularLimit'));
             groups.unpopular = extras.concat(groups.unpopular);
           })
-          .each(function(group, name) {
+          .each(function (group, name) {
             $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
           })
           .commit();
@@ -170,7 +170,7 @@ export function createFieldChooserDirective($location) {
         $scope.fieldTypes = _.union(['any'], _.pluck(fields, 'type'));
       });
 
-      $scope.increaseFieldCounter = function(fieldName) {
+      $scope.increaseFieldCounter = function (fieldName) {
         $scope.indexPattern.popularizeField(fieldName, 1);
       };
 
@@ -240,7 +240,7 @@ export function createFieldChooserDirective($location) {
         );
       }
 
-      $scope.computeDetails = function(field, recompute) {
+      $scope.computeDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
           field.details = {
             visualizeUrl: isFieldVisualizable(field) ? getVisualizeUrl(field) : null,
@@ -251,7 +251,7 @@ export function createFieldChooserDirective($location) {
               grouped: false,
             }),
           };
-          _.each(field.details.buckets, function(bucket) {
+          _.each(field.details.buckets, function (bucket) {
             bucket.display = field.format.convert(bucket.value);
           });
           $scope.increaseFieldCounter(field, 1);
@@ -272,7 +272,7 @@ export function createFieldChooserDirective($location) {
         const fieldNamesInDocs = _.keys(fieldCounts);
         const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
 
-        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(function(
+        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(function (
           unknownFieldName
         ) {
           fieldSpecs.push({
@@ -284,7 +284,7 @@ export function createFieldChooserDirective($location) {
         const fields = new IndexPatternFieldList(indexPattern, fieldSpecs);
 
         if (prevFields) {
-          fields.forEach(function(field) {
+          fields.forEach(function (field) {
             field.details = (prevFields.getByName(field.name) || {}).details;
           });
         }

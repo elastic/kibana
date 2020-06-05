@@ -39,9 +39,9 @@ export const GroupsFilterPopoverComponent = ({
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
   const groups = siemJobs
-    .map(j => j.groups)
+    .map((j) => j.groups)
     .flat()
-    .filter(g => g !== 'siem');
+    .filter((g) => g !== 'siem');
   const uniqueGroups = Array.from(new Set(groups));
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export const GroupsFilterPopoverComponent = ({
           key={`${index}-${group}`}
           onClick={() => toggleSelectedGroup(group, selectedGroups, setSelectedGroups)}
         >
-          {`${group} (${groups.filter(g => g === group).length})`}
+          {`${group} (${groups.filter((g) => g === group).length})`}
         </EuiFilterSelectItem>
       ))}
       {uniqueGroups.length === 0 && (

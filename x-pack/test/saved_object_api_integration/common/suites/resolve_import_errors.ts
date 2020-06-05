@@ -126,7 +126,7 @@ export function resolveImportErrorsTestSuiteFactory(
           )
           .attach(
             'file',
-            Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+            Buffer.from(data.map((obj) => JSON.stringify(obj)).join('\n'), 'utf8'),
             'export.ndjson'
           )
           .expect(tests.default.statusCode)
@@ -163,7 +163,7 @@ export function resolveImportErrorsTestSuiteFactory(
             )
             .attach(
               'file',
-              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              Buffer.from(data.map((obj) => JSON.stringify(obj)).join('\n'), 'utf8'),
               'export.ndjson'
             )
             .expect(tests.unknownType.statusCode)
@@ -200,7 +200,7 @@ export function resolveImportErrorsTestSuiteFactory(
             )
             .attach(
               'file',
-              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              Buffer.from(data.map((obj) => JSON.stringify(obj)).join('\n'), 'utf8'),
               'export.ndjson'
             )
             .expect(tests.hiddenType.statusCode)

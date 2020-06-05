@@ -10,7 +10,7 @@ import { throttle } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
 import {
   Coordinate,
-  TimeSeries
+  TimeSeries,
 } from '../../../../../../../../plugins/apm/typings/timeseries';
 import { Maybe } from '../../../../../../../../plugins/apm/typings/common';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
@@ -33,7 +33,7 @@ const formatTooltipValue = (coordinate: Coordinate) => {
     : NOT_AVAILABLE_LABEL;
 };
 
-const TransactionBreakdownGraph: React.FC<Props> = props => {
+const TransactionBreakdownGraph: React.FC<Props> = (props) => {
   const { timeseries } = props;
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const handleHover = useMemo(

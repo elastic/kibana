@@ -9,14 +9,14 @@ import {
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
-  ERROR_LOG_MESSAGE
+  ERROR_LOG_MESSAGE,
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../../common/projections/errors';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
@@ -30,7 +30,7 @@ export async function getErrorGroups({
   serviceName,
   sortField,
   sortDirection = 'desc',
-  setup
+  setup,
 }: {
   serviceName: string;
   sortField?: string;
@@ -46,7 +46,7 @@ export async function getErrorGroups({
 
   const order: SortOptions = sortByLatestOccurrence
     ? {
-        max_timestamp: sortDirection
+        max_timestamp: sortDirection,
       }
     : { _count: sortDirection };
 
@@ -58,7 +58,7 @@ export async function getErrorGroups({
           terms: {
             ...projection.body.aggs.error_groups.terms,
             size: 500,
-            order
+            order,
           },
           aggs: {
             sample: {
@@ -69,25 +69,25 @@ export async function getErrorGroups({
                   ERROR_EXC_HANDLED,
                   ERROR_CULPRIT,
                   ERROR_GROUP_ID,
-                  '@timestamp'
+                  '@timestamp',
                 ],
                 sort: [{ '@timestamp': 'desc' as const }],
-                size: 1
-              }
+                size: 1,
+              },
             },
             ...(sortByLatestOccurrence
               ? {
                   max_timestamp: {
                     max: {
-                      field: '@timestamp'
-                    }
-                  }
+                      field: '@timestamp',
+                    },
+                  },
                 }
-              : {})
-          }
-        }
-      }
-    }
+              : {}),
+          },
+        },
+      },
+    },
   });
 
   interface SampleError {
@@ -109,7 +109,7 @@ export async function getErrorGroups({
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
-  const hits = (resp.aggregations?.error_groups.buckets || []).map(bucket => {
+  const hits = (resp.aggregations?.error_groups.buckets || []).map((bucket) => {
     const source = bucket.sample.hits.hits[0]._source;
     const message =
       source.error.log?.message || source.error.exception?.[0]?.message;
@@ -120,7 +120,7 @@ export async function getErrorGroups({
       culprit: source.error.culprit,
       groupId: source.error.grouping_key,
       latestOccurrenceAt: source['@timestamp'],
-      handled: source.error.exception?.[0].handled
+      handled: source.error.exception?.[0].handled,
     };
   });
 

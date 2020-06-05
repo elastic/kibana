@@ -80,7 +80,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.alerting.enabled=true',
           '--xpack.eventLog.logEntries=true',
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,

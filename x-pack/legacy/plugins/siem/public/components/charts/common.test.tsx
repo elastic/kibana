@@ -143,7 +143,7 @@ describe('checkIfAllValuesAreZero', () => {
     ],
   ];
 
-  describe.each(mockInvalidDataSets)('with data [%o]', data => {
+  describe.each(mockInvalidDataSets)('with data [%o]', (data) => {
     let result: boolean;
     beforeAll(() => {
       result = checkIfAllValuesAreZero(data);
@@ -154,7 +154,7 @@ describe('checkIfAllValuesAreZero', () => {
     });
   });
 
-  describe.each(mockValidDataSets)('with data [%o]', data => {
+  describe.each(mockValidDataSets)('with data [%o]', (data) => {
     let result: boolean;
     beforeAll(() => {
       result = checkIfAllValuesAreZero(data);

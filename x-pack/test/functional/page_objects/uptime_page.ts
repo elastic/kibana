@@ -68,7 +68,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
       return retry.tryForTime(15000, async () => {
-        await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+        await Promise.all(monitorIdsToCheck.map((id) => uptimeService.monitorPageLinkExists(id)));
       });
     }
 

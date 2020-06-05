@@ -28,7 +28,7 @@ import { VisConfig } from '../../lib/vis_config';
 import { Data } from '../../lib/data';
 import { getMockUiState } from './fixtures/_vis_fixture';
 
-describe('Vislib AxisTitle Class Test Suite', function() {
+describe('Vislib AxisTitle Class Test Suite', function () {
   let el;
   let dataObj;
   let xTitle;
@@ -94,10 +94,7 @@ describe('Vislib AxisTitle Class Test Suite', function() {
   };
 
   beforeEach(() => {
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'visWrapper');
+    el = d3.select('body').append('div').attr('class', 'visWrapper');
 
     el.append('div')
       .attr('class', 'visAxis__column--bottom')
@@ -141,11 +138,11 @@ describe('Vislib AxisTitle Class Test Suite', function() {
     yTitle = new AxisTitle(yAxisConfig);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     el.remove();
   });
 
-  it('should not do anything if title.show is set to false', function() {
+  it('should not do anything if title.show is set to false', function () {
     const xAxisConfig = new AxisConfig(visConfig, {
       position: 'bottom',
       show: false,
@@ -155,57 +152,33 @@ describe('Vislib AxisTitle Class Test Suite', function() {
     });
     xTitle = new AxisTitle(xAxisConfig);
     xTitle.render();
-    expect(
-      $(el.node())
-        .find('.x-axis-title')
-        .find('svg').length
-    ).to.be(0);
+    expect($(el.node()).find('.x-axis-title').find('svg').length).to.be(0);
   });
 
-  describe('render Method', function() {
-    beforeEach(function() {
+  describe('render Method', function () {
+    beforeEach(function () {
       xTitle.render();
       yTitle.render();
     });
 
-    it('should append an svg to div', function() {
+    it('should append an svg to div', function () {
       expect(el.select('.x-axis-title').selectAll('svg').length).to.be(1);
       expect(el.select('.y-axis-title').selectAll('svg').length).to.be(1);
     });
 
-    it('should append a g element to the svg', function() {
-      expect(
-        el
-          .select('.x-axis-title')
-          .selectAll('svg')
-          .select('g').length
-      ).to.be(1);
-      expect(
-        el
-          .select('.y-axis-title')
-          .selectAll('svg')
-          .select('g').length
-      ).to.be(1);
+    it('should append a g element to the svg', function () {
+      expect(el.select('.x-axis-title').selectAll('svg').select('g').length).to.be(1);
+      expect(el.select('.y-axis-title').selectAll('svg').select('g').length).to.be(1);
     });
 
-    it('should append text', function() {
-      expect(
-        !!el
-          .select('.x-axis-title')
-          .selectAll('svg')
-          .selectAll('text')
-      ).to.be(true);
-      expect(
-        !!el
-          .select('.y-axis-title')
-          .selectAll('svg')
-          .selectAll('text')
-      ).to.be(true);
+    it('should append text', function () {
+      expect(!!el.select('.x-axis-title').selectAll('svg').selectAll('text')).to.be(true);
+      expect(!!el.select('.y-axis-title').selectAll('svg').selectAll('text')).to.be(true);
     });
   });
 
-  describe('draw Method', function() {
-    it('should be a function', function() {
+  describe('draw Method', function () {
+    it('should be a function', function () {
       expect(_.isFunction(xTitle.draw())).to.be(true);
     });
   });

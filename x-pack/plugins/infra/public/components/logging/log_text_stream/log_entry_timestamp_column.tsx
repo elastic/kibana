@@ -31,15 +31,15 @@ export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
 );
 
 const hoveredContentStyle = css`
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.theme.darkMode
       ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
       : darken(0.05, props.theme.eui.euiColorHighlight)};
-  border-color: ${props =>
+  border-color: ${(props) =>
     props.theme.darkMode
       ? transparentize(0.7, darken(0.2, props.theme.eui.euiColorHighlight))
       : darken(0.2, props.theme.eui.euiColorHighlight)};
-  color: ${props => props.theme.eui.euiColorFullShade};
+  color: ${(props) => props.theme.eui.euiColorFullShade};
 `;
 
 interface TimestampColumnContentProps {
@@ -48,10 +48,10 @@ interface TimestampColumnContentProps {
 }
 
 const TimestampColumnContent = euiStyled(LogEntryColumnContent)<TimestampColumnContentProps>`
-  color: ${props => props.theme.eui.euiColorDarkShade};
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
   overflow: hidden;
   text-overflow: clip;
   white-space: pre;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${(props) => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
 `;

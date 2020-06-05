@@ -32,7 +32,7 @@ export class Table extends PureComponent {
     deleteField: PropTypes.func.isRequired,
   };
 
-  renderFormatCell = value => {
+  renderFormatCell = (value) => {
     const { indexPattern } = this.props;
 
     const title =

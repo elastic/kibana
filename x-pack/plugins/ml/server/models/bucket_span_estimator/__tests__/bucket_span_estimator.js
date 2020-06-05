@@ -14,8 +14,8 @@ import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 // sufficient permissions should be returned, the second time insufficient
 // permissions.
 const permissions = [false, true];
-const callWithRequest = method => {
-  return new Promise(resolve => {
+const callWithRequest = (method) => {
+  return new Promise((resolve) => {
     if (method === 'ml.privilegeCheck') {
       resolve({
         cluster: {
@@ -32,7 +32,7 @@ const callWithRequest = method => {
 };
 
 const callWithInternalUser = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     resolve({});
   });
 };
@@ -68,20 +68,20 @@ const formConfig = {
 
 describe('ML - BucketSpanEstimator', () => {
   it('call factory', () => {
-    expect(function() {
+    expect(function () {
       estimateBucketSpanFactory(callWithRequest, callWithInternalUser);
     }).to.not.throwError('Not initialized.');
   });
 
-  it('call factory and estimator with security disabled', done => {
-    expect(function() {
+  it('call factory and estimator with security disabled', (done) => {
+    expect(function () {
       const estimateBucketSpan = estimateBucketSpanFactory(
         callWithRequest,
         callWithInternalUser,
         mockXpackMainPluginFactory()
       );
 
-      estimateBucketSpan(formConfig).catch(catchData => {
+      estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
 
         done();
@@ -89,14 +89,14 @@ describe('ML - BucketSpanEstimator', () => {
     }).to.not.throwError('Not initialized.');
   });
 
-  it('call factory and estimator with security enabled and sufficient permissions.', done => {
-    expect(function() {
+  it('call factory and estimator with security enabled and sufficient permissions.', (done) => {
+    expect(function () {
       const estimateBucketSpan = estimateBucketSpanFactory(
         callWithRequest,
         callWithInternalUser,
         mockXpackMainPluginFactory(true)
       );
-      estimateBucketSpan(formConfig).catch(catchData => {
+      estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
 
         done();
@@ -104,15 +104,15 @@ describe('ML - BucketSpanEstimator', () => {
     }).to.not.throwError('Not initialized.');
   });
 
-  it('call factory and estimator with security enabled and insufficient permissions.', done => {
-    expect(function() {
+  it('call factory and estimator with security enabled and insufficient permissions.', (done) => {
+    expect(function () {
       const estimateBucketSpan = estimateBucketSpanFactory(
         callWithRequest,
         callWithInternalUser,
         mockXpackMainPluginFactory(true)
       );
 
-      estimateBucketSpan(formConfig).catch(catchData => {
+      estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Insufficient permissions to call bucket span estimation.');
         done();
       });

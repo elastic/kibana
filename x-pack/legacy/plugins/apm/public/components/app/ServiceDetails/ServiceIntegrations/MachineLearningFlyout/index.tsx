@@ -27,11 +27,11 @@ export class MachineLearningFlyout extends Component<Props, State> {
   static contextType = ApmPluginContext;
 
   public state: State = {
-    isCreatingJob: false
+    isCreatingJob: false,
   };
 
   public onClickCreate = async ({
-    transactionType
+    transactionType,
   }: {
     transactionType: string;
   }) => {
@@ -69,7 +69,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
         {
-          defaultMessage: 'Job creation failed'
+          defaultMessage: 'Job creation failed',
         }
       ),
       text: toMountPoint(
@@ -78,16 +78,16 @@ export class MachineLearningFlyout extends Component<Props, State> {
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
             {
               defaultMessage:
-                'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
+                'Your current license may not allow for creating machine learning jobs, or this job may already exist.',
             }
           )}
         </p>
-      )
+      ),
     });
   };
 
   public addSuccessToast = ({
-    transactionType
+    transactionType,
   }: {
     transactionType: string;
   }) => {
@@ -103,7 +103,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationTitle',
         {
-          defaultMessage: 'Job successfully created'
+          defaultMessage: 'Job successfully created',
         }
       ),
       text: toMountPoint(
@@ -115,8 +115,8 @@ export class MachineLearningFlyout extends Component<Props, State> {
                 'The analysis is now running for {serviceName} ({transactionType}). It might take a while before results are added to the response times graph.',
               values: {
                 serviceName,
-                transactionType
-              }
+                transactionType,
+              },
             }
           )}{' '}
           <ApmPluginContext.Provider value={this.context}>
@@ -127,13 +127,13 @@ export class MachineLearningFlyout extends Component<Props, State> {
               {i18n.translate(
                 'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
                 {
-                  defaultMessage: 'View job'
+                  defaultMessage: 'View job',
                 }
               )}
             </MLJobLink>
           </ApmPluginContext.Provider>
         </p>
-      )
+      ),
     });
   };
 

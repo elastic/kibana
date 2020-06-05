@@ -40,10 +40,7 @@ describe('CaseView actions', () => {
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
 
-    wrapper
-      .find('button[data-test-subj="property-actions-ellipses"]')
-      .first()
-      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
     expect(handleToggleModal).toHaveBeenCalled();
   });

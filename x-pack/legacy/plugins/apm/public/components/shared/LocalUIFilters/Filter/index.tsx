@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiButton,
   EuiFlexItem,
-  EuiFlexGroup
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -26,7 +26,7 @@ import { FilterTitleButton } from './FilterTitleButton';
 
 const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
   () => ({
-    anchorClassName: 'anchor'
+    anchorClassName: 'anchor',
   })
 )<EuiPopoverProps & { className?: string; id?: string }>`
   .anchor {
@@ -73,11 +73,11 @@ const Filter = ({
   options,
   onChange,
   value,
-  showCount
+  showCount,
 }: Props) => {
   const [showPopover, setShowPopover] = useState(false);
 
-  const toggleShowPopover = () => setShowPopover(show => !show);
+  const toggleShowPopover = () => setShowPopover((show) => !show);
 
   const button = (
     <FilterTitleButton onClick={toggleShowPopover}>{title}</FilterTitleButton>
@@ -85,14 +85,14 @@ const Filter = ({
 
   const items: Option[] = useMemo(
     () =>
-      options.map(option => ({
+      options.map((option) => ({
         label: option.name,
         append: showCount ? (
           <Counter>
             <EuiText size="xs">{option.count}</EuiText>
           </Counter>
         ) : null,
-        checked: value.includes(option.name) ? 'on' : undefined
+        checked: value.includes(option.name) ? 'on' : undefined,
       })),
     [value, options, showCount]
   );
@@ -114,7 +114,7 @@ const Filter = ({
         anchorPosition="downLeft"
       >
         <EuiSelectable
-          onChange={selectedOptions => {
+          onChange={(selectedOptions) => {
             setVisibleOptions(selectedOptions);
           }}
           options={visibleOptions}
@@ -128,7 +128,7 @@ const Filter = ({
                     <h4>
                       {i18n.translate('xpack.apm.applyFilter', {
                         defaultMessage: 'Apply {title} filter',
-                        values: { title }
+                        values: { title },
                       })}
                     </h4>
                   </EuiTitle>
@@ -145,8 +145,8 @@ const Filter = ({
                     fill={true}
                     onClick={() => {
                       const newValue = visibleOptions
-                        .filter(option => option.checked === 'on')
-                        .map(option => option.label);
+                        .filter((option) => option.checked === 'on')
+                        .map((option) => option.label);
 
                       setShowPopover(false);
                       onChange(newValue);
@@ -154,7 +154,7 @@ const Filter = ({
                     size="s"
                   >
                     {i18n.translate('xpack.apm.applyOptions', {
-                      defaultMessage: 'Apply options'
+                      defaultMessage: 'Apply options',
                     })}
                   </ApplyButton>
                 </FlexItem>
@@ -166,8 +166,8 @@ const Filter = ({
       {value.length ? (
         <>
           <FilterBadgeList
-            onRemove={val => {
-              onChange(value.filter(v => val !== v));
+            onRemove={(val) => {
+              onChange(value.filter((v) => val !== v));
             }}
             value={value}
           />

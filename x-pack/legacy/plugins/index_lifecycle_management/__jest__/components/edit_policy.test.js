@@ -35,7 +35,7 @@ import {
   maximumDocumentsRequiredMessage,
 } from '../../public/np_ready/application/store/selectors/lifecycle';
 
-initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
 initUiMetric(() => () => {});
 initNotification({
   addDanger: () => {},
@@ -61,9 +61,7 @@ const policies = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment()
-      .subtract(i, 'days')
-      .valueOf(),
+    modified_date: moment().subtract(i, 'days').valueOf(),
     linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`,
     policy: {
@@ -82,7 +80,7 @@ const activatePhase = (rendered, phase) => {
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
   const errorMessages = rendered.find('.euiFormErrorText');
   expect(errorMessages.length).toBe(expectedErrorMessages.length);
-  expectedErrorMessages.forEach(expectedErrorMessage => {
+  expectedErrorMessages.forEach((expectedErrorMessage) => {
     let foundErrorMessage;
     for (let i = 0; i < errorMessages.length; i++) {
       if (errorMessages.at(i).text() === expectedErrorMessage) {
@@ -92,7 +90,7 @@ const expectedErrorMessages = (rendered, expectedErrorMessages) => {
     expect(foundErrorMessage).toBe(true);
   });
 };
-const noRollover = rendered => {
+const noRollover = (rendered) => {
   findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   rendered.update();
 };
@@ -114,7 +112,7 @@ const setPhaseIndexPriority = (rendered, phase, priority) => {
   priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
-const save = rendered => {
+const save = (rendered) => {
   const saveButton = findTestSubject(rendered, 'savePolicyButton');
   saveButton.simulate('click');
   rendered.update();

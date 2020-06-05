@@ -151,9 +151,9 @@ export const useExploreData = (
         // This avoids confusion later on if a field name has dots in its name
         // or is a nested fields when displaying it via EuiInMemoryTable.
         const flattenedFields = getFlattenedFields(docs[0]._source, resultsField);
-        const transformedTableItems = docs.map(doc => {
+        const transformedTableItems = docs.map((doc) => {
           const item: TableItem = {};
-          flattenedFields.forEach(ff => {
+          flattenedFields.forEach((ff) => {
             item[ff] = getNestedProperty(doc._source, ff);
             if (item[ff] === undefined) {
               // If the attribute is undefined, it means it was not a nested property

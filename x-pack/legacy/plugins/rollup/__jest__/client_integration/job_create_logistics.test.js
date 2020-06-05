@@ -18,7 +18,7 @@ import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobCreate;
 
@@ -151,7 +151,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow invalid characters', () => {
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           form.setInputValue('rollupIndexName', `rollup_index_${char}`);
           actions.clickNextStep();
           expect(form.getErrorsMessages()).toContain(
@@ -172,17 +172,17 @@ describe('Create Rollup Job, step 1: Logistics', () => {
     });
 
     describe('rollup cron', () => {
-      const changeFrequency = value => {
+      const changeFrequency = (value) => {
         find('cronFrequencySelect').simulate('change', { target: { value } });
       };
 
-      const generateStringSequenceOfNumbers = total =>
+      const generateStringSequenceOfNumbers = (total) =>
         new Array(total).fill('').map((_, i) => (i < 10 ? `0${i}` : i.toString())); // eslint-disable-line no-unused-vars
 
       describe('frequency', () => {
         it('should allow "minute", "hour", "day", "week", "month", "year"', () => {
           const frequencySelect = find('cronFrequencySelect');
-          const options = frequencySelect.find('option').map(option => option.text());
+          const options = frequencySelect.find('option').map((option) => option.text());
           expect(options).toEqual(['minute', 'hour', 'day', 'week', 'month', 'year']);
         });
 
@@ -205,7 +205,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any minute from 00 -> 59', () => {
             const minutSelect = find('cronFrequencyHourlyMinuteSelect');
-            const options = minutSelect.find('option').map(option => option.text());
+            const options = minutSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
         });
@@ -223,13 +223,13 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any hour from 00 -> 23', () => {
             const hourSelect = find('cronFrequencyDailyHourSelect');
-            const options = hourSelect.find('option').map(option => option.text());
+            const options = hourSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
             const minutSelect = find('cronFrequencyDailyMinuteSelect');
-            const options = minutSelect.find('option').map(option => option.text());
+            const options = minutSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
         });
@@ -248,7 +248,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any day of the week', () => {
             const hourSelect = find('cronFrequencyWeeklyDaySelect');
-            const options = hourSelect.find('option').map(option => option.text());
+            const options = hourSelect.find('option').map((option) => option.text());
             expect(options).toEqual([
               'Sunday',
               'Monday',
@@ -262,13 +262,13 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any hour from 00 -> 23', () => {
             const hourSelect = find('cronFrequencyWeeklyHourSelect');
-            const options = hourSelect.find('option').map(option => option.text());
+            const options = hourSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
             const minutSelect = find('cronFrequencyWeeklyMinuteSelect');
-            const options = minutSelect.find('option').map(option => option.text());
+            const options = minutSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
         });
@@ -287,19 +287,19 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any date of the month from 1st to 31st', () => {
             const dateSelect = find('cronFrequencyMonthlyDateSelect');
-            const options = dateSelect.find('option').map(option => option.text());
+            const options = dateSelect.find('option').map((option) => option.text());
             expect(options.length).toEqual(31);
           });
 
           it('should allow to select any hour from 00 -> 23', () => {
             const hourSelect = find('cronFrequencyMonthlyHourSelect');
-            const options = hourSelect.find('option').map(option => option.text());
+            const options = hourSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
             const minutSelect = find('cronFrequencyMonthlyMinuteSelect');
-            const options = minutSelect.find('option').map(option => option.text());
+            const options = minutSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
         });
@@ -319,7 +319,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any month of the year', () => {
             const monthSelect = find('cronFrequencyYearlyMonthSelect');
-            const options = monthSelect.find('option').map(option => option.text());
+            const options = monthSelect.find('option').map((option) => option.text());
             expect(options).toEqual([
               'January',
               'February',
@@ -338,19 +338,19 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
           it('should allow to select any date of the month from 1st to 31st', () => {
             const dateSelect = find('cronFrequencyYearlyDateSelect');
-            const options = dateSelect.find('option').map(option => option.text());
+            const options = dateSelect.find('option').map((option) => option.text());
             expect(options.length).toEqual(31);
           });
 
           it('should allow to select any hour from 00 -> 23', () => {
             const hourSelect = find('cronFrequencyYearlyHourSelect');
-            const options = hourSelect.find('option').map(option => option.text());
+            const options = hourSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
             const minutSelect = find('cronFrequencyYearlyMinuteSelect');
-            const options = minutSelect.find('option').map(option => option.text());
+            const options = minutSelect.find('option').map((option) => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
         });

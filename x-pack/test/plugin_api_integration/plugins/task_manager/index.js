@@ -9,9 +9,9 @@ const { EventEmitter } = require('events');
 
 import { initRoutes } from './init_routes';
 
-const once = function(emitter, event) {
-  return new Promise(resolve => {
-    emitter.once(event, data => resolve(data || {}));
+const once = function (emitter, event) {
+  return new Promise((resolve) => {
+    emitter.once(event, (data) => resolve(data || {}));
   });
 };
 

@@ -63,7 +63,7 @@ export const destroyIndexPatternList = () => {
 };
 
 const indexPatternsResolutions = {
-  indexPatterns: function() {
+  indexPatterns: function () {
     const savedObjectsClient = npStart.core.savedObjects.client;
 
     return savedObjectsClient
@@ -72,7 +72,7 @@ const indexPatternsResolutions = {
         fields: ['title', 'type'],
         perPage: 10000,
       })
-      .then(response => response.savedObjects);
+      .then((response) => response.savedObjects);
   },
 };
 
@@ -80,7 +80,7 @@ const indexPatternsResolutions = {
 uiRoutes.defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
   resolve: indexPatternsResolutions,
   requireUICapability: 'management.kibana.index_patterns',
-  badge: uiCapabilities => {
+  badge: (uiCapabilities) => {
     if (uiCapabilities.indexPatterns.save) {
       return undefined;
     }
@@ -105,14 +105,14 @@ uiRoutes.when('/management/kibana/index_patterns', {
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules
   .get('apps/management')
-  .directive('kbnManagementIndexPatterns', function($route, config, kbnUrl) {
+  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl) {
     return {
       restrict: 'E',
       transclude: true,
       template: indexTemplate,
-      link: async function($scope) {
+      link: async function ($scope) {
         const indexPatternCreationOptions = await managementSetup.indexPattern.creation.getIndexPatternCreationOptions(
-          url => {
+          (url) => {
             $scope.$evalAsync(() => kbnUrl.change(url));
           }
         );
@@ -120,7 +120,7 @@ uiModules
         const renderList = () => {
           $scope.indexPatternList =
             $route.current.locals.indexPatterns
-              .map(pattern => {
+              .map((pattern) => {
                 const id = pattern.id;
                 const title = pattern.get('title');
                 const isDefault = $scope.defaultIndex === id;

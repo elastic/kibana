@@ -59,7 +59,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('connectors-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             name: $(row)
               .findTestSubject('connectorsTableCell-name')
@@ -81,7 +81,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             name: $(row)
               .findTestSubject('alertsTableCell-name')

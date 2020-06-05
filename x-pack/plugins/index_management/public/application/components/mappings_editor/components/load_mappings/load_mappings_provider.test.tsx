@@ -24,7 +24,7 @@ import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
   <LoadMappingsProvider onJson={onJson}>
-    {openModal => (
+    {(openModal) => (
       <button onClick={openModal} data-test-subj="load-json-button">
         Load JSON
       </button>

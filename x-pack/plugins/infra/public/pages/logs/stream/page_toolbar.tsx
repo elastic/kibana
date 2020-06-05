@@ -101,7 +101,7 @@ export const LogsToolbar = () => {
             onChange={setHighlightTerms}
             isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
             activeHighlights={
-              highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
+              highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
             }
             goToPreviousHighlight={goToPreviousHighlight}
             goToNextHighlight={goToNextHighlight}

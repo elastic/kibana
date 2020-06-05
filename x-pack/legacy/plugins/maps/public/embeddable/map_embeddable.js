@@ -63,7 +63,7 @@ export class MapEmbeddable extends Embeddable {
     this._layerList = config.layerList;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
   getInspectorAdapters() {
@@ -90,7 +90,7 @@ export class MapEmbeddable extends Embeddable {
     this._prevFilters = filters;
     this._store.dispatch(
       setQuery({
-        filters: filters.filter(filter => !filter.meta.disabled),
+        filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         refresh,
@@ -187,7 +187,7 @@ export class MapEmbeddable extends Embeddable {
     return await this._store.dispatch(replaceLayerList(this._layerList));
   }
 
-  addFilters = filters => {
+  addFilters = (filters) => {
     npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters,

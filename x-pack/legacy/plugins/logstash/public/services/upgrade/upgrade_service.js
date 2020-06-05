@@ -16,8 +16,8 @@ export class UpgradeService {
   executeUpgrade() {
     return this.$http
       .post(`${this.basePath}/upgrade`)
-      .then(response => response.data.is_upgraded)
-      .catch(e => {
+      .then((response) => response.data.is_upgraded)
+      .catch((e) => {
         throw e.data.message;
       });
   }

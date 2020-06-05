@@ -63,7 +63,7 @@ function NumberList({
 
   // set up validity for each model
   useEffect(() => {
-    setModels(state =>
+    setModels((state) =>
       getValidatedModels(
         numberArray,
         state,
@@ -97,7 +97,7 @@ function NumberList({
       const parsedValue = parse(value);
 
       onUpdate(
-        models.map(model => {
+        models.map((model) => {
           if (model.id === id) {
             return {
               id,
@@ -120,7 +120,7 @@ function NumberList({
 
   const onDelete = useCallback(
     (id: string) => {
-      const newArray = models.filter(model => model.id !== id);
+      const newArray = models.filter((model) => model.id !== id);
       onUpdate(newArray);
     },
     [models, onUpdate]

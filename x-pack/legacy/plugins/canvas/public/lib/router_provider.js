@@ -23,7 +23,7 @@ export function routerProvider(routes) {
   const componentListeners = [];
 
   // assume any string starting with a / is a path
-  const isPath = str => typeof str === 'string' && str.substr(0, 1) === '/';
+  const isPath = (str) => typeof str === 'string' && str.substr(0, 1) === '/';
 
   // helper to get the current state in history
   const getState = (name, params, state) => {
@@ -36,7 +36,7 @@ export function routerProvider(routes) {
 
   // helper to append appState to a given url path
   const appendAppState = (path, appState = getCurrentAppState()) => {
-    const newUrl = modifyUrl(path, parts => {
+    const newUrl = modifyUrl(path, (parts) => {
       parts.query = assignAppState(parts.query, appState);
     });
 
@@ -78,7 +78,7 @@ export function routerProvider(routes) {
       history[method](currentState, newPath);
     },
     onPathChange(fn) {
-      const execOnMatch = location => {
+      const execOnMatch = (location) => {
         const { pathname } = location;
         const match = this.match(pathname);
 

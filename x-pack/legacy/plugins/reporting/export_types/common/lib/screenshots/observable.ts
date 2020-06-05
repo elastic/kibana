@@ -36,14 +36,14 @@ export function screenshotsObservableFactory(
       logger
     );
     return Rx.from(urls).pipe(
-      concatMap(url => {
+      concatMap((url) => {
         return create$.pipe(
           mergeMap(({ driver, exit$ }) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
               mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger)),
               mergeMap(() => getNumberOfItems(server, driver, layout, logger)),
-              mergeMap(async itemsCount => {
+              mergeMap(async (itemsCount) => {
                 const viewport = layout.getViewport(itemsCount);
                 await Promise.all([
                   driver.setViewport(viewport, logger),
@@ -71,7 +71,7 @@ export function screenshotsObservableFactory(
                   timeRange,
                 }));
               }),
-              catchError(err => {
+              catchError((err) => {
                 logger.error(err);
                 return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
               })

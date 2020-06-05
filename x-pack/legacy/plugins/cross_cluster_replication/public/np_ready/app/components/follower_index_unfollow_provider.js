@@ -24,13 +24,13 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
     ids: null,
   };
 
-  onMouseOverModal = event => {
+  onMouseOverModal = (event) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  unfollowLeaderIndex = id => {
+  unfollowLeaderIndex = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
@@ -110,7 +110,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
                 />
               </p>
               <ul>
-                {ids.map(id => (
+                {ids.map((id) => (
                   <li key={id}>{id}</li>
                 ))}
               </ul>
@@ -134,8 +134,8 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  unfollowLeaderIndex: id => dispatch(unfollowLeaderIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  unfollowLeaderIndex: (id) => dispatch(unfollowLeaderIndex(id)),
 });
 
 export const FollowerIndexUnfollowProvider = connect(

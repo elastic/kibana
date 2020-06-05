@@ -22,7 +22,7 @@ const TimeFilterType = 'time';
 
 function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
   const timeFilter = filters.find(
-    filter => filter.type !== undefined && filter.type === TimeFilterType
+    (filter) => filter.type !== undefined && filter.type === TimeFilterType
   );
 
   return timeFilter !== undefined && timeFilter.from !== undefined && timeFilter.to !== undefined

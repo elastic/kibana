@@ -11,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
   const retry = getService('retry');
 
-  describe('overview page', function() {
+  describe('overview page', function () {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
     it('loads and displays uptime data based on date range', async () => {

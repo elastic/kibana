@@ -55,7 +55,7 @@ export class AddFilter extends Component {
           <EuiFieldText
             fullWidth
             value={filter}
-            onChange={e => this.setState({ filter: e.target.value.trim() })}
+            onChange={(e) => this.setState({ filter: e.target.value.trim() })}
             placeholder={placeholder}
           />
         </EuiFlexItem>

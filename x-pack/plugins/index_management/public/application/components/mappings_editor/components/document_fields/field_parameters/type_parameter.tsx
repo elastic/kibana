@@ -26,7 +26,7 @@ interface Props {
 
 export const TypeParameter = ({ onTypeChange, isMultiField, docLink, isRootLevelField }: Props) => (
   <UseField path="type" config={getFieldConfig('type')}>
-    {typeField => {
+    {(typeField) => {
       const error = typeField.getErrorsMessages();
       const isInvalid = error ? Boolean(error.length) : false;
 

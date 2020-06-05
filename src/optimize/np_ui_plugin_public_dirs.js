@@ -30,7 +30,7 @@ export function isNpUiPluginPublicDirs(something) {
   return (
     Array.isArray(something) &&
     something.every(
-      s => typeof s === 'object' && s && typeof s.id === 'string' && typeof s.path === 'string'
+      (s) => typeof s === 'object' && s && typeof s.id === 'string' && typeof s.path === 'string'
     )
   );
 }

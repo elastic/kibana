@@ -214,7 +214,7 @@ describe('LoginForm', () => {
         />
       );
 
-      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -251,7 +251,7 @@ describe('LoginForm', () => {
         />
       );
 
-      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
 
       await act(async () => {
         await nextTick();

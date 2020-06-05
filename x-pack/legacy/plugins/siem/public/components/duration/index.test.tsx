@@ -26,11 +26,6 @@ describe('Duration', () => {
         />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="formatted-duration"]')
-        .first()
-        .text()
-    ).toEqual('1ms');
+    expect(wrapper.find('[data-test-subj="formatted-duration"]').first().text()).toEqual('1ms');
   });
 });

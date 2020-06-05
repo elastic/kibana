@@ -35,11 +35,11 @@ const DATAFEED_CONFIG: Datafeed = {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('single metric viewer', function() {
+  describe('single metric viewer', function () {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
@@ -59,7 +59,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id);
       const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter(row => row.id === JOB_CONFIG.job_id)).to.have.length(1);
+      expect(rows.filter((row) => row.id === JOB_CONFIG.job_id)).to.have.length(1);
 
       await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
       await ml.common.waitForMlLoadingIndicatorToDisappear();

@@ -11,19 +11,19 @@ import apmIndexPattern from './index_pattern.json';
 import { CloudSetup } from '../../../cloud/server';
 import {
   ArtifactsSchema,
-  TutorialsCategory
+  TutorialsCategory,
 } from '../../../../../src/plugins/home/server';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
-    'Collect in-depth performance metrics and errors from inside your applications.'
+    'Collect in-depth performance metrics and errors from inside your applications.',
 });
 
 export const tutorialProvider = ({
   isEnabled,
   indexPatternTitle,
   cloud,
-  indices
+  indices,
 }: {
   isEnabled: boolean;
   indexPatternTitle: string;
@@ -41,9 +41,9 @@ export const tutorialProvider = ({
       ...apmIndexPattern,
       attributes: {
         ...apmIndexPattern.attributes,
-        title: indexPatternTitle
-      }
-    }
+        title: indexPatternTitle,
+      },
+    },
   ];
 
   const artifacts: ArtifactsSchema = {
@@ -53,12 +53,12 @@ export const tutorialProvider = ({
         linkLabel: i18n.translate(
           'xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel',
           {
-            defaultMessage: 'APM dashboard'
+            defaultMessage: 'APM dashboard',
           }
         ),
-        isOverview: true
-      }
-    ]
+        isOverview: true,
+      },
+    ],
   };
 
   if (isEnabled) {
@@ -67,16 +67,16 @@ export const tutorialProvider = ({
       label: i18n.translate(
         'xpack.apm.tutorial.specProvider.artifacts.application.label',
         {
-          defaultMessage: 'Launch APM'
+          defaultMessage: 'Launch APM',
         }
-      )
+      ),
     };
   }
 
   return {
     id: 'apm',
     name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
-      defaultMessage: 'APM'
+      defaultMessage: 'APM',
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
@@ -90,8 +90,8 @@ It allows you to monitor the performance of thousands of applications in real ti
 [Learn more]({learnMoreLink}).',
         values: {
           learnMoreLink:
-            '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html'
-        }
+            '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
+        },
       }
     ),
     euiIconType: 'apmApp',
@@ -104,8 +104,8 @@ It allows you to monitor the performance of thousands of applications in real ti
       'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
       {
         defaultMessage:
-          'An APM index pattern is required for some features in the APM UI.'
+          'An APM index pattern is required for some features in the APM UI.',
       }
-    )
+    ),
   };
 };

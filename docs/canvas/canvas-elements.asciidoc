@@ -31,7 +31,7 @@ By default, most of the elements you create use demo data until you change the d
 [[canvas-add-object]]
 ==== Add a saved object
 
-Add a <<managing-saved-objects,saved object>>, such as a map or Lens visualization, then customize it to fit your display needs.
+Add a <<managing-saved-objects,saved object>>, then customize it to fit your display needs.
 
 . Click *Embed object*.
 

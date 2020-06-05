@@ -21,7 +21,7 @@ export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields
 ): ColumnHeaderOptions[] => {
-  return headers.map(header => {
+  return headers.map((header) => {
     const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
 
     return {

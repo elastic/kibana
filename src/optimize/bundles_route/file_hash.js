@@ -51,9 +51,9 @@ export async function getFileHash(cache, path, stat, fd) {
       merge(Rx.fromEvent(read, 'error').pipe(mergeMap(Rx.throwError))),
       takeUntil(Rx.fromEvent(read, 'end'))
     )
-    .forEach(chunk => hash.update(chunk))
+    .forEach((chunk) => hash.update(chunk))
     .then(() => hash.digest('hex'))
-    .catch(error => {
+    .catch((error) => {
       // don't cache failed attempts
       cache.del(key);
       throw error;

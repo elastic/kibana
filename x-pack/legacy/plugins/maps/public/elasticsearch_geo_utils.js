@@ -236,7 +236,7 @@ function createGeoPolygonFilter(polygonCoordinates, geoFieldName, filterProps = 
     geo_polygon: {
       ignore_unmapped: true,
       [geoFieldName]: {
-        points: polygonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
+        points: polygonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map((coordinatePair) => {
           return {
             lon: coordinatePair[LON_INDEX],
             lat: coordinatePair[LAT_INDEX],
@@ -329,7 +329,7 @@ function createGeometryFilterWithMeta({
       meta,
       query: {
         bool: {
-          should: geometry.coordinates.map(polygonCoordinates => {
+          should: geometry.coordinates.map((polygonCoordinates) => {
             return createGeoPolygonFilter(polygonCoordinates, geoFieldName);
           }),
         },

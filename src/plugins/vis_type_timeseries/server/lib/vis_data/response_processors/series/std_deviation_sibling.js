@@ -23,12 +23,12 @@ import { getLastMetric } from '../../helpers/get_last_metric';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
 
 export function stdDeviationSibling(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {
-      getSplits(resp, panel, series, meta).forEach(split => {
-        const mapBucketByMode = mode => {
-          return bucket => {
+      getSplits(resp, panel, series, meta).forEach((split) => {
+        const mapBucketByMode = (mode) => {
+          return (bucket) => {
             return [bucket.key, getSiblingAggValue(split, _.assign({}, metric, { mode }))];
           };
         };

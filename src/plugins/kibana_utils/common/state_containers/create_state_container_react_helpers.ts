@@ -61,7 +61,7 @@ export const createStateContainerReactHelpers = <Container extends StateContaine
     return value;
   };
 
-  const connect: Connect<UnboxState<Container>> = mapStateToProp => component => props =>
+  const connect: Connect<UnboxState<Container>> = (mapStateToProp) => (component) => (props) =>
     h(component, { ...useSelector(mapStateToProp), ...props } as any);
 
   return {

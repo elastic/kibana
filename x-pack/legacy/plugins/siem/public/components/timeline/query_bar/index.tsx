@@ -175,7 +175,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                 ...mySavedQuery,
                 attributes: {
                   ...mySavedQuery.attributes,
-                  filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
+                  filters: filters.filter((f) => f.meta.controlledBy !== timelineFilterDropArea),
                 },
               });
             }
@@ -247,7 +247,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             const dataProviderFilterExists =
               newSavedQuery.attributes.filters != null
                 ? newSavedQuery.attributes.filters.findIndex(
-                    f => f.meta.controlledBy === timelineFilterDropArea
+                    (f) => f.meta.controlledBy === timelineFilterDropArea
                   )
                 : -1;
             savedQueryServices.saveQuery(

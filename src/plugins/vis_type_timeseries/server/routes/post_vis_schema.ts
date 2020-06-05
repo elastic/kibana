@@ -18,19 +18,11 @@
  */
 
 import Joi from 'joi';
-const stringOptionalNullable = Joi.string()
-  .allow('', null)
-  .optional();
-const stringRequired = Joi.string()
-  .allow('')
-  .required();
+const stringOptionalNullable = Joi.string().allow('', null).optional();
+const stringRequired = Joi.string().allow('').required();
 const arrayNullable = Joi.array().allow(null);
-const numberIntegerOptional = Joi.number()
-  .integer()
-  .optional();
-const numberIntegerRequired = Joi.number()
-  .integer()
-  .required();
+const numberIntegerOptional = Joi.number().integer().optional();
+const numberIntegerRequired = Joi.number().integer().required();
 const numberOptional = Joi.number().optional();
 const queryObject = Joi.object({
   language: Joi.string().allow(''),
@@ -53,9 +45,7 @@ const annotationsItems = Joi.object({
 });
 
 const backgroundColorRulesItems = Joi.object({
-  value: Joi.number()
-    .allow(null)
-    .optional(),
+  value: Joi.number().allow(null).optional(),
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
   color: stringOptionalNullable,
@@ -110,10 +100,7 @@ const metricsItems = Joi.object({
     .optional(),
   type: stringRequired,
   value: stringOptionalNullable,
-  values: Joi.array()
-    .items(Joi.string().allow('', null))
-    .allow(null)
-    .optional(),
+  values: Joi.array().items(Joi.string().allow('', null)).allow(null).optional(),
 });
 
 const splitFiltersItems = Joi.object({
@@ -169,9 +156,7 @@ const seriesItems = Joi.object({
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
-  split_filters: Joi.array()
-    .items(splitFiltersItems)
-    .optional(),
+  split_filters: Joi.array().items(splitFiltersItems).optional(),
   split_mode: stringRequired,
   stacked: stringRequired,
   steps: numberIntegerOptional,
@@ -192,9 +177,7 @@ export const visPayloadSchema = Joi.object({
   filters: arrayNullable,
   panels: Joi.array().items(
     Joi.object({
-      annotations: Joi.array()
-        .items(annotationsItems)
-        .optional(),
+      annotations: Joi.array().items(annotationsItems).optional(),
       axis_formatter: stringRequired,
       axis_position: stringRequired,
       axis_scale: stringRequired,
@@ -202,9 +185,7 @@ export const visPayloadSchema = Joi.object({
       axis_max: stringOptionalNullable,
       bar_color_rules: arrayNullable.optional(),
       background_color: stringOptionalNullable,
-      background_color_rules: Joi.array()
-        .items(backgroundColorRulesItems)
-        .optional(),
+      background_color_rules: Joi.array().items(backgroundColorRulesItems).optional(),
       default_index_pattern: stringOptionalNullable,
       default_timefield: stringOptionalNullable,
       drilldown_url: stringOptionalNullable,
@@ -216,9 +197,7 @@ export const visPayloadSchema = Joi.object({
           query: stringOptionalNullable,
         })
       ),
-      gauge_color_rules: Joi.array()
-        .items(gaugeColorRulesItems)
-        .optional(),
+      gauge_color_rules: Joi.array().items(gaugeColorRulesItems).optional(),
       gauge_width: [stringOptionalNullable, numberOptional],
       gauge_inner_color: stringOptionalNullable,
       gauge_inner_width: Joi.alternatives(stringOptionalNullable, numberIntegerOptional),
@@ -241,9 +220,7 @@ export const visPayloadSchema = Joi.object({
       pivot_label: stringOptionalNullable,
       pivot_type: stringOptionalNullable,
       pivot_rows: stringOptionalNullable,
-      series: Joi.array()
-        .items(seriesItems)
-        .required(),
+      series: Joi.array().items(seriesItems).required(),
       show_grid: numberIntegerRequired,
       show_legend: numberIntegerRequired,
       time_field: stringOptionalNullable,
@@ -252,16 +229,11 @@ export const visPayloadSchema = Joi.object({
     })
   ),
   // general
-  query: Joi.array()
-    .items(queryObject)
-    .allow(null)
-    .required(),
+  query: Joi.array().items(queryObject).allow(null).required(),
   state: Joi.object({
     sort: Joi.object({
       column: stringRequired,
-      order: Joi.string()
-        .valid(['asc', 'desc'])
-        .required(),
+      order: Joi.string().valid(['asc', 'desc']).required(),
     }).optional(),
   }).required(),
   savedObjectId: Joi.string().optional(),

@@ -24,11 +24,11 @@ import { getSearchParams, getMSearchParams, getPreference, getTimeout } from './
 export const defaultSearchStrategy: SearchStrategyProvider = {
   id: 'default',
 
-  search: params => {
+  search: (params) => {
     return params.config.get('courier:batchSearches') ? msearch(params) : search(params);
   },
 
-  isViable: indexPattern => {
+  isViable: (indexPattern) => {
     return indexPattern && isDefault(indexPattern);
   },
 };

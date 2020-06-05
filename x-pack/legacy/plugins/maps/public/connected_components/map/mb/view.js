@@ -108,7 +108,7 @@ export class MBMapContainer extends React.Component {
   }
 
   async _createMbMapInstance() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const mbStyle = {
         version: 8,
         sources: {},
@@ -145,7 +145,7 @@ export class MBMapContainer extends React.Component {
       }
 
       let emptyImage;
-      mbMap.on('styleimagemissing', e => {
+      mbMap.on('styleimagemissing', (e) => {
         if (emptyImage) {
           mbMap.addImage(e.id, emptyImage);
         }
@@ -195,7 +195,7 @@ export class MBMapContainer extends React.Component {
     );
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.hideViewControl) {
-      const throttledSetMouseCoordinates = _.throttle(e => {
+      const throttledSetMouseCoordinates = _.throttle((e) => {
         this.props.setMouseCoordinates({
           lat: e.lngLat.lat,
           lon: e.lngLat.lng,
@@ -261,7 +261,7 @@ export class MBMapContainer extends React.Component {
     }
 
     removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
-    this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
+    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
   };
 

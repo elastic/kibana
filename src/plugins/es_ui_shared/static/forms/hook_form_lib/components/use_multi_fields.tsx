@@ -41,7 +41,7 @@ export const UseMultiFields = ({ fields, children }: Props) => {
     const { id } = fieldsArray[index];
     return (
       <UseField {...fields[id]}>
-        {field => {
+        {(field) => {
           hookFields[id] = field;
           return index === fieldsArray.length - 1 ? children(hookFields) : renderField(index + 1);
         }}

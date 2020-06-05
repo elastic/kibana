@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   ESSearchResponse,
-  ESSearchRequest
+  ESSearchRequest,
 } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerting/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -30,14 +30,14 @@ const paramsSchema = schema.object({
   serviceName: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
-  threshold: schema.number()
+  threshold: schema.number(),
 });
 
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
 
 export function registerErrorRateAlertType({
   alerting,
-  config$
+  config$,
 }: RegisterAlertParams) {
   alerting.registerType({
     id: AlertType.ErrorRate,
@@ -45,7 +45,7 @@ export function registerErrorRateAlertType({
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
-      params: paramsSchema
+      params: paramsSchema,
     },
     actionVariables: {
       context: [
@@ -53,12 +53,12 @@ export function registerErrorRateAlertType({
           description: i18n.translate(
             'xpack.apm.registerErrorRateAlertType.variables.serviceName',
             {
-              defaultMessage: 'Service name'
+              defaultMessage: 'Service name',
             }
           ),
-          name: 'serviceName'
-        }
-      ]
+          name: 'serviceName',
+        },
+      ],
     },
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
@@ -67,7 +67,7 @@ export function registerErrorRateAlertType({
 
       const indices = await getApmIndices({
         config,
-        savedObjectsClient: services.savedObjectsClient
+        savedObjectsClient: services.savedObjectsClient,
       });
 
       const searchParams = {
@@ -80,25 +80,25 @@ export function registerErrorRateAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
-                    }
-                  }
+                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                    },
+                  },
                 },
                 {
                   term: {
-                    [PROCESSOR_EVENT]: 'error'
-                  }
+                    [PROCESSOR_EVENT]: 'error',
+                  },
                 },
                 {
                   term: {
-                    [SERVICE_NAME]: alertParams.serviceName
-                  }
-                }
-              ]
-            }
+                    [SERVICE_NAME]: alertParams.serviceName,
+                  },
+                },
+              ],
+            },
           },
-          track_total_hits: true
-        }
+          track_total_hits: true,
+        },
       };
 
       const response: ESSearchResponse<
@@ -113,11 +113,11 @@ export function registerErrorRateAlertType({
           AlertType.ErrorRate
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName
+          serviceName: alertParams.serviceName,
         });
       }
 
       return {};
-    }
+    },
   });
 }

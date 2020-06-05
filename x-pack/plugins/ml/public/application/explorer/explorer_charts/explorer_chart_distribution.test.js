@@ -10,7 +10,7 @@ import seriesConfig from './__mocks__/mock_series_config_rare.json';
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
 jest.mock('../../util/time_buckets', () => ({
-  TimeBuckets: function() {
+  TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();
@@ -121,15 +121,9 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('y')).toBe(2);
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
-    const xAxisTicks = wrapper
-      .getDOMNode()
-      .querySelector('.x')
-      .querySelectorAll('.tick');
+    const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
     expect([...xAxisTicks]).toHaveLength(0);
-    const yAxisTicks = wrapper
-      .getDOMNode()
-      .querySelector('.y')
-      .querySelectorAll('.tick');
+    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(5);
     const emphasizedAxisLabel = wrapper
       .getDOMNode()
@@ -142,10 +136,7 @@ describe('ExplorerChart', () => {
     expect(paths[1].getAttribute('class')).toBe('domain');
     expect(paths[2]).toBe(undefined);
 
-    const dots = wrapper
-      .getDOMNode()
-      .querySelector('.values-dots')
-      .querySelectorAll('circle');
+    const dots = wrapper.getDOMNode().querySelector('.values-dots').querySelectorAll('circle');
     expect([...dots]).toHaveLength(5);
     expect(dots[0].getAttribute('r')).toBe('1.5');
 
@@ -154,7 +145,7 @@ describe('ExplorerChart', () => {
       .querySelector('.chart-markers')
       .querySelectorAll('circle');
     expect([...chartMarkers]).toHaveLength(5);
-    expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7, 7, 7]);
+    expect([...chartMarkers].map((d) => +d.getAttribute('r'))).toEqual([7, 7, 7, 7, 7]);
   });
 
   it('Anomaly Explorer Chart with single data point', () => {
@@ -170,10 +161,7 @@ describe('ExplorerChart', () => {
     ];
 
     const wrapper = init(chartData);
-    const yAxisTicks = wrapper
-      .getDOMNode()
-      .querySelector('.y')
-      .querySelectorAll('.tick');
+    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(1);
   });
 });

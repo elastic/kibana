@@ -13,9 +13,9 @@ export async function getPermissions(setup: Setup) {
     body: {
       size: 0,
       query: {
-        match_all: {}
-      }
-    }
+        match_all: {},
+      },
+    },
   };
 
   try {

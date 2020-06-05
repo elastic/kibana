@@ -59,7 +59,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
   const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
     const xValue = tooltipData.value;
     const chartPoint: MetricDistributionChartData | undefined = chartData.find(
-      data => data.x === xValue
+      (data) => data.x === xValue
     );
 
     return (
@@ -97,9 +97,9 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
         <Axis
           id="bottom"
           position={Position.Bottom}
-          tickFormat={d => kibanaFieldFormat(d, fieldFormat)}
+          tickFormat={(d) => kibanaFieldFormat(d, fieldFormat)}
         />
-        <Axis id="left" position={Position.Left} tickFormat={d => d.toFixed(3)} hide={true} />
+        <Axis id="left" position={Position.Left} tickFormat={(d) => d.toFixed(3)} hide={true} />
         <AreaSeries
           id={SPEC_ID}
           name={seriesName}

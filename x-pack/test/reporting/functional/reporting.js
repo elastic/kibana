@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
  * TODO Remove this file and spread the tests to various apps
  */
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
@@ -54,7 +54,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Print Layout', () => {
-        it('Job completes and generates a download URL', async function() {
+        it('Job completes and generates a download URL', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(300000);
@@ -85,7 +85,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       describe('Preserve Layout', () => {
-        it('Job completes and generates a download URL', async function() {
+        it('Job completes and generates a download URL', async function () {
           this.timeout(300000);
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
@@ -191,7 +191,7 @@ export default function({ getService, getPageObjects }) {
           expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         });
 
-        it('Job completes and generates a download URL', async function() {
+        it('Job completes and generates a download URL', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);

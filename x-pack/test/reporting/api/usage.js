@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import * as GenerationUrls from './generation_urls';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');

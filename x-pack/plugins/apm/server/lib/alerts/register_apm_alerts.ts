@@ -20,10 +20,10 @@ interface Params {
 export function registerApmAlerts(params: Params) {
   registerTransactionDurationAlertType({
     alerting: params.alerting,
-    config$: params.config$
+    config$: params.config$,
   });
   registerErrorRateAlertType({
     alerting: params.alerting,
-    config$: params.config$
+    config$: params.config$,
   });
 }

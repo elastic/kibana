@@ -21,7 +21,7 @@ const isBogusUrl = (url: string) => {
 };
 
 export const validateUrls = (urls: string[]): void => {
-  const badUrls = _.filter(urls, url => isBogusUrl(url));
+  const badUrls = _.filter(urls, (url) => isBogusUrl(url));
 
   if (badUrls.length) {
     throw new Error(`Found invalid URL(s), all URLs must be relative: ${badUrls.join(' ')}`);

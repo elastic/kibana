@@ -71,10 +71,10 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
       this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
         .toPromise()
-        .then(config => {
+        .then((config) => {
           registerRollupUsageCollector(usageCollection, config.kibana.index);
         })
-        .catch(e => {
+        .catch((e) => {
           this.log.warn(`Registering Rollup collector failed: ${e}`);
         });
     }

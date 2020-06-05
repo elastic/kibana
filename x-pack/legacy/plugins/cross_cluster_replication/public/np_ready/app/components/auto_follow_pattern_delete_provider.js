@@ -19,13 +19,13 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
     ids: null,
   };
 
-  onMouseOverModal = event => {
+  onMouseOverModal = (event) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  deleteAutoFollowPattern = id => {
+  deleteAutoFollowPattern = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
@@ -91,7 +91,7 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
                 />
               </p>
               <ul>
-                {ids.map(id => (
+                {ids.map((id) => (
                   <li key={id}>{id}</li>
                 ))}
               </ul>
@@ -115,8 +115,8 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  deleteAutoFollowPattern: id => dispatch(deleteAutoFollowPattern(id)),
+const mapDispatchToProps = (dispatch) => ({
+  deleteAutoFollowPattern: (id) => dispatch(deleteAutoFollowPattern(id)),
 });
 
 export const AutoFollowPatternDeleteProvider = connect(

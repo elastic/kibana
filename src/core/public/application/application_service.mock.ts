@@ -64,7 +64,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
     currentAppId$: currentAppId$.asObservable(),
     getComponent: jest.fn(),
     getUrlForApp: jest.fn(),
-    navigateToApp: jest.fn().mockImplementation(appId => currentAppId$.next(appId)),
+    navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     registerMountContext: jest.fn(),
   };
 };

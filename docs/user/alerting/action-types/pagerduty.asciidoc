@@ -92,7 +92,7 @@ section of the alert configuration and selecting *Add new*.
 * Alternatively, create a connector by navigating to *Management* from the {kib} navbar and selecting
 *Alerts and Actions*. Then, select the *Connectors* tab, click the *Create connector* button, and select the PagerDuty option.
 
-. Configure the connector by giving it a name and optionally entering the API URL and Routing Key, or using the defaults.
+. Configure the connector by giving it a name and entering the Integration Key, optionally entering a custom API URL.
 +
 See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
 <<pagerduty-connector-configuration, Connector configuration>> for more details.
@@ -133,7 +133,7 @@ PagerDuty connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted.
-Routing Key::   A 32 character PagerDuty Integration Key for an integration on a service or on a global ruleset.
+Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
 [[pagerduty-action-configuration]]

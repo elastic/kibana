@@ -35,12 +35,9 @@ describe('Filter', () => {
 
       const wrapper = mount(<Filter header={textFilterColumnHeader} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="textFilter"]')
-          .first()
-          .props()
-      ).toHaveProperty('placeholder');
+      expect(wrapper.find('[data-test-subj="textFilter"]').first().props()).toHaveProperty(
+        'placeholder'
+      );
     });
 
     test('it does NOT render a filter when the columnHeaderType is "not-filtered"', () => {

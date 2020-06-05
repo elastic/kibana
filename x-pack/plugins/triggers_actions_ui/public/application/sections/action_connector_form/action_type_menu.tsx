@@ -38,7 +38,7 @@ export const ActionTypeMenu = ({
         setActionTypesIndex(index);
         if (setHasActionsDisabledByLicense) {
           const hasActionsDisabledByLicense = availableActionTypes.some(
-            action => !index[action.id].enabledInLicense
+            (action) => !index[action.id].enabledInLicense
           );
           setHasActionsDisabledByLicense(hasActionsDisabledByLicense);
         }

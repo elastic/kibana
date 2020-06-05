@@ -86,7 +86,7 @@ export const defaultTimelineToTimelineModel = (
     ...timeline,
     columns:
       timeline.columns != null
-        ? timeline.columns.map(col => {
+        ? timeline.columns.map((col) => {
             const timelineCols: ColumnHeaderOptions = {
               ...col,
               columnHeaderType: defaultColumnHeaderType,
@@ -116,7 +116,7 @@ export const defaultTimelineToTimelineModel = (
       : {},
     filters:
       timeline.filters != null
-        ? timeline.filters.map(filter => ({
+        ? timeline.filters.map((filter) => ({
             $state: {
               store: 'appState',
             },

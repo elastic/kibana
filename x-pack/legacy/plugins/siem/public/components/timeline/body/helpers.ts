@@ -71,7 +71,7 @@ export const getEventIdToDataMapping = (
 ): Record<string, TimelineNonEcsData[]> => {
   return timelineData.reduce((acc, v) => {
     const fvm = eventIds.includes(v._id)
-      ? { [v._id]: v.data.filter(ti => fieldsToKeep.includes(ti.field)) }
+      ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }
       : {};
     return {
       ...acc,

@@ -193,7 +193,7 @@ describe('Step1', () => {
     it('should allow for testing', async () => {
       jest.isolateModules(() => {
         jest.doMock('ui/kfetch', () => ({
-          kfetch: jest.fn().mockImplementation(arg => {
+          kfetch: jest.fn().mockImplementation((arg) => {
             if (arg.pathname === '/api/action/1/_execute') {
               return { status: 'ok' };
             }
@@ -205,29 +205,11 @@ describe('Step1', () => {
 
       const component = shallow(<Step1 {...defaultProps} />);
 
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isLoading')
-      ).toBe(false);
-      component
-        .find('EuiButton')
-        .at(1)
-        .simulate('click');
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isLoading')
-      ).toBe(true);
+      expect(component.find('EuiButton').at(1).prop('isLoading')).toBe(false);
+      component.find('EuiButton').at(1).simulate('click');
+      expect(component.find('EuiButton').at(1).prop('isLoading')).toBe(true);
       await component.update();
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isLoading')
-      ).toBe(false);
+      expect(component.find('EuiButton').at(1).prop('isLoading')).toBe(false);
     });
 
     it('should show a successful test', async () => {
@@ -245,10 +227,7 @@ describe('Step1', () => {
 
       const component = shallow(<Step1 {...defaultProps} />);
 
-      component
-        .find('EuiButton')
-        .at(1)
-        .simulate('click');
+      component.find('EuiButton').at(1).simulate('click');
       await component.update();
       expect(component).toMatchSnapshot();
     });
@@ -268,10 +247,7 @@ describe('Step1', () => {
 
       const component = shallow(<Step1 {...defaultProps} />);
 
-      component
-        .find('EuiButton')
-        .at(1)
-        .simulate('click');
+      component.find('EuiButton').at(1).simulate('click');
       await component.update();
       expect(component).toMatchSnapshot();
     });
@@ -281,12 +257,7 @@ describe('Step1', () => {
         emailAddress: '',
       };
       const component = shallow(<Step1 {...defaultProps} {...customProps} />);
-      expect(
-        component
-          .find('EuiButton')
-          .at(1)
-          .prop('isDisabled')
-      ).toBe(true);
+      expect(component.find('EuiButton').at(1).prop('isDisabled')).toBe(true);
     });
 
     it('should should a tooltip if there is no email address', () => {
@@ -314,10 +285,7 @@ describe('Step1', () => {
       };
       const component = shallow(<Step1 {...defaultProps} {...customProps} />);
 
-      await component
-        .find('EuiButton')
-        .at(2)
-        .simulate('click');
+      await component.find('EuiButton').at(2).simulate('click');
       await component.update();
 
       expect(kfetch).toHaveBeenCalledWith({
@@ -327,12 +295,7 @@ describe('Step1', () => {
 
       expect(customProps.setSelectedEmailActionId).toHaveBeenCalledWith('');
       expect(customProps.onActionDone).toHaveBeenCalled();
-      expect(
-        component
-          .find('EuiButton')
-          .at(2)
-          .prop('isLoading')
-      ).toBe(false);
+      expect(component.find('EuiButton').at(2).prop('isLoading')).toBe(false);
     });
   });
 });

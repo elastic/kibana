@@ -12,7 +12,7 @@ import { fetch } from '../../common/lib/fetch';
 import { CustomElement } from '../../types';
 import { getCoreStart } from '../legacy';
 
-const getApiPath = function() {
+const getApiPath = function () {
   const basePath = getCoreStart().http.basePath.get();
   return `${basePath}${API_ROUTE_CUSTOM_ELEMENT}`;
 };

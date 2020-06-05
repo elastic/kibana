@@ -28,7 +28,7 @@ const buildRequest = (path = '/app/kibana') => {
         create: sinon.stub(),
 
         errors: {
-          isNotFoundError: error => {
+          isNotFoundError: (error) => {
             return error.message === 'not found exception';
           },
         },

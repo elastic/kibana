@@ -65,7 +65,7 @@ function FilterBarUI(props: Props) {
         <FilterItem
           id={`${i}`}
           filter={filter}
-          onUpdate={newFilter => onUpdate(i, newFilter)}
+          onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}

@@ -208,7 +208,7 @@ describe('ObjectsTable', () => {
     defaultProps.savedObjectsClient.find.mockClear();
     extractExportDetails.mockReset();
     // mock _.debounce to fire immediately with no internal timer
-    require('lodash').debounce = func => {
+    require('lodash').debounce = (func) => {
       function debounced(...args) {
         return func.apply(this, args);
       }
@@ -230,7 +230,7 @@ describe('ObjectsTable', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -246,7 +246,7 @@ describe('ObjectsTable', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -260,7 +260,7 @@ describe('ObjectsTable', () => {
         { id: '3', type: 'dashboard' },
       ];
 
-      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
         _id: obj.id,
         _type: obj._type,
         _source: {},
@@ -280,7 +280,7 @@ describe('ObjectsTable', () => {
       );
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -301,7 +301,7 @@ describe('ObjectsTable', () => {
         { id: '3', type: 'dashboard' },
       ];
 
-      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
         _id: obj.id,
         _type: obj._type,
         _source: {},
@@ -326,7 +326,7 @@ describe('ObjectsTable', () => {
       );
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -348,7 +348,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -366,7 +366,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -395,7 +395,7 @@ describe('ObjectsTable', () => {
       });
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -418,7 +418,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -432,7 +432,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -450,7 +450,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -469,7 +469,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -508,7 +508,7 @@ describe('ObjectsTable', () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -532,7 +532,7 @@ describe('ObjectsTable', () => {
       ];
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -550,7 +550,7 @@ describe('ObjectsTable', () => {
         { id: '3', type: 'dashboard' },
       ];
 
-      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
         id: obj.id,
         type: obj.type,
         source: {},
@@ -569,7 +569,7 @@ describe('ObjectsTable', () => {
       );
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 

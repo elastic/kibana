@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
 * <<release-notes-7.6.1>>
@@ -36,6 +37,90 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.7.1]]
+== {kib} 7.7.1
+
+See <<breaking-changes-7.7,breaking changes in 7.7>>.
+
+[float]
+[[security-update-7.1.1]]
+=== Security update
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
+edit and create TSVB visualizations can obtain sensitive information, or perform 
+destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
+
+You must upgrade to 7.7.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
+
+[float]
+[[bug-7.7.1]]
+=== Bug fixes
+Alerting::
+* Fixes bug with no possibility to edit the index name after adding {pull}64033[#64033]
+* Corrects validation and errors handling in PagerDuty action {pull}63954[#63954]
+* Fixes saving doc count alerts {pull}63750[#63750]
+* Fixes issue when connectors dropdown not showing all avaliable connectors {pull}63636[#63636]
+* Fixes inability to clear numeric field in a "Group over top docs" condition {pull}63543[#63543]
+* Handles when an Alerting Task fails due to its Alert object being deleted mid flight {pull}63093[#63093]
+APM:
+* Encodes spaces when creating ML job {pull}63683[#63683]
+Canvas::
+* Fixes bring to front shortcut label {pull}67374[#67374]
+* Fixes add page CSS animation bug {pull}66496[#66496]
+Dashboard::
+* Shows visualization in Safari in dashboard fullscreen {pull}66894[#66894]
+* Fixes saved object share link {pull}66771[#66771]
+* Don't lose dashboard/visualize/discover state when navigating to other applications {pull}66766[#66766]
+Discover::
+* Don't lose dashboard/visualize/discover state when navigating to other applications {pull}66766[#66766]
+Lens and visualizations::
+* Fixes redirect on reload {pull}66491[#66491]
+* Timelion graph is not refreshing content after searching or filtering {pull}67023[#67023]
+* Don't lose dashboard/visualize/discover state when navigating to other applications {pull}66766[#66766]
+* Fixes redirect on reload {pull}66491[#66491]
+* Shows missing values on chart setting {pull}66375[#66375]
+* Usage of custom plugins using the @plugin statement and inline JavaScript in less code used in the TSVB Markdown 
+visualization is not allowed anymore. Using it will simply not apply the styles {pull}65467[#65467]
+* Fixes std deviation band mode {pull}64413[#64413]
+* Reloads on ui state change and fix ui state for tsvb {pull}63699[#63699]
+Machine Learning:
+* Fixes watch creation {pull}65956[#65956]
+* Fixes new job wizard with multiple indices {pull}64567[#64567]
+* Fixes optional plugin dependency types {pull}64450[#64450]
+* Ensures both keyword/text types are excluded for selected excluded field {pull}62712[#62712]
+Management::
+* Fixes an integration issue with the security plugin in Ingest Pipelines and Snapshot and Restore that would incorrectly 
+report requiring security to be enabled when the plugins should work normally without security. 
+This affects the default docker distribution {pull}67308[#67308]
+* Preserves saved object references when saving the object {pull}66584[#66584]
+* Fixes detail panel for indices with % in the name {pull}66435[#66435]
+* Setting dev_tools.enabled: false in kibana.yml will no longer crash Kibana {pull}66276[#66276]
+* Fixes `mappings` keyword in Index Management plugin (Index detail pane, Mapping tab) {pull}66012#66012]
+Maps::
+* Handle cross cluster index _settings resp {pull}66797[#66797]
+* Fixes edit filter {pull}64586[#64586]
+Metrics::
+* Migrating Docker network fields {pull}65133[#65133]
+* Removes APM Hard Dependency {pull}64952[#64952]
+* Fixes for editing alerts in alert management {pull}64597[#64597]
+* Fixes alerting when a filter query is present {pull}64575[#64575]
+* Allows users to create alerts from the central Alerts UI {pull}63803[#63803]
+* Remove remaining field filtering {pull}63398[#63398]
+Monitoring::
+* Uses custom route to ensure global state is preserved {pull}63891[#63891]
+* Ensures time picker is actually disabled {pull}63709[#63709]
+* Fixes server response errors {pull}63181[#63181]
+Platform::
+* Allows any type for customResponseHeaders config {pull}66689[#66689]
+Security::
+* Allows IdP initiated SAML login with session containing expired token {pull}59686[#59686]
+SIEM::
+* Updates the alert apiKey when a rule is modified, so deactivating rule actions does not cause failures {pull}67364[#67364]
+* Corrects validation and error handling of PagerDuty action timestamps {pull}63954[#63954]
+* Fixes Network Map empty tooltip {pull}66828[#66828]
+* Changes find_statuses route HTTP method from GET to POST {pull}63508[#63508]
+Uptime::
+* Updates duration chart query filters {pull}63620[#63620]
+
 
 [[release-notes-7.7.0]]
 == {kib} 7.7.0
@@ -47,8 +132,16 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 === Known issues
 
 SIEM::
-* When you deactivate an action within a rule, the rule fails {issue}620[#620]
-* When you add a timestamp to the PagerDuty action, the rule fails {issue}607[#607]
+* When you deactivate an action within a rule, the rule fails {issue}64870[#64870]
+* When you add a timestamp to the PagerDuty action, the rule fails {issue}64871[#64871]
+
+Management::
+* Editing Saved Objects (eg. Dashboards) via the "Inspect" JSON editor in Management corrupts objects {issue}66542[#66542]
+
+Configuration::
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings.  For example, use `my-header: "true"` instead of `my-header: true`.
+{issue}66146[#66146]
 
 [float]
 [[enhancement-7.7.0]]
@@ -348,6 +441,15 @@ Platform::
 See <<breaking-changes-7.6,breaking changes in 7.6>>.
 
 [float]
+[[known-issue-7.6.2]]
+=== Known issue
+
+Configuration::
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings.  For example, use`my-header: "true"` instead of `my-header: true`.
+{issue}66146[#66146]
+
+[float]
 [[bug-7.6.2]]
 === Bug fixes
 Discover::
@@ -386,6 +488,15 @@ Visualizations::
 == {kib} 7.6.1
 
 See <<breaking-changes-7.6,breaking changes in 7.6>>.
+
+[float]
+[[known-issue-7.6.1]]
+=== Known issue
+
+Configuration::
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings. For example, use `my-header: "true"` instead of `my-header: true`.
+{issue}66146[#66146]
 
 [float]
 [[security-fix-7.6.1]]
@@ -469,6 +580,9 @@ See also <<breaking-changes-7.6,breaking changes in 7.6>>.
 === Known issue
 
 * When you use the default `dateFormat:tz: browser` setting, the timestamps appear in UTC instead of the local time of the user browser. To use the local time of the user browser, set `dateFormat:tz:` to the timezone of the user. {issue}57457[#57457]
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings. For example, use `my-header: "true"` instead of `my-header: true`.
+{issue}66146[#66146]
 
 [float]
 [[enhancement-7.6.0]]

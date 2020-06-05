@@ -38,7 +38,7 @@ const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
 
 export function compatibilityShimFactory(server, logger) {
   return function compatibilityShimFactory(createJobFn) {
-    return async function(
+    return async function (
       {
         savedObjectId, // deprecating
         queryString, // deprecating
@@ -66,7 +66,7 @@ export function compatibilityShimFactory(server, logger) {
         if (!Array.isArray(relativeUrls)) {
           throw new Error('Invalid relativeUrls. String[] is expected.');
         }
-        relativeUrls.forEach(url => {
+        relativeUrls.forEach((url) => {
           if (typeof url !== 'string') {
             throw new Error('Invalid Relative URL in relativeUrls. String is expected.');
           }

@@ -71,7 +71,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
     return (
       <TimelineContext.Consumer>
-        {isLoading => (
+        {(isLoading) => (
           <ProviderItemActions
             andProviderId={andProviderId}
             browserFields={browserFields}

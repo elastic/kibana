@@ -64,7 +64,7 @@ async function buildEuiContextMenuPanelItems<A>({
   closeMenu: () => void;
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = [];
-  const promises = actions.map(async action => {
+  const promises = actions.map(async (action) => {
     const isCompatible = await action.isCompatible(actionContext);
     if (!isCompatible) {
       return;

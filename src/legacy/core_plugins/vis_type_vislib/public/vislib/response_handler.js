@@ -86,7 +86,7 @@ function convertTableGroup(tableGroup, convertTable) {
   const out = {};
   let outList;
 
-  tables.forEach(function(table) {
+  tables.forEach(function (table) {
     if (!outList) {
       const direction = tableGroup.direction === 'row' ? 'rows' : 'columns';
       outList = out[direction] = [];
@@ -102,9 +102,9 @@ function convertTableGroup(tableGroup, convertTable) {
 }
 
 function handlerFunction(convertTable) {
-  return function(response, dimensions) {
+  return function (response, dimensions) {
     const tableGroup = tableResponseHandler(response, dimensions);
-    let converted = convertTableGroup(tableGroup, table => {
+    let converted = convertTableGroup(tableGroup, (table) => {
       return convertTable(table, dimensions);
     });
     if (!converted) {

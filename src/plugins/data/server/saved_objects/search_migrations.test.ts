@@ -245,7 +245,7 @@ Object {
     });
   });
 
-  describe('7.4.0', function() {
+  describe('7.4.0', function () {
     const migrationFn = searchSavedObjectTypeMigrations['7.4.0'];
 
     test('transforms one dimensional sort arrays into two dimensional arrays', () => {

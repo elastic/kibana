@@ -192,10 +192,10 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
   $http: IHttpService
 ) => {
   newPlatform.http.addLoadingCountSource(
-    new Rx.Observable(observer => {
+    new Rx.Observable((observer) => {
       const unwatch = $rootScope.$watch(() => {
         const reqs = $http.pendingRequests || [];
-        observer.next(reqs.filter(req => !isSystemApiRequest(req)).length);
+        observer.next(reqs.filter((req) => !isSystemApiRequest(req)).length);
       });
 
       return unwatch;

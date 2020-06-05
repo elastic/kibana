@@ -181,7 +181,7 @@ export function getAggNameConflictToastMessages(
   // check the new aggName against existing aggs and groupbys
   const aggNameSplit = aggName.split('.');
   let aggNameCheck: string;
-  aggNameSplit.forEach(aggNamePart => {
+  aggNameSplit.forEach((aggNamePart) => {
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
       conflicts.push(
@@ -198,10 +198,10 @@ export function getAggNameConflictToastMessages(
   }
 
   // check all aggs against new aggName
-  Object.keys(aggList).some(aggListName => {
+  Object.keys(aggList).some((aggListName) => {
     const aggListNameSplit = aggListName.split('.');
     let aggListNameCheck: string;
-    return aggListNameSplit.some(aggListNamePart => {
+    return aggListNameSplit.some((aggListNamePart) => {
       aggListNameCheck =
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
       if (aggListNameCheck === aggName) {
@@ -222,10 +222,10 @@ export function getAggNameConflictToastMessages(
   }
 
   // check all group-bys against new aggName
-  Object.keys(groupByList).some(groupByListName => {
+  Object.keys(groupByList).some((groupByListName) => {
     const groupByListNameSplit = groupByListName.split('.');
     let groupByListNameCheck: string;
-    return groupByListNameSplit.some(groupByListNamePart => {
+    return groupByListNameSplit.some((groupByListNamePart) => {
       groupByListNameCheck =
         groupByListNameCheck === undefined
           ? groupByListNamePart
@@ -317,7 +317,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
     const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -335,7 +335,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       groupByListWithoutPrevious
     );
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -358,7 +358,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
     const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -376,7 +376,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       groupByList
     );
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -463,7 +463,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
-      Object.entries(pivotConfig.group_by).forEach(d => {
+      Object.entries(pivotConfig.group_by).forEach((d) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotGroupByDict;
         const aggConfigKeys = Object.keys(aggConfig);
@@ -480,7 +480,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
     const newAggList: PivotAggsConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.aggregations !== undefined) {
-      Object.entries(pivotConfig.aggregations).forEach(d => {
+      Object.entries(pivotConfig.aggregations).forEach((d) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotAggDict;
         const aggConfigKeys = Object.keys(aggConfig);

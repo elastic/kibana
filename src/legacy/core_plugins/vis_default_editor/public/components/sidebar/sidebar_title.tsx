@@ -53,7 +53,7 @@ interface SidebarTitleProps {
 export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const closePopover = useCallback(() => setShowPopover(false), []);
-  const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
+  const onClickButtonLink = useCallback(() => setShowPopover((v) => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
     eventEmitter.emit('unlinkFromSavedSearch');

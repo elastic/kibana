@@ -23,12 +23,7 @@ describe('TitleRow', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-title"]')
-        .first()
-        .text()
-    ).toEqual(title);
+    expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(title);
   });
 
   describe('Favorite Selected button', () => {
@@ -43,12 +38,7 @@ describe('TitleRow', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="favorite-selected"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="favorite-selected"]').first().exists()).toBe(true);
     });
 
     test('it does NOT render the Favorite Selected button when onAddTimelinesToFavorites is NOT provided', () => {
@@ -58,12 +48,7 @@ describe('TitleRow', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="favorite-selected"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="favorite-selected"]').first().exists()).toBe(false);
     });
 
     test('it disables the Favorite Selected button when the selectedTimelinesCount is 0', () => {
@@ -117,10 +102,7 @@ describe('TitleRow', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[data-test-subj="favorite-selected"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
 
       expect(onAddTimelinesToFavorites).toHaveBeenCalled();
     });

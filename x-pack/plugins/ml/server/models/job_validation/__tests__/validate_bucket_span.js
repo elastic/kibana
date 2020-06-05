@@ -19,30 +19,30 @@ import mockFareQuoteSearchResponse from './mock_farequote_search_response';
 import mockItSearchResponse from './mock_it_search_response';
 
 // mock callWithRequestFactory
-const callWithRequestFactory = mockSearchResponse => {
+const callWithRequestFactory = (mockSearchResponse) => {
   return () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       resolve(mockSearchResponse);
     });
   };
 };
 
 describe('ML - validateBucketSpan', () => {
-  it('called without arguments', done => {
+  it('called without arguments', (done) => {
     validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse)).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #1, missing datafeed_config', done => {
+  it('called with non-valid job argument #1, missing datafeed_config', (done) => {
     validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), {}).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #2, missing datafeed_config.indices', done => {
+  it('called with non-valid job argument #2, missing datafeed_config.indices', (done) => {
     validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), {
       datafeed_config: {},
     }).then(
@@ -51,7 +51,7 @@ describe('ML - validateBucketSpan', () => {
     );
   });
 
-  it('called with non-valid job argument #3, missing data_description', done => {
+  it('called with non-valid job argument #3, missing data_description', (done) => {
     const job = { datafeed_config: { indices: [] } };
     validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -59,7 +59,7 @@ describe('ML - validateBucketSpan', () => {
     );
   });
 
-  it('called with non-valid job argument #4, missing data_description.time_field', done => {
+  it('called with non-valid job argument #4, missing data_description.time_field', (done) => {
     const job = { datafeed_config: { indices: [] }, data_description: {} };
     validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -67,7 +67,7 @@ describe('ML - validateBucketSpan', () => {
     );
   });
 
-  it('called with non-valid job argument #5, missing analysis_config.influencers', done => {
+  it('called with non-valid job argument #5, missing analysis_config.influencers', (done) => {
     const job = {
       datafeed_config: { indices: [] },
       data_description: { time_field: '@timestamp' },
@@ -86,14 +86,14 @@ describe('ML - validateBucketSpan', () => {
     };
 
     return validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), job).then(
-      messages => {
-        const ids = messages.map(m => m.id);
+      (messages) => {
+        const ids = messages.map((m) => m.id);
         expect(ids).to.eql([]);
       }
     );
   });
 
-  const getJobConfig = bucketSpan => ({
+  const getJobConfig = (bucketSpan) => ({
     analysis_config: {
       bucket_span: bucketSpan,
       detectors: [],
@@ -111,8 +111,8 @@ describe('ML - validateBucketSpan', () => {
       callWithRequestFactory(mockFareQuoteSearchResponse),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['success_bucket_span']);
     });
   });
@@ -125,8 +125,8 @@ describe('ML - validateBucketSpan', () => {
       callWithRequestFactory(mockFareQuoteSearchResponse),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['bucket_span_high']);
     });
   });
@@ -142,21 +142,21 @@ describe('ML - validateBucketSpan', () => {
     });
 
     return validateBucketSpan(callWithRequestFactory(mockSearchResponse), job, {}).then(
-      messages => {
-        const ids = messages.map(m => m.id);
+      (messages) => {
+        const ids = messages.map((m) => m.id);
         test(ids);
       }
     );
   };
 
   it('farequote count detector, bucket span estimation matches 15m', () => {
-    return testBucketSpan('15m', mockFareQuoteSearchResponse, ids => {
+    return testBucketSpan('15m', mockFareQuoteSearchResponse, (ids) => {
       expect(ids).to.eql(['success_bucket_span']);
     });
   });
 
   it('farequote count detector, bucket span estimation does not match 1m', () => {
-    return testBucketSpan('1m', mockFareQuoteSearchResponse, ids => {
+    return testBucketSpan('1m', mockFareQuoteSearchResponse, (ids) => {
       expect(ids).to.eql(['bucket_span_estimation_mismatch']);
     });
   });
@@ -166,7 +166,7 @@ describe('ML - validateBucketSpan', () => {
   // not many non-empty buckets. future work on bucket estimation and sparsity validation
   // should result in a lower bucket span estimation.
   it('it_ops_app_logs count detector, bucket span estimation matches 6h', () => {
-    return testBucketSpan('6h', mockItSearchResponse, ids => {
+    return testBucketSpan('6h', mockItSearchResponse, (ids) => {
       expect(ids).to.eql(['success_bucket_span']);
     });
   });

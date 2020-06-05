@@ -22,18 +22,18 @@ import {
 } from '../utils';
 
 export const findRulesStatusesRoute = (router: IRouter) => {
-  router.get(
+  router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
       validate: {
-        query: buildRouteValidation<FindRulesStatusesRequestParams>(findRulesStatusesSchema),
+        body: buildRouteValidation<FindRulesStatusesRequestParams>(findRulesStatusesSchema),
       },
       options: {
         tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
-      const { query } = request;
+      const { body } = request;
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
@@ -50,7 +50,7 @@ export const findRulesStatusesRoute = (router: IRouter) => {
         }
     */
       try {
-        const statuses = await query.ids.reduce<Promise<RuleStatusResponse | {}>>(
+        const statuses = await body.ids.reduce<Promise<RuleStatusResponse | {}>>(
           async (acc, id) => {
             const lastFiveErrorsForId = await savedObjectsClient.find<
               IRuleSavedAttributesSavedObjectAttributes
@@ -72,7 +72,7 @@ export const findRulesStatusesRoute = (router: IRouter) => {
             );
             const failures = lastFiveErrorsForId.saved_objects
               .slice(1)
-              .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
+              .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
             return {
               ...accumulated,
               [id]: {

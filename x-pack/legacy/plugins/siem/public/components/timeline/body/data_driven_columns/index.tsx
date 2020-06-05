@@ -27,7 +27,7 @@ interface Props {
 export const DataDrivenColumns = React.memo<Props>(
   ({ _id, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
-      {columnHeaders.map(header => (
+      {columnHeaders.map((header) => (
         <EventsTd key={header.id} width={header.width}>
           <EventsTdContent data-test-subj="cell-container">
             {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
@@ -58,7 +58,7 @@ const getMappedNonEcsValue = ({
   data: TimelineNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
-  const item = data.find(d => d.field === fieldName);
+  const item = data.find((d) => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;
   }

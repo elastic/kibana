@@ -26,7 +26,7 @@ export async function loadAlertType({
   http: HttpSetup;
   id: AlertType['id'];
 }): Promise<AlertType> {
-  const maybeAlertType = findFirst<AlertType>(type => type.id === id)(
+  const maybeAlertType = findFirst<AlertType>((type) => type.id === id)(
     await http.get(`${BASE_ALERT_API_PATH}/types`)
   );
   if (isNone(maybeAlertType)) {

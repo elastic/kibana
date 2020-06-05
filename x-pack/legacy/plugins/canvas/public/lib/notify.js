@@ -7,11 +7,11 @@
 import { get } from 'lodash';
 import { getCoreStart, getStartPlugins } from '../legacy';
 
-const getToastNotifications = function() {
+const getToastNotifications = function () {
   return getCoreStart().notifications.toasts;
 };
 
-const formatMsg = function(...args) {
+const formatMsg = function (...args) {
   return getStartPlugins().__LEGACY.formatMsg(...args);
 };
 

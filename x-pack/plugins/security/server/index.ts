@@ -54,7 +54,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
         }
 
         return Object.values(providers?.[providerType] || {}).some(
-          provider => (provider as { enabled: boolean | undefined })?.enabled !== false
+          (provider) => (provider as { enabled: boolean | undefined })?.enabled !== false
         );
       };
 

@@ -41,7 +41,7 @@ beforeEach(() => {
 
 const waitForPromises = async () =>
   act(async () => {
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
   });
 
 /**

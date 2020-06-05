@@ -42,7 +42,7 @@ describe('SavedObjectsService', () => {
     env,
   }: { skipMigration?: boolean; env?: Env } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
-    configService.atPath.mockImplementation(path => {
+    configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
         return new BehaviorSubject({ skip: skipMigration });
       }
@@ -188,7 +188,7 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async done => {
+    it('waits for all es nodes to be compatible before running migrations', async (done) => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);

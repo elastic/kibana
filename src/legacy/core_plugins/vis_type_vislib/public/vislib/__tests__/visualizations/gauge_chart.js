@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import data from '../lib/fixtures/mock_data/terms/_seriesMultiple';
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
-describe('Vislib Gauge Chart Test Suite', function() {
+describe('Vislib Gauge Chart Test Suite', function () {
   let vis;
   let chartEl;
   const visLibParams = {
@@ -85,21 +85,17 @@ describe('Vislib Gauge Chart Test Suite', function() {
     generateVis();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     vis.destroy();
     $('.visChart').remove();
   });
 
-  it('creates meter gauge', function() {
+  it('creates meter gauge', function () {
     expect($(chartEl).find('svg').length).to.equal(5);
-    expect(
-      $(chartEl)
-        .find('svg > g > g > text')
-        .text()
-    ).to.equal('2820231918357341352');
+    expect($(chartEl).find('svg > g > g > text').text()).to.equal('2820231918357341352');
   });
 
-  it('creates circle gauge', function() {
+  it('creates circle gauge', function () {
     generateVis({
       gauge: {
         minAngle: 0,
@@ -109,36 +105,28 @@ describe('Vislib Gauge Chart Test Suite', function() {
     expect($(chartEl).find('svg').length).to.equal(5);
   });
 
-  it('creates gauge with automatic mode', function() {
+  it('creates gauge with automatic mode', function () {
     generateVis({
       gauge: {
         alignment: 'automatic',
       },
     });
-    expect(
-      $(chartEl)
-        .find('svg')
-        .width()
-    ).to.equal(197);
+    expect($(chartEl).find('svg').width()).to.equal(197);
   });
 
-  it('creates gauge with vertical mode', function() {
+  it('creates gauge with vertical mode', function () {
     generateVis({
       gauge: {
         alignment: 'vertical',
       },
     });
-    expect(
-      $(chartEl)
-        .find('svg')
-        .width()
-    ).to.equal($(chartEl).width());
+    expect($(chartEl).find('svg').width()).to.equal($(chartEl).width());
   });
 
-  it('applies range settings correctly', function() {
+  it('applies range settings correctly', function () {
     const paths = $(chartEl).find('svg > g > g:nth-child(1) > path:nth-child(2)');
     const fills = [];
-    paths.each(function() {
+    paths.each(function () {
       fills.push(this.style.fill);
     });
     expect(fills).to.eql([
@@ -150,7 +138,7 @@ describe('Vislib Gauge Chart Test Suite', function() {
     ]);
   });
 
-  it('applies color schema correctly', function() {
+  it('applies color schema correctly', function () {
     generateVis({
       gauge: {
         colorSchema: 'Blues',
@@ -158,7 +146,7 @@ describe('Vislib Gauge Chart Test Suite', function() {
     });
     const paths = $(chartEl).find('svg > g > g:nth-child(1) > path:nth-child(2)');
     const fills = [];
-    paths.each(function() {
+    paths.each(function () {
       fills.push(this.style.fill);
     });
     expect(fills).to.eql([

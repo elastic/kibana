@@ -39,7 +39,7 @@ function updateObjectsTable($scope, $injector) {
   const config = $injector.get('config');
 
   const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = savedObjectManagementRegistry.all().map(obj => obj.service);
+  const services = savedObjectManagementRegistry.all().map((obj) => obj.service);
   const uiCapabilites = npStart.core.application.capabilities;
 
   $scope.$$postDigest(() => {
@@ -60,13 +60,13 @@ function updateObjectsTable($scope, $injector) {
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
           uiCapabilities={uiCapabilites}
-          goInspectObject={object => {
+          goInspectObject={(object) => {
             if (object.meta.editUrl) {
               kbnUrl.change(object.meta.editUrl);
               $scope.$apply();
             }
           }}
-          canGoInApp={object => {
+          canGoInApp={(object) => {
             const { inAppUrl } = object.meta;
             return inAppUrl && get(uiCapabilites, inAppUrl.uiCapabilitiesPath);
           }}
@@ -92,11 +92,11 @@ uiRoutes
     redirectTo: '/management/kibana/objects',
   });
 
-uiModules.get('apps/management').directive('kbnManagementObjects', function() {
+uiModules.get('apps/management').directive('kbnManagementObjects', function () {
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    controller: function($scope, $injector) {
+    controller: function ($scope, $injector) {
       updateObjectsTable($scope, $injector);
       $scope.$on('$destroy', destroyObjectsTable);
     },

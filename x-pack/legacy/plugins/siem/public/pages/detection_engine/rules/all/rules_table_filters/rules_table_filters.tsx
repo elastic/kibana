@@ -52,7 +52,7 @@ const RulesTableFiltersComponent = ({
     onFilterChanged({ filter, showCustomRules, showElasticRules, tags: selectedTags });
   }, [filter, selectedTags, showCustomRules, showElasticRules, onFilterChanged]);
 
-  const handleOnSearch = useCallback(filterString => setFilter(filterString.trim()), [setFilter]);
+  const handleOnSearch = useCallback((filterString) => setFilter(filterString.trim()), [setFilter]);
 
   const handleElasticRulesClick = useCallback(() => {
     setShowElasticRules(!showElasticRules);
@@ -65,7 +65,7 @@ const RulesTableFiltersComponent = ({
   }, [setShowElasticRules, showCustomRules, setShowCustomRules]);
 
   const handleSelectedTags = useCallback(
-    newTags => {
+    (newTags) => {
       if (!isEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
       }

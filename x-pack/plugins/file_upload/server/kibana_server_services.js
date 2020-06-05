@@ -6,13 +6,13 @@
 
 let dataClient;
 
-export const setElasticsearchClientServices = elasticsearch => {
+export const setElasticsearchClientServices = (elasticsearch) => {
   ({ dataClient } = elasticsearch);
 };
 export const getDataClient = () => dataClient;
 
 let internalRepository;
-export const setInternalRepository = createInternalRepository => {
+export const setInternalRepository = (createInternalRepository) => {
   internalRepository = createInternalRepository();
 };
 export const getInternalRepository = () => internalRepository;
