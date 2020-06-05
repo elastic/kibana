@@ -60,7 +60,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
       closeWithReload();
     } catch (error) {
       toasts.addError(new Error(error.body.message), {
-        title: i18n.translate('xpack.ml.newJob.wizard.editModelSnapshotFlyout.saveErrorTitle', {
+        title: i18n.translate('xpack.ml.editModelSnapshotFlyout.saveErrorTitle', {
           defaultMessage: 'Model snapshot update failed',
         }),
       });
@@ -74,7 +74,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
       closeWithReload();
     } catch (error) {
       toasts.addError(new Error(error.body.message), {
-        title: i18n.translate('xpack.ml.newJob.wizard.editModelSnapshotFlyout.saveErrorTitle', {
+        title: i18n.translate('xpack.ml.editModelSnapshotFlyout.saveErrorTitle', {
           defaultMessage: 'Model snapshot deletion failed',
         }),
       });
@@ -102,7 +102,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             <EuiTitle size="s">
               <h5>
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.editModelSnapshotFlyout.title"
+                  id="xpack.ml.editModelSnapshotFlyout.title"
                   defaultMessage="Edit snapshot {ssId}"
                   values={{ ssId: snapshot.snapshot_id }}
                 />
@@ -112,15 +112,28 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             {isCurrentSnapshot && (
               <>
                 <EuiSpacer size="m" />
-                <EuiCallOut size="s" title="Current snapshot">
-                  This is the current snapshot being used by job THING and so cannot be deleted.
+                <EuiCallOut
+                  size="s"
+                  title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
+                    defaultMessage: 'Current snapshot',
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.editModelSnapshotFlyout.calloutText"
+                    defaultMessage="This is the current snapshot being used by job THING and so cannot be deleted."
+                  />
                 </EuiCallOut>
               </>
             )}
 
             <EuiSpacer size="l" />
 
-            <EuiFormRow label="Description" fullWidth>
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.editModelSnapshotFlyout.descriptionTitle', {
+                defaultMessage: 'Description',
+              })}
+              fullWidth
+            >
               <EuiTextArea
                 fullWidth
                 value={description}
@@ -130,7 +143,9 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             <EuiSpacer size="m" />
             <EuiFormRow fullWidth>
               <EuiSwitch
-                label="Retain snapshot during automatic snapshot cleanup process"
+                label={i18n.translate('xpack.ml.editModelSnapshotFlyout.retainSwitchLabel', {
+                  defaultMessage: 'Retain snapshot during automatic snapshot cleanup process',
+                })}
                 checked={retain}
                 onChange={(e) => setRetain(e.target.checked)}
               />
@@ -142,7 +157,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={closeWithoutReload} flush="left">
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.closeButton"
+                  id="xpack.ml.editModelSnapshotFlyout.closeButton"
                   defaultMessage="Close"
                 />
               </EuiButtonEmpty>
@@ -155,7 +170,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
                 disabled={isCurrentSnapshot === true}
               >
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.useDefaultButton"
+                  id="xpack.ml.editModelSnapshotFlyout.useDefaultButton"
                   defaultMessage="Delete"
                 />
               </EuiButtonEmpty>
@@ -163,7 +178,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             <EuiFlexItem grow={false}>
               <EuiButton onClick={updateSnapshot} fill>
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.saveButton"
+                  id="xpack.ml.editModelSnapshotFlyout.saveButton"
                   defaultMessage="Save"
                 />
               </EuiButton>
@@ -175,11 +190,17 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
       {deleteModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title="Delete snapshot?"
+            title={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteTitle', {
+              defaultMessage: 'Delete snapshot?',
+            })}
             onCancel={hideDeleteModal}
             onConfirm={deleteSnapshot}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteButton', {
+              defaultMessage: 'Delete',
+            })}
             buttonColor="danger"
             defaultFocusedButton="confirm"
           />

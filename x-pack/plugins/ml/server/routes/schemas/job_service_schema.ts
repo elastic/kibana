@@ -66,3 +66,17 @@ export const updateGroupsSchema = {
     )
   ),
 };
+
+export const revertModelSnapshotSchema = schema.object({
+  jobId: schema.string(),
+  snapshotId: schema.string(),
+  replay: schema.boolean(),
+  end: schema.maybe(schema.number()),
+  deleteInterveningResults: schema.maybe(schema.boolean()),
+  skip: schema.maybe(
+    schema.object({
+      start: schema.number(),
+      end: schema.number(),
+    })
+  ),
+});

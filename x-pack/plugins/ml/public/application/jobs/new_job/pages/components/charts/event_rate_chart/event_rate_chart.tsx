@@ -12,6 +12,7 @@ import { Anomaly } from '../../../../common/results_loader';
 import { useChartColors } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
 import { Anomalies } from '../common/anomalies';
+import { OverlayRange } from './overlay_range';
 
 interface Props {
   eventRateChartData: LineChartPoint[];
@@ -21,6 +22,10 @@ interface Props {
   showAxis?: boolean;
   loading?: boolean;
   fadeChart?: boolean;
+  overlayRange?: {
+    start: number;
+    end: number;
+  };
 }
 
 export const EventRateChart: FC<Props> = ({
@@ -31,6 +36,7 @@ export const EventRateChart: FC<Props> = ({
   showAxis,
   loading = false,
   fadeChart,
+  overlayRange,
 }) => {
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
@@ -43,8 +49,16 @@ export const EventRateChart: FC<Props> = ({
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart>
           {showAxis === true && <Axes />}
-
           <Settings tooltip={TooltipType.None} />
+
+          {overlayRange && (
+            <OverlayRange
+              eventRateChartData={eventRateChartData}
+              start={overlayRange.start}
+              end={overlayRange.end}
+            />
+          )}
+
           <Anomalies anomalyData={anomalyData} />
           <BarSeries
             id="event_rate"

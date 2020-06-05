@@ -10,6 +10,7 @@ import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
+import { modelSnapshotProvider } from './model_snapshots';
 
 export function jobServiceProvider(callAsCurrentUser: APICaller) {
   return {
@@ -19,5 +20,6 @@ export function jobServiceProvider(callAsCurrentUser: APICaller) {
     ...newJobCapsProvider(callAsCurrentUser),
     ...newJobChartsProvider(callAsCurrentUser),
     ...topCategoriesProvider(callAsCurrentUser),
+    ...modelSnapshotProvider(callAsCurrentUser),
   };
 }

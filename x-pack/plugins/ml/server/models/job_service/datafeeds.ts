@@ -27,7 +27,7 @@ interface Results {
 }
 
 export function datafeedsProvider(callAsCurrentUser: APICaller) {
-  async function forceStartDatafeeds(datafeedIds: string[], start: number, end: number) {
+  async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
       acc[cur] = false;
@@ -96,7 +96,7 @@ export function datafeedsProvider(callAsCurrentUser: APICaller) {
     return opened;
   }
 
-  async function startDatafeed(datafeedId: string, start: number, end: number) {
+  async function startDatafeed(datafeedId: string, start?: number, end?: number) {
     return callAsCurrentUser('ml.startDatafeed', { datafeedId, start, end });
   }
 

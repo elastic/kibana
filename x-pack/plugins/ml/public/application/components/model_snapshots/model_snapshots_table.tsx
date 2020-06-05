@@ -19,10 +19,13 @@ import {
   EuiInMemoryTable,
   // EuiLink,
   EuiLoadingSpinner,
+  EuiOverlayMask,
+  EuiConfirmModal,
   // EuiToolTip,
 } from '@elastic/eui';
 
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
+import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { ml } from '../../services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
 import {
@@ -36,10 +39,20 @@ interface Props {
   job: CombinedJobWithStats;
 }
 
+enum COMBINED_JOB_STATE {
+  OPEN_AND_RUNNING,
+  OPEN_AND_STOPPED,
+  CLOSED,
+  UNKNOWN,
+}
+
 export const ModelSnapshotTable: FC<Props> = ({ job }) => {
   const [snapshots, setSnapshots] = useState<ModelSnapshot[]>([]);
   const [snapshotsLoaded, setSnapshotsLoaded] = useState<boolean>(false);
-  const [editSnapshot, setEditSnapshot] = useState<any | null>(null);
+  const [editSnapshot, setEditSnapshot] = useState<ModelSnapshot | null>(null);
+  const [revertSnapshot, setRevertSnapshot] = useState<ModelSnapshot | null>(null);
+  const [closeJobModalVisible, setCloseJobModalVisible] = useState(false);
+  const [combinedJobState, setCombinedJobState] = useState<COMBINED_JOB_STATE | null>(null);
 
   useEffect(() => {
     loadModelSnapshots();
@@ -51,13 +64,33 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
     setSnapshotsLoaded(true);
   }
 
-  async function isJobOk() {
-    const gg = await canJobBeReverted(job.job_id);
-    if (gg) {
-      // console.log('ok!!');
-    } else {
-      // console.log('not ok!!');
+  async function checkJobIsClosed(snapshot: ModelSnapshot) {
+    const state = await getCombinedJobState(job.job_id);
+    if (state === COMBINED_JOB_STATE.UNKNOWN) {
+      // show toast
+      return;
     }
+
+    if (state === COMBINED_JOB_STATE.CLOSED) {
+      // show flyout
+      setRevertSnapshot(snapshot);
+    } else {
+      setCombinedJobState(state);
+      showCloseJobModalVisible();
+    }
+  }
+
+  function showCloseJobModalVisible() {
+    setCloseJobModalVisible(true);
+  }
+  function hideCloseJobModalVisible() {
+    setCombinedJobState(null);
+    setCloseJobModalVisible(false);
+  }
+
+  async function forceCloseJob() {
+    ml.jobs.forceStopAndCloseJob(job.job_id);
+    hideCloseJobModalVisible();
   }
 
   function renderDate(date: number) {
@@ -84,7 +117,16 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
     {
       field: 'timestamp',
       name: i18n.translate('xpack.ml.modelSnapshotTable.time', {
-        defaultMessage: 'Date',
+        defaultMessage: 'Date created',
+      }),
+      dataType: 'date',
+      render: renderDate,
+      sortable: true,
+    },
+    {
+      field: 'latest_record_time_stamp',
+      name: i18n.translate('xpack.ml.modelSnapshotTable.latestTimestamp', {
+        defaultMessage: 'Latest timestamp',
       }),
       dataType: 'date',
       render: renderDate,
@@ -114,7 +156,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
           }),
           type: 'icon',
           icon: 'crosshairs',
-          onClick: isJobOk,
+          onClick: checkJobIsClosed,
         },
         {
           name: i18n.translate('xpack.ml.modelSnapshotTable.actions.edit.name', {
@@ -125,9 +167,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
           }),
           type: 'icon',
           icon: 'pencil',
-          onClick: (a: any) => {
-            setEditSnapshot(a);
-          },
+          onClick: setEditSnapshot,
         },
         // {
         //   name: i18n.translate('xpack.ml.modelSnapshotTable.actions.delete.name', {
@@ -188,15 +228,63 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
           }}
         />
       )}
+
+      {revertSnapshot !== null && (
+        <RevertModelSnapshotFlyout
+          snapshot={revertSnapshot}
+          snapshots={snapshots}
+          job={job}
+          closeFlyout={(reload: boolean) => {
+            setRevertSnapshot(null);
+            if (reload) {
+              loadModelSnapshots();
+            }
+          }}
+        />
+      )}
+
+      {closeJobModalVisible && combinedJobState !== null && (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.title', {
+              defaultMessage: 'Close job?',
+            })}
+            onCancel={hideCloseJobModalVisible}
+            onConfirm={forceCloseJob}
+            cancelButtonText={i18n.translate(
+              'xpack.ml.modelSnapshotTable.closeJobConfirm.cancelButton',
+              {
+                defaultMessage: 'Cancel',
+              }
+            )}
+            confirmButtonText={i18n.translate(
+              'xpack.ml.modelSnapshotTable.closeJobConfirm.deleteButton',
+              {
+                defaultMessage: 'Force close',
+              }
+            )}
+            defaultFocusedButton="confirm"
+          >
+            <p>Close this job blah</p>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      )}
     </>
   );
 };
 
-async function canJobBeReverted(jobId: string) {
+async function getCombinedJobState(jobId: string) {
   const jobs = await ml.jobs.jobs([jobId]);
-  return (
-    jobs.length === 1 &&
-    jobs[0].state === JOB_STATE.CLOSED &&
-    jobs[0].datafeed_config.state === DATAFEED_STATE.STOPPED
-  );
+
+  if (jobs.length !== 1) {
+    return COMBINED_JOB_STATE.UNKNOWN;
+  }
+
+  if (jobs[0].state !== JOB_STATE.CLOSED) {
+    if (jobs[0].datafeed_config.state !== DATAFEED_STATE.STOPPED) {
+      return COMBINED_JOB_STATE.OPEN_AND_RUNNING;
+    }
+    return COMBINED_JOB_STATE.OPEN_AND_STOPPED;
+  }
+  return COMBINED_JOB_STATE.CLOSED;
 }

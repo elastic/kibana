@@ -99,10 +99,20 @@ export const jobs = {
       body,
     });
   },
+
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return http<any>({
       path: `${basePath()}/jobs/close_jobs`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  forceStopAndCloseJob(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return http<any>({
+      path: `${basePath()}/jobs/force_stop_and_close_job`,
       method: 'POST',
       body,
     });
@@ -255,6 +265,21 @@ export const jobs = {
     const body = JSON.stringify({ jobId, count });
     return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
       path: `${basePath()}/jobs/top_categories`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  revertModelSnapshot(
+    jobId: string,
+    snapshotId: string,
+    replay: boolean,
+    end?: number,
+    skip?: { start: number; end: number }
+  ) {
+    const body = JSON.stringify({ jobId, snapshotId, replay, end, skip });
+    return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
+      path: `${basePath()}/jobs/revert_model_snapshot`,
       method: 'POST',
       body,
     });
