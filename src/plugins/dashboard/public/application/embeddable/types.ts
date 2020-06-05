@@ -25,5 +25,5 @@ export type SavedObjectId = string;
 export interface DashboardPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > extends PanelState<TEmbeddableInput> {
-  gridData: GridData;
+  readonly gridData: GridData;
 }
