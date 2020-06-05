@@ -19,7 +19,6 @@
 
 import { defaults, pluck, last, get } from 'lodash';
 
-jest.mock('../../../../kibana_utils/public/history');
 import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
@@ -31,8 +30,8 @@ import { Field } from '../fields';
 
 import { FieldFormatMethods } from '../types';
 
-jest.mock('../../../../kibana_utils/public', () => {
-  const originalModule = jest.requireActual('../../../../kibana_utils/public');
+jest.mock('../../../../kibana_utils/common', () => {
+  const originalModule = jest.requireActual('../../../../kibana_utils/common');
 
   return {
     ...originalModule,
