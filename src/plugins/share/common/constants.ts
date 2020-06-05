@@ -17,16 +17,5 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
-import { VisualizationsPlugin } from './plugin';
-
-export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
-
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VisualizationsPlugin(initializerContext);
-}
-
-export { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+export const CSV_SEPARATOR_SETTING = 'csv:separator';
+export const CSV_QUOTE_VALUES_SETTING = 'csv:quoteValues';
