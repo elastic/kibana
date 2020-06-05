@@ -8,8 +8,6 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
-import dateMath from '@elastic/datemath';
-import moment from 'moment';
 
 import {
   SIGNALS_ID,
@@ -238,44 +236,9 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
-          // add a 'gap' parameter that would add the
-          // 'from' with the 'gap' - need to figure out
-          // how to do datemath with moment.
-          let calculatedFrom = from;
-          if (gap != null && previousStartedAt != null) {
-            // const unit = from[from.length - 1]; // only seconds (s), minutes (m) or hours (h)
-            // const parsedGap = moment(gap.asSeconds());
-            // console.log('gap', gap.humanize());
-            const tempNow = moment();
-            const newFrom = moment.duration(tempNow.diff(previousStartedAt));
-            // console.log('newFrom.asSeconds(): ', newFrom.asSeconds());
-            const parsed = parseInt(newFrom.asSeconds().toString(), 10);
-            calculatedFrom = `now-${parsed}s`;
-          }
-          const noReIndex = buildEventsSearchQuery({
-            index: inputIndex,
-            from: calculatedFrom,
-            to,
-            filter: esFilter,
-            size: searchAfterSize,
-            searchAfterSortId: undefined,
-          });
-
-          logger.debug(buildRuleMessage('[+] Initial search call'));
-          const start = performance.now();
-          const noReIndexResult = await services.callCluster('search', noReIndex);
-          const end = performance.now();
-
-          const signalCount = noReIndexResult.hits.total.value;
-          if (signalCount !== 0) {
-            logger.info(
-              buildRuleMessage(
-                `Found ${signalCount} signals from the indexes of "[${inputIndex.join(', ')}]"`
-              )
-            );
-          }
-
           result = await searchAfterAndBulkCreate({
+            gap,
+            previousStartedAt,
             listClient,
             exceptionsList: exceptionItems ?? [],
             ruleParams: params,
