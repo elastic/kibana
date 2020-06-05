@@ -60,7 +60,7 @@ export const TreeNode: FunctionComponent<Props> = ({
               )}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty size="s" onClick={onMove}>
+            <EuiButtonEmpty disabled={Boolean(selectedProcessorInfo)} size="s" onClick={onMove}>
               {i18n.translate('xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel', {
                 defaultMessage: 'Move',
               })}
