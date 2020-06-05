@@ -44,7 +44,7 @@ export function LongQueryNotification(props: Props) {
           <EuiButton
             size="s"
             onClick={async () => {
-              await props.application.navigateToApp('kibana#/management/stack/license_management');
+              await props.application.navigateToApp('management/stack/license_management');
             }}
           >
             <FormattedMessage
