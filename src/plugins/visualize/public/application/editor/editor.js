@@ -244,6 +244,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   onTitleDuplicate,
                   returnToOrigin,
                 };
+                //const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
                 return doSave(saveOptions).then((response) => {
                   // If the save wasn't successful, put the original values back.
                   if (!response.id || response.error) {
@@ -656,6 +657,9 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.toJSON());
     $appStatus.dirty = false;
+
+    const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
+    console.dir(currentDashboardInput);
 
     return savedVis.save(saveOptions).then(
       function (id) {

@@ -33,6 +33,7 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
+import { DashboardContainerInput } from './index';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
@@ -101,6 +102,7 @@ interface SetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  dashboard: DashboardStart;
 }
 
 interface StartDependencies {
@@ -113,6 +115,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
 }
 
 export type Setup = void;
@@ -125,6 +128,8 @@ export interface DashboardStart {
   }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
+  getLastLoadedDashboardAppDashboardInput: () => DashboardContainerInput | undefined;
+  setLastLoadedDashboardAppDashboardInput: (dashboard: DashboardContainerInput | undefined) => void;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -137,6 +142,7 @@ declare module '../../../plugins/ui_actions/public' {
 
 export class DashboardPlugin
   implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
+  private currentDashboardInput: DashboardContainerInput | undefined;
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -169,7 +175,7 @@ export class DashboardPlugin
     }
 
     const getStartServices = async () => {
-      const [coreStart, deps] = await core.getStartServices();
+      const [coreStart, deps, dashboardStart] = await core.getStartServices();
 
       const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
         React.useEffect(() => {
@@ -203,6 +209,7 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
+        dashboard: dashboardStart,
       };
     };
 
@@ -286,6 +293,7 @@ export class DashboardPlugin
           usageCollection,
           scopedHistory: () => this.currentHistory!,
           savedObjects,
+          dashboard: dashboardStart,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -403,6 +411,9 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
+      getLastLoadedDashboardAppDashboardInput: () => this.currentDashboardInput,
+      setLastLoadedDashboardAppDashboardInput: (dashboardInput) =>
+        (this.currentDashboardInput = dashboardInput),
     };
   }
 

@@ -29,6 +29,7 @@ import { DashboardAppState, SavedDashboardPanel } from '../types';
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
 import { SavedObjectDashboard } from '../saved_dashboards';
+import { DashboardStart } from '../plugin';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
@@ -60,6 +61,7 @@ export interface DashboardAppScope extends ng.IScope {
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
   isVisible: boolean;
+  dashboard: DashboardStart;
 }
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {

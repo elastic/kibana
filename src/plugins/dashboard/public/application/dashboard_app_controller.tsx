@@ -149,6 +149,7 @@ export class DashboardAppController {
     kbnUrlStateStorage,
     usageCollection,
     navigation,
+    dashboard,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
@@ -1112,6 +1113,7 @@ export class DashboardAppController {
         outputSubscription.unsubscribe();
       }
       if (dashboardContainer) {
+        dashboard.setLastLoadedDashboardAppDashboardInput(dashboardContainer.getInput());
         dashboardContainer.destroy();
       }
     });
