@@ -60,7 +60,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with Advanced Settings disabled', function () {
-      this.tags('skipCoverage');
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
