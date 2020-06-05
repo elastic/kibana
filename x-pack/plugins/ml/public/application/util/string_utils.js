@@ -83,7 +83,7 @@ function quoteField(field) {
 
 // re-order an object based on the value of the keys
 export function sortByKey(list, reverse, comparator) {
-  let keys = _.sortBy(_.keys(list), key => {
+  let keys = _.sortBy(_.keys(list), (key) => {
     return comparator ? comparator(list[key], key) : key;
   });
 
@@ -93,7 +93,7 @@ export function sortByKey(list, reverse, comparator) {
 
   return _.object(
     keys,
-    _.map(keys, key => {
+    _.map(keys, (key) => {
       return list[key];
     })
   );
@@ -121,7 +121,7 @@ export function mlEscape(str) {
     "'": '&#39;',
     '/': '&#x2F;',
   };
-  return String(str).replace(/[&<>"'\/]/g, s => entityMap[s]);
+  return String(str).replace(/[&<>"'\/]/g, (s) => entityMap[s]);
 }
 
 // Escapes reserved characters for use in Elasticsearch query terms.

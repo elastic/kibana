@@ -12,7 +12,7 @@ import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 import { App as Component } from './app';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   // appReady could be an error object
   const appState = getAppReady(state);
 
@@ -22,7 +22,7 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   setAppReady: () => async () => {
     try {
       // set app state to ready
@@ -31,7 +31,7 @@ const mapDispatchToProps = dispatch => ({
       dispatch(appError(e));
     }
   },
-  setAppError: payload => dispatch(appError(payload)),
+  setAppError: (payload) => dispatch(appError(payload)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -46,7 +46,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 export const App = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withKibana,
-  withProps(props => ({
+  withProps((props) => ({
     onRouteChange: props.kibana.services.canvas.navLink.updatePath,
   }))
 )(Component);

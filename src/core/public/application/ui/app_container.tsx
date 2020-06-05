@@ -83,7 +83,7 @@ export const AppContainer: FunctionComponent<Props> = ({
             appBasePath: mounter.appBasePath,
             history: createScopedHistory(appPath),
             element: elementRef.current!,
-            onAppLeave: handler => setAppLeaveHandler(appId, handler),
+            onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
           })) || null;
       } catch (e) {
         // TODO: add error UI

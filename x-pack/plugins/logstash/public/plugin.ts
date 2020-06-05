@@ -32,7 +32,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
-      map(license => new LogstashLicenseService(license))
+      map((license) => new LogstashLicenseService(license))
     );
 
     const managementApp = plugins.management.sections
@@ -43,7 +43,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
           defaultMessage: 'Logstash Pipelines',
         }),
         order: 1,
-        mount: async params => {
+        mount: async (params) => {
           const [coreStart] = await core.getStartServices();
           const { renderApp } = await import('./application');
           const isMonitoringEnabled = 'monitoring' in plugins;
@@ -71,7 +71,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
               defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
             }),
             icon: 'pipelineApp',
-            path: '/app/kibana#/management/ingest/pipelines',
+            path: '/app/management/ingest/pipelines',
             showOnHomePage: true,
             category: FeatureCatalogueCategory.ADMIN,
           });

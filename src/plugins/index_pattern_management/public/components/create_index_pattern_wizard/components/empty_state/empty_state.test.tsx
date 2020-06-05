@@ -24,7 +24,7 @@ import sinon from 'sinon';
 
 describe('EmptyState', () => {
   it('should render normally', () => {
-    const component = shallow(<EmptyState onRefresh={() => {}} prependBasePath={x => x} />);
+    const component = shallow(<EmptyState onRefresh={() => {}} prependBasePath={(x) => x} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -35,7 +35,7 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = shallow(
-          <EmptyState onRefresh={onRefreshHandler} prependBasePath={x => x} />
+          <EmptyState onRefresh={onRefreshHandler} prependBasePath={(x) => x} />
         );
 
         component.find('[data-test-subj="refreshIndicesButton"]').simulate('click');

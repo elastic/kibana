@@ -60,10 +60,10 @@ export function createSavedGisMapClass(services) {
           savedObject.layerListJSON = attributes.layerListJSON;
 
           const indexPatternIds = references
-            .filter(reference => {
+            .filter((reference) => {
               return reference.type === 'index-pattern';
             })
-            .map(reference => {
+            .map((reference) => {
               return reference.id;
             });
           savedObject.indexPatternIds = _.uniq(indexPatternIds);

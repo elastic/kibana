@@ -144,7 +144,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
           agentConfig={agentConfig}
           updateAgentConfig={updateAgentConfig}
           withSysMonitoring={withSysMonitoring}
-          updateSysMonitoring={newValue => setWithSysMonitoring(newValue)}
+          updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
           validation={validation}
           isEditing={true}
           onDelete={() => {

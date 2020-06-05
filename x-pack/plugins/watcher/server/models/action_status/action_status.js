@@ -96,7 +96,7 @@ export class ActionStatus {
 
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
-    const missingPropertyError = missingProperty =>
+    const missingPropertyError = (missingProperty) =>
       i18n.translate(
         'xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage',
         {

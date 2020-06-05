@@ -54,68 +54,69 @@ export const useWaffleOptions = () => {
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
   const changeMetric = useCallback(
-    (metric: SnapshotMetricInput) => setState(previous => ({ ...previous, metric })),
+    (metric: SnapshotMetricInput) => setState((previous) => ({ ...previous, metric })),
     [setState]
   );
 
   const changeGroupBy = useCallback(
-    (groupBy: SnapshotGroupBy) => setState(previous => ({ ...previous, groupBy })),
+    (groupBy: SnapshotGroupBy) => setState((previous) => ({ ...previous, groupBy })),
     [setState]
   );
 
   const changeNodeType = useCallback(
-    (nodeType: InventoryItemType) => setState(previous => ({ ...previous, nodeType })),
+    (nodeType: InventoryItemType) => setState((previous) => ({ ...previous, nodeType })),
     [setState]
   );
 
-  const changeView = useCallback((view: string) => setState(previous => ({ ...previous, view })), [
-    setState,
-  ]);
+  const changeView = useCallback(
+    (view: string) => setState((previous) => ({ ...previous, view })),
+    [setState]
+  );
 
   const changeCustomOptions = useCallback(
     (customOptions: Array<{ text: string; field: string }>) =>
-      setState(previous => ({ ...previous, customOptions })),
+      setState((previous) => ({ ...previous, customOptions })),
     [setState]
   );
 
   const changeAutoBounds = useCallback(
-    (autoBounds: boolean) => setState(previous => ({ ...previous, autoBounds })),
+    (autoBounds: boolean) => setState((previous) => ({ ...previous, autoBounds })),
     [setState]
   );
 
   const changeBoundsOverride = useCallback(
     (boundsOverride: { min: number; max: number }) =>
-      setState(previous => ({ ...previous, boundsOverride })),
+      setState((previous) => ({ ...previous, boundsOverride })),
     [setState]
   );
 
   const changeAccount = useCallback(
-    (accountId: string) => setState(previous => ({ ...previous, accountId })),
+    (accountId: string) => setState((previous) => ({ ...previous, accountId })),
     [setState]
   );
 
   const changeRegion = useCallback(
-    (region: string) => setState(previous => ({ ...previous, region })),
+    (region: string) => setState((previous) => ({ ...previous, region })),
     [setState]
   );
 
   const changeCustomMetrics = useCallback(
     (customMetrics: SnapshotCustomMetricInput[]) => {
-      setState(previous => ({ ...previous, customMetrics }));
+      setState((previous) => ({ ...previous, customMetrics }));
     },
     [setState]
   );
 
   const changeLegend = useCallback(
     (legend: WaffleLegendOptions) => {
-      setState(previous => ({ ...previous, legend }));
+      setState((previous) => ({ ...previous, legend }));
     },
     [setState]
   );
 
   const changeSort = useCallback(
     (sort: WaffleSortOption) => {
-      setState(previous => ({ ...previous, sort }));
+      setState((previous) => ({ ...previous, sort }));
     },
     [setState]
   );

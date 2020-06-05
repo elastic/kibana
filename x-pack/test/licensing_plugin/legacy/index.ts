@@ -7,8 +7,8 @@
 import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('Legacy licensing plugin', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Legacy licensing plugin', function () {
     this.tags('ciGroup2');
     // MUST BE LAST! CHANGES LICENSE TYPE!
     loadTestFile(require.resolve('./updates'));

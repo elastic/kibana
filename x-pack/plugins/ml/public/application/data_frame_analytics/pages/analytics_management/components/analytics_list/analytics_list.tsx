@@ -53,13 +53,14 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
 import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
+import { SourceSelection } from '../source_selection';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
   dataFrameAnalytics: DataFrameAnalyticsListRow[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, analyticsId: DataFrameAnalyticsId) => {
-    const item = dataFrameAnalytics.find(analytics => analytics.config.id === analyticsId);
+    const item = dataFrameAnalytics.find((analytics) => analytics.config.id === analyticsId);
     if (item !== undefined) {
       m[analyticsId] = <ExpandedRow item={item} />;
     }
@@ -90,6 +91,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
@@ -176,7 +178,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       return p;
     }, {});
 
-    clauses.forEach(c => {
+    clauses.forEach((c) => {
       // the search term could be negated with a minus, e.g. -bananas
       const bool = c.match === 'must';
       let ts: DataFrameAnalyticsListRow[];
@@ -187,12 +189,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         // if the term has been negated, AND the matches
         if (bool === true) {
           ts = analytics.filter(
-            d => stringMatch(d.id, c.value) === bool // ||
+            (d) => stringMatch(d.id, c.value) === bool // ||
             // stringMatch(d.config.description, c.value) === bool
           );
         } else {
           ts = analytics.filter(
-            d => stringMatch(d.id, c.value) === bool // &&
+            (d) => stringMatch(d.id, c.value) === bool // &&
             // stringMatch(d.config.description, c.value) === bool
           );
         }
@@ -200,25 +202,25 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           if (c.field === 'job_type') {
-            ts = analytics.filter(d =>
+            ts = analytics.filter((d) =>
               (c.value as string).includes(getAnalysisType(d.config.analysis))
             );
           } else {
             // the status value is an array of string(s) e.g. ['failed', 'stopped']
-            ts = analytics.filter(d => (c.value as string).includes(d.stats.state));
+            ts = analytics.filter((d) => (c.value as string).includes(d.stats.state));
           }
         } else {
-          ts = analytics.filter(d => d.mode === c.value);
+          ts = analytics.filter((d) => d.mode === c.value);
         }
       }
 
-      ts.forEach(t => matches[t.id].count++);
+      ts.forEach((t) => matches[t.id].count++);
     });
 
     // loop through the matches and return only analytics which have match all the clauses
     const filtered = Object.values(matches)
-      .filter(m => (m && m.count) >= clauses.length)
-      .map(m => m.analytics);
+      .filter((m) => (m && m.count) >= clauses.length)
+      .map((m) => m.analytics);
 
     let pageStart = pageIndex * pageSize;
     if (pageStart >= filtered.length && filtered.length !== 0) {
@@ -271,7 +273,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             !isManagementTable && createAnalyticsForm
               ? [
                   <EuiButtonEmpty
-                    onClick={createAnalyticsForm.actions.openModal}
+                    onClick={() => setIsSourceIndexModalVisible(true)}
                     isDisabled={disabled}
                     data-test-subj="mlAnalyticsCreateFirstButton"
                   >
@@ -286,6 +288,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         />
         {!isManagementTable && createAnalyticsForm && (
           <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+        )}
+        {isSourceIndexModalVisible === true && (
+          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
       </Fragment>
     );
@@ -330,7 +335,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           defaultMessage: 'Type',
         }),
         multiSelect: 'or',
-        options: Object.values(ANALYSIS_CONFIG_TYPE).map(val => ({
+        options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
           value: val,
           name: val,
           view: getJobTypeBadge(val),
@@ -343,7 +348,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           defaultMessage: 'Status',
         }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map(val => ({
+        options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -402,7 +407,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </EuiFlexItem>
             {!isManagementTable && createAnalyticsForm && (
               <EuiFlexItem grow={false}>
-                <CreateAnalyticsButton {...createAnalyticsForm} />
+                <CreateAnalyticsButton
+                  {...createAnalyticsForm}
+                  setIsSourceIndexModalVisible={setIsSourceIndexModalVisible}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -426,7 +434,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           sorting={sorting}
           search={search}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
-          rowProps={item => ({
+          rowProps={(item) => ({
             'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
           })}
         />
@@ -434,6 +442,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
       {!isManagementTable && createAnalyticsForm?.state.isModalVisible && (
         <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+      )}
+      {isSourceIndexModalVisible === true && (
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </Fragment>
   );

@@ -42,23 +42,23 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 }
 
 export function buildKueryForOnlineAgents() {
-  return `(${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} and ${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${(4 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s) or (${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_TEMPORARY} and ${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${(3 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s) or (${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_EPHEMERAL} and ${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${(3 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s)`;
+  return `(${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} and ${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${
+    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s) or (${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_TEMPORARY} and ${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${
+    (3 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s) or (${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_EPHEMERAL} and ${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${
+    (3 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s)`;
 }
 
 export function buildKueryForOfflineAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_TEMPORARY} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${(3 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s`;
+  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_TEMPORARY} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+    (3 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s`;
 }
 
 export function buildKueryForErrorAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${(4 *
-    AGENT_POLLING_THRESHOLD_MS) /
-    1000}s`;
+  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
+  }s`;
 }

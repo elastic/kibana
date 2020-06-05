@@ -30,7 +30,7 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
     const embeddableFactories = this.props.getEmbeddableFactories();
 
     // Find the embeddable type from the saved object type
-    const found = Array.from(embeddableFactories).find(embeddableFactory => {
+    const found = Array.from(embeddableFactories).find((embeddableFactory) => {
       return Boolean(
         embeddableFactory.savedObjectMetaData &&
           embeddableFactory.savedObjectMetaData.type === savedObjectType
@@ -46,11 +46,11 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
     const embeddableFactories = this.props.getEmbeddableFactories();
 
     const availableSavedObjects = Array.from(embeddableFactories)
-      .filter(factory => {
+      .filter((factory) => {
         return this.props.availableEmbeddables.includes(factory.type);
       })
-      .map(factory => factory.savedObjectMetaData)
-      .filter<SavedObjectMetaData<{}>>(function(
+      .map((factory) => factory.savedObjectMetaData)
+      .filter<SavedObjectMetaData<{}>>(function (
         maybeSavedObjectMetaData
       ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
         return maybeSavedObjectMetaData !== undefined;

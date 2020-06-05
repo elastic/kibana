@@ -109,7 +109,7 @@ export default class BaseOptimizer {
   }
 
   registerCompilerDoneHook() {
-    this.compiler.hooks.done.tap('base_optimizer-done', stats => {
+    this.compiler.hooks.done.tap('base_optimizer-done', (stats) => {
       // We are not done while we have an additional
       // compilation pass to run
       // We also don't need to emit the stats if we don't have
@@ -120,7 +120,7 @@ export default class BaseOptimizer {
 
       const path = this.uiBundles.resolvePath('stats.json');
       const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function(err) {
+      writeFile(path, content, function (err) {
         if (err) throw err;
       });
     });
@@ -226,7 +226,7 @@ export default class BaseOptimizer {
      * Creates the selection rules for a loader that will only pass for
      * source files that are eligible for automatic transpilation.
      */
-    const createSourceFileResourceSelector = test => {
+    const createSourceFileResourceSelector = (test) => {
       return [
         {
           test,
@@ -268,20 +268,22 @@ export default class BaseOptimizer {
           cacheGroups: {
             commons: {
               name: 'commons',
-              chunks: chunk =>
+              chunks: (chunk) =>
                 chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
               minChunks: 2,
               reuseExistingChunk: true,
             },
             light_theme: {
               name: 'light_theme',
-              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
+              test: (m) =>
+                m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
               chunks: 'all',
               enforce: true,
             },
             dark_theme: {
               name: 'dark_theme',
-              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
+              test: (m) =>
+                m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
               chunks: 'all',
               enforce: true,
             },
@@ -302,13 +304,13 @@ export default class BaseOptimizer {
         }),
 
         // ignore scss imports in new-platform code that finds its way into legacy bundles
-        new webpack.NormalModuleReplacementPlugin(/\.scss$/, resource => {
+        new webpack.NormalModuleReplacementPlugin(/\.scss$/, (resource) => {
           resource.request = EMPTY_MODULE_PATH;
         }),
 
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
-        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
           // the map of uiExport types to module ids
           const extensions = this.uiBundles.getAppExtensions();
 
@@ -330,7 +332,7 @@ export default class BaseOptimizer {
           ].join('');
         }),
 
-        ...this.uiBundles.getWebpackPluginProviders().map(provider => provider(webpack)),
+        ...this.uiBundles.getWebpackPluginProviders().map((provider) => provider(webpack)),
       ],
 
       module: {
@@ -376,7 +378,7 @@ export default class BaseOptimizer {
               },
             ]),
           },
-          ...this.uiBundles.getPostLoaders().map(loader => ({
+          ...this.uiBundles.getPostLoaders().map((loader) => ({
             enforce: 'post',
             ...loader,
           })),

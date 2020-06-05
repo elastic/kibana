@@ -39,11 +39,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await table.parseDomContent();
       return $.findTestSubjects('~docTableRow')
         .toArray()
-        .map((row: any) =>
-          $(row)
-            .text()
-            .trim()
-        );
+        .map((row: any) => $(row).text().trim());
     }
 
     public async getBodyRows(): Promise<WebElementWrapper[]> {
@@ -111,11 +107,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await table.parseDomContent();
       return $.findTestSubjects('~docTableHeaderField')
         .toArray()
-        .map((field: any) =>
-          $(field)
-            .text()
-            .trim()
-        );
+        .map((field: any) => $(field).text().trim());
     }
 
     public async getTableDocViewRow(

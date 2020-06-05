@@ -179,7 +179,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       const select = await testSubjects.find('superDatePickerRefreshIntervalUnitsSelect');
       const options = await find.allDescendantDisplayedByCssSelector('option', select);
       await Promise.all(
-        options.map(async optionElement => {
+        options.map(async (optionElement) => {
           const isSelected = await optionElement.isSelected();
           if (isSelected) {
             selectedUnit = await optionElement.getVisibleText();

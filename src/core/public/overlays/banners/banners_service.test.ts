@@ -31,11 +31,7 @@ describe('OverlayBannersService', () => {
     });
   });
 
-  const currentBanners = () =>
-    service
-      .get$()
-      .pipe(take(1))
-      .toPromise();
+  const currentBanners = () => service.get$().pipe(take(1)).toPromise();
 
   describe('adding banners', () => {
     test('adds a single banner', async () => {

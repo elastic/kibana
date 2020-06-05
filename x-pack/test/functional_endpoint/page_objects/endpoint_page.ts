@@ -23,7 +23,7 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await (await testSubjects.find('policyTable')).parseDomContent();
       return $('thead tr th')
         .toArray()
-        .map(th =>
+        .map((th) =>
           $(th)
             .text()
             .replace(/&nbsp;/g, '')
@@ -47,11 +47,11 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await hostTable.parseDomContent();
       return $('tr')
         .toArray()
-        .map(row =>
+        .map((row) =>
           $(row)
             .find('.euiTableCellContent')
             .toArray()
-            .map(cell =>
+            .map((cell) =>
               $(cell)
                 .text()
                 .replace(/&nbsp;/g, '')
@@ -83,7 +83,7 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await detailsData.parseDomContent();
       return $('dt')
         .toArray()
-        .map(key =>
+        .map((key) =>
           $(key)
             .text()
             .replace(/&nbsp;/g, '')

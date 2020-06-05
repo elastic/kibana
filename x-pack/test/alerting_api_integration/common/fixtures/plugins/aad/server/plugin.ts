@@ -36,7 +36,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           }),
         },
       },
-      async function(
+      async function (
         context: RequestHandlerContext,
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
@@ -49,7 +49,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           const [, { encryptedSavedObjects }] = await core.getStartServices();
           await encryptedSavedObjects
             .getClient({
-              includedHiddenTypes: ['alert'],
+              includedHiddenTypes: ['alert', 'action'],
             })
             .getDecryptedAsInternalUser(req.body.type, req.body.id, {
               namespace,

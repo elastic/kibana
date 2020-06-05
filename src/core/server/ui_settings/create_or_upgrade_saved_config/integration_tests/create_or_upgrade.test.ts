@@ -38,9 +38,9 @@ describe('createOrUpgradeSavedConfig()', () => {
 
   let kbnServer: TestKibanaUtils['kbnServer'];
 
-  beforeAll(async function() {
+  beforeAll(async function () {
     servers = createTestServers({
-      adjustTimeout: t => {
+      adjustTimeout: (t) => {
         jest.setTimeout(t);
       },
     });
@@ -86,7 +86,7 @@ describe('createOrUpgradeSavedConfig()', () => {
     await kbn.stop();
   }, 30000);
 
-  it('upgrades the previous version on each increment', async function() {
+  it('upgrades the previous version on each increment', async function () {
     jest.setTimeout(30000);
     // ------------------------------------
     // upgrade to 5.4.0

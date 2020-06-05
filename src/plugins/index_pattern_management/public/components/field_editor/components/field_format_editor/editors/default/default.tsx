@@ -34,7 +34,7 @@ export const convertSampleInput = (
   let samples: Sample[] = [];
 
   try {
-    samples = inputs.map(input => {
+    samples = inputs.map((input) => {
       return {
         input,
         output: converter(input),

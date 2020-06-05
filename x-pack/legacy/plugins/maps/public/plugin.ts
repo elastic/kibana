@@ -52,7 +52,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: CoreSetup, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
     uiModules
       .get('app/maps', ['ngRoute', 'react'])
-      .directive('mapListing', function(reactDirective: any) {
+      .directive('mapListing', function (reactDirective: any) {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 

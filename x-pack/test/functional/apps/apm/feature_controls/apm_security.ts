@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'security']);
@@ -60,7 +60,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows apm navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['APM', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['APM', 'Stack Management']);
       });
 
       it('can navigate to APM app', async () => {
@@ -108,7 +108,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows apm navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['APM', 'Stack Management']);
       });
 
@@ -161,7 +161,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show APM navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('APM');
       });
 

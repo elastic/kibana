@@ -36,7 +36,7 @@ export class TileServiceSelect extends React.Component {
       return;
     }
 
-    const emsTmsOptions = emsTMSServices.map(tmsService => {
+    const emsTmsOptions = emsTMSServices.map((tmsService) => {
       return {
         value: tmsService.getId(),
         text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
@@ -51,7 +51,7 @@ export class TileServiceSelect extends React.Component {
     this.setState({ emsTmsOptions, hasLoaded: true });
   };
 
-  _onChange = e => {
+  _onChange = (e) => {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({

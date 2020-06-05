@@ -4859,7 +4859,7 @@ class ProcRunner {
         this.closing = false;
         this.procs = [];
         this.signalUnsubscribe = exit_hook_1.default(() => {
-            this.teardown().catch(error => {
+            this.teardown().catch((error) => {
                 log.error(`ProcRunner teardown error: ${error.stack}`);
             });
         });
@@ -4898,7 +4898,7 @@ class ProcRunner {
         try {
             if (wait instanceof RegExp) {
                 // wait for process to log matching line
-                await Rx.race(proc.lines$.pipe(operators_1.filter(line => wait.test(line)), operators_1.first(), operators_1.catchError(err => {
+                await Rx.race(proc.lines$.pipe(operators_1.filter((line) => wait.test(line)), operators_1.first(), operators_1.catchError((err) => {
                     if (err.name !== 'EmptyError') {
                         throw errors_1.createCliError(`[${name}] exited without matching pattern: ${wait}`);
                     }
@@ -4943,7 +4943,7 @@ class ProcRunner {
      *  @return {Promise<undefined>}
      */
     async waitForAllToStop() {
-        await Promise.all(this.procs.map(proc => proc.outcomePromise));
+        await Promise.all(this.procs.map((proc) => proc.outcomePromise));
     }
     /**
      *  Close the ProcRunner and stop all running
@@ -4959,14 +4959,14 @@ class ProcRunner {
         this.closing = true;
         this.signalUnsubscribe();
         if (!signal && this.procs.length > 0) {
-            this.log.warning('%d processes left running, stop them with procs.stop(name):', this.procs.length, this.procs.map(proc => proc.name));
+            this.log.warning('%d processes left running, stop them with procs.stop(name):', this.procs.length, this.procs.map((proc) => proc.name));
         }
         await Promise.all(this.procs.map(async (proc) => {
             await proc.stop(signal === 'exit' ? 'SIGKILL' : signal);
         }));
     }
     getProc(name) {
-        return this.procs.find(proc => {
+        return this.procs.find((proc) => {
             return proc.name === name;
         });
     }
@@ -4979,14 +4979,14 @@ class ProcRunner {
         };
         // tie into proc outcome$, remove from _procs on compete
         proc.outcome$.subscribe({
-            next: code => {
+            next: (code) => {
                 const duration = moment_1.default.duration(Date.now() - startMs);
                 this.log.info('[%s] exited with %s after %s', name, code, duration.humanize());
             },
             complete: () => {
                 remove();
             },
-            error: error => {
+            error: (error) => {
                 if (this.closing) {
                     this.log.error(error);
                 }
@@ -33599,8 +33599,8 @@ function startProc(name, options, log) {
         return code;
     })), 
     // observe first error event
-    Rx.fromEvent(childProcess, 'error').pipe(operators_1.take(1), operators_1.mergeMap(err => Rx.throwError(err)))).pipe(operators_1.share());
-    const lines$ = Rx.merge(observe_lines_1.observeLines(childProcess.stdout), observe_lines_1.observeLines(childProcess.stderr)).pipe(operators_1.tap(line => log.write(` ${chalk_1.default.gray('proc')} [${chalk_1.default.gray(name)}] ${line}`)), operators_1.share());
+    Rx.fromEvent(childProcess, 'error').pipe(operators_1.take(1), operators_1.mergeMap((err) => Rx.throwError(err)))).pipe(operators_1.share());
+    const lines$ = Rx.merge(observe_lines_1.observeLines(childProcess.stdout), observe_lines_1.observeLines(childProcess.stderr)).pipe(operators_1.tap((line) => log.write(` ${chalk_1.default.gray('proc')} [${chalk_1.default.gray(name)}] ${line}`)), operators_1.share());
     const outcomePromise = Rx.merge(lines$.pipe(operators_1.ignoreElements()), outcome$).toPromise();
     async function stop(signal) {
         if (stopCalled) {
@@ -34812,10 +34812,11 @@ const makeError = ({
 
 	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
 	const execaMessage = `Command ${prefix}: ${command}`;
-	const shortMessage = error instanceof Error ? `${execaMessage}\n${error.message}` : execaMessage;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
 	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
 
-	if (error instanceof Error) {
+	if (isError) {
 		error.originalMessage = error.message;
 		error.message = message;
 	} else {
@@ -36263,25 +36264,24 @@ module.exports = function (/*streams...*/) {
 
 "use strict";
 
-const mergePromiseProperty = (spawned, promise, property) => {
-	// Starting the main `promise` is deferred to avoid consuming streams
-	const value = typeof promise === 'function' ?
-		(...args) => promise()[property](...args) :
-		promise[property].bind(promise);
 
-	Object.defineProperty(spawned, property, {
-		value,
-		writable: true,
-		enumerable: false,
-		configurable: true
-	});
-};
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
 
 // The return value is a mixin of `childProcess` and `Promise`
 const mergePromise = (spawned, promise) => {
-	mergePromiseProperty(spawned, promise, 'then');
-	mergePromiseProperty(spawned, promise, 'catch');
-	mergePromiseProperty(spawned, promise, 'finally');
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
 	return spawned;
 };
 
@@ -36584,7 +36584,7 @@ const operators_1 = __webpack_require__(270);
  *   - fails on the first "error" event
  */
 function observeReadable(readable) {
-    return Rx.race(Rx.fromEvent(readable, 'end').pipe(operators_1.first(), operators_1.ignoreElements()), Rx.fromEvent(readable, 'error').pipe(operators_1.first(), operators_1.mergeMap(err => Rx.throwError(err))));
+    return Rx.race(Rx.fromEvent(readable, 'end').pipe(operators_1.first(), operators_1.ignoreElements()), Rx.fromEvent(readable, 'error').pipe(operators_1.first(), operators_1.mergeMap((err) => Rx.throwError(err))));
 }
 exports.observeReadable = observeReadable;
 
@@ -36894,7 +36894,7 @@ class ToolingLogCollectingWriter extends tooling_log_text_writer_1.ToolingLogTex
         super({
             level: 'verbose',
             writeTo: {
-                write: msg => {
+                write: (msg) => {
                     // trim trailing new line
                     this.messages.push(msg.slice(0, -1));
                 },
@@ -39475,7 +39475,7 @@ async function run(fn, options = {}) {
         level: tooling_log_1.pickLevelFromFlags(flags),
         writeTo: process.stdout,
     });
-    process.on('unhandledRejection', error => {
+    process.on('unhandledRejection', (error) => {
         log.error('UNHANDLED PROMISE REJECTION');
         log.error(error instanceof Error
             ? error
@@ -39589,7 +39589,7 @@ function combineErrors(errors) {
     const exitCode = errors
         .filter(isFailError)
         .reduce((acc, error) => Math.max(acc, error.exitCode), 1);
-    const showHelp = errors.some(error => isFailError(error) && error.showHelp);
+    const showHelp = errors.some((error) => isFailError(error) && error.showHelp);
     const message = errors.reduce((acc, error) => {
         if (isFailError(error)) {
             return acc + '\n' + error.message;
@@ -40091,7 +40091,7 @@ exports.uriencode = (strings, ...values) => {
     return queue.reduce((acc, string, i) => `${acc}${encodeURIComponent(values[i])}${string}`, leadingString);
 };
 const DEFAULT_MAX_ATTEMPTS = 5;
-const delay = (ms) => new Promise(resolve => {
+const delay = (ms) => new Promise((resolve) => {
     setTimeout(resolve, ms);
 });
 class KbnClientRequester {
@@ -43984,7 +43984,7 @@ class CiStatsReporter {
                 const reason = ((_d = (_c = error) === null || _c === void 0 ? void 0 : _c.response) === null || _d === void 0 ? void 0 : _d.status) ? `${error.response.status} response`
                     : 'no response';
                 this.log.warning(`failed to reach kibana-ci-stats service [reason=${reason}], retrying in ${attempt} seconds`);
-                await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+                await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
             }
         }
     }

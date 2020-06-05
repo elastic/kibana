@@ -31,7 +31,7 @@ export const readListIndexRoute = (router: IRouter): void => {
 
         if (listIndexExists || listItemIndexExists) {
           const [validated, errors] = validate(
-            { list_index: listIndexExists, lists_item_index: listItemIndexExists },
+            { list_index: listIndexExists, list_item_index: listItemIndexExists },
             listItemIndexExistSchema
           );
           if (errors != null) {

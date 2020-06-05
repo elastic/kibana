@@ -49,7 +49,7 @@ export default new Chainable('label', {
   }),
   fn: function labelFn(args) {
     const config = args.byName;
-    return alter(args, function(eachSeries) {
+    return alter(args, function (eachSeries) {
       if (config.regex) {
         eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
       } else {

@@ -26,7 +26,7 @@ const fieldPathComboBoxConfig = {
   type: FIELD_TYPES.COMBO_BOX,
   defaultValue: [],
   serializer: (options: ComboBoxOption[]): string[] => options.map(({ label }) => label),
-  deserializer: (values: string[]): ComboBoxOption[] => values.map(value => ({ label: value })),
+  deserializer: (values: string[]): ComboBoxOption[] => values.map((value) => ({ label: value })),
 };
 
 export const configurationFormSchema: FormSchema<MappingsConfiguration> = {

@@ -142,11 +142,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async clickHistogramBar() {
       const el = await elasticChart.getCanvas();
 
-      await browser
-        .getActions()
-        .move({ x: 0, y: 20, origin: el._webElement })
-        .click()
-        .perform();
+      await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
@@ -214,7 +210,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const $ = await table.parseDomContent();
       return $('mark')
         .toArray()
-        .map(mark => $(mark).text());
+        .map((mark) => $(mark).text());
     }
 
     public async toggleSidebarCollapse() {
@@ -226,11 +222,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const $ = await sidebar.parseDomContent();
       return $('.dscSidebar__item[attr-field]')
         .toArray()
-        .map(field =>
-          $(field)
-            .find('span.eui-textTruncate')
-            .text()
-        );
+        .map((field) => $(field).find('span.eui-textTruncate').text());
     }
 
     public async getSidebarWidth() {

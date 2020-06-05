@@ -74,7 +74,7 @@ export function getMetricData(
     ...(query ? [query] : []),
   ];
 
-  entityFields.forEach(entity => {
+  entityFields.forEach((entity) => {
     if (entity.fieldValue.length !== 0) {
       mustCriteria.push({
         term: {
@@ -227,7 +227,7 @@ export function getModelPlotOutput(
   ];
 
   // Add in term queries for each of the specified criteria.
-  _.each(criteriaFields, criteria => {
+  _.each(criteriaFields, (criteria) => {
     mustCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -305,7 +305,7 @@ export function getModelPlotOutput(
       },
     })
     .pipe(
-      map(resp => {
+      map((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
         _.each(aggregationsByTime, (dataForTime: any) => {
           const time = dataForTime.key;
@@ -385,7 +385,7 @@ export function getRecordsForCriteria(
   }
 
   // Add in term queries for each of the specified criteria.
-  _.each(criteriaFields, criteria => {
+  _.each(criteriaFields, (criteria) => {
     boolCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -420,7 +420,7 @@ export function getRecordsForCriteria(
       },
     })
     .pipe(
-      map(resp => {
+      map((resp) => {
         if (resp.hits.total !== 0) {
           _.each(resp.hits.hits, (hit: any) => {
             obj.records.push(hit._source);
@@ -533,7 +533,7 @@ export function getScheduledEventsByBucket(
       },
     })
     .pipe(
-      map(resp => {
+      map((resp) => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobs', 'buckets'], []);
         _.each(dataByJobId, (dataForJob: any) => {
           const jobId: string = dataForJob.key;

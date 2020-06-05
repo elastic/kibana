@@ -8,7 +8,7 @@ import { ReactWrapper } from 'enzyme';
 import { Component } from 'react';
 
 export const tick = (ms = 0) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 

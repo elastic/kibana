@@ -69,7 +69,7 @@ export function createEditIndexPatternPageStateContainer({
     stateContainer: {
       ...stateContainer,
       // state syncing utility requires state containers to handle "null"
-      set: state => state && stateContainer.set(state),
+      set: (state) => state && stateContainer.set(state),
     },
     stateStorage: kbnUrlStateStorage,
   });

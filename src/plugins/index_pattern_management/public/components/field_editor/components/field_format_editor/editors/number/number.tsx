@@ -70,7 +70,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
           <EuiFieldText
             value={formatParams.pattern}
             placeholder={defaultPattern}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ pattern: e.target.value });
             }}
             isInvalid={!!error}

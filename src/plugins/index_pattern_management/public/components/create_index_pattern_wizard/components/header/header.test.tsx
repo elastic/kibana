@@ -19,46 +19,65 @@
 
 import React from 'react';
 import { Header } from '../header';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { mockManagementPlugin } from '../../../../mocks';
 
 describe('Header', () => {
   const indexPatternName = 'test index pattern';
+  const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
+
   it('should render normally', () => {
-    const component = shallowWithI18nProvider(
+    const component = mount(
       <Header
         indexPatternName={indexPatternName}
         isIncludingSystemIndices={true}
         onChangeIncludingSystemIndices={() => {}}
-        changeTitle={() => {}}
-      />
+      />,
+      {
+        wrappingComponent: KibanaContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render without including system indices', () => {
-    const component = shallowWithI18nProvider(
+    const component = mount(
       <Header
         indexPatternName={indexPatternName}
         isIncludingSystemIndices={false}
         onChangeIncludingSystemIndices={() => {}}
-        changeTitle={() => {}}
-      />
+      />,
+      {
+        wrappingComponent: KibanaContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render a different name, prompt, and beta tag if provided', () => {
-    const component = shallowWithI18nProvider(
+    const component = mount(
       <Header
         isIncludingSystemIndices={false}
         onChangeIncludingSystemIndices={() => {}}
         prompt={<div>Test prompt</div>}
         indexPatternName={indexPatternName}
         isBeta={true}
-        changeTitle={() => {}}
-      />
+      />,
+      {
+        wrappingComponent: KibanaContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
     );
 
     expect(component).toMatchSnapshot();

@@ -37,7 +37,7 @@ const mapCertsToSummaryString = (
 ): string =>
   certs
     .slice(0, maxSummaryItems)
-    .map(cert => `${cert.common_name}, ${certLimitMessage(cert)}`)
+    .map((cert) => `${cert.common_name}, ${certLimitMessage(cert)}`)
     .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
 const getValidAfter = ({ not_after: date }: Cert) => {
@@ -64,11 +64,11 @@ export const getCertSummary = (
 ): TlsAlertState => {
   certs.sort((a, b) => sortCerts(a.not_after ?? '', b.not_after ?? ''));
   const expiring = certs.filter(
-    cert => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
+    (cert) => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
   );
 
   certs.sort((a, b) => sortCerts(a.not_before ?? '', b.not_before ?? ''));
-  const aging = certs.filter(cert => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
+  const aging = certs.filter((cert) => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
 
   return {
     count: certs.length,
@@ -113,10 +113,13 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       to: DEFAULT_TO,
       index: 0,
       size: DEFAULT_SIZE,
-      notValidAfter: `now+${dynamicSettings?.certExpirationThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
-      notValidBefore: `now-${dynamicSettings?.certAgeThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
+      notValidAfter: `now+${
+        dynamicSettings?.certExpirationThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+      }d`,
+      notValidBefore: `now-${
+        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+      }d`,
       sortBy: 'common_name',
       direction: 'desc',
     });

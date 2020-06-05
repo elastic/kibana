@@ -12,8 +12,8 @@ describe('getIndicesPrivileges', () => {
       errorIndices: 'apm-*',
       metricsIndices: 'apm-*',
       transactionIndices: 'apm-*',
-      spanIndices: 'apm-*'
-    }
+      spanIndices: 'apm-*',
+    },
   };
   it('return that the user has privileges when security plugin is disabled', async () => {
     const setup = ({
@@ -23,19 +23,19 @@ describe('getIndicesPrivileges', () => {
           const error = {
             message:
               'no handler found for uri [/_security/user/_has_privileges]',
-            statusCode: 400
+            statusCode: 400,
           };
           throw error;
-        }
-      }
+        },
+      },
     } as unknown) as Setup;
     const privileges = await getIndicesPrivileges({
       setup,
-      isSecurityPluginEnabled: false
+      isSecurityPluginEnabled: false,
     });
     expect(privileges).toEqual({
       has_all_requested: true,
-      index: {}
+      index: {},
     });
   });
   it('throws when an error happens while fetching indices privileges', async () => {
@@ -44,8 +44,8 @@ describe('getIndicesPrivileges', () => {
       client: {
         hasPrivileges: () => {
           throw new Error('unknow error');
-        }
-      }
+        },
+      },
     } as unknown) as Setup;
     await expect(
       getIndicesPrivileges({ setup, isSecurityPluginEnabled: true })
@@ -58,23 +58,23 @@ describe('getIndicesPrivileges', () => {
         hasPrivileges: () => {
           return Promise.resolve({
             has_all_requested: true,
-            index: { 'apm-*': { read: true } }
+            index: { 'apm-*': { read: true } },
           });
-        }
-      }
+        },
+      },
     } as unknown) as Setup;
     const privileges = await getIndicesPrivileges({
       setup,
-      isSecurityPluginEnabled: true
+      isSecurityPluginEnabled: true,
     });
 
     expect(privileges).toEqual({
       has_all_requested: true,
       index: {
         'apm-*': {
-          read: true
-        }
-      }
+          read: true,
+        },
+      },
     });
   });
 
@@ -85,24 +85,24 @@ describe('getIndicesPrivileges', () => {
         hasPrivileges: () => {
           return Promise.resolve({
             has_all_requested: false,
-            index: { 'apm-*': { read: false } }
+            index: { 'apm-*': { read: false } },
           });
-        }
-      }
+        },
+      },
     } as unknown) as Setup;
 
     const privileges = await getIndicesPrivileges({
       setup,
-      isSecurityPluginEnabled: true
+      isSecurityPluginEnabled: true,
     });
 
     expect(privileges).toEqual({
       has_all_requested: false,
       index: {
         'apm-*': {
-          read: false
-        }
-      }
+          read: false,
+        },
+      },
     });
   });
   it("doesn't have privileges on multiple indices", async () => {
@@ -112,8 +112,8 @@ describe('getIndicesPrivileges', () => {
           errorIndices: 'apm-error-*',
           metricsIndices: 'apm-metrics-*',
           transactionIndices: 'apm-trasanction-*',
-          spanIndices: 'apm-span-*'
-        }
+          spanIndices: 'apm-span-*',
+        },
       },
       client: {
         hasPrivileges: () => {
@@ -123,16 +123,16 @@ describe('getIndicesPrivileges', () => {
               'apm-error-*': { read: false },
               'apm-trasanction-*': { read: false },
               'apm-metrics-*': { read: true },
-              'apm-span-*': { read: true }
-            }
+              'apm-span-*': { read: true },
+            },
           });
-        }
-      }
+        },
+      },
     } as unknown) as Setup;
 
     const privileges = await getIndicesPrivileges({
       setup,
-      isSecurityPluginEnabled: true
+      isSecurityPluginEnabled: true,
     });
 
     expect(privileges).toEqual({
@@ -141,8 +141,8 @@ describe('getIndicesPrivileges', () => {
         'apm-error-*': { read: false },
         'apm-trasanction-*': { read: false },
         'apm-metrics-*': { read: true },
-        'apm-span-*': { read: true }
-      }
+        'apm-span-*': { read: true },
+      },
     });
   });
 });

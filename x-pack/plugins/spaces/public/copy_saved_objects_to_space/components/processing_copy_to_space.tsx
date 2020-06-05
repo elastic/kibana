@@ -85,8 +85,8 @@ export const ProcessingCopyToSpace = (props: Props) => {
         </h5>
       </EuiText>
       <EuiSpacer size="m" />
-      {props.copyOptions.selectedSpaceIds.map(id => {
-        const space = props.spaces.find(s => s.id === id) as Space;
+      {props.copyOptions.selectedSpaceIds.map((id) => {
+        const space = props.spaces.find((s) => s.id === id) as Space;
         const spaceCopyResult = props.copyResult[space.id];
         const summarizedSpaceCopyResult = summarizeCopyResult(
           props.savedObject,
@@ -101,7 +101,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
               space={space}
               summarizedCopyResult={summarizedSpaceCopyResult}
               retries={props.retries[space.id] || []}
-              onRetriesChange={retries => updateRetries(space.id, retries)}
+              onRetriesChange={(retries) => updateRetries(space.id, retries)}
               conflictResolutionInProgress={props.conflictResolutionInProgress}
             />
             <EuiSpacer size="s" />

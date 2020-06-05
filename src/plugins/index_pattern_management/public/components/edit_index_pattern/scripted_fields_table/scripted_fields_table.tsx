@@ -95,7 +95,7 @@ export class ScriptedFieldsTable extends Component<
 
     if (scriptedFieldLanguageFilter) {
       languageFilteredFields = fields.filter(
-        field => field.lang === this.props.scriptedFieldLanguageFilter
+        (field) => field.lang === this.props.scriptedFieldLanguageFilter
       );
     }
 
@@ -104,7 +104,7 @@ export class ScriptedFieldsTable extends Component<
     if (fieldFilter) {
       const normalizedFieldFilter = fieldFilter.toLowerCase();
 
-      filteredFields = languageFilteredFields.filter(field =>
+      filteredFields = languageFilteredFields.filter((field) =>
         field.name.toLowerCase().includes(normalizedFieldFilter)
       );
     }
@@ -151,7 +151,7 @@ export class ScriptedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={items}
-          editField={field => this.props.helpers.redirectToRoute(field)}
+          editField={(field) => this.props.helpers.redirectToRoute(field)}
           deleteField={this.startDeleteField}
         />
 

@@ -28,16 +28,16 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     cloneLayer: (layerId: string) => {
-      dispatch(cloneLayer(layerId));
+      dispatch<any>(cloneLayer(layerId));
     },
     fitToBounds: (layerId: string) => {
-      dispatch(fitToLayerExtent(layerId));
+      dispatch<any>(fitToLayerExtent(layerId));
     },
     removeLayer: (layerId: string) => {
-      dispatch(removeLayer(layerId));
+      dispatch<any>(removeLayer(layerId));
     },
     toggleVisible: (layerId: string) => {
-      dispatch(toggleLayerVisible(layerId));
+      dispatch<any>(toggleLayerVisible(layerId));
     },
   };
 }

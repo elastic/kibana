@@ -10,24 +10,24 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
-  PluginStartContract as AlertingPluginPublicStart
-} from '../../alerting/public';
+  PluginStartContract as AlertingPluginPublicStart,
+} from '../../alerts/public';
 import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,
-  DataPublicPluginStart
+  DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart
+  TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
 import { ConfigSchema } from '.';
 import { createCallApmApi } from './services/rest/createCallApmApi';
@@ -44,7 +44,7 @@ export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerting?: AlertingPluginPublicSetup;
+  alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home: HomePublicPluginSetup;
@@ -53,7 +53,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmPluginStartDeps {
-  alerting?: AlertingPluginPublicStart;
+  alerts?: AlertingPluginPublicStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
@@ -92,13 +92,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         setReadonlyBadge(coreStart);
 
         // Automatically creates static index pattern and stores as saved object
-        createStaticIndexPattern().catch(e => {
+        createStaticIndexPattern().catch((e) => {
           // eslint-disable-next-line no-console
           console.log('Error creating static index pattern', e);
         });
 
         return renderApp(coreStart, pluginSetupDeps, params, config);
-      }
+      },
     });
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
@@ -109,27 +109,27 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.triggers_actions_ui.alertTypeRegistry.register({
       id: AlertType.ErrorRate,
       name: i18n.translate('xpack.apm.alertTypes.errorRate', {
-        defaultMessage: 'Error rate'
+        defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
       alertParamsExpression: ErrorRateAlertTrigger,
       validate: () => ({
-        errors: []
+        errors: [],
       }),
-      requiresAppContext: true
+      requiresAppContext: true,
     });
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
       id: AlertType.TransactionDuration,
       name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-        defaultMessage: 'Transaction duration'
+        defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
       alertParamsExpression: TransactionDurationAlertTrigger,
       validate: () => ({
-        errors: []
+        errors: [],
       }),
-      requiresAppContext: true
+      requiresAppContext: true,
     });
   }
 }

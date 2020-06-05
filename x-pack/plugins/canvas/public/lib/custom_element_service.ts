@@ -10,7 +10,7 @@ import { fetch } from '../../common/lib/fetch';
 import { CustomElement } from '../../types';
 import { platformService } from '../services';
 
-const getApiPath = function() {
+const getApiPath = function () {
   const basePath = platformService.getService().coreStart.http.basePath.get();
   return `${basePath}${API_ROUTE_CUSTOM_ELEMENT}`;
 };

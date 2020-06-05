@@ -39,7 +39,7 @@ export const getKibanaFrameworkAdapter = (
     triggers_actions_ui,
   } = plugins;
 
-  alertTypeInitializers.forEach(init => {
+  alertTypeInitializers.forEach((init) => {
     const alertInitializer = init({ autocomplete });
     if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
       triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
@@ -73,7 +73,7 @@ export const getKibanaFrameworkAdapter = (
         links: [
           {
             linkType: 'documentation',
-            href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-uptime.html`,
+            href: `${ELASTIC_WEBSITE_URL}guide/en/uptime/${DOC_LINK_VERSION}/uptime-app-overview.html`,
           },
           {
             linkType: 'discuss',

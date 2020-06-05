@@ -46,12 +46,12 @@ const dataTypesArray = [
   ['stackedSeries', 'stacked', stackedSeries],
 ];
 
-dataTypesArray.forEach(function(dataType) {
+dataTypesArray.forEach(function (dataType) {
   const name = dataType[0];
   const mode = dataType[1];
   const data = dataType[2];
 
-  describe('Vislib Column Chart Test Suite for ' + name + ' Data', function() {
+  describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
     let vis;
     let mockUiState;
     const visLibParams = {
@@ -73,46 +73,46 @@ dataTypesArray.forEach(function(dataType) {
       vis.render(data, mockUiState);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       vis.destroy();
     });
 
-    describe('stackData method', function() {
+    describe('stackData method', function () {
       let stackedData;
       let isStacked;
 
-      beforeEach(function() {
-        vis.handler.charts.forEach(function(chart) {
+      beforeEach(function () {
+        vis.handler.charts.forEach(function (chart) {
           stackedData = chart.chartData;
 
-          isStacked = stackedData.series.every(function(arr) {
-            return arr.values.every(function(d) {
+          isStacked = stackedData.series.every(function (arr) {
+            return arr.values.every(function (d) {
               return _.isNumber(d.y0);
             });
           });
         });
       });
 
-      it('should stack values when mode is stacked', function() {
+      it('should stack values when mode is stacked', function () {
         if (mode === 'stacked') {
           expect(isStacked).to.be(true);
         }
       });
 
-      it('should stack values when mode is percentage', function() {
+      it('should stack values when mode is percentage', function () {
         if (mode === 'percentage') {
           expect(isStacked).to.be(true);
         }
       });
     });
 
-    describe('addBars method', function() {
-      it('should append rects', function() {
+    describe('addBars method', function () {
+      it('should append rects', function () {
         let numOfSeries;
         let numOfValues;
         let product;
 
-        vis.handler.charts.forEach(function(chart) {
+        vis.handler.charts.forEach(function (chart) {
           numOfSeries = chart.chartData.series.length;
           numOfValues = chart.chartData.series[0].values.length;
           product = numOfSeries * numOfValues;
@@ -121,11 +121,9 @@ dataTypesArray.forEach(function(dataType) {
       });
     });
 
-    describe('addBarEvents method', function() {
+    describe('addBarEvents method', function () {
       function checkChart(chart) {
-        const rect = $(chart.chartEl)
-          .find('.series rect')
-          .get(0);
+        const rect = $(chart.chartEl).find('.series rect').get(0);
 
         // check for existence of stuff and things
         return {
@@ -140,8 +138,8 @@ dataTypesArray.forEach(function(dataType) {
         };
       }
 
-      it('should attach the brush if data is a set is ordered', function() {
-        vis.handler.charts.forEach(function(chart) {
+      it('should attach the brush if data is a set is ordered', function () {
+        vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
           const ordered = vis.handler.data.get('ordered');
           const allowBrushing = Boolean(ordered);
@@ -149,30 +147,30 @@ dataTypesArray.forEach(function(dataType) {
         });
       });
 
-      it('should attach a click event', function() {
-        vis.handler.charts.forEach(function(chart) {
+      it('should attach a click event', function () {
+        vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
           expect(has.click).to.be(true);
         });
       });
 
-      it('should attach a hover event', function() {
-        vis.handler.charts.forEach(function(chart) {
+      it('should attach a hover event', function () {
+        vis.handler.charts.forEach(function (chart) {
           const has = checkChart(chart);
           expect(has.mouseOver).to.be(true);
         });
       });
     });
 
-    describe('draw method', function() {
-      it('should return a function', function() {
-        vis.handler.charts.forEach(function(chart) {
+    describe('draw method', function () {
+      it('should return a function', function () {
+        vis.handler.charts.forEach(function (chart) {
           expect(_.isFunction(chart.draw())).to.be(true);
         });
       });
 
-      it('should return a yMin and yMax', function() {
-        vis.handler.charts.forEach(function(chart) {
+      it('should return a yMin and yMax', function () {
+        vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
           const domain = yAxis.getScale().domain();
 
@@ -181,8 +179,8 @@ dataTypesArray.forEach(function(dataType) {
         });
       });
 
-      it('should render a zero axis line', function() {
-        vis.handler.charts.forEach(function(chart) {
+      it('should render a zero axis line', function () {
+        vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
@@ -192,14 +190,14 @@ dataTypesArray.forEach(function(dataType) {
       });
     });
 
-    describe('defaultYExtents is true', function() {
-      beforeEach(function() {
+    describe('defaultYExtents is true', function () {
+      beforeEach(function () {
         vis.visConfigArgs.defaultYExtents = true;
         vis.render(data, mockUiState);
       });
 
-      it('should return yAxis extents equal to data extents', function() {
-        vis.handler.charts.forEach(function(chart) {
+      it('should return yAxis extents equal to data extents', function () {
+        vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
           const min = vis.handler.valueAxes[0].axisScale.getYMin();
           const max = vis.handler.valueAxes[0].axisScale.getYMax();
@@ -209,16 +207,16 @@ dataTypesArray.forEach(function(dataType) {
         });
       });
     });
-    [0, 2, 4, 8].forEach(function(boundsMarginValue) {
-      describe('defaultYExtents is true and boundsMargin is defined', function() {
-        beforeEach(function() {
+    [0, 2, 4, 8].forEach(function (boundsMarginValue) {
+      describe('defaultYExtents is true and boundsMargin is defined', function () {
+        beforeEach(function () {
           vis.visConfigArgs.defaultYExtents = true;
           vis.visConfigArgs.boundsMargin = boundsMarginValue;
           vis.render(data, mockUiState);
         });
 
-        it('should return yAxis extents equal to data extents with boundsMargin', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should return yAxis extents equal to data extents with boundsMargin', function () {
+          vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const min = vis.handler.valueAxes[0].axisScale.getYMin();
             const max = vis.handler.valueAxes[0].axisScale.getYMax();
@@ -240,7 +238,7 @@ dataTypesArray.forEach(function(dataType) {
   });
 });
 
-describe('stackData method - data set with zeros in percentage mode', function() {
+describe('stackData method - data set with zeros in percentage mode', function () {
   let vis;
   let mockUiState;
   const visLibParams = {
@@ -257,11 +255,11 @@ describe('stackData method - data set with zeros in percentage mode', function()
     vis.on('brush', _.noop);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     vis.destroy();
   });
 
-  it('should not mutate the injected zeros', function() {
+  it('should not mutate the injected zeros', function () {
     vis.render(seriesMonthlyInterval, mockUiState);
 
     expect(vis.handler.charts).to.have.length(1);
@@ -274,7 +272,7 @@ describe('stackData method - data set with zeros in percentage mode', function()
     expect(point.y).to.be(0);
   });
 
-  it('should not mutate zeros that exist in the data', function() {
+  it('should not mutate zeros that exist in the data', function () {
     vis.render(rowsWithZeros, mockUiState);
 
     expect(vis.handler.charts).to.have.length(2);
@@ -287,7 +285,7 @@ describe('stackData method - data set with zeros in percentage mode', function()
   });
 });
 
-describe('datumWidth - split chart data set with holes', function() {
+describe('datumWidth - split chart data set with holes', function () {
   let vis;
   let mockUiState;
   const visLibParams = {
@@ -305,23 +303,23 @@ describe('datumWidth - split chart data set with holes', function() {
     vis.render(rowsSeriesWithHoles, mockUiState);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     vis.destroy();
   });
 
-  it('should not have bar widths that span multiple time bins', function() {
+  it('should not have bar widths that span multiple time bins', function () {
     expect(vis.handler.charts.length).to.equal(1);
     const chart = vis.handler.charts[0];
     const rects = $(chart.chartEl).find('.series rect');
     const MAX_WIDTH_IN_PIXELS = 27;
-    rects.each(function() {
+    rects.each(function () {
       const width = $(this).attr('width');
       expect(width).to.be.lessThan(MAX_WIDTH_IN_PIXELS);
     });
   });
 });
 
-describe('datumWidth - monthly interval', function() {
+describe('datumWidth - monthly interval', function () {
   let vis;
   let mockUiState;
   const visLibParams = {
@@ -339,11 +337,11 @@ describe('datumWidth - monthly interval', function() {
     vis.render(seriesMonthlyInterval, mockUiState);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     vis.destroy();
   });
 
-  it('should vary bar width when date histogram intervals are not equal', function() {
+  it('should vary bar width when date histogram intervals are not equal', function () {
     expect(vis.handler.charts.length).to.equal(1);
     const chart = vis.handler.charts[0];
     const rects = $(chart.chartEl).find('.series rect');

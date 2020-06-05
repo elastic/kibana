@@ -46,13 +46,13 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
-      const types = testCaseArray.map(x => x.type);
+      const types = testCaseArray.map((x) => x.type);
       await expectForbidden(types)(response);
     } else {
       // permitted
       const { success, successCount, errors } = response.body;
-      const expectedSuccesses = testCaseArray.filter(x => !x.failure);
-      const expectedFailures = testCaseArray.filter(x => x.failure);
+      const expectedSuccesses = testCaseArray.filter((x) => !x.failure);
+      const expectedFailures = testCaseArray.filter((x) => x.failure);
       expect(success).to.eql(expectedFailures.length === 0);
       expect(successCount).to.eql(expectedSuccesses.length);
       if (expectedFailures.length) {
@@ -69,7 +69,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         const { type, id, failure } = expectedFailures[i];
         // we don't know the order of the returned errors; search for each one
         const object = (errors as Array<Record<string, unknown>>).find(
-          x => x.type === type && x.id === id
+          (x) => x.type === type && x.id === id
         );
         expect(object).not.to.be(undefined);
         if (failure === 400) {
@@ -95,7 +95,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     if (!options?.singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
-      return cases.map(x => ({
+      return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
         request: [createRequest(x)],
         responseStatusCode,
@@ -108,7 +108,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     return [
       {
         title: getTestTitle(cases, responseStatusCode),
-        request: cases.map(x => createRequest(x)),
+        request: cases.map((x) => createRequest(x)),
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride ||
@@ -132,7 +132,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
           const requestBody = test.request
-            .map(obj => JSON.stringify({ ...obj, ...attrs }))
+            .map((obj) => JSON.stringify({ ...obj, ...attrs }))
             .join('\n');
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)

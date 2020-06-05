@@ -80,7 +80,7 @@ export class SourceFiltersTable extends Component<
     (filters, filterFilter) => {
       if (filterFilter) {
         const filterFilterToLowercase = filterFilter.toLowerCase();
-        return filters.filter(filter =>
+        return filters.filter((filter) =>
           filter.value.toLowerCase().includes(filterFilterToLowercase)
         );
       }
@@ -107,7 +107,7 @@ export class SourceFiltersTable extends Component<
     const { indexPattern, onAddOrRemoveFilter } = this.props;
     const { filterToDelete, filters } = this.state;
 
-    indexPattern.sourceFilters = filters.filter(filter => {
+    indexPattern.sourceFilters = filters.filter((filter) => {
       return filter.clientId !== filterToDelete.clientId;
     });
 
@@ -143,7 +143,7 @@ export class SourceFiltersTable extends Component<
     const { indexPattern } = this.props;
     const { filters } = this.state;
 
-    indexPattern.sourceFilters = filters.map(filter => {
+    indexPattern.sourceFilters = filters.map((filter) => {
       if (filter.clientId === clientId) {
         return {
           value,

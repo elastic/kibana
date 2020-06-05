@@ -30,7 +30,7 @@ describe('createOnPreResponseHandler', () => {
     const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
     const refresh = jest.fn().mockImplementation(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(() => {
             license$.next(updatedLicense);
             resolve();

@@ -34,7 +34,7 @@ export class ValidatedRange extends React.Component {
     return null;
   }
 
-  _onRangeChange = e => {
+  _onRangeChange = (e) => {
     const sanitizedValue = parseFloat(e.target.value, 10);
     let newValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
     // work around for https://github.com/elastic/eui/issues/1458

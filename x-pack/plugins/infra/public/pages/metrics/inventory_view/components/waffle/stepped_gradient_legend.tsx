@@ -51,14 +51,14 @@ const TickLabel = ({ value, bounds, formatter }: TickProps) => {
 };
 
 const GradientStep = euiStyled.div`
-  height: ${props => props.theme.eui.paddingSizes.s};
+  height: ${(props) => props.theme.eui.paddingSizes.s};
   flex: 1 1 auto;
   &:first-child {
-    border-radius: ${props => props.theme.eui.euiBorderRadius} 0 0 ${props =>
+    border-radius: ${(props) => props.theme.eui.euiBorderRadius} 0 0 ${(props) =>
   props.theme.eui.euiBorderRadius};
   }
   &:last-child {
-    border-radius: 0 ${props => props.theme.eui.euiBorderRadius} ${props =>
+    border-radius: 0 ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
   props.theme.eui.euiBorderRadius} 0;
   }
 `;

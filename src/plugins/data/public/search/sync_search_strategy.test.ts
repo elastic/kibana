@@ -61,7 +61,7 @@ describe('Sync search strategy', () => {
     const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
 
     const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
-    loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
+    loadingCount$.subscribe((value) => receivedLoadingCountValues.push(value));
 
     await syncSearch.search(request, {}).toPromise();
 
@@ -82,7 +82,7 @@ describe('Sync search strategy', () => {
     const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
 
     const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
-    loadingCount$.subscribe(value => receivedLoadingCountValues.push(value));
+    loadingCount$.subscribe((value) => receivedLoadingCountValues.push(value));
 
     try {
       await syncSearch.search(request, {}).toPromise();

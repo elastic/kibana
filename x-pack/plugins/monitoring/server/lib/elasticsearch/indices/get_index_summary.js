@@ -11,7 +11,7 @@ import { ElasticsearchMetric } from '../../metrics';
 import { i18n } from '@kbn/i18n';
 
 export function handleResponse(shardStats, indexUuid) {
-  return response => {
+  return (response) => {
     const indexStats = get(response, 'hits.hits[0]._source.index_stats');
     const primaries = get(indexStats, 'primaries');
     const total = get(indexStats, 'total');

@@ -125,7 +125,7 @@ function wrapHistoryInstance(history) {
     const prevLocationObj = locationFormat(prevLocation, action, wrappedHistory.parse);
 
     // execute all listeners
-    historyState.onChange.forEach(fn => fn.call(null, locationObj, prevLocationObj));
+    historyState.onChange.forEach((fn) => fn.call(null, locationObj, prevLocationObj));
 
     // track the updated location
     historyState.prevLocation = wrappedHistory.getLocation();
@@ -136,7 +136,7 @@ function wrapHistoryInstance(history) {
 
 let instances = new WeakMap();
 
-const getHistoryInstance = win => {
+const getHistoryInstance = (win) => {
   // if no window object, use memory module
   if (typeof win === 'undefined' || !win.history) {
     return createMemoryHistory();

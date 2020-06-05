@@ -18,10 +18,7 @@ export function IngestManagerProvider({ getService }: FtrProviderContext) {
         .expect(200);
 
       if (!body.isInitialized) {
-        await supertest
-          .post(setupRouteService.getSetupPath())
-          .set(headers)
-          .expect(200);
+        await supertest.post(setupRouteService.getSetupPath()).set(headers).expect(200);
       }
     },
   };

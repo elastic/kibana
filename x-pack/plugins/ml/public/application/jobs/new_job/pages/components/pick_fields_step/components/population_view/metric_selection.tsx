@@ -49,7 +49,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number, action: any) => number>(
-    s => s + 1,
+    (s) => s + 1,
     0
   );
   const [pageReady, setPageReady] = useState(false);
@@ -203,7 +203,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
   function allDataReady() {
     let ready = aggFieldPairList.length > 0;
-    aggFieldPairList.forEach(af => {
+    aggFieldPairList.forEach((af) => {
       if (af.by !== undefined && af.by.field !== null) {
         // if a by field is set, it's only ready when the value is loaded
         ready = ready && af.by.value !== null;

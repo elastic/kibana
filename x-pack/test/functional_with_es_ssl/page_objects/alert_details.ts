@@ -32,7 +32,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-instance-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             instance: $(row)
               .findTestSubject('alertInstancesTableCell-instance')
@@ -86,7 +86,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
           $.findTestSubjects('alert-instance-row')
             .toArray()
             .filter(
-              row =>
+              (row) =>
                 $(row)
                   .findTestSubject('alertInstancesTableCell-instance')
                   .find('.euiTableCellContent')

@@ -52,10 +52,7 @@ describe('tls alert', () => {
     });
 
     it('sorts expiring certs appropriately when creating summary', () => {
-      diffSpy
-        .mockReturnValueOnce(900)
-        .mockReturnValueOnce(901)
-        .mockReturnValueOnce(902);
+      diffSpy.mockReturnValueOnce(900).mockReturnValueOnce(901).mockReturnValueOnce(902);
       const result = getCertSummary(
         mockCerts,
         new Date('2020-07-20T05:00:00.000Z').valueOf(),
@@ -75,10 +72,7 @@ describe('tls alert', () => {
     });
 
     it('sorts aging certs appropriate when creating summary', () => {
-      diffSpy
-        .mockReturnValueOnce(702)
-        .mockReturnValueOnce(701)
-        .mockReturnValueOnce(700);
+      diffSpy.mockReturnValueOnce(702).mockReturnValueOnce(701).mockReturnValueOnce(700);
       const result = getCertSummary(
         mockCerts,
         new Date('2020-07-01T12:00:00.000Z').valueOf(),
@@ -98,10 +92,7 @@ describe('tls alert', () => {
     });
 
     it('handles negative diff values appropriately for aging certs', () => {
-      diffSpy
-        .mockReturnValueOnce(700)
-        .mockReturnValueOnce(-90)
-        .mockReturnValueOnce(-80);
+      diffSpy.mockReturnValueOnce(700).mockReturnValueOnce(-90).mockReturnValueOnce(-80);
       const result = getCertSummary(
         mockCerts,
         new Date('2020-07-01T12:00:00.000Z').valueOf(),

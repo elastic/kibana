@@ -43,6 +43,11 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
+export const noItemsMessage = (loading: boolean, filters?: string) => {
+  if (loading) return labels.LOADING;
+  return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
+};
+
 export const MonitorListComponent: React.FC<Props> = ({
   filters,
   monitorList: { list, error, loading },
@@ -140,7 +145,7 @@ export const MonitorListComponent: React.FC<Props> = ({
             iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
             onClick={() => {
               if (drawerIds.includes(id)) {
-                updateDrawerIds(drawerIds.filter(p => p !== id));
+                updateDrawerIds(drawerIds.filter((p) => p !== id));
               } else {
                 updateDrawerIds([...drawerIds, id]);
               }
@@ -164,7 +169,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={!!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE}
+        noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
       />
       <EuiSpacer size="m" />

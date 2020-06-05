@@ -41,7 +41,7 @@ export class BreadcrumbProvider extends Component<ComponentProps, ComponentState
 
   public removeCrumb = (crumbToRemove: Breadcrumb) => {
     this.setState(({ breadcrumbs: prevCrumbs }) => {
-      const breadcrumbs = prevCrumbs.filter(prevCrumb => {
+      const breadcrumbs = prevCrumbs.filter((prevCrumb) => {
         const { href } = prevCrumb;
         return !(crumbToRemove.href === href);
       });

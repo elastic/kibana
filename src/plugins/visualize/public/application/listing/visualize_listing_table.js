@@ -46,7 +46,7 @@ class VisualizeListingTable extends Component {
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         initialPageSize={this.props.initialPageSize}
-        selectable={item => item.canDelete}
+        selectable={(item) => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={i18n.translate('visualize.listing.table.entityName', {
@@ -224,7 +224,7 @@ VisualizeListingTable.propTypes = {
   listingLimit: PropTypes.number.isRequired,
 };
 
-const withI18nContext = I18nContext => props => (
+const withI18nContext = (I18nContext) => (props) => (
   <I18nContext>
     <VisualizeListingTable {...props} />
   </I18nContext>

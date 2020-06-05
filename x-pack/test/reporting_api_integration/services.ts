@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
 import { filter, first, mapTo, switchMap, timeout } from 'rxjs/operators';
 // @ts-ignore no module definition
-import { indexTimestamp } from '../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { indexTimestamp } from '../../plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
 import { services as xpackServices } from '../functional/services';
 import { FtrProviderContext } from './ftr_provider_context';
 
@@ -53,7 +53,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
 
-      const statusCode = await new Promise(resolve => {
+      const statusCode = await new Promise((resolve) => {
         const intervalId = setInterval(async () => {
           const response = (await supertest
             .get(downloadReportPath)
@@ -78,7 +78,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
 
     async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {
       await Promise.all(
-        jobPaths.map(async path => {
+        jobPaths.map(async (path) => {
           await this.waitForJobToFinish(path);
         })
       );
@@ -140,7 +140,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
             .send({ query: { match_all: {} } })
             .then(({ status }) => status)
         ),
-        filter(status => status === 200),
+        filter((status) => status === 200),
         mapTo(true),
         first(),
         timeout(5000)

@@ -55,7 +55,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     path: UiSharedDeps.distDir,
     filename: '[name].js',
     sourceMapFilename: '[file].map',
-    devtoolModuleFilenameTemplate: info =>
+    devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
   },
@@ -78,17 +78,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
-      {
-        include: [require.resolve('./monaco.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
-          },
-        ],
-      },
     ],
   },
 
@@ -96,6 +85,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     alias: {
       moment: MOMENT_SRC,
     },
+    extensions: ['.js', '.ts'],
   },
 
   optimization: {
@@ -104,7 +94,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       cacheGroups: {
         'kbn-ui-shared-deps.@elastic': {
           name: 'kbn-ui-shared-deps.@elastic',
-          test: m => m.resource && m.resource.includes('@elastic'),
+          test: (m) => m.resource && m.resource.includes('@elastic'),
           chunks: 'all',
           enforce: true,
         },

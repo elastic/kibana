@@ -36,7 +36,7 @@ interface ILayerTypeCount {
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
-  const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map(lTypes => Object.keys(lTypes))));
+  const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map((lTypes) => Object.keys(lTypes))));
 
   return uniqueLayerTypes.reduce((accu: IStats, type: string) => {
     const typeCounts = layerCountsList.reduce(
@@ -59,24 +59,24 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
 }
 
 function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
-  const fieldLists = indexPatterns.map(indexPattern =>
+  const fieldLists = indexPatterns.map((indexPattern) =>
     indexPattern.attributes && indexPattern.attributes.fields
       ? JSON.parse(indexPattern.attributes.fields)
       : []
   );
 
-  const fieldListsWithGeoFields = fieldLists.filter(fields =>
+  const fieldListsWithGeoFields = fieldLists.filter((fields) =>
     fields.some(
       (field: IFieldType) =>
         field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
     )
   );
 
-  const fieldListsWithGeoPointFields = fieldLists.filter(fields =>
+  const fieldListsWithGeoPointFields = fieldLists.filter((fields) =>
     fields.some((field: IFieldType) => field.type === ES_GEO_FIELD_TYPE.GEO_POINT)
   );
 
-  const fieldListsWithGeoShapeFields = fieldLists.filter(fields =>
+  const fieldListsWithGeoShapeFields = fieldLists.filter((fields) =>
     fields.some((field: IFieldType) => field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
   );
 
@@ -96,25 +96,25 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects: IIndexPattern[];
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
-  const layerLists = mapSavedObjects.map(savedMapObject =>
+  const layerLists = mapSavedObjects.map((savedMapObject) =>
     savedMapObject.attributes && savedMapObject.attributes.layerListJSON
       ? JSON.parse(savedMapObject.attributes.layerListJSON)
       : []
   );
   const mapsCount = layerLists.length;
 
-  const dataSourcesCount = layerLists.map(lList => {
+  const dataSourcesCount = layerLists.map((lList) => {
     // todo: not every source-descriptor has an id
     // @ts-ignore
     const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
-  const layersCount = layerLists.map(lList => lList.length);
-  const layerTypesCount = layerLists.map(lList => _.countBy(lList, 'type'));
+  const layersCount = layerLists.map((lList) => lList.length);
+  const layerTypesCount = layerLists.map((lList) => _.countBy(lList, 'type'));
 
   // Count of EMS Vector layers used
-  const emsLayersCount = layerLists.map(lList =>
+  const emsLayersCount = layerLists.map((lList) =>
     _(lList)
       .countBy((layer: LayerDescriptor) => {
         const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;

@@ -77,7 +77,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
             data-test-subj="dateEditorPattern"
             value={formatParams.pattern}
             placeholder={defaultPattern}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ pattern: e.target.value });
             }}
             isInvalid={!!error}

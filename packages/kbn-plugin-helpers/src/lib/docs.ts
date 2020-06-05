@@ -28,7 +28,7 @@ function indent(txt: string, n: number) {
 export function docs(name: string) {
   const md = readFileSync(resolve(__dirname, '../../src/tasks', name, 'README.md'), 'utf8');
 
-  return function() {
+  return function () {
     /* eslint-disable-next-line no-console */
     console.log(`\n  Docs:\n\n${indent(md, 4)}\n\n`);
   };

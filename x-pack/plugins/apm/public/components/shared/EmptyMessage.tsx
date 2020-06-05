@@ -16,12 +16,12 @@ interface Props {
 
 const EmptyMessage: React.FC<Props> = ({
   heading = i18n.translate('xpack.apm.emptyMessage.noDataFoundLabel', {
-    defaultMessage: 'No data found.'
+    defaultMessage: 'No data found.',
   }),
   subheading = i18n.translate('xpack.apm.emptyMessage.noDataFoundDescription', {
-    defaultMessage: 'Try another time range or reset the search filter.'
+    defaultMessage: 'Try another time range or reset the search filter.',
   }),
-  hideSubheading = false
+  hideSubheading = false,
 }) => {
   return (
     <EuiEmptyPrompt

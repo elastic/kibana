@@ -24,7 +24,7 @@ import { indexPatterns } from '../../../../src/plugins/data/public';
 
 const geoFieldName = 'location';
 
-const flattenHitMock = hit => {
+const flattenHitMock = (hit) => {
   const properties = {};
   for (const fieldName in hit._source) {
     if (hit._source.hasOwnProperty(fieldName)) {
@@ -173,7 +173,7 @@ describe('hitsToGeoJson', () => {
   describe('dot in geoFieldName', () => {
     const indexPatternMock = {
       fields: {
-        getByName: name => {
+        getByName: (name) => {
           const fields = {
             ['my.location']: {
               type: 'geo_point',

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const listingTable = getService('listingTable');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
@@ -28,11 +28,11 @@ export default function({ getService, getPageObjects }) {
     const dashboardName = 'Dashboard Clone Test';
     const clonedDashboardName = dashboardName + ' Copy';
 
-    before(async function() {
+    before(async function () {
       return PageObjects.dashboard.initTests();
     });
 
-    it('Clone saves a copy', async function() {
+    it('Clone saves a copy', async function () {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(
         PageObjects.dashboard.getTestVisualizationNames()
@@ -45,7 +45,7 @@ export default function({ getService, getPageObjects }) {
       await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
 
-    it('the copy should have all the same visualizations', async function() {
+    it('the copy should have all the same visualizations', async function () {
       await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
       await retry.try(async () => {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
@@ -61,7 +61,7 @@ export default function({ getService, getPageObjects }) {
       expect(title).to.be(clonedDashboardName);
     });
 
-    it('and warns on duplicate name', async function() {
+    it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
     });
@@ -73,7 +73,7 @@ export default function({ getService, getPageObjects }) {
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
     });
 
-    it('Clones on confirm duplicate title warning', async function() {
+    it('Clones on confirm duplicate title warning', async function () {
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
       await PageObjects.dashboard.clickClone();
 

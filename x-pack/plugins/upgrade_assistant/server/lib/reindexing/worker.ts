@@ -102,7 +102,7 @@ export class ReindexWorker {
    * Returns whether or not the given ReindexOperation is in the worker's queue.
    */
   public includes = (reindexOp: ReindexSavedObject) => {
-    return this.inProgressOps.map(o => o.id).includes(reindexOp.id);
+    return this.inProgressOps.map((o) => o.id).includes(reindexOp.id);
   };
 
   /**
@@ -121,11 +121,11 @@ export class ReindexWorker {
 
         if (
           this.inProgressOps.length &&
-          this.inProgressOps.every(op => !this.credentialStore.get(op))
+          this.inProgressOps.every((op) => !this.credentialStore.get(op))
         ) {
           // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
           // This scheduler should be revisited in future.
-          await new Promise(resolve => setTimeout(resolve, WORKER_PADDING_MS));
+          await new Promise((resolve) => setTimeout(resolve, WORKER_PADDING_MS));
         }
       }
     } finally {

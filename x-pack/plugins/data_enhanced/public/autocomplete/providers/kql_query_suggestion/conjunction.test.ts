@@ -34,7 +34,7 @@ describe('Kuery conjunction suggestions', () => {
     const suggestions = await getSuggestions(querySuggestionsArgs, mockKueryNode({ text }));
 
     expect(suggestions.length).toBe(2);
-    expect(suggestions.map(suggestion => suggestion.text)).toEqual(['and ', 'or ']);
+    expect(suggestions.map((suggestion) => suggestion.text)).toEqual(['and ', 'or ']);
   });
 
   test('should suggest to insert the suggestion at the end of the string', async () => {
@@ -43,8 +43,8 @@ describe('Kuery conjunction suggestions', () => {
     const suggestions = await getSuggestions(querySuggestionsArgs, mockKueryNode({ text, end }));
 
     expect(suggestions.length).toBe(2);
-    expect(suggestions.map(suggestion => suggestion.start)).toEqual([end, end]);
-    expect(suggestions.map(suggestion => suggestion.end)).toEqual([end, end]);
+    expect(suggestions.map((suggestion) => suggestion.start)).toEqual([end, end]);
+    expect(suggestions.map((suggestion) => suggestion.end)).toEqual([end, end]);
   });
 
   test('should have descriptions', async () => {
@@ -54,7 +54,7 @@ describe('Kuery conjunction suggestions', () => {
     expect(typeof suggestions).toBe('object');
     expect(Object.keys(suggestions).length).toBe(2);
 
-    suggestions.forEach(suggestion => {
+    suggestions.forEach((suggestion) => {
       expect(typeof suggestion).toBe('object');
       expect(suggestion).toHaveProperty('description');
     });

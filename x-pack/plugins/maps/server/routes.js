@@ -21,12 +21,15 @@ import {
   GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
+  FONTS_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { schema } from '@kbn/config-schema';
+import fs from 'fs';
+import path from 'path';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -76,7 +79,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -87,7 +90,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const fileLayers = await emsClient.getFileLayers();
-      const layer = fileLayers.find(layer => layer.getId() === request.query.id);
+      const layer = fileLayers.find((layer) => layer.getId() === request.query.id);
       if (!layer) {
         return null;
       }
@@ -108,7 +111,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
       validate: false,
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -124,7 +127,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -144,7 +147,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
       validate: false,
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -155,8 +158,8 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       };
 
       //rewrite the urls to the submanifest
-      const tileService = main.services.find(service => service.type === 'tms');
-      const fileService = main.services.find(service => service.type === 'file');
+      const tileService = main.services.find((service) => service.type === 'tms');
+      const fileService = main.services.find((service) => service.type === 'file');
       if (tileService) {
         proxiedManifest.services.push({
           ...tileService,
@@ -180,13 +183,13 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
       validate: false,
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
       const file = await emsClient.getDefaultFileManifest();
-      const layers = file.layers.map(layer => {
+      const layers = file.layers.map((layer) => {
         const newLayer = { ...layer };
         const id = encodeURIComponent(layer.layer_id);
         const newUrl = `${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
@@ -210,19 +213,19 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
       validate: false,
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
       const tilesManifest = await emsClient.getDefaultTMSManifest();
-      const newServices = tilesManifest.services.map(service => {
+      const newServices = tilesManifest.services.map((service) => {
         const newService = {
           ...service,
         };
 
         newService.formats = [];
-        const rasterFormats = service.formats.filter(format => format.format === 'raster');
+        const rasterFormats = service.formats.filter((format) => format.format === 'raster');
         if (rasterFormats.length) {
           const newUrl = `${EMS_TILES_RASTER_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
@@ -230,7 +233,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
             url: newUrl,
           });
         }
-        const vectorFormats = service.formats.filter(format => format.format === 'vector');
+        const vectorFormats = service.formats.filter((format) => format.format === 'vector');
         if (vectorFormats.length) {
           const newUrl = `${EMS_TILES_VECTOR_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
@@ -258,7 +261,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -269,7 +272,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -294,7 +297,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -305,7 +308,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -344,7 +347,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -355,7 +358,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -386,7 +389,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -403,7 +406,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -423,7 +426,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
       validate: false,
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -444,7 +447,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, { ok, badRequest }) => {
+    async (context, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
@@ -455,7 +458,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.params.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.params.id);
       if (!tmsService) {
         return null;
       }
@@ -483,6 +486,39 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
+      path: `/${FONTS_API_PATH}/{fontstack}/{range}`,
+      validate: {
+        params: schema.object({
+          fontstack: schema.string(),
+          range: schema.string(),
+        }),
+      },
+    },
+    (context, request, response) => {
+      return new Promise((resolve, reject) => {
+        const santizedRange = path.normalize(request.params.range);
+        const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${santizedRange}.pbf`);
+        fs.readFile(fontPath, (error, data) => {
+          if (error) {
+            reject(
+              response.custom({
+                statusCode: 404,
+              })
+            );
+          } else {
+            resolve(
+              response.ok({
+                body: data,
+              })
+            );
+          }
+        });
+      });
+    }
+  );
+
+  router.get(
+    {
       path: `/${INDEX_SETTINGS_API_PATH}`,
       validate: {
         query: schema.object({
@@ -490,7 +526,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         }),
       },
     },
-    async (con, request, response) => {
+    async (context, request, response) => {
       const { query } = request;
 
       if (!query.indexPatternTitle) {
@@ -502,7 +538,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       try {
-        const resp = await con.core.elasticsearch.dataClient.callAsCurrentUser(
+        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getSettings',
           {
             index: query.indexPatternTitle,

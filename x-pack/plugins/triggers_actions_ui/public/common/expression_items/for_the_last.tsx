@@ -100,7 +100,7 @@ export const ForLastExpression = ({
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
                 min={0}
                 value={timeWindowSize || ''}
-                onChange={e => {
+                onChange={(e) => {
                   const { value } = e.target;
                   const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
                   onChangeWindowSize(timeWindowSizeVal);
@@ -112,7 +112,7 @@ export const ForLastExpression = ({
             <EuiSelect
               data-test-subj="timeWindowUnitSelect"
               value={timeWindowUnit}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeWindowUnit(e.target.value);
               }}
               options={getTimeOptions(timeWindowSize ?? 1)}

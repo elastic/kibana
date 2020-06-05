@@ -68,7 +68,7 @@ export const getLowPolyLayer = () => {
 };
 
 export const getDownPointsLayer = (downPoints: LocationPoint[], dangerColor: string) => {
-  const features = downPoints?.map(point => ({
+  const features = downPoints?.map((point) => ({
     type: 'feature',
     geometry: {
       type: 'Point',
@@ -120,7 +120,7 @@ export const getDownPointsLayer = (downPoints: LocationPoint[], dangerColor: str
 };
 
 export const getUpPointsLayer = (upPoints: LocationPoint[]) => {
-  const features = upPoints?.map(point => ({
+  const features = upPoints?.map((point) => ({
     type: 'feature',
     geometry: {
       type: 'Point',

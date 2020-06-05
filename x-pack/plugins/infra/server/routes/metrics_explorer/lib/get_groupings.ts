@@ -60,7 +60,7 @@ export const getGroupings = async (
         },
       },
     },
-    ...groupBy.map(field => ({ exists: { field } })),
+    ...groupBy.map((field) => ({ exists: { field } })),
   ];
   const params = {
     allowNoIndices: true,
@@ -72,8 +72,8 @@ export const getGroupings = async (
         bool: {
           should: [
             ...options.metrics
-              .filter(m => m.field)
-              .map(m => ({
+              .filter((m) => m.field)
+              .map((m) => ({
                 exists: { field: m.field },
               })),
           ],
@@ -83,7 +83,7 @@ export const getGroupings = async (
       aggs: {
         groupingsCount: {
           cardinality: {
-            script: { source: groupBy.map(field => `doc['${field}'].value`).join('+') },
+            script: { source: groupBy.map((field) => `doc['${field}'].value`).join('+') },
           },
         },
         groupings: {
@@ -136,7 +136,7 @@ export const getGroupings = async (
   const { groupings, groupingsCount } = response.aggregations;
   const { after_key: afterKey } = groupings;
   return {
-    series: groupings.buckets.map(bucket => {
+    series: groupings.buckets.map((bucket) => {
       const keys = Object.values(bucket.key);
       const id = keys.join(' / ');
       return { id, keys, rows: [], columns: [] };

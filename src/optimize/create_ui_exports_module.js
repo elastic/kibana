@@ -22,7 +22,7 @@ function normalizePath(path) {
   return path.replace(/[\\\/]+/g, '/');
 }
 
-module.exports = function() {
+module.exports = function () {
   if (!module.id.includes('?')) {
     throw new Error('create_ui_exports_module loaded without JSON args in module.id');
   }
@@ -31,7 +31,7 @@ module.exports = function() {
   const comment = `// dynamically generated to load ${type} uiExports from plugins`;
   const requires = modules
     .sort((a, b) => a.localeCompare(b))
-    .map(m => `require('${normalizePath(m)}')`)
+    .map((m) => `require('${normalizePath(m)}')`)
     .join('\n        ');
 
   return {

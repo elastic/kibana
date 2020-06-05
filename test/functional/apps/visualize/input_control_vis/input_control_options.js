@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
@@ -45,7 +45,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
     });
 
-    it('should not have inspector enabled', async function() {
+    it('should not have inspector enabled', async function () {
       await inspector.expectIsNotEnabled();
     });
 
@@ -61,12 +61,7 @@ export default function({ getService, getPageObjects }) {
     describe('updateFiltersOnChange is false', () => {
       it('should contain dropdown with terms aggregation results as options', async () => {
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(
-          menu
-            .trim()
-            .split('\n')
-            .join()
-        ).to.equal('ios,osx,win 7,win 8,win xp');
+        expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
       });
 
       it('should display staging control buttons', async () => {
@@ -191,12 +186,7 @@ export default function({ getService, getPageObjects }) {
 
         // Expect control to have values for selected time filter
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(
-          menu
-            .trim()
-            .split('\n')
-            .join()
-        ).to.equal('osx,win 7,win 8,win xp');
+        expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
       });
     });
   });

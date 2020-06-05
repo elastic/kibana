@@ -13,7 +13,7 @@ export type ApmTimeSeriesResponse = ReturnType<typeof timeseriesTransformer>;
 
 export function timeseriesTransformer({
   timeseriesResponse,
-  bucketSize
+  bucketSize,
 }: {
   timeseriesResponse: ESResponse;
   bucketSize: number;
@@ -29,10 +29,10 @@ export function timeseriesTransformer({
     responseTimes: {
       avg,
       p95,
-      p99
+      p99,
     },
     tpmBuckets,
-    overallAvgDuration
+    overallAvgDuration,
   };
 }
 
@@ -44,10 +44,10 @@ export function getTpmBuckets(
 ) {
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
-      const dataPoints = timeseries.buckets.map(bucket => {
+      const dataPoints = timeseries.buckets.map((bucket) => {
         return {
           x: bucket.key,
-          y: round(bucket.doc_count * (60 / bucketSize), 1)
+          y: round(bucket.doc_count * (60 / bucketSize), 1),
         };
       });
 
@@ -61,7 +61,7 @@ export function getTpmBuckets(
 
   return sortBy(
     buckets,
-    bucket => bucket.key.toString().replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
+    (bucket) => bucket.key.toString().replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
   );
 }
 
@@ -82,7 +82,7 @@ function getResponseTime(
     {
       avg: [] as Coordinate[],
       p95: [] as Coordinate[],
-      p99: [] as Coordinate[]
+      p99: [] as Coordinate[],
     }
   );
 }

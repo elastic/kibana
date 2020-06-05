@@ -44,13 +44,13 @@ export async function editAction({
       cwd: prefix ? resolve(dataDir, prefix) : dataDir,
       absolute: true,
     })
-  ).map(path => ({
+  ).map((path) => ({
     path,
     rawPath: path.slice(0, -3),
   }));
 
   await Promise.all(
-    archives.map(async archive => {
+    archives.map(async (archive) => {
       await createPromiseFromStreams([
         Fs.createReadStream(archive.path),
         createGunzip(),
@@ -70,7 +70,7 @@ export async function editAction({
   await handler();
 
   await Promise.all(
-    archives.map(async archive => {
+    archives.map(async (archive) => {
       await createPromiseFromStreams([
         Fs.createReadStream(archive.rawPath),
         createGzip({ level: Z_BEST_COMPRESSION }),
