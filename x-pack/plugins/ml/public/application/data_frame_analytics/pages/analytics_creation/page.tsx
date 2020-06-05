@@ -146,10 +146,19 @@ export const Page: FC<Props> = ({ jobId }) => {
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="m">
                     <h1>
-                      <FormattedMessage
-                        id="xpack.ml.dataframe.analytics.creationPageTitle"
-                        defaultMessage="Create analytics job"
-                      />
+                      {jobId === undefined && (
+                        <FormattedMessage
+                          id="xpack.ml.dataframe.analytics.creationPageTitle"
+                          defaultMessage="Create analytics job"
+                        />
+                      )}
+                      {jobId !== undefined && (
+                        <FormattedMessage
+                          id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
+                          defaultMessage="Clone analytics job from {jobId}"
+                          values={{ jobId }}
+                        />
+                      )}
                     </h1>
                   </EuiTitle>
                 </EuiFlexItem>

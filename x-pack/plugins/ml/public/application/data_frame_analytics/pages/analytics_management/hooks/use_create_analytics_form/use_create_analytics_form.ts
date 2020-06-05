@@ -310,7 +310,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {
-    // resetForm();
+    resetForm();
     const config = extractCloningConfig(cloneJob);
     if (isAdvancedConfig(config)) {
       setJobConfig(config);

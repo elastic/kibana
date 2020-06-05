@@ -129,6 +129,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             standardization_enabled: {
               defaultValue: true,
               optional: true,
+              formKey: 'standardizationEnabled',
             },
             compute_feature_influence: {
               defaultValue: true,

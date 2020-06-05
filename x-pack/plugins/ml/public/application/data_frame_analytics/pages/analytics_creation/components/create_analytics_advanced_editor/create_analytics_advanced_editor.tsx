@@ -125,7 +125,6 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
           onChange={onChange}
           setOptions={{
             fontSize: '12px',
-            maxLines: 20,
           }}
           theme="textmate"
           aria-label={i18n.translate(
