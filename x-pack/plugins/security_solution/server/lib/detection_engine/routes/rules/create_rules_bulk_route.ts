@@ -160,6 +160,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               });
 
               await alertsClient.enable({ id: createdRule.id });
+              createdRule.enabled = true;
 
               return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {

@@ -144,6 +144,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
 
         // enable rule here.
         await alertsClient.enable({ id: createdRule.id });
+        createdRule.enabled = true;
 
         const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
           perPage: 1,
