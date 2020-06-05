@@ -523,10 +523,22 @@ export class IndexPattern implements IIndexPattern {
         // const { toasts } = getNotifications();
 
         if (err instanceof IndexPatternMissingIndices) {
+          // toasts.addDanger((err as any).message);
           this.onNotification({ title: (err as any).message, color: 'danger' });
           return [];
         }
 
+        /*
+        toasts.addError(err, {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            values: {
+              id: this.id,
+              title: this.title,
+            },
+          }),
+        });
+        */
         this.onNotification({
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
@@ -535,8 +547,6 @@ export class IndexPattern implements IIndexPattern {
               title: this.title,
             },
           }),
-          // todo
-          // message: err,
           color: 'danger',
         }); // was addError
       });

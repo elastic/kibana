@@ -31,8 +31,8 @@ import { Field } from '../fields';
 
 import { FieldFormatMethods } from '../types';
 
-jest.mock('../../../../kibana_utils/common', () => {
-  const originalModule = jest.requireActual('../../../../kibana_utils/common');
+jest.mock('../../../../kibana_utils/public', () => {
+  const originalModule = jest.requireActual('../../../../kibana_utils/public');
 
   return {
     ...originalModule,
