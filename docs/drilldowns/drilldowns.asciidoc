@@ -6,17 +6,17 @@ workflow for analyzing and troubleshooting your data.
 Using a drilldown, you can navigate from one dashboard to another,
 taking the current time range, filters, and other parameters with you.
 Although the destination dashboard shows the data in a different structure,
-the context is the same. You can continue your investigation from a new perspective.
+the context is the same. You can continue your analysis from a new perspective.
 
 For example, you might have a dashboard that shows the overall status of multiple data centers.
 You can create a drilldown that navigates from this dashboard to a dashboard
-that shows a specific data center or server.
+that shows a single data center or server.
 
 [float]
 [[how-drilldowns-work]]
 === How drilldowns work
 
-Drilldowns are Kibana actions configured by the user and stored
+Drilldowns are {kib} actions that you configure and store
 in the dashboard saved object. Drilldowns are specific to the dashboard panel
 for which they are created&mdash;they are not shared across panels.
 A panel can have multiple drilldowns.
@@ -24,7 +24,7 @@ A panel can have multiple drilldowns.
 This example shows a dashboard panel that contains a pie chart.
 Typically, clicking a pie slice applies the current filter.
 When a panel has a drilldown, clicking a pie slice opens a menu with
-the default action and your drilldowns. See the <<drilldowns-example, Try it section>> of this doc
+the default action and your drilldowns. See the <<drilldowns-example, Try it section>>
 for instructions on how to create this drilldown.
 
 [role="screenshot"]
@@ -50,7 +50,7 @@ image::images/drilldown_menu.png[Panel menu with Create drilldown and Manage dri
 [[drilldowns-example]]
 === Try it: Create a drilldown
 
-This example shows how to create the drilldown shown previously in this doc.
+This example shows how to create the drilldown shown earlier in this doc.
 
 [float]
 ==== Set up the dashboards
@@ -97,7 +97,7 @@ image::images/drilldown_create.png[Create drilldown with entries for drilldown n
 +
 If you don’t save the drilldown, and then navigate away, the drilldown is lost.
 
-. In *[Logs] Visitors by OS*, click the “win 8” slice of the pie, and then click the name of your drilldown.
+. In *[Logs] Visitors by OS*, click the `win 8` slice of the pie, and then click the name of your drilldown.
 +
 You are navigated to your destination dashboard. Verify that the search query, filters,
 and time range are carried over.

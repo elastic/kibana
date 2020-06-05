@@ -159,6 +159,8 @@ When you're finished adding and arranging the panels, save the dashboard.
 
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
+include::{kib-repo-dir}/drilldowns/drilldowns.asciidoc[]
+
 [[sharing-dashboards]]
 == Share the dashboard
 
@@ -186,5 +188,3 @@ tools. To create a short URL, you must have write access to {kib}.
 
 To export the dashboard, go to *Management > Saved Objects*. For more information,
 see <<managing-saved-objects, Managing saved objects>>.
-
-include::{kib-repo-dir}/drilldowns/drilldowns.asciidoc[]
