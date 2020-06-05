@@ -20,7 +20,7 @@ import { AllThirdPartyFields } from '../../../common/lib/connectors/types';
 export interface RowProps {
   id: string;
   disabled: boolean;
-  siemField: CaseField;
+  securitySolutionField: CaseField;
   thirdPartyOptions: Array<EuiSuperSelectOption<AllThirdPartyFields>>;
   actionTypeOptions: Array<EuiSuperSelectOption<ActionType>>;
   onChangeActionType: (caseField: CaseField, newActionType: ActionType) => void;
@@ -32,7 +32,7 @@ export interface RowProps {
 const FieldMappingRowComponent: React.FC<RowProps> = ({
   id,
   disabled,
-  siemField,
+  securitySolutionField,
   thirdPartyOptions,
   actionTypeOptions,
   onChangeActionType,
@@ -40,13 +40,15 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
   selectedActionType,
   selectedThirdParty,
 }) => {
-  const siemFieldCapitalized = useMemo(() => capitalize(siemField), [siemField]);
+  const securitySolutionFieldCapitalized = useMemo(() => capitalize(securitySolutionField), [
+    securitySolutionField,
+  ]);
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup component="span" justifyContent="spaceBetween">
           <EuiFlexItem component="span" grow={false}>
-            {siemFieldCapitalized}
+            {securitySolutionFieldCapitalized}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiIcon type="sortRight" />
@@ -58,7 +60,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           disabled={disabled}
           options={thirdPartyOptions}
           valueOfSelected={selectedThirdParty}
-          onChange={onChangeThirdParty.bind(null, siemField)}
+          onChange={onChangeThirdParty.bind(null, securitySolutionField)}
           data-test-subj={`case-configure-third-party-select-${id}`}
         />
       </EuiFlexItem>
@@ -67,7 +69,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           disabled={disabled}
           options={actionTypeOptions}
           valueOfSelected={selectedActionType}
-          onChange={onChangeActionType.bind(null, siemField)}
+          onChange={onChangeActionType.bind(null, securitySolutionField)}
           data-test-subj={`case-configure-action-type-select-${id}`}
         />
       </EuiFlexItem>
