@@ -132,7 +132,7 @@ export const TimeSeries = ({
         baseTheme={theme}
         tooltip={{
           snap: true,
-          type: tooltipMode === 'show_all' ? TooltipType.VerticalCursor : TooltipType.Follow,
+          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
       />
