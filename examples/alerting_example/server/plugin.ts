@@ -19,6 +19,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../x-pack/plugins/features/server';
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
@@ -26,12 +27,45 @@ import { alertType as peopleInSpaceAlert } from './alert_types/astros';
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
   alerts: AlertingSetup;
+  features: FeaturesPluginSetup;
 }
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts }: AlertingExampleDeps) {
+  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
     alerts.registerType(alwaysFiringAlert);
     alerts.registerType(peopleInSpaceAlert);
+
+    features.registerFeature({
+      id: 'alertsExample',
+      name: 'alertsExample',
+      app: [],
+      privileges: {
+        all: {
+          alerting: {
+            globally: {
+              all: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          alerting: {
+            globally: {
+              read: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
   }
 
   public start() {}
