@@ -289,4 +289,4 @@ export const list_and = t.intersection([
 ]);
 
 export const listAndOrUndefined = t.union([list_and, t.undefined]);
-export type ListAndOrUndefined = t.typeOf<typeof listAndOrUndefined>;
+export type ListAndOrUndefined = t.TypeOf<typeof listAndOrUndefined>;
