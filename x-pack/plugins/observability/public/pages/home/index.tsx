@@ -41,9 +41,7 @@ const Page = styled.div`
 }
 `;
 
-const EuiCardWithoutBorder = styled(EuiCard)`
-  border: none;
-  box-shadow: none;
+const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;
 `;
 
@@ -116,7 +114,8 @@ export const Home = () => {
                 <EuiFlexGrid columns={2}>
                   {appsSection.map((app) => (
                     <EuiFlexItem>
-                      <EuiCardWithoutBorder
+                      <EuiCardWithoutPadding
+                        display="plain"
                         layout="horizontal"
                         icon={<EuiIcon size="l" type={app.icon} />}
                         title={
