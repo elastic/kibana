@@ -15,6 +15,7 @@ import {
   ResolverTree,
   LegacyEndpointEvent,
   ResolverNodeStats,
+  ResolverRelatedAlerts,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -199,6 +200,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
   const treeOptions: Options = {
     ancestors: 5,
     relatedEvents: relatedEventsToGen,
+    relatedAlerts: 4,
     children: 3,
     generations: 2,
     percentTerminated: 100,
@@ -217,6 +219,62 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     after(async () => {
       await resolver.deleteTrees(resolverTrees);
       await esArchiver.unload('endpoint/resolver/api_feature');
+    });
+
+    describe('related alerts route', () => {
+      describe('endpoint events', () => {
+        it('should not find any alerts', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/5555/alerts`)
+            .expect(200);
+          expect(body.nextAlert).to.eql(null);
+          expect(body.alerts).to.be.empty();
+        });
+
+        it('should return details for the root node', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(4);
+          compareArrays(tree.origin.relatedAlerts, body.alerts, true);
+          expect(body.nextAlert).to.eql(null);
+        });
+
+        it('should return paginated results for the root node', async () => {
+          let { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(2);
+          compareArrays(tree.origin.relatedAlerts, body.alerts);
+          expect(body.nextAlert).not.to.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
+            )
+            .expect(200));
+          expect(body.alerts.length).to.eql(2);
+          compareArrays(tree.origin.relatedAlerts, body.alerts);
+          expect(body.nextAlert).to.not.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
+            )
+            .expect(200));
+          expect(body.alerts).to.be.empty();
+          expect(body.nextAlert).to.eql(null);
+        });
+
+        it('should return the first page of information when the cursor is invalid', async () => {
+          const { body }: { body: ResolverRelatedAlerts } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?afterAlert=blah`)
+            .expect(200);
+          expect(body.alerts.length).to.eql(4);
+          compareArrays(tree.origin.relatedAlerts, body.alerts, true);
+          expect(body.nextAlert).to.eql(null);
+        });
+      });
     });
 
     describe('related events route', () => {
@@ -604,7 +662,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('returns a tree', async () => {
           const { body }: { body: ResolverTree } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4`
+              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4&alerts=4`
             )
             .expect(200);
 
@@ -619,6 +677,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
           expect(body.relatedEvents.nextEvent).to.equal(null);
           compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
+
+          expect(body.relatedAlerts.nextAlert).to.equal(null);
+          compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
 
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
           verifyStats(body.stats, relatedEventsToGen);

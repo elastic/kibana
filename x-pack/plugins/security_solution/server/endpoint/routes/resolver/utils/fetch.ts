@@ -9,7 +9,7 @@ import {
   ResolverChildren,
   ResolverRelatedEvents,
   ResolverAncestry,
-  ResolverAlerts,
+  ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 import { entityId, parentEntityId } from '../../../../../common/endpoint/models/event';
 import { PaginationBuilder } from './pagination';
@@ -18,7 +18,7 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
-import { createAncestry, createRelatedEvents, createLifecycle, createAlerts } from './node';
+import { createAncestry, createRelatedEvents, createLifecycle, createRelatedAlerts } from './node';
 import { ChildrenNodesHelper } from './children_helper';
 import { AlertsQuery } from '../queries/alerts';
 
@@ -88,7 +88,7 @@ export class Fetcher {
    * @param limit the upper bound number of alerts to return
    * @param after a cursor to use as the starting point for retrieving alerts
    */
-  public async alerts(limit: number, after?: string): Promise<ResolverAlerts> {
+  public async alerts(limit: number, after?: string): Promise<ResolverRelatedAlerts> {
     return this.doAlerts(limit, after);
   }
 
@@ -160,13 +160,17 @@ export class Fetcher {
     const { totals, results } = await query.search(this.client, this.id);
     if (results.length === 0) {
       // return an empty set of results
-      return createAlerts(this.id);
+      return createRelatedAlerts(this.id);
     }
     if (!totals[this.id]) {
       throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
     }
 
-    return createAlerts(this.id, results, PaginationBuilder.buildCursor(totals[this.id], results));
+    return createRelatedAlerts(
+      this.id,
+      results,
+      PaginationBuilder.buildCursor(totals[this.id], results)
+    );
   }
 
   private async doChildren(

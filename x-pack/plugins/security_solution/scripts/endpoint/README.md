@@ -33,7 +33,7 @@ Options:
   --eventIndex, --ei             index to store events in
                                          [string] [default: "events-endpoint-1"]
   --metadataIndex, --mi          index to store host metadata in
-                                [string] [default: "metrics-endpoint-default-1"]
+                       [string] [default: "metrics-endpoint.metadata-default-1"]
   --policyIndex, --pi            index to store host policy in
                          [string] [default: "metrics-endpoint.policy-default-1"]
   --auth                         elasticsearch username and password, separated
@@ -46,8 +46,10 @@ Options:
                                                            [number] [default: 3]
   --relatedEvents, --related     number of related events to create for each
                                  process event             [number] [default: 5]
+  --relatedAlerts, --relAlerts   number of related alerts to create for each
+                                 process event             [number] [default: 5]
   --percentWithRelated, --pr     percent of process events to add related events
-                                 to                       [number] [default: 30]
+                                 and related alerts to    [number] [default: 30]
   --percentTerminated, --pt      percent of process events to add termination
                                  event for                [number] [default: 30]
   --maxChildrenPerNode, --maxCh  always generate the max number of children per

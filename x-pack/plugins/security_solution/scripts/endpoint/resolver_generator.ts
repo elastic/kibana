@@ -107,9 +107,15 @@ async function main() {
       type: 'number',
       default: 5,
     },
+    relatedAlerts: {
+      alias: 'relAlerts',
+      describe: 'number of related alerts to create for each process event',
+      type: 'number',
+      default: 5,
+    },
     percentWithRelated: {
       alias: 'pr',
-      describe: 'percent of process events to add related events to',
+      describe: 'percent of process events to add related events and related alerts to',
       type: 'number',
       default: 30,
     },
@@ -248,6 +254,7 @@ async function main() {
       argv.generations,
       argv.children,
       argv.relatedEvents,
+      argv.relatedAlerts,
       argv.percentWithRelated,
       argv.percentTerminated,
       argv.maxChildrenPerNode

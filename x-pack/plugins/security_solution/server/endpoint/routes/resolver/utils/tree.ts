@@ -12,7 +12,7 @@ import {
   ResolverAncestry,
   ResolverTree,
   ResolverChildren,
-  ResolverAlerts,
+  ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 import { createTree } from './node';
 
@@ -26,7 +26,7 @@ export interface Options {
   relatedEvents?: ResolverRelatedEvents;
   ancestry?: ResolverAncestry;
   children?: ResolverChildren;
-  alerts?: ResolverAlerts;
+  relatedAlerts?: ResolverRelatedAlerts;
 }
 
 /**
@@ -76,7 +76,7 @@ export class Tree {
     this.addRelatedEvents(options.relatedEvents);
     this.addAncestors(options.ancestry);
     this.addChildren(options.children);
-    this.addAlerts(options.alerts);
+    this.addRelatedAlerts(options.relatedAlerts);
   }
 
   /**
@@ -116,7 +116,7 @@ export class Tree {
    *
    * @param alertInfo is the alerts and pagination information to add to the tree.
    */
-  private addAlerts(alertInfo: ResolverAlerts | undefined) {
+  private addRelatedAlerts(alertInfo: ResolverRelatedAlerts | undefined) {
     if (!alertInfo) {
       return;
     }
