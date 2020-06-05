@@ -68,7 +68,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         eventType &&
         signalIndexExists &&
         signalIndexName != null &&
-        ['signal', 'all'].includes(eventType)
+        ['signal', 'alert', 'all'].includes(eventType)
       ) {
         return [signalIndexName];
       }
