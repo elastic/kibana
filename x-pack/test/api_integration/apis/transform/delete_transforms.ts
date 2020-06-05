@@ -80,6 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
         await transform.api.waitForTransformNotToExist(transformId);
+        await transform.api.waitForIndicesToExist(destinationIndex);
       });
 
       it('should return 403 for unauthorized user', async () => {
@@ -96,11 +97,12 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(403);
         await transform.api.waitForTransformToExist(transformId);
+        await transform.api.waitForIndicesToExist(destinationIndex);
       });
     });
 
     describe('single transform deletion with invalid transformId', function () {
-      it('should return 404 with error message if invalid transformId', async () => {
+      it('should return 200 with error in response if invalid transformId', async () => {
         const transformsInfo: TransformEndpointRequest[] = [{ id: 'invalid_transform_id' }];
         const { body } = await supertest
           .post(`/api/transform/delete_transforms`)
@@ -150,12 +152,16 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await asyncForEach(transformsInfo, async ({ id: transformId }: { id: string }) => {
-          expect(body[transformId].transformDeleted.success).to.eql(true);
-          expect(body[transformId].destIndexDeleted.success).to.eql(false);
-          expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-          await transform.api.waitForTransformNotToExist(transformId);
-        });
+        await asyncForEach(
+          transformsInfo,
+          async ({ id: transformId }: { id: string }, idx: number) => {
+            expect(body[transformId].transformDeleted.success).to.eql(true);
+            expect(body[transformId].destIndexDeleted.success).to.eql(false);
+            expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+            await transform.api.waitForTransformNotToExist(transformId);
+            await transform.api.waitForIndicesToExist(destinationIndices[idx]);
+          }
+        );
       });
 
       it('should delete multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
@@ -176,12 +182,16 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await asyncForEach(transformsInfo, async ({ id: transformId }: { id: string }) => {
-          expect(body[transformId].transformDeleted.success).to.eql(true);
-          expect(body[transformId].destIndexDeleted.success).to.eql(false);
-          expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-          await transform.api.waitForTransformNotToExist(transformId);
-        });
+        await asyncForEach(
+          transformsInfo,
+          async ({ id: transformId }: { id: string }, idx: number) => {
+            expect(body[transformId].transformDeleted.success).to.eql(true);
+            expect(body[transformId].destIndexDeleted.success).to.eql(false);
+            expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+            await transform.api.waitForTransformNotToExist(transformId);
+            await transform.api.waitForIndicesToExist(destinationIndices[idx]);
+          }
+        );
 
         expect(body[invalidTransformId].transformDeleted.success).to.eql(false);
         expect(body[invalidTransformId].transformDeleted).to.have.property('error');
@@ -259,6 +269,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
         expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
+        await transform.api.waitForIndicesToExist(destinationIndex);
         await transform.testResources.assertIndexPatternNotExist(destinationIndex);
       });
     });
