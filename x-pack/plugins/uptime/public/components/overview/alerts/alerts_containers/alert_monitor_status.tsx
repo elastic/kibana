@@ -13,6 +13,7 @@ import {
   overviewFiltersSelector,
   snapshotDataSelector,
   esKuerySelector,
+  selectedFiltersSelector,
 } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 import {
@@ -91,6 +92,22 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       getSnapshotCountAction({ dateRangeStart: 'now-24h', dateRangeEnd: 'now', filters: esKuery })
     );
   }, [dispatch, esKuery]);
+
+  const selectedFilters = useSelector(selectedFiltersSelector);
+  useEffect(() => {
+    if (!alertParams.filters && selectedFilters !== null) {
+      setAlertParams('filters', {
+        // @ts-ignore
+        'url.port': selectedFilters?.ports ?? [],
+        // @ts-ignore
+        'observer.geo.name': selectedFilters?.locations ?? [],
+        // @ts-ignore
+        'monitor.type': selectedFilters?.schemes ?? [],
+        // @ts-ignore
+        tags: selectedFilters?.tags ?? [],
+      });
+    }
+  }, [alertParams, setAlertParams, selectedFilters]);
 
   return (
     <AlertMonitorStatusComponent

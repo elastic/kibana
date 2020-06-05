@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -110,6 +110,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       <EuiSpacer size="xs" />
 
       <AddFilterButton
+        alertFilters={alertParams.filters}
         newFilters={newFilters}
         onNewFilter={(newFilter) => {
           setNewFilters([...newFilters, newFilter]);
@@ -118,21 +119,17 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="m" />
 
-      {!snapshotLoading ? (
-        <EuiCallOut
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
-              defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-              values={{ snapshotCount }}
-            />
-          }
-          iconType="iInCircle"
-        />
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      )}
+      <EuiCallOut
+        size="s"
+        title={
+          <FormattedMessage
+            id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+            defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+            values={{ snapshotCount: snapshotLoading ? '...' : snapshotCount }}
+          />
+        }
+        iconType="iInCircle"
+      />
 
       <EuiSpacer size="m" />
     </>
