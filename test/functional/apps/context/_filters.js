@@ -72,8 +72,6 @@ export default function ({ getService, getPageObjects }) {
           .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
         return hasOnlyFilteredRows === false;
       });
-
-      retry.try(async () => {});
     });
 
     it('filter for presence should be addable via expanded doc table rows', async function () {
