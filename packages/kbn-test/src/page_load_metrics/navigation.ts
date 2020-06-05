@@ -76,7 +76,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
   const browser = await puppeteer.launch({ headless: options.headless, args: ['--no-sandbox'] });
   const devToolsResponses: NavigationResults = new Map();
   const apps = [
-    { path: '/app/discover', locator: '[data-test-subj="discover-sidebar"]' },
+    { path: 'app/kibana#/discover', locator: '[data-test-subj="discover-sidebar"]' },
     { path: '/app/home', locator: '[data-test-subj="homeApp"]' },
     { path: '/app/canvas', locator: '[data-test-subj="create-workpad-button"]' },
     { path: '/app/maps', locator: '[title="Maps"]' },
