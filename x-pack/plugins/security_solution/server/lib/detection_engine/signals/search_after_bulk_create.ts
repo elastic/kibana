@@ -151,7 +151,7 @@ export const searchAfterAndBulkCreate = async ({
           dateMath.parse(ruleParams.from),
           shorthandMap[unit].momentString as moment.DurationInputArg2
         );
-        const ratio = gapDiffInSeconds / normalDiffInSeconds;
+        const ratio = Math.abs(gapDiffInSeconds / normalDiffInSeconds);
 
         // maxCatchup is to ensure we are not trying to catch up too far back.
         // This allows for a maximum of 4 consecutive rule execution misses
@@ -161,7 +161,8 @@ export const searchAfterAndBulkCreate = async ({
         // create a new max results which in the above example equates to
         // 20 signals as the MAX_SIGNALS for the gap duration + our normal MAX_SIGNALS defaulted to 100
         // which comes out to 120 total max signals.
-        maxResults = Math.round(maxCatchup * ruleParams.maxSignals + ruleParams.maxSignals);
+        maxResults = Math.round(maxCatchup * ruleParams.maxSignals) + ruleParams.maxSignals;
+        logger.debug(`new maxResults: ${maxResults}`);
       }
     }
   }
@@ -176,7 +177,7 @@ export const searchAfterAndBulkCreate = async ({
       }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter({
         searchAfterSortId: sortId,
         index: inputIndexPattern,
-        from: ruleParams.from,
+        from: calculatedFrom,
         to: ruleParams.to,
         services,
         logger,
