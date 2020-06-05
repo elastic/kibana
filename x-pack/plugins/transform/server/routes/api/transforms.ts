@@ -29,7 +29,7 @@ import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError } from './error_utils';
-import { schemaTransformId, SchemaTransformId } from './schema';
+import { deleteTransformSchema, schemaTransformId, SchemaTransformId } from './schema';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
@@ -182,14 +182,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     {
       path: addBasePath('delete_transforms'),
       validate: {
-        body: schema.maybe(schema.any()),
-        query: schema.object({
-          /**
-           * Transform Destination Index
-           */
-          deleteDestIndex: schema.maybe(schema.boolean()),
-          deleteDestIndexPattern: schema.maybe(schema.boolean()),
-        }),
+        body: deleteTransformSchema,
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
