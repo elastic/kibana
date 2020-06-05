@@ -9,7 +9,7 @@ import React, { useEffect, useState, FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { BarSeries, Chart, Settings } from '@elastic/charts';
-import { EuiText } from '@elastic/eui';
+import { euiPaletteColorBlind, EuiText } from '@elastic/eui';
 
 // import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -34,6 +34,8 @@ interface DataItem {
 }
 
 const MAX_CHART_COLUMNS = 20;
+const BAR_COLOR = euiPaletteColorBlind()[0];
+const BAR_COLOR_BLUR = euiPaletteColorBlind(2)[10];
 
 export const ColumnChart: FC<Props> = ({ indexPatternTitle, columnType, query, api }) => {
   const [cardinality, setCardinality] = useState(0);
@@ -198,14 +200,12 @@ export const ColumnChart: FC<Props> = ({ indexPatternTitle, columnType, query, a
   const xScaleType = getXScaleType(fieldType);
 
   const getColor = (d: DataItem) => {
-    const barColor = '#55b399';
-
     if (hoveredRow === undefined || hoveredRow === null) {
-      return barColor;
+      return BAR_COLOR;
     }
 
     if (xScaleType === 'ordinal' && hoveredRow._source[columnType.id] === d.key) {
-      return barColor;
+      return BAR_COLOR;
     }
 
     if (
@@ -213,7 +213,7 @@ export const ColumnChart: FC<Props> = ({ indexPatternTitle, columnType, query, a
       hoveredRow._source[columnType.id] >= +d.key &&
       hoveredRow._source[columnType.id] < +d.key + interval
     ) {
-      return barColor;
+      return BAR_COLOR;
     }
 
     if (
@@ -221,13 +221,10 @@ export const ColumnChart: FC<Props> = ({ indexPatternTitle, columnType, query, a
       moment(hoveredRow._source[columnType.id]).unix() * 1000 >= +d.key &&
       moment(hoveredRow._source[columnType.id]).unix() * 1000 < +d.key + interval
     ) {
-      return barColor;
+      return BAR_COLOR;
     }
 
-    if (xScaleType === 'time') {
-      // console.log('time', moment(hoveredRow._source[columnType.id]).unix(), +d.key, d.key);
-    }
-    return '#d4dae5';
+    return BAR_COLOR_BLUR;
   };
 
   const coloredData = data.map((d) => ({ ...d, color: getColor(d) }));

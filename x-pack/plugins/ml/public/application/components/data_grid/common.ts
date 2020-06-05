@@ -8,7 +8,6 @@ import moment from 'moment-timezone';
 import { useEffect, useMemo } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
   EuiDataGridStyle,
