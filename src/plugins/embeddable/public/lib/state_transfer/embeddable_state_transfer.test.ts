@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../core/public/mocks';
 import { EmbeddableStateTransfer } from '.';
 import { ApplicationStart, ScopedHistory } from '../../../../../core/public';
 
@@ -37,11 +37,7 @@ function isSuperCoolState(state: unknown): state is SuperCoolCustomState {
 }
 
 function mockHistoryState(state: unknown) {
-  return {
-    location: {
-      state,
-    },
-  } as ScopedHistory;
+  return scopedHistoryMock.create({ state });
 }
 
 describe('embeddable state transfer', () => {
@@ -84,25 +80,33 @@ describe('embeddable state transfer', () => {
 
   it('can fetch an incoming originating app state', async () => {
     const historyMock = mockHistoryState({ originatingApp: 'extremeSportsKibana' });
-    const fetchedState = stateTransfer.getIncomingOriginatingApp(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingOriginatingApp(
+      (historyMock as unknown) as ScopedHistory
+    );
     expect(fetchedState).toEqual({ originatingApp: 'extremeSportsKibana' });
   });
 
   it('returns undefined with originating app state is not in the right shape', async () => {
     const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
-    const fetchedState = stateTransfer.getIncomingOriginatingApp(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingOriginatingApp(
+      (historyMock as unknown) as ScopedHistory
+    );
     expect(fetchedState).toBeUndefined();
   });
 
   it('can fetch an incoming embeddable package state', async () => {
     const historyMock = mockHistoryState({ type: 'skisEmbeddable', id: '123' });
-    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(
+      (historyMock as unknown) as ScopedHistory
+    );
     expect(fetchedState).toEqual({ type: 'skisEmbeddable', id: '123' });
   });
 
   it('returns undefined when embeddable package is not in the right shape', async () => {
     const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
-    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(
+      (historyMock as unknown) as ScopedHistory
+    );
     expect(fetchedState).toBeUndefined();
   });
 
@@ -110,7 +114,7 @@ describe('embeddable state transfer', () => {
     const historyMock = mockHistoryState({ isCool: true, coolValue: 123 });
     // @ts-ignore
     const fetchedState = stateTransfer.getIncomingState<SuperCoolCustomState>(
-      historyMock as ScopedHistory,
+      (historyMock as unknown) as ScopedHistory,
       isSuperCoolState
     );
     expect(fetchedState).toEqual({ isCool: true, coolValue: 123 });
@@ -120,7 +124,7 @@ describe('embeddable state transfer', () => {
     const historyMock = mockHistoryState({ isUncool: false, coolValue: 123 });
     // @ts-ignore
     const fetchedState = stateTransfer.getIncomingState<SuperCoolCustomState>(
-      historyMock as ScopedHistory,
+      (historyMock as unknown) as ScopedHistory,
       isSuperCoolState
     );
     expect(fetchedState).toBeUndefined();
@@ -130,7 +134,7 @@ describe('embeddable state transfer', () => {
     const historyMock = mockHistoryState({ isCool: false, coolValue: 123 });
     // @ts-ignore
     stateTransfer.getIncomingState<SuperCoolCustomState>(
-      historyMock as ScopedHistory,
+      (historyMock as unknown) as ScopedHistory,
       isSuperCoolState,
       true
     );
@@ -142,7 +146,7 @@ describe('embeddable state transfer', () => {
     const historyMock = mockHistoryState({ isCool: false, coolValue: 123 });
     // @ts-ignore
     stateTransfer.getIncomingState<SuperCoolCustomState>(
-      historyMock as ScopedHistory,
+      (historyMock as unknown) as ScopedHistory,
       isSuperCoolState
     );
     expect((historyMock.location.state as { [key: string]: unknown }).isCool).toBeDefined();
