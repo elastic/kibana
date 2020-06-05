@@ -12,11 +12,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/66579
-  describe.skip('When on the Endpoint Policy List', function () {
+  describe('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
+      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
     });
 
     it('loads the Policy List Page', async () => {
@@ -34,10 +33,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const allHeaderCells = await pageObjects.endpoint.tableHeaderVisibleText('policyTable');
       expect(allHeaderCells).to.eql([
         'Policy Name',
-        'Revision',
+        'Created By',
+        'Created Date',
+        'Last Updated By',
+        'Last Updated',
         'Version',
-        'Description',
-        'Agent Configuration',
+        'Actions',
       ]);
     });
     it('should show empty table results message', async () => {
@@ -47,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(noItemsFoundMessage).to.equal('No items found');
     });
 
-    xdescribe('and policies exists', () => {
+    describe('and policies exists', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
@@ -67,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(policyRow).to.eql([
           'Protect East Coast',
           '1',
-          'Elastic Endpoint v1.0.0',
+          `${policyInfo.datasource.package?.title} v${policyInfo.datasource.package?.version}`,
           'Protect the worlds data - but in the East Coast',
           policyInfo.agentConfig.id,
         ]);
