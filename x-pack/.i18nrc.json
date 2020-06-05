@@ -2,8 +2,7 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "plugins/actions",
-    "xpack.advancedUiActions": "plugins/advanced_ui_actions",
-    "xpack.uiActionsEnhanced": "examples/ui_actions_enhanced_examples",
+    "xpack.uiActionsEnhanced": ["plugins/ui_actions_enhanced", "examples/ui_actions_enhanced_examples"],
     "xpack.alerts": "plugins/alerts",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
     "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
@@ -39,7 +38,7 @@
     "xpack.reporting": ["plugins/reporting"],
     "xpack.rollupJobs": ["legacy/plugins/rollup", "plugins/rollup"],
     "xpack.searchProfiler": "plugins/searchprofiler",
-    "xpack.security": ["legacy/plugins/security", "plugins/security"],
+    "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
     "xpack.securitySolution": "plugins/security_solution",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
