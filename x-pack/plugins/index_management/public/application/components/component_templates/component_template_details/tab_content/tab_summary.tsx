@@ -15,7 +15,8 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { ComponentTemplateDeserialized } from '../../../types';
+
+import { ComponentTemplateDeserialized } from '../../types';
 
 interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;

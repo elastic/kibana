@@ -8,21 +8,21 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
-import { ComponentTemplateDeserialized } from '../../../types';
+import { ComponentTemplateDeserialized } from '../../types';
 
 interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;
 }
 
-export const TabSettings: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
+export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
   const {
-    template: { settings },
+    template: { mappings },
   } = componentTemplateDetails;
 
-  if (settings && Object.keys(settings).length) {
+  if (mappings && Object.keys(mappings).length) {
     return (
-      <div data-test-subj="settingsTab">
-        <EuiCodeBlock lang="json">{JSON.stringify(settings, null, 2)}</EuiCodeBlock>
+      <div data-test-subj="mappingsTab">
+        <EuiCodeBlock lang="json">{JSON.stringify(mappings, null, 2)}</EuiCodeBlock>
       </div>
     );
   }
@@ -31,12 +31,12 @@ export const TabSettings: React.FunctionComponent<Props> = ({ componentTemplateD
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.idxMgmt.componentTemplateDetails.settingsTab.noSettingsTitle"
-          defaultMessage="No settings defined."
+          id="xpack.idxMgmt.componentTemplateDetails.mappingsTab.noMappingsTitle"
+          defaultMessage="No mappings defined."
         />
       }
       iconType="pin"
-      data-test-subj="noSettingsCallout"
+      data-test-subj="noMappingsCallout"
       size="s"
     />
   );

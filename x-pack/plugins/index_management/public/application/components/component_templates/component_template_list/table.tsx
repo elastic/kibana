@@ -18,6 +18,8 @@ import { ScopedHistory } from 'kibana/public';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ComponentTemplateListItem } from '../types';
+import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
@@ -32,6 +34,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onDeleteClick,
   history,
 }) => {
+  const { trackMetric } = useComponentTemplatesContext();
+
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
@@ -132,8 +136,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
               history,
               {
                 pathname: `/component_templates/${name}`,
-              }
-              // () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+              },
+              () => trackMetric('click', UIM_COMPONENT_TEMPLATE_DETAILS)
             )}
             data-test-subj="templateDetailsLink"
           >

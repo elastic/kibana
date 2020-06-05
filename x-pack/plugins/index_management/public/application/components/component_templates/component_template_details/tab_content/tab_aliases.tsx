@@ -8,21 +8,21 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
-import { ComponentTemplateDeserialized } from '../../../types';
+import { ComponentTemplateDeserialized } from '../../types';
 
 interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;
 }
 
-export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
+export const TabAliases: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
   const {
-    template: { mappings },
+    template: { aliases },
   } = componentTemplateDetails;
 
-  if (mappings && Object.keys(mappings).length) {
+  if (aliases && Object.keys(aliases).length) {
     return (
-      <div data-test-subj="mappingsTab">
-        <EuiCodeBlock lang="json">{JSON.stringify(mappings, null, 2)}</EuiCodeBlock>
+      <div data-test-subj="aliasesTab">
+        <EuiCodeBlock lang="json">{JSON.stringify(aliases, null, 2)}</EuiCodeBlock>
       </div>
     );
   }
@@ -31,12 +31,12 @@ export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateD
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.idxMgmt.componentTemplateDetails.mappingsTab.noMappingsTitle"
-          defaultMessage="No mappings defined."
+          id="xpack.idxMgmt.componentTemplateDetails.aliasesTab.noAliasesTitle"
+          defaultMessage="No aliases defined."
         />
       }
       iconType="pin"
-      data-test-subj="noMappingsCallout"
+      data-test-subj="noAliasesCallout"
       size="s"
     />
   );

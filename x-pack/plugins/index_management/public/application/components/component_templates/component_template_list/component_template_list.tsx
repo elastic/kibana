@@ -10,13 +10,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 
 import { SectionLoading } from '../shared_imports';
-import { useComponentTemplatesContext } from '../component_templates_context';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+import { useComponentTemplatesContext } from '../component_templates_context';
+import { ComponentTemplateDetailsFlyout } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
-import { ComponentTemplateDetailsFlyout } from './details_flyout';
 
 interface MatchParams {
   componentTemplateName?: string;
@@ -97,6 +97,7 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
           onClose={goToList}
           onDeleteClick={setComponentTemplatesToDelete}
           componentTemplateName={componentTemplateName}
+          showFooter
         />
       )}
     </div>

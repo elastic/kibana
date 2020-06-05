@@ -8,21 +8,21 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
-import { ComponentTemplateDeserialized } from '../../../types';
+import { ComponentTemplateDeserialized } from '../../types';
 
 interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;
 }
 
-export const TabAliases: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
+export const TabSettings: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
   const {
-    template: { aliases },
+    template: { settings },
   } = componentTemplateDetails;
 
-  if (aliases && Object.keys(aliases).length) {
+  if (settings && Object.keys(settings).length) {
     return (
-      <div data-test-subj="aliasesTab">
-        <EuiCodeBlock lang="json">{JSON.stringify(aliases, null, 2)}</EuiCodeBlock>
+      <div data-test-subj="settingsTab">
+        <EuiCodeBlock lang="json">{JSON.stringify(settings, null, 2)}</EuiCodeBlock>
       </div>
     );
   }
@@ -31,12 +31,12 @@ export const TabAliases: React.FunctionComponent<Props> = ({ componentTemplateDe
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.idxMgmt.componentTemplateDetails.aliasesTab.noAliasesTitle"
-          defaultMessage="No aliases defined."
+          id="xpack.idxMgmt.componentTemplateDetails.settingsTab.noSettingsTitle"
+          defaultMessage="No settings defined."
         />
       }
       iconType="pin"
-      data-test-subj="noAliasesCallout"
+      data-test-subj="noSettingsCallout"
       size="s"
     />
   );
