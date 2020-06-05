@@ -70,6 +70,7 @@ import {
   listCustomLinksRoute,
   customLinkTransactionRoute,
 } from './settings/custom_link';
+import { rumClientRoute } from './rum_client';
 
 const createApmApi = () => {
   const api = createApi()
@@ -150,7 +151,8 @@ const createApmApi = () => {
     .add(customLinkTransactionRoute)
 
     // Rum Overview
-    .add(rumOverviewLocalFiltersRoute);
+    .add(rumOverviewLocalFiltersRoute)
+    .add(rumClientRoute);
 
   return api;
 };
