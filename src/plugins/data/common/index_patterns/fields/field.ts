@@ -18,10 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-import { IIndexPattern } from '../../types';
+import { IndexPattern } from '../index_patterns';
 import {
   IFieldType,
   getKbnFieldType,
@@ -55,21 +54,17 @@ export class Field implements IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
-  indexPattern?: IIndexPattern;
+  indexPattern?: IndexPattern;
   readFromDocValues?: boolean;
   format: any;
   $$spec: FieldSpec;
   conflictDescriptions?: Record<string, string[]>;
 
   constructor(
-    indexPattern: IIndexPattern,
+    indexPattern: IndexPattern,
     spec: FieldSpec | Field,
     shortDotsEnable: boolean,
-    {
-      fieldFormats,
-      onNotification,
-    }: // toastNotifications
-    FieldDependencies
+    { fieldFormats, onNotification }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;

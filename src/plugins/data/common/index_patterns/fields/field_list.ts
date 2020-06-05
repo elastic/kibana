@@ -18,7 +18,7 @@
  */
 
 import { findIndex } from 'lodash';
-import { IIndexPattern } from '../../types';
+import { IndexPattern } from '../index_patterns';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
 import { FieldFormatMethods, OnNotification } from '../types';
@@ -39,7 +39,7 @@ export interface IIndexPatternFieldList extends Array<Field> {
 }
 
 export type CreateIndexPatternFieldList = (
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   specs?: FieldSpec[],
   shortDotsEnable?: boolean
 ) => IIndexPatternFieldList;
@@ -51,7 +51,7 @@ export const getIndexPatternFieldListCreator = ({
   class FieldList extends Array<Field> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<Field['type'], FieldMap> = new Map();
-    private indexPattern: IIndexPattern;
+    private indexPattern: IndexPattern;
     private shortDotsEnable: boolean;
     private setByName = (field: Field) => this.byName.set(field.name, field);
     private setByGroup = (field: Field) => {
@@ -62,7 +62,7 @@ export const getIndexPatternFieldListCreator = ({
     };
     private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
 
-    constructor(indexPattern: IIndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
+    constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
       super();
       this.indexPattern = indexPattern;
       this.shortDotsEnable = shortDotsEnable;

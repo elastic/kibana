@@ -18,15 +18,8 @@
  */
 
 import { contains } from 'lodash';
-// import React from 'react';
-// import { History } from 'history';
-// import { i18n } from '@kbn/i18n';
-// import { EuiCallOut } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
-// import { toMountPoint } from '../../../../kibana_react/public';
 import { IndexPatternsContract } from './index_patterns';
-
-// export type EnsureDefaultIndexPattern = (history: History) => Promise<unknown> | undefined;
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 
@@ -34,16 +27,9 @@ export const createEnsureDefaultIndexPattern = (
   core: CoreStart,
   onRedirectNoIndexPattern: (core: CoreStart) => void
 ) => {
-  // let bannerId: string;
-  // let timeoutId: NodeJS.Timeout | undefined;
-
   /**
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
-   *
-   * If there are no index patterns, redirect to management page and show
-   * banner. In this case the promise returned from this function will never
-   * resolve to wait for the URL change to happen.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
     const patterns = await this.getIds();
