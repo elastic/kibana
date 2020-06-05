@@ -18,68 +18,22 @@ import { shallow } from 'enzyme';
 
 // @ts-ignore
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { StyleMeta } from '../style_meta';
-import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
-import { DataRequest } from '../../../util/data_request';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
+import { MockMbMap } from './__tests__/test_util';
 
-// @ts-ignore
-const mockField: IField = {
-  async getLabel() {
-    return 'foobar_label';
-  },
-  getName() {
-    return 'foobar';
-  },
-  getRootName() {
-    return 'foobar';
-  },
-  getOrigin() {
-    return FIELD_ORIGIN.SOURCE;
-  },
-  supportsFieldMeta() {
-    return true;
-  },
-  canValueBeFormatted() {
-    return true;
-  },
-  async getDataType() {
-    return 'number';
-  },
-};
+import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
 
-// @ts-ignore
-const mockLayer: IVectorLayer = {
-  getDataRequest(): DataRequest | undefined {
-    return undefined;
-  },
-  getStyle(): IVectorStyle {
-    // @ts-ignore
-    return {
-      getStyleMeta(): StyleMeta {
-        return new StyleMeta({
-          geometryTypes: {
-            isPointsOnly: true,
-            isLinesOnly: false,
-            isPolygonsOnly: false,
-          },
-          fieldMeta: {
-            foobar: {
-              range: { min: 0, max: 100, delta: 100 },
-              categories: { categories: [] },
-            },
-          },
-        });
-      },
-    };
-  },
-};
-
-const makeProperty: DynamicSizeProperty = (options: object) => {
-  return new DynamicSizeProperty(options, VECTOR_STYLES.ICON_SIZE, mockField, mockLayer, () => {
-    return (x: string) => x + '_format';
-  });
+const makeProperty = (options: object, mockStyle: IVectorStyle, field: IField = mockField) => {
+  return new DynamicSizeProperty(
+    options,
+    VECTOR_STYLES.ICON_SIZE,
+    field,
+    new MockLayer(mockStyle),
+    () => {
+      return (x: string) => x + '_format';
+    }
+  );
 };
 
 const defaultLegendParams = {
@@ -89,7 +43,7 @@ const defaultLegendParams = {
 
 describe('renderLegendDetailRow', () => {
   test('Should render as range', async () => {
-    const sizeProp = makeProperty();
+    const sizeProp = makeProperty({}, new MockStyle({ min: 0, max: 100 }));
     const legendRow = sizeProp.renderLegendDetailRow(defaultLegendParams);
     const component = shallow(legendRow);
 
@@ -98,5 +52,72 @@ describe('renderLegendDetailRow', () => {
     // Ensure the state changes are reflected
     component.update();
     expect(component).toMatchSnapshot();
+  });
+});
+
+describe('syncSize', () => {
+  test('Should sync with circle-radius prop', async () => {
+    const sizeProp = makeProperty({ minSize: 8, maxSize: 32 }, new MockStyle({ min: 0, max: 100 }));
+    const mockMbMap = new MockMbMap();
+
+    sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
+
+    expect(mockMbMap.getPaintPropertyCalls()).toEqual([
+      [
+        'foobar',
+        'circle-radius',
+        [
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              -1,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
+            ],
+            0,
+          ],
+          0,
+          8,
+          100,
+          32,
+        ],
+      ],
+    ]);
+  });
+
+  test('Should truncate interpolate expression to max when no delta', async () => {
+    const sizeProp = makeProperty(
+      { minSize: 8, maxSize: 32 },
+      new MockStyle({ min: 100, max: 100 })
+    );
+    const mockMbMap = new MockMbMap();
+
+    sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
+
+    expect(mockMbMap.getPaintPropertyCalls()).toEqual([
+      [
+        'foobar',
+        'circle-radius',
+        [
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              99,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 100],
+            ],
+            0,
+          ],
+          100,
+          32,
+        ],
+      ],
+    ]);
   });
 });

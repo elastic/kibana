@@ -112,7 +112,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     const lookup = this.supportsMbFeatureState() ? 'feature-state' : 'get';
 
     const stops =
-      minValue === maxValue ? [minValue, minSize] : [minValue, minSize, maxValue, maxSize];
+      minValue === maxValue ? [maxValue, maxSize] : [minValue, minSize, maxValue, maxSize];
     return [
       'interpolate',
       ['linear'],
