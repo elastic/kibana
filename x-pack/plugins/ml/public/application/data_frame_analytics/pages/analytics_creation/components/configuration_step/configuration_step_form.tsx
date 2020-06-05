@@ -20,13 +20,13 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
+import { Messages } from '../shared';
 import {
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { shouldAddAsDepVarOption } from '../../../analytics_management/components/create_analytics_form/form_options_validation';
+import { shouldAddAsDepVarOption } from './form_options_validation';
 import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 

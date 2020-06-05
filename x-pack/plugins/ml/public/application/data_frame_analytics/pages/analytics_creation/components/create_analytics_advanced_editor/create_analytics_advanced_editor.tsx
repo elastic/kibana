@@ -22,9 +22,9 @@ import { XJsonMode } from '../../../../../../../shared_imports';
 
 const xJsonMode = new XJsonMode();
 
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { CreateStep } from '../../../analytics_creation/components/create_step';
-import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateStep } from '../create_step';
+import { ANALYTICS_STEPS } from '../../page';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
   const { actions, state } = props;

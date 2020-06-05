@@ -26,7 +26,7 @@ import { newJobCapsService } from '../../../services/new_job_capabilities_servic
 import { ml } from '../../../services/ml_api_service';
 import { DataFrameAnalyticsId } from '../../common/analytics';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
-import { CreateAnalyticsAdvancedEditor } from '../analytics_management/components/create_analytics_advanced_editor';
+import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
 
 export enum ANALYTICS_STEPS {

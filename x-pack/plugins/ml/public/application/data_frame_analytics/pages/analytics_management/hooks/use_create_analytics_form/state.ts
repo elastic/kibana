@@ -92,7 +92,6 @@ export interface State {
     outlierFraction: undefined | number;
     predictionFieldName: undefined | string;
     previousJobType: null | AnalyticsJobType;
-    previousSourceIndex: EsIndexName | undefined;
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     sourceIndex: EsIndexName;
@@ -110,8 +109,6 @@ export interface State {
   isAdvancedEditorValidJson: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
-  isModalButtonDisabled: boolean;
-  isModalVisible: boolean;
   isValid: boolean;
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
@@ -167,7 +164,6 @@ export const getInitialState = (): State => ({
     outlierFraction: undefined,
     predictionFieldName: undefined,
     previousJobType: null,
-    previousSourceIndex: undefined,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     sourceIndex: '',
@@ -189,8 +185,6 @@ export const getInitialState = (): State => ({
   isAdvancedEditorValidJson: true,
   isJobCreated: false,
   isJobStarted: false,
-  isModalVisible: false,
-  isModalButtonDisabled: false,
   isValid: false,
   jobIds: [],
   requestMessages: [],

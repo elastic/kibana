@@ -87,12 +87,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_IS_JOB_STARTED, isJobStarted });
   };
 
-  const setIsModalButtonDisabled = (isModalButtonDisabled: boolean) =>
-    dispatch({ type: ACTION.SET_IS_MODAL_BUTTON_DISABLED, isModalButtonDisabled });
-
-  const setIsModalVisible = (isModalVisible: boolean) =>
-    dispatch({ type: ACTION.SET_IS_MODAL_VISIBLE, isModalVisible });
-
   const setJobIds = (jobIds: DataFrameAnalyticsId[]) =>
     dispatch({ type: ACTION.SET_JOB_IDS, jobIds });
 
@@ -102,7 +96,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const createAnalyticsJob = async () => {
     resetRequestMessages();
-    setIsModalButtonDisabled(true);
 
     const analyticsJobConfig = (isAdvancedEditorEnabled
       ? jobConfig
@@ -123,7 +116,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
       setIsJobCreated(true);
       if (createIndexPattern) {
         createKibanaIndexPattern();
@@ -139,7 +131,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
     }
   };
 
@@ -269,7 +260,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const initiateWizard = async () => {
     await mlContext.indexPatterns.clearCache();
-    resetForm();
     await prepareFormValidation();
   };
 
@@ -340,7 +330,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,
     setFormState,
-    setIsModalVisible,
     setJobConfig,
     startAnalyticsJob,
     switchToAdvancedEditor,
