@@ -11,6 +11,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
+import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -72,7 +73,9 @@ export class AdvancedUiActionsPublicPlugin
 
   public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
-    const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
+    const commonlyUsedRanges = core.uiSettings.get(
+      UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+    ) as CommonlyUsedRange[];
     const { openModal } = createReactOverlays(core);
     const timeRangeAction = new CustomTimeRangeAction({
       openModal,
