@@ -27,6 +27,7 @@ import {
 } from './types';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
+import { searchSavedObjectType } from '../saved_objects';
 import { DataPluginStart } from '../plugin';
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -35,7 +36,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
-    this.registerSearchStrategy(
+    core.savedObjects.registerType(searchSavedObjectType);
+
+    const registerSearchStrategy: TRegisterSearchStrategy = async (name, strategy) => {
+      this.searchStrategies[name] = await strategy;
+    };
+
+    registerSearchStrategy(
       ES_SEARCH_STRATEGY,
       esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
     );
@@ -49,6 +56,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return { getSearchStrategy: this.getSearchStrategy };
   }
 
+  public start(): ISearchStart {
+    const getSearchStrategy: TGetSearchStrategy = (name) => {
+      if (!this.searchStrategies.hasOwnProperty(name)) {
+        throw new Error('No strategy registered for `${name}`.');
+      }
+      return this.searchStrategies[name];
+    };
+
+    return { getSearchStrategy };
+  }
   public stop() {}
 
   private registerSearchStrategy: TRegisterSearchStrategy = (name, strategy) => {

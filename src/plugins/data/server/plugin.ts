@@ -91,11 +91,11 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     const fieldFormats = this.fieldFormats.start();
     return {
       search: this.searchService.start(),
-      fieldFormats,
       indexPatterns: this.indexPatterns.start(core, {
         fieldFormats,
         logger: this.logger.get('indexPatterns'),
       }),
+      fieldFormats: this.fieldFormats.start(),
     };
   }
 
