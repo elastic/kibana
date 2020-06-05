@@ -27,6 +27,8 @@ interface EventOptions {
   eventType?: string;
   eventCategory?: string;
   processName?: string;
+  pid?: number;
+  parentPid?: number;
 }
 
 const Windows: HostOS[] = [
@@ -313,7 +315,7 @@ export class EndpointDocGenerator {
       },
       host: this.commonInfo.host,
       process: {
-        pid: this.randomN(5000),
+        pid: options.pid ? options.pid : this.randomN(5000),
         executable: `C:\\${processName}`,
         code_signature: {
           status: 'trusted',
@@ -321,7 +323,7 @@ export class EndpointDocGenerator {
         },
         hash: { md5: this.seededUUIDv4()},
         entity_id: options.entityID ? options.entityID : this.randomString(10),
-        parent: options.parentEntityID ? { entity_id: options.parentEntityID, pid: this.randomN(5000) } : undefined,
+        parent: options.parentEntityID ? { entity_id: options.parentEntityID, pid: options.parentPid ? options.parentPid : this.randomN(5000) } : undefined,
         name: processName,
       },
       user: {
@@ -380,7 +382,7 @@ export class EndpointDocGenerator {
   ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
-    const root = this.generateEvent({ timestamp: startDate + 1000 });
+    const root = this.generateEvent({ timestamp: startDate + 1000, pid: this.randomN(5000) });
     events.push(root);
     let ancestor = root;
     // generate related alerts for root
@@ -398,6 +400,8 @@ export class EndpointDocGenerator {
       ancestor = this.generateEvent({
         timestamp: startDate + 1000 * (i + 1),
         parentEntityID: ancestor.process.entity_id,
+        parentPid: ancestor.process.pid,
+        pid: this.randomN(5000),
       });
       events.push(ancestor);
 

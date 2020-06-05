@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useCallback, useMemo, useContext } from 'react';
+import React, { memo, useCallback, useMemo, useContext, useLayoutEffect } from 'react';
 import {
   EuiPanel,
   EuiBadge,
@@ -26,6 +26,10 @@ import querystring from 'querystring';
 import { displayNameRecord } from './process_event_dot';
 import { hostPidForProcess, hostParentPidForProcess, hostPathForProcess, userInfoForProcess } from '../models/process_event';
 import { EuiDescriptionList } from '@elastic/eui';
+import { htmlIdGenerator } from '@elastic/eui';
+
+//To control "just-once" behavior of the node selection layout effect:
+let lockNodeSelectionByParam = false;
 
 const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
@@ -196,9 +200,6 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
       [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.pid', {
         defaultMessage: 'PID',
       })]: hostPidForProcess(processEvent),
-      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.name', {
-        defaultMessage: 'Name',
-      })]: processName,
       [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.parentPid', {
         defaultMessage: 'Parent PID',
       })]: hostParentPidForProcess(processEvent),
@@ -230,14 +231,61 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
   )
 });
 
+/**
+   * The team decided to use this determinant to express how we comport state in the UI with the values of the two query params:
+   * 
+   * | Crumb&Table            | &crumbId                   | &crumbEvent              |
+   * | :--------------------- | :------------------------- | :----------------------  |
+   * | all processes/default  | null                       | null                     |
+   * | process detail         | entity_id of process       | null                     |
+   * | relateds count by type | entity_id of process       | 'all'                    |
+   * | relateds list 1 type   | entity_id of process       | valid related event type |
+   * | related event detail   | entity_id of related event | entity_id of process     |
+   * 
+   * This component implements the strategy laid out above by determining the "right" view and doing some other housekeeping e.g. effects to keep the UI-selected node in line with what's indicated by the URL parameters.
+   */
 const PanelContent = memo(function PanelContent() {
+  
+
   const history = useHistory();
   const urlSearch = location.search;
   const queryParams: {readonly crumbId: string, readonly crumbEvent: string} = useMemo(() => { 
     return Object.assign({crumbId: '', crumbEvent: ''}, querystring.parse(urlSearch.slice(1)))},
   [urlSearch]);
-  
+
+  const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
   const graphableProcesses = useSelector(selectors.graphableProcesses);
+  const dispatch = useResolverDispatch();
+  /**
+   * When the ui-selected node is _not_ the one indicated by the query params, but the id from params _is_ in the current tree,
+   * dispatch a selection action to repair the UI to hold the query id as "selected".
+   * This is to cover cases where users e.g. share links to reconstitute a Resolver state and it _should never run otherwise_ under the assumption that the query parameters are updated along with the selection in state
+  */
+  useLayoutEffect(() => {
+    
+    if(lockNodeSelectionByParam){
+      return;
+    }
+    console.log('running layout effect');
+    const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
+    console.log('all ids: ', graphableProcessEntityIds);
+    const idOnTree = (graphableProcessEntityIds.has(queryParams.crumbId) && queryParams.crumbId) || (graphableProcessEntityIds.has(queryParams.crumbEvent) && queryParams.crumbEvent);
+    console.log('id on tree:', idOnTree);
+     if(idOnTree && idOnTree !== selectedDescendantProcessId) {
+      const nodeId = htmlIdGenerator('resolverNode')(idOnTree);
+      //Prevent this effect from running again:
+      lockNodeSelectionByParam = true;
+      dispatch({
+        type: 'userSelectedResolverNode',
+        payload: {
+          nodeId,
+          selectedProcessId: idOnTree,
+        },
+      });
+     }
+  }, [dispatch, selectedDescendantProcessId, queryParams, graphableProcesses]);
+
+  
   const relatedEvents = useSelector(selectors.relatedEvents);
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
