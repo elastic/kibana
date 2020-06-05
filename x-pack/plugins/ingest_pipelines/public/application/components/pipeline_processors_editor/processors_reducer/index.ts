@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { State, reducer, useProcessorsState, ProcessorsDispatch } from './processors_reducer';
+export {
+  State,
+  reducer,
+  useProcessorsState,
+  ProcessorsDispatch,
+  Action,
+} from './processors_reducer';

@@ -6,25 +6,18 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiAccordion,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiAccordion, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
+import { PipelineProcessorsEditorItem } from '../pipeline_processors_editor_item';
+
 import { PrivateTree, TreeMode, ProcessorInfo, PrivateOnActionHandler } from './tree';
-import { RenderTreeItemFunction } from './types';
 
 export interface Props {
   processor: ProcessorInternal;
   processorInfo: ProcessorInfo;
   privateOnAction: PrivateOnActionHandler;
   mode: TreeMode;
-  renderItem: RenderTreeItemFunction;
   level: number;
   selectedProcessorInfo?: ProcessorInfo;
 }
@@ -36,7 +29,6 @@ export const TreeNode: FunctionComponent<Props> = ({
   mode,
   selectedProcessorInfo,
   level,
-  renderItem,
 }) => {
   const onMove = () => {
     privateOnAction({ type: 'selectToMove', payload: processorInfo });
@@ -45,45 +37,36 @@ export const TreeNode: FunctionComponent<Props> = ({
     privateOnAction({ type: 'cancelMove' });
   };
   const onDuplicate = () => {
-    privateOnAction({ type: 'duplicate', payload: processorInfo.selector });
+    privateOnAction({ type: 'duplicate', payload: { source: processorInfo.selector } });
   };
+  const onDelete = () => {
+    privateOnAction({ type: 'remove', payload: { selector: processorInfo.selector, processor } });
+  };
+  const onEdit = () => {
+    privateOnAction({
+      type: 'edit',
+      payload: { processor, selector: processorInfo.selector },
+    });
+  };
+  const onAddFailure = () => {
+    privateOnAction({ type: 'addOnFailure', payload: { target: processorInfo.selector } });
+  };
+
+  const selected = selectedProcessorInfo?.id === processor.id;
+  const moving = Boolean(selectedProcessorInfo);
   return (
     <EuiPanel paddingSize="s">
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="flexStart"
-        responsive={false}
-        gutterSize="none"
-      >
-        <EuiFlexItem grow={false}>
-          {renderItem({ processor, selector: processorInfo.selector })}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {selectedProcessorInfo?.id === processor.id ? (
-            <EuiButtonEmpty size="s" onClick={onCancelMove}>
-              {i18n.translate(
-                'xpack.ingestPipelines.pipelineEditor.cancelMoveProcessorButtonLabel',
-                {
-                  defaultMessage: 'Cancel Move',
-                }
-              )}
-            </EuiButtonEmpty>
-          ) : (
-            <EuiButtonEmpty disabled={Boolean(selectedProcessorInfo)} size="s" onClick={onMove}>
-              {i18n.translate('xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel', {
-                defaultMessage: 'Move',
-              })}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={onDuplicate}>
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonLabel', {
-              defaultMessage: 'Duplicate',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <PipelineProcessorsEditorItem
+        processor={processor}
+        moving={moving}
+        selected={selected}
+        onMove={onMove}
+        onCancelMove={onCancelMove}
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        onAddOnFailure={onAddFailure}
+      />
       {processor.onFailure?.length && (
         <div style={{ marginLeft: `${level * 30}px` }}>
           <EuiAccordion
@@ -100,7 +83,6 @@ export const TreeNode: FunctionComponent<Props> = ({
           >
             <PrivateTree
               level={level + 1}
-              renderItem={renderItem}
               selectedProcessorInfo={selectedProcessorInfo}
               privateOnAction={privateOnAction}
               selector={processorInfo.selector.concat('onFailure')}

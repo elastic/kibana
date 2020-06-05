@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Tree, OnDuplicateHandler, OnMoveHandler } from './tree';
-export { RenderTreeItemFunction } from './types';
+export { Tree, OnActionHandler } from './tree';

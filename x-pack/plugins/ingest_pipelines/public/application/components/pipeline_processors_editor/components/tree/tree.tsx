@@ -10,7 +10,6 @@ import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import './tree.scss';
 import { TreeNode } from './tree_node';
-import { RenderTreeItemFunction } from './types';
 import { DropZoneButton } from './drop_zone_button';
 
 export type TreeMode = 'copy' | 'move' | 'idle';
@@ -22,22 +21,20 @@ export interface ProcessorInfo {
   belowId?: string;
 }
 
-export type PrivateOnActionArgs =
+export type PrivateAction =
+  | Action
   | {
       type: 'selectToMove';
       payload: ProcessorInfo;
     }
   | {
       type: 'cancelMove';
-    }
-  | { type: 'move'; payload: ProcessorSelector }
-  | { type: 'duplicate'; payload: ProcessorSelector };
+    };
 
-export type PrivateOnActionHandler = (args: PrivateOnActionArgs) => void;
+export type PrivateOnActionHandler = (args: PrivateAction) => void;
 
 export interface PrivateProps {
   processors: ProcessorInternal[];
-  renderItem: RenderTreeItemFunction;
   selector: ProcessorSelector;
   privateOnAction: PrivateOnActionHandler;
   mode: TreeMode;
@@ -63,7 +60,6 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   selector,
   selectedProcessorInfo,
   privateOnAction,
-  renderItem,
   mode,
   level,
 }) => {
@@ -84,7 +80,13 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
             {idx === 0 ? (
               <DropZoneButton
                 onClick={() => {
-                  privateOnAction({ type: 'move', payload: selector.concat(String(idx)) });
+                  privateOnAction({
+                    type: 'move',
+                    payload: {
+                      source: selector.concat(String(idx)),
+                      destination: selectedProcessorInfo!.selector,
+                    },
+                  });
                 }}
                 isDisabled={
                   mode !== 'move' || isDropZoneAboveDisabled(info, selectedProcessorInfo!)
@@ -99,13 +101,18 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                 processorInfo={info}
                 privateOnAction={privateOnAction}
                 selectedProcessorInfo={selectedProcessorInfo}
-                renderItem={renderItem}
               />
             </EuiFlexItem>
             <DropZoneButton
               isDisabled={mode !== 'move' || isDropZoneBelowDisabled(info, selectedProcessorInfo!)}
               onClick={() => {
-                privateOnAction({ type: 'move', payload: selector.concat(String(idx + 1)) });
+                privateOnAction({
+                  type: 'move',
+                  payload: {
+                    destination: selector.concat(String(idx + 1)),
+                    source: selectedProcessorInfo!.selector,
+                  },
+                });
               }}
             />
           </React.Fragment>
@@ -115,60 +122,57 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   );
 };
 
-export type OnMoveHandler = (args: {
-  source: ProcessorSelector;
-  destination: ProcessorSelector;
-}) => void;
-export type OnDuplicateHandler = (args: { source: ProcessorSelector }) => void;
+export type Action =
+  | { type: 'move'; payload: { source: ProcessorSelector; destination: ProcessorSelector } }
+  | { type: 'edit'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } }
+  | { type: 'duplicate'; payload: { source: ProcessorSelector } }
+  | { type: 'addOnFailure'; payload: { target: ProcessorSelector } }
+  | { type: 'remove'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } };
+
+export type OnActionHandler = (action: Action) => void;
 
 export interface Props {
   processors: ProcessorInternal[];
   baseSelector: ProcessorSelector;
-  renderItem: RenderTreeItemFunction;
-  onMove: OnMoveHandler;
-  onDuplicate: OnDuplicateHandler;
+  onAction: OnActionHandler;
 }
 
-export const Tree: FunctionComponent<Props> = memo(
-  ({ processors, baseSelector, renderItem, onDuplicate, onMove }) => {
-    const [treeMode, setTreeMode] = useState<TreeMode>('idle');
-    const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
-    return (
-      <PrivateTree
-        level={1}
-        renderItem={renderItem}
-        privateOnAction={(action) => {
-          if (action.type === 'selectToMove') {
-            setTreeMode('move');
-            setSelectedProcessorInfo(action.payload);
-            return;
-          }
+export const Tree: FunctionComponent<Props> = memo(({ processors, baseSelector, onAction }) => {
+  const [treeMode, setTreeMode] = useState<TreeMode>('idle');
+  const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
+  return (
+    <PrivateTree
+      level={1}
+      privateOnAction={(action) => {
+        if (action.type === 'selectToMove') {
+          setTreeMode('move');
+          setSelectedProcessorInfo(action.payload);
+          return;
+        }
 
-          if (action.type === 'cancelMove') {
-            setTreeMode('idle');
-            setSelectedProcessorInfo(undefined);
-            return;
-          }
+        if (action.type === 'cancelMove') {
+          setTreeMode('idle');
+          setSelectedProcessorInfo(undefined);
+          return;
+        }
 
-          if (action.type === 'move') {
-            setTreeMode('idle');
-            onMove({ source: selectedProcessorInfo!.selector, destination: action.payload });
-            setSelectedProcessorInfo(undefined);
-            return;
-          }
-
-          if (action.type === 'duplicate') {
-            setTreeMode('idle');
-            onDuplicate({ source: action.payload });
-            setSelectedProcessorInfo(undefined);
-            return;
-          }
-        }}
-        selectedProcessorInfo={selectedProcessorInfo}
-        processors={processors}
-        selector={baseSelector}
-        mode={treeMode}
-      />
-    );
-  }
-);
+        if (
+          action.type === 'move' ||
+          action.type === 'edit' ||
+          action.type === 'remove' ||
+          action.type === 'addOnFailure' ||
+          action.type === 'duplicate'
+        ) {
+          setTreeMode('idle');
+          onAction(action);
+          setSelectedProcessorInfo(undefined);
+          return;
+        }
+      }}
+      selectedProcessorInfo={selectedProcessorInfo}
+      processors={processors}
+      selector={baseSelector}
+      mode={treeMode}
+    />
+  );
+});

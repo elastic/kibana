@@ -17,7 +17,7 @@ export type State = Omit<DeserializeResult, 'onFailure'> & {
   isRoot: true;
 };
 
-type Action =
+export type Action =
   | {
       type: 'addTopLevelProcessor';
       payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };

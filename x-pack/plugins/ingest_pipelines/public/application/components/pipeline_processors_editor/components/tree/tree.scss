@@ -33,4 +33,10 @@
   &__onFailureHandlerContainer {
     margin-top: $euiSize;
   }
+
+  &__item {
+    &__name {
+      padding-right: 10px;
+    }
+  }
 }

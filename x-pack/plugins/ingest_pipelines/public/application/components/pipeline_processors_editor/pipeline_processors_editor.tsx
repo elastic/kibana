@@ -11,15 +11,12 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/e
 import './pipeline_processors_editor.scss';
 
 import {
-  RenderTreeItemFunction,
-  PipelineProcessorsEditorItem,
   ProcessorsTitleAndTestButton,
   OnFailureProcessorsTitle,
   Tree,
   SettingsFormFlyout,
   ProcessorRemoveModal,
-  OnMoveHandler,
-  OnDuplicateHandler,
+  OnActionHandler,
 } from './components';
 
 import {
@@ -149,52 +146,43 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       setSettingsFormMode({ id: 'closed' });
     };
 
-    const renderItem = useCallback<RenderTreeItemFunction>(
-      ({ processor, selector }) => {
-        return (
-          <PipelineProcessorsEditorItem
-            onClick={(type) => {
-              switch (type) {
-                case 'edit':
-                  setSettingsFormMode({
-                    id: 'editingProcessor',
-                    arg: { processor, selector },
-                  });
-                  break;
-                case 'delete':
-                  if (processor.onFailure?.length) {
-                    setProcessorToDeleteSelector(selector);
-                  } else {
-                    processorsDispatch({
-                      type: 'removeProcessor',
-                      payload: { selector },
-                    });
-                  }
-                  break;
-                case 'addOnFailure':
-                  setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
-                  break;
-              }
-            }}
-            processor={processor}
-          />
-        );
+    const onTreeAction = useCallback<OnActionHandler>(
+      (action) => {
+        switch (action.type) {
+          case 'edit':
+            setSettingsFormMode({
+              id: 'editingProcessor',
+              arg: { processor: action.payload.processor, selector: action.payload.selector },
+            });
+            break;
+          case 'remove':
+            if (action.payload.processor.onFailure?.length) {
+              setProcessorToDeleteSelector(action.payload.selector);
+            } else {
+              processorsDispatch({
+                type: 'removeProcessor',
+                payload: { selector: action.payload.selector },
+              });
+            }
+            break;
+          case 'addOnFailure':
+            setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: action.payload.target });
+            break;
+          case 'move':
+            processorsDispatch({
+              type: 'moveProcessor',
+              payload: action.payload,
+            });
+            break;
+          case 'duplicate':
+            processorsDispatch({
+              type: 'duplicateProcessor',
+              payload: action.payload,
+            });
+            break;
+        }
       },
-      [processorsDispatch, setSettingsFormMode, setProcessorToDeleteSelector]
-    );
-
-    const onMove = useCallback<OnMoveHandler>(
-      (args) => {
-        processorsDispatch({ type: 'moveProcessor', payload: args });
-      },
-      [processorsDispatch]
-    );
-
-    const onDuplicate = useCallback<OnDuplicateHandler>(
-      (args) => {
-        processorsDispatch({ type: 'duplicateProcessor', payload: args });
-      },
-      [processorsDispatch]
+      [processorsDispatch, setSettingsFormMode]
     );
 
     return (
@@ -218,9 +206,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 <Tree
                   baseSelector={PROCESSOR_STATE_SCOPE}
                   processors={processors}
-                  renderItem={renderItem}
-                  onMove={onMove}
-                  onDuplicate={onDuplicate}
+                  onAction={onTreeAction}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -272,9 +258,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 <Tree
                   baseSelector={ON_FAILURE_STATE_SCOPE}
                   processors={onFailureProcessors}
-                  onMove={onMove}
-                  onDuplicate={onDuplicate}
-                  renderItem={renderItem}
+                  onAction={onTreeAction}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
