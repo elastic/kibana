@@ -13,7 +13,7 @@ import { getMlIndex } from '../../../common/ml_job_constants';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';

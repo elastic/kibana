@@ -20,7 +20,7 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../../helpers/setup_request';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
