@@ -15,7 +15,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
 
 export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
-  checkVisibility: () => {
+  checkVisibility: async () => {
     const regions = getKibanaRegionList();
     return regions.length > 0;
   },
