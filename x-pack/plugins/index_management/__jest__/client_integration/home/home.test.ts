@@ -7,8 +7,16 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, nextTick } from '../helpers';
-
 import { HomeTestBed, setup } from './home.helpers';
+
+/**
+ * The below import is required to avoid a console error warn from the "brace" package
+ * console.warn ../node_modules/brace/index.js:3999
+      Could not load worker ReferenceError: Worker is not defined
+          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
+ */
+import { stubWebWorker } from '../../../../../test_utils/stub_web_worker';
+stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -62,7 +70,7 @@ describe('<IndexManagementHome />', () => {
         expect(exists('indicesList')).toBe(true);
         expect(exists('templateList')).toBe(false);
 
-        httpRequestsMockHelpers.setLoadTemplatesResponse([]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
         actions.selectHomeTab('templatesTab');
 
