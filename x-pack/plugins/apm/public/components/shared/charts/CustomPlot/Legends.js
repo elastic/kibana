@@ -78,7 +78,7 @@ export default function Legends({
   hasAnnotations,
   showAnnotations,
   onAnnotationsToggle,
-}) => {
+}) {
   const theme = useTheme();
 
   if (noHits && !hasAnnotations) {
@@ -95,9 +95,7 @@ export default function Legends({
         const text = (
           <LegendContent>
             {truncateLegends ? (
-              <TruncatedLabel title={serie.title}>
-                {serie.title}
-              </TruncatedLabel>
+              <TruncatedLabel title={serie.title}>{serie.title}</TruncatedLabel>
             ) : (
               serie.title
             )}
@@ -143,7 +141,7 @@ export default function Legends({
       <MoreSeries hiddenSeriesCount={hiddenSeriesCount} />
     </Container>
   );
-};
+}
 
 Legends.propTypes = {
   clickLegend: PropTypes.func.isRequired,
