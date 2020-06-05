@@ -38,7 +38,12 @@ import {
   migrateLegacyQuery,
 } from '../../../../kibana_legacy/public';
 import { showSaveModal, SavedObjectSaveModalOrigin } from '../../../../saved_objects/public';
-import { esFilters, connectToQueryState, syncQueryStateWithUrl } from '../../../../data/public';
+import {
+  esFilters,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+  UI_SETTINGS,
+} from '../../../../data/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -108,7 +113,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   const defaultQuery = {
     query: '',
     language:
-      localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
+      localStorage.get('kibana.userQueryLanguage') ||
+      uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
   };
 
   const { originatingApp } =
