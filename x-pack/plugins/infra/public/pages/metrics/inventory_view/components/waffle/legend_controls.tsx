@@ -141,14 +141,16 @@ export const LegendControls = ({
 
   const handleStepsChange = useCallback(
     (e) => {
-      setLegendOptions((previous) => ({ ...previous, steps: parseInt(e.target.value, 10) }));
+      const steps = parseInt(e.target.value, 10);
+      setLegendOptions((previous) => ({ ...previous, steps }));
     },
     [setLegendOptions]
   );
 
   const handlePaletteChange = useCallback(
     (e) => {
-      setLegendOptions((previous) => ({ ...previous, palette: e.target.value }));
+      const palette = e.target.value;
+      setLegendOptions((previous) => ({ ...previous, palette }));
     },
     [setLegendOptions]
   );
