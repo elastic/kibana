@@ -36,6 +36,9 @@
   }
 
   &__item {
+    &--selected {
+      border: 1px solid $euiColorPrimary;
+    }
     &__name {
       padding-right: 10px;
     }

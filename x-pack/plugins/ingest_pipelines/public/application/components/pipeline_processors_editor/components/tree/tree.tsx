@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent, useState, memo } from 'react';
+import React, { FunctionComponent, useState, memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
@@ -141,35 +141,39 @@ export interface Props {
 export const Tree: FunctionComponent<Props> = memo(({ processors, baseSelector, onAction }) => {
   const [treeMode, setTreeMode] = useState<TreeMode>('idle');
   const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
+  const privateOnAction = useCallback<PrivateOnActionHandler>(
+    (action) => {
+      if (action.type === 'selectToMove') {
+        setTreeMode('move');
+        setSelectedProcessorInfo(action.payload);
+        return;
+      }
+
+      if (action.type === 'cancelMove') {
+        setTreeMode('idle');
+        setSelectedProcessorInfo(undefined);
+        return;
+      }
+
+      if (
+        action.type === 'move' ||
+        action.type === 'edit' ||
+        action.type === 'remove' ||
+        action.type === 'addOnFailure' ||
+        action.type === 'duplicate'
+      ) {
+        setTreeMode('idle');
+        onAction(action);
+        setSelectedProcessorInfo(undefined);
+        return;
+      }
+    },
+    [onAction, setSelectedProcessorInfo, setTreeMode]
+  );
   return (
     <PrivateTree
       level={1}
-      privateOnAction={(action) => {
-        if (action.type === 'selectToMove') {
-          setTreeMode('move');
-          setSelectedProcessorInfo(action.payload);
-          return;
-        }
-
-        if (action.type === 'cancelMove') {
-          setTreeMode('idle');
-          setSelectedProcessorInfo(undefined);
-          return;
-        }
-
-        if (
-          action.type === 'move' ||
-          action.type === 'edit' ||
-          action.type === 'remove' ||
-          action.type === 'addOnFailure' ||
-          action.type === 'duplicate'
-        ) {
-          setTreeMode('idle');
-          onAction(action);
-          setSelectedProcessorInfo(undefined);
-          return;
-        }
-      }}
+      privateOnAction={privateOnAction}
       selectedProcessorInfo={selectedProcessorInfo}
       processors={processors}
       selector={baseSelector}
