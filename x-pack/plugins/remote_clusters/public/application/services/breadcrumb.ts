@@ -6,8 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CRUD_APP_BASE_PATH } from '../constants';
-
 interface Breadcrumb {
   text: string;
   href?: string;
@@ -28,7 +26,7 @@ export function init(setGlobalBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void):
       text: i18n.translate('xpack.remoteClusters.listBreadcrumbTitle', {
         defaultMessage: 'Remote Clusters',
       }),
-      href: `#${CRUD_APP_BASE_PATH}/list`,
+      href: `/list`,
     },
     add: {
       text: i18n.translate('xpack.remoteClusters.addBreadcrumbTitle', {
