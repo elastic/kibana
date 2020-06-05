@@ -11,7 +11,7 @@ import {
   SelectedFilters,
 } from '../actions/selected_filters';
 
-const initialState = null;
+const initialState: SelectedFilters | null = null;
 
 export function selectedFiltersReducer(
   state = initialState,
