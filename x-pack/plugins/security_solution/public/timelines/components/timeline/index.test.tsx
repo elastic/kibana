@@ -33,7 +33,7 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
-jest.mock('../../containers/detection_engine/signals/use_signal_index');
+jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
 
 describe('StatefulTimeline', () => {
   let props = {} as StatefulTimelineProps;

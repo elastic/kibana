@@ -8,6 +8,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { WithSource } from '../../../common/containers/source';
 import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
@@ -71,7 +72,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       ) {
         return [signalIndexName];
       }
-      return ['unknown-049FC71A-4C2C-446F-9901-3770C5024C51-index']; // Following index does not exist so we won't show any events;
+      return [NO_ALERT_INDEX]; // Following index does not exist so we won't show any events;
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(

@@ -92,7 +92,7 @@ class TimelineQueryComponent extends QueryTemplate<
       indexPattern == null || (indexPattern != null && indexPattern.title === '')
         ? [
             ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
-          ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
+            ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
           ]
         : indexPattern?.title.split(',') ?? [];
     const variables: GetTimelineQuery.Variables = {
