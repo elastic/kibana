@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       // expected result for status should be 'going to run' or 'succeeded
-      expect(['succeeded', 'going to run']).to.contain(body[resBody.id].current_status.status);
+      expect(body[resBody.id].current_status.status).to.eql('succeeded');
     });
   });
 };
