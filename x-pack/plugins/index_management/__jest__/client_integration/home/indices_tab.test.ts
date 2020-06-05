@@ -8,8 +8,16 @@ import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
-
 import { IndicesTestBed, setup } from './indices_tab.helpers';
+
+/**
+ * The below import is required to avoid a console error warn from the "brace" package
+ * console.warn ../node_modules/brace/index.js:3999
+      Could not load worker ReferenceError: Worker is not defined
+          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
+ */
+import { stubWebWorker } from '../../../../../test_utils/stub_web_worker';
+stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -33,16 +41,14 @@ describe('<IndexManagementHome />', () => {
       });
     });
 
-    test('sets the hash query param base on include hidden indices toggle', () => {
+    test('toggles the include hidden button through URL hash correctly', () => {
       const { actions } = testBed;
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
-      expect(window.location.hash.includes('includeHidden=true')).toBe(true);
       actions.clickIncludeHiddenIndicesToggle();
-      expect(window.location.hash.includes('includeHidden=true')).toBe(false);
+      expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(false);
       // Note: this test modifies the shared location.hash state, we put it back the way it was
       actions.clickIncludeHiddenIndicesToggle();
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
-      expect(window.location.hash.includes('includeHidden=true')).toBe(true);
     });
   });
 
