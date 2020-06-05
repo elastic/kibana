@@ -48,3 +48,9 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .trigger('mouseup', { force: true })
     .wait(1000);
 };
+
+export const reload = (afterReload: () => void) => {
+  cy.reload();
+  cy.contains('a', 'Security');
+  afterReload();
+};

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { reload } from '../tasks/common';
 import { loginAndWaitForPage } from '../tasks/login';
 import { HOSTS_PAGE } from '../urls/navigation';
 import { openEvents } from '../tasks/hosts/main';
@@ -30,7 +31,7 @@ describe('persistent timeline', () => {
       .invoke('text')
       .should('equal', 'message');
     removeColumn(TABLE_COLUMN_EVENTS_MESSAGE);
-    cy.reload();
+    reload(waitsForEventsToBeLoaded);
     cy.get(DRAGGABLE_HEADER).each(($el) => {
       expect($el.text()).not.equal('message');
     });
