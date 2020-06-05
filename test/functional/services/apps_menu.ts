@@ -60,7 +60,7 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
       if (await find.existsByCssSelector(CLOSE_BUTTON)) {
         // Close button is only visible when focused
         const button = await find.byCssSelector(CLOSE_BUTTON);
-        button.focus();
+        await button.focus();
 
         await find.clickByCssSelector(CLOSE_BUTTON);
       }
