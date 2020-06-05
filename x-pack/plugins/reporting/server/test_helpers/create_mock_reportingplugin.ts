@@ -7,17 +7,27 @@
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../browsers');
 jest.mock('../lib/create_queue');
 jest.mock('../lib/enqueue_job');
 jest.mock('../lib/validate');
 
 import { of } from 'rxjs';
 import { coreMock } from 'src/core/server/mocks';
+import {
+  initializeBrowserDriverFactory,
+  HeadlessChromiumDriverFactory,
+  chromium,
+} from '../browsers';
 import { ReportingConfig, ReportingCore } from '../';
 import { ReportingInternalSetup } from '../core';
 import { ReportingPlugin } from '../plugin';
 import { ReportingSetupDeps, ReportingStartDeps } from '../types';
+
+(initializeBrowserDriverFactory as jest.Mock<
+  Promise<HeadlessChromiumDriverFactory>
+>).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
+
+(chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
@@ -57,8 +67,10 @@ const createMockReportingPlugin = async (config: ReportingConfig): Promise<Repor
     data: { fieldFormats: {} },
   };
 
-  await plugin.setup(setupMock, createMockSetupDeps(setupMock));
-  await plugin.start(startMock, createMockStartDeps(startMock));
+  plugin.setup(setupMock, createMockSetupDeps(setupMock));
+  await plugin.setupReady();
+  plugin.start(startMock, createMockStartDeps(startMock));
+  await plugin.startReady();
 
   return plugin;
 };

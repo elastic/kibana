@@ -20,9 +20,26 @@ export class ReportingPlugin
   private logger: LevelLogger;
   private reportingCore?: ReportingCore;
 
+  private setupDone: (val?: unknown) => void = () => {};
+  private startDone: (val?: unknown) => void = () => {};
+  private setupPromise: Promise<unknown>;
+  private startPromise: Promise<unknown>;
+
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
     this.logger = new LevelLogger(context.logger.get());
     this.initializerContext = context;
+
+    // Setup some promises for modules that need to await setup/start
+    this.setupPromise = new Promise((r) => (this.setupDone = r));
+    this.startPromise = new Promise((r) => (this.startDone = r));
+  }
+
+  public async setupReady() {
+    return this.setupPromise;
+  }
+
+  public async startReady() {
+    return this.startPromise;
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
@@ -49,6 +66,7 @@ export class ReportingPlugin
       this.reportingCore = reportingCore;
 
       this.logger.debug('Setup complete');
+      this.setupDone();
     });
 
     return {};
@@ -81,6 +99,7 @@ export class ReportingPlugin
       runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
       this.logger.debug('Start complete');
+      this.startDone();
     });
 
     return {};
