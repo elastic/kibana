@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -25,6 +25,8 @@ interface AlertMonitorStatusProps {
   hasFilters: boolean;
   isOldAlert: boolean;
   locations: string[];
+  snapshotCount: number;
+  snapshotLoading: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
   timerange: {
@@ -34,7 +36,14 @@ interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const { alertParams, hasFilters, isOldAlert, setAlertParams } = props;
+  const {
+    alertParams,
+    hasFilters,
+    isOldAlert,
+    setAlertParams,
+    snapshotCount,
+    snapshotLoading,
+  } = props;
 
   const alertFilters = alertParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(
@@ -50,7 +59,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
           size="s"
           title={
             <FormattedMessage
-              id="xpack.uptime.alerts.monitorStatus.oldAlertCallout.Title"
+              id="xpack.uptime.alerts.monitorStatus.oldAlertCallout.title"
               defaultMessage="You are editing an older alert, some fields may not auto-populate."
             />
           }
@@ -106,6 +115,24 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
           setNewFilters([...newFilters, newFilter]);
         }}
       />
+
+      <EuiSpacer size="m" />
+
+      {!snapshotLoading ? (
+        <EuiCallOut
+          size="s"
+          title={
+            <FormattedMessage
+              id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+              defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+              values={{ snapshotCount }}
+            />
+          }
+          iconType="iInCircle"
+        />
+      ) : (
+        <EuiLoadingSpinner size="m" />
+      )}
 
       <EuiSpacer size="m" />
     </>

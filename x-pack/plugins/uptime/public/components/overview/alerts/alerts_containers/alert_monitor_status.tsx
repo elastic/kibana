@@ -8,12 +8,18 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { isRight } from 'fp-ts/lib/Either';
-import { selectMonitorStatusAlert, overviewFiltersSelector } from '../../../../state/selectors';
+import {
+  selectMonitorStatusAlert,
+  overviewFiltersSelector,
+  snapshotDataSelector,
+  esKuerySelector,
+} from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 import {
   fetchOverviewFilters,
   setSearchTextAction,
   setEsKueryString,
+  getSnapshotCountAction,
 } from '../../../../state/actions';
 import { AtomicStatusCheckParamsType } from '../../../../../common/runtime_types';
 import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
@@ -43,7 +49,7 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   useEffect(() => {
     dispatch(
       fetchOverviewFilters({
-        dateRangeStart: 'now-15m',
+        dateRangeStart: 'now-24h',
         dateRangeEnd: 'now',
         locations: alertParams.filters?.['observer.geo.name'] ?? [],
         ports: alertParams.filters?.['url.port'] ?? [],
@@ -62,12 +68,16 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   }, [alertParams, dispatch]);
 
   const { index_pattern: indexPattern } = useIndexPattern();
+
+  const { count, loading } = useSelector(snapshotDataSelector);
+  const esKuery = useSelector(esKuerySelector);
   const [esFilters] = useUpdateKueryString(
     indexPattern,
     alertParams.search,
-    typeof alertParams.filters === 'string' ? {} : alertParams.filters
+    alertParams.filters === undefined || typeof alertParams.filters === 'string'
+      ? ''
+      : JSON.stringify(Array.from(Object.entries(alertParams.filters)))
   );
-
   useEffect(() => {
     dispatch(setEsKueryString(esFilters ?? ''));
   }, [dispatch, esFilters]);
@@ -76,6 +86,11 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     () => !isRight(AtomicStatusCheckParamsType.decode(alertParams)),
     [alertParams]
   );
+  useEffect(() => {
+    dispatch(
+      getSnapshotCountAction({ dateRangeStart: 'now-24h', dateRangeEnd: 'now', filters: esKuery })
+    );
+  }, [dispatch, esKuery]);
 
   return (
     <AlertMonitorStatusComponent
@@ -87,6 +102,8 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       locations={locations}
       numTimes={numTimes}
       setAlertParams={setAlertParams}
+      snapshotCount={count.total}
+      snapshotLoading={loading}
       timerange={timerange}
     />
   );
