@@ -96,7 +96,7 @@ def collectVcsInfo(title) {
   )
 }
 
-def bootMergeAndIngest(buildNum, buildUrl, title) {
+def generateReports(title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
     # bootstrap from x-pack folder
@@ -108,6 +108,28 @@ def bootMergeAndIngest(buildNum, buildUrl, title) {
     . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
     . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
     . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
+    # zip combined reports
+    tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
+  """, title)
+}
+
+def uploadCombinedReports() {
+  kibanaPipeline.bash("""
+    ls -laR target/kibana-coverage/
+  """, "### List Combined Reports"
+  )
+
+  kibanaPipeline.uploadGcsArtifact(
+    "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined",
+    'kibana-coverage.tar.gz'
+  )
+}
+
+def ingestData(buildNum, buildUrl, title) {
+  kibanaPipeline.bash("""
+    source src/dev/ci_setup/setup_env.sh
+    yarn kbn bootstrap --prefer-offline
+    # Using existing target/kibana-coverage folder
     . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
   """, title)
 }
@@ -117,7 +139,7 @@ def ingestWithVault(buildNum, buildUrl, title) {
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        bootMergeAndIngest(buildNum, buildUrl, title)
+        ingestData(buildNum, buildUrl, title)
       }
     }
   }

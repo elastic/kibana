@@ -27,7 +27,7 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
-import { setupServer, createExportableType } from './test_utils';
+import { setupServer, createExportableType } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;

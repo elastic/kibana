@@ -69,7 +69,7 @@ const savedObjectsManagement = getManagementaMock({
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
+        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.index_patterns',
       };
     },
@@ -325,7 +325,7 @@ describe('findRelationships', () => {
           title: 'My Index Pattern',
           editUrl: '/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/app/kibana#/management/kibana/indexPatterns/patterns/1',
+            path: '/app/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },
@@ -439,7 +439,7 @@ describe('findRelationships', () => {
           title: 'My Index Pattern',
           editUrl: '/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/app/kibana#/management/kibana/indexPatterns/patterns/1',
+            path: '/app/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },

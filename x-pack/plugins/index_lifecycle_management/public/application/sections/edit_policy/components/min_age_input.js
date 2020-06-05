@@ -140,6 +140,41 @@ export const MinAgeInput = (props) => {
         defaultMessage: 'hours from index creation',
       }
     );
+
+    minutesOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationMinutesOptionLabel',
+      {
+        defaultMessage: 'minutes from index creation',
+      }
+    );
+
+    secondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationSecondsOptionLabel',
+      {
+        defaultMessage: 'seconds from index creation',
+      }
+    );
+
+    millisecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationMilliSecondsOptionLabel',
+      {
+        defaultMessage: 'milliseconds from index creation',
+      }
+    );
+
+    microsecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationMicroSecondsOptionLabel',
+      {
+        defaultMessage: 'microseconds from index creation',
+      }
+    );
+
+    nanosecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationNanoSecondsOptionLabel',
+      {
+        defaultMessage: 'nanoseconds from index creation',
+      }
+    );
   }
 
   return (
