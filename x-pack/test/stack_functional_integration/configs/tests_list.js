@@ -11,7 +11,7 @@ export default envObj => {
   if (envObj.PRODUCTS.includes('logstash')) {
     xs.push('management');
   } else {
-    xs.push('sampleData');
+    xs.push('sample_data');
   }
 
   // get the opt in/out banner out of the way early

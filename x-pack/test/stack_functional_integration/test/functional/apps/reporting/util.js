@@ -17,15 +17,16 @@ export const putWatcher = async (watch, id, body, client, log) => {
   expect(putWatchResponse.body._version).to.eql('1');
 };
 export const getWatcher = async (watch, id, client, log, common, tryForTime) => {
-  await common.sleep(20000);
+  await common.sleep(50000);
   await tryForTime(
-    90000,
+    250000,
     async () => {
-      await common.sleep(15000);
+      await common.sleep(25000);
 
       await watcherHistory(id, client, log);
 
       const getWatchResponse = await client.watcher.getWatch(watch);
+      log.debug(`\n getWatchResponse: ${JSON.stringify(getWatchResponse)}`);
       expect(getWatchResponse.body._id).to.eql(id);
       expect(getWatchResponse.body._version).to.be.above(1);
       log.debug(`\n getWatchResponse.body._version: ${getWatchResponse.body._version}`);
