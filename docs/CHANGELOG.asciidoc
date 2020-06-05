@@ -127,11 +127,6 @@ By default, the Upgrade Assistant flaw is mitigated in all {kib} instances acces
 +
 For all other installations, you must upgrade to 6.8.9. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
-* In 6.7.0 to 6.8.8, {kib} contains a privilege escalation flaw. An attacker with privileges to generate API keys and authentication
-tokens is able to generate authentication tokens with elevated privileges, CVE-2020-7014.
-+
-You must upgrade to 6.8.9. If you are unable to upgrade, set ‘xpack.security.authc.api_key.enabled:false’ in your elasticsearch.yml file to disable API keys.
-
 [float]
 [[enhancement-6.8.9]]
 === Enhancement
