@@ -14,15 +14,18 @@ import { DashboardHelloWorldDrilldown } from './dashboard_hello_world_drilldown'
 import { DashboardToUrlDrilldown } from './dashboard_to_url_drilldown';
 import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;
-  advancedUiActions: AdvancedUiActionsSetup;
+  discover: DiscoverSetup;
+  uiActionsEnhanced: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
-  advancedUiActions: AdvancedUiActionsStart;
+  discover: DiscoverStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
 export class UiActionsEnhancedExamplesPlugin
