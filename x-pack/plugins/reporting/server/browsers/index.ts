@@ -9,10 +9,9 @@ import { LevelLogger } from '../lib';
 import { CaptureConfig } from '../types';
 import { chromium } from './chromium';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
-import { BrowserInstaller } from './install';
+import { installBrowser } from './install';
 import { ReportingConfig } from '..';
 
-export { BrowserInstaller } from './install';
 export { ensureAllBrowsersDownloaded } from './download';
 export { HeadlessChromiumDriver } from './chromium/driver';
 export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
@@ -43,7 +42,7 @@ export const initializeBrowserDriverFactory = async (
   config: ReportingConfig,
   logger: LevelLogger
 ) => {
-  const { binaryPath$ } = new BrowserInstaller(chromium, config, logger);
+  const { binaryPath$ } = installBrowser(chromium, config, logger);
   const binaryPath = await binaryPath$.pipe(first()).toPromise();
   const captureConfig = config.get('capture');
   return chromium.createDriverFactory(binaryPath, captureConfig, logger);

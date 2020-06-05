@@ -28,15 +28,13 @@ interface Package {
  * "install" a browser by type into installs path by extracting the downloaded
  * archive. If there is an error extracting the archive an `ExtractError` is thrown
  */
-export class BrowserInstaller {
-  public readonly binaryPath$: Rx.Subject<string>;
-
-  constructor(browser: BrowserDownload, config: ReportingConfig, logger: LevelLogger) {
-    this.binaryPath$ = new Rx.Subject<string>();
-    this.backgroundInstall(browser, config, logger);
-  }
-
-  async backgroundInstall(browser: BrowserDownload, config: ReportingConfig, logger: LevelLogger) {
+export function installBrowser(
+  browser: BrowserDownload,
+  config: ReportingConfig,
+  logger: LevelLogger
+): { binaryPath$: Rx.Subject<string> } {
+  const binaryPath$ = new Rx.Subject<string>();
+  const backgroundInstall = async () => {
     const captureConfig = config.get('capture');
     const { autoDownload, type: browserType } = captureConfig.browser;
     if (autoDownload) {
@@ -73,6 +71,9 @@ export class BrowserInstaller {
 
     logger.debug(`Browser executable: ${binaryPath}`);
 
-    this.binaryPath$.next(binaryPath); // subscribers wait for download and extract to complete
-  }
+    binaryPath$.next(binaryPath); // subscribers wait for download and extract to complete
+  };
+
+  backgroundInstall();
+  return { binaryPath$ };
 }
