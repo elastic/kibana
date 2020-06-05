@@ -47,20 +47,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(headingText).to.be('Ingest Node Pipelines');
     });
 
-    it('Creates a pipeline', async () => {
-      await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
+    // it('Creates a pipeline', async () => {
+    //   await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
+    //
+    //   const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+    //   const newPipelineExists = Boolean(
+    //     pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
+    //   );
+    //
+    //   expect(newPipelineExists).to.be(true);
+    // });
 
-      const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
-      const newPipelineExists = Boolean(
-        pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
-      );
-
-      expect(newPipelineExists).to.be(true);
-    });
-
-    after(async () => {
-      // Delete the pipeline that was created
-      await es.ingest.deletePipeline({ id: PIPELINE.name });
-    });
+    // after(async () => {
+    //   // Delete the pipeline that was created
+    //   await es.ingest.deletePipeline({ id: PIPELINE.name });
+    // });
   });
 };
