@@ -4,9 +4,8 @@
 Drilldowns, also known as custom actions, allow you to configure a
 workflow for analyzing and troubleshooting your data.
 Using a drilldown, you can navigate from one dashboard to another,
-taking the current time range, filters, and other parameters with you.
-Although the destination dashboard shows the data in a different structure,
-the context is the same. You can continue your analysis from a new perspective.
+taking the current time range, filters, and other parameters with you,
+so the context remains the same. You can continue your analysis from a new perspective.
 
 For example, you might have a dashboard that shows the overall status of multiple data centers.
 You can create a drilldown that navigates from this dashboard to a dashboard
@@ -18,7 +17,7 @@ that shows a single data center or server.
 
 Drilldowns are {kib} actions that you configure and store
 in the dashboard saved object. Drilldowns are specific to the dashboard panel
-for which they are created&mdash;they are not shared across panels.
+for which you create them&mdash;they are not shared across panels.
 A panel can have multiple drilldowns.
 
 This example shows a dashboard panel that contains a pie chart.
@@ -50,7 +49,7 @@ image::images/drilldown_menu.png[Panel menu with Create drilldown and Manage dri
 [[drilldowns-example]]
 === Try it: Create a drilldown
 
-This example shows how to create the drilldown shown earlier in this doc.
+This example shows how to create the *Host Overview* drilldown shown earlier in this doc.
 
 [float]
 ==== Set up the dashboards
@@ -68,7 +67,7 @@ from the sample data set:
 +
 TIP: If you don’t see data for a panel, try changing the time range.
 
-. Open the prebuilt *[Logs] Web traffic* dashboard.
+. Open the *[Logs] Web traffic* dashboard.
 
 . Set a search and filter.
 +
@@ -89,6 +88,8 @@ Filter: `geo.src : CN`
 . Select *Host Overview* as the destination dashboard.
 
 . Keep both filters enabled so that the drilldown carries over the global filters and date range.
++
+Your input should look similar to this:
 +
 [role="screenshot"]
 image::images/drilldown_create.png[Create drilldown with entries for drilldown name and destination]
