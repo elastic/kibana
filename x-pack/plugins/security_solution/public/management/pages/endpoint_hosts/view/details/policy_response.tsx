@@ -19,7 +19,7 @@ import {
   Immutable,
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/types';
 
 /**
  * Nested accordion in the policy response detailing any concerned

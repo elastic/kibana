@@ -16,14 +16,14 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useHostSelector, useHostLogsUrl } from '../hooks';
-import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
-import { FormattedDateAndTime } from '../../../common/components/endpoint/formatted_date_time';
-import { useNavigateByRouterEventHandler } from '../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
+import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
+import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
+import { getManagementUrl } from '../../../..';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -61,14 +61,24 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     ];
   }, [details]);
 
-  const policyResponseUri = useMemo(() => {
-    return urlFromQueryParams({
-      ...queryParams,
-      selected_host: details.host.id,
-      show: 'policy_response',
-    });
+  const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
+    const { selected_host, show, ...currentUrlParams } = queryParams;
+    return [
+      getManagementUrl({
+        name: 'endpointPolicyResponse',
+        ...currentUrlParams,
+        selected_host: details.host.id,
+      }),
+      getManagementUrl({
+        name: 'endpointPolicyResponse',
+        excludePrefix: true,
+        ...currentUrlParams,
+        selected_host: details.host.id,
+      }),
+    ];
   }, [details.host.id, queryParams]);
-  const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseUri);
+
+  const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
   const detailsResultsLower = useMemo(() => {
     return [
@@ -90,7 +100,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               data-test-subj="policyStatusValue"
-              href={`?${policyResponseUri.search}`}
+              href={policyResponseUri}
               onClick={policyStatusClickHandler}
             >
               <FormattedMessage

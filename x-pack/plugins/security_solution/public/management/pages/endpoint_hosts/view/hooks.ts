@@ -7,12 +7,18 @@
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { HostState } from '../types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { State } from '../../common/store/types';
+import {
+  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
+  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
+} from '../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { State } from '../../../../common/store';
 
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function (state: State) {
-    return selector(state.hostList as HostState);
+    return selector(
+      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE] as HostState
+    );
   });
 }
 

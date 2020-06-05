@@ -7,13 +7,15 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
+import { matchPath } from 'react-router-dom';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-} from '../../../common/endpoint/types';
+} from '../../../../../common/endpoint/types';
 import { HostState, HostIndexUIQueryParams } from '../types';
+import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -96,8 +98,14 @@ export const policyResponseLoading = (state: Immutable<HostState>): boolean =>
 
 export const policyResponseError = (state: Immutable<HostState>) => state.policyResponseError;
 
-export const isOnHostPage = (state: Immutable<HostState>) =>
-  state.location ? state.location.pathname === '/endpoint-hosts' : false;
+export const isOnHostPage = (state: Immutable<HostState>) => {
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+      exact: true,
+    }) !== null
+  );
+};
 
 export const uiQueryParams: (
   state: Immutable<HostState>
@@ -117,11 +125,21 @@ export const uiQueryParams: (
       ];
 
       for (const key of keys) {
-        const value = query[key];
-        if (typeof value === 'string') {
-          data[key] = value;
-        } else if (Array.isArray(value)) {
-          data[key] = value[value.length - 1];
+        const value: string | undefined =
+          typeof query[key] === 'string'
+            ? (query[key] as string)
+            : Array.isArray(query[key])
+            ? (query[key][query[key].length - 1] as string)
+            : undefined;
+
+        if (value !== undefined) {
+          if (key === 'show') {
+            if (value === 'policy_response' || value === 'details') {
+              data[key] = value;
+            }
+          } else {
+            data[key] = value;
+          }
         }
       }
 

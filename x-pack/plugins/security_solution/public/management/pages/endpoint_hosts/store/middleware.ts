@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostResultList } from '../../../common/endpoint/types';
-import { ImmutableMiddlewareFactory } from '../../common/store';
+import { HostResultList } from '../../../../../common/endpoint/types';
+import { ImmutableMiddlewareFactory } from '../../../../common/store';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../types';
 
@@ -37,7 +37,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         });
       }
     }
-    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
+    if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
       // If user navigated directly to a host details page, load the host list
       if (listData(state).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
