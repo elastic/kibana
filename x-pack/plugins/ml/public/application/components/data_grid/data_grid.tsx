@@ -27,6 +27,9 @@ import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
+// TODO Fix row hovering + bar highlighting
+// import { hoveredRow$ } from './column_chart';
+import { useColumnCharts } from './use_column_charts';
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
@@ -71,7 +74,26 @@ export const DataGrid: FC<Props> = memo(
       tableItems: data,
       toastNotifications,
       visibleColumns,
+      // TODO move mini charts data fetching to outer hook
+      // @ts-ignore
+      api,
+      // @ts-ignore
+      indexPatternTitle,
     } = props;
+
+    const { refFn, columnResizeHandler } = useColumnCharts(
+      columns.filter((c) => visibleColumns.includes(c.id)),
+      api,
+      indexPatternTitle
+    );
+
+    // TODO Fix row hovering + bar highlighting
+    // const getRowProps = (item: any) => {
+    //   return {
+    //     onMouseOver: () => hoveredRow$.next(item),
+    //     onMouseLeave: () => hoveredRow$.next(null),
+    //   };
+    // };
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
@@ -162,22 +184,28 @@ export const DataGrid: FC<Props> = memo(
             <EuiSpacer size="m" />
           </div>
         )}
-        <EuiDataGrid
-          aria-label={isWithHeader(props) ? props.title : ''}
-          columns={columns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
-          gridStyle={euiDataGridStyle}
-          rowCount={rowCount}
-          renderCellValue={renderCellValue}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={euiDataGridToolbarSettings}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: [5, 10, 25],
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-        />
+        <div ref={refFn} className="mlDataGrid">
+          <EuiDataGrid
+            aria-label={isWithHeader(props) ? props.title : ''}
+            columns={columns.map((c) => {
+              c.initialWidth = 160;
+              return c;
+            })}
+            columnVisibility={{ visibleColumns, setVisibleColumns }}
+            gridStyle={euiDataGridStyle}
+            rowCount={rowCount}
+            renderCellValue={renderCellValue}
+            sorting={{ columns: sortingColumns, onSort }}
+            toolbarVisibility={euiDataGridToolbarSettings}
+            pagination={{
+              ...pagination,
+              pageSizeOptions: [5, 10, 25],
+              onChangeItemsPerPage,
+              onChangePage,
+            }}
+            onColumnResize={columnResizeHandler}
+          />
+        </div>
       </div>
     );
   },
