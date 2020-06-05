@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -45,6 +47,7 @@ import {
   setChrome,
   setOverlays,
   setSavedSearchLoader,
+  setEmbeddable,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -52,7 +55,7 @@ import {
   createVisEmbeddableFromObject,
 } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
-import { EmbeddableSetup } from '../../embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
@@ -102,6 +105,7 @@ export interface VisualizationsSetupDeps {
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
@@ -151,11 +155,12 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
+    setEmbeddable(embeddable);
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
