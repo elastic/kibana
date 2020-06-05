@@ -169,7 +169,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       savedObjects.client,
       http,
       fieldFormats,
-      notifications.toasts.add,
+      (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
       notifications.toasts.addError,
       onRedirectNoIndexPattern
     );

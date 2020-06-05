@@ -25,18 +25,16 @@ export {
   validateIndexPattern,
   getFromSavedObject,
   isDefault,
-  getTitle,
-} from '../../common/index_patterns/lib';
-export { onRedirectNoIndexPattern } from './index_patterns';
+} from './lib';
+export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
 
-export { getIndexPatternFieldListCreator, Field, IIndexPatternFieldList } from '../../common';
+export { getIndexPatternFieldListCreator, Field, IIndexPatternFieldList } from './fields';
 
+// TODO: figure out how to replace IndexPatterns in get_inner_angular.
 export {
-  flattenHitWrapper,
-  formatHitProvider,
   IndexPatternsService,
   IndexPatternsContract,
   IndexPattern,
   TypeMeta,
   AggregationRestrictions,
-} from '../../common/index_patterns';
+} from './index_patterns';

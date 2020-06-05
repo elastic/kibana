@@ -25,9 +25,9 @@ import {
   CoreStart,
 } from 'src/core/public';
 
-import { createIndexPatternCache } from './_pattern_cache';
+import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
+import { IndexPatternsApiClient, GetFieldsOptions } from '.';
 import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,

@@ -41,7 +41,8 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { IIndexPatternsApiClient, TypeMeta } from '.';
+import { IIndexPatternsApiClient } from '.';
+import { TypeMeta } from '.';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 
@@ -529,6 +530,7 @@ export class IndexPattern implements IIndexPattern {
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
+        // const { toasts } = getNotifications();
 
         if (err instanceof IndexPatternMissingIndices) {
           this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
