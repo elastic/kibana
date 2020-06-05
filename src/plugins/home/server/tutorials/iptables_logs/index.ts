@@ -37,7 +37,7 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.iptablesLogs.nameTitle', {
       defaultMessage: 'Iptables / Ubiquiti',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.iptablesLogs.shortDescription', {
       defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
     }),
@@ -56,9 +56,9 @@ number and the action performed on the traffic (allow/deny).. \
     artifacts: {
       dashboards: [],
       application: {
-        path: '/app/siem',
+        path: '/app/security',
         label: i18n.translate('home.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'SIEM App',
+          defaultMessage: 'Security App',
         }),
       },
       exportedFields: {
