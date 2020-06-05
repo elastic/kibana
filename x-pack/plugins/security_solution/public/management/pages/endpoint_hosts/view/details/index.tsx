@@ -18,7 +18,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useHostSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import {
@@ -35,9 +35,10 @@ import {
 } from '../../store/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
-import { useNavigateByRouterEventHandler } from '../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { getManagementUrl } from '../../../..';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -115,24 +116,32 @@ const PolicyResponseFlyoutPanel = memo<{
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const loading = useHostSelector(policyResponseLoading);
   const error = useHostSelector(policyResponseError);
-  const detailsUri = useMemo(
-    () =>
-      urlFromQueryParams({
+  const [detailsUri, detailsRoutePath] = useMemo(
+    () => [
+      getManagementUrl({
+        name: 'endpointList',
         ...queryParams,
         selected_host: hostMeta.host.id,
       }),
+      getManagementUrl({
+        name: 'endpointList',
+        excludePrefix: true,
+        ...queryParams,
+        selected_host: hostMeta.host.id,
+      }),
+    ],
     [hostMeta.host.id, queryParams]
   );
-  const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsUri);
+  const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsRoutePath);
   const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
     return {
       title: i18n.translate('xpack.securitySolution.endpoint.host.policyResponse.backLinkTitle', {
         defaultMessage: 'Endpoint Details',
       }),
-      href: `?${detailsUri.search}`,
+      href: detailsUri,
       onClick: backToDetailsClickHandler,
     };
-  }, [backToDetailsClickHandler, detailsUri.search]);
+  }, [backToDetailsClickHandler, detailsUri]);
 
   return (
     <>

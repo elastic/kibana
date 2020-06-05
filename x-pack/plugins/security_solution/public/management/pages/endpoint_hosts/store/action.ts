@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostResultList, HostInfo, GetHostPolicyResponse } from '../../../common/endpoint/types';
-import { ServerApiError } from '../../common/types';
+import {
+  HostResultList,
+  HostInfo,
+  GetHostPolicyResponse,
+} from '../../../../../common/endpoint/types';
+import { ServerApiError } from '../../../../common/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';

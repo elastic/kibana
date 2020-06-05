@@ -10,8 +10,8 @@ import {
   HostMetadata,
   HostPolicyResponse,
   AppLocation,
-} from '../../common/endpoint/types';
-import { ServerApiError } from '../common/types';
+} from '../../../../common/endpoint/types';
+import { ServerApiError } from '../../../common/types';
 
 export interface HostState {
   /** list of host **/
@@ -53,5 +53,5 @@ export interface HostIndexUIQueryParams {
   /** Which page to show */
   page_index?: string;
   /** show the policy response or host details */
-  show?: string;
+  show?: 'policy_response' | 'details';
 }
