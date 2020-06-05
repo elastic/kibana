@@ -11,7 +11,7 @@ import { StartServicesGetter } from '../../../../../src/plugins/kibana_utils/pub
 import { ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import { txtGoToDiscover } from './i18n';
 
 const isOutputWithIndexPatterns = (

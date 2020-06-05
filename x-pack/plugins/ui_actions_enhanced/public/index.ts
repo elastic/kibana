@@ -19,8 +19,8 @@ export {
 
 export { ActionWizard } from './components';
 export {
-  ActionFactoryDefinition as AdvancedUiActionsActionFactoryDefinition,
-  ActionFactory as AdvancedUiActionsActionFactory,
+  ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
+  ActionFactory as UiActionsEnhancedActionFactory,
   SerializedAction as UiActionsEnhancedSerializedAction,
   SerializedEvent as UiActionsEnhancedSerializedEvent,
   AbstractActionStorage as UiActionsEnhancedAbstractActionStorage,
