@@ -23,11 +23,14 @@ import { XJsonMode } from '../../../../../../../shared_imports';
 const xJsonMode = new XJsonMode();
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { CreateStep } from '../../../analytics_creation/components/create_step';
+import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
 
-export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
+  const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 
-  const { advancedEditorMessages, advancedEditorRawString, isJobCreated, requestMessages } = state;
+  const { advancedEditorMessages, advancedEditorRawString, isJobCreated } = state;
 
   const {
     createIndexPattern,
@@ -56,120 +59,105 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
-      {requestMessages.map((requestMessage, i) => (
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.analytics.create.advancedEditor.jobIdLabel', {
+          defaultMessage: 'Analytics job ID',
+        })}
+        isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+        error={[
+          ...(!jobIdEmpty && !jobIdValid
+            ? [
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdInvalidError',
+                  {
+                    defaultMessage:
+                      'Must contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores only and must start and end with alphanumeric characters.',
+                  }
+                ),
+              ]
+            : []),
+          ...(jobIdExists
+            ? [
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdExistsError',
+                  {
+                    defaultMessage: 'An analytics job with this ID already exists.',
+                  }
+                ),
+              ]
+            : []),
+        ]}
+      >
+        <EuiFieldText
+          inputRef={(input) => {
+            if (input) {
+              forceInput.current = input;
+            }
+          }}
+          disabled={isJobCreated}
+          placeholder="analytics job ID"
+          value={jobId}
+          onChange={(e) => setFormState({ jobId: e.target.value })}
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdInputAriaLabel',
+            {
+              defaultMessage: 'Choose a unique analytics job ID.',
+            }
+          )}
+          isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditor.configRequestBody',
+          {
+            defaultMessage: 'Configuration request body',
+          }
+        )}
+        style={{ maxWidth: '100%' }}
+      >
+        <EuiCodeEditor
+          isReadOnly={isJobCreated}
+          mode={xJsonMode}
+          width="100%"
+          value={advancedEditorRawString}
+          onChange={onChange}
+          setOptions={{
+            fontSize: '12px',
+            maxLines: 20,
+          }}
+          theme="textmate"
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
+            {
+              defaultMessage: 'Advanced analytics job editor',
+            }
+          )}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      {advancedEditorMessages.map((advancedEditorMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
-            title={requestMessage.message}
-            color={requestMessage.error !== undefined ? 'danger' : 'primary'}
-            iconType={requestMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
+            title={
+              advancedEditorMessage.message !== ''
+                ? advancedEditorMessage.message
+                : advancedEditorMessage.error
+            }
+            color={advancedEditorMessage.error !== undefined ? 'danger' : 'primary'}
+            iconType={advancedEditorMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
             size="s"
           >
-            {requestMessage.error !== undefined ? <p>{requestMessage.error}</p> : null}
+            {advancedEditorMessage.message !== '' && advancedEditorMessage.error !== undefined ? (
+              <p>{advancedEditorMessage.error}</p>
+            ) : null}
           </EuiCallOut>
-          <EuiSpacer size="s" />
+          <EuiSpacer />
         </Fragment>
       ))}
       {!isJobCreated && (
         <Fragment>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.advancedEditor.jobIdLabel', {
-              defaultMessage: 'Analytics job ID',
-            })}
-            isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
-            error={[
-              ...(!jobIdEmpty && !jobIdValid
-                ? [
-                    i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdInvalidError',
-                      {
-                        defaultMessage:
-                          'Must contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores only and must start and end with alphanumeric characters.',
-                      }
-                    ),
-                  ]
-                : []),
-              ...(jobIdExists
-                ? [
-                    i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdExistsError',
-                      {
-                        defaultMessage: 'An analytics job with this ID already exists.',
-                      }
-                    ),
-                  ]
-                : []),
-            ]}
-          >
-            <EuiFieldText
-              inputRef={(input) => {
-                if (input) {
-                  forceInput.current = input;
-                }
-              }}
-              disabled={isJobCreated}
-              placeholder="analytics job ID"
-              value={jobId}
-              onChange={(e) => setFormState({ jobId: e.target.value })}
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdInputAriaLabel',
-                {
-                  defaultMessage: 'Choose a unique analytics job ID.',
-                }
-              )}
-              isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.advancedEditor.configRequestBody',
-              {
-                defaultMessage: 'Configuration request body',
-              }
-            )}
-            style={{ maxWidth: '100%' }}
-          >
-            <EuiCodeEditor
-              mode={xJsonMode}
-              width="100%"
-              value={advancedEditorRawString}
-              onChange={onChange}
-              setOptions={{
-                fontSize: '12px',
-                maxLines: 20,
-              }}
-              theme="textmate"
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
-                {
-                  defaultMessage: 'Advanced analytics job editor',
-                }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer />
-          {advancedEditorMessages.map((advancedEditorMessage, i) => (
-            <Fragment key={i}>
-              <EuiCallOut
-                title={
-                  advancedEditorMessage.message !== ''
-                    ? advancedEditorMessage.message
-                    : advancedEditorMessage.error
-                }
-                color={advancedEditorMessage.error !== undefined ? 'danger' : 'primary'}
-                iconType={
-                  advancedEditorMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'
-                }
-                size="s"
-              >
-                {advancedEditorMessage.message !== '' &&
-                advancedEditorMessage.error !== undefined ? (
-                  <p>{advancedEditorMessage.error}</p>
-                ) : null}
-              </EuiCallOut>
-              <EuiSpacer />
-            </Fragment>
-          ))}
           <EuiFormRow
             isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
             error={
@@ -196,6 +184,8 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
           </EuiFormRow>
         </Fragment>
       )}
+      <EuiSpacer />
+      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} />
     </EuiForm>
   );
 };

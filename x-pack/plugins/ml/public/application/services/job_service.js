@@ -412,8 +412,7 @@ class JobService {
     // return the promise chain
     return ml
       .updateJob({ jobId, job })
-      .then((resp) => {
-        console.log('update job', resp);
+      .then(() => {
         return { success: true };
       })
       .catch((err) => {
@@ -423,7 +422,7 @@ class JobService {
             values: { jobId },
           })
         );
-        console.log('update job', err);
+        console.error('update job', err);
         return { success: false, message: err.message };
       });
   }

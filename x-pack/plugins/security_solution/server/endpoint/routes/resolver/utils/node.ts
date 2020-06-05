@@ -101,7 +101,10 @@ export function createTree(entityID: string): ResolverTree {
     },
     stats: {
       totalAlerts: 0,
-      totalEvents: 0,
+      events: {
+        total: 0,
+        byCategory: {},
+      },
     },
   };
 }
