@@ -12,7 +12,7 @@ import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/se
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { DOCUMENT_COUNT_I18N } from '../messages';
-import { getElasticsearchMetricQuery } from './get_elasticsearch_metric_query';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 interface Aggregation {
   aggregatedIntervals: {

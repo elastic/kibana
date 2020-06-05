@@ -27,15 +27,11 @@ import { i18n } from '@kbn/i18n';
 import {
   Comparator,
   Aggregators,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-import {
   INFRA_ALERT_PREVIEW_PATH,
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/routes/alerting/preview';
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../../../../common/alerting/metrics';
 import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
