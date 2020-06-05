@@ -563,7 +563,10 @@ export const Expressions: React.FC<Props> = (props) => {
               <EuiText>
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.previewIntervalTooShort"
-                  defaultMessage="Not enough data to preview. Please select a longer preview length."
+                  defaultMessage="Not enough data to preview. Please select a longer preview length, or increase the amount of time in the {checkEvery} field."
+                  values={{
+                    checkEvery: <strong>check every</strong>,
+                  }}
                 />
               </EuiText>
             </>
