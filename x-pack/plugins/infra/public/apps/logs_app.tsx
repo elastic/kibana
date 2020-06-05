@@ -17,7 +17,6 @@ import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import { ClientPluginDeps } from '../types';
 import { createApolloClient } from '../utils/apollo_client';
-import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 
@@ -57,9 +56,6 @@ const LogsApp: React.FC<{
         <Router history={history}>
           <Switch>
             <Route path="/link-to" component={LinkToLogsPage} />
-            {uiCapabilities?.logs?.show && (
-              <RedirectWithQueryParams from="/" exact={true} to="/stream" />
-            )}
             {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
             <Route component={NotFoundPage} />
           </Switch>
