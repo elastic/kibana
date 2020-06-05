@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { serializers } from '../../../shared_imports';
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
+import { TemplateDeserialized, CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../../common';
 import { TemplateSteps } from './template_steps';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
 import { StepProps, DataGetterFunc } from './types';
@@ -51,9 +51,9 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     name: '',
     indexPatterns: [],
     template: {},
-    isManaged: false,
     _kbnMeta: {
-      formatVersion: DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+      isManaged: false,
+      isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
     },
   },
   onSave,
@@ -246,7 +246,9 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     iconType="check"
                     onClick={onSave.bind(
                       null,
-                      stripEmptyFields(template.current!) as TemplateDeserialized
+                      stripEmptyFields(template.current!, {
+                        types: ['string'],
+                      }) as TemplateDeserialized
                     )}
                     data-test-subj="submitButton"
                     isLoading={isSaving}

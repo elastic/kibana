@@ -93,7 +93,7 @@ Some example translations are shown here:
 [horizontal]
 **Environment Variable**:: **Kibana Setting**
 `SERVER_NAME`:: `server.name`
-`KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
+`SERVER_BASEPATH`:: `server.basePath`
 `MONITORING_ENABLED`:: `monitoring.enabled`
 
 In general, any setting listed in <<settings>> can be
