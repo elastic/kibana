@@ -24,6 +24,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
 import {
   Comparator,
   Aggregators,
@@ -273,12 +275,22 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
+  const previewIntervalError = useMemo(() => {
+    const intervalInSeconds = getIntervalInSeconds(`${timeSize}${timeUnit}`);
+    const lookbackInSeconds = getIntervalInSeconds(`1${previewLookbackInterval}`);
+    if (intervalInSeconds >= lookbackInSeconds) {
+      return true;
+    }
+    return false;
+  }, [previewLookbackInterval, timeSize, timeUnit]);
+
   const isPreviewDisabled = useMemo(() => {
     const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
-    return Object.values(validationResult.errors).some((result) =>
+    const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
       Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
     );
-  }, [alertParams.criteria]);
+    return hasValidationErrors || previewIntervalError;
+  }, [alertParams.criteria, previewIntervalError]);
 
   return (
     <>
@@ -468,7 +480,7 @@ export const Expressions: React.FC<Props> = (props) => {
             </EuiFlexItem>
             <EuiSpacer size={'s'} />
           </EuiFlexGroup>
-          {previewResult && (
+          {previewResult && !previewResult.resultTotals.tooManyBuckets && (
             <>
               <EuiSpacer size={'s'} />
               <EuiText>
@@ -500,20 +512,58 @@ export const Expressions: React.FC<Props> = (props) => {
                   />
                 )}
               </EuiText>
-              {alertParams.alertOnNoData && previewResult.resultTotals.noData && (
+              {alertParams.alertOnNoData && previewResult.resultTotals.noData ? (
                 <>
                   <EuiSpacer size={'s'} />
                   <EuiText>
                     <FormattedMessage
                       id="xpack.infra.metrics.alertFlyout.alertPreviewNoDataResult"
-                      defaultMessage="There were {noData} results of no data."
+                      defaultMessage="There {were} {noData} result{plural} of no data."
                       values={{
+                        were: previewResult.resultTotals.noData !== 1 ? 'were' : 'was',
                         noData: <strong>{previewResult.resultTotals.noData}</strong>,
+                        plural: previewResult.resultTotals.noData !== 1 ? 's' : '',
                       }}
                     />
                   </EuiText>
                 </>
-              )}
+              ) : null}
+              {previewResult.resultTotals.error ? (
+                <>
+                  <EuiSpacer size={'s'} />
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.alertPreviewErrorResult"
+                      defaultMessage="An error occurred when trying to evaluate some of the data."
+                    />
+                  </EuiText>
+                </>
+              ) : null}
+            </>
+          )}
+          {previewResult && previewResult.resultTotals.tooManyBuckets ? (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.infra.metrics.alertFlyout.tooManyBucketsError"
+                  defaultMessage="Too much data to preview. Please select a shorter preview length, or increase the amount of time in the {checkEvery} field."
+                  values={{
+                    checkEvery: <strong>check every</strong>,
+                  }}
+                />
+              </EuiText>
+            </>
+          ) : null}
+          {previewIntervalError && (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.infra.metrics.alertFlyout.previewIntervalTooShort"
+                  defaultMessage="Not enough data to preview. Please select a longer preview length."
+                />
+              </EuiText>
             </>
           )}
           {previewError && (

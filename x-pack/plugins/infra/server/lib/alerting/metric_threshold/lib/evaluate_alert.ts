@@ -5,6 +5,7 @@
  */
 
 import { mapValues, first, last } from 'lodash';
+import { TOO_MANY_BUCKETS_PREVIEW_EXCEPTION } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/http_api/source_api';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
@@ -54,18 +55,22 @@ export const evaluateAlert = (
         );
         const { threshold, comparator } = criterion;
         const comparisonFunction = comparatorMap[comparator];
-        return mapValues(currentValues, (values: number[] | null | undefined) => {
-          return {
-            ...criterion,
-            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-            currentValue: Array.isArray(values) ? last(values) : NaN,
-            shouldFire: Array.isArray(values)
-              ? values.map((value) => comparisonFunction(value, threshold))
-              : [false],
-            isNoData: values === null,
-            isError: values === undefined,
-          };
-        });
+        return mapValues(
+          currentValues,
+          (values: number[] | null | undefined | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION) => {
+            return {
+              ...criterion,
+              metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+              currentValue: Array.isArray(values) ? last(values) : NaN,
+              shouldFire: Array.isArray(values)
+                ? values.map((value) => comparisonFunction(value, threshold))
+                : [false],
+              isNoData: values === null,
+              isError: values === undefined,
+              tooManyBuckets: values === TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
+            };
+          }
+        );
       })();
     })
   );
@@ -129,6 +134,13 @@ const getMetric: (
 
     return { '*': getValuesFromAggregations(result.aggregations, aggType) };
   } catch (e) {
+    if (timeframe) {
+      // This code should only ever be reached when previewing the alert, not executing it
+      const causedByType = e.body?.error?.caused_by?.type;
+      if (causedByType === 'too_many_buckets_exception') {
+        return { '*': TOO_MANY_BUCKETS_PREVIEW_EXCEPTION };
+      }
+    }
     return { '*': undefined }; // Trigger an Error state
   }
 };

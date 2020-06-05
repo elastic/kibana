@@ -5,6 +5,7 @@
  */
 
 import { first } from 'lodash';
+import { TOO_MANY_BUCKETS_PREVIEW_EXCEPTION } from '../../../../common/alerting/metrics';
 import { IScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -24,12 +25,9 @@ interface PreviewMetricThresholdAlertParams {
 
 export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams
-) => Promise<Array<number | null | undefined>> = async ({
-  callCluster,
-  params,
-  config,
-  lookback,
-}) => {
+) => Promise<
+  Array<number | null | undefined | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION>
+> = async ({ callCluster, params, config, lookback }) => {
   const interval = `1${lookback}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
 
@@ -41,6 +39,11 @@ export const previewMetricThresholdAlert: (
   const groups = Object.keys(first(alertResults));
 
   return groups.map((group) => {
+    const tooManyBuckets = alertResults.some((alertResult) => alertResult[group].tooManyBuckets);
+    if (tooManyBuckets) {
+      return TOO_MANY_BUCKETS_PREVIEW_EXCEPTION;
+    }
+
     const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
     if (isNoData) {
       return null;

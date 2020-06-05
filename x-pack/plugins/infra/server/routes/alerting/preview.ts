@@ -8,6 +8,7 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   INFRA_ALERT_PREVIEW_PATH,
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
   MetricThresholdAlertRequestParams,
@@ -52,6 +53,8 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             const numberOfGroups = previewResult.length;
             const resultTotals = previewResult.reduce(
               (totals, groupResult) => {
+                if (groupResult === TOO_MANY_BUCKETS_PREVIEW_EXCEPTION)
+                  return { ...totals, tooManyBuckets: totals.tooManyBuckets + 1 };
                 if (groupResult === null) return { ...totals, noData: totals.noData + 1 };
                 if (groupResult === undefined) return { ...totals, error: totals.error + 1 };
                 return { ...totals, fired: totals.fired + groupResult };
@@ -60,6 +63,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
                 fired: 0,
                 noData: 0,
                 error: 0,
+                tooManyBuckets: 0,
               }
             );
 
