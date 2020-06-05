@@ -298,6 +298,7 @@ export class EndpointDocGenerator {
    * @param options - Allows event field values to be specified
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
+    const processName = options.processName ? options.processName : randomProcessName();
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
@@ -312,10 +313,21 @@ export class EndpointDocGenerator {
       },
       host: this.commonInfo.host,
       process: {
+        pid: this.randomN(5000),
+        executable: `C:\\${processName}`,
+        code_signature: {
+          status: 'trusted',
+          subject_name: 'Microsoft',
+        },
+        hash: { md5: this.seededUUIDv4()},
         entity_id: options.entityID ? options.entityID : this.randomString(10),
-        parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : randomProcessName(),
+        parent: options.parentEntityID ? { entity_id: options.parentEntityID, pid: this.randomN(5000) } : undefined,
+        name: processName,
       },
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      }
     };
   }
 

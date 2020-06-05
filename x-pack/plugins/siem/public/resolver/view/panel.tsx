@@ -24,7 +24,7 @@ import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { displayNameRecord } from './process_event_dot';
-import { uniquePidForProcess, uniqueParentPidForProcess } from '../models/process_event';
+import { hostPidForProcess, hostParentPidForProcess, hostPathForProcess, userInfoForProcess } from '../models/process_event';
 import { EuiDescriptionList } from '@elastic/eui';
 
 const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
@@ -155,16 +155,28 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
   );
 
   return (
+    <>
+    <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
+            defaultMessage: 'Events',
+          })}
+        </h4>
+      </EuiTitle>
+      <HorizontalRule />
     <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
+  </>
   )
 });
 
 const ProcessDetails = memo(function ProcessListWithCounts() {
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
+  const [processEvent] = useMemo(()=>{
+    return [...processNodePositions.keys()].filter(processEvent=>event.entityId(processEvent)===selectedDescendantProcessId);  
+  },[]);
+  const processName = processEvent && event.eventName(processEvent);
   const processInfoEntry = useMemo(() =>{
-    const [processEvent] = [...processNodePositions.keys()].filter(processEvent=>event.entityId(processEvent)===selectedDescendantProcessId);
-    
     let dateTime = '';
     const eventTime = processEvent && event.eventTimestamp(processEvent);
     if (eventTime) {
@@ -175,17 +187,46 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
     }
 
     const processInfo = processEvent ? {
-      Created: dateTime,
-      PID: uniquePidForProcess(processEvent),
-      name: event.eventName(processEvent),
-      PPID: uniqueParentPidForProcess(processEvent),
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.created', {
+        defaultMessage: 'Created',
+      })]: dateTime,
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.path', {
+        defaultMessage: 'Path',
+      })]: hostPathForProcess(processEvent),
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.pid', {
+        defaultMessage: 'PID',
+      })]: hostPidForProcess(processEvent),
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.name', {
+        defaultMessage: 'Name',
+      })]: processName,
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.parentPid', {
+        defaultMessage: 'Parent PID',
+      })]: hostParentPidForProcess(processEvent),
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.user', {
+        defaultMessage: 'User',
+      })]: (userInfoForProcess(processEvent) as {name: string, domain: string}).name,
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.domain', {
+        defaultMessage: 'Domain',
+      })]: (userInfoForProcess(processEvent) as {name: string, domain: string}).name,
     } : {};
 
-    return Object.entries(processInfo).map(([title,description])=>{ return {title, description: String(description)} });
-  }, [processNodePositions,selectedDescendantProcessId]);
+    return Object.entries(processInfo)
+      .filter(([,description])=>{ return description })
+      .map(([title,description])=>{ 
+        return {title, description: String(description)}
+      });
+  }, [processNodePositions,selectedDescendantProcessId,processEvent]);
   console.log(processInfoEntry);
   return (
+    <>
+    <EuiTitle size="xs">
+        <h4>
+          {processName}
+        </h4>
+    </EuiTitle>
+    <HorizontalRule />
     <EuiDescriptionList type="responsiveColumn" listItems={processInfoEntry} />
+    </>
   )
 });
 
@@ -295,14 +336,6 @@ const HorizontalRule = memo(function HorizontalRule() {
 export const Panel = memo(function Event({ className }: { className?: string }) {
   return (
     <EuiPanel className={className}>
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
-            defaultMessage: 'Events',
-          })}
-        </h4>
-      </EuiTitle>
-      <HorizontalRule />
       <PanelContent />
     </EuiPanel>
   );
