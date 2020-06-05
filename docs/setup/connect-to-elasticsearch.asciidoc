@@ -21,10 +21,7 @@ to see all that you can do in {kib}.
 To visualize data in a CSV, JSON, or log file, you can
 upload it using the File Data Visualizer.  On the home page,
 click *Import a CSV, NDSON, or log file*, and then drag your file into the
-File Data Visualizer.
-
-You can upload a file up to 100 MB.  This value is configurable up to 1 GB in
-<<kibana-ml-settings, Advanced Settings>>.
+File Data Visualizer. You can upload a file up to 100 MB.
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
