@@ -62,6 +62,7 @@ describe.skip('<TemplateEdit />', () => {
     const templateToEdit = fixtures.getTemplate({
       name: 'index_template_without_mappings',
       indexPatterns: ['indexPattern1'],
+      isLegacy: true,
     });
 
     beforeEach(async () => {
@@ -102,6 +103,7 @@ describe.skip('<TemplateEdit />', () => {
       template: {
         mappings: MAPPING,
       },
+      isLegacy: true,
     });
 
     beforeEach(async () => {
@@ -206,9 +208,9 @@ describe.skip('<TemplateEdit />', () => {
             settings: SETTINGS,
             aliases: ALIASES,
           },
-          isManaged: false,
           _kbnMeta: {
-            formatVersion: templateToEdit._kbnMeta.formatVersion,
+            isManaged: false,
+            isLegacy: templateToEdit._kbnMeta.isLegacy,
           },
         };
 
