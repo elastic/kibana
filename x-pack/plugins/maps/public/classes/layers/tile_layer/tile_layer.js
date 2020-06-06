@@ -69,15 +69,15 @@ export class TileLayer extends AbstractLayer {
         return;
       }
 
-      const tmsData = sourceDataRequest.getData();
-      if (!tmsData || !tmsData.url) {
+      const tmsSourceData = sourceDataRequest.getData();
+      if (!tmsSourceData || !tmsSourceData.url) {
         return;
       }
 
       const sourceId = this.getId();
       mbMap.addSource(sourceId, {
         type: 'raster',
-        tiles: [tmsData.url],
+        tiles: [tmsSourceData.url],
         tileSize: 256,
         scheme: 'xyz',
       });
