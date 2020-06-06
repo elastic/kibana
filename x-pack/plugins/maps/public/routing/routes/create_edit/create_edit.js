@@ -241,7 +241,7 @@ export const MapsCreateEditView = class extends React.Component {
     return await savedObjectLoader.get(savedObjectId);
   }
 
-  initFilters(savedMap) {
+  initQueryTimeRefresh(savedMap) {
     const { setRefreshConfig } = this.props;
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
@@ -265,7 +265,7 @@ export const MapsCreateEditView = class extends React.Component {
   initMapAndLayerSettings(savedMap) {
     // Get saved map & layer settings
     let layerList;
-    this.initFilters(savedMap);
+    this.initQueryTimeRefresh(savedMap);
     if (savedMap.layerListJSON) {
       layerList = JSON.parse(savedMap.layerListJSON);
     } else {
@@ -368,6 +368,7 @@ export const MapsCreateEditView = class extends React.Component {
         ...savedObjectFilters,
       ],
     });
+    this.setState({ initialized: true });
   }
 
   _renderTopNav() {
@@ -383,8 +384,7 @@ export const MapsCreateEditView = class extends React.Component {
       currentPath,
     } = this.state;
 
-    const initialized = !!query && !!time && !!refreshConfig;
-    return initialized ? (
+    return (
       <MapsTopNavMenu
         savedMap={savedMap}
         query={query}
@@ -417,17 +417,18 @@ export const MapsCreateEditView = class extends React.Component {
         syncAppAndGlobalState={this.syncAppAndGlobalState}
         currentPath={currentPath}
       />
-    ) : null;
+    );
   }
 
   render() {
-    const { isFullScreen, filters } = this.state;
-    return (
+    const { isFullScreen, filters, initialized } = this.state;
+
+    return initialized ? (
       <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <MapsRoot filters={filters} />
       </div>
-    );
+    ) : null;
   }
 };
