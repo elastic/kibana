@@ -5,12 +5,13 @@
  */
 import { i18n } from '@kbn/i18n';
 
-interface ISection {
+export interface ISection {
   id: string;
   title: string;
   icon: string;
   description: string;
   href?: string;
+  linkTitle?: string;
   target?: '_blank';
 }
 
@@ -25,6 +26,10 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'The Elastic Stack (sometimes known as the ELK Stack) is the most popular open source logging platform.',
     }),
+    linkTitle: i18n.translate('xpack.observability.section.apps.logs.link', {
+      defaultMessage: 'Install Filebeat',
+    }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'apm',
@@ -36,6 +41,10 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'See exactly where your application is spending time so you can quickly fix issues and feel good about the code you push.',
     }),
+    linkTitle: i18n.translate('xpack.observability.section.apps.apm.link', {
+      defaultMessage: 'Install agent',
+    }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'metrics',
@@ -47,6 +56,10 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'Already using the Elastic Stack for logs? Add metrics in just a few steps and correlate metrics and logs in one place.',
     }),
+    linkTitle: i18n.translate('xpack.observability.section.apps.metrics.link', {
+      defaultMessage: 'Install metrics module',
+    }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'uptime',
@@ -58,7 +71,22 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'React to availability issues across your apps and services before they affect users.',
     }),
+    linkTitle: i18n.translate('xpack.observability.section.apps.uptime.link', {
+      defaultMessage: 'Install Heartbeat',
+    }),
+    href: 'https://www.elastic.co',
   },
+  // {
+  //   id: 'alert',
+  //   title: i18n.translate('xpack.observability.section.apps.alert.title', {
+  //     defaultMessage: 'Alert',
+  //   }),
+  //   icon: 'watchesApp',
+  //   description: i18n.translate('xpack.observability.section.apps.alert.description', {
+  //     defaultMessage:
+  //       '503 errors stacking up. Applications not responding. CPU and RAM utilization jumping. See these warnings as they happen - not as part of the post-mortem.',
+  //   }),
+  // },
 ];
 
 export const tryItOutItemsSection: ISection[] = [

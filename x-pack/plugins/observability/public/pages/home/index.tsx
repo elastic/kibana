@@ -63,6 +63,8 @@ export const Home = () => {
     ]);
   }, [core]);
 
+  const apps = appsSection.filter((app) => app.id !== 'alert');
+
   return (
     <Container>
       <Title>
@@ -112,7 +114,7 @@ export const Home = () => {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFlexGrid columns={2}>
-                  {appsSection.map((app) => (
+                  {apps.map((app) => (
                     <EuiFlexItem>
                       <EuiCardWithoutPadding
                         display="plain"

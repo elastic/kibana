@@ -13,7 +13,7 @@ export const plugin: PluginInitializer<ClientSetup, ClientStart> = (
   return new Plugin(context);
 };
 
-export * from './components/action_menu';
+export * from './components/action_menu/';
 
 export {
   useTrackPageview,
