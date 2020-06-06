@@ -26,45 +26,9 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   HapiReadableStream,
 } from '../../rules/types';
-import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { RuleAlertParamsRest } from '../../types';
 import { requestMock } from './request';
 import { RuleNotificationAlertType } from '../../notifications/types';
-
-export const mockPrepackagedRule = (): PrepackagedRules => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  output_index: '.siem-signals',
-  risk_score: 50,
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  threat: [
-    {
-      framework: 'fake',
-      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
-    },
-  ],
-  throttle: null,
-  enabled: true,
-  filters: [],
-  immutable: false,
-  references: [],
-  meta: {},
-  tags: [],
-  version: 1,
-  false_positives: [],
-  max_signals: 100,
-  note: '',
-  timeline_id: 'timeline-id',
-  timeline_title: 'timeline-title',
-});
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',

@@ -135,18 +135,6 @@ export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & 
   immutable: boolean;
 };
 
-export type PrepackagedRules = Omit<
-  RuleAlertParamsRest,
-  | 'status'
-  | 'status_date'
-  | 'last_failure_at'
-  | 'last_success_at'
-  | 'last_failure_message'
-  | 'last_success_message'
-  | 'updated_at'
-  | 'created_at'
-> & { rule_id: string; immutable: boolean };
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CallWithRequest<T extends Record<string, any>, V> = (
   endpoint: string,

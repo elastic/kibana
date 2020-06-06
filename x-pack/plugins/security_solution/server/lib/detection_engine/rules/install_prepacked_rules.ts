@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { Alert } from '../../../../../alerts/common';
 import { AlertsClient } from '../../../../../alerts/server';
 import { createRules } from './create_rules';
-import { PrepackagedRules } from '../types';
+import { PartialFilter } from '../types';
 
 export const installPrepackagedRules = (
   alertsClient: AlertsClient,
-  rules: PrepackagedRules[],
+  rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
 ): Array<Promise<Alert>> =>
   rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
@@ -21,7 +22,6 @@ export const installPrepackagedRules = (
       enabled,
       false_positives: falsePositives,
       from,
-      immutable,
       query,
       language,
       machine_learning_job_id: machineLearningJobId,
@@ -29,7 +29,7 @@ export const installPrepackagedRules = (
       timeline_id: timelineId,
       timeline_title: timelineTitle,
       meta,
-      filters,
+      filters: filtersObject,
       rule_id: ruleId,
       index,
       interval,
@@ -46,6 +46,9 @@ export const installPrepackagedRules = (
       version,
       exceptions_list: exceptionsList,
     } = rule;
+    // TODO: Fix these either with an is conversion or by better typing them within io-ts
+    const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];
+
     return [
       ...acc,
       createRules({
@@ -55,7 +58,7 @@ export const installPrepackagedRules = (
         enabled,
         falsePositives,
         from,
-        immutable,
+        immutable: true, // At the moment we force all prepackaged rules to be immutable
         query,
         language,
         machineLearningJobId,

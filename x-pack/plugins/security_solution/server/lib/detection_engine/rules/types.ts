@@ -74,11 +74,6 @@ export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   rule_id: RuleAlertParams['ruleId'] | undefined;
 };
 
-export type UpdateRuleAlertParamsRest = RuleAlertParamsRest & {
-  id: string | undefined;
-  rule_id: RuleAlertParams['ruleId'] | undefined;
-};
-
 export interface FindParamsRest {
   per_page: number;
   page: number;
