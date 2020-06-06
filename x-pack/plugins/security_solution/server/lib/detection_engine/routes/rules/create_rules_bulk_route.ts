@@ -126,7 +126,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
               if (ruleId != null) {
-                const rule = await readRules({ alertsClient, ruleId });
+                const rule = await readRules({ alertsClient, ruleId, id: undefined });
                 if (rule != null) {
                   return createBulkErrorObject({
                     ruleId,

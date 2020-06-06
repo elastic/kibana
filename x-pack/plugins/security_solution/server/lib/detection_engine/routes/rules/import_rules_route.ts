@@ -157,7 +157,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                 try {
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  const rule = await readRules({ alertsClient, ruleId });
+                  const rule = await readRules({ alertsClient, ruleId, id: undefined });
                   if (rule == null) {
                     await createRules({
                       alertsClient,

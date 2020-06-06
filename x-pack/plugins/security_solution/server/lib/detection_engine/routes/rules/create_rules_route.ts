@@ -110,7 +110,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           });
         }
         if (ruleId != null) {
-          const rule = await readRules({ alertsClient, ruleId });
+          const rule = await readRules({ alertsClient, ruleId, id: undefined });
           if (rule != null) {
             return siemResponse.error({
               statusCode: 409,

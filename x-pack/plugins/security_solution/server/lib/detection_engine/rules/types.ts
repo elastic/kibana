@@ -67,12 +67,7 @@ import {
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest, PartialFilter } from '../types';
-
-export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
-  id: string | undefined;
-  rule_id: RuleAlertParams['ruleId'] | undefined;
-};
+import { RuleAlertParams, RuleTypeParams, PartialFilter } from '../types';
 
 export interface FindParamsRest {
   per_page: number;
@@ -149,15 +144,6 @@ export interface ExportRulesRequestParams {
   };
 }
 
-export interface RuleRequestParams {
-  id: string | undefined;
-  rule_id: string | undefined;
-}
-
-export type ReadRuleRequestParams = RuleRequestParams;
-export type DeleteRuleRequestParams = RuleRequestParams;
-export type DeleteRulesRequestParams = RuleRequestParams[];
-
 export interface FindRuleParams {
   alertsClient: AlertsClient;
   perPage?: number;
@@ -186,22 +172,11 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-// TODO: Try and remove them
+// TODO: Try and remove this patch
 export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle'>> & {
   rule: SanitizedAlert | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
-
-export type DeleteRuleParams = Clients & {
-  id: string | undefined;
-  ruleId: string | undefined | null;
-};
-
-export interface ReadRuleParams {
-  alertsClient: AlertsClient;
-  id?: string | undefined | null;
-  ruleId?: string | undefined | null;
-}
 
 export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
   return partialAlert.every((rule) => isAlertType(rule));
@@ -333,4 +308,16 @@ export interface PatchRulesOptions {
   exceptionsList: ListAndOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert | null;
+}
+
+export interface ReadRuleOptions {
+  alertsClient: AlertsClient;
+  id: IdOrUndefined;
+  ruleId: RuleIdOrUndefined;
+}
+
+export interface DeleteRuleOptions {
+  alertsClient: AlertsClient;
+  id: IdOrUndefined;
+  ruleId: RuleIdOrUndefined;
 }

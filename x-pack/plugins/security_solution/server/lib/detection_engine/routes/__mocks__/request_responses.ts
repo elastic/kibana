@@ -134,14 +134,14 @@ export const getDeleteBulkRequestById = () =>
   requestMock.create({
     method: 'delete',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequestById = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequest = () =>

@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { rule_id, id } from './schemas';
+import { rule_id, id } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const queryRulesSchema = Joi.object({
-  rule_id,
-  id,
-}).xor('id', 'rule_id');
+export const queryRulesSchema = t.exact(
+  t.partial({
+    rule_id,
+    id,
+  })
+);
+
+export type QueryRulesSchema = t.TypeOf<typeof queryRulesSchema>;
+export type QueryRulesSchemaDecoded = QueryRulesSchema;
