@@ -35,7 +35,7 @@ describe('NewTemplateTimeline', () => {
         services: {
           application: {
             capabilities: {
-              siem: {
+              securitySolution: {
                 crud: true,
               },
             },
@@ -76,7 +76,7 @@ describe('NewTemplateTimeline', () => {
         services: {
           application: {
             capabilities: {
-              siem: {
+              securitySolution: {
                 crud: false,
               },
             },

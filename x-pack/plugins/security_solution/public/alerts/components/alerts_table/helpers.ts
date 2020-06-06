@@ -159,6 +159,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
         dataProvider.queryMatch.displayValue = undefined;
       }
     }
+    dataProvider.type = dataProvider.type ?? DataProviderType.default;
     return dataProvider;
   }
 
@@ -179,10 +180,15 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
       dataProvider.queryMatch.displayField = undefined;
       dataProvider.queryMatch.displayValue = undefined;
       dataProvider.type = DataProviderType.default;
+
+      return dataProvider;
     }
+
+    dataProvider.type = dataProvider.type ?? DataProviderType.default;
 
     return dataProvider;
   }
+
   return dataProvider;
 };
 

@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled, { css } from 'styled-components';
 
-import { AndOrBadge, AddFieldBadge } from '../and_or_badge';
+import { AndOrBadge, AddFieldBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
