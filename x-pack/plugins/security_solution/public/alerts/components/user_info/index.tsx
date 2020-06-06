@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useEffect, useReducer, Dispatch, createContext, useContext } from 'react';
 
 import { usePrivilegeUser } from '../../containers/detection_engine/alerts/use_privilege_user';
@@ -119,10 +119,7 @@ export const userInfoReducer = (state: State, action: Action): State => {
   }
 };
 
-const StateUserInfoContext = createContext<[State, Dispatch<Action>]>([
-  initialState,
-  () => fp.noop,
-]);
+const StateUserInfoContext = createContext<[State, Dispatch<Action>]>([initialState, () => noop]);
 
 const useUserData = () => useContext(StateUserInfoContext);
 
