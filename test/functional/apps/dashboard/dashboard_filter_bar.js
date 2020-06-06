@@ -217,6 +217,11 @@ export default function ({ getService, getPageObjects }) {
         const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
         expect(hasWarningFieldFilter).to.be(true);
       });
+
+      it('filter without an index pattern is rendred as a warning, if the dashboard has an index pattern', async function () {
+        const noIndexPatternFilter = await filterBar.hasFilter('banana', 'warn', true);
+        expect(noIndexPatternFilter).to.be(true);
+      });
     });
   });
 }
