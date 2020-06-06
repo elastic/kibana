@@ -9,16 +9,25 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     async openFlyout(alertType: 'monitorStatus' | 'tls') {
-      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
-      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
-      if (alertType === 'monitorStatus') {
-        await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
-      } else if (alertType === 'tls') {
-        await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
-      }
+      await retry.try(
+        async () => {
+          await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
+          await testSubjects.click('xpack.uptime.openAlertContextPanel');
+          if (alertType === 'monitorStatus') {
+            await testSubjects.existOrFail('xpack.uptime.toggleAlertFlyout');
+            await testSubjects.click('xpack.uptime.toggleAlertFlyout');
+          } else if (alertType === 'tls') {
+            await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
+          }
+        },
+        async () => {
+          await browser.refresh();
+        }
+      );
     },
     async openMonitorStatusAlertType(alertType: string) {
       return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);

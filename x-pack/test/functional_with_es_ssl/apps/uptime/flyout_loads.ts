@@ -8,25 +8,29 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('uptime alert flyout', () => {
-    const pageObjects = getPageObjects(['common', 'uptime']);
     const uptimeService = getService('uptime');
     const browserService = getService('browser');
+    const retry = getService('retry');
 
-    afterEach(async () => browserService.refresh());
+    afterEach(async () => await browserService.refresh());
 
     it('can open status flyout', async () => {
-      await pageObjects.uptime.goToUptimeOverview();
-      await uptimeService.alerts.openFlyout('monitorStatus');
-      await uptimeService.alerts.assertMonitorStatusFlyoutSearchBarExists();
+      await retry.tryForTime(15000, async () => {
+        await uptimeService.navigation.goToUptime();
+        await uptimeService.alerts.openFlyout('monitorStatus');
+        await uptimeService.alerts.assertMonitorStatusFlyoutSearchBarExists();
+      });
     });
 
     it('can open tls flyout', async () => {
-      await pageObjects.uptime.goToUptimeOverview();
-      await uptimeService.alerts.openFlyout('tls');
-      await Promise.all([
-        uptimeService.alerts.assertTlsFieldExists('expiration'),
-        uptimeService.alerts.assertTlsFieldExists('age'),
-      ]);
+      await retry.tryForTime(15000, async () => {
+        await uptimeService.navigation.goToUptime();
+        await uptimeService.alerts.openFlyout('tls');
+        await Promise.all([
+          uptimeService.alerts.assertTlsFieldExists('expiration'),
+          uptimeService.alerts.assertTlsFieldExists('age'),
+        ]);
+      });
     });
   });
 };
