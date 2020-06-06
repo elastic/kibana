@@ -34,7 +34,7 @@ export class TileLayer extends AbstractLayer {
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
     try {
       const url = await this.getSource().getUrlTemplate();
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, url, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, { url }, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
@@ -68,15 +68,16 @@ export class TileLayer extends AbstractLayer {
         //when turning the layer back into visible, it's possible the url has not been resovled yet.
         return;
       }
-      const url = sourceDataRequest.getData();
-      if (!url) {
+
+      const tmsData = sourceDataRequest.getData();
+      if (!tmsData || !tmsData.url) {
         return;
       }
 
       const sourceId = this.getId();
       mbMap.addSource(sourceId, {
         type: 'raster',
-        tiles: [url],
+        tiles: [tmsData.url],
         tileSize: 256,
         scheme: 'xyz',
       });
