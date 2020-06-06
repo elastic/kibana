@@ -32,21 +32,22 @@ const env = {
   NODE_ENV: 'integration_test',
   COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
 };
-const verboseArgs = [
-  'scripts/ingest_coverage.js',
-  '--verbose',
-  '--vcsInfoPath',
-  'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-  '--path',
-];
 
 describe('Ingesting coverage', () => {
+  const verboseArgs = [
+    'scripts/ingest_coverage.js',
+    '--verbose',
+    '--vcsInfoPath',
+    'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+    '--path',
+  ];
+
   const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
   const resolved = resolve(MOCKS_DIR, summaryPath);
 
   describe(`staticSiteUrl`, () => {
     let actualUrl = '';
-    const siteUrlRegex = /"staticSiteUrl": (".+",)/;
+    const siteUrlRegex = /staticSiteUrl:\s*(.+,)/;
 
     beforeAll(async () => {
       const opts = [...verboseArgs, resolved];
@@ -89,6 +90,42 @@ describe('Ingesting coverage', () => {
         const commitMsgRE = /"commitMsg"/;
         expect(commitMsgRE.test(vcsInfo)).to.not.be.ok();
       });
+    });
+  });
+  describe(`team assignment`, () => {
+    let shouldNotHavePipelineOut = '';
+    let shouldIndeedHavePipelineOut = '';
+
+    const args = [
+      'scripts/ingest_coverage.js',
+      '--verbose',
+      '--vcsInfoPath',
+      'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+      '--path',
+    ];
+
+    const teamAssignRE = /pipeline:/;
+
+    beforeAll(async () => {
+      const summaryPath = 'jest-combined/coverage-summary-just-total.json';
+      const resolved = resolve(MOCKS_DIR, summaryPath);
+      const opts = [...args, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      shouldNotHavePipelineOut = stdout;
+    });
+    beforeAll(async () => {
+      const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
+      const resolved = resolve(MOCKS_DIR, summaryPath);
+      const opts = [...args, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      shouldIndeedHavePipelineOut = stdout;
+    });
+
+    it(`should not occur when going to the totals index`, () => {
+      expect(teamAssignRE.test(shouldNotHavePipelineOut)).to.not.be.ok();
+    });
+    it(`should indeed occur when going to the coverage index`, () => {
+      expect(teamAssignRE.test(shouldIndeedHavePipelineOut)).to.be.ok();
     });
   });
 });

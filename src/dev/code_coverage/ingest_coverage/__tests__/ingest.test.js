@@ -18,19 +18,19 @@
  */
 
 import expect from '@kbn/expect';
-import { request } from '../ingest';
+import { maybeTeamAssign } from '../ingest';
 import { COVERAGE_INDEX, TOTALS_INDEX } from '../constants';
 
 describe(`Ingest fns`, () => {
-  describe(`request fn`, () => {
+  describe(`maybeTeamAssign fn`, () => {
     describe(`against the coverage index`, () => {
       it(`should have the pipeline prop`, () => {
-        expect(request(COVERAGE_INDEX, {})).to.have.property('pipeline');
+        expect(maybeTeamAssign(COVERAGE_INDEX, {})).to.have.property('pipeline');
       });
     });
     describe(`against the totals index`, () => {
       it(`should not have the pipeline prop`, () => {
-        expect(request(TOTALS_INDEX, {})).not.to.have.property('pipeline');
+        expect(maybeTeamAssign(TOTALS_INDEX, {})).not.to.have.property('pipeline');
       });
     });
   });

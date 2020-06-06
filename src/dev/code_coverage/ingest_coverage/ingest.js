@@ -17,38 +17,42 @@
  * under the License.
  */
 
-import { pretty } from './utils';
-
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
 import { errMsg, redact } from './ingest_helpers';
+import { noop } from './utils';
+import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
-const redacted = redact(node);
 const client = new Client({ node });
 const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
+const redacted = redact(node);
 
 export const ingest = (log) => async (body) => {
   const index = body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
-  const sendIndex = send(index);
+  const maybeWithPipeline = maybeTeamAssign(index, body);
+  const withIndex = { index, body: maybeWithPipeline };
+  const dontSend = noop;
+
+  log.verbose(withIndex);
 
   process.env.NODE_ENV === 'integration_test'
-    ? log.verbose(pretty(body))
-    : await sendIndex(log, body);
+    ? left(null)
+    : right(withIndex).fold(dontSend, async function doSend(finalPayload) {
+        await send(index, redacted, finalPayload);
+      });
 };
 
-function send(index) {
-  return async (log, body) => {
-    try {
-      await client.index(request(index, body));
-      log.verbose(pretty(body));
-    } catch (e) {
-      throw createFailError(errMsg(index, redacted, body, e));
-    }
-  };
+async function send(idx, redacted, requestBody) {
+  try {
+    await client.index(requestBody);
+  } catch (e) {
+    throw createFailError(errMsg(idx, redacted, requestBody, e));
+  }
 }
 
-export function request(index, body) {
-  return index === TOTALS_INDEX ? body : { ...body, pipeline };
+export function maybeTeamAssign(index, body) {
+  const payload = index === TOTALS_INDEX ? body : { ...body, pipeline };
+  return payload;
 }
