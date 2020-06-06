@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
+  deserializeLegacyTemplateList,
   deserializeTemplateList,
-  deserializeV1Template,
-  serializeV1Template,
+  deserializeLegacyTemplate,
+  serializeLegacyTemplate,
 } from './template_serialization';
 
 export { getTemplateParameter } from './utils';

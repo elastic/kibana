@@ -14,7 +14,7 @@ import { WithAppDependencies, services, TestSubjects } from '../helpers';
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`/indices?includeHidden=true`],
+    initialEntries: [`/indices?includeHiddenIndices=true`],
     componentRoutePath: `/:section(indices|templates)`,
   },
   doMountAsync: true,

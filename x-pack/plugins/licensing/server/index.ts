@@ -10,6 +10,7 @@ import { LicensingPlugin } from './plugin';
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
 
 export * from '../common/types';
+export { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 export * from './types';
 export { config } from './licensing_config';
 export { CheckLicense, wrapRouteWithLicenseCheck } from './wrap_route_with_license_check';
