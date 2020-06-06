@@ -436,6 +436,8 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
+  TimefilterSetup,
+  TimeRangeBounds,
 } from './query';
 
 export {
