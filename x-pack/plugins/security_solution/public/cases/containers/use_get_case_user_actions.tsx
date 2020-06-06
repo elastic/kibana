@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as fp from 'lodash/fp';
+import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
@@ -173,11 +173,11 @@ export const useGetCaseUserActions = (
             // Attention Future developer
             // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
-            const participants = !fp.isEmpty(response)
-              ? fp.uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
+            const participants = !isEmpty(response)
+              ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
               : [];
 
-            const caseUserActions = !fp.isEmpty(response) ? response.slice(1) : [];
+            const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
             setCaseUserActionsState({
               caseUserActions,
               ...getPushedInfo(caseUserActions, caseConnectorId),
@@ -215,7 +215,7 @@ export const useGetCaseUserActions = (
   );
 
   useEffect(() => {
-    if (!fp.isEmpty(caseId)) {
+    if (!isEmpty(caseId)) {
       fetchCaseUserActions(caseId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
