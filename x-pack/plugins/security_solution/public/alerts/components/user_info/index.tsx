@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import * as fp from 'lodash/fp';
 import React, { useEffect, useReducer, Dispatch, createContext, useContext } from 'react';
 
 import { usePrivilegeUser } from '../../containers/detection_engine/alerts/use_privilege_user';
@@ -119,7 +119,10 @@ export const userInfoReducer = (state: State, action: Action): State => {
   }
 };
 
-const StateUserInfoContext = createContext<[State, Dispatch<Action>]>([initialState, () => noop]);
+const StateUserInfoContext = createContext<[State, Dispatch<Action>]>([
+  initialState,
+  () => fp.noop,
+]);
 
 const useUserData = () => useContext(StateUserInfoContext);
 
@@ -171,18 +174,21 @@ export const useUserInfo = (): State => {
     if (loading !== privilegeLoading || indexNameLoading) {
       dispatch({ type: 'updateLoading', loading: privilegeLoading || indexNameLoading });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, privilegeLoading, indexNameLoading]);
 
   useEffect(() => {
     if (!loading && hasIndexManage !== hasApiIndexManage && hasApiIndexManage != null) {
       dispatch({ type: 'updateHasIndexManage', hasIndexManage: hasApiIndexManage });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, hasIndexManage, hasApiIndexManage]);
 
   useEffect(() => {
     if (!loading && hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, hasIndexWrite, hasApiIndexWrite]);
 
   useEffect(() => {
@@ -193,30 +199,35 @@ export const useUserInfo = (): State => {
     ) {
       dispatch({ type: 'updateIsSignalIndexExists', isSignalIndexExists: isApiSignalIndexExists });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, isSignalIndexExists, isApiSignalIndexExists]);
 
   useEffect(() => {
     if (!loading && isAuthenticated !== isApiAuthenticated && isApiAuthenticated != null) {
       dispatch({ type: 'updateIsAuthenticated', isAuthenticated: isApiAuthenticated });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, isAuthenticated, isApiAuthenticated]);
 
   useEffect(() => {
     if (!loading && hasEncryptionKey !== isApiEncryptionKey && isApiEncryptionKey != null) {
       dispatch({ type: 'updateHasEncryptionKey', hasEncryptionKey: isApiEncryptionKey });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, hasEncryptionKey, isApiEncryptionKey]);
 
   useEffect(() => {
     if (!loading && canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
       dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, canUserCRUD, capabilitiesCanUserCRUD]);
 
   useEffect(() => {
     if (!loading && signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
       dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, signalIndexName, apiSignalIndexName]);
 
   useEffect(() => {

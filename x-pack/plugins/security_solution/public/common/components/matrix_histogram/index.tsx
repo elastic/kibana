@@ -125,6 +125,7 @@ export const MatrixHistogramComponent: React.FC<
         yTickFormatter,
         showLegend,
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       chartHeight,
       startDate,
@@ -145,6 +146,7 @@ export const MatrixHistogramComponent: React.FC<
         stackByOptions.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -260,7 +262,7 @@ export const MatrixHistogram = React.memo(MatrixHistogramComponent);
 
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id }: OwnProps) => {
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       isInspected,
