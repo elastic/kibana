@@ -6,8 +6,8 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getMapsCapabilities, getUiSettings, getToasts } from '../../kibana_services';
+import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
+import { getMapsCapabilities, getUiSettings, getToasts } from '../../../kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -26,9 +26,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { addHelpMenuToAppChrome } from '../../help_menu_util';
+import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { Link, withRouter } from 'react-router-dom';
-import { updateBreadcrumbs } from '../page_elements/breadcrumbs';
+import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
+import { goToSpecifiedPath } from '../../maps_router';
 
 export const EMPTY_FILTER = '';
 
@@ -98,7 +99,7 @@ export const MapsListView = withRouter(
 
     deleteSelectedItems = async () => {
       try {
-        await this.props.delete(this.state.selectedIds);
+        await this._delete(this.state.selectedIds);
       } catch (error) {
         getToasts().addDanger({
           title: i18n.translate('xpack.maps.mapListing.unableToDeleteToastTitle', {
@@ -315,12 +316,15 @@ export const MapsListView = withRouter(
           }),
           sortable: true,
           render: (field, record) => (
-            <Link
-              to={`/map/${record.id}`}
+            <EuiLink
+              onClick={(e) => {
+                e.preventDefault();
+                goToSpecifiedPath(`/map/${record.id}`);
+              }}
               data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
             >
               {field}
-            </Link>
+            </EuiLink>
           ),
         },
         {

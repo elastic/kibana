@@ -5,19 +5,19 @@
  */
 
 import { syncQueryStateWithUrl } from '../../../../../../src/plugins/data/public';
-import { IKbnUrlStateStorage } from '../../../../../../src/plugins/kibana_utils/public';
 import { getData } from '../../kibana_services';
+import { kbnUrlStateStorage } from '../maps_router';
 
-export function useGlobalStateSyncing(kbnUrlStateStorage: IKbnUrlStateStorage) {
+export function useGlobalStateSyncing() {
   const { stop } = syncQueryStateWithUrl(getData().query, kbnUrlStateStorage);
   return stop;
 }
 
-export function getGlobalState(kbnUrlStateStorage: IKbnUrlStateStorage) {
+export function getGlobalState() {
   return kbnUrlStateStorage.get('_g');
 }
 
-export function updateGlobalState(kbnUrlStateStorage: IKbnUrlStateStorage, newState: unknown) {
+export function updateGlobalState(newState: unknown) {
   const globalState = getGlobalState(kbnUrlStateStorage);
   kbnUrlStateStorage.set(
     '_g',

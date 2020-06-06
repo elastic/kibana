@@ -8,31 +8,29 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getCoreI18n } from '../kibana_services';
-import { MapsListView } from './routes/list';
-import { MapsCreateEditView } from './routes/create_edit';
 import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
-import { getMapsSavedObjectLoader } from '../bootstrap/services/gis_map_saved_object_loader';
+import { LoadListAndRender } from './routes/list/load_list_and_render';
+import { LoadMapAndRender } from './routes/create_edit/load_map_and_render';
 
 export let returnToMapsList;
 export let goToSpecifiedPath;
+export let kbnUrlStateStorage;
 
 export async function renderApp(context, { appBasePath, element, history }) {
-  const { hits = [] } = await getMapsSavedObjectLoader().find();
-  const hasSavedMaps = !!hits.length;
   returnToMapsList = () => history.push('/');
   goToSpecifiedPath = (path) => history.push(path);
+  kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
-  render(<App history={history} appBasePath={appBasePath} hasSavedMaps={hasSavedMaps} />, element);
+  render(<App history={history} appBasePath={appBasePath} />, element);
 
   return () => {
     unmountComponentAtNode(element);
   };
 }
 
-const App = ({ history, appBasePath, hasSavedMaps }) => {
-  const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+const App = ({ history, appBasePath }) => {
   const store = getStore();
 
   const I18nContext = getCoreI18n().Context;
@@ -41,23 +39,11 @@ const App = ({ history, appBasePath, hasSavedMaps }) => {
       <Provider store={store}>
         <Router basename={appBasePath} history={history}>
           <Switch>
-            <Route
-              path={`/map/:savedMapId`}
-              render={() =>
-                hasSavedMaps ? (
-                  <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />
-                ) : (
-                  <Redirect to={`/map`} />
-                )
-              }
-            />
-            <Route
-              exact
-              path={`/map`}
-              render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
-            />
-            <Route exact path={`/`} component={MapsListView} />
-            <Route component={MapsListView} />
+            <Route path={`/map/:savedMapId`} component={LoadMapAndRender} />
+            <Route exact path={`/map`} component={LoadMapAndRender} />
+            <Route exact path={`/`} component={LoadListAndRender} />
+            // Redirect other routes to list, or if hash-containing, their
+            // non-hash equivalents
             <Route
               path={``}
               render={({ location }) => {

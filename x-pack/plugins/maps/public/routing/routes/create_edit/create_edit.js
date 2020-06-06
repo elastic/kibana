@@ -64,22 +64,19 @@ export const MapsCreateEditView = class extends React.Component {
   }
 
   componentDidMount() {
-    const { match, kbnUrlStateStorage } = this.props;
-    this.setState({
-      currentPath: match.url,
-    });
+    const { savedMap, currentPath } = this.props;
+    this.setState({ currentPath });
 
     // Init sync utils
-    this.globalSyncUnsubscribe = useGlobalStateSyncing(kbnUrlStateStorage);
-    this.appSyncUnsubscribe = useAppStateSyncing(this.appStateManager, kbnUrlStateStorage);
+    this.globalSyncUnsubscribe = useGlobalStateSyncing();
+    this.appSyncUnsubscribe = useAppStateSyncing(this.appStateManager);
 
     // Monitor visibility
     this.visibleSubscription = getCoreChrome()
       .getIsVisible$()
       .subscribe((isVisible) => this.setState({ isVisible }));
 
-    const { savedMapId } = match.params;
-    this.initMap(savedMapId);
+    this.initMap(savedMap);
   }
 
   _initBreadcrumbUpdater = () => {
@@ -121,11 +118,15 @@ export const MapsCreateEditView = class extends React.Component {
     }
 
     try {
-      return rison.decode_array(mapAppParams.get('initialLayers'));
+      let mapInitLayers = mapAppParams.get('initialLayers');
+      if (mapInitLayers[mapInitLayers.length - 1] === '#') {
+        mapInitLayers = mapInitLayers.substr(0, mapInitLayers.length - 1);
+      }
+      return rison.decode_array(mapInitLayers);
     } catch (e) {
       getToasts().addWarning({
         title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
-          defaultMessage: `Inital layers not added to map`,
+          defaultMessage: `Initial layers not added to map`,
         }),
         text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
           defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: {errorMsg}`,
@@ -191,7 +192,6 @@ export const MapsCreateEditView = class extends React.Component {
 
   syncAppAndGlobalState() {
     const { query, time, refreshConfig } = this.state;
-    const { kbnUrlStateStorage } = this.props;
     const { filterManager } = getData().query;
 
     // appState
@@ -201,7 +201,7 @@ export const MapsCreateEditView = class extends React.Component {
     });
 
     // globalState
-    updateGlobalState(kbnUrlStateStorage, {
+    updateGlobalState({
       time: time,
       refreshInterval: {
         pause: refreshConfig.isPaused,
@@ -213,7 +213,7 @@ export const MapsCreateEditView = class extends React.Component {
 
   onQueryChange = async ({ filters, query, time, refresh }) => {
     const { filterManager } = getData().query;
-    const { kbnUrlStateStorage, dispatchSetQuery } = this.props;
+    const { dispatchSetQuery } = this.props;
     const newState = {};
     if (filters) {
       filterManager.setFilters(filters); // Maps and merges filters
@@ -232,7 +232,7 @@ export const MapsCreateEditView = class extends React.Component {
       query || this.state.query,
       time || this.state.time
     );
-    updateGlobalState(kbnUrlStateStorage, newState);
+    updateGlobalState(newState);
     this.setState(newState);
   };
 
@@ -242,8 +242,8 @@ export const MapsCreateEditView = class extends React.Component {
   }
 
   initFilters(savedMap) {
-    const { setRefreshConfig, kbnUrlStateStorage } = this.props;
-    const globalState = getGlobalState(kbnUrlStateStorage);
+    const { setRefreshConfig } = this.props;
+    const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
     const query = getInitialQuery({
       mapStateJSON,
@@ -262,10 +262,9 @@ export const MapsCreateEditView = class extends React.Component {
     setRefreshConfig(refreshConfig);
   }
 
-  async initMapAndLayerSettings(savedMapId) {
+  initMapAndLayerSettings(savedMap) {
     // Get saved map & layer settings
     let layerList;
-    const savedMap = await this._fetchSavedMap(savedMapId);
     this.initFilters(savedMap);
     if (savedMap.layerListJSON) {
       layerList = JSON.parse(savedMap.layerListJSON);
@@ -280,7 +279,6 @@ export const MapsCreateEditView = class extends React.Component {
       },
       this._initBreadcrumbUpdater
     );
-    return savedMap;
   }
 
   updateFiltersAndDispatch = (filters) => {
@@ -353,10 +351,10 @@ export const MapsCreateEditView = class extends React.Component {
     return savedObjectFilters;
   }
 
-  async initMap(savedMapId) {
-    const { kbnUrlStateStorage, clearUi } = this.props;
-    const globalState = getGlobalState(kbnUrlStateStorage);
-    const savedMap = await this.initMapAndLayerSettings(savedMapId);
+  async initMap(savedMap) {
+    const { clearUi } = this.props;
+    const globalState = getGlobalState();
+    this.initMapAndLayerSettings(savedMap);
     clearUi();
 
     await this.handleStoreChanges();
