@@ -12,13 +12,13 @@ import * as labels from './translations';
 import {
   DownNoExpressionSelect,
   TimeExpressionSelect,
-  FiltersExpressionsSelect,
+  FiltersExpressionSelectContainer,
 } from './monitor_expressions';
-
 import { AddFilterButton } from './add_filter_btn';
+import { OldAlertCallOut } from './old_alert_call_out';
 import { KueryBar } from '..';
 
-interface AlertMonitorStatusProps {
+export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
   autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
@@ -52,20 +52,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
   return (
     <>
-      <EuiSpacer size="m" />
-
-      {isOldAlert && (
-        <EuiCallOut
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.uptime.alerts.monitorStatus.oldAlertCallout.title"
-              defaultMessage="You are editing an older alert, some fields may not auto-populate."
-            />
-          }
-          iconType="alert"
-        />
-      )}
+      <OldAlertCallOut isOldAlert={isOldAlert} />
 
       <EuiSpacer size="m" />
 
@@ -96,13 +83,13 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="xs" />
 
-      <FiltersExpressionsSelect
+      <FiltersExpressionSelectContainer
         setAlertParams={setAlertParams}
         alertParams={alertParams}
         newFilters={newFilters}
-        onRemoveFilter={(removeFiler) => {
-          if (newFilters.includes(removeFiler)) {
-            setNewFilters(newFilters.filter((item) => item !== removeFiler));
+        onRemoveFilter={(removeFilter: string) => {
+          if (newFilters.includes(removeFilter)) {
+            setNewFilters(newFilters.filter((item) => item !== removeFilter));
           }
         }}
       />

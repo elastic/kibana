@@ -5,30 +5,23 @@
  */
 
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
-import { overviewFiltersSelector } from '../../../../state/selectors';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
+import { FilterExpressionsSelectProps } from './filters_expression_select_container';
+import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
 
-interface Props {
-  alertParams: { [key: string]: any };
-  newFilters: string[];
-  onRemoveFilter: (val: string) => void;
-  setAlertParams: (key: string, value: any) => void;
-}
+type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'>;
 
 export const FiltersExpressionsSelect: React.FC<Props> = ({
+  alertParams,
   setAlertParams,
   newFilters,
   onRemoveFilter,
-  alertParams,
+  filters: overviewFilters,
 }) => {
-  const {
-    filters: { tags, ports, schemes, locations },
-  } = useSelector(overviewFiltersSelector);
-
+  const { tags, ports, schemes, locations } = overviewFilters;
   const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
   const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
   const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
