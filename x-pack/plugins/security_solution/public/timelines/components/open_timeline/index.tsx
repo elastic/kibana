@@ -178,14 +178,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
       async (timelineIds: string[]) => {
-        deleteTimelines(timelineIds);
+        // The type for `deleteTimelines` is incorrect, it returns a Promise
+        await deleteTimelines(timelineIds);
       },
       [deleteTimelines]
     );
 
     /** Invoked when the user clicks the action to delete the selected timelines */
     const onDeleteSelected: OnDeleteSelected = useCallback(async () => {
-      deleteTimelines(getSelectedTimelineIds(selectedItems));
+      // The type for `deleteTimelines` is incorrect, it returns a Promise
+      await deleteTimelines(getSelectedTimelineIds(selectedItems));
 
       // NOTE: we clear the selection state below, but if the server fails to
       // delete a timeline, it will remain selected in the table:
