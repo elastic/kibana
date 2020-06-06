@@ -51,7 +51,7 @@ export interface TemplateDeserialized {
 
 export interface TemplateV2Es {
   name: string;
-  index_template: Omit<TemplateV2Serialized, 'name'>;
+  index_template: Omit<TemplateSerialized, 'name'>;
 }
 
 /**
