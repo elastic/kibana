@@ -44,7 +44,7 @@ export const installPrepackagedRules = (
       references,
       note,
       version,
-      exceptions_list,
+      exceptions_list: exceptionsList,
     } = rule;
     return [
       ...acc,
@@ -79,7 +79,7 @@ export const installPrepackagedRules = (
         references,
         note,
         version,
-        exceptions_list,
+        exceptionsList,
         actions: [], // At this time there is no pre-packaged actions
       }),
     ];

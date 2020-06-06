@@ -68,7 +68,7 @@ export interface RuleAlertParams {
   type: RuleType;
   version: number;
   throttle: string | undefined | null;
-  exceptions_list: ListsDefaultArraySchema | null | undefined;
+  exceptionsList: ListsDefaultArraySchema | null | undefined;
 }
 
 export type RuleTypeParams = Omit<
@@ -83,6 +83,7 @@ export type RuleAlertParamsRest = Omit<
   | 'falsePositives'
   | 'immutable'
   | 'maxSignals'
+  | 'exceptionsList'
   | 'machineLearningJobId'
   | 'savedId'
   | 'riskScore'
@@ -101,6 +102,7 @@ export type RuleAlertParamsRest = Omit<
     | 'lastFailureMessage'
   > & {
     anomaly_threshold: RuleAlertParams['anomalyThreshold'];
+    exceptions_list: RuleAlertParams['exceptionsList'];
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
     saved_id?: RuleAlertParams['savedId'];

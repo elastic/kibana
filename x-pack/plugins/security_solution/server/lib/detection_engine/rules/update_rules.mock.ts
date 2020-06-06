@@ -40,7 +40,7 @@ export const getUpdateRulesOptionsMock = (): UpdateRulesOptions => ({
   references: ['http://www.example.com'],
   note: '# sample markdown',
   version: 1,
-  exceptions_list: [],
+  exceptionsList: [],
   actions: [],
 });
 
@@ -76,6 +76,6 @@ export const getUpdateMlRulesOptionsMock = (): UpdateRulesOptions => ({
   references: ['http://www.example.com'],
   note: '# sample markdown',
   version: 1,
-  exceptions_list: [],
+  exceptionsList: [],
   actions: [],
 });

@@ -42,11 +42,11 @@ export const createRules = async ({
   references,
   note,
   version,
-  exceptions_list,
+  exceptionsList,
   actions,
 }: CreateRulesOptions): Promise<Alert> => {
   // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
+  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
   return alertsClient.create({
     data: {
       name,

@@ -44,9 +44,14 @@ describe('updatePrepackagedRules', () => {
     );
 
     expect(patchRules).toHaveBeenCalledWith(
-      expect.not.objectContaining({
-        enabled: true,
-        actions,
+      expect.objectContaining({
+        actions: undefined,
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: undefined,
       })
     );
   });

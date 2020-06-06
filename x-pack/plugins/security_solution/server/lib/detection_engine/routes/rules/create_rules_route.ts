@@ -74,7 +74,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         type,
         references,
         note,
-        exceptions_list,
+        exceptions_list: exceptionsList,
       } = request.body;
       try {
         const query =
@@ -149,7 +149,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           references,
           note,
           version: 1,
-          exceptions_list,
+          exceptionsList,
           actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it,
         });
 

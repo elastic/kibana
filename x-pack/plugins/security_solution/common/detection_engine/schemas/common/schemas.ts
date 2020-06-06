@@ -16,11 +16,20 @@ import { PositiveInteger } from '../types/positive_integer';
 export const description = t.string;
 export type Description = t.TypeOf<typeof description>;
 
+export const descriptionOrUndefined = t.union([description, t.undefined]);
+export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
 
+export const enabledOrUndefined = t.union([enabled, t.undefined]);
+export type EnabledOrUndefined = t.TypeOf<typeof enabledOrUndefined>;
+
 export const false_positives = t.array(t.string);
 export type FalsePositives = t.TypeOf<typeof false_positives>;
+
+export const falsePositivesOrUndefined = t.union([false_positives, t.undefined]);
+export type FalsePositivesOrUndefined = t.TypeOf<typeof falsePositivesOrUndefined>;
 
 export const file_name = t.string;
 export const exclude_export_details = t.boolean;
@@ -56,6 +65,9 @@ export type Actions = t.TypeOf<typeof actions>;
 export const from = t.string;
 export type From = t.TypeOf<typeof from>;
 
+export const fromOrUndefined = t.union([from, t.undefined]);
+export type FromOrUndefined = t.TypeOf<typeof fromOrUndefined>;
+
 export const immutable = t.boolean;
 export type Immutable = t.TypeOf<typeof immutable>;
 
@@ -81,6 +93,9 @@ export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 export const interval = t.string;
 export type Interval = t.TypeOf<typeof interval>;
 
+export const intervalOrUndefined = t.union([interval, t.undefined]);
+export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
+
 export const query = t.string;
 export type Query = t.TypeOf<typeof query>;
 
@@ -97,6 +112,9 @@ export const objects = t.array(t.type({ rule_id }));
 
 export const output_index = t.string;
 export type OutputIndex = t.TypeOf<typeof output_index>;
+
+export const outputIndexOrUndefined = t.union([output_index, t.undefined]);
+export type OutputIndexOrUndefined = t.TypeOf<typeof outputIndexOrUndefined>;
 
 export const saved_id = t.string;
 export type SavedId = t.TypeOf<typeof saved_id>;
@@ -149,14 +167,26 @@ export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 export const max_signals = PositiveIntegerGreaterThanZero;
 export type MaxSignals = t.TypeOf<typeof max_signals>;
 
+export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
+export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;
+
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
+
+export const nameOrUndefined = t.union([name, t.undefined]);
+export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
 export const risk_score = RiskScore;
 export type RiskScore = t.TypeOf<typeof risk_score>;
 
+export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
+export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;
+
 export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
 export type Severity = t.TypeOf<typeof severity>;
+
+export const severityOrUndefined = t.union([severity, t.undefined]);
+export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
 
 export const status = t.keyof({ open: null, closed: null });
 
@@ -166,13 +196,22 @@ export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
 
+export const toOrUndefined = t.union([to, t.undefined]);
+export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
+
 export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
 export type Type = t.TypeOf<typeof type>;
+
+export const typeOrUndefined = t.union([type, t.undefined]);
+export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
 
 export const queryFilter = t.string;
 
 export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
+
+export const referencesOrUndefined = t.union([references, t.undefined]);
+export type ReferencesOrUndefined = t.TypeOf<typeof referencesOrUndefined>;
 
 export const per_page = PositiveInteger;
 export const page = PositiveIntegerGreaterThanZero;
@@ -186,6 +225,9 @@ export const sort_order = t.keyof({ asc: null, desc: null });
 
 export const tags = t.array(t.string);
 export type Tags = t.TypeOf<typeof tags>;
+
+export const tagsOrUndefined = t.union([tags, t.undefined]);
+export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
 export const fields = t.array(t.string);
 export const threat_framework = t.string;
@@ -219,6 +261,9 @@ export const threat = t.array(
 );
 
 export type Threat = t.TypeOf<typeof threat>;
+
+export const threatOrUndefined = t.union([threat, t.undefined]);
+export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;

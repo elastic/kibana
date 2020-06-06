@@ -22,7 +22,6 @@ export const updatePrepackagedRules = async (
         description,
         false_positives: falsePositives,
         from,
-        immutable,
         query,
         language,
         saved_id: savedId,
@@ -42,6 +41,11 @@ export const updatePrepackagedRules = async (
         references,
         version,
         note,
+        anomalyThreshold,
+        timelineId,
+        timelineTitle,
+        machineLearningJobId,
+        exceptionsList,
       } = rule;
 
       const existingRule = await readRules({ alertsClient, ruleId, id: undefined });
@@ -53,7 +57,6 @@ export const updatePrepackagedRules = async (
         description,
         falsePositives,
         from,
-        immutable,
         query,
         language,
         outputIndex,
@@ -75,6 +78,13 @@ export const updatePrepackagedRules = async (
         references,
         version,
         note,
+        anomalyThreshold,
+        enabled: undefined,
+        timelineId,
+        timelineTitle,
+        machineLearningJobId,
+        exceptionsList,
+        actions: undefined,
       });
     })
   );

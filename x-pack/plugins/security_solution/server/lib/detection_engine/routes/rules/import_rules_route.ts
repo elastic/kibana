@@ -151,7 +151,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   timeline_id: timelineId,
                   timeline_title: timelineTitle,
                   version,
-                  exceptions_list,
+                  exceptions_list: exceptionsList,
                 } = parsedRule;
 
                 try {
@@ -190,7 +190,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       references,
                       note,
                       version,
-                      exceptions_list,
+                      exceptionsList,
                       actions: [], // Actions are not imported nor exported at this time
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
@@ -202,7 +202,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       enabled,
                       falsePositives,
                       from,
-                      immutable,
                       query,
                       language,
                       outputIndex,
@@ -225,9 +224,10 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       references,
                       note,
                       version,
-                      exceptions_list,
+                      exceptionsList,
                       anomalyThreshold,
                       machineLearningJobId,
+                      actions: undefined,
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null) {

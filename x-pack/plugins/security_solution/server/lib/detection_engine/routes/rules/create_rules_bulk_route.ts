@@ -91,7 +91,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
-              exceptions_list,
+              exceptions_list: exceptionsList,
             } = payloadRule;
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
@@ -166,7 +166,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 references,
                 note,
                 version,
-                exceptions_list,
+                exceptionsList,
                 actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is set to rule, otherwise we are a notification and should not enable it,
               });
 

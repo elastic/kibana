@@ -6,7 +6,7 @@
 
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
-import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rule.mock';
+import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
 import { AlertsClientMock } from '../../../../../alerts/server/alerts_client.mock';
 
 describe('updateRules', () => {

@@ -85,7 +85,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             references,
             note,
             version,
-            exceptions_list,
+            exceptions_list: exceptionsList,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -145,7 +145,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               references,
               note,
               version,
-              exceptions_list,
+              exceptionsList,
               actions,
             });
             if (rule != null) {

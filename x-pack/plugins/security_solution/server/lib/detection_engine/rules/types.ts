@@ -20,6 +20,7 @@ import {
   From,
   RuleId,
   Immutable,
+  DescriptionOrUndefined,
   Interval,
   MaxSignals,
   RiskScore,
@@ -47,6 +48,21 @@ import {
   VersionOrUndefined,
   IdOrUndefined,
   RuleIdOrUndefined,
+  EnabledOrUndefined,
+  FalsePositivesOrUndefined,
+  FromOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  MaxSignalsOrUndefined,
+  RiskScoreOrUndefined,
+  NameOrUndefined,
+  SeverityOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThreatOrUndefined,
+  TypeOrUndefined,
+  ReferencesOrUndefined,
+  ListAndOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
@@ -175,6 +191,7 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
+// TODO: Try and remove them
 export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle'>> & {
   rule: SanitizedAlert | null;
   savedObjectsClient: SavedObjectsClientContract;
@@ -248,7 +265,7 @@ export interface CreateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: Version;
-  exceptions_list: ListsDefaultArraySchema;
+  exceptionsList: ListsDefaultArraySchema;
   actions: RuleAlertAction[];
 }
 
@@ -284,6 +301,41 @@ export interface UpdateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptions_list: ListsDefaultArraySchema;
+  exceptionsList: ListsDefaultArraySchema;
   actions: RuleAlertAction[];
+}
+
+export interface PatchRulesOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  alertsClient: AlertsClient;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+  description: DescriptionOrUndefined;
+  enabled: EnabledOrUndefined;
+  falsePositives: FalsePositivesOrUndefined;
+  from: FromOrUndefined;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  index: IndexOrUndefined;
+  interval: IntervalOrUndefined;
+  maxSignals: MaxSignalsOrUndefined;
+  riskScore: RiskScoreOrUndefined;
+  outputIndex: OutputIndexOrUndefined;
+  name: NameOrUndefined;
+  severity: SeverityOrUndefined;
+  tags: TagsOrUndefined;
+  threat: ThreatOrUndefined;
+  to: ToOrUndefined;
+  type: TypeOrUndefined;
+  references: ReferencesOrUndefined;
+  note: NoteOrUndefined;
+  version: VersionOrUndefined;
+  exceptionsList: ListAndOrUndefined;
+  actions: RuleAlertAction[] | undefined;
+  rule: SanitizedAlert | null;
 }
