@@ -60,9 +60,11 @@ const mapStateToProps = (state: State) => {
   const pageId = getSelectedPage(state);
   const nodes = getNodes(state, pageId) as PositionedElement[];
   const selectedToplevelNodes = getSelectedToplevelNodes(state);
+
   const selectedPrimaryShapeObjects = selectedToplevelNodes
     .map((id: string) => nodes.find((s: PositionedElement) => s.id === id))
     .filter((shape?: PositionedElement) => shape) as PositionedElement[];
+
   const selectedPersistentPrimaryNodes = flatten(
     selectedPrimaryShapeObjects.map((shape: PositionedElement) =>
       nodes.find((n: PositionedElement) => n.id === shape.id) // is it a leaf or a persisted group?
@@ -71,7 +73,8 @@ const mapStateToProps = (state: State) => {
     )
   );
 
-  const selectedNodes = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
+  const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
+  const selectedNodes = selectedNodeIds.map((id: string) => nodes.find((s) => s.id === id));
 
   return {
     pageId,
