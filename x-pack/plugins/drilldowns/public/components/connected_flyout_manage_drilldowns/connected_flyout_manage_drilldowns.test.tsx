@@ -10,7 +10,7 @@ import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldow
 import {
   dashboardFactory,
   urlFactory,
-} from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
+} from '../../../../ui_actions_enhanced/public/components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
@@ -23,7 +23,7 @@ import { toastDrilldownsCRUDError } from './i18n';
 const storage = new Storage(new StubBrowserStorage());
 const notifications = coreMock.createStart().notifications;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  advancedUiActions: {
+  uiActionsEnhanced: {
     getActionFactories() {
       return [dashboardFactory, urlFactory];
     },

@@ -28,7 +28,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('<PipelinesClone />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/66856
+describe.skip('<PipelinesClone />', () => {
   let testBed: PipelinesCloneTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();

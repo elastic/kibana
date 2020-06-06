@@ -85,7 +85,7 @@ const finishValidationAndProcessReq = () => {
     let resp;
     try {
       const validIdReqData = idConditionalValidation(body, boolHasId);
-      const callWithRequest = con.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callWithRequest = con.core.elasticsearch.legacy.client.callAsCurrentUser;
       const { importData: importDataFunc } = importDataProvider(callWithRequest);
 
       const { index, settings, mappings, ingestPipeline, data } = validIdReqData;

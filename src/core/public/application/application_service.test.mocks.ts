@@ -36,7 +36,11 @@ jest.doMock('history', () => ({
 }));
 
 export const parseAppUrlMock = jest.fn();
-jest.doMock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  parseAppUrl: parseAppUrlMock,
-}));
+jest.doMock('./utils', () => {
+  const original = jest.requireActual('./utils');
+
+  return {
+    ...original,
+    parseAppUrl: parseAppUrlMock,
+  };
+});

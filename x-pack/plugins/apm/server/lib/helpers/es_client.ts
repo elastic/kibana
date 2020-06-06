@@ -19,6 +19,7 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../typings/elasticsearch';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/server';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRequestHandlerContext } from '../../routes/typings';
@@ -95,7 +96,7 @@ async function getParamsForSearchRequest(
       savedObjectsClient: context.core.savedObjects.client,
       config: context.config,
     }),
-    uiSettings.client.get('search:includeFrozen'),
+    uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
   ]);
 
   // Get indices for legacy data filter (only those which apply)
@@ -138,7 +139,7 @@ export function getESClient(
   const {
     callAsCurrentUser,
     callAsInternalUser,
-  } = context.core.elasticsearch.dataClient;
+  } = context.core.elasticsearch.legacy.client;
 
   async function callEs(operationName: string, params: Record<string, any>) {
     const startTime = process.hrtime();

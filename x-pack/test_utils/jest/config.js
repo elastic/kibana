@@ -9,6 +9,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants'
 export default {
   rootDir: '../../',
   roots: [
+    '<rootDir>/plugins',
     '<rootDir>/legacy/plugins',
     '<rootDir>/legacy/server',
     '<rootDir>/legacy/common',

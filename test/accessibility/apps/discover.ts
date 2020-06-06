@@ -132,9 +132,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Context view test
     it('should open context view on a doc', async () => {
-      await docTable.clickRowToggle();
-      // click the open action
       await retry.try(async () => {
+        await docTable.clickRowToggle();
+        // click the open action
         const rowActions = await docTable.getRowActions();
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');

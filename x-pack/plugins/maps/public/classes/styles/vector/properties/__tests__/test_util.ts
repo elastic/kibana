@@ -14,6 +14,7 @@ import {
   StyleMetaDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../../fields/field';
+import { IStyle, AbstractStyle } from '../../../style';
 
 class MockField extends AbstractField {
   async getLabel(): Promise<string> {
@@ -24,19 +25,47 @@ class MockField extends AbstractField {
   }
 }
 
+export class MockMbMap {
+  _paintPropertyCalls: unknown[];
+
+  constructor() {
+    this._paintPropertyCalls = [];
+  }
+  setPaintProperty(...args: unknown[]) {
+    this._paintPropertyCalls.push([...args]);
+  }
+
+  getPaintPropertyCalls(): unknown[] {
+    return this._paintPropertyCalls;
+  }
+}
+
 export const mockField: IField = new MockField({
   fieldName: 'foobar',
   origin: FIELD_ORIGIN.SOURCE,
 });
 
-class MockStyle {
+export class MockStyle extends AbstractStyle implements IStyle {
+  private readonly _min: number;
+  private readonly _max: number;
+
+  constructor({ min = 0, max = 100 } = {}) {
+    super(null);
+    this._min = min;
+    this._max = max;
+  }
+
   getStyleMeta(): StyleMeta {
     const geomTypes: GeometryTypes = {
       isPointsOnly: false,
       isLinesOnly: false,
       isPolygonsOnly: false,
     };
-    const rangeFieldMeta: RangeFieldMeta = { min: 0, max: 100, delta: 100 };
+    const rangeFieldMeta: RangeFieldMeta = {
+      min: this._min,
+      max: this._max,
+      delta: this._max - this._min,
+    };
     const catFieldMeta: CategoryFieldMeta = {
       categories: [
         {
@@ -65,8 +94,12 @@ class MockStyle {
 }
 
 export class MockLayer {
+  private readonly _style: IStyle;
+  constructor(style = new MockStyle()) {
+    this._style = style;
+  }
   getStyle() {
-    return new MockStyle();
+    return this._style;
   }
 
   getDataRequest() {
