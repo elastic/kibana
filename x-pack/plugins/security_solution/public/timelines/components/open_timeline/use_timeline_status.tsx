@@ -18,7 +18,7 @@ import {
 import * as i18n from './translations';
 import { TimelineTabsStyle, TemplateTimelineFilter } from './types';
 
-export const usePrepackageTimelineFilter = ({
+export const useTimelineStatus = ({
   timelineType,
   elasticTemplateTimelineCount,
   customTemplateTimelineCount,

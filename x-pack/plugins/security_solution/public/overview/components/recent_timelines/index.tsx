@@ -27,7 +27,7 @@ import { useGetUrlSearch } from '../../../common/components/navigation/use_get_u
 import { navTabs } from '../../../app/home/home_navigations';
 import { getTimelinesUrl } from '../../../common/components/link_to/redirect_to_timelines';
 import { LoadingPlaceholders } from '../loading_placeholders';
-import { usePrepackageTimelineFilter } from '../../../timelines/components/open_timeline/use_prepackage_timeline_filter';
+import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
 
 interface OwnProps {
   apolloClient: ApolloClient<{}>;
@@ -69,7 +69,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
     const timelineType = TimelineType.default;
-    const { timelineStatus } = usePrepackageTimelineFilter({ timelineType });
+    const { timelineStatus } = useTimelineStatus({ timelineType });
     useEffect(() => {
       fetchAllTimeline({
         pageInfo: {

@@ -48,7 +48,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
-import { usePrepackageTimelineFilter } from './use_prepackage_timeline_filter';
+import { useTimelineStatus } from './use_timeline_status';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -127,7 +127,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const { timelineStatus, templateTimelineFilter } = usePrepackageTimelineFilter({
+    const { timelineStatus, templateTimelineFilter } = useTimelineStatus({
       timelineType,
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,

@@ -33,7 +33,7 @@ import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
-import { usePrepackageTimelineFilter } from '../../open_timeline/use_prepackage_timeline_filter';
+import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;
@@ -115,7 +115,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
-  const { timelineStatus } = usePrepackageTimelineFilter({ timelineType });
+  const { timelineStatus } = useTimelineStatus({ timelineType });
 
   const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);
