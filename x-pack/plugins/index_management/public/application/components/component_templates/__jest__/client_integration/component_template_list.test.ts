@@ -6,7 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { ComponentTemplateListTestBed } from './helpers/component_template_list.helpers';
 import { API_BASE_PATH } from '../../../../../../common/constants';
 import { ComponentTemplateListItem } from '../../types';
@@ -24,6 +24,14 @@ describe('<ComponentTemplateList />', () => {
 
   afterAll(() => {
     server.restore();
+  });
+
+  beforeEach(async () => {
+    await act(async () => {
+      testBed = await setup();
+    });
+
+    testBed.component.update();
   });
 
   describe('With component templates', () => {
@@ -47,18 +55,9 @@ describe('<ComponentTemplateList />', () => {
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
 
-    beforeEach(async () => {
-      testBed = await setup();
-
-      await act(async () => {
-        await nextTick(100);
-      });
-
-      testBed.component.update();
-    });
-
     test('should render the list view', async () => {
       const { table } = testBed;
+
       // Verify table content
       const { tableCellsValues } = table.getMetaData('componentTemplatesTable');
       tableCellsValues.forEach((row, i) => {
@@ -86,15 +85,10 @@ describe('<ComponentTemplateList />', () => {
     });
 
     test('should delete a component template', async () => {
-      const { actions } = testBed;
+      const { actions, component } = testBed;
       const { name: componentTemplateName } = componentTemplate1;
 
-      httpRequestsMockHelpers.setDeleteComponentTemplateResponse({
-        itemsDeleted: [componentTemplateName],
-        errors: [],
-      });
-
-      act(() => {
+      await act(async () => {
         actions.clickDeleteActionAt(0);
       });
 
@@ -110,17 +104,24 @@ describe('<ComponentTemplateList />', () => {
       expect(modal).not.toBe(null);
       expect(modal!.textContent).toContain('Delete component template');
 
+      httpRequestsMockHelpers.setDeleteComponentTemplateResponse({
+        itemsDeleted: [componentTemplateName],
+        errors: [],
+      });
+
       await act(async () => {
         confirmButton!.click();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
+      component.update();
 
-      expect(latestRequest.method).toBe('DELETE');
-      expect(latestRequest.url).toBe(
+      const deleteRequest = server.requests[server.requests.length - 2];
+
+      expect(deleteRequest.method).toBe('DELETE');
+      expect(deleteRequest.url).toBe(
         `${API_BASE_PATH}/component_templates/${componentTemplateName}`
       );
-      expect(latestRequest.status).toEqual(200);
+      expect(deleteRequest.status).toEqual(200);
     });
   });
 
@@ -128,10 +129,8 @@ describe('<ComponentTemplateList />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
 
-      testBed = await setup();
-
       await act(async () => {
-        await nextTick(100);
+        testBed = await setup();
       });
 
       testBed.component.update();
@@ -156,10 +155,8 @@ describe('<ComponentTemplateList />', () => {
 
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(undefined, { body: error });
 
-      testBed = await setup();
-
       await act(async () => {
-        await nextTick(100);
+        testBed = await setup();
       });
 
       testBed.component.update();

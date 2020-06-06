@@ -5,28 +5,23 @@
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import React from 'react';
+import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
+import { HttpSetup } from 'kibana/public';
 import { BASE_PATH, API_BASE_PATH } from '../../../../../../../common/constants';
 import {
   notificationServiceMock,
-  fatalErrorsServiceMock,
   docLinksServiceMock,
-  injectedMetadataServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { HttpService } from '../../../../../../../../../../src/core/public/http';
 
 import { init as initHttpRequests } from './http_requests';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
 
-const httpServiceSetupMock = new HttpService().setup({
-  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-  fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-});
+const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 const appDependencies = {
-  httpClient: httpServiceSetupMock,
+  httpClient: (mockHttpClient as unknown) as HttpSetup,
   apiBasePath: API_BASE_PATH,
   appBasePath: BASE_PATH,
   trackMetric: () => {},
