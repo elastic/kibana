@@ -197,7 +197,7 @@ function endDataLoad(
   layerId: string,
   dataId: string,
   requestToken: symbol,
-  data: FeatureCollection | object,
+  data: object,
   meta: DataMeta
 ) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
