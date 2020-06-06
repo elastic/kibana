@@ -530,7 +530,6 @@ export class IndexPattern implements IIndexPattern {
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
-        // const { toasts } = getNotifications();
 
         if (err instanceof IndexPatternMissingIndices) {
           this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
