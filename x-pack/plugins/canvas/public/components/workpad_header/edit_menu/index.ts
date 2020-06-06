@@ -73,8 +73,12 @@ const mapStateToProps = (state: State) => {
     )
   );
 
-  const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
-  const selectedNodes = selectedNodeIds.map((id: string) => nodes.find((s) => s.id === id));
+  const selectedNodeIds: string[] = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
+  const selectedNodes = selectedNodeIds
+    .map((id: string) => nodes.find((s) => s.id === id))
+    .filter((node: PositionedElement | undefined): node is PositionedElement => {
+      return !!node;
+    });
 
   return {
     pageId,

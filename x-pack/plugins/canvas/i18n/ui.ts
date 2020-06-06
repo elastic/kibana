@@ -791,8 +791,12 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.pie.args.labelsTitle', {
         defaultMessage: 'Labels',
       }),
-    getLabelsHelp: () =>
+    getLabelsToggleSwitch: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.labelsToggleSwitch', {
+        defaultMessage: 'Show labels',
+      }),
+    getLabelsHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.pie.args.labelsLabel', {
         defaultMessage: 'Show/hide labels',
       }),
     getLegendDisplayName: () =>
@@ -1103,6 +1107,10 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.table.args.paginateTitle', {
         defaultMessage: 'Pagination',
       }),
+    getPaginateToggleSwitch: () =>
+      i18n.translate('xpack.canvas.uis.views.table.args.paginateToggleSwitch', {
+        defaultMessage: 'Show pagination controls',
+      }),
     getPaginateHelp: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.paginateLabel', {
         defaultMessage:
@@ -1119,6 +1127,10 @@ export const ViewStrings = {
     getShowHeaderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.showHeaderTitle', {
         defaultMessage: 'Header',
+      }),
+    getShowHeaderToggleSwitch: () =>
+      i18n.translate('xpack.canvas.uis.views.table.args.showHeaderToggleSwitch', {
+        defaultMessage: 'Show the header row',
       }),
     getShowHeaderHelp: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.showHeaderLabel', {
