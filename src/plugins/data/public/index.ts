@@ -371,6 +371,7 @@ export {
   TabbedTable,
   SearchInterceptor,
   RequestTimeoutError,
+  LegacyApiCaller,
 } from './search';
 
 // Search namespace

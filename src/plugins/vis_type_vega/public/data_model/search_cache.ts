@@ -18,9 +18,18 @@
  */
 
 import LruCache from 'lru-cache';
+import { LegacyApiCaller } from '../../../data/public';
+
+interface CacheOptions {
+  max: number;
+  maxAge: number;
+}
 
 export class SearchCache {
-  constructor(es, cacheOpts) {
+  _es: LegacyApiCaller;
+  _cache: LruCache<string, Promise<string>>;
+
+  constructor(es: LegacyApiCaller, cacheOpts: CacheOptions) {
     this._es = es;
     this._cache = new LruCache(cacheOpts);
   }
@@ -30,8 +39,8 @@ export class SearchCache {
    * with the new ones already in cache
    * @param {object[]} requests array of search requests
    */
-  search(requests) {
-    const promises = [];
+  search(requests: Array<Promise<string>>) {
+    const promises: Array<Promise<string>> = [];
 
     for (const request of requests) {
       const key = JSON.stringify(request);

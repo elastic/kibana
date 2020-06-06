@@ -19,9 +19,7 @@
 
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
-// @ts-ignore
 import { SearchCache } from './data_model/search_cache';
-// @ts-ignore
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
