@@ -12,7 +12,8 @@ interface CommandType {
     | 'setScheduleProperty'
     | 'setAlertParams'
     | 'setAlertActionParams'
-    | 'setAlertActionProperty';
+    | 'setAlertActionProperty'
+    | 'setAlertActionSubProperty';
 }
 
 export interface AlertState {
@@ -25,6 +26,7 @@ export interface AlertReducerAction {
     key: string;
     value: {};
     index?: number;
+    subKey?: string;
   };
 }
 
@@ -124,6 +126,33 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
         const updatedAction = {
           ...oldAction,
           [key]: value,
+        };
+        alert.actions.splice(index, 0, updatedAction);
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            actions: [...alert.actions],
+          },
+        };
+      }
+    }
+    case 'setAlertActionSubProperty': {
+      const { key, subKey, value, index } = payload;
+      if (
+        index === undefined ||
+        subKey === undefined ||
+        isEqual(alert.actions[index][key][subKey], value)
+      ) {
+        return state;
+      } else {
+        const oldAction = alert.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          [key]: {
+            ...[key],
+            [subKey]: value,
+          },
         };
         alert.actions.splice(index, 0, updatedAction);
         return {

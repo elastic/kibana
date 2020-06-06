@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { api } from '../case/api';
 import { externalServiceMock, mapping, apiParams } from './mocks';
-import { ExternalService } from '../case/types';
+import { ExternalService } from './types';
+import { api } from './api';
 
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;

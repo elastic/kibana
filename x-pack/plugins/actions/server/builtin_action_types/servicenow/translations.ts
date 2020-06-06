@@ -9,3 +9,11 @@ import { i18n } from '@kbn/i18n';
 export const NAME = i18n.translate('xpack.actions.builtin.case.servicenowTitle', {
   defaultMessage: 'ServiceNow',
 });
+
+export const WHITE_LISTED_ERROR = (message: string) =>
+  i18n.translate('xpack.actions.builtin.case.configuration.apiWhitelistError', {
+    defaultMessage: 'error configuring connector action: {message}',
+    values: {
+      message,
+    },
+  });
