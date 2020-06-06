@@ -131,13 +131,6 @@ export interface HapiReadableStream extends Readable {
     filename: string;
   };
 }
-export interface ExportRulesRequestParams {
-  body: { objects: Array<{ rule_id: string }> | null | undefined };
-  query: {
-    file_name: string;
-    exclude_export_details: boolean;
-  };
-}
 
 export interface FindRuleParams {
   alertsClient: AlertsClient;

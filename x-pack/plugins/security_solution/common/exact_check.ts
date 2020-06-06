@@ -45,7 +45,11 @@ export const exactCheck = <T>(original: T, decoded: Either<t.Errors, T>): Either
 };
 
 export const findDifferencesRecursive = <T>(original: T, decodedValue: T): string[] => {
-  if (decodedValue == null) {
+  if (decodedValue === null && original === null) {
+    // both the decodedValue and the original are null which indicates that they are equal
+    // so do not report differences
+    return [];
+  } else if (decodedValue == null) {
     try {
       // It is null and painful when the original contains an object or an array
       // the the decoded value does not have.

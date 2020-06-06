@@ -32,7 +32,10 @@ export const falsePositivesOrUndefined = t.union([false_positives, t.undefined])
 export type FalsePositivesOrUndefined = t.TypeOf<typeof falsePositivesOrUndefined>;
 
 export const file_name = t.string;
+export type FileName = t.TypeOf<typeof file_name>;
+
 export const exclude_export_details = t.boolean;
+export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
 
 /**
  * TODO: Right now the filters is an "unknown", when it could more than likely
