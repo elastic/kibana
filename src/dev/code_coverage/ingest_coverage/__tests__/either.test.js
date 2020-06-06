@@ -41,7 +41,7 @@ describe(`either datatype functions`, () => {
   });
   describe('tryCatch', () => {
     let sut;
-    beforeAll(() => {
+    before(() => {
       sut = undefined;
     });
     it(`should return a 'Left' on error`, () => {
