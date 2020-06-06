@@ -33,7 +33,7 @@ export const updateTimelinesRoute = (
         body: buildRouteValidation(updateTimelineSchema),
       },
       options: {
-        tags: ['access:access:securitySolution'],
+        tags: ['access:securitySolution'],
       },
     },
     // eslint-disable-next-line complexity
