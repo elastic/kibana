@@ -159,12 +159,12 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
 
 export enum TemplateTimelineType {
   elastic = 'elastic',
-  customized = 'customized',
+  custom = 'custom',
 }
 
 export const TemplateTimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TemplateTimelineType.elastic),
-  runtimeTypes.literal(TemplateTimelineType.customized),
+  runtimeTypes.literal(TemplateTimelineType.custom),
 ]);
 
 export const TemplateTimelineTypeLiteralWithNullRt = unionWithNullType(

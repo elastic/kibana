@@ -2112,6 +2112,16 @@ export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
+
+  defaultTimelineCount?: Maybe<number>;
+
+  templateTimelineCount?: Maybe<number>;
+
+  elasticTemplateTimelineCount?: Maybe<number>;
+
+  customTemplateTimelineCount?: Maybe<number>;
+
+  favoriteCount?: Maybe<number>;
 }
 
 export interface Mutation {
@@ -8641,6 +8651,24 @@ export namespace ResponseTimelinesResolvers {
     timeline?: TimelineResolver<(Maybe<TimelineResult>)[], TypeParent, TContext>;
 
     totalCount?: TotalCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    defaultTimelineCount?: DefaultTimelineCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    templateTimelineCount?: TemplateTimelineCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    elasticTemplateTimelineCount?: ElasticTemplateTimelineCountResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
+
+    customTemplateTimelineCount?: CustomTemplateTimelineCountResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
+
+    favoriteCount?: FavoriteCountResolver<Maybe<number>, TypeParent, TContext>;
   }
 
   export type TimelineResolver<
@@ -8649,6 +8677,31 @@ export namespace ResponseTimelinesResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type TotalCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DefaultTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ElasticTemplateTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CustomTemplateTimelineCountResolver<
+    R = Maybe<number>,
+    Parent = ResponseTimelines,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FavoriteCountResolver<
     R = Maybe<number>,
     Parent = ResponseTimelines,
     TContext = SiemContext

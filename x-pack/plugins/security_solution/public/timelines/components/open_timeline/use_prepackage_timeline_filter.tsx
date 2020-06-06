@@ -21,63 +21,75 @@ import { TimelineTabsStyle, TemplateTimelineFilter } from './types';
 export const usePrepackageTimelineFilter = ({
   timelineType,
   elasticTemplateTimelineCount,
-  customizedTemplateTimelineCount,
+  customTemplateTimelineCount,
 }: {
   timelineType: TimelineTypeLiteralWithNull;
   elasticTemplateTimelineCount?: number | null;
-  customizedTemplateTimelineCount?: number | null;
+  customTemplateTimelineCount?: number | null;
 }): {
   timelineStatus: TimelineStatusLiteral;
   templateTimelineFilter: JSX.Element[] | null;
 } => {
-  const showTemplateTimelineFilter = timelineType === TimelineType.template;
+  const isTemplateFilterEnabled = timelineType === TimelineType.template;
 
   const [templateTimelineType, setTemplateTimelineType] = useState<
     TemplateTimelineTypeLiteralWithNull
-  >(showTemplateTimelineFilter ? TemplateTimelineType.elastic : null);
+  >(null);
 
-  const filters = [
-    {
-      id: TemplateTimelineType.elastic,
-      name: i18n.FILTER_ELASTIC_TIMELINES,
-      disabled: false,
-      withNext: true,
-      count: elasticTemplateTimelineCount ?? undefined,
-    },
-    {
-      id: TemplateTimelineType.customized,
-      name: i18n.FILTER_CUSTOMISED_TIMELINES,
-      disabled: false,
-      withNext: false,
-      count: customizedTemplateTimelineCount ?? undefined,
-    },
-  ];
+  const filters = useMemo(
+    () => [
+      {
+        id: TemplateTimelineType.elastic,
+        name: i18n.FILTER_ELASTIC_TIMELINES,
+        disabled: !isTemplateFilterEnabled,
+        withNext: true,
+        count: elasticTemplateTimelineCount ?? undefined,
+      },
+      {
+        id: TemplateTimelineType.custom,
+        name: i18n.FILTER_CUSTOM_TIMELINES,
+        disabled: !isTemplateFilterEnabled,
+        withNext: false,
+        count: customTemplateTimelineCount ?? undefined,
+      },
+    ],
+    [customTemplateTimelineCount, elasticTemplateTimelineCount, isTemplateFilterEnabled]
+  );
 
   const onFilterClicked = useCallback(
     (timelineStatus, tabId) => {
-      if (timelineStatus !== TimelineStatus.immutiable && tabId !== TemplateTimelineType.elastic) {
-        setTemplateTimelineType(TemplateTimelineType.customized);
+      if (templateTimelineType === tabId) {
+        setTemplateTimelineType(null);
       } else {
-        setTemplateTimelineType(tabId);
+        if (
+          timelineStatus !== TimelineStatus.immutiable &&
+          tabId !== TemplateTimelineType.elastic
+        ) {
+          setTemplateTimelineType(TemplateTimelineType.custom);
+        } else {
+          setTemplateTimelineType(tabId);
+        }
       }
     },
-    [setTemplateTimelineType]
+    [setTemplateTimelineType, templateTimelineType]
   );
 
   const templateTimelineFilter = useMemo(() => {
-    return showTemplateTimelineFilter
+    return isTemplateFilterEnabled
       ? filters.map((tab: TemplateTimelineFilter) => (
           <EuiFilterButton
             hasActiveFilters={tab.id === templateTimelineType}
             key={`template-timeline-filter-${tab.id}`}
             numFilters={tab.count}
             onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
+            withNext={tab.withNext}
+            isDisabled={tab.disabled}
           >
             {tab.name}
           </EuiFilterButton>
         ))
       : null;
-  }, [templateTimelineType, showTemplateTimelineFilter]);
+  }, [templateTimelineType, filters]);
 
   return {
     timelineStatus:

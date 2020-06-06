@@ -227,10 +227,10 @@ export const FILTER_ELASTIC_TIMELINES = i18n.translate(
   }
 );
 
-export const FILTER_CUSTOMISED_TIMELINES = i18n.translate(
+export const FILTER_CUSTOM_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.templateFilter.customizedTitle',
   {
-    defaultMessage: 'Customized',
+    defaultMessage: 'Custom',
   }
 );
 

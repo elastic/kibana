@@ -34,7 +34,12 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
-  'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'query' | 'totalSearchResultsCount'
+  | 'favoriteCount'
+  | 'onlyFavorites'
+  | 'onQueryChange'
+  | 'onToggleOnlyFavorites'
+  | 'query'
+  | 'totalSearchResultsCount'
 > & { children?: JSX.Element | null };
 
 const searchBox = {
@@ -47,6 +52,7 @@ const searchBox = {
  */
 export const SearchRow = React.memo<Props>(
   ({
+    favoriteCount,
     onlyFavorites,
     onQueryChange,
     onToggleOnlyFavorites,
@@ -68,6 +74,7 @@ export const SearchRow = React.memo<Props>(
                   data-test-subj="only-favorites-toggle"
                   hasActiveFilters={onlyFavorites}
                   onClick={onToggleOnlyFavorites}
+                  numFilters={favoriteCount}
                 >
                   {i18n.ONLY_FAVORITES}
                 </EuiFilterButton>

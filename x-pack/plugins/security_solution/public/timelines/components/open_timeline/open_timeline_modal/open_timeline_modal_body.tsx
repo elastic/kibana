@@ -23,6 +23,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     hideActions = [],
     isLoading,
     itemIdToExpandedNotesRowMap,
@@ -78,6 +79,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             <>
               <SearchRow
                 data-test-subj="search-row"
+                favoriteCount={favoriteCount}
                 onlyFavorites={onlyFavorites}
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}

@@ -30,6 +30,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
@@ -156,6 +157,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"
+            favoriteCount={favoriteCount}
             onlyFavorites={onlyFavorites}
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={onToggleOnlyFavorites}

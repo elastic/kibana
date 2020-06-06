@@ -24,6 +24,11 @@ export const allTimelinesQuery = gql`
       status: $status
     ) {
       totalCount
+      defaultTimelineCount
+      templateTimelineCount
+      elasticTemplateTimelineCount
+      customTemplateTimelineCount
+      favoriteCount
       timeline {
         savedObjectId
         description

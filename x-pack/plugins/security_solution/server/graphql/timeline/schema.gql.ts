@@ -278,6 +278,11 @@ export const timelineSchema = gql`
   type ResponseTimelines {
     timeline: [TimelineResult]!
     totalCount: Float
+    defaultTimelineCount: Float
+    templateTimelineCount: Float
+    elasticTemplateTimelineCount: Float
+    customTemplateTimelineCount: Float
+    favoriteCount: Float
   }
 
   #########################

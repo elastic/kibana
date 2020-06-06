@@ -38,6 +38,11 @@ export interface AllTimelinesArgs {
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
+  customTemplateTimelineCount: number;
+  defaultTimelineCount: number;
+  elasticTemplateTimelineCount: number;
+  templateTimelineCount: number;
+  favoriteCount: number;
 }
 
 export interface AllTimelinesVariables {
@@ -95,6 +100,11 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
     loading: false,
     totalCount: 0,
     timelines: [],
+    customTemplateTimelineCount: 0,
+    defaultTimelineCount: 0,
+    elasticTemplateTimelineCount: 0,
+    templateTimelineCount: 0,
+    favoriteCount: 0,
   });
 
   const fetchAllTimeline = useCallback(
@@ -138,8 +148,16 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                 },
               },
             });
-            const totalCount = response?.data?.getAllTimeline?.totalCount ?? 0;
-            const timelines = response?.data?.getAllTimeline?.timeline ?? [];
+            const getAllTimelineResponse = response?.data?.getAllTimeline;
+            const totalCount = getAllTimelineResponse?.totalCount ?? 0;
+            const timelines = getAllTimelineResponse?.timeline ?? [];
+            const customTemplateTimelineCount =
+              getAllTimelineResponse?.customTemplateTimelineCount ?? 0;
+            const defaultTimelineCount = getAllTimelineResponse?.defaultTimelineCount ?? 0;
+            const elasticTemplateTimelineCount =
+              getAllTimelineResponse?.elasticTemplateTimelineCount ?? 0;
+            const templateTimelineCount = getAllTimelineResponse?.templateTimelineCount ?? 0;
+            const favoriteCount = getAllTimelineResponse?.favoriteCount ?? 0;
             if (!didCancel) {
               dispatch(
                 inputsActions.setQuery({
@@ -155,6 +173,11 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                 loading: false,
                 totalCount,
                 timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
+                customTemplateTimelineCount,
+                defaultTimelineCount,
+                elasticTemplateTimelineCount,
+                templateTimelineCount,
+                favoriteCount,
               });
             }
           }
@@ -170,6 +193,11 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               loading: false,
               totalCount: 0,
               timelines: [],
+              customTemplateTimelineCount: 0,
+              defaultTimelineCount: 0,
+              elasticTemplateTimelineCount: 0,
+              templateTimelineCount: 0,
+              favoriteCount: 0,
             });
           }
         }

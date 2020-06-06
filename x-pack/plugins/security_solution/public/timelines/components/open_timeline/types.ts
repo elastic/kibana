@@ -123,6 +123,8 @@ export interface OpenTimelineProps {
   deleteTimelines?: DeleteTimelines;
   /** The default requested size of each page of search results */
   defaultPageSize: number;
+  /** The number of favorite timeline*/
+  favoriteCount?: number | null | undefined;
   /** Displays an indicator that data is loading when true */
   isLoading: boolean;
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */

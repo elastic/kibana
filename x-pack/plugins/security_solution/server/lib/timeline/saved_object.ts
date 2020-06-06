@@ -39,6 +39,14 @@ interface ResponseTimelines {
   totalCount: number;
 }
 
+interface AllTimelinesResponse extends ResponseTimelines {
+  defaultTimelineCount: number;
+  templateTimelineCount: number;
+  elasticTemplateTimelineCount: number;
+  customTemplateTimelineCount: number;
+  favoriteCount: number;
+}
+
 export interface ResponseTemplateTimeline {
   code?: Maybe<number>;
 
@@ -58,7 +66,7 @@ export interface Timeline {
     sort: SortTimeline | null,
     status: TimelineStatusLiteralWithNull,
     timelineType: TimelineTypeLiteralWithNull
-  ) => Promise<ResponseTimelines>;
+  ) => Promise<AllTimelinesResponse>;
 
   persistFavorite: (
     request: FrameworkRequest,
@@ -111,7 +119,9 @@ const getTimelineTypeFilter = (
   status: TimelineStatusLiteralWithNull
 ) => {
   const typeFilter =
-    timelineType === TimelineType.template
+    timelineType == null
+      ? null
+      : timelineType === TimelineType.template
       ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
       : /** Show me every timeline whose timelineType is not "template".
          * which includes timelineType === 'default' and
@@ -127,11 +137,13 @@ const getTimelineTypeFilter = (
       : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
 
   const immutiableFilter =
-    status === TimelineStatus.immutiable
+    status == null
+      ? null
+      : status === TimelineStatus.immutiable
       ? `siem-ui-timeline.attributes.status: ${TimelineStatus.immutiable}`
       : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutiable}`;
 
-  return `${typeFilter} and ${draftFilter} and ${immutiableFilter}`;
+  return [typeFilter, draftFilter, immutiableFilter].filter((f) => f != null).join(' and ');
 };
 
 export const getAllTimeline = async (
@@ -142,7 +154,7 @@ export const getAllTimeline = async (
   sort: SortTimeline | null,
   status: TimelineStatusLiteralWithNull,
   timelineType: TimelineTypeLiteralWithNull
-): Promise<ResponseTimelines> => {
+): Promise<AllTimelinesResponse> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: pageInfo != null ? pageInfo.pageSize : undefined,
@@ -163,7 +175,60 @@ export const getAllTimeline = async (
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
-  return getAllSavedTimeline(request, options);
+
+  const timelineOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    page: 1,
+    filter: getTimelineTypeFilter(TimelineType.default, TimelineStatus.active),
+  };
+
+  const templateTimelineOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    page: 1,
+    filter: getTimelineTypeFilter(TimelineType.template, null),
+  };
+
+  const elasticTemplateTimelineOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    page: 1,
+    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.immutiable),
+  };
+
+  const customTemplateTimelineOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    page: 1,
+    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.active),
+  };
+
+  const favoriteTimelineOptions = {
+    type: timelineSavedObjectType,
+    searchFields: ['title', 'description', 'favorite.keySearch'],
+    perPage: 1,
+    page: 1,
+    filter: getTimelineTypeFilter(timelineType, TimelineStatus.active),
+  };
+
+  const result = await Promise.all([
+    getAllSavedTimeline(request, options),
+    getAllSavedTimeline(request, timelineOptions),
+    getAllSavedTimeline(request, templateTimelineOptions),
+    getAllSavedTimeline(request, elasticTemplateTimelineOptions),
+    getAllSavedTimeline(request, customTemplateTimelineOptions),
+    getAllSavedTimeline(request, favoriteTimelineOptions),
+  ]);
+
+  return Promise.resolve({
+    ...result[0],
+    defaultTimelineCount: result[1].totalCount,
+    templateTimelineCount: result[2].totalCount,
+    elasticTemplateTimelineCount: result[3].totalCount,
+    customTemplateTimelineCount: result[4].totalCount,
+    favoriteCount: result[5].totalCount,
+  });
 };
 
 export const getDraftTimeline = async (

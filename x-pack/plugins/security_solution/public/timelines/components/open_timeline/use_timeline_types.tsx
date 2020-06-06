@@ -32,36 +32,43 @@ export const useTimelineTypes = ({
     tabName === TimelineType.default || tabName === TimelineType.template ? tabName : null
   );
 
-  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = (
-    timelineTabsStyle: TimelineTabsStyle
-  ) => [
-    {
-      id: TimelineType.default,
-      name:
-        timelineTabsStyle === TimelineTabsStyle.filter
-          ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
-          : i18n.TAB_TIMELINES,
-      href: getTimelineTabsUrl(TimelineType.default, urlSearch),
-      disabled: false,
-      withNext: true,
-      count: defaultTimelineCount ?? undefined,
-    },
-    {
-      id: TimelineType.template,
-      name:
-        timelineTabsStyle === TimelineTabsStyle.filter
-          ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
-          : i18n.TAB_TEMPLATES,
-      href: getTimelineTabsUrl(TimelineType.template, urlSearch),
-      disabled: false,
-      withNext: false,
-      count: templateTimelineCount ?? undefined,
-    },
-  ];
+  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
+    (timelineTabsStyle: TimelineTabsStyle) => [
+      {
+        id: TimelineType.default,
+        name:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
+            : i18n.TAB_TIMELINES,
+        href: getTimelineTabsUrl(TimelineType.default, urlSearch),
+        disabled: false,
+        withNext: true,
+        count:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? defaultTimelineCount ?? undefined
+            : undefined,
+      },
+      {
+        id: TimelineType.template,
+        name:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
+            : i18n.TAB_TEMPLATES,
+        href: getTimelineTabsUrl(TimelineType.template, urlSearch),
+        disabled: false,
+        withNext: false,
+        count:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? templateTimelineCount ?? undefined
+            : undefined,
+      },
+    ],
+    [defaultTimelineCount, templateTimelineCount, urlSearch]
+  );
 
   const onFilterClicked = useCallback(
-    (timelineTabsStyle, tabId) => {
-      if (timelineTabsStyle === TimelineTabsStyle.filter && tabId === timelineType) {
+    (tabId) => {
+      if (tabId === timelineType) {
         setTimelineTypes(null);
       } else {
         setTimelineTypes(tabId);
@@ -80,7 +87,7 @@ export const useTimelineTypes = ({
               disabled={tab.disabled}
               key={`timeline-${TimelineTabsStyle.tab}-${tab.id}`}
               href={tab.href}
-              onClick={onFilterClicked.bind(null, TimelineTabsStyle.tab, tab.id)}
+              onClick={onFilterClicked.bind(null, tab.id)}
             >
               {tab.name}
             </EuiTab>
@@ -103,7 +110,7 @@ export const useTimelineTypes = ({
         {tab.name}
       </EuiFilterButton>
     ));
-  }, [timelineType]);
+  }, [timelineType, getFilterOrTabs]);
 
   return {
     timelineType,

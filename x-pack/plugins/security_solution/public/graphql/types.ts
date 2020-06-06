@@ -2110,6 +2110,16 @@ export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
+
+  defaultTimelineCount?: Maybe<number>;
+
+  templateTimelineCount?: Maybe<number>;
+
+  elasticTemplateTimelineCount?: Maybe<number>;
+
+  customTemplateTimelineCount?: Maybe<number>;
+
+  favoriteCount?: Maybe<number>;
 }
 
 export interface Mutation {
@@ -4323,6 +4333,16 @@ export namespace GetAllTimeline {
     __typename?: 'ResponseTimelines';
 
     totalCount: Maybe<number>;
+
+    defaultTimelineCount: Maybe<number>;
+
+    templateTimelineCount: Maybe<number>;
+
+    elasticTemplateTimelineCount: Maybe<number>;
+
+    customTemplateTimelineCount: Maybe<number>;
+
+    favoriteCount: Maybe<number>;
 
     timeline: (Maybe<Timeline>)[];
   };

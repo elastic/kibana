@@ -112,10 +112,25 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
-    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes({});
+    const {
+      customTemplateTimelineCount,
+      defaultTimelineCount,
+      elasticTemplateTimelineCount,
+      favoriteCount,
+      fetchAllTimeline,
+      timelines,
+      loading,
+      totalCount,
+      templateTimelineCount,
+    } = useGetAllTimeline();
+    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes({
+      defaultTimelineCount,
+      templateTimelineCount,
+    });
     const { timelineStatus, templateTimelineFilter } = usePrepackageTimelineFilter({
       timelineType,
+      customTemplateTimelineCount,
+      elasticTemplateTimelineCount,
     });
 
     const refetch = useCallback(() => {
@@ -274,6 +289,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         data-test-subj={'open-timeline'}
         deleteTimelines={onDeleteOneTimeline}
         defaultPageSize={defaultPageSize}
+        favoriteCount={favoriteCount}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
         importDataModalToggle={importDataModalToggle}
@@ -305,6 +321,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         data-test-subj={'open-timeline-modal'}
         deleteTimelines={onDeleteOneTimeline}
         defaultPageSize={defaultPageSize}
+        favoriteCount={favoriteCount}
         hideActions={hideActions}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
