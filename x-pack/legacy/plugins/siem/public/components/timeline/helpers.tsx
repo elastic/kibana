@@ -68,12 +68,12 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
     .reduce((queries: string[], dataProvider: DataProvider) => {
       const flatDataProviders = [dataProvider, ...dataProvider.and];
       const activeDataProviders = flatDataProviders.filter(
-        flatDataProvider => flatDataProvider.enabled
+        (flatDataProvider) => flatDataProvider.enabled
       );
 
       if (!activeDataProviders.length) return queries;
 
-      const activeDataProvidersQueries = activeDataProviders.map(activeDataProvider =>
+      const activeDataProvidersQueries = activeDataProviders.map((activeDataProvider) =>
         buildQueryMatch(activeDataProvider, browserFields)
       );
 
@@ -81,7 +81,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
 
       return [...queries, activeDataProvidersQueryMatch];
     }, [])
-    .filter(queriesItem => !isEmpty(queriesItem))
+    .filter((queriesItem) => !isEmpty(queriesItem))
     .reduce((globalQuery: string, queryMatch: string, index: number, queries: string[]) => {
       if (queries.length <= 1) return queryMatch;
 
