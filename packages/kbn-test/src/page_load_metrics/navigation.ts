@@ -78,7 +78,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
   const browser = await puppeteer.launch({ headless: options.headless, args: ['--no-sandbox'] });
   const devToolsResponses: NavigationResults = new Map();
   const apps = [
-    { path: 'app/kibana#/discover', locator: '[data-test-subj="discover-sidebar"]' },
+    { path: '/app/kibana#/discover', locator: '[data-test-subj="discover-sidebar"]' },
     { path: '/app/kibana#/home', locator: '[data-test-subj="homeApp"]' },
     { path: '/app/canvas', locator: '[data-test-subj="create-workpad-button"]' },
     { path: '/app/maps', locator: '[title="Maps"]' },
@@ -141,7 +141,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
           const failureDir = resolve(options.screenshotsDir, 'failure');
           const screenshotPath = resolve(
             failureDir,
-            `${app.path.slice(1).split('/').join('_')}_navigation.png`
+            `${app.path.slice(1).split(/#|\//).join('_')}_navigation.png`
           );
           Fs.mkdirSync(failureDir, { recursive: true });
 
