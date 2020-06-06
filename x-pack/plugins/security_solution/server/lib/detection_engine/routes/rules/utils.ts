@@ -8,6 +8,7 @@ import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -20,7 +21,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -32,7 +33,7 @@ import {
 import { hasListsFeature } from '../../feature_flags';
 import { RuleActions } from '../../rule_actions/types';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 export const getIdError = ({
   id,

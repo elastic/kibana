@@ -129,12 +129,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   immutable: boolean;
 };
 
-export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
-  id: string | undefined | null;
-  rule_id: string;
-  immutable: boolean;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CallWithRequest<T extends Record<string, any>, V> = (
   endpoint: string,

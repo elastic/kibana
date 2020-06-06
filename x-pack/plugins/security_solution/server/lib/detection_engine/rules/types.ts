@@ -131,11 +131,6 @@ export interface HapiReadableStream extends Readable {
     filename: string;
   };
 }
-export interface ImportRulesRequestParams {
-  query: { overwrite: boolean };
-  body: { file: HapiReadableStream };
-}
-
 export interface ExportRulesRequestParams {
   body: { objects: Array<{ rule_id: string }> | null | undefined };
   query: {

@@ -11,7 +11,7 @@ export type DefaultBooleanFalseC = t.Type<boolean, boolean, unknown>;
 
 /**
  * Types the DefaultBooleanFalse as:
- *   - If null or undefined, then a default true will be set
+ *   - If null or undefined, then a default false will be set
  */
 export const DefaultBooleanFalse: DefaultBooleanFalseC = new t.Type<boolean, boolean, unknown>(
   'DefaultBooleanFalse',

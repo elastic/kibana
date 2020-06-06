@@ -19,7 +19,7 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { ImportRuleAlertRest, RuleTypeParams } from '../../types';
+import { RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
@@ -29,8 +29,9 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { RuleAlertType } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
   beforeAll(() => {
