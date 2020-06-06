@@ -19,7 +19,7 @@
 
 import { Field } from './field';
 import { IndexPattern } from '../index_patterns';
-import { FieldFormatMethods } from '../types';
+import { FieldFormatsStartCommon } from '../..';
 import { KBN_FIELD_TYPES } from '../../../common';
 
 describe('Field', function () {
@@ -33,7 +33,7 @@ describe('Field', function () {
       { ...fieldValues, ...values },
       false,
       {
-        fieldFormats: {} as FieldFormatMethods,
+        fieldFormats: {} as FieldFormatsStartCommon,
         onNotification: () => {},
       }
     );
@@ -214,7 +214,7 @@ describe('Field', function () {
 
   it('exports the property to JSON', () => {
     const field = new Field({ fieldFormatMap: { name: {} } } as IndexPattern, fieldValues, false, {
-      fieldFormats: {} as FieldFormatMethods,
+      fieldFormats: {} as FieldFormatsStartCommon,
       onNotification: () => {},
     });
     expect(flatten(field)).toMatchSnapshot();
