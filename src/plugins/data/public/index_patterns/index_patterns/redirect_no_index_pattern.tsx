@@ -25,7 +25,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 
 let bannerId: string;
 
-export function onRedirectNoIndexPattern(core: CoreStart) {
+export const onRedirectNoIndexPattern = (core: CoreStart) => () => {
   const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
   const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
   let timeoutId: NodeJS.Timeout | undefined;
@@ -62,4 +62,4 @@ export function onRedirectNoIndexPattern(core: CoreStart) {
 
   // return never-resolving promise to stop resolving and wait for the url change
   return new Promise(() => {});
-}
+};

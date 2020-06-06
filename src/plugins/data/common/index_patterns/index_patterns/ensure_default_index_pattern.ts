@@ -25,7 +25,7 @@ export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
   core: CoreStart,
-  onRedirectNoIndexPattern: (core: CoreStart) => Promise<unknown> | void
+  onRedirectNoIndexPattern: () => Promise<unknown> | void
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
@@ -51,7 +51,7 @@ export const createEnsureDefaultIndexPattern = (
       defaultId = patterns[0];
       core.uiSettings.set('defaultIndex', defaultId);
     } else {
-      return onRedirectNoIndexPattern(core);
+      return onRedirectNoIndexPattern();
     }
   };
 };

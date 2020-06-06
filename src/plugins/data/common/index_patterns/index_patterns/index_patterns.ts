@@ -72,7 +72,7 @@ export class IndexPatternsService {
     fieldFormats: FieldFormatsStartCommon,
     onNotification: OnNotification,
     onError: OnError,
-    onRedirectNoIndexPattern: (core: CoreStart) => void
+    onRedirectNoIndexPattern: () => void
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
