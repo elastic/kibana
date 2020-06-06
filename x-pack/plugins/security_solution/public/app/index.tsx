@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { AppMountParameters } from '../../../../../src/core/public';
 import { State } from '../common/store';
 import { StartServices } from '../types';
-import { SiemApp } from './app';
+import { SecurityApp } from './app';
 import { AppFrontendLibs } from '../common/lib/lib';
 
 interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
@@ -30,9 +30,9 @@ export const renderApp = ({
   SubPluginRoutes,
 }: RenderAppProps) => {
   render(
-    <SiemApp apolloClient={apolloClient} history={history} services={services} store={store}>
+    <SecurityApp apolloClient={apolloClient} history={history} services={services} store={store}>
       <SubPluginRoutes />
-    </SiemApp>,
+    </SecurityApp>,
     element
   );
   return () => unmountComponentAtNode(element);

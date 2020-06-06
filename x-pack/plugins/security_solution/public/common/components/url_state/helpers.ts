@@ -12,7 +12,7 @@ import * as H from 'history';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
@@ -84,17 +84,17 @@ export const replaceQueryStringInLocation = (
 };
 
 export const getUrlType = (pageName: string): UrlStateType => {
-  if (pageName === SiemPageName.overview) {
+  if (pageName === SecurityPageName.overview) {
     return 'overview';
-  } else if (pageName === SiemPageName.hosts) {
+  } else if (pageName === SecurityPageName.hosts) {
     return 'host';
-  } else if (pageName === SiemPageName.network) {
+  } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.detections) {
+  } else if (pageName === SecurityPageName.detections) {
     return 'detections';
-  } else if (pageName === SiemPageName.timelines) {
+  } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
-  } else if (pageName === SiemPageName.case) {
+  } else if (pageName === SecurityPageName.case) {
     return 'case';
   }
   return 'overview';

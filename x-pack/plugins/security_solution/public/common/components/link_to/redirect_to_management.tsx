@@ -6,10 +6,10 @@
 
 import React, { memo } from 'react';
 import { RedirectWrapper } from './redirect_wrapper';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 export const RedirectToManagementPage = memo(() => {
-  return <RedirectWrapper to={`/${SiemPageName.management}`} />;
+  return <RedirectWrapper to={`/${SecurityPageName.management}`} />;
 });
 
 RedirectToManagementPage.displayName = 'RedirectToManagementPage';

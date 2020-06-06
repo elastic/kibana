@@ -10,7 +10,7 @@ import { Redirect } from 'react-router-dom';
 import * as i18n from './translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { PropertyActions } from '../property_actions';
 import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
@@ -68,7 +68,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
-    return <Redirect to={`/${SiemPageName.case}`} />;
+    return <Redirect to={`/${SecurityPageName.case}`} />;
   }
   return (
     <>

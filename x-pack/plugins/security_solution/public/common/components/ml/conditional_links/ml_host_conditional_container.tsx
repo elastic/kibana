@@ -11,7 +11,7 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { HostsTableType } from '../../../../hosts/store/model';
 
 import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
@@ -42,7 +42,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           sort: false,
           encode: false,
         });
-        return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
+        return <Redirect to={`/${SecurityPageName.hosts}?${reEncoded}`} />;
       }}
     />
     <Route
@@ -67,7 +67,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           });
 
           return (
-            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+            <Redirect to={`/${SecurityPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
           );
         } else if (multipleEntities(hostName)) {
           const hosts: string[] = getMultipleEntities(hostName);
@@ -82,7 +82,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           });
 
           return (
-            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+            <Redirect to={`/${SecurityPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
           );
         } else {
           const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
@@ -92,7 +92,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
 
           return (
             <Redirect
-              to={`/${SiemPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+              to={`/${SecurityPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
             />
           );
         }

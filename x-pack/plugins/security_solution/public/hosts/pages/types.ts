@@ -7,12 +7,12 @@
 import { IIndexPattern } from 'src/plugins/data/public';
 import { ActionCreator } from 'typescript-fsa';
 
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 import { hostsModel } from '../store';
 import { GlobalTimeArgs } from '../../common/containers/global_time';
 import { InputsModelId } from '../../common/store/inputs/constants';
 
-export const hostsPagePath = `/:pageName(${SiemPageName.hosts})`;
+export const hostsPagePath = `/:pageName(${SecurityPageName.hosts})`;
 export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
 
 export type HostsTabsProps = HostsComponentProps & {

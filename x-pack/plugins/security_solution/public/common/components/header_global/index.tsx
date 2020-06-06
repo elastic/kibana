@@ -12,7 +12,7 @@ import styled, { css } from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { getOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
@@ -60,14 +60,14 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                         display="condensed"
                         navTabs={
                           hideDetectionEngine
-                            ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
+                            ? pickBy((_, key) => key !== SecurityPageName.detections, navTabs)
                             : navTabs
                         }
                       />
                     ) : (
                       <SiemNavigation
                         display="condensed"
-                        navTabs={pickBy((_, key) => key === SiemPageName.overview, navTabs)}
+                        navTabs={pickBy((_, key) => key === SecurityPageName.overview, navTabs)}
                       />
                     )}
                   </FlexItem>
@@ -77,7 +77,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
               <FlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                   {indicesExistOrDataTemporarilyUnavailable(indicesExist) &&
-                    currentLocation.pathname.includes(`/${SiemPageName.detections}/`) && (
+                    currentLocation.pathname.includes(`/${SecurityPageName.detections}/`) && (
                       <FlexItem grow={false}>
                         <MlPopover />
                       </FlexItem>

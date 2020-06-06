@@ -8,7 +8,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 export type CaseComponentProps = RouteComponentProps<{
   detailName: string;
@@ -20,16 +20,18 @@ export const RedirectToCasePage = ({
   },
 }: CaseComponentProps) => (
   <RedirectWrapper
-    to={detailName ? `/${SiemPageName.case}/${detailName}` : `/${SiemPageName.case}`}
+    to={detailName ? `/${SecurityPageName.case}/${detailName}` : `/${SecurityPageName.case}`}
   />
 );
 
-export const RedirectToCreatePage = () => <RedirectWrapper to={`/${SiemPageName.case}/create`} />;
+export const RedirectToCreatePage = () => (
+  <RedirectWrapper to={`/${SecurityPageName.case}/create`} />
+);
 export const RedirectToConfigureCasesPage = () => (
-  <RedirectWrapper to={`/${SiemPageName.case}/configure`} />
+  <RedirectWrapper to={`/${SecurityPageName.case}/configure`} />
 );
 
-const baseCaseUrl = `#/link-to/${SiemPageName.case}`;
+const baseCaseUrl = `#/link-to/${SecurityPageName.case}`;
 
 export const getCaseUrl = (search: string | null) =>
   `${baseCaseUrl}${appendSearch(search ?? undefined)}`;

@@ -15,7 +15,7 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../alerts/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import {
   RouteSpyState,
   HostRouteSpyState,
@@ -46,19 +46,19 @@ export const siemRootBreadcrumb: ChromeBreadcrumb[] = [
 ];
 
 const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.network;
+  spyState != null && spyState.pageName === SecurityPageName.network;
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.hosts;
+  spyState != null && spyState.pageName === SecurityPageName.hosts;
 
 const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.timelines;
+  spyState != null && spyState.pageName === SecurityPageName.timelines;
 
 const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.case;
+  spyState != null && spyState.pageName === SecurityPageName.case;
 
 const isDetectionsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SiemPageName.detections;
+  spyState != null && spyState.pageName === SecurityPageName.detections;
 
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps

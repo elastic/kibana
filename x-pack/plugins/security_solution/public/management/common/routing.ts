@@ -12,7 +12,7 @@ import {
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from './constants';
 import { ManagementSubTab } from '../types';
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 
 export type GetManagementUrlProps = {
   /**
@@ -42,24 +42,24 @@ export const getManagementUrl = (props: GetManagementUrlProps): string => {
   switch (props.name) {
     case 'default':
       url += generatePath(MANAGEMENT_ROUTING_ROOT_PATH, {
-        pageName: SiemPageName.management,
+        pageName: SecurityPageName.management,
       });
       break;
     case 'endpointList':
       url += generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
-        pageName: SiemPageName.management,
+        pageName: SecurityPageName.management,
         tabName: ManagementSubTab.endpoints,
       });
       break;
     case 'policyList':
       url += generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
-        pageName: SiemPageName.management,
+        pageName: SecurityPageName.management,
         tabName: ManagementSubTab.policies,
       });
       break;
     case 'policyDetails':
       url += generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
-        pageName: SiemPageName.management,
+        pageName: SecurityPageName.management,
         tabName: ManagementSubTab.policies,
         policyId: props.policyId,
       });

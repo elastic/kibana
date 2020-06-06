@@ -27,7 +27,7 @@ import {
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
 } from './types';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -204,7 +204,7 @@ export const useUrlStateHooks = ({
         }
       });
     } else if (pathName !== prevProps.pathName) {
-      handleInitialize(type, pageName === SiemPageName.detections);
+      handleInitialize(type, pageName === SecurityPageName.alerts);
     }
   }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
 

@@ -19,7 +19,7 @@ import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 
-export enum SiemPageName {
+export enum SecurityPageName {
   alerts = 'alerts',
   overview = 'overview',
   hosts = 'hosts',
@@ -30,13 +30,13 @@ export enum SiemPageName {
 }
 
 export type SiemNavTabKey =
-  | SiemPageName.overview
-  | SiemPageName.hosts
-  | SiemPageName.network
-  | SiemPageName.alerts
-  | SiemPageName.timelines
-  | SiemPageName.case
-  | SiemPageName.management;
+  | SecurityPageName.overview
+  | SecurityPageName.hosts
+  | SecurityPageName.network
+  | SecurityPageName.alerts
+  | SecurityPageName.timelines
+  | SecurityPageName.case
+  | SecurityPageName.management;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 

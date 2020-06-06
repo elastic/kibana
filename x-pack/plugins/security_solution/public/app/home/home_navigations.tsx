@@ -13,57 +13,57 @@ import {
   getCaseUrl,
 } from '../../common/components/link_to';
 import * as i18n from './translations';
-import { SiemPageName, SiemNavTab } from '../types';
+import { SecurityPageName, SiemNavTab } from '../types';
 import { getManagementUrl } from '../../management';
 
 export const navTabs: SiemNavTab = {
-  [SiemPageName.overview]: {
-    id: SiemPageName.overview,
+  [SecurityPageName.overview]: {
+    id: SecurityPageName.overview,
     name: i18n.OVERVIEW,
     href: getOverviewUrl(),
     disabled: false,
     urlKey: 'overview',
   },
-  [SiemPageName.hosts]: {
-    id: SiemPageName.hosts,
+  [SecurityPageName.hosts]: {
+    id: SecurityPageName.hosts,
     name: i18n.HOSTS,
     href: getHostsUrl(),
     disabled: false,
     urlKey: 'host',
   },
-  [SiemPageName.network]: {
-    id: SiemPageName.network,
+  [SecurityPageName.network]: {
+    id: SecurityPageName.network,
     name: i18n.NETWORK,
     href: getNetworkUrl(),
     disabled: false,
     urlKey: 'network',
   },
-  [SiemPageName.detections]: {
-    id: SiemPageName.detections,
+  [SecurityPageName.detections]: {
+    id: SecurityPageName.detections,
     name: i18n.DETECTION_ENGINE,
     href: getDetectionEngineUrl(),
     disabled: false,
     urlKey: 'detections',
   },
-  [SiemPageName.timelines]: {
-    id: SiemPageName.timelines,
+  [SecurityPageName.timelines]: {
+    id: SecurityPageName.timelines,
     name: i18n.TIMELINES,
     href: getTimelinesUrl(),
     disabled: false,
     urlKey: 'timeline',
   },
-  [SiemPageName.case]: {
-    id: SiemPageName.case,
+  [SecurityPageName.case]: {
+    id: SecurityPageName.case,
     name: i18n.CASE,
     href: getCaseUrl(null),
     disabled: false,
     urlKey: 'case',
   },
-  [SiemPageName.management]: {
-    id: SiemPageName.management,
+  [SecurityPageName.management]: {
+    id: SecurityPageName.management,
     name: i18n.MANAGEMENT,
     href: getManagementUrl({ name: 'default' }),
     disabled: false,
-    urlKey: SiemPageName.management,
+    urlKey: SecurityPageName.management,
   },
 };

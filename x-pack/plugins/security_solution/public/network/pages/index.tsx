@@ -14,13 +14,13 @@ import { FlowTarget } from '../../graphql/types';
 import { IPDetails } from './ip_details';
 import { Network } from './network';
 import { GlobalTime } from '../../common/containers/global_time';
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-const networkPagePath = `/:pageName(${SiemPageName.network})`;
+const networkPagePath = `/:pageName(${SecurityPageName.network})`;
 const ipDetailsPageBasePath = `${networkPagePath}/ip/:detailName`;
 
 const NetworkContainerComponent: React.FC<Props> = () => {
@@ -81,14 +81,14 @@ const NetworkContainerComponent: React.FC<Props> = () => {
               },
             }) => (
               <Redirect
-                to={`/${SiemPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
+                to={`/${SecurityPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
               />
             )}
           />
           <Route
-            path={`/${SiemPageName.network}/`}
+            path={`/${SecurityPageName.network}/`}
             render={({ location: { search = '' } }) => (
-              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
+              <Redirect to={`/${SecurityPageName.network}/${NetworkRouteType.flows}${search}`} />
             )}
           />
         </Switch>

@@ -22,18 +22,17 @@ import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
-import { APP_ID, APP_ICON, APP_PATH } from '../common/constants';
+import { APP_ID, APP_ICON, APP_PATH, APP_ALERT_PATH } from '../common/constants';
 import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
 
 import { State, createStore, createInitialState } from './common/store';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
-  private store: Store<State, Action> | null;
+  private store!: Store<State, Action>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.store = null;
   }
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
@@ -72,14 +71,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:overview`,
-      title: 'Overview',
+      title: i18n.translate('xpack.securitySolution.overviewPage.title', {
+        defaultMessage: 'Overview',
+      }),
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: `${APP_PATH}/overview`,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, startPlugins, services },
+          { coreStart, store, services },
           { renderApp, composeLibs },
           { overviewSubPlugin },
         ] = await Promise.all([
@@ -91,7 +92,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...composeLibs(coreStart),
           ...params,
           services,
-          store: this.getStore(coreStart, startPlugins),
+          store,
           SubPluginRoutes: overviewSubPlugin.start().SubPluginRoutes,
         });
       },
@@ -99,12 +100,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.application.register({
       id: `${APP_ID}:alerts`,
-      title: 'Alerts',
+      title: i18n.translate('xpack.securitySolution.alertsPage.title', {
+        defaultMessage: 'Alerts',
+      }),
       order: 9001,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/alerts`,
-      async mount(params: AppMountParameters) {
+      appRoute: APP_ALERT_PATH,
+      mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
@@ -131,7 +134,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: `${APP_PATH}/hosts`,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
@@ -158,7 +161,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: `${APP_PATH}/network`,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
@@ -185,7 +188,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: `${APP_PATH}/timelines`,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
@@ -212,7 +215,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: `${APP_PATH}/cases`,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
@@ -239,9 +242,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: `${APP_PATH}/management`,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [
-          { coreStart, store, services },
+          { coreStart, startPlugins, store, services },
           { renderApp, composeLibs },
           { managementSubPlugin },
         ] = await Promise.all([
@@ -254,7 +257,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: managementSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
         });
       },
     });

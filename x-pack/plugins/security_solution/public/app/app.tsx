@@ -16,7 +16,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { DEFAULT_DARK_MODE } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
@@ -74,14 +74,14 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
 
 const StartApp = memo(StartAppComponent);
 
-interface SiemAppComponentProps extends AppFrontendLibs {
+interface SecurityAppComponentProps extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
   services: StartServices;
   store: Store<State, Action>;
 }
 
-const SiemAppComponent: React.FC<SiemAppComponentProps> = ({
+const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   children,
   apolloClient,
   history,
@@ -90,7 +90,7 @@ const SiemAppComponent: React.FC<SiemAppComponentProps> = ({
 }) => (
   <KibanaContextProvider
     services={{
-      appName: 'siem',
+      appName: APP_NAME,
       storage: new Storage(localStorage),
       ...services,
     }}
@@ -101,4 +101,4 @@ const SiemAppComponent: React.FC<SiemAppComponentProps> = ({
   </KibanaContextProvider>
 );
 
-export const SiemApp = memo(SiemAppComponent);
+export const SecurityApp = memo(SecurityAppComponent);

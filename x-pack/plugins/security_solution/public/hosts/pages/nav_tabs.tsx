@@ -8,9 +8,9 @@ import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
 import { HostsNavTab } from './navigation/types';
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 
-const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/${SiemPageName.hosts}/${tabName}`;
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/${SecurityPageName.hosts}/${tabName}`;
 
 export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
   const hostsNavTabs = {

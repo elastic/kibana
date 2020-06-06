@@ -7,7 +7,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
@@ -27,14 +27,14 @@ export const RedirectToTimelinesPage = ({
   <RedirectWrapper
     to={
       tabName
-        ? `/${SiemPageName.timelines}/${tabName}${search}`
-        : `/${SiemPageName.timelines}/${TimelineType.default}${search}`
+        ? `/${SecurityPageName.timelines}/${tabName}${search}`
+        : `/${SecurityPageName.timelines}/${TimelineType.default}${search}`
     }
   />
 );
 
 export const getTimelinesUrl = (search?: string) =>
-  `#/link-to/${SiemPageName.timelines}${appendSearch(search)}`;
+  `#/link-to/${SecurityPageName.timelines}${appendSearch(search)}`;
 
 export const getTimelineTabsUrl = (tabName: TimelineTypeLiteral, search?: string) =>
-  `#/link-to/${SiemPageName.timelines}/${tabName}${appendSearch(search)}`;
+  `#/link-to/${SecurityPageName.timelines}/${tabName}${appendSearch(search)}`;

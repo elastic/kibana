@@ -7,14 +7,14 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { RedirectWrapper } from './redirect_wrapper';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 export type OverviewComponentProps = RouteComponentProps<{
   search: string;
 }>;
 
 export const RedirectToOverviewPage = ({ location: { search } }: OverviewComponentProps) => (
-  <RedirectWrapper to={`/${SiemPageName.overview}${search}`} />
+  <RedirectWrapper to={`/${SecurityPageName.overview}${search}`} />
 );
 
-export const getOverviewUrl = () => `#/link-to/${SiemPageName.overview}`;
+export const getOverviewUrl = () => `#/link-to/${SecurityPageName.overview}`;

@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { navTabs } from '../../../../app/home/home_navigations';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState } from '../../../utils/route/types';
@@ -17,7 +17,7 @@ import { TabNavigationComponent } from './';
 import { TabNavigationProps } from './types';
 
 describe('Tab Navigation', () => {
-  const pageName = SiemPageName.hosts;
+  const pageName = SecurityPageName.hosts;
   const hostName = 'siem-window';
   const tabName = HostsTableType.authentications;
   const pathName = `/${pageName}/${hostName}/${tabName}`;
@@ -137,8 +137,8 @@ describe('Tab Navigation', () => {
         wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`).first();
       expect(tableNavigationTab().prop('isSelected')).toBeFalsy();
       wrapper.setProps({
-        pageName: SiemPageName.hosts,
-        pathName: `/${SiemPageName.hosts}`,
+        pageName: SecurityPageName.hosts,
+        pathName: `/${SecurityPageName.hosts}`,
         tabName: HostsTableType.events,
       });
       wrapper.update();

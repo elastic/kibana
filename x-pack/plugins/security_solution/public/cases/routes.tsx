@@ -8,11 +8,11 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { Case } from './pages';
-import { SiemPageName } from '../app/types';
+import { SecurityPageName } from '../app/types';
 
 export const CasesRoutes: React.FC = () => (
   <Switch>
-    <Route path={`/:pageName(${SiemPageName.case})`}>
+    <Route path={`/:pageName(${SecurityPageName.case})`}>
       <Case />
     </Route>
   </Switch>

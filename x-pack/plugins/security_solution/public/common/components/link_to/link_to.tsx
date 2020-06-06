@@ -7,7 +7,7 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { HostsTableType } from '../../../hosts/store/model';
 import {
   RedirectToCreateRulePage,
@@ -36,88 +36,88 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
   <Switch>
     <Route
       component={RedirectToOverviewPage}
-      path={`${match.url}/:pageName(${SiemPageName.overview})`}
+      path={`${match.url}/:pageName(${SecurityPageName.overview})`}
     />
     <Route
       exact
       component={RedirectToCasePage}
-      path={`${match.url}/:pageName(${SiemPageName.case})`}
+      path={`${match.url}/:pageName(${SecurityPageName.case})`}
     />
     <Route
       exact
       component={RedirectToCreatePage}
-      path={`${match.url}/:pageName(${SiemPageName.case})/create`}
+      path={`${match.url}/:pageName(${SecurityPageName.case})/create`}
     />
     <Route
       exact
       component={RedirectToConfigureCasesPage}
-      path={`${match.url}/:pageName(${SiemPageName.case})/configure`}
+      path={`${match.url}/:pageName(${SecurityPageName.case})/configure`}
     />
     <Route
       component={RedirectToCasePage}
-      path={`${match.url}/:pageName(${SiemPageName.case})/:detailName`}
+      path={`${match.url}/:pageName(${SecurityPageName.case})/:detailName`}
     />
     <Route
       component={RedirectToHostsPage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.hosts})`}
+      path={`${match.url}/:pageName(${SecurityPageName.hosts})`}
     />
     <Route
       component={RedirectToHostsPage}
-      path={`${match.url}/:pageName(${SiemPageName.hosts})/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events}|${HostsTableType.alerts})`}
+      path={`${match.url}/:pageName(${SecurityPageName.hosts})/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events}|${HostsTableType.alerts})`}
     />
     <Route
       component={RedirectToHostDetailsPage}
-      path={`${match.url}/:pageName(${SiemPageName.hosts})/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events}|${HostsTableType.alerts})`}
+      path={`${match.url}/:pageName(${SecurityPageName.hosts})/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events}|${HostsTableType.alerts})`}
     />
     <Route
       component={RedirectToHostDetailsPage}
-      path={`${match.url}/:pageName(${SiemPageName.hosts})/:detailName`}
+      path={`${match.url}/:pageName(${SecurityPageName.hosts})/:detailName`}
     />
     <Route
       component={RedirectToNetworkPage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.network})`}
+      path={`${match.url}/:pageName(${SecurityPageName.network})`}
     />
     <Route
       component={RedirectToNetworkPage}
-      path={`${match.url}/:pageName(${SiemPageName.network})/ip/:detailName/:flowTarget`}
+      path={`${match.url}/:pageName(${SecurityPageName.network})/ip/:detailName/:flowTarget`}
     />
     <Route
       component={RedirectToDetectionEnginePage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.detections})`}
+      path={`${match.url}/:pageName(${SecurityPageName.detections})`}
     />
     <Route
       component={RedirectToRulesPage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules`}
+      path={`${match.url}/:pageName(${SecurityPageName.detections})/rules`}
     />
     <Route
       component={RedirectToCreateRulePage}
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/create`}
+      path={`${match.url}/:pageName(${SecurityPageName.detections})/rules/create`}
     />
     <Route
       component={RedirectToRuleDetailsPage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/id/:detailName`}
+      path={`${match.url}/:pageName(${SecurityPageName.detections})/rules/id/:detailName`}
     />
     <Route
       component={RedirectToEditRulePage}
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/id/:detailName/edit`}
+      path={`${match.url}/:pageName(${SecurityPageName.detections})/rules/id/:detailName/edit`}
     />
     <Route
       component={RedirectToTimelinesPage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.timelines})`}
+      path={`${match.url}/:pageName(${SecurityPageName.timelines})`}
     />
     <Route
       component={RedirectToTimelinesPage}
-      path={`${match.url}/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`}
+      path={`${match.url}/:pageName(${SecurityPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`}
     />
     <Route
       component={RedirectToManagementPage}
-      path={`${match.url}/:pageName(${SiemPageName.management})`}
+      path={`${match.url}/:pageName(${SecurityPageName.management})`}
     />
     <Redirect to="/" />
   </Switch>

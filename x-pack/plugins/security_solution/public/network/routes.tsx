@@ -8,12 +8,12 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { NetworkContainer } from './pages';
-import { SiemPageName } from '../app/types';
+import { SecurityPageName } from '../app/types';
 
 export const NetworkRoutes = () => (
   <Switch>
     <Route
-      path={`/:pageName(${SiemPageName.network})`}
+      path={`/:pageName(${SecurityPageName.network})`}
       render={({ location, match }) => <NetworkContainer location={location} url={match.url} />}
     />
   </Switch>

@@ -11,7 +11,7 @@ import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
 import { GlobalTime } from '../../common/containers/global_time';
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 import { Hosts } from './hosts';
 import { hostsPagePath, hostDetailsPagePath } from './types';
 
@@ -84,7 +84,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
         <Route
           path={`${hostsPagePath}/`}
           render={({ location: { search = '' } }) => (
-            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
+            <Redirect to={`/${SecurityPageName.hosts}/${HostsTableType.hosts}${search}`} />
           )}
         />
       </Switch>

@@ -26,7 +26,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { NotFoundPage } from '../404';
 import { navTabs } from './home_navigations';
-import { SiemPageName } from '../types';
+import { SecurityPageName } from '../types';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -88,9 +88,9 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
                 </>
               )}
 
-              <Switch>
-                <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                {children}
+              {children}
+              {/* <Switch>
+                <Redirect exact from="/" to={`/${SecurityPageName.overview}`} />
                 <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
                 <Route
                   path="/ml-hosts"
@@ -105,7 +105,7 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
                   )}
                 />
                 <Route render={() => <NotFoundPage />} />
-              </Switch>
+              </Switch> */}
             </DragDropContextWrapper>
           )}
         </WithSource>

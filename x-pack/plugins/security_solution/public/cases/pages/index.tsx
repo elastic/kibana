@@ -7,13 +7,13 @@
 import React from 'react';
 
 import { Route, Switch } from 'react-router-dom';
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 import { CaseDetailsPage } from './case_details';
 import { CasesPage } from './case';
 import { CreateCasePage } from './create_case';
 import { ConfigureCasesPage } from './configure_cases';
 
-const casesPagePath = `/:pageName(${SiemPageName.case})`;
+const casesPagePath = `/:pageName(${SecurityPageName.case})`;
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
 const caseDetailsPagePathWithCommentId = `${casesPagePath}/:detailName/:commentId`;
 const createCasePagePath = `${casesPagePath}/create`;

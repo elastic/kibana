@@ -8,10 +8,10 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { Timelines } from './pages';
-import { SiemPageName } from '../app/types';
+import { SecurityPageName } from '../app/types';
 
 export const TimelinesRoutes = () => (
   <Switch>
-    <Route path={`/:pageName(${SiemPageName.timelines})`} render={() => <Timelines />} />
+    <Route path={`/:pageName(${SecurityPageName.timelines})`} render={() => <Timelines />} />
   </Switch>
 );

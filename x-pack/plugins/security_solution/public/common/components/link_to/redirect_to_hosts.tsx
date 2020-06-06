@@ -8,7 +8,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HostsTableType } from '../../../hosts/store/model';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
@@ -27,7 +27,7 @@ export const RedirectToHostsPage = ({
 }: HostComponentProps) => {
   const defaultSelectedTab = HostsTableType.hosts;
   const selectedTab = tabName ? tabName : defaultSelectedTab;
-  const to = `/${SiemPageName.hosts}/${selectedTab}${search}`;
+  const to = `/${SecurityPageName.hosts}/${selectedTab}${search}`;
 
   return <RedirectWrapper to={to} />;
 };
@@ -40,11 +40,11 @@ export const RedirectToHostDetailsPage = ({
 }: HostComponentProps) => {
   const defaultSelectedTab = HostsTableType.authentications;
   const selectedTab = tabName ? tabName : defaultSelectedTab;
-  const to = `/${SiemPageName.hosts}/${detailName}/${selectedTab}${search}`;
+  const to = `/${SecurityPageName.hosts}/${detailName}/${selectedTab}${search}`;
   return <RedirectWrapper to={to} />;
 };
 
-const baseHostsUrl = `#/link-to/${SiemPageName.hosts}`;
+const baseHostsUrl = `#/link-to/${SecurityPageName.hosts}`;
 
 export const getHostsUrl = (search?: string) => `${baseHostsUrl}${appendSearch(search)}`;
 

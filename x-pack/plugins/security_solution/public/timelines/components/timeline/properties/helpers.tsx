@@ -30,7 +30,7 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { State } from '../../../../common/store';
 
@@ -133,7 +133,7 @@ export const NewCase = React.memo<NewCaseProps>(
     const handleClick = useCallback(() => {
       onClosePopover();
       history.push({
-        pathname: `/${SiemPageName.case}/create`,
+        pathname: `/${SecurityPageName.case}/create`,
         state: {
           insertTimeline: {
             timelineId,

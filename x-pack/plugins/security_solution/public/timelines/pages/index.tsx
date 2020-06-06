@@ -15,13 +15,13 @@ import { TAB_TIMELINES, TAB_TEMPLATES } from '../components/open_timeline/transl
 import { getTimelinesUrl } from '../../common/components/link_to';
 import { TimelineRouteSpyState } from '../../common/utils/route/types';
 
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 
 import { TimelinesPage } from './timelines_page';
 import { PAGE_TITLE } from './translations';
 import { appendSearch } from '../../common/components/link_to/helpers';
-const timelinesPagePath = `/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`;
-const timelinesDefaultPath = `/${SiemPageName.timelines}/${TimelineType.default}`;
+const timelinesPagePath = `/:pageName(${SecurityPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`;
+const timelinesDefaultPath = `/${SecurityPageName.timelines}/${TimelineType.default}`;
 
 const TabNameMappedToI18nKey: Record<string, string> = {
   [TimelineType.default]: TAB_TIMELINES,
@@ -59,7 +59,7 @@ export const Timelines = React.memo(() => {
         <ApolloConsumer>{(client) => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
       </Route>
       <Route
-        path={`/${SiemPageName.timelines}/`}
+        path={`/${SecurityPageName.timelines}/`}
         render={({ location: { search = '' } }) => (
           <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />
         )}
