@@ -64,7 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
-  describe('lens smokescreen tests', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/67838
+  describe.skip('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');

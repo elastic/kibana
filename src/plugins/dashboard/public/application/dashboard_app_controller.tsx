@@ -41,6 +41,7 @@ import {
   QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
+  UI_SETTINGS,
 } from '../../../data/public';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../../saved_objects/public';
 
@@ -448,7 +449,8 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || {
         query: '',
         language:
-          localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
+          localStorage.get('kibana.userQueryLanguage') ||
+          uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
       },
       queryFilter.getFilters()
     );
