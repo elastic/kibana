@@ -7,7 +7,12 @@
 import React from 'react';
 import _ from 'lodash';
 import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
-import { getMapsCapabilities, getUiSettings, getToasts } from '../../../kibana_services';
+import {
+  getMapsCapabilities,
+  getUiSettings,
+  getToasts,
+  getCoreChrome,
+} from '../../../kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -62,6 +67,7 @@ export const MapsListView = withRouter(
     async componentDidMount() {
       this.fetchItems();
       addHelpMenuToAppChrome();
+      getCoreChrome().docTitle.change('Maps');
     }
 
     _find = (search) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);

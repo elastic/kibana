@@ -66,6 +66,7 @@ export const MapsCreateEditView = class extends React.Component {
   componentDidMount() {
     const { savedMap, currentPath } = this.props;
     this.setState({ currentPath });
+    getCoreChrome().docTitle.change(savedMap.title);
 
     // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
