@@ -7,7 +7,12 @@
 import { Observable } from 'rxjs';
 import { CoreSetup } from '../../../../../src/core/public';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../../../src/plugins/data/common';
-import { ISearch, getEsPreference, ISearchStrategy, UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import {
+  ISearch,
+  getEsPreference,
+  ISearchStrategy,
+  UI_SETTINGS,
+} from '../../../../../src/plugins/data/public';
 import { IEnhancedEsSearchRequest, EnhancedSearchParams } from '../../common';
 import { ASYNC_SEARCH_STRATEGY } from './async_search_strategy';
 import { IAsyncSearchOptions } from './types';
