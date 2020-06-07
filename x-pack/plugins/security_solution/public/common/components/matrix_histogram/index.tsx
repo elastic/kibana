@@ -19,12 +19,7 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useQuery } from '../../containers/matrix_histogram';
-import {
-  MatrixHistogramProps,
-  MatrixHistogramOption,
-  HistogramAggregation,
-  MatrixHistogramQueryProps,
-} from './types';
+import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { InspectButtonContainer } from '../inspect';
 
 import { State, inputsSelectors } from '../../store';
@@ -150,18 +145,16 @@ export const MatrixHistogramComponent: React.FC<
     []
   );
 
-  const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
-    {
-      endDate,
-      errorMessage,
-      filterQuery,
-      histogramType,
-      indexToAdd,
-      startDate,
-      isInspected,
-      stackByField: selectedStackByOption.value,
-    }
-  );
+  const { data, loading, inspect, totalCount, refetch = noop } = useQuery({
+    endDate,
+    errorMessage,
+    filterQuery,
+    histogramType,
+    indexToAdd,
+    startDate,
+    isInspected,
+    stackByField: selectedStackByOption.value,
+  });
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
