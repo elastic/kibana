@@ -11,7 +11,7 @@ import _ from 'lodash';
 import { getLayerListRaw } from '../../selectors/map_selectors';
 import { copyPersistentState } from '../../reducers/util';
 import { getStore } from '../store_operations';
-import { returnToMapsList } from '../maps_router';
+import { goToSpecifiedPath } from '../maps_router';
 
 function hasUnsavedChanges(savedMap, initialLayerListConfig) {
   const state = getStore().getState();
@@ -46,10 +46,10 @@ export const updateBreadcrumbs = (savedMap, initialLayerListConfig, currentPath 
                 })
               );
               if (navigateAway) {
-                returnToMapsList();
+                goToSpecifiedPath('/');
               }
             } else {
-              returnToMapsList();
+              goToSpecifiedPath('/');
             }
           },
         },

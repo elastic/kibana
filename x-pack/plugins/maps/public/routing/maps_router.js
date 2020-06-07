@@ -14,12 +14,10 @@ import { Provider } from 'react-redux';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
 import { LoadMapAndRender } from './routes/create_edit/load_map_and_render';
 
-export let returnToMapsList;
 export let goToSpecifiedPath;
 export let kbnUrlStateStorage;
 
 export async function renderApp(context, { appBasePath, element, history }) {
-  returnToMapsList = () => history.push('/');
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
@@ -32,8 +30,8 @@ export async function renderApp(context, { appBasePath, element, history }) {
 
 const App = ({ history, appBasePath }) => {
   const store = getStore();
-
   const I18nContext = getCoreI18n().Context;
+
   return (
     <I18nContext>
       <Provider store={store}>
@@ -41,17 +39,19 @@ const App = ({ history, appBasePath }) => {
           <Switch>
             <Route path={`/map/:savedMapId`} component={LoadMapAndRender} />
             <Route exact path={`/map`} component={LoadMapAndRender} />
-            <Route exact path={`/`} component={LoadListAndRender} />
-            // Redirect other routes to list, or if hash-containing, their
-            // non-hash equivalents
+            // Redirect other routes to list, or if hash-containing, their non-hash equivalents
             <Route
               path={``}
-              render={({ location }) => {
-                return location.hash ? (
-                  <Redirect to={`${appBasePath}${location.hash.replace('#', '')}`} />
-                ) : (
-                  <Redirect to="/" />
-                );
+              render={({ location: { pathname, hash } }) => {
+                if (hash) {
+                  // Remove leading hash
+                  const newPath = hash.substr(1);
+                  return <Redirect to={newPath} />;
+                } else if (pathname === '/' || pathname === '') {
+                  return <LoadListAndRender />;
+                } else {
+                  return <Redirect to="/" />;
+                }
               }}
             />
           </Switch>
