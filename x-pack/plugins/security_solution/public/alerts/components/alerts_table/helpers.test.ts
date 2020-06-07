@@ -292,6 +292,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
+          type: TimelineType.default,
         });
       });
 
@@ -321,6 +322,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
+          type: TimelineType.default,
         });
       });
 
@@ -349,6 +351,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
+          type: TimelineType.default,
         });
       });
     });

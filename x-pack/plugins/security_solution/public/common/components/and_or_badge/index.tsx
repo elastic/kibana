@@ -6,38 +6,36 @@
 
 import { EuiFlexGroup, EuiBadge, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 
 const AndOrBadgeAntenna = styled(EuiFlexItem)`
-  ${({ theme }) => css`
-    background: ${theme.eui.euiColorLightShade};
-    position: relative;
-    width: 2px;
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
+  position: relative;
+  width: 2px;
+  &:after {
+    background: ${({ theme }) => theme.eui.euiColorLightShade};
+    content: '';
+    height: 8px;
+    right: -4px;
+    position: absolute;
+    width: 9px;
+    clip-path: circle();
+  }
+  &.topAndOrBadgeAntenna {
     &:after {
-      background: ${theme.eui.euiColorLightShade};
-      content: '';
-      height: 8px;
-      right: -4px;
-      position: absolute;
-      width: 9px;
-      clip-path: circle();
+      top: -1px;
     }
-    &.topAndOrBadgeAntenna {
-      &:after {
-        top: -1px;
-      }
+  }
+  &.bottomAndOrBadgeAntenna {
+    &:after {
+      bottom: -1px;
     }
-    &.bottomAndOrBadgeAntenna {
-      &:after {
-        bottom: -1px;
-      }
-    }
-    &.euiFlexItem {
-      margin: 0 12px 0 0;
-    }
-  `}
+  }
+  &.euiFlexItem {
+    margin: 0 12px 0 0;
+  }
 `;
 
 const EuiFlexItemWrapper = styled(EuiFlexItem)`
@@ -57,10 +55,12 @@ const RoundedBadge = (styled(EuiBadge)`
   padding: 7px 6px 4px 6px;
   user-select: none;
   width: 34px;
+
   .euiBadge__content {
     position: relative;
     top: -1px;
   }
+
   .euiBadge__text {
     text-overflow: clip;
   }

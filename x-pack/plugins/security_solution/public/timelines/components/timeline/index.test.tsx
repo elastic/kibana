@@ -15,6 +15,7 @@ import {
   ReturnSignalIndex,
 } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { mocksSource } from '../../../common/containers/source/mock';
+import { TimelineType } from '../../../../common/types/timeline';
 import { wait } from '../../../common/lib/helpers';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { Direction } from '../../../graphql/types';
@@ -72,10 +73,12 @@ describe('StatefulTimeline', () => {
       showCallOutUnauthorizedMsg: false,
       sort,
       start: startDate,
+      timelineType: TimelineType.default,
       updateColumns: timelineActions.updateColumns,
       updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
       updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
       updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+      updateDataProviderType: timelineActions.updateDataProviderType,
       updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
       updateItemsPerPage: timelineActions.updateItemsPerPage,
       updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,

@@ -94,14 +94,14 @@ describe('Build KQL Query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].type = DataProviderType.template;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 2" )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 2"');
   });
 
   test('Build KQL query with two data provider (second is template)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[1].type = DataProviderType.template;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1" )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1"');
   });
 
   test('Build KQL query with one data provider and one and', () => {
