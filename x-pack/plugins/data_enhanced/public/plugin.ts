@@ -29,8 +29,12 @@ export interface DataEnhancedStartDependencies {
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
-export class DataEnhancedPlugin implements Plugin {
-  public setup(core: CoreSetup, { data }: DataEnhancedSetupDependencies) {
+export class DataEnhancedPlugin
+  implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+  public setup(
+    core: CoreSetup<DataEnhancedStartDependencies>,
+    { data }: DataEnhancedSetupDependencies
+  ) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)

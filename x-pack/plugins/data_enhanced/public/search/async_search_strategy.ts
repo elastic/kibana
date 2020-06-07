@@ -26,7 +26,7 @@ declare module '../../../../../src/plugins/data/public' {
 }
 
 export function asyncSearchStrategyProvider(
-  core: CoreSetup
+  core: CoreSetup<DataEnhancedStartDependencies>
 ): ISearchStrategy<typeof ASYNC_SEARCH_STRATEGY> {
   const startServices$ = from(core.getStartServices()).pipe(share());
 
@@ -53,9 +53,7 @@ export function asyncSearchStrategyProvider(
 
     return startServices$.pipe(
       flatMap((startServices) => {
-        const syncSearch = (startServices[1] as DataEnhancedStartDependencies).data.search.getSearchStrategy(
-          SYNC_SEARCH_STRATEGY
-        );
+        const syncSearch = startServices[1].data.search.getSearchStrategy(SYNC_SEARCH_STRATEGY);
         return (syncSearch.search(request, options) as Observable<IAsyncSearchResponse>).pipe(
           expand((response) => {
             // If the response indicates of an error, stop polling and complete the observable
