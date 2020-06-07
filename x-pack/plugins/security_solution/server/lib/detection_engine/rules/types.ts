@@ -129,10 +129,6 @@ export interface HapiReadableStream extends Readable {
   };
 }
 
-export interface FindRulesStatusesRequestParams {
-  ids: string[];
-}
-
 export interface Clients {
   alertsClient: AlertsClient;
 }

@@ -6,11 +6,7 @@
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server';
-import {
-  SignalsStatusRestParams,
-  SignalsQueryRestParams,
-  SignalSearchResponse,
-} from '../../signals/types';
+import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -29,6 +25,8 @@ import {
 import { RuleAlertParamsRest } from '../../types';
 import { requestMock } from './request';
 import { RuleNotificationAlertType } from '../../notifications/types';
+import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',
@@ -53,25 +51,25 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   ],
 });
 
-export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
-export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
   status: 'closed',
 });
 
