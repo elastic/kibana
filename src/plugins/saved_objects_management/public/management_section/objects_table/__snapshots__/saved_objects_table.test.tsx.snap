@@ -315,7 +315,7 @@ exports[`SavedObjectsTable relationships should show the flyout 1`] = `
     Object {
       "id": "2",
       "meta": Object {
-        "editUrl": "#/management/kibana/objects/savedSearches/2",
+        "editUrl": "/management/kibana/objects/savedSearches/2",
         "icon": "search",
         "inAppUrl": Object {
           "path": "/discover/2",
@@ -405,7 +405,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
         Object {
           "id": "2",
           "meta": Object {
-            "editUrl": "#/management/kibana/objects/savedSearches/2",
+            "editUrl": "/management/kibana/objects/savedSearches/2",
             "icon": "search",
             "inAppUrl": Object {
               "path": "/discover/2",
@@ -418,7 +418,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
         Object {
           "id": "3",
           "meta": Object {
-            "editUrl": "#/management/kibana/objects/savedDashboards/3",
+            "editUrl": "/management/kibana/objects/savedDashboards/3",
             "icon": "dashboardApp",
             "inAppUrl": Object {
               "path": "/dashboard/3",
@@ -431,7 +431,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
         Object {
           "id": "4",
           "meta": Object {
-            "editUrl": "#/management/kibana/objects/savedVisualizations/4",
+            "editUrl": "/management/kibana/objects/savedVisualizations/4",
             "icon": "visualizeApp",
             "inAppUrl": Object {
               "path": "/edit/4",
