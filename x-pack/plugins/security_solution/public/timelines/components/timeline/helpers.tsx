@@ -69,19 +69,6 @@ const buildQueryMatch = (
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
-const buildQueryForAndProvider = (
-  dataAndProviders: DataProvidersAnd[],
-  browserFields: BrowserFields
-) =>
-  dataAndProviders
-    .reduce((andQuery, andDataProvider) => {
-      const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
-      return andDataProvider.enabled
-        ? `${prepend(andQuery)} ${buildQueryMatch(andDataProvider, browserFields)}`
-        : andQuery;
-    }, '')
-    .trim();
-
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
     .reduce((queries: string[], dataProvider: DataProvider) => {
