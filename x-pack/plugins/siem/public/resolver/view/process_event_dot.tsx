@@ -620,3 +620,11 @@ function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   }
   return 'runningProcessCube';
 }
+
+/**
+ * Export assets to reuse symbols/icons in other places in the app (e.g. tables, etc.)
+ * @param processEvent : The process event to fetch node assets for
+ */
+export function cubeAssetsForNode(processEvent: ResolverEvent) {
+  return nodeAssets[nodeType(processEvent)]
+}

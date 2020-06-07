@@ -129,3 +129,19 @@ export function hostPathForProcess(passedEvent: ResolverEvent): string | undefin
 export function userInfoForProcess(passedEvent: ResolverEvent): object | undefined {
   return passedEvent.user;
 }
+
+export function md5HashForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    //There is not currently a key for this on Legacy event types
+    return undefined;
+  }
+  return passedEvent?.process?.hash?.md5;
+}
+
+export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    //There is not currently a key for this on Legacy event types
+    return undefined;
+  }
+  return passedEvent?.process?.args;
+}

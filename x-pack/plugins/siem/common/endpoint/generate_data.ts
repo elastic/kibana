@@ -317,6 +317,7 @@ export class EndpointDocGenerator {
       process: {
         pid: options.pid ? options.pid : this.randomN(5000),
         executable: `C:\\${processName}`,
+        args: `"C:\\${processName}" \\${this.randomString(3)}`,
         code_signature: {
           status: 'trusted',
           subject_name: 'Microsoft',

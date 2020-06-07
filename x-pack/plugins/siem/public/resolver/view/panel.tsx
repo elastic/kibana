@@ -23,10 +23,14 @@ import * as selectors from '../store/selectors';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import { displayNameRecord } from './process_event_dot';
-import { hostPidForProcess, hostParentPidForProcess, hostPathForProcess, userInfoForProcess } from '../models/process_event';
+import { displayNameRecord, cubeAssetsForNode } from './process_event_dot';
+import { hostPidForProcess, hostParentPidForProcess, hostPathForProcess, userInfoForProcess, md5HashForProcess, argsForProcess } from '../models/process_event';
 import { EuiDescriptionList } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiSpacer } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 //To control "just-once" behavior of the node selection layout effect:
 let lockNodeSelectionByParam = false;
@@ -173,6 +177,12 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
   )
 });
 
+const StyledDescriptionList = styled(EuiDescriptionList)`
+  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
+    max-width: 8em;
+  }
+`;
+
 const ProcessDetails = memo(function ProcessListWithCounts() {
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
@@ -200,15 +210,21 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
       [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.pid', {
         defaultMessage: 'PID',
       })]: hostPidForProcess(processEvent),
-      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.parentPid', {
-        defaultMessage: 'Parent PID',
-      })]: hostParentPidForProcess(processEvent),
       [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.user', {
         defaultMessage: 'User',
       })]: (userInfoForProcess(processEvent) as {name: string, domain: string}).name,
       [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.domain', {
         defaultMessage: 'Domain',
-      })]: (userInfoForProcess(processEvent) as {name: string, domain: string}).name,
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.parentPid', {
+        defaultMessage: 'Parent PID',
+      })]: hostParentPidForProcess(processEvent),
+      })]: (userInfoForProcess(processEvent) as {name: string, domain: string}).domain,
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.md5hash', {
+        defaultMessage: 'MD5',
+      })]: md5HashForProcess(processEvent),
+      [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.commandLine', {
+        defaultMessage: 'Command Line',
+      })]: argsForProcess(processEvent),
     } : {};
 
     return Object.entries(processInfo)
@@ -218,18 +234,49 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
       });
   }, [processNodePositions,selectedDescendantProcessId,processEvent]);
   console.log(processInfoEntry);
+  
+  /**
+   * During user testing, one user indicated they wanted to see stronger visual relationships between
+   * Nodes on the graph and what's in the table. Using the same symbol in both places (as below) could help with that.
+   */
+  const { cubeSymbol, descriptionText } = useMemo(()=>{
+    if(!processEvent){
+      return {cubeSymbol: undefined, descriptionText: undefined}
+    }
+    return cubeAssetsForNode(processEvent);
+  },
+  [processEvent])
+  console.log({cubeSymbol, descriptionText})
+  const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
     <EuiTitle size="xs">
-        <h4>
+        <h4 id={titleId}>
+          {descriptionText && (<svg style={{position: 'relative', top: '0.4em', marginRight: '.25em'}} className="table-process-icon" width="1.5em" height="1.5em" viewBox="0 0 1 1">
+            <desc>{descriptionText}</desc>
+            <use
+              role="presentation"
+              xlinkHref={cubeSymbol}
+              x={0}
+              y={0}
+              width={1}
+              height={1}
+              opacity="1"
+              className="cube"
+            />
+          </svg>)}
           {processName}
         </h4>
     </EuiTitle>
-    <HorizontalRule />
-    <EuiDescriptionList type="responsiveColumn" listItems={processInfoEntry} />
+    <EuiText>
+        <EuiTextColor color="subdued"><span aria-describes={titleId}>{descriptionText}</span></EuiTextColor>
+    </EuiText>
+    <EuiSpacer size="l" />
+    <StyledDescriptionList type="column" align="left" titleProps={{className: 'desc-title'}} compressed listItems={processInfoEntry} />
     </>
   )
-});
+})
+
 
 /**
    * The team decided to use this determinant to express how we comport state in the UI with the values of the two query params:
@@ -245,8 +292,6 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
    * This component implements the strategy laid out above by determining the "right" view and doing some other housekeeping e.g. effects to keep the UI-selected node in line with what's indicated by the URL parameters.
    */
 const PanelContent = memo(function PanelContent() {
-  
-
   const history = useHistory();
   const urlSearch = location.search;
   const queryParams: {readonly crumbId: string, readonly crumbEvent: string} = useMemo(() => { 

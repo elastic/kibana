@@ -331,6 +331,7 @@ export interface EndpointEvent {
     entity_id: string;
     name: string;
     executable: string;
+    args: string;
     code_signature: {
       status: string;
       subject_name: string;
