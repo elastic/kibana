@@ -170,6 +170,7 @@ const PropertiesRightComponent: React.FC<Props> = ({
                   showNotes={showNotes}
                   size="l"
                   text={i18n.NOTES}
+                  timelineStatus={status}
                   toggleShowNotes={onToggleShowNotes}
                   toolTip={i18n.NOTES_TOOL_TIP}
                   updateNote={updateNote}

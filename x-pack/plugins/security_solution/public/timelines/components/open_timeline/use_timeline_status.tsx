@@ -12,7 +12,7 @@ import {
   TimelineTypeLiteralWithNull,
   TemplateTimelineType,
   TemplateTimelineTypeLiteralWithNull,
-  TimelineStatusLiteral,
+  TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
@@ -27,7 +27,7 @@ export const useTimelineStatus = ({
   elasticTemplateTimelineCount?: number | null;
   customTemplateTimelineCount?: number | null;
 }): {
-  timelineStatus: TimelineStatusLiteral;
+  timelineStatus: TimelineStatusLiteralWithNull;
   templateTimelineFilter: JSX.Element[] | null;
 } => {
   const isTemplateFilterEnabled = timelineType === TimelineType.template;
@@ -93,7 +93,9 @@ export const useTimelineStatus = ({
 
   return {
     timelineStatus:
-      templateTimelineType === TemplateTimelineType.elastic
+      templateTimelineType == null
+        ? null
+        : templateTimelineType === TemplateTimelineType.elastic
         ? TimelineStatus.immutiable
         : TimelineStatus.active,
     templateTimelineFilter,

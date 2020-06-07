@@ -104,7 +104,7 @@ export const useTimelineTypes = ({
         hasActiveFilters={tab.id === timelineType}
         key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
         numFilters={tab.count}
-        onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
+        onClick={onFilterClicked.bind(null, tab.id)}
         withNext={tab.withNext}
       >
         {tab.name}

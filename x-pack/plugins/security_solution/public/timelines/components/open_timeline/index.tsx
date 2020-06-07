@@ -132,7 +132,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,
     });
-
     const refetch = useCallback(() => {
       fetchAllTimeline({
         pageInfo: {

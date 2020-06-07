@@ -3,10 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import { Note } from '../../../../../common/lib/note';
+import { StoreState } from '../../../../../common/store/types';
+
+import { TimelineModel } from '../../../../store/timeline/model';
+
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { Pin } from '../../pin';
 import { NotesButton } from '../../properties/helpers';
@@ -78,91 +83,99 @@ export const Actions = React.memo<Props>(
     showNotes,
     toggleShowNotes,
     updateNote,
-  }) => (
-    <EventsTdGroupActions
-      actionsColumnWidth={actionsColumnWidth}
-      data-test-subj="event-actions-container"
-    >
-      <EventsTd>
-        <EventsTdContent textAlign="center">
-          {loading && <EventsLoading />}
+  }) => {
+    const timeline = useSelector<StoreState, TimelineModel>((state) => {
+      return state.timeline.timelineById['timeline-1'];
+    });
 
-          {!loading && (
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              data-test-subj="expand-event"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              id={eventId}
-              onClick={onEventToggled}
-            />
-          )}
-        </EventsTdContent>
-      </EventsTd>
-      {showCheckboxes && (
-        <EventsTd data-test-subj="select-event-container">
+    return (
+      <EventsTdGroupActions
+        actionsColumnWidth={actionsColumnWidth}
+        data-test-subj="event-actions-container"
+      >
+        <EventsTd>
           <EventsTdContent textAlign="center">
-            {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
-            ) : (
-              <EuiCheckbox
-                data-test-subj="select-event"
+            {loading && <EventsLoading />}
+
+            {!loading && (
+              <EuiButtonIcon
+                aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+                data-test-subj="expand-event"
+                iconType={expanded ? 'arrowDown' : 'arrowRight'}
                 id={eventId}
-                checked={checked}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  onRowSelected({
-                    eventIds: [eventId],
-                    isSelected: event.currentTarget.checked,
-                  });
-                }}
+                onClick={onEventToggled}
               />
             )}
           </EventsTdContent>
         </EventsTd>
-      )}
-
-      <>{additionalActions}</>
-
-      {!isEventViewer && (
-        <>
-          <EventsTd>
+        {showCheckboxes && (
+          <EventsTd data-test-subj="select-event-container">
             <EventsTdContent textAlign="center">
-              <EuiToolTip
-                data-test-subj="timeline-action-pin-tool-tip"
-                content={getPinTooltip({
-                  isPinned: eventIsPinned,
-                  eventHasNotes: eventHasNotes(noteIds),
-                })}
-              >
-                <Pin
-                  allowUnpinning={!eventHasNotes(noteIds)}
-                  data-test-subj="pin-event"
-                  onClick={onPinClicked}
-                  pinned={eventIsPinned}
+              {loadingEventIds.includes(eventId) ? (
+                <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
+              ) : (
+                <EuiCheckbox
+                  data-test-subj="select-event"
+                  id={eventId}
+                  checked={checked}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    onRowSelected({
+                      eventIds: [eventId],
+                      isSelected: event.currentTarget.checked,
+                    });
+                  }}
                 />
-              </EuiToolTip>
+              )}
             </EventsTdContent>
           </EventsTd>
+        )}
 
-          <EventsTd>
-            <EventsTdContent textAlign="center">
-              <NotesButton
-                animate={false}
-                associateNote={associateNote}
-                data-test-subj="add-note"
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds || emptyNotes}
-                showNotes={showNotes}
-                size="s"
-                toggleShowNotes={toggleShowNotes}
-                toolTip={i18n.NOTES_TOOLTIP}
-                updateNote={updateNote}
-              />
-            </EventsTdContent>
-          </EventsTd>
-        </>
-      )}
-    </EventsTdGroupActions>
-  ),
+        <>{additionalActions}</>
+
+        {!isEventViewer && (
+          <>
+            <EventsTd>
+              <EventsTdContent textAlign="center">
+                <EuiToolTip
+                  data-test-subj="timeline-action-pin-tool-tip"
+                  content={getPinTooltip({
+                    isPinned: eventIsPinned,
+                    eventHasNotes: eventHasNotes(noteIds),
+                  })}
+                >
+                  <Pin
+                    allowUnpinning={!eventHasNotes(noteIds)}
+                    data-test-subj="pin-event"
+                    onClick={onPinClicked}
+                    pinned={eventIsPinned}
+                    status={timeline.status}
+                  />
+                </EuiToolTip>
+              </EventsTdContent>
+            </EventsTd>
+
+            <EventsTd>
+              <EventsTdContent textAlign="center">
+                <NotesButton
+                  animate={false}
+                  associateNote={associateNote}
+                  data-test-subj="add-note"
+                  getNotesByIds={getNotesByIds}
+                  noteIds={noteIds || emptyNotes}
+                  showNotes={showNotes}
+                  size="s"
+                  toggleShowNotes={toggleShowNotes}
+                  toolTip={i18n.NOTES_TOOLTIP}
+                  updateNote={updateNote}
+                  timelineStatus={timeline.status}
+                />
+              </EventsTdContent>
+            </EventsTd>
+          </>
+        )}
+      </EventsTdGroupActions>
+    );
+  },
   (nextProps, prevProps) => {
     return (
       prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&

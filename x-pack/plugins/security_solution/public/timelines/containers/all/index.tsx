@@ -24,7 +24,7 @@ import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../pages/translations';
 import {
   TimelineTypeLiteralWithNull,
-  TimelineStatusLiteral,
+  TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
 
 export interface AllTimelinesArgs {
@@ -33,6 +33,7 @@ export interface AllTimelinesArgs {
     pageInfo,
     search,
     sort,
+    status,
     timelineType,
   }: AllTimelinesVariables) => void;
   timelines: OpenTimelineResult[];
@@ -50,7 +51,7 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  status: TimelineStatusLiteral;
+  status: TimelineStatusLiteralWithNull;
   timelineType: TimelineTypeLiteralWithNull;
 }
 
