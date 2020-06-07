@@ -19,47 +19,48 @@
 
 import { fromNullable, tryCatch, left, right } from '../either';
 import { noop } from '../utils';
+import expect from '@kbn/expect';
 
 const pluck = (x) => (obj) => obj[x];
-const expectNull = (x) => expect(x).toEqual(null);
+const expectNull = (x) => expect(x).to.equal(null);
 const attempt = (obj) => fromNullable(obj).map(pluck('detail'));
 
 describe(`either datatype functions`, () => {
   describe(`helpers`, () => {
     it(`'fromNullable' should be a fn`, () => {
-      expect(typeof fromNullable).toBe('function');
+      expect(typeof fromNullable).to.be('function');
     });
     it(`'tryCatch' should be a fn`, () => {
-      expect(typeof tryCatch).toBe('function');
+      expect(typeof tryCatch).to.be('function');
     });
     it(`'left' should be a fn`, () => {
-      expect(typeof left).toBe('function');
+      expect(typeof left).to.be('function');
     });
     it(`'right' should be a fn`, () => {
-      expect(typeof right).toBe('function');
+      expect(typeof right).to.be('function');
     });
   });
   describe('tryCatch', () => {
     let sut;
-    before(() => {
+    beforeAll(() => {
       sut = undefined;
     });
     it(`should return a 'Left' on error`, () => {
       sut = tryCatch(() => {
         throw new Error('blah');
       });
-      expect(sut.inspect()).toBe('Left(Error: blah)');
+      expect(sut.inspect()).to.be('Left(Error: blah)');
     });
     it(`should return a 'Right' on successful execution`, () => {
       sut = tryCatch(noop);
-      expect(sut.inspect()).toBe('Right(undefined)');
+      expect(sut.inspect()).to.be('Right(undefined)');
     });
   });
   describe(`'fromNullable`, () => {
     it(`should continue processing if a truthy is calculated`, () => {
       attempt({ detail: 'x' }).fold(
         () => {},
-        (x) => expect(x).toEqual('x')
+        (x) => expect(x).to.equal('x')
       );
     });
     it(`should drop processing if a falsey is calculated`, () => {
