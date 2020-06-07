@@ -23,7 +23,7 @@ export const file_name = t.string;
  * TODO: Right now the filters is an "unknown", when it could more than likely
  * become the actual ESFilter as a type.
  */
-export const filters = t.array(t.unknown); // Filters are not easily type-able yet
+export const filters = t.array(t.record(t.string, t.unknown)); // Filters are not easily type-able yet
 
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
@@ -32,7 +32,7 @@ export const filters = t.array(t.unknown); // Filters are not easily type-able y
 export const action_group = t.string;
 export const action_id = t.string;
 export const action_action_type_id = t.string;
-export const action_params = t.object;
+export const action_params = t.record(t.string, t.union([t.string, t.array(t.string)]));
 export const action = t.exact(
   t.type({
     group: action_group,
@@ -75,7 +75,7 @@ export const machine_learning_job_id = t.string;
  * TODO: Strip away extra information and possibly even "freeze" this object
  * so we have tighter control over 3rd party data structures.
  */
-export const meta = t.object;
+export const meta = t.record(t.string, t.string);
 export const max_signals = PositiveIntegerGreaterThanZero;
 export const name = t.string;
 export const risk_score = RiskScore;
