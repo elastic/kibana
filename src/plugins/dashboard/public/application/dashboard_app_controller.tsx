@@ -154,11 +154,6 @@ export class DashboardAppController {
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
     const isEmbeddedExternally = Boolean($routeParams.embed);
-    let showTopNavMenu = true;
-    let showSearchBar = true;
-    let showQueryBar = true;
-    let showQueryInput = true;
-    let showDatePicker = true;
 
     // url param rules should only apply when embedded (e.g. url?embed=true)
     const shouldForceDisplay = (param: string): boolean =>
@@ -283,10 +278,6 @@ export class DashboardAppController {
         });
       }
     };
-
-    const showFilterBar = () =>
-      !forceHideFilterBar &&
-      ($scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode());
 
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
@@ -625,9 +616,22 @@ export class DashboardAppController {
       dashboardStateManager.setSavedQueryId(savedQueryId);
     };
 
+    const shouldShowFilterBar = (forceHide: boolean): boolean =>
+      !forceHide && ($scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode());
+
+    const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
+      (forceShow || $scope.isVisible) && !dashboardStateManager.getFullScreenMode();
+
     const getNavBarProps = () => {
       const isFullScreenMode = dashboardStateManager.getFullScreenMode();
       const screenTitle = dashboardStateManager.getTitle();
+      const showTopNavMenu = shouldShowNavBarComponent(forceShowTopNavMenu);
+      const showQueryInput = shouldShowNavBarComponent(forceShowQueryInput);
+      const showDatePicker = shouldShowNavBarComponent(forceShowDatePicker);
+      const showQueryBar = showQueryInput || showDatePicker;
+      const showFilterBar = shouldShowFilterBar(forceHideFilterBar);
+      const showSearchBar = showQueryBar || showFilterBar;
+
       return {
         appName: 'dashboard',
         config: showTopNavMenu ? $scope.topNavMenu : undefined,
@@ -638,7 +642,7 @@ export class DashboardAppController {
         showQueryBar,
         showQueryInput,
         showDatePicker,
-        showFilterBar: showFilterBar(),
+        showFilterBar,
         indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
@@ -1071,16 +1075,7 @@ export class DashboardAppController {
 
     const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
       $scope.$evalAsync(() => {
-        const shouldShow = (forceShow: boolean) =>
-          (forceShow || isVisible) && !dashboardStateManager.getFullScreenMode();
-
         $scope.isVisible = isVisible;
-        showTopNavMenu = shouldShow(forceShowTopNavMenu);
-        showQueryInput = shouldShow(forceShowQueryInput);
-        showDatePicker = shouldShow(forceShowDatePicker);
-        showQueryBar = showQueryInput || showDatePicker;
-        showSearchBar = showQueryBar || showFilterBar();
-
         updateNavBar();
       });
     });
