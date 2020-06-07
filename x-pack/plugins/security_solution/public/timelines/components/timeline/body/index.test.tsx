@@ -203,7 +203,7 @@ describe('Body', () => {
             .exists()
         ).toEqual(true);
       });
-    });
+    }, 20000);
   });
 
   describe('action on event', () => {
