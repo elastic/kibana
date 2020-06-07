@@ -68,7 +68,9 @@ export const MapsCreateEditView = class extends React.Component {
     this.setState({ currentPath });
 
     // Init sync utils
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     this.globalSyncUnsubscribe = useGlobalStateSyncing();
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     this.appSyncUnsubscribe = useAppStateSyncing(this.appStateManager);
 
     // Monitor visibility
@@ -427,7 +429,7 @@ export const MapsCreateEditView = class extends React.Component {
       <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <MapsRoot filters={filters} />
+        <MapsRoot filters={filters} updateFiltersAndDispatch={this.updateFiltersAndDispatch} />
       </div>
     ) : null;
   }

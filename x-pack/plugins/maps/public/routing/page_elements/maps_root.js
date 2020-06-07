@@ -15,10 +15,11 @@ export class MapsRoot extends React.PureComponent {
   }
 
   addFilters = (newFilters) => {
+    const { updateFiltersAndDispatch, filters } = this.props;
     newFilters.forEach((filter) => {
       filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
     });
-    this.updateFiltersAndDispatch([...this.props.filters, ...newFilters]);
+    updateFiltersAndDispatch([...filters, ...newFilters]);
   };
 
   render() {
