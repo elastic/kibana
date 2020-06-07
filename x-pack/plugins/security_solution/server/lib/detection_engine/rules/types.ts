@@ -63,20 +63,17 @@ import {
   TypeOrUndefined,
   ReferencesOrUndefined,
   ListAndOrUndefined,
+  PerPageOrUndefined,
+  PageOrUndefined,
+  SortFieldOrUndefined,
+  QueryFilterOrUndefined,
+  FieldsOrUndefined,
+  SortOrderOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleAlertParams, RuleTypeParams, PartialFilter } from '../types';
-
-export interface FindParamsRest {
-  per_page: number;
-  page: number;
-  sort_field: string;
-  sort_order: 'asc' | 'desc';
-  fields: string[];
-  filter: string;
-}
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -130,26 +127,6 @@ export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
   };
-}
-
-export interface FindRuleParams {
-  alertsClient: AlertsClient;
-  perPage?: number;
-  page?: number;
-  sortField?: string;
-  filter?: string;
-  fields?: string[];
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface FindRulesRequestParams {
-  per_page: number;
-  page: number;
-  search?: string;
-  sort_field?: string;
-  filter?: string;
-  fields?: string[];
-  sort_order?: 'asc' | 'desc';
 }
 
 export interface FindRulesStatusesRequestParams {
@@ -308,4 +285,14 @@ export interface DeleteRuleOptions {
   alertsClient: AlertsClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
+}
+
+export interface FindRuleOptions {
+  alertsClient: AlertsClient;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  filter: QueryFilterOrUndefined;
+  fields: FieldsOrUndefined;
+  sortOrder: SortOrderOrUndefined;
 }

@@ -43,6 +43,10 @@ export const readRules = async ({
       alertsClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
       page: 1,
+      fields: undefined,
+      perPage: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
     });
     if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
       return null;

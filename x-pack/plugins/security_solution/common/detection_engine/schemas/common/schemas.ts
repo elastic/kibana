@@ -209,6 +209,10 @@ export const typeOrUndefined = t.union([type, t.undefined]);
 export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
 
 export const queryFilter = t.string;
+export type QueryFilter = t.TypeOf<typeof queryFilter>;
+
+export const queryFilterOrUndefined = t.union([queryFilter, t.undefined]);
+export type QueryFilterOrUndefined = t.TypeOf<typeof queryFilterOrUndefined>;
 
 export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
@@ -217,14 +221,33 @@ export const referencesOrUndefined = t.union([references, t.undefined]);
 export type ReferencesOrUndefined = t.TypeOf<typeof referencesOrUndefined>;
 
 export const per_page = PositiveInteger;
+export type PerPage = t.TypeOf<typeof per_page>;
+
+export const perPageOrUndefined = t.union([per_page, t.undefined]);
+export type PerPageOrUndefined = t.TypeOf<typeof perPageOrUndefined>;
+
 export const page = PositiveIntegerGreaterThanZero;
+export type Page = t.TypeOf<typeof page>;
+
+export const pageOrUndefined = t.union([page, t.undefined]);
+export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
+
 export const signal_ids = t.array(t.string);
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
 
 export const sort_field = t.string;
+export type SortField = t.TypeOf<typeof sort_field>;
+
+export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
+export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
+
 export const sort_order = t.keyof({ asc: null, desc: null });
+export type sortOrder = t.TypeOf<typeof sort_order>;
+
+export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
+export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
 
 export const tags = t.array(t.string);
 export type Tags = t.TypeOf<typeof tags>;
@@ -233,6 +256,10 @@ export const tagsOrUndefined = t.union([tags, t.undefined]);
 export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
 export const fields = t.array(t.string);
+export type Fields = t.TypeOf<typeof fields>;
+export const fieldsOrUndefined = t.union([fields, t.undefined]);
+export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
+
 export const threat_framework = t.string;
 export const threat_tactic_id = t.string;
 export const threat_tactic_name = t.string;
