@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import md5 from 'md5';
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 
 import { useSecurityLocalStorage } from '../../../common/containers/use_local_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
+import { createCalloutId } from './helpers';
 
 export * from './helpers';
 
@@ -82,7 +82,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
     <>
       {(Object.keys(groupedByTypeErrorMessages) as Array<keyof ErrorMessage['errorType']>).map(
         (type: NonNullable<ErrorMessage['errorType']>) => {
-          const id = md5(groupedByTypeErrorMessages[type].messagesId.join('|'));
+          const id = createCalloutId(groupedByTypeErrorMessages[type].messagesId);
           return (
             <React.Fragment key={id}>
               <CallOut

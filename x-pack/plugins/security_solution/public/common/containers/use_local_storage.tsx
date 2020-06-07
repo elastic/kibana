@@ -7,7 +7,7 @@
 import { useCallback } from 'react';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
-interface UseSecurityLocalStorage {
+export interface UseSecurityLocalStorage {
   getCallouts: (plugin: string) => string[];
   persistDismissCallout: (plugin: string, id: string) => void;
 }
@@ -15,14 +15,20 @@ interface UseSecurityLocalStorage {
 export const useSecurityLocalStorage = (): UseSecurityLocalStorage => {
   const storage = new Storage(localStorage);
 
-  const getCallouts = useCallback((plugin: string): string[] => {
-    return storage.get(plugin)?.callouts ?? [];
-  }, []);
+  const getCallouts = useCallback(
+    (plugin: string): string[] => {
+      return storage.get(plugin)?.callouts ?? [];
+    },
+    [storage]
+  );
 
-  const persistDismissCallout = useCallback((plugin: string, id: string) => {
-    const pluginStorage = storage.get(plugin) ?? { callouts: [] };
-    storage.set(plugin, { ...pluginStorage, callouts: [...pluginStorage.callouts, id] });
-  }, []);
+  const persistDismissCallout = useCallback(
+    (plugin: string, id: string) => {
+      const pluginStorage = storage.get(plugin) ?? { callouts: [] };
+      storage.set(plugin, { ...pluginStorage, callouts: [...pluginStorage.callouts, id] });
+    },
+    [storage]
+  );
 
   return {
     persistDismissCallout,

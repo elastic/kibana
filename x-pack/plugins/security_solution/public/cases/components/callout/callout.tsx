@@ -31,12 +31,12 @@ const CallOutComponent = ({
   const handleCallOut = useCallback(() => handleDismissCallout(id), [handleDismissCallout]);
 
   return showCallOut ? (
-    <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-call-out-${type}`}>
+    <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-callout-${id}`}>
       {!isEmpty(messages) && (
-        <EuiDescriptionList data-test-subj={`callout-messages-${type}`} listItems={messages} />
+        <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       )}
       <EuiButton
-        data-test-subj={`callout-dismiss-${type}`}
+        data-test-subj={`callout-dismiss-${id}`}
         color={type === 'success' ? 'secondary' : type}
         onClick={handleCallOut}
       >

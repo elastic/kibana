@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import md5 from 'md5';
 import * as i18n from './translations';
 
 export const savedObjectReadOnly = {
   title: i18n.READ_ONLY_SAVED_OBJECT_TITLE,
   description: i18n.READ_ONLY_SAVED_OBJECT_MSG,
 };
+
+export const createCalloutId = (ids: string[], delimiter: string = '|'): string =>
+  md5(ids.join(delimiter));
