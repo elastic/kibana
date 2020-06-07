@@ -27,12 +27,12 @@ interface SetupDependencies {
   security: SecurityPluginSetup;
 }
 
-export interface EnhancedDataPluginStart {
+export interface DataEnhancedStart {
   backgroundSession: BackgroundSessionService;
 }
 
 export class EnhancedDataServerPlugin
-  implements Plugin<void, EnhancedDataPluginStart, SetupDependencies> {
+  implements Plugin<void, DataEnhancedStart, SetupDependencies> {
   private readonly logger: Logger;
   private backgroundSessionService!: BackgroundSessionService;
   private security?: SecurityPluginSetup;

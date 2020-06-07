@@ -27,8 +27,8 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 
   /*
     An identifier used to mark multiple search requests as originating from a single
-    application session. In particular, this argument is used to restore long running
-    background search requests.
+    application session, such as all of the search requests initiated by a dashboard. 
+    In particular, this argument is used to restore long running background search requests.
    */
   sessionId?: string;
 }

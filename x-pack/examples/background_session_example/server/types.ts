@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EnhancedDataPluginStart } from '../../../plugins/data_enhanced/server';
+import { DataEnhancedStart } from '../../../plugins/data_enhanced/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BackgroundSessionExamplePluginSetup {}
@@ -13,5 +13,5 @@ export interface BackgroundSessionExamplePluginSetup {}
 export interface BackgroundSessionExamplePluginStart {}
 
 export interface BackgroundSessionExamplePluginStartDeps {
-  dataEnhanced: EnhancedDataPluginStart;
+  dataEnhanced: DataEnhancedStart;
 }

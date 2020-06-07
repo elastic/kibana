@@ -14,7 +14,7 @@ import {
 import { BackgroundSessionParams } from './types';
 
 export function registerBackgroundSessionGetRoute(router: IRouter): void {
-  router.post(
+  router.get(
     {
       path: '/internal/session/{sessionId}',
       validate: {

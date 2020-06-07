@@ -12,4 +12,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { EnhancedDataServerPlugin as Plugin };
-export { EnhancedDataPluginStart } from './plugin';
+export { DataEnhancedStart } from './plugin';

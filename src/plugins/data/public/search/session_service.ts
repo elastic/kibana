@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { uuidV4 } from '../../../../plugins/kibana_utils/public';
+import uuid from 'uuid';
 
 export class SessionService {
-  private sessionId: string = uuidV4();
+  private sessionId: string = uuid.v4();
 
   public get() {
     return this.sessionId;
@@ -31,12 +31,12 @@ export class SessionService {
   }
 
   public start() {
-    this.sessionId = uuidV4();
+    this.sessionId = uuid.v4();
     return this.sessionId;
   }
 
   public clear() {
-    this.sessionId = uuidV4();
+    this.sessionId = uuid.v4();
   }
 }
 

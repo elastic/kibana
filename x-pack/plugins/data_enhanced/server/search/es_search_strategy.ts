@@ -106,7 +106,7 @@ export function updateExpirationProvider(caller: APICaller) {
   return async (searchId: string) => {
     const path = encodeURI(`/_async_search/${searchId}`);
 
-    // Wait up to 1s for the response to return
+    // Wait up to 1ms for the response to return
     const query = toSnakeCase({
       waitForCompletionTimeout: '1ms',
       keepAlive: `${BACKGROUND_SESSION_STORE_DAYS}d`,
@@ -139,13 +139,11 @@ async function asyncSearch(
   const method = asyncId ? 'GET' : 'POST';
   const path = encodeURI(asyncId ? `/_async_search/${asyncId}` : `/${index}/_async_search`);
 
-  // Wait up to 1s for the response to return
-  // TODO: DONT MERGE WITH 1ms!!!!!!!!!!!!!!!!!!!!!!!
+  // Wait up to 1ms for the response to return for new requests
+  // DONT MERGE WITH requestCache: false,
   const query = toSnakeCase({
     ...(asyncId
-      ? {
-          // waitForCompletionTimeout: '10s',
-        }
+      ? {}
       : {
           requestCache: false,
           waitForCompletionTimeout: '1ms',

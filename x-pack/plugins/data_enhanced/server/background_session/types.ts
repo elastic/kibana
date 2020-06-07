@@ -18,3 +18,7 @@ export interface SessionInfo {
   userId: string;
   retryCount: number;
 }
+
+export interface SessionKeys {
+  [key: string]: any;
+}

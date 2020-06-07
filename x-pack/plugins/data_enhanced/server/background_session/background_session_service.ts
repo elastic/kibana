@@ -21,7 +21,7 @@ import {
   BackgroundSessionStatus,
 } from '../../common';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
-import { SessionInfo } from './types';
+import { SessionInfo, SessionKeys } from './types';
 import { SecurityPluginSetup } from '../../../security/server';
 
 const INMEM_TRACKING_TIMEOUT_SEC = 60;
@@ -73,6 +73,7 @@ export class BackgroundSessionService {
     if (sessionSavedObject) {
       this.logger.debug(`${sessionId} Found object. Updating.`);
       const success = await this.updateBackgroundSession(sessionSavedObject, sessionInfo);
+      // How to track retries here?
       if (success) this.idMapping.delete(sessionId);
     } else if (
       moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() >=
@@ -198,7 +199,7 @@ export class BackgroundSessionService {
     }
   }
 
-  private getKey(userId: string, requestParams: any): string {
+  private getKey(userId: string, requestParams: SessionKeys): string {
     return createHash(`md5`)
       .update(JSON.stringify({ uid: userId, req: requestParams }))
       .digest('hex');
@@ -225,7 +226,12 @@ export class BackgroundSessionService {
    * @param searchId
    */
 
-  public trackId(request: KibanaRequest, sessionId: string, requestParams: any, searchId: string) {
+  public trackId(
+    request: KibanaRequest,
+    sessionId: string,
+    requestParams: SessionKeys,
+    searchId: string
+  ) {
     this.logger.debug(`${sessionId} trackId ${searchId}`);
     const user = this.security.authc.getCurrentUser(request);
     if (!user) return;
@@ -263,7 +269,7 @@ export class BackgroundSessionService {
    * @param sessionId
    * @param requestParams
    */
-  public async getId(request: KibanaRequest, sessionId: string, requestParams: any) {
+  public async getId(request: KibanaRequest, sessionId: string, requestParams: SessionKeys) {
     try {
       this.logger.debug(`${sessionId} Checking.`);
       const user = this.security.authc.getCurrentUser(request);
@@ -272,9 +278,9 @@ export class BackgroundSessionService {
         return undefined;
       } else {
         const reqHashKey = this.getKey(user.email, requestParams);
-        const asyncId = bgSavedObject.attributes.idMapping[reqHashKey];
-        this.logger.debug(`${sessionId} Object found. ${reqHashKey} async ID is ${asyncId}`);
-        return asyncId;
+        const reqId = bgSavedObject.attributes.idMapping[reqHashKey];
+        this.logger.debug(`${sessionId} Object found. ${reqHashKey} request ID is ${reqId}`);
+        return reqId;
       }
     } catch (e) {
       return undefined;

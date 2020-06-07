@@ -8,7 +8,7 @@
 import fetch from 'node-fetch';
 import uuid from 'uuid';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../src/core/server';
-import { EnhancedDataPluginStart } from '../../../../plugins/data_enhanced/server';
+import { DataEnhancedStart } from '../../../../plugins/data_enhanced/server';
 
 export interface DemoBody {
   sessionId: string;
@@ -26,7 +26,7 @@ const getData = async (wordCount: number) => {
 };
 
 export async function backgroundSessionRouteHandler(
-  backgroundSession: EnhancedDataPluginStart['backgroundSession'],
+  backgroundSession: DataEnhancedStart['backgroundSession'],
   request: KibanaRequest<unknown, unknown, DemoBody>,
   response: KibanaResponseFactory
 ) {

@@ -19,7 +19,7 @@ export class BackgroundSessionService {
 
   public async get(sessionId?: string) {
     try {
-      return await this.http.post(`/internal/session/${sessionId || this.search.session.get()}`);
+      return await this.http.get(`/internal/session/${sessionId || this.search.session.get()}`);
     } catch (e) {
       return undefined;
     }
