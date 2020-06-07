@@ -13,11 +13,11 @@ Example command sequence to get ES and kibana running with sample data after ins
 
 `yarn es snapshot` -> starts ES
 
-`npx yarn start --xpack.securitySolution.endpoint.enabled=true --no-base-path` -> starts kibana
+`npx yarn start --xpack.ingestManager.enabled=true --xpack.ingestManager.epm.enabled=true --xpack.ingestManager.fleet.enabled=true --no-base-path --verbose` -> starts kibana with Ingest and Fleet enabled
 
-`cd ~/path/to/kibana/x-pack/plugins/endpoint`
+`cd ~/path/to/kibana/x-pack/plugins/security_solution/scripts/endpoint`
 
-`yarn test:generate --auth elastic:changeme` -> run the resolver_generator.ts script
+`yarn test:generate --auth elastic:changeme --delete --ne <num_endpoints>` -> run the resolver_generator.ts script
 
 Resolver generator CLI options:
 
