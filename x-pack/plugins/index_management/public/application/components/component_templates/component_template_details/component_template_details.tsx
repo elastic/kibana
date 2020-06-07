@@ -117,7 +117,7 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
 
       {actions && (
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter data-test-subj="footer">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             {/* "Close" link */}
             <EuiFlexItem grow={false}>

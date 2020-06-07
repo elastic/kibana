@@ -21,7 +21,7 @@ export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateD
 
   if (mappings && Object.keys(mappings).length) {
     return (
-      <div data-test-subj="mappingsTab">
+      <div data-test-subj="mappingsTabContent">
         <EuiCodeBlock lang="json">{JSON.stringify(mappings, null, 2)}</EuiCodeBlock>
       </div>
     );

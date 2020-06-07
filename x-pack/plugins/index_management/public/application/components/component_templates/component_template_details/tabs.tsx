@@ -62,7 +62,7 @@ export const ComponentTemplateTabs: React.FunctionComponent<Props> = ({
           }}
           isSelected={tab.id === activeTab}
           key={tab.id}
-          data-test-subj="tab"
+          data-test-subj={`${tab.id}Tab`}
         >
           {tab.name}
         </EuiTab>

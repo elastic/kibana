@@ -49,11 +49,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ componentTemplateDe
       )}
 
       {/* Summary description list */}
-      <EuiDescriptionList textStyle="reverse" data-test-subj="summaryTab">
+      <EuiDescriptionList textStyle="reverse" data-test-subj="summaryTabContent">
         {/* Used by templates */}
         {templateIsInUse && (
           <>
-            <EuiDescriptionListTitle>
+            <EuiDescriptionListTitle data-test-subj="usedByTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateDetails.summaryTab.usedByDescriptionListTitle"
                 defaultMessage="Used by"
@@ -76,7 +76,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ componentTemplateDe
         {/* Version (optional) */}
         {version && (
           <>
-            <EuiDescriptionListTitle>
+            <EuiDescriptionListTitle data-test-subj="versionTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateDetails.summaryTab.versionDescriptionListTitle"
                 defaultMessage="Version"
@@ -89,7 +89,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ componentTemplateDe
         {/* Metadata (optional) */}
         {_meta && (
           <>
-            <EuiDescriptionListTitle>
+            <EuiDescriptionListTitle data-test-subj="metaTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateDetails.summaryTab.metaDescriptionListTitle"
                 defaultMessage="Metadata"
