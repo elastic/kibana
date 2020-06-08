@@ -14,7 +14,7 @@ export interface IField {
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
-  createTooltipProperty(value: string | undefined): Promise<ITooltipProperty>;
+  createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty>;
   getSource(): IVectorSource;
   getOrigin(): FIELD_ORIGIN;
   isValid(): boolean;
@@ -60,7 +60,7 @@ export class AbstractField implements IField {
     return this._fieldName;
   }
 
-  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
+  async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const label = await this.getLabel();
     return new TooltipProperty(this.getName(), label, value);
   }

@@ -26,7 +26,7 @@ export function rewritePackageJson(
   buildVersion: string,
   kibanaVersion: string
 ) {
-  return Through2Map.obj(function(file: File) {
+  return Through2Map.obj(function (file: File) {
     if (file.basename === 'package.json' && file.dirname === buildSource) {
       const pkg = JSON.parse(file.contents!.toString('utf8'));
 

@@ -49,10 +49,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
         onChange: jest.fn(),
       };
       const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...emptyProps} />);
-      const isNode = wrapper
-        .find('div')
-        .children()
-        .exists();
+      const isNode = wrapper.find('div').children().exists();
       expect(isNode).toBeFalsy();
     });
 

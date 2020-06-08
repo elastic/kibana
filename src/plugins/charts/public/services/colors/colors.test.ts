@@ -28,7 +28,7 @@ const config = new Map<string, any>();
 describe('Vislib Color Service', () => {
   const colors = new ColorsService();
   const mockUiSettings = coreMock.createSetup().uiSettings;
-  mockUiSettings.get.mockImplementation(a => config.get(a));
+  mockUiSettings.get.mockImplementation((a) => config.get(a));
   mockUiSettings.set.mockImplementation((...a) => config.set(...a) as any);
   colors.init(mockUiSettings);
 

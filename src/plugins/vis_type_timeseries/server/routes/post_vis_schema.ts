@@ -26,7 +26,7 @@ const stringRequired = schema.string();
 
 const arrayNullable = schema.arrayOf(schema.nullable(schema.any()));
 
-const validateInteger: TypeOptions<number>['validate'] = value => {
+const validateInteger: TypeOptions<number>['validate'] = (value) => {
   if (!Number.isInteger(value)) {
     return `${value} is not an integer`;
   }
@@ -66,6 +66,7 @@ const backgroundColorRulesItems = schema.object({
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
   color: stringOptionalNullable,
+  operator: stringOptionalNullable,
 });
 
 const gaugeColorRulesItems = schema.object({
@@ -73,7 +74,7 @@ const gaugeColorRulesItems = schema.object({
   text: stringOptionalNullable,
   id: stringOptionalNullable,
   operator: stringOptionalNullable,
-  value: schema.number(),
+  value: schema.maybe(schema.nullable(schema.number())),
 });
 const metricsItems = schema.object({
   field: stringOptionalNullable,

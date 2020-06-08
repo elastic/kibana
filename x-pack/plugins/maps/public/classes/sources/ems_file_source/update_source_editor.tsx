@@ -49,11 +49,11 @@ export class UpdateSourceEditor extends Component<Props, State> {
       // @ts-ignore
       const emsFiles = await emsClient.getFileLayers();
       // @ts-ignore
-      const taregetEmsFile = emsFiles.find(emsFile => emsFile.getId() === this.props.layerId);
+      const taregetEmsFile = emsFiles.find((emsFile) => emsFile.getId() === this.props.layerId);
       // @ts-ignore
       const emsFields = taregetEmsFile.getFieldsInLanguage();
       // @ts-ignore
-      fields = emsFields.map(field => this.props.source.createField({ fieldName: field.name }));
+      fields = emsFields.map((field) => this.props.source.createField({ fieldName: field.name }));
     } catch (e) {
       // When a matching EMS-config cannot be found, the source already will have thrown errors during the data request.
       // This will propagate to the vector-layer and be displayed in the UX

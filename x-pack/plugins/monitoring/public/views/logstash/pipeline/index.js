@@ -53,9 +53,9 @@ function getPageData($injector) {
       ccs,
       detailVertexId,
     })
-    .then(response => response.data)
-    .then(data => {
-      data.versions = data.versions.map(version => {
+    .then((response) => response.data)
+    .then((data) => {
+      data.versions = data.versions.map((version) => {
         const relativeFirstSeen = formatTimestampToDuration(
           version.firstSeen,
           CALCULATE_DURATION_SINCE
@@ -90,7 +90,7 @@ function getPageData($injector) {
 
       return data;
     })
-    .catch(err => {
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -124,9 +124,9 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         $injector,
       });
 
-      const timeseriesTooltipXValueFormatter = xValue => moment(xValue).format(dateFormat);
+      const timeseriesTooltipXValueFormatter = (xValue) => moment(xValue).format(dateFormat);
 
-      const setDetailVertexId = vertex => {
+      const setDetailVertexId = (vertex) => {
         if (!vertex) {
           detailVertexId = undefined;
         } else {
@@ -138,7 +138,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.pipeline) {
             return;
           }

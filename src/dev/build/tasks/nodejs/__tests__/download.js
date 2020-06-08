@@ -62,7 +62,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
   });
 
   const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
-  const createSendHandler = send => (req, res) => {
+  const createSendHandler = (send) => (req, res) => {
     res.statusCode = 200;
     res.end(send);
   };
@@ -91,7 +91,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       new Promise((resolve, reject) => {
         server.once('error', reject);
       }),
-      new Promise(resolve => {
+      new Promise((resolve) => {
         server.listen(resolve);
       }),
     ]);
@@ -206,9 +206,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
         });
         throw new Error('Expected download() to reject');
       } catch (error) {
-        expect(error)
-          .to.have.property('message')
-          .contain('Request failed with status code 500');
+        expect(error).to.have.property('message').contain('Request failed with status code 500');
         expect(reqCount).to.be(6);
       }
     });
@@ -232,9 +230,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
 
         throw new Error('expected download() to reject');
       } catch (error) {
-        expect(error)
-          .to.have.property('message')
-          .contain('refusing to download');
+        expect(error).to.have.property('message').contain('refusing to download');
       }
     });
   });

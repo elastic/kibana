@@ -61,7 +61,7 @@ export function isOrdinalStopInvalid(stop) {
 
 export function isCategoricalStopsInvalid(colorStops) {
   const nonDefaults = colorStops.slice(1); //
-  const values = nonDefaults.map(stop => stop.stop);
+  const values = nonDefaults.map((stop) => stop.stop);
   const uniques = _.uniq(values);
   return values.length !== uniques.length;
 }

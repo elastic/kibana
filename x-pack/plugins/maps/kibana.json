@@ -14,7 +14,8 @@
     "navigation",
     "visualizations",
     "embeddable",
-    "mapsLegacy"
+    "mapsLegacy",
+    "usageCollection"
   ],
   "ui": true,
   "server": true

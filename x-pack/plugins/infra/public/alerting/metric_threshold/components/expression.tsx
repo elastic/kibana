@@ -66,7 +66,7 @@ const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 
-export const Expressions: React.FC<Props> = props => {
+export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -90,6 +90,7 @@ export const Expressions: React.FC<Props> = props => {
         aggregation: 'avg',
       };
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [alertsContext.metadata]);
 
   const updateParams = useCallback(
@@ -109,6 +110,7 @@ export const Expressions: React.FC<Props> = props => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
@@ -119,6 +121,7 @@ export const Expressions: React.FC<Props> = props => {
         setAlertParams('criteria', exp);
       }
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [setAlertParams, alertParams.criteria]
   );
 
@@ -133,12 +136,13 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, derivedIndexPattern]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
 
   const onGroupByChange = useCallback(
-    (group: string | null) => {
+    (group: string | null | string[]) => {
       setAlertParams('groupBy', group || '');
     },
     [setAlertParams]
@@ -155,26 +159,28 @@ export const Expressions: React.FC<Props> = props => {
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeSize: ts,
         })) || [];
       setTimeSize(ts || undefined);
       setAlertParams('criteria', criteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams.criteria, setAlertParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeUnit: tu,
         })) || [];
       setTimeUnit(tu as TimeUnit);
       setAlertParams('criteria', criteria);
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [alertParams.criteria, setAlertParams]
   );
 
@@ -183,7 +189,7 @@ export const Expressions: React.FC<Props> = props => {
     if (md && md.currentOptions?.metrics) {
       setAlertParams(
         'criteria',
-        md.currentOptions.metrics.map(metric => ({
+        md.currentOptions.metrics.map((metric) => ({
           metric: metric.field,
           comparator: Comparator.GT,
           threshold: [],
@@ -206,7 +212,10 @@ export const Expressions: React.FC<Props> = props => {
         convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
-      const filter = `${md.currentOptions?.groupBy}: "${md.series.id}"`;
+      const { groupBy } = md.currentOptions;
+      const filter = Array.isArray(groupBy)
+        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
+        : `${groupBy}: "${md.series.id}"`;
       setAlertParams('filterQueryText', filter);
       setAlertParams(
         'filterQuery',
@@ -285,6 +294,7 @@ export const Expressions: React.FC<Props> = props => {
         />
       </div>
 
+      <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
           color={'primary'}
@@ -319,7 +329,7 @@ export const Expressions: React.FC<Props> = props => {
           </>
         }
         checked={alertParams.alertOnNoData}
-        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
       />
 
       <EuiSpacer size={'m'} />

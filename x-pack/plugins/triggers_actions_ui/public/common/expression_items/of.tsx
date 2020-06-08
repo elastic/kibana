@@ -125,7 +125,7 @@ export const OfExpression = ({
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   onChangeSelectedAggField(
                     selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                   );

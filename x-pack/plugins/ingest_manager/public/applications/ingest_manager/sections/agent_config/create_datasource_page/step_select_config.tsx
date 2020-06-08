@@ -115,7 +115,7 @@ export const StepSelectConfig: React.FunctionComponent<{
               checked: selectedConfigId === id ? 'on' : undefined,
             };
           })}
-          renderOption={option => (
+          renderOption={(option) => (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
               <EuiFlexItem>
@@ -148,8 +148,8 @@ export const StepSelectConfig: React.FunctionComponent<{
             ),
           }}
           height={240}
-          onChange={options => {
-            const selectedOption = options.find(option => option.checked === 'on');
+          onChange={(options) => {
+            const selectedOption = options.find((option) => option.checked === 'on');
             if (selectedOption) {
               setSelectedConfigId(selectedOption.key);
             } else {

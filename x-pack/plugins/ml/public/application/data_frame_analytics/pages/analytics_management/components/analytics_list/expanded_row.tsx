@@ -186,7 +186,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         ),
         description: `${currentPhase}/${totalPhases}`,
       },
-      ...item.stats.progress.map(s => {
+      ...item.stats.progress.map((s) => {
         return {
           title: s.phase,
           description: <ProgressBar progress={s.progress_percent} />,

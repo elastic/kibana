@@ -36,6 +36,7 @@ import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -54,7 +55,7 @@ export interface WorkspacePanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
-  plugins: { uiActions?: UiActionsStart };
+  plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -86,7 +87,7 @@ export function InnerWorkspacePanel({
     }
 
     const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-      datasource => datasource.getTableSpec().length > 0
+      (datasource) => datasource.getTableSpec().length > 0
     );
 
     const suggestions = getSuggestions({
@@ -101,7 +102,7 @@ export function InnerWorkspacePanel({
       field: dragDropContext.dragging,
     });
 
-    return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
   const [localState, setLocalState] = useState({
@@ -123,7 +124,7 @@ export function InnerWorkspacePanel({
       });
     } catch (e) {
       // Most likely an error in the expression provided by a datasource or visualization
-      setLocalState(s => ({ ...s, expressionBuildError: e.toString() }));
+      setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
     }
   }, [
     activeVisualization,
@@ -135,10 +136,15 @@ export function InnerWorkspacePanel({
     framePublicAPI.filters,
   ]);
 
+  const autoRefreshFetch$ = useMemo(
+    () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
+    [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
+  );
+
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expression && localState.expressionBuildError) {
-      setLocalState(s => ({
+      setLocalState((s) => ({
         ...s,
         expressionBuildError: undefined,
       }));
@@ -224,6 +230,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          reload$={autoRefreshFetch$}
           onEvent={(event: ExpressionRendererEvent) => {
             if (!plugins.uiActions) {
               // ui actions not available, not handling event...
@@ -256,7 +263,7 @@ export function InnerWorkspacePanel({
                   <EuiFlexItem className="eui-textBreakAll" grow={false}>
                     <EuiButtonEmpty
                       onClick={() => {
-                        setLocalState(prevState => ({
+                        setLocalState((prevState) => ({
                           ...prevState,
                           expandError: !prevState.expandError,
                         }));

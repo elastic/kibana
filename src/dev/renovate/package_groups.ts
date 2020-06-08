@@ -214,9 +214,9 @@ for (const dep of getAllDepNames()) {
   // determine if one of the existing groups has typesFor in its
   // packageNames or if any of the packageWords is in typesFor
   const existing = RENOVATE_PACKAGE_GROUPS.some(
-    group =>
+    (group) =>
       (group.packageNames || []).includes(typesFor) ||
-      (group.packageWords || []).some(word => wordRegExp(word).test(typesFor))
+      (group.packageWords || []).some((word) => wordRegExp(word).test(typesFor))
   );
 
   if (existing) {

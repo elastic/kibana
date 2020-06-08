@@ -55,7 +55,7 @@ const createTestCases = (spaceId: string) => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function ({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
@@ -87,11 +87,11 @@ export default function({ getService }: TestInvoker) {
         users.readGlobally,
         users.readAtSpace,
         users.allAtOtherSpace,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, unauthorized);
       });
       _addTests(users.allAtSpace, authorizedThisSpace);
-      [users.dualAll, users.allGlobally, users.superuser].forEach(user => {
+      [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
         _addTests(user, authorizedGlobally);
       });
     });

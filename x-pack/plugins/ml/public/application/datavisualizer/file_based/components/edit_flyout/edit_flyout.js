@@ -36,13 +36,13 @@ export class EditFlyout extends Component {
     this.props.closeEditFlyout();
   };
 
-  setApplyOverrides = applyOverrides => {
+  setApplyOverrides = (applyOverrides) => {
     this.applyOverrides = applyOverrides;
   };
   unsetApplyOverrides = () => {
     this.applyOverrides = () => {};
   };
-  setOverridesValid = overridesValid => {
+  setOverridesValid = (overridesValid) => {
     this.setState({ overridesValid });
   };
 

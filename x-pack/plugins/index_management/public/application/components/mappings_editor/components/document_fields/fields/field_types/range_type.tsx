@@ -33,7 +33,7 @@ export const RangeType = ({ field }: Props) => {
         <IndexParameter hasIndexOptions={false} />
 
         <FormDataProvider pathsToWatch="subType">
-          {formData =>
+          {(formData) =>
             formData.subType === 'date_range' ? (
               <FormatParameter
                 defaultValue={field.source.format as string}
@@ -46,7 +46,7 @@ export const RangeType = ({ field }: Props) => {
 
       <AdvancedParametersSection>
         <FormDataProvider pathsToWatch="subType">
-          {formData =>
+          {(formData) =>
             formData.subType === 'date_range' ? (
               <LocaleParameter defaultToggleValue={getDefaultToggleValue('locale', field.source)} />
             ) : null

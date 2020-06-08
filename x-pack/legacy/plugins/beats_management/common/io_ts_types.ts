@@ -24,7 +24,7 @@ export class DateFromStringType extends t.Type<Date, string, t.mixed> {
           return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
         }
       },
-      a => a.toISOString()
+      (a) => a.toISOString()
     );
   }
 }

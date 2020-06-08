@@ -32,14 +32,14 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
       describe(scenario.id, () => {
         it('should handle unmute alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_mute_all`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_mute_all`)
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -61,7 +61,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);

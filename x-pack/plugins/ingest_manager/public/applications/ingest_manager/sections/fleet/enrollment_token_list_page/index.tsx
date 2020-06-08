@@ -178,7 +178,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Config',
       }),
       render: (configId: string) => {
-        const config = agentConfigs.find(c => c.id === configId);
+        const config = agentConfigs.find((c) => c.id === configId);
         return <>{config ? config.name : configId}</>;
       },
     },
@@ -246,7 +246,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,

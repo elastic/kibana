@@ -74,7 +74,7 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as FeatureConfig[];
 
-    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
     expect(features).toEqual([
       {
         id: 'feature_3',
@@ -103,7 +103,7 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as FeatureConfig[];
 
-    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
 
     expect(features).toEqual([
       {
@@ -133,7 +133,7 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as FeatureConfig[];
 
-    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
 
     expect(features).toEqual([
       {
@@ -163,7 +163,7 @@ describe('GET /api/features', () => {
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]!.body as FeatureConfig[];
 
-    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+    const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
 
     expect(features).toEqual([
       {

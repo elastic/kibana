@@ -18,25 +18,27 @@ import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-ignore Untyped local
 import { App } from './components/app';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
-import { initInterpreter, resetInterpreter } from './lib/run_interpreter';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
-import { createStore, destroyStore } from './store';
+import { createStore } from './store';
 
 /* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, stopServices, services } from './services';
+import { startServices, services } from './services';
 // @ts-ignore Untyped local
 import { destroyHistory } from './lib/history_provider';
 // @ts-ignore Untyped local
 import { stopRouter } from './lib/router_provider';
+import { initFunctions } from './functions';
+// @ts-ignore Untyped local
+import { appUnload } from './state/actions/app';
 
 import './style/index.scss';
 
@@ -68,6 +70,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    canvasStore.dispatch(appUnload());
   };
 };
 
@@ -79,15 +82,25 @@ export const initializeCanvas = async (
   registries: SetupRegistries,
   appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  await startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+
+  // Adding these functions here instead of in plugin.ts.
+  // Some of these functions have deep dependencies into Canvas, which was bulking up the size
+  // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
+  const canvasFunctions = initFunctions({
+    timefilter: setupPlugins.data.query.timefilter.timefilter,
+    prependBasePath: coreSetup.http.basePath.prepend,
+    typesRegistry: setupPlugins.expressions.__LEGACY.types,
+  });
+
+  for (const fn of canvasFunctions) {
+    services.expressions.getService().registerFunction(fn);
+  }
 
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
 
-  // Init Interpreter
-  initInterpreter(startPlugins.expressions, setupPlugins.expressions).then(() => {
-    registerLanguage(Object.values(startPlugins.expressions.getFunctions()));
-  });
+  registerLanguage(Object.values(services.expressions.getService().getFunctions()));
 
   // Init Registries
   initRegistries();
@@ -115,7 +128,7 @@ export const initializeCanvas = async (
         href: getDocumentationLinks().canvas,
       },
     ],
-    content: domNode => {
+    content: (domNode) => {
       ReactDOM.render(<HelpMenu />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
@@ -129,10 +142,14 @@ export const initializeCanvas = async (
 };
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
-  stopServices();
   destroyRegistries();
-  resetInterpreter();
-  destroyStore();
+
+  // TODO: Not cleaning these up temporarily.
+  // We have an issue where if requests are inflight, and you navigate away,
+  // those requests could still be trying to act on the store and possibly require services.
+  // stopServices();
+  // resetInterpreter();
+  // destroyStore();
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);

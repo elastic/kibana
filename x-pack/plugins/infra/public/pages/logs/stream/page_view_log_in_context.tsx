@@ -28,6 +28,7 @@ const MODAL_MARGIN = 25;
 export const PageViewLogInContext: React.FC = () => {
   const { sourceConfiguration } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const columnConfigurations = useMemo(() => sourceConfiguration?.configuration.logColumns ?? [], [
     sourceConfiguration,
   ]);
@@ -39,7 +40,7 @@ export const PageViewLogInContext: React.FC = () => {
 
   const streamItems = useMemo(
     () =>
-      entries.map(entry => ({
+      entries.map((entry) => ({
         kind: 'logEntry' as const,
         logEntry: entry,
         highlights: [],

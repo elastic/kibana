@@ -36,21 +36,21 @@ describe('plugin discovery/plugin spec', () => {
     describe('validation', () => {
       it('throws if missing spec.id AND Pack has no name', () => {
         const pack = new PluginPack({ pkg: {} });
-        expect(() => new PluginSpec(pack, {})).to.throwError(error => {
+        expect(() => new PluginSpec(pack, {})).to.throwError((error) => {
           expect(error.message).to.contain('Unable to determine plugin id');
         });
       });
 
       it('throws if missing spec.kibanaVersion AND Pack has no version', () => {
         const pack = new PluginPack({ pkg: { name: 'foo' } });
-        expect(() => new PluginSpec(pack, {})).to.throwError(error => {
+        expect(() => new PluginSpec(pack, {})).to.throwError((error) => {
           expect(error.message).to.contain('Unable to determine plugin version');
         });
       });
 
       it('throws if spec.require is defined, but not an array', () => {
         function assert(require) {
-          expect(() => new PluginSpec(fooPack, { require })).to.throwError(error => {
+          expect(() => new PluginSpec(fooPack, { require })).to.throwError((error) => {
             expect(error.message).to.contain('"plugin.require" must be an array of plugin ids');
           });
         }
@@ -65,7 +65,7 @@ describe('plugin discovery/plugin spec', () => {
 
       it('throws if spec.publicDir is truthy and not a string', () => {
         function assert(publicDir) {
-          expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError(error => {
+          expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError((error) => {
             expect(error.message).to.contain(
               `The "path" argument must be of type string. Received type ${typeof publicDir}`
             );
@@ -73,14 +73,14 @@ describe('plugin discovery/plugin spec', () => {
         }
 
         assert(1);
-        assert(function() {});
+        assert(function () {});
         assert([]);
         assert(/a.*b/);
       });
 
       it('throws if spec.publicDir is not an absolute path', () => {
         function assert(publicDir) {
-          expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError(error => {
+          expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError((error) => {
             expect(error.message).to.contain('plugin.publicDir must be an absolute path');
           });
         }
@@ -91,7 +91,7 @@ describe('plugin discovery/plugin spec', () => {
 
       it('throws if spec.publicDir basename is not `public`', () => {
         function assert(publicDir) {
-          expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError(error => {
+          expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError((error) => {
             expect(error.message).to.contain('must end with a "public" directory');
           });
         }
@@ -171,13 +171,13 @@ describe('plugin discovery/plugin spec', () => {
         it('throws if not passed a config service', () => {
           const { spec } = setup('a.b.c', () => true);
 
-          expect(() => spec.isEnabled()).to.throwError(error => {
+          expect(() => spec.isEnabled()).to.throwError((error) => {
             expect(error.message).to.contain('must be called with a config service');
           });
-          expect(() => spec.isEnabled(null)).to.throwError(error => {
+          expect(() => spec.isEnabled(null)).to.throwError((error) => {
             expect(error.message).to.contain('must be called with a config service');
           });
-          expect(() => spec.isEnabled({ get: () => {} })).to.throwError(error => {
+          expect(() => spec.isEnabled({ get: () => {} })).to.throwError((error) => {
             expect(error.message).to.contain('must be called with a config service');
           });
         });
@@ -214,13 +214,13 @@ describe('plugin discovery/plugin spec', () => {
         it('throws if not passed a config service', () => {
           const { spec } = setup(() => true);
 
-          expect(() => spec.isEnabled()).to.throwError(error => {
+          expect(() => spec.isEnabled()).to.throwError((error) => {
             expect(error.message).to.contain('must be called with a config service');
           });
-          expect(() => spec.isEnabled(null)).to.throwError(error => {
+          expect(() => spec.isEnabled(null)).to.throwError((error) => {
             expect(error.message).to.contain('must be called with a config service');
           });
-          expect(() => spec.isEnabled({ get: () => {} })).to.throwError(error => {
+          expect(() => spec.isEnabled({ get: () => {} })).to.throwError((error) => {
             expect(error.message).to.contain('must be called with a config service');
           });
         });

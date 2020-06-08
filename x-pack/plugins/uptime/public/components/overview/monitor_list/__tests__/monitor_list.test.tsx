@@ -10,7 +10,7 @@ import {
   CursorDirection,
   SortOrder,
 } from '../../../../../common/runtime_types';
-import { MonitorListComponent } from '../monitor_list';
+import { MonitorListComponent, noItemsMessage } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
 
@@ -106,8 +106,8 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, loading: false }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -126,8 +126,8 @@ describe('MonitorList component', () => {
           },
           loading: true,
         }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();
@@ -137,8 +137,8 @@ describe('MonitorList component', () => {
     const component = renderWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, loading: false }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -149,8 +149,8 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, error: new Error('foo message'), loading: false }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -161,8 +161,8 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, loading: true }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -260,8 +260,8 @@ describe('MonitorList component', () => {
             },
             loading: false,
           }}
-          lastRefresh={123}
-          getMonitorList={jest.fn()}
+          pageSize={10}
+          setPageSize={jest.fn()}
         />
       );
 
@@ -280,12 +280,32 @@ describe('MonitorList component', () => {
             },
             loading: false,
           }}
-          lastRefresh={123}
-          getMonitorList={jest.fn()}
+          pageSize={10}
+          setPageSize={jest.fn()}
         />
       );
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('noItemsMessage', () => {
+    it('returns loading message while loading', () => {
+      expect(noItemsMessage(true)).toEqual(`Loading...`);
+    });
+
+    it('returns loading message when filters are defined and loading', () => {
+      expect(noItemsMessage(true, 'filters')).toEqual(`Loading...`);
+    });
+
+    it('returns no monitors selected when filters are defined and not loading', () => {
+      expect(noItemsMessage(false, 'filters')).toEqual(
+        `No monitors found for selected filter criteria`
+      );
+    });
+
+    it('returns no data message when no filters and not loading', () => {
+      expect(noItemsMessage(false)).toEqual(`No uptime monitors found`);
     });
   });
 });

@@ -19,14 +19,14 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
-  describe('vector map', function() {
+export default function ({ getService, getPageObjects }) {
+  describe('vector map', function () {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');
     const PageObjects = getPageObjects(['visualize', 'visEditor', 'timePicker']);
 
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickRegionMap');
@@ -43,11 +43,11 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('vector map', function indexPatternCreation() {
-      it('should have inspector enabled', async function() {
+      it('should have inspector enabled', async function () {
         await inspector.expectIsEnabled();
       });
 
-      it('should show results after clicking play (join on states)', async function() {
+      it('should show results after clicking play (join on states)', async function () {
         const expectedData = [
           ['CN', '2,592'],
           ['IN', '2,373'],
@@ -60,7 +60,7 @@ export default function({ getService, getPageObjects }) {
         await inspector.close();
       });
 
-      it('should change results after changing layer to world', async function() {
+      it('should change results after changing layer to world', async function () {
         await PageObjects.visEditor.clickOptionsTab();
         await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectLayer',
@@ -104,7 +104,7 @@ export default function({ getService, getPageObjects }) {
         const $ = await selectField.parseDomContent();
         const optionsText = $('option')
           .toArray()
-          .map(option => $(option).text());
+          .map((option) => $(option).text());
 
         expect(optionsText.includes('road_map')).to.be(true);
       });

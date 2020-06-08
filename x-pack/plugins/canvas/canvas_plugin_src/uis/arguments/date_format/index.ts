@@ -30,7 +30,7 @@ export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentPr
     LOCAL_TIME_WITH_SECONDS: 'LTS',
   };
 
-  const dateFormats = Object.values(formatMap).map(format => ({
+  const dateFormats = Object.values(formatMap).map((format) => ({
     value: format,
     text: moment.utc(moment()).format(format),
   }));

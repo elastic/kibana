@@ -22,10 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return case tags', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
       await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')

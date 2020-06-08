@@ -33,7 +33,7 @@ export class KibanaRegionField extends AbstractField implements IField {
     const meta = await this._source.getVectorFileMeta();
     // TODO remove any and @ts-ignore when vectorFileMeta type defined
     // @ts-ignore
-    const field: any = meta.fields.find(f => f.name === this.getName());
+    const field: any = meta.fields.find((f) => f.name === this.getName());
     return field ? field.description : this.getName();
   }
 }

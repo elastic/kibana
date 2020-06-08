@@ -55,7 +55,7 @@ export function newJobPopulationChartProvider(callWithRequest: callWithRequestTy
       const results = await callWithRequest('search', json);
       return processSearchResults(
         results,
-        aggFieldNamePairs.map(af => af.field)
+        aggFieldNamePairs.map((af) => af.field)
       );
     } catch (error) {
       return { error };

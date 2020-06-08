@@ -148,7 +148,7 @@ describe('settings', () => {
     act(() => {
       instance
         .find(EuiTab)
-        .findWhere(node => node.key() === tab)
+        .findWhere((node) => node.key() === tab)
         .prop('onClick')!({});
     });
     instance.update();
@@ -185,7 +185,7 @@ describe('settings', () => {
     });
 
     it('should switch tab to blacklist', () => {
-      expect(instance.find(EuiListGroupItem).map(item => item.prop('label'))).toEqual([
+      expect(instance.find(EuiListGroupItem).map((item) => item.prop('label'))).toEqual([
         'blacklisted node 1',
         'blacklisted node 2',
       ]);
@@ -219,25 +219,19 @@ describe('settings', () => {
 
       instance.update();
 
-      expect(instance.find(EuiListGroupItem).map(item => item.prop('label'))).toEqual([
+      expect(instance.find(EuiListGroupItem).map((item) => item.prop('label'))).toEqual([
         'blacklisted node 3',
       ]);
     });
 
     it('should delete node', () => {
-      instance
-        .find(EuiListGroupItem)
-        .at(0)
-        .prop('extraAction')!.onClick!({} as any);
+      instance.find(EuiListGroupItem).at(0).prop('extraAction')!.onClick!({} as any);
 
       expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
-      instance
-        .find('[data-test-subj="graphUnblacklistAll"]')
-        .find(EuiButton)
-        .simulate('click');
+      instance.find('[data-test-subj="graphUnblacklistAll"]').find(EuiButton).simulate('click');
 
       expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![0]);
       expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![1]);
@@ -251,11 +245,9 @@ describe('settings', () => {
 
     function insert(formIndex: number, label: string, value: string) {
       act(() => {
-        templateForm(formIndex)
-          .find({ label })
-          .first()
-          .find(EuiFieldText)
-          .prop('onChange')!({ target: { value } } as React.ChangeEvent<HTMLInputElement>);
+        templateForm(formIndex).find({ label }).first().find(EuiFieldText).prop('onChange')!({
+          target: { value },
+        } as React.ChangeEvent<HTMLInputElement>);
       });
       instance.update();
     }
@@ -265,12 +257,7 @@ describe('settings', () => {
     });
 
     it('should switch tab to url templates', () => {
-      expect(
-        instance
-          .find(EuiAccordion)
-          .at(0)
-          .prop('buttonContent')
-      ).toEqual('template');
+      expect(instance.find(EuiAccordion).at(0).prop('buttonContent')).toEqual('template');
     });
 
     it('should delete url template', () => {
@@ -283,9 +270,7 @@ describe('settings', () => {
     it('should update url template', () => {
       insert(0, 'Title', 'Updated title');
       act(() => {
-        templateForm(0)
-          .find('form')
-          .simulate('submit');
+        templateForm(0).find('form').simulate('submit');
       });
       expect(dispatchSpy).toHaveBeenCalledWith(
         saveTemplate({ index: 0, template: { ...initialTemplate, description: 'Updated title' } })
@@ -302,9 +287,7 @@ describe('settings', () => {
       insert(1, 'Title', 'Title');
 
       act(() => {
-        templateForm(1)
-          .find('form')
-          .simulate('submit');
+        templateForm(1).find('form').simulate('submit');
       });
       expect(dispatchSpy).toHaveBeenCalledWith(
         saveTemplate({

@@ -51,7 +51,8 @@ export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
 
   useEffect(() => {
     const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
-    setAlertParams('timerange', { from: `now-${numUnits}${timerangeUnit}`, to: 'now' });
+    setAlertParams('timerangeUnit', timerangeUnit);
+    setAlertParams('timerangeCount', numUnits);
   }, [numUnits, timerangeUnitOptions, setAlertParams]);
 
   return (
@@ -91,7 +92,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
                 aria-label={timeExpLabels.SELECT_TIME_RANGE_ARIA}
                 data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
                 options={timerangeUnitOptions}
-                onChange={newOptions => {
+                onChange={(newOptions) => {
                   if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
                     setTimerangeUnitOptions(newOptions);
                   }
@@ -101,7 +102,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
                   showIcons: true,
                 }}
               >
-                {list => list}
+                {(list) => list}
               </EuiSelectable>
             </>
           }

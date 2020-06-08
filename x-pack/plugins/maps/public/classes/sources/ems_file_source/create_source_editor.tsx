@@ -37,7 +37,7 @@ export class EMSFileCreateSourceEditor extends Component<Props, State> {
     const emsClient = getEMSClient();
     // @ts-ignore
     const fileLayers: unknown[] = await emsClient.getFileLayers();
-    const options = fileLayers.map(fileLayer => {
+    const options = fileLayers.map((fileLayer) => {
       return {
         // @ts-ignore
         value: fileLayer.getId(),

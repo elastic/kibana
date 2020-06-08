@@ -35,7 +35,7 @@ export function startTask({ plugin, options }: TaskContext) {
   let args = nodeOptions.concat([script, '--dev', '--plugin-path', plugin.root]);
 
   if (Array.isArray(plugin.includePlugins)) {
-    plugin.includePlugins.forEach(path => {
+    plugin.includePlugins.forEach((path) => {
       args = args.concat(['--plugin-path', path]);
     });
   }

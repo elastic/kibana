@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 import { ExpressionFunction } from '../../types';
 
 export const LANGUAGE_ID = 'canvas-expression';
@@ -95,7 +95,7 @@ export const language: Language = {
 };
 
 export function registerLanguage(functions: ExpressionFunction[]) {
-  language.keywords = functions.map(fn => fn.name);
+  language.keywords = functions.map((fn) => fn.name);
 
   monaco.languages.register({ id: LANGUAGE_ID });
   monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, language);

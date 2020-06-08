@@ -147,7 +147,7 @@ function findHeadersIntersection(
   headers: ResponseHeaders,
   log: Logger
 ) {
-  Object.keys(headers).forEach(headerName => {
+  Object.keys(headers).forEach((headerName) => {
     if (Reflect.has(responseHeaders, headerName)) {
       log.warn(`onPreResponseHandler rewrote a response header [${headerName}].`);
     }

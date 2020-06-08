@@ -18,8 +18,8 @@ export const storedDatasourceToAgentDatasource = (
     enabled,
     use_output: DEFAULT_OUTPUT.name, // TODO: hardcoded to default output for now
     inputs: inputs
-      .filter(input => input.enabled)
-      .map(input => {
+      .filter((input) => input.enabled)
+      .map((input) => {
         const fullInput = {
           ...input,
           ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
@@ -27,8 +27,8 @@ export const storedDatasourceToAgentDatasource = (
             return acc;
           }, {} as { [k: string]: any }),
           streams: input.streams
-            .filter(stream => stream.enabled)
-            .map(stream => {
+            .filter((stream) => stream.enabled)
+            .map((stream) => {
               const fullStream = {
                 ...stream,
                 ...stream.agent_stream,

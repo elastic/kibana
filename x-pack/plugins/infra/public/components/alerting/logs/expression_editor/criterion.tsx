@@ -81,7 +81,7 @@ const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => 
 };
 
 const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | undefined => {
-  return fields.find(field => {
+  return fields.find((field) => {
     return field.name === fieldName;
   });
 };
@@ -109,7 +109,7 @@ export const Criterion: React.FC<Props> = ({
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
 
   const fieldOptions = useMemo(() => {
-    return fields.map(field => {
+    return fields.map((field) => {
       return { value: field.name, text: field.name };
     });
   }, [fields]);
@@ -123,7 +123,7 @@ export const Criterion: React.FC<Props> = ({
   }, [fieldInfo]);
 
   const handleFieldChange = useCallback(
-    e => {
+    (e) => {
       const fieldName = e.target.value;
       const nextFieldInfo = getFieldInfo(fields, fieldName);
       // If the field information we're dealing with has changed, reset the comparator and value.
@@ -219,7 +219,7 @@ export const Criterion: React.FC<Props> = ({
                       <EuiSelect
                         compressed
                         value={criterion.comparator}
-                        onChange={e =>
+                        onChange={(e) =>
                           updateCriterion(idx, { comparator: e.target.value as Comparator })
                         }
                         options={compatibleComparatorOptions}
@@ -232,7 +232,7 @@ export const Criterion: React.FC<Props> = ({
                         <EuiFieldNumber
                           compressed
                           value={criterion.value as number | undefined}
-                          onChange={e => {
+                          onChange={(e) => {
                             const number = parseInt(e.target.value, 10);
                             updateCriterion(idx, { value: number ? number : undefined });
                           }}
@@ -241,7 +241,7 @@ export const Criterion: React.FC<Props> = ({
                         <EuiFieldText
                           compressed
                           value={criterion.value}
-                          onChange={e => updateCriterion(idx, { value: e.target.value })}
+                          onChange={(e) => updateCriterion(idx, { value: e.target.value })}
                         />
                       )}
                     </EuiFormRow>

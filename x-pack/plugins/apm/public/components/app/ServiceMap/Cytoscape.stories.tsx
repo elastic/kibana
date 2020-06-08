@@ -22,31 +22,31 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
         data: {
           id: 'opbeans-python',
           'service.name': 'opbeans-python',
-          'agent.name': 'python'
-        }
+          'agent.name': 'python',
+        },
       },
       {
         data: {
           id: 'opbeans-node',
           'service.name': 'opbeans-node',
-          'agent.name': 'nodejs'
-        }
+          'agent.name': 'nodejs',
+        },
       },
       {
         data: {
           id: 'opbeans-ruby',
           'service.name': 'opbeans-ruby',
-          'agent.name': 'ruby'
-        }
+          'agent.name': 'ruby',
+        },
       },
       { data: { source: 'opbeans-python', target: 'opbeans-node' } },
       {
         data: {
           bidirectional: true,
           source: 'opbeans-python',
-          target: 'opbeans-ruby'
-        }
-      }
+          target: 'opbeans-ruby',
+        },
+      },
     ];
     const height = 300;
     const width = 1340;
@@ -63,8 +63,8 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
   {
     info: {
       propTables: false,
-      source: false
-    }
+      source: false,
+    },
   }
 );
 
@@ -79,8 +79,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           data: {
             id: 'aws',
             'span.type': 'aws',
-            'span.subtype': 'servicename'
-          }
+            'span.subtype': 'servicename',
+          },
         },
         { data: { id: 'cache', 'span.type': 'cache' } },
         { data: { id: 'database', 'span.type': 'db' } },
@@ -88,43 +88,43 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           data: {
             id: 'cassandra',
             'span.type': 'db',
-            'span.subtype': 'cassandra'
-          }
+            'span.subtype': 'cassandra',
+          },
         },
         {
           data: {
             id: 'elasticsearch',
             'span.type': 'db',
-            'span.subtype': 'elasticsearch'
-          }
+            'span.subtype': 'elasticsearch',
+          },
         },
         {
           data: {
             id: 'mongodb',
             'span.type': 'db',
-            'span.subtype': 'mongodb'
-          }
+            'span.subtype': 'mongodb',
+          },
         },
         {
           data: {
             id: 'mysql',
             'span.type': 'db',
-            'span.subtype': 'mysql'
-          }
+            'span.subtype': 'mysql',
+          },
         },
         {
           data: {
             id: 'postgresql',
             'span.type': 'db',
-            'span.subtype': 'postgresql'
-          }
+            'span.subtype': 'postgresql',
+          },
         },
         {
           data: {
             id: 'redis',
             'span.type': 'db',
-            'span.subtype': 'redis'
-          }
+            'span.subtype': 'redis',
+          },
         },
         { data: { id: 'external', 'span.type': 'external' } },
         { data: { id: 'ext', 'span.type': 'ext' } },
@@ -132,122 +132,129 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           data: {
             id: 'graphql',
             'span.type': 'external',
-            'span.subtype': 'graphql'
-          }
+            'span.subtype': 'graphql',
+          },
         },
         {
           data: {
             id: 'grpc',
             'span.type': 'external',
-            'span.subtype': 'grpc'
-          }
+            'span.subtype': 'grpc',
+          },
         },
         {
           data: {
             id: 'websocket',
             'span.type': 'external',
-            'span.subtype': 'websocket'
-          }
+            'span.subtype': 'websocket',
+          },
         },
         { data: { id: 'messaging', 'span.type': 'messaging' } },
         {
           data: {
             id: 'jms',
             'span.type': 'messaging',
-            'span.subtype': 'jms'
-          }
+            'span.subtype': 'jms',
+          },
         },
         {
           data: {
             id: 'kafka',
             'span.type': 'messaging',
-            'span.subtype': 'kafka'
-          }
+            'span.subtype': 'kafka',
+          },
         },
         { data: { id: 'template', 'span.type': 'template' } },
         {
           data: {
             id: 'handlebars',
             'span.type': 'template',
-            'span.subtype': 'handlebars'
-          }
+            'span.subtype': 'handlebars',
+          },
         },
         {
           data: {
             id: 'dark',
             'service.name': 'dark service',
-            'agent.name': 'dark'
-          }
+            'agent.name': 'dark',
+          },
         },
         {
           data: {
             id: 'dotnet',
             'service.name': 'dotnet service',
-            'agent.name': 'dotnet'
-          }
+            'agent.name': 'dotnet',
+          },
+        },
+        {
+          data: {
+            id: 'dotNet',
+            'service.name': 'dotNet service',
+            'agent.name': 'dotNet',
+          },
         },
         {
           data: {
             id: 'go',
             'service.name': 'go service',
-            'agent.name': 'go'
-          }
+            'agent.name': 'go',
+          },
         },
         {
           data: {
             id: 'java',
             'service.name': 'java service',
-            'agent.name': 'java'
-          }
+            'agent.name': 'java',
+          },
         },
         {
           data: {
             id: 'RUM (js-base)',
             'service.name': 'RUM service',
-            'agent.name': 'js-base'
-          }
+            'agent.name': 'js-base',
+          },
         },
         {
           data: {
             id: 'RUM (rum-js)',
             'service.name': 'RUM service',
-            'agent.name': 'rum-js'
-          }
+            'agent.name': 'rum-js',
+          },
         },
         {
           data: {
             id: 'nodejs',
             'service.name': 'nodejs service',
-            'agent.name': 'nodejs'
-          }
+            'agent.name': 'nodejs',
+          },
         },
         {
           data: {
             id: 'php',
             'service.name': 'php service',
-            'agent.name': 'php'
-          }
+            'agent.name': 'php',
+          },
         },
         {
           data: {
             id: 'python',
             'service.name': 'python service',
-            'agent.name': 'python'
-          }
+            'agent.name': 'python',
+          },
         },
         {
           data: {
             id: 'ruby',
             'service.name': 'ruby service',
-            'agent.name': 'ruby'
-          }
-        }
+            'agent.name': 'ruby',
+          },
+        },
       ];
       cy.add(elements);
 
       return (
         <EuiFlexGroup gutterSize="l" wrap={true}>
-          {cy.nodes().map(node => (
+          {cy.nodes().map((node) => (
             <EuiFlexItem key={node.data('id')}>
               <EuiCard
                 description={
@@ -277,8 +284,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
     {
       info: {
         propTables: false,
-        source: false
-      }
+        source: false,
+      },
     }
   )
   .add(
@@ -299,8 +306,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
     },
     {
       info: {
-        source: false
-      }
+        source: false,
+      },
     }
   )
   .addParameters({ options: { showPanel: false } });
@@ -314,34 +321,34 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
         data: {
           id: 'warning',
           'service.name': 'severity: warning',
-          severity: 'warning'
-        }
+          severity: 'warning',
+        },
       },
       {
         data: {
           id: 'minor',
           'service.name': 'severity: minor',
-          severity: 'minor'
-        }
+          severity: 'minor',
+        },
       },
       {
         data: {
           id: 'major',
           'service.name': 'severity: major',
-          severity: 'major'
-        }
+          severity: 'major',
+        },
       },
       {
         data: {
           id: 'critical',
           'service.name': 'severity: critical',
-          severity: 'critical'
-        }
-      }
+          severity: 'critical',
+        },
+      },
     ];
     return <Cytoscape elements={elements} height={300} width={1340} />;
   },
   {
-    info: { propTables: false, source: false }
+    info: { propTables: false, source: false },
   }
 );

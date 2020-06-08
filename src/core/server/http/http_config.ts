@@ -103,7 +103,7 @@ export const config = {
       }),
     },
     {
-      validate: rawConfig => {
+      validate: (rawConfig) => {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
@@ -157,7 +157,7 @@ export class HttpConfig {
       (headers, [key, value]) => {
         return {
           ...headers,
-          [key]: Array.isArray(value) ? value.map(e => convertHeader(e)) : convertHeader(value),
+          [key]: Array.isArray(value) ? value.map((e) => convertHeader(e)) : convertHeader(value),
         };
       },
       {}

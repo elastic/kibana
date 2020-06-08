@@ -47,7 +47,6 @@ export interface UptimeAppProps {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  kibanaBreadcrumbs: ChromeBreadcrumb[];
   plugins: ClientPluginsSetup;
   startPlugins: ClientPluginsStart;
   routerBasename: string;

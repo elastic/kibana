@@ -36,7 +36,7 @@ import BarThreeSections from './bar_three_sections';
 import barThreeSectionsSource from '!!raw-loader!./bar_three_sections';
 const barThreeSectionsHtml = renderToHtml(BarThreeSections);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Bar"

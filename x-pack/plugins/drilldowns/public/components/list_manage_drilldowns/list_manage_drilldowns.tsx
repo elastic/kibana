@@ -92,8 +92,8 @@ export function ListManageDrilldowns({
         isSelectable={true}
         responsive={false}
         selection={{
-          onSelectionChange: selection => {
-            setSelectedDrilldowns(selection.map(drilldown => drilldown.id));
+          onSelectionChange: (selection) => {
+            setSelectedDrilldowns(selection.map((drilldown) => drilldown.id));
           },
           selectableMessage: () => txtSelectDrilldown,
         }}

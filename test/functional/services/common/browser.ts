@@ -87,10 +87,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
     public async getWindowSize(): Promise<{ height: number; width: number; x: number; y: number }> {
-      return await driver
-        .manage()
-        .window()
-        .getRect();
+      return await driver.manage().window().getRect();
     }
 
     /**
@@ -102,10 +99,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async setWindowSize(width: number, height: number) {
-      await driver
-        .manage()
-        .window()
-        .setRect({ width, height });
+      await driver.manage().window().setRect({ width, height });
     }
 
     /**
@@ -176,7 +170,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       } else {
         current = await driver.getCurrentUrl();
       }
-      const currentWithoutTime = modifyUrl(current, parsed => {
+      const currentWithoutTime = modifyUrl(current, (parsed) => {
         delete (parsed.query as any)._t;
         return void 0;
       });
@@ -193,7 +187,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async get(url: string, insertTimestamp: boolean = true) {
       if (insertTimestamp) {
-        const urlWithTime = modifyUrl(url, parsed => {
+        const urlWithTime = modifyUrl(url, (parsed) => {
           (parsed.query as any)._t = Date.now();
           return void 0;
         });
@@ -221,12 +215,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async moveMouseTo(point: { x: number; y: number }): Promise<void> {
       if (this.isW3CEnabled) {
-        await this.getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
-        await this.getActions()
-          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
-          .perform();
+        await this.getActions().move({ x: 0, y: 0 }).perform();
+        await this.getActions().move({ x: point.x, y: point.y, origin: Origin.POINTER }).perform();
       } else {
         await this.getActions()
           .pause(this.getActions().mouse)
@@ -260,15 +250,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
         const startPoint = getW3CPoint(from);
         const endPoint = getW3CPoint(to);
-        await this.getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
-        return await this.getActions()
-          .move(startPoint)
-          .press()
-          .move(endPoint)
-          .release()
-          .perform();
+        await this.getActions().move({ x: 0, y: 0 }).perform();
+        return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
       } else {
         // The offset should be specified in pixels relative to the top-left corner of the element's bounding box
         const getOffset: any = (offset: { x: number; y: number }) =>
@@ -345,9 +328,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async pressKeys(...args: string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void> {
       const chord = this.keys.chord(...args);
-      await this.getActions()
-        .sendKeys(chord)
-        .perform();
+      await this.getActions().sendKeys(chord).perform();
     }
 
     /**
@@ -361,9 +342,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async clickMouseButton(point: { x: number; y: number }) {
       if (this.isW3CEnabled) {
-        await this.getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
+        await this.getActions().move({ x: 0, y: 0 }).perform();
         await this.getActions()
           .move({ x: point.x, y: point.y, origin: Origin.POINTER })
           .click()
@@ -405,9 +384,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async doubleClick() {
-      await this.getActions()
-        .doubleClick()
-        .perform();
+      await this.getActions().doubleClick().perform();
     }
 
     /**
@@ -430,6 +407,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async getAllWindowHandles() {
       return await driver.getAllWindowHandles();
+    }
+
+    /**
+     * Switches driver to specific browser tab by index
+     *
+     * @param {string} tabIndex
+     * @return {Promise<void>}
+     */
+    public async switchTab(tabIndex: number) {
+      const tabs = await driver.getAllWindowHandles();
+      if (tabs.length <= tabIndex) {
+        throw new Error(`Out of existing tabs bounds`);
+      }
+      await driver.switchTo().window(tabs[tabIndex]);
     }
 
     /**
@@ -480,7 +471,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     ): Promise<R> {
       return await driver.executeScript(
         fn,
-        ...cloneDeep<any>(args, arg => {
+        ...cloneDeep<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -494,7 +485,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     ): Promise<R> {
       return await driver.executeAsyncScript(
         fn,
-        ...cloneDeep<any>(args, arg => {
+        ...cloneDeep<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }

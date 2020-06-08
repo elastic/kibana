@@ -215,13 +215,13 @@ const breadcrumbGetters: {
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
   const { chrome, http } = useCore();
-  const breadcrumbs: ChromeBreadcrumb[] = breadcrumbGetters[page](values).map(breadcrumb => ({
+  const breadcrumbs: ChromeBreadcrumb[] = breadcrumbGetters[page](values).map((breadcrumb) => ({
     ...breadcrumb,
     href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}#${breadcrumb.href}`) : undefined,
   }));
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
-    .map(breadcrumb => breadcrumb.text as string);
+    .map((breadcrumb) => breadcrumb.text as string);
   chrome.docTitle.change(docTitle);
   chrome.setBreadcrumbs(breadcrumbs);
 }

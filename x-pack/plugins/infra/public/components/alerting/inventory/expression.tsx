@@ -85,7 +85,7 @@ const defaultExpression = {
   timeUnit: 'm',
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = props => {
+export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -117,6 +117,7 @@ export const Expressions: React.FC<Props> = props => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
@@ -141,6 +142,7 @@ export const Expressions: React.FC<Props> = props => {
     [derivedIndexPattern, setAlertParams]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
@@ -155,7 +157,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
-      const criteria = alertParams.criteria.map(c => ({
+      const criteria = alertParams.criteria.map((c) => ({
         ...c,
         timeSize: ts,
       }));
@@ -167,7 +169,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      const criteria = alertParams.criteria.map(c => ({
+      const criteria = alertParams.criteria.map((c) => ({
         ...c,
         timeUnit: tu,
       }));
@@ -357,7 +359,7 @@ const StyledExpression = euiStyled.div`
   padding: 0 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
+export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const { setAlertParams, expression, errors, expressionId, remove, canDelete } = props;
   const { metric, comparator = Comparator.GT, threshold = [] } = expression;
 
@@ -376,7 +378,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   );
 
   const updateThreshold = useCallback(
-    t => {
+    (t) => {
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
       }
@@ -422,10 +424,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
               <MetricExpression
                 metric={{
                   value: metric!,
-                  text: ofFields.find(v => v?.value === metric)?.text || '',
+                  text: ofFields.find((v) => v?.value === metric)?.text || '',
                 }}
                 metrics={
-                  ofFields.filter(m => m !== undefined && m.value !== undefined) as Array<{
+                  ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
                     value: SnapshotMetricType;
                     text: string;
                   }>

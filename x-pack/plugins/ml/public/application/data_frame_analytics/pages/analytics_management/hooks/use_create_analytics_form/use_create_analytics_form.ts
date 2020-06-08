@@ -36,9 +36,22 @@ import {
   getCloneFormStateFromJobConfig,
 } from './state';
 
+import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+
+export interface AnalyticsCreationStep {
+  number: ANALYTICS_STEPS;
+  completed: boolean;
+}
+
 export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
+}
+
+export interface CreateAnalyticsStepProps extends CreateAnalyticsFormProps {
+  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  step?: ANALYTICS_STEPS;
+  stepActivated?: boolean;
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
@@ -214,7 +227,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     try {
-      setIndexNames((await ml.getIndices()).map(index => index.name));
+      setIndexNames((await ml.getIndices()).map((index) => index.name));
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),
@@ -261,8 +274,12 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.OPEN_MODAL });
   };
 
+  const initiateWizard = async () => {
+    await mlContext.indexPatterns.clearCache();
+    await prepareFormValidation();
+  };
+
   const startAnalyticsJob = async () => {
-    setIsModalButtonDisabled(true);
     try {
       const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
@@ -278,7 +295,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobStarted(true);
-      setIsModalButtonDisabled(false);
       refresh();
     } catch (e) {
       addRequestMessage({
@@ -290,7 +306,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
     }
   };
 
@@ -331,6 +346,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     closeModal,
     createAnalyticsJob,
     openModal,
+    initiateWizard,
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,
     setFormState,

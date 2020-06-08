@@ -25,7 +25,7 @@ function getExpressionForLayer(
     return operationDefinitionMap[column.operationType].toEsAggsConfig(column, columnId);
   }
 
-  const columnEntries = columnOrder.map(colId => [colId, columns[colId]] as const);
+  const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
   const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
   const metricsCount = columnEntries.length - bucketsCount;
 
@@ -88,7 +88,7 @@ function getExpressionForLayer(
     });
 
     const allDateHistogramFields = Object.values(columns)
-      .map(column =>
+      .map((column) =>
         column.operationType === dateHistogramOperation.type ? column.sourceField : null
       )
       .filter((field): field is string => Boolean(field));

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -30,14 +30,10 @@ interface AlertMonitorStatusProps {
   };
 }
 
-export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = props => {
+export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
   const { filters, setAlertParams } = props;
 
   const [newFilters, setNewFilters] = useState<string[]>([]);
-
-  useEffect(() => {
-    setAlertParams('filters', filters);
-  }, [filters, setAlertParams]);
 
   return (
     <>
@@ -61,9 +57,9 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       <FiltersExpressionsSelect
         setAlertParams={setAlertParams}
         newFilters={newFilters}
-        onRemoveFilter={removeFiler => {
+        onRemoveFilter={(removeFiler) => {
           if (newFilters.includes(removeFiler)) {
-            setNewFilters(newFilters.filter(item => item !== removeFiler));
+            setNewFilters(newFilters.filter((item) => item !== removeFiler));
           }
         }}
       />
@@ -72,7 +68,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
 
       <AddFilterButton
         newFilters={newFilters}
-        onNewFilter={newFilter => {
+        onNewFilter={(newFilter) => {
           setNewFilters([...newFilters, newFilter]);
         }}
       />

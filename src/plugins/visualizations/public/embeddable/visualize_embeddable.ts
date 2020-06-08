@@ -167,7 +167,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         this.vis.uiState.clearAllKeys();
         if (visCustomizations.vis) {
           this.vis.uiState.set('vis', visCustomizations.vis);
-          getKeys(visCustomizations).forEach(key => {
+          getKeys(visCustomizations).forEach((key) => {
             this.vis.uiState.set(key, visCustomizations[key]);
           });
         }
@@ -242,7 +242,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.handler = new expressions.ExpressionLoader(this.domNode);
 
     this.subscriptions.push(
-      this.handler.events$.subscribe(async event => {
+      this.handler.events$.subscribe(async (event) => {
         // maps hack, remove once esaggs function is cleaned up and ready to accept variables
         if (event.name === 'bounds') {
           const agg = this.vis.data.aggs!.aggs.find((a: any) => {
@@ -267,9 +267,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
           };
 
-          getUiActions()
-            .getTrigger(triggerId)
-            .exec(context);
+          getUiActions().getTrigger(triggerId).exec(context);
         }
       })
     );
@@ -293,7 +291,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     );
 
     this.subscriptions.push(
-      this.handler.render$.subscribe(count => {
+      this.handler.render$.subscribe((count) => {
         div.removeAttribute('data-loading');
         div.setAttribute('data-render-complete', 'true');
         div.setAttribute('data-rendering-count', count.toString());
@@ -306,7 +304,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   public destroy() {
     super.destroy();
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
     this.vis.uiState.off('reload', this.reload);
 

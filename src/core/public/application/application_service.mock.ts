@@ -25,8 +25,8 @@ import {
   InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
-  App,
-  LegacyApp,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
 } from './types';
 import { ApplicationServiceContract } from './test_types';
 
@@ -47,9 +47,11 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
+    applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     navigateToApp: jest.fn(),
+    navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
     registerMountContext: jest.fn(),
   };
@@ -59,12 +61,13 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    applications$: new BehaviorSubject<Map<string, App | LegacyApp>>(new Map()),
+    applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
     getComponent: jest.fn(),
     getUrlForApp: jest.fn(),
-    navigateToApp: jest.fn().mockImplementation(appId => currentAppId$.next(appId)),
+    navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
+    navigateToUrl: jest.fn(),
     registerMountContext: jest.fn(),
   };
 };

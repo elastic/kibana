@@ -85,8 +85,8 @@ export class GaugeChart extends Chart {
     const self = this;
     const { gaugeConfig } = this;
 
-    return function(selection) {
-      selection.each(function(data) {
+    return function (selection) {
+      selection.each(function (data) {
         const div = d3.select(this);
         const { width, height } = self.calcGaugeDim(
           gaugeConfig.alignment,
@@ -98,7 +98,7 @@ export class GaugeChart extends Chart {
 
         div.style('text-align', 'center').style('overflow-y', 'auto');
 
-        data.series.forEach(series => {
+        data.series.forEach((series) => {
           const svg = div
             .append('svg')
             .style('display', 'inline-block')

@@ -60,7 +60,7 @@ function DevToolsWrapper({
   return (
     <main className="devApp">
       <EuiTabs>
-        {devTools.map(currentDevTool => (
+        {devTools.map((currentDevTool) => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab
               disabled={currentDevTool.isDisabled()}
@@ -80,7 +80,7 @@ function DevToolsWrapper({
         className="devApp__container"
         role="tabpanel"
         data-test-subj={activeDevTool.id}
-        ref={async element => {
+        ref={async (element) => {
           if (
             element &&
             (mountedTool.current === null ||
@@ -172,13 +172,13 @@ export function renderApp(
         <Switch>
           {devTools
             // Only create routes for devtools that are not disabled
-            .filter(devTool => !devTool.isDisabled())
-            .map(devTool => (
+            .filter((devTool) => !devTool.isDisabled())
+            .map((devTool) => (
               <Route
                 key={devTool.id}
                 path={`/${devTool.id}`}
                 exact={!devTool.enableRouting}
-                render={props => (
+                render={(props) => (
                   <DevToolsWrapper
                     updateRoute={props.history.push}
                     activeDevTool={devTool}

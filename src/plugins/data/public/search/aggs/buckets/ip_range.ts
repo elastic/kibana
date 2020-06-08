@@ -73,7 +73,7 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
           TEXT_CONTEXT_TYPE,
           fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
         );
-        const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
+        const IpRangeFormat = FieldFormat.from(function (range: IpRangeKey) {
           return convertIPRangeToString(range, formatter);
         });
         return new IpRangeFormat();

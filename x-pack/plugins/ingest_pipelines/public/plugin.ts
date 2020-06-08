@@ -27,7 +27,7 @@ export class IngestPipelinesPlugin implements Plugin {
       title: i18n.translate('xpack.ingestPipelines.appTitle', {
         defaultMessage: 'Ingest Node Pipelines',
       }),
-      mount: async params => {
+      mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
 
         return await mountManagementSection(coreSetup, params);

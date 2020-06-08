@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects }) {
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
 
   describe('vector styling', () => {
@@ -23,12 +23,7 @@ export default function({ getPageObjects }) {
         await PageObjects.maps.setStyleByValue('fillColor', 'machine.os.raw');
         await PageObjects.maps.selectCustomColorRamp('fillColor');
         const suggestions = await PageObjects.maps.getCategorySuggestions();
-        expect(
-          suggestions
-            .trim()
-            .split('\n')
-            .join()
-        ).to.equal('win 8,win xp,win 7,ios,osx');
+        expect(suggestions.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
       });
     });
   });

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import numeral from 'numeral';
+import numeral from '@elastic/numeral';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -27,12 +27,12 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { collectBranch } from './_collect_branch';
 
 export function hierarchicalTooltipFormatter(metricFieldFormatter) {
-  return function({ datum }) {
+  return function ({ datum }) {
     // Collect the current leaf and parents into an array of values
     const rows = collectBranch(datum);
 
     // Map those values to what the tooltipSource.rows format.
-    _.forEachRight(rows, function(row) {
+    _.forEachRight(rows, function (row) {
       row.spacer = _.escape(_.repeat('&nbsp;', row.depth));
 
       let percent;

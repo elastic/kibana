@@ -131,11 +131,11 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       ];
 
       before(async () => {
-        await Promise.all(configs.map(config => createConfiguration(config)));
+        await Promise.all(configs.map((config) => createConfiguration(config)));
       });
 
       after(async () => {
-        await Promise.all(configs.map(config => deleteConfiguration(config)));
+        await Promise.all(configs.map((config) => deleteConfiguration(config)));
       });
 
       const agentsRequests = [
@@ -268,7 +268,7 @@ async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolea
 
   const res = await cb();
   if (!res) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     return waitFor(cb, retries - 1);
   }
   return res;

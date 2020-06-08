@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { DefaultEditorController } from '../../../../vis_default_editor/public';
+
 export function initVisEditorDirective(app, deps) {
-  app.directive('visualizationEditor', function($timeout) {
+  app.directive('visualizationEditor', function ($timeout) {
     return {
       restrict: 'E',
       scope: {
@@ -31,8 +33,8 @@ export function initVisEditorDirective(app, deps) {
         embeddableHandler: '=',
         eventEmitter: '=',
       },
-      link: function($scope, element) {
-        const Editor = $scope.vis.type.editor || deps.DefaultVisualizationEditor;
+      link: function ($scope, element) {
+        const Editor = $scope.vis.type.editor || DefaultEditorController;
         const editor = new Editor(
           element[0],
           $scope.vis,
@@ -53,7 +55,7 @@ export function initVisEditorDirective(app, deps) {
           });
         };
 
-        $scope.$on('render', event => {
+        $scope.$on('render', (event) => {
           event.preventDefault();
           $timeout(() => {
             $scope.renderFunction();

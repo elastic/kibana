@@ -31,7 +31,7 @@ export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
       }
     >
       {children &&
-        React.Children.map(children, child =>
+        React.Children.map(children, (child) =>
           React.isValidElement(child) ? <Fragment>{React.cloneElement(child, {})}</Fragment> : child
         )}
     </EuiPopover>

@@ -79,10 +79,7 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
-      this._$parentEl
-        .empty()
-        .addClass(`vgaVis`)
-        .css('flex-direction', this._parser.containerDir);
+      this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
@@ -283,7 +280,7 @@ export class VegaBaseView {
     const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find(filter =>
+    const existingFilter = currentFilters.find((filter) =>
       esFilters.compareFilters(filter, filterToRemove)
     );
 
@@ -398,7 +395,7 @@ export class VegaBaseView {
     // into the _ongoingDestroy promise, while handlers are being disposed
     if (this._destroyHandlers) {
       // If no destroy is yet running, execute all handlers and wait for all of them to resolve.
-      this._ongoingDestroy = Promise.all(this._destroyHandlers.map(v => v()));
+      this._ongoingDestroy = Promise.all(this._destroyHandlers.map((v) => v()));
       this._destroyHandlers = null;
     }
     return this._ongoingDestroy;

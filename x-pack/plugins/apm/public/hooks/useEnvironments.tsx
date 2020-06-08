@@ -9,23 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { useFetcher } from './useFetcher';
 import {
   ENVIRONMENT_NOT_DEFINED,
-  ENVIRONMENT_ALL
+  ENVIRONMENT_ALL,
 } from '../../common/environment_filter_values';
 import { callApmApi } from '../services/rest/createCallApmApi';
 
 export const ALL_OPTION = {
   value: ENVIRONMENT_ALL,
   text: i18n.translate('xpack.apm.environment.allLabel', {
-    defaultMessage: 'All'
-  })
+    defaultMessage: 'All',
+  }),
 };
 
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter(env => env !== ENVIRONMENT_NOT_DEFINED)
-    .map(environment => ({
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .map((environment) => ({
       value: environment,
-      text: environment
+      text: environment,
     }));
 
   return [ALL_OPTION, ...environmentOptions];
@@ -34,7 +34,7 @@ function getEnvironmentOptions(environments: string[]) {
 export function useEnvironments({
   serviceName,
   start,
-  end
+  end,
 }: {
   serviceName?: string;
   start?: string;
@@ -48,9 +48,9 @@ export function useEnvironments({
           query: {
             start,
             end,
-            serviceName
-          }
-        }
+            serviceName,
+          },
+        },
       });
     }
   }, [start, end, serviceName]);

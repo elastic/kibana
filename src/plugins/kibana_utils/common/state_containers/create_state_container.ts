@@ -108,8 +108,8 @@ export function createStateContainer<
       ];
       return pureTransition ? freeze(pureTransition(state)(...action.args)) : state;
     },
-    replaceReducer: nextReducer => (container.reducer = nextReducer),
-    dispatch: action => data$.next(container.reducer(get(), action)),
+    replaceReducer: (nextReducer) => (container.reducer = nextReducer),
+    dispatch: (action) => data$.next(container.reducer(get(), action)),
     transitions: Object.keys(pureTransitions).reduce<PureTransitionsToTransitions<PureTransitions>>(
       (acc, type) => ({ ...acc, [type]: (...args: any) => container.dispatch({ type, args }) }),
       {} as PureTransitionsToTransitions<PureTransitions>
@@ -121,7 +121,7 @@ export function createStateContainer<
       }),
       {} as PureSelectorsToSelectors<PureSelectors>
     ),
-    addMiddleware: middleware =>
+    addMiddleware: (middleware) =>
       (container.dispatch = middleware(container as any)(container.dispatch)),
     subscribe: (listener: (state: State) => void) => {
       const subscription = state$.subscribe(listener);

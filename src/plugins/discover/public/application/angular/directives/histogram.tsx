@@ -66,10 +66,7 @@ function findIntervalFromDuration(
 ) {
   const date = moment.tz(dateValue, timeZone);
   const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
-  const endOfDate = moment
-    .tz(date, timeZone)
-    .startOf(esUnit)
-    .add(esValue, esUnit);
+  const endOfDate = moment.tz(date, timeZone).startOf(esUnit).add(esValue, esUnit);
   return endOfDate.valueOf() - startOfDate.valueOf();
 }
 
@@ -242,10 +239,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
     // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
     const now = moment();
-    const isAnnotationAtEdge =
-      moment(domainEnd)
-        .add(60000)
-        .isAfter(now) && now.isAfter(domainEnd);
+    const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
     const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
 
     const lineAnnotationData = [

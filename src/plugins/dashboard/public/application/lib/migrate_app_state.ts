@@ -58,7 +58,7 @@ export function migrateAppState(
     | SavedDashboardPanel630
     | SavedDashboardPanel640To720
     | SavedDashboardPanel730ToLatest
-  >).some(panel => {
+  >).some((panel) => {
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;

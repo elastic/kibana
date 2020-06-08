@@ -55,7 +55,7 @@ const cliEsCredentials = pick(
   {
     'elasticsearch.username': process.env.ELASTICSEARCH_USERNAME,
     'elasticsearch.password': process.env.ELASTICSEARCH_PASSWORD,
-    'elasticsearch.hosts': process.env.ELASTICSEARCH_HOST
+    'elasticsearch.hosts': process.env.ELASTICSEARCH_HOST,
   },
   identity
 ) as {
@@ -73,12 +73,12 @@ const config = {
   'apm_oss.sourcemapIndices': 'apm-*',
   'elasticsearch.hosts': 'http://localhost:9200',
   ...loadedKibanaConfig,
-  ...cliEsCredentials
+  ...cliEsCredentials,
 };
 
 async function uploadData() {
   const octokit = new Octokit({
-    auth: githubToken
+    auth: githubToken,
   });
 
   const telemetryTemplate = await downloadTelemetryTemplate(octokit);
@@ -89,7 +89,7 @@ async function uploadData() {
     config['elasticsearch.username'] && config['elasticsearch.password']
       ? {
           username: config['elasticsearch.username'],
-          password: config['elasticsearch.password']
+          password: config['elasticsearch.password'],
         }
       : null;
 
@@ -97,15 +97,15 @@ async function uploadData() {
     host: config['elasticsearch.hosts'],
     ...(httpAuth
       ? {
-          httpAuth: `${httpAuth.username}:${httpAuth.password}`
+          httpAuth: `${httpAuth.username}:${httpAuth.password}`,
         }
-      : {})
+      : {}),
   });
 
   if (argv.clear) {
     try {
       await promisify(client.indices.delete.bind(client))({
-        index: xpackTelemetryIndexName
+        index: xpackTelemetryIndexName,
       });
     } catch (err) {
       // 404 = index not found, totally okay
@@ -117,13 +117,13 @@ async function uploadData() {
 
   const axiosInstance = axios.create({
     baseURL: config['elasticsearch.hosts'],
-    ...(httpAuth ? { auth: httpAuth } : {})
+    ...(httpAuth ? { auth: httpAuth } : {}),
   });
 
   const newTemplate = merge(telemetryTemplate, {
     settings: {
-      index: { mapping: { total_fields: { limit: 10000 } } }
-    }
+      index: { mapping: { total_fields: { limit: 10000 } } },
+    },
   });
 
   // override apm mapping instead of merging
@@ -137,24 +137,24 @@ async function uploadData() {
       indices: {
         ...config,
         apmCustomLinkIndex: '.apm-custom-links',
-        apmAgentConfigurationIndex: '.apm-agent-configuration'
+        apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
-      search: body => {
+      search: (body) => {
         return promisify(client.search.bind(client))({
           ...body,
-          requestTimeout: 120000
+          requestTimeout: 120000,
         }) as any;
       },
-      indicesStats: body => {
+      indicesStats: (body) => {
         return promisify(client.indices.stats.bind(client))({
           ...body,
-          requestTimeout: 120000
+          requestTimeout: 120000,
         }) as any;
       },
-      transportRequest: (params => {
+      transportRequest: ((params) => {
         return axiosInstance[params.method](params.path);
-      }) as CollectTelemetryParams['transportRequest']
-    }
+      }) as CollectTelemetryParams['transportRequest'],
+    },
   });
 
   const chunks = chunk(sampleDocuments, 250);
@@ -162,12 +162,12 @@ async function uploadData() {
   await chunks.reduce<Promise<any>>((prev, documents) => {
     return prev.then(async () => {
       const body = flatten(
-        documents.map(doc => [{ index: { _index: 'xpack-phone-home' } }, doc])
+        documents.map((doc) => [{ index: { _index: 'xpack-phone-home' } }, doc])
       );
 
       return promisify(client.bulk.bind(client))({
         body,
-        refresh: true
+        refresh: true,
       }).then((response: any) => {
         if (response.errors) {
           const firstError = response.items.filter(
@@ -181,7 +181,7 @@ async function uploadData() {
 }
 
 uploadData()
-  .catch(e => {
+  .catch((e) => {
     if ('response' in e) {
       if (typeof e.response === 'string') {
         // eslint-disable-next-line no-console

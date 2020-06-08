@@ -77,7 +77,7 @@ export const ExplorerChartInfoTooltip = ({
     },
   ];
 
-  entityFields.forEach(entityField => {
+  entityFields.forEach((entityField) => {
     toolTipData.push({
       title: entityField.fieldName,
       description: entityField.fieldValue,

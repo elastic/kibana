@@ -63,7 +63,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
-    fields.forEach(field => {
+    fields.forEach((field) => {
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
 
@@ -314,11 +314,11 @@ const queryIndicesFromTemplates = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
 ): Promise<CurrentIndex[]> => {
-  const indexPromises = templates.map(template => {
+  const indexPromises = templates.map((template) => {
     return getIndices(callCluster, template);
   });
   const indexObjects = await Promise.all(indexPromises);
-  return indexObjects.filter(item => item !== undefined).flat();
+  return indexObjects.filter((item) => item !== undefined).flat();
 };
 
 const getIndices = async (
@@ -329,7 +329,7 @@ const getIndices = async (
   const res = await callCluster('search', getIndexQuery(templateName));
   const indices: any[] = res?.aggregations?.index.buckets;
   if (indices) {
-    return indices.map(index => ({
+    return indices.map((index) => ({
       indexName: index.key,
       indexTemplate,
     }));

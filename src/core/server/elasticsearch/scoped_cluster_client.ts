@@ -89,7 +89,7 @@ export class ScopedClusterClient implements IScopedClusterClient {
       const customHeaders: any = clientParams.headers;
       if (isObject(customHeaders)) {
         const duplicates = intersection(Object.keys(defaultHeaders), Object.keys(customHeaders));
-        duplicates.forEach(duplicate => {
+        duplicates.forEach((duplicate) => {
           if (defaultHeaders[duplicate] !== (customHeaders as any)[duplicate]) {
             throw Error(`Cannot override default header ${duplicate}.`);
           }

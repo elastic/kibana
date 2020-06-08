@@ -39,9 +39,7 @@ export class ListPlugin
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<ListPluginSetup> {
-    const config = await createConfig$(this.initializerContext)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
 
     this.logger.error(
       'You have activated the lists values feature flag which is NOT currently supported for Elastic Security! You should turn this feature flag off immediately by un-setting "xpack.lists.enabled: true" in kibana.yml and restarting Kibana'
@@ -89,7 +87,9 @@ export class ListPlugin
         core: {
           savedObjects: { client: savedObjectsClient },
           elasticsearch: {
-            dataClient: { callAsCurrentUser: callCluster },
+            legacy: {
+              client: { callAsCurrentUser: callCluster },
+            },
           },
         },
       } = context;

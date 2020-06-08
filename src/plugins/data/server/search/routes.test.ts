@@ -38,8 +38,9 @@ describe('Search service', () => {
     const mockContext = {
       core: {
         elasticsearch: {
-          dataClient: {} as ScopedClusterClient,
-          adminClient: {} as ScopedClusterClient,
+          legacy: {
+            client: {} as ScopedClusterClient,
+          },
         },
       },
       search: {
@@ -75,8 +76,9 @@ describe('Search service', () => {
     const mockContext = {
       core: {
         elasticsearch: {
-          dataClient: {} as ScopedClusterClient,
-          adminClient: {} as ScopedClusterClient,
+          legacy: {
+            client: {} as ScopedClusterClient,
+          },
         },
       },
       search: {

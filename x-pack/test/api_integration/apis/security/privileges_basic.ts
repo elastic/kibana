@@ -7,7 +7,7 @@ import util from 'util';
 import { isEqual } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Privileges', () => {
@@ -33,8 +33,7 @@ export default function({ getService }: FtrProviderContext) {
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
-            siem: ['all', 'read'],
-            endpoint: ['all', 'read'],
+            securitySolution: ['all', 'read'],
             ingestManager: ['all', 'read'],
           },
           global: ['all', 'read'],
