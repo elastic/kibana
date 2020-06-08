@@ -209,6 +209,8 @@ describe('VegaVisualizations', () => {
           vegaliteGraph,
           new SearchAPI({
             search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
           })
         );
         await vegaParser.parseAsync();
@@ -236,6 +238,8 @@ describe('VegaVisualizations', () => {
           vegaGraph,
           new SearchAPI({
             search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
           })
         );
         await vegaParser.parseAsync();
@@ -257,6 +261,8 @@ describe('VegaVisualizations', () => {
           vegaTooltipGraph,
           new SearchAPI({
             search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
           })
         );
         await vegaParser.parseAsync();
@@ -304,6 +310,8 @@ describe('VegaVisualizations', () => {
           vegaMapGraph,
           new SearchAPI({
             search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
           })
         );
         await vegaParser.parseAsync();
@@ -346,6 +354,8 @@ describe('VegaVisualizations', () => {
           }`,
           new SearchAPI({
             search: npStart.plugins.data.search,
+            uiSettings: npStart.core.uiSettings,
+            injectedMetadata: npStart.core.injectedMetadata,
           })
         );
         await vegaParser.parseAsync();
