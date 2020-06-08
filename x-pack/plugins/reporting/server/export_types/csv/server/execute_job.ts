@@ -7,6 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
+import {
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+} from '../../../../../../../src/plugins/share/server';
 import { ReportingCore } from '../../..';
 import { CSV_BOM_CHARS, CSV_JOB_TYPE } from '../../../../common/constants';
 import { getFieldFormats } from '../../../../server/services';
@@ -94,8 +98,8 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     };
     const getUiSettings = async (client: IUiSettingsClient) => {
       const [separator, quoteValues, timezone] = await Promise.all([
-        client.get('csv:separator'),
-        client.get('csv:quoteValues'),
+        client.get(CSV_SEPARATOR_SETTING),
+        client.get(CSV_QUOTE_VALUES_SETTING),
         client.get('dateFormat:tz'),
       ]);
 
