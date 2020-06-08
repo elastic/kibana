@@ -9,7 +9,7 @@ or SAML.
 
 Role mappings have no effect for users inside the `native` or `file` realms.
 
-To manage your role mappings, use *Management > Security > Role Mappings*.
+To manage your role mappings, open the menu, then go to *Stack Management > Security > Role Mappings*.
 
 With *Role mappings*, you can:
 
