@@ -39,7 +39,9 @@ export function createUninstallRoute(
       {
         core: {
           elasticsearch: {
-            dataClient: { callAsCurrentUser },
+            legacy: {
+              client: { callAsCurrentUser },
+            },
           },
           savedObjects: { client: savedObjectsClient },
         },

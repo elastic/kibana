@@ -33,7 +33,7 @@ import {
   KBN_FIELD_TYPES,
   IIndexPattern,
   IFieldType,
-  META_FIELDS_SETTING,
+  UI_SETTINGS,
 } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
@@ -110,8 +110,8 @@ export class IndexPattern implements IIndexPattern {
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
 
-    this.shortDotsEnable = this.getConfig('shortDots:enable');
-    this.metaFields = this.getConfig(META_FIELDS_SETTING);
+    this.shortDotsEnable = this.getConfig(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    this.metaFields = this.getConfig(UI_SETTINGS.META_FIELDS);
 
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats: getFieldFormats(),
@@ -120,8 +120,12 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
     this.apiClient = apiClient;
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
-    this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
+    this.fieldsFetcher = createFieldsFetcher(
+      this,
+      apiClient,
+      this.getConfig(UI_SETTINGS.META_FIELDS)
+    );
+    this.flattenHit = flattenHitWrapper(this, this.getConfig(UI_SETTINGS.META_FIELDS));
     this.formatHit = formatHitProvider(
       this,
       getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -177,7 +181,7 @@ export class IndexPattern implements IIndexPattern {
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, '#/management/kibana/indexPatterns');
+      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {

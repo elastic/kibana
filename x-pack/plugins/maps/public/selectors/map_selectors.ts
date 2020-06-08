@@ -26,7 +26,7 @@ import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/client_file_source';
 import {
   LAYER_TYPE,
-  SOURCE_DATA_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
   SPATIAL_FILTERS_LAYER_ID,
@@ -136,9 +136,6 @@ export const getGoto = ({ map }: MapStoreState): Goto | null | undefined => map 
 export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
-
-export const getTransientLayerId = ({ map }: MapStoreState): string | null =>
-  map.__transientLayerId;
 
 export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.layerList ? map.layerList : [];
@@ -266,7 +263,7 @@ export const getSpatialFiltersLayer = createSelector(
         alpha: settings.spatialFiltersAlpa,
         __dataRequests: [
           {
-            dataId: SOURCE_DATA_ID_ORIGIN,
+            dataId: SOURCE_DATA_REQUEST_ID,
             data: featureCollection,
           },
         ],
@@ -300,7 +297,7 @@ export const getLayerList = createSelector(
   }
 );
 
-export function getLayerById(layerId: string, state: MapStoreState): ILayer | undefined {
+export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
   });
@@ -331,15 +328,28 @@ export const getSelectedLayer = createSelector(
   }
 );
 
-export const getMapColors = createSelector(
-  getTransientLayerId,
-  getLayerListRaw,
-  (transientLayerId, layerList) =>
-    layerList.reduce((accu: string[], layer: LayerDescriptor) => {
-      if (layer.id === transientLayerId) {
-        return accu;
-      }
-      const color: string | undefined = _.get(layer, 'style.properties.fillColor.options.color');
+export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
+  return layerList.some((layer) => {
+    return layer.isPreviewLayer();
+  });
+});
+
+export const isLoadingPreviewLayers = createSelector(getLayerList, (layerList) => {
+  return layerList.some((layer) => {
+    return layer.isPreviewLayer() && layer.isLayerLoading();
+  });
+});
+
+export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
+  layerList
+    .filter((layerDescriptor) => {
+      return !layerDescriptor.__isPreviewLayer;
+    })
+    .reduce((accu: string[], layerDescriptor: LayerDescriptor) => {
+      const color: string | undefined = _.get(
+        layerDescriptor,
+        'style.properties.fillColor.options.color'
+      );
       if (color) accu.push(color);
       return accu;
     }, [])
@@ -373,24 +383,20 @@ export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (l
   return _.uniq(indexPatternIds);
 });
 
-export const hasDirtyState = createSelector(
-  getLayerListRaw,
-  getTransientLayerId,
-  (layerListRaw, transientLayerId) => {
-    if (transientLayerId) {
+export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
+  return layerListRaw.some((layerDescriptor) => {
+    if (layerDescriptor.__isPreviewLayer) {
       return true;
     }
 
-    return layerListRaw.some((layerDescriptor) => {
-      const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-      if (!trackedState) {
-        return false;
-      }
-      const currentState = copyPersistentState(layerDescriptor);
-      return !_.isEqual(currentState, trackedState);
-    });
-  }
-);
+    const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
+    if (!trackedState) {
+      return false;
+    }
+    const currentState = copyPersistentState(layerDescriptor);
+    return !_.isEqual(currentState, trackedState);
+  });
+});
 
 export const areLayersLoaded = createSelector(
   getLayerList,

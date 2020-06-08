@@ -40,7 +40,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.js')
+      require.resolve('../../api_integration/config.ts')
     );
     const servers = {
       ...xPackApiIntegrationTestsConfig.get('servers'),

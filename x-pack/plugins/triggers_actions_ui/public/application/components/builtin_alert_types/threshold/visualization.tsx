@@ -33,7 +33,7 @@ import { getThresholdAlertVisualizationData } from '../../../../common/lib/index
 import { AggregationType, Comparator } from '../../../../common/types';
 import { AlertsContextValue } from '../../../context/alerts_context';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../../../alerting/common/parse_duration';
+import { parseDuration } from '../../../../../../alerts/common/parse_duration';
 
 const customTheme = () => {
   return {
