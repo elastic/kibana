@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 
 export interface Props {
   isDisabled: boolean;
@@ -18,7 +18,7 @@ const MOVE_HERE_COPY = i18n.translate('xpack.ingestPipelines.pipelineEditor.move
   defaultMessage: 'Move here',
 });
 
-export const DropZoneButton: FunctionComponent<Props> = ({ isDisabled, onClick }) => {
+export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled }) => {
   const containerClasses = classNames({
     'pipelineProcessorsEditor__tree__dropZoneContainer--active': !isDisabled,
   });
@@ -30,14 +30,18 @@ export const DropZoneButton: FunctionComponent<Props> = ({ isDisabled, onClick }
     <EuiFlexItem
       className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}
     >
-      <EuiButtonEmpty
-        className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
-        aria-label={MOVE_HERE_COPY}
-        disabled={isDisabled}
-        onClick={onClick}
-      >
-        &nbsp;
-      </EuiButtonEmpty>
+      <div className="pipelineProcessorsEditor__tree__buttonContainer">
+        <div className="pipelineProcessorsEditor__tree__buttonContainerButton">
+          <EuiButtonIcon
+            className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
+            aria-label={MOVE_HERE_COPY}
+            disabled={isDisabled}
+            onClick={onClick}
+            iconType="pin"
+          />
+        </div>
+        <div className="pipelineProcessorsEditor__tree__buttonContainerArrow" />
+      </div>
     </EuiFlexItem>
   );
 };

@@ -75,7 +75,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         selected={Boolean(selectedProcessorInfo?.id === processor.id)}
       />
       {processor.onFailure?.length ? (
-        <div style={{ marginLeft: `${level * 30}px` }}>
+        <div style={{ marginLeft: `${level * 34}px` }}>
           <EuiAccordion
             className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
             id={`onFailureHandlers-${processor.id}`}
