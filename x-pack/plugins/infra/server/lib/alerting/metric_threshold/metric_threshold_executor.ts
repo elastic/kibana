@@ -17,7 +17,7 @@ import {
   DOCUMENT_COUNT_I18N,
   stateToAlertMessage,
 } from './messages';
-import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertServices, AlertExecutorOptions } from '../../../../../alerts/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
 import { InfraBackendLibs } from '../../infra_types';
@@ -336,6 +336,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
+          value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
+          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
 
@@ -352,3 +355,14 @@ export const FIRED_ACTIONS = {
     defaultMessage: 'Fired',
   }),
 };
+
+const mapToConditionsLookup = (
+  list: any[],
+  mapFn: (value: any, index: number, array: any[]) => unknown
+) =>
+  list
+    .map(mapFn)
+    .reduce(
+      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
+      {}
+    );

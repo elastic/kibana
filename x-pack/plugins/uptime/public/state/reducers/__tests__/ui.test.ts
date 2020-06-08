@@ -18,6 +18,7 @@ describe('ui reducer', () => {
           basePath: 'abc',
           esKuery: '',
           integrationsPopoverOpen: null,
+          searchText: '',
         },
         action
       )
@@ -36,6 +37,7 @@ describe('ui reducer', () => {
           basePath: '',
           esKuery: '',
           integrationsPopoverOpen: null,
+          searchText: '',
         },
         action
       )
@@ -51,6 +53,7 @@ describe('ui reducer', () => {
           basePath: '',
           esKuery: '',
           integrationsPopoverOpen: null,
+          searchText: '',
         },
         action
       )
@@ -60,6 +63,7 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
+        "searchText": "",
       }
     `);
   });
