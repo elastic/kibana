@@ -62,7 +62,10 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
       //
       // We just check if the timestamp is greater. Note this may match an incomplete check group
       // that has not yet sent a summary doc
-      if (latestStillMatchingSource['@timestamp'] >= latestSource['@timestamp']) {
+      if (
+        latestStillMatchingSource &&
+        latestStillMatchingSource['@timestamp'] >= latestSource['@timestamp']
+      ) {
         matched = true;
       }
       const checkGroup = latestSource.monitor.check_group;
