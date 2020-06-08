@@ -44,9 +44,7 @@ describe('FieldSelect', () => {
         />
       </div>
     );
-    expect(wrapper.find(EuiComboBox).props().options).toMatchInlineSnapshot(
-      '',
-      `
+    expect(wrapper.find(EuiComboBox).props().options).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "special ",
@@ -68,8 +66,7 @@ describe('FieldSelect', () => {
           ],
         },
       ]
-    `
-    );
+    `);
   });
   it('should have scripted field selected', () => {
     const wrapper = mountWithIntl(
