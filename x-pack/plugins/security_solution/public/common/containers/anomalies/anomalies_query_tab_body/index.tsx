@@ -35,6 +35,7 @@ export const AnomaliesQueryTabBody = ({
         deleteQuery({ id: ID });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [, siemJobs] = useSiemJobs(true);

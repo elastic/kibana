@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export * from '../../../../../examples/bfetch_explorer/server';
+const path = require('path');
+
+module.exports = {
+  'temp-dir': process.env.COVERAGE_TEMP_DIR
+    ? path.resolve(process.env.COVERAGE_TEMP_DIR, 'jest')
+    : 'target/kibana-coverage/jest',
+  'report-dir': 'target/kibana-coverage/jest-combined',
+  reporter: ['html', 'json-summary'],
+};
