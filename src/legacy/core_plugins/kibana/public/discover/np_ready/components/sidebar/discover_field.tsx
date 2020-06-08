@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButton, EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
@@ -128,16 +128,14 @@ export function DiscoverField({
           />
         </span>
         <span className="dscSidebarField__name eui-textTruncate">
-          <EuiToolTip
-            position="top"
-            content={field.name}
-            delay="long"
-            anchorClassName="eui-textTruncate"
+          <EuiText
+            size="xs"
+            data-test-subj={`field-${field.name}`}
+            className="eui-textTruncate"
+            title={field.name}
           >
-            <EuiText size="xs" data-test-subj={`field-${field.name}`} className="eui-textTruncate">
-              {useShortDots ? shortenDottedString(field.name) : field.displayName}
-            </EuiText>
-          </EuiToolTip>
+            {useShortDots ? shortenDottedString(field.name) : field.displayName}
+          </EuiText>
         </span>
         <span>
           {field.name !== '_source' && !selected && (
