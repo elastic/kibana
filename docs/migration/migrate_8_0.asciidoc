@@ -116,8 +116,9 @@ URL that it derived from the actual server address and `xpack.security.public` s
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
 [float]]
-=== bin/kibana-keystore has moved from the `data` folder to `config`
-*Details:* The Kibana keystore is used to add configuration changes.  It has been moved to Kibana's confugration directory.
+=== kibana.keystore has moved from the `data` folder to the `config` folder
+*Details:* By default, kibana.keystore has moved from the confgured `path.data` folder to `<root>/config` for archive distributions
+and `/etc/kibana` for package distributions.
 
 [float]
 [[breaking_80_user_role_changes]]
