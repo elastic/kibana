@@ -13,6 +13,7 @@ import {
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
   ExecutorParamsSchema,
+  ExecutorSubActionPushParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
@@ -41,7 +42,7 @@ export function getActionType(params: GetActionTypeParams): ActionType {
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
-      params: ExecutorParamsSchema,
+      params: ExecutorSubActionPushParamsSchema,
     },
     executor: curry(executor)({ logger }),
   };
@@ -54,7 +55,7 @@ async function executor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  // const { subAction, subActionParams } = params as ExecutorParams;
   let data = {};
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
@@ -68,13 +69,14 @@ async function executor(
     secrets,
   });
 
-  if (!api[subAction]) {
+  /* if (!api[subAction]) {
     throw new Error('[Action][ExternalService] Unsupported subAction type.');
   }
 
   if (subAction !== 'pushToService') {
     throw new Error('[Action][ExternalService] subAction not implemented.');
   }
+  */
 
   const mapParams = (mapping: Map<string, MapRecord>): AnyParams => {
     return Object.keys(params).reduce((prev: AnyParams, curr: string): AnyParams => {
@@ -86,19 +88,20 @@ async function executor(
     }, {});
   };
 
-  if (subAction === 'pushToService') {
-    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
+  // if (subAction === 'pushToService') {
+  //  const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const mapping = config.indexConfiguration ? buildMap(config.indexConfiguration.mapping) : null;
-    const externalObject = config.indexConfiguration && mapping ? mapParams(mapping) : {};
+  const mapping = config.indexConfiguration ? buildMap(config.indexConfiguration.mapping) : null;
+  const externalObject = config.indexConfiguration && mapping ? mapParams(mapping) : {};
 
-    data = await api.pushToService({
-      externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
-      secrets,
-    });
-  }
+  data = await api.pushToService({
+    externalService,
+    mapping,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params: { ...params, externalObject } as any,
+    secrets,
+  });
+  // }
 
   return {
     ...res,

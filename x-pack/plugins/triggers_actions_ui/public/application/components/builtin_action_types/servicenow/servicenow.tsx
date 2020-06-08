@@ -63,10 +63,10 @@ export function getActionType(): ActionTypeModel<
         title: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (actionParams.subActionParams && !actionParams.subActionParams.description?.length) {
+      if (!actionParams.description?.length) {
         errors.description.push(i18n.DESCRIPTION_REQUIRED);
       }
-      if (actionParams.subActionParams && !actionParams.subActionParams.title?.length) {
+      if (!actionParams.title?.length) {
         errors.title.push(i18n.TITLE_REQUIRED);
       }
       return validationResult;

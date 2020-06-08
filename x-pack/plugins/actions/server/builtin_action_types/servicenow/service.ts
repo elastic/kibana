@@ -60,10 +60,7 @@ export const createExternalService = ({
 
   const findIncidents = async (params?: Record<string, string>) => {
     const query = params
-      ? Object.keys(params).reduce(
-          (pkey: string, res: string) => `${res}${pkey}:${params[pkey]}&`,
-          '?'
-        )
+      ? Object.keys(params).reduce((res, pkey) => `${res}${pkey}=${params[pkey]}&`, '?')
       : '';
     try {
       const res = await request({

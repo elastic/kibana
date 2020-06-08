@@ -62,7 +62,10 @@ const pushToServiceHandler = async ({
   incident = params;
 
   if (updateIncident) {
-    res = await externalService.updateIncident({ incidentId: externalId, incident });
+    res = await externalService.updateIncident({
+      incidentId: existingIncident![0].sys_id,
+      incident,
+    });
   } else {
     res = await externalService.createIncident({
       incident,
