@@ -31,8 +31,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/53308
-  describe.skip('context link in discover', function contextSize() {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('context link in discover', function contextSize() {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
