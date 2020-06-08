@@ -86,7 +86,7 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
           process: processTableViewItem.event,
         },
       });
-      pushToQueryParams({crumbId: '', crumbEvent: ''});
+      pushToQueryParams({crumbId: event.entityId(processTableViewItem.event), crumbEvent: ''});
     },
     [dispatch, timestamp, pushToQueryParams]
   );
@@ -209,6 +209,7 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
 `;
 
 const ProcessDetails = memo(function ProcessListWithCounts() {
+  console.log('rendering process details');
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
   const [processEvent] = useMemo(()=>{
@@ -258,7 +259,7 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
         return {title, description: String(description)}
       });
   }, [processNodePositions,selectedDescendantProcessId,processEvent]);
-  console.log(processInfoEntry);
+  
   
   /**
    * During user testing, one user indicated they wanted to see stronger visual relationships between
@@ -271,7 +272,7 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
     return cubeAssetsForNode(processEvent);
   },
   [processEvent])
-  console.log({cubeSymbol, descriptionText})
+  
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
@@ -332,7 +333,6 @@ const PanelContent = memo(function PanelContent() {
    * This is to cover cases where users e.g. share links to reconstitute a Resolver state and it _should never run otherwise_ under the assumption that the query parameters are updated along with the selection in state
   */
   useLayoutEffect(() => {
-    
     if(lockNodeSelectionByParam){
       return;
     }
