@@ -201,7 +201,6 @@ Array [
         "show",
         "save",
         "saveQuery",
-        "saveIndexPattern",
         "createShortUrl",
       ],
     },
