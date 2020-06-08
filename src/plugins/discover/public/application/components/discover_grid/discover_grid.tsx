@@ -18,6 +18,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
+import './discover_grid.scss';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -43,6 +44,7 @@ import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { shortenDottedString } from '../../helpers';
+import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
@@ -69,6 +71,7 @@ interface Props {
   getContextAppHref: (id: string | number | Record<string, unknown>) => string;
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
+  onSetColumns: (columns: string[]) => void;
 }
 
 function CellPopover({
@@ -140,56 +143,69 @@ export const DiscoverGrid = function DiscoverGridInner({
   onRemoveColumn,
   onAddColumn,
   showTimeCol,
+  onSetColumns,
 }: Props) {
   const lowestPageSize = 50;
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
   });
   const [flyoutRow, setFlyoutRow] = useState<number | undefined>(undefined);
+  const buildColumns = useCallback(
+    (cols: any) => {
+      const mappedCols = cols.map(
+        (columnName: string): EuiDataGridColumn => {
+          const column: EuiDataGridColumn = {
+            id: columnName,
+            schema: indexPattern.getFieldByName(columnName)?.type,
+          };
 
-  const dataGridColumns = useMemo(() => {
-    const mappedCols = columns.map(
-      (columnName): EuiDataGridColumn => {
-        const column: EuiDataGridColumn = {
-          id: columnName,
-          schema: indexPattern.getFieldByName(columnName)?.type,
-        };
+          // Default DataGrid schemas: boolean, numeric, datetime, json, currency
+          // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
+          switch (column.schema) {
+            case 'date':
+              column.schema = 'datetime';
+              break;
+            case 'number':
+              column.schema = 'numeric';
+              break;
+            case '_source':
+            case 'object':
+              column.schema = kibanaJSON;
+              break;
+            case 'geo_point':
+              column.schema = geoPoint;
+              break;
+            default:
+              column.schema = undefined;
+              break;
+          }
 
-        // Default DataGrid schemas: boolean, numeric, datetime, json, currency
-        // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
-        switch (column.schema) {
-          case 'date':
-            column.schema = 'datetime';
-            break;
-          case 'number':
-            column.schema = 'numeric';
-            break;
-          case '_source':
-          case 'object':
-            column.schema = kibanaJSON;
-            break;
-          case 'geo_point':
-            column.schema = geoPoint;
-            break;
-          default:
-            column.schema = undefined;
-            break;
+          if (useShortDots) {
+            column.display = <>{shortenDottedString(columnName)}</>;
+          }
+
+          return column;
         }
-
-        if (useShortDots) {
-          column.display = <>{shortenDottedString(columnName)}</>;
-        }
-
-        return column;
+      );
+      // Discover always injects a Time column as the first item (unless advance settings turned it off)
+      // Have to guard against this to allow users to request the same column again later
+      if (showTimeCol) {
+        mappedCols.unshift({ id: timeString, schema: 'datetime', initialWidth: 200 });
       }
-    );
-    // Discover always injects a Time column as the first item (unless advance settings turned it off)
-    // Have to guard against this to allow users to request the same column again later
-    if (showTimeCol) {
-      mappedCols.unshift({ id: timeString, schema: 'datetime', initialWidth: 200 });
+      return mappedCols;
+    },
+    [indexPattern, showTimeCol, timeString, useShortDots]
+  );
+
+  const [dataGridColumns, setDataGridColumns] = useState<EuiDataGridColumn[]>(
+    buildColumns(columns)
+  );
+  useEffect(() => {
+    const prevColums = dataGridColumns.map((col) => col.id);
+    if (isEqual(columns, prevColums)) {
+      setDataGridColumns(buildColumns(columns));
     }
-    return mappedCols;
-  }, [columns, useShortDots, showTimeCol, indexPattern, timeString]);
+  }, [columns, buildColumns, setDataGridColumns, dataGridColumns]);
 
   /**
    * Pagination
@@ -207,7 +223,15 @@ export const DiscoverGrid = function DiscoverGridInner({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
+  const sortingColumns = useMemo(
+    () =>
+      sort.length === 0
+        ? getDefaultSort(indexPattern).map(
+            ([id, direction]) => ({ id, direction } as { id: string; direction: 'asc' | 'desc' })
+          )
+        : sort.map(([id, direction]) => ({ id, direction })),
+    [sort, indexPattern]
+  );
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
@@ -216,34 +240,10 @@ export const DiscoverGrid = function DiscoverGridInner({
   );
 
   /**
-   * Visibility and order
-   */
-  const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map((obj) => obj.id));
-  const mounted = React.useRef(false);
-  useEffect(() => {
-    // every time a column is added, make it visible
-    if (!mounted.current) {
-      mounted.current = true;
-    } else {
-      const newColumns = dataGridColumns.map((obj) => obj.id);
-      if (!isEqual(newColumns, visibleColumns)) {
-        setVisibleColumns(newColumns);
-      }
-    }
-  }, [dataGridColumns, visibleColumns]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /**
    * Cell rendering
    */
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-      if (
-        rowIndex < pagination.pageIndex * pagination.pageSize ||
-        rowIndex > pagination.pageIndex * pagination.pageSize + pagination.pageSize
-      ) {
-        return null;
-      }
-
       const row = rows[rowIndex];
 
       if (typeof row === 'undefined') {
@@ -277,7 +277,7 @@ export const DiscoverGrid = function DiscoverGridInner({
       }
       return value;
     },
-    [rows, indexPattern, onFilter, pagination, timeString]
+    [rows, indexPattern, onFilter, timeString]
   );
 
   /**
@@ -349,8 +349,12 @@ export const DiscoverGrid = function DiscoverGridInner({
         renderCellValue={renderCellValue}
         leadingControlColumns={leadingControlControls}
         columnVisibility={{
-          visibleColumns,
-          setVisibleColumns,
+          visibleColumns: dataGridColumns.map((obj) => obj.id),
+          setVisibleColumns: (col) => {
+            const newColumns = showTimeCol ? col.slice(1) : col;
+            setDataGridColumns(buildColumns(newColumns));
+            onSetColumns(newColumns);
+          },
         }}
         pagination={{
           ...pagination,
@@ -483,7 +487,7 @@ export const DiscoverGrid = function DiscoverGridInner({
             <EuiFlyoutBody>
               <DocViewer
                 hit={rows[flyoutRow]}
-                columns={visibleColumns}
+                columns={columns}
                 indexPattern={indexPattern}
                 filter={onFilter}
                 onRemoveColumn={onRemoveColumn}

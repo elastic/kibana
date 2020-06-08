@@ -933,7 +933,11 @@ function discoverController(
   };
 
   $scope.toMoment = function (datetime) {
-    return moment(datetime).format(config.get('dateFormat'));
+    try {
+      return moment(datetime).format(config.get('dateFormat'));
+    } catch (e) {
+      return moment().format(config.get('dateFormat'));
+    }
   };
 
   $scope.resetQuery = function () {
@@ -994,6 +998,10 @@ function discoverController(
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
     const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
+    setAppState({ columns });
+  };
+
+  $scope.setColumns = function setColumns(columns) {
     setAppState({ columns });
   };
 

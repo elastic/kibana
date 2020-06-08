@@ -1,5 +1,3 @@
-@import '../../mixins';
-
 .dscTable__footer {
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;
@@ -9,4 +7,8 @@
 
 .dscTable__flyoutHeader {
   white-space: nowrap;
+}
+// this is a hack than needs to be improved
+div[data-rbd-draggable-id="Time"] {
+  display: none;
 }
