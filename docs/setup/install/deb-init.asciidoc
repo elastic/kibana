@@ -1,4 +1,4 @@
-==== Run Kibana with SysV `init`
+==== Run {kib} with SysV `init`
 
 Use the `update-rc.d` command to configure Kibana to start automatically
 when the system boots up:

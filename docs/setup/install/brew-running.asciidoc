@@ -1,4 +1,4 @@
-==== Run Kibana with `brew services`
+==== Run {kib} with `brew services`
 
 With Homebrew, Kibana can be started and stopped as follows:
 

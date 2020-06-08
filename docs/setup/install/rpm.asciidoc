@@ -1,5 +1,5 @@
 [[rpm]]
-=== Install Kibana with RPM
+=== Install {kib} with RPM
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
 or from our <<rpm-repo,RPM repository>>. It can be used to install
@@ -21,7 +21,7 @@ link:/downloads/kibana[Download Kibana] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
 [[rpm-key]]
-==== Import the Elastic PGP Key
+==== Import the Elastic PGP key
 
 include::key.asciidoc[]
 
@@ -160,7 +160,7 @@ include::rpm-init.asciidoc[]
 include::systemd.asciidoc[]
 
 [[rpm-configuring]]
-==== Configure Kibana via the config file
+==== Configure {kib} via the config file
 
 Kibana loads its configuration from the `/etc/kibana/kibana.yml`
 file by default.  The format of this config file is explained in

@@ -1,5 +1,5 @@
 [[docker]]
-== Run Kibana on Docker
+=== Install Kibana with Docker
 Docker images for Kibana are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/centos/[centos:7].
 

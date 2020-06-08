@@ -1,5 +1,5 @@
 [[start-stop]]
-== Start and stop Kibana
+== Start and stop {kib}
 
 The method for starting and stopping {kib} varies depending on how you installed
 it.

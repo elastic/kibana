@@ -1,5 +1,5 @@
 [[deb]]
-=== Install Kibana with Debian Package
+=== Install {kib} with Debian package
 
 The Debian package for Kibana can be <<install-deb,downloaded from our website>>
 or from our <<deb-repo,APT repository>>. It can be used to install
@@ -17,7 +17,7 @@ link:/downloads/kibana[Download Kibana] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
 [[deb-key]]
-==== Import the Elastic PGP Key
+==== Import the Elastic PGP key
 
 include::key.asciidoc[]
 
@@ -169,7 +169,7 @@ include::deb-init.asciidoc[]
 include::systemd.asciidoc[]
 
 [[deb-configuring]]
-==== Configure Kibana via the config file
+==== Configure {kib} via the config file
 
 Kibana loads its configuration from the `/etc/kibana/kibana.yml`
 file by default.  The format of this config file is explained in
