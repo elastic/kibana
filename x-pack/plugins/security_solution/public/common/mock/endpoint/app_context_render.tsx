@@ -18,7 +18,7 @@ import { createStore, State, substateMiddlewareFactory } from '../../store';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
-import { hostMiddlewareFactory } from '../../../endpoint_hosts/store/middleware';
+import { createKibanaContextProviderMock } from '../kibana_react';
 import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
@@ -58,21 +58,20 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const middlewareSpy = createSpyMiddleware();
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, [
     substateMiddlewareFactory(
-      (globalState) => globalState.hostList,
-      hostMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory(
       (globalState) => globalState.alertList,
       alertMiddlewareFactory(coreStart, depsStart)
     ),
     ...managementMiddlewareFactory(coreStart, depsStart),
     middlewareSpy.actionSpyMiddleware,
   ]);
+  const MockKibanaContextProvider = createKibanaContextProviderMock();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-      {children}
-    </AppRootProvider>
+    <MockKibanaContextProvider>
+      <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
+        {children}
+      </AppRootProvider>
+    </MockKibanaContextProvider>
   );
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
