@@ -25,8 +25,12 @@ import { toMountPoint } from '../../../../kibana_react/public';
 
 let bannerId: string;
 
-export const onRedirectNoIndexPattern = (core: CoreStart) => () => {
-  const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
+export const onRedirectNoIndexPattern = (
+  capabilities: CoreStart['application']['capabilities'],
+  navigateToApp: CoreStart['application']['navigateToApp'],
+  overlays: CoreStart['overlays']
+) => () => {
+  const canManageIndexPatterns = capabilities.management.kibana.index_patterns;
   const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
   let timeoutId: NodeJS.Timeout | undefined;
 
@@ -41,21 +45,21 @@ export const onRedirectNoIndexPattern = (core: CoreStart) => () => {
 
   // Avoid being hostile to new users who don't have an index pattern setup yet
   // give them a friendly info message instead of a terse error message
-  bannerId = core.overlays.banners.replace(
+  bannerId = overlays.banners.replace(
     bannerId,
     toMountPoint(<EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage} />)
   );
 
   // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
   timeoutId = setTimeout(() => {
-    core.overlays.banners.remove(bannerId);
+    overlays.banners.remove(bannerId);
     timeoutId = undefined;
   }, 15000);
 
   if (redirectTarget === '/home') {
-    core.application.navigateToApp('home');
+    navigateToApp('home');
   } else {
-    core.application.navigateToApp('management', {
+    navigateToApp('management', {
       path: `/kibana/indexPatterns?bannerMessage=${bannerMessage}`,
     });
   }
