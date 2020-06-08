@@ -29,6 +29,7 @@ export interface AlertMonitorStatusProps {
   snapshotLoading: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
+  shouldUpdateUrl: boolean;
   timerange: {
     from: string;
     to: string;
@@ -41,6 +42,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     hasFilters,
     isOldAlert,
     setAlertParams,
+    shouldUpdateUrl,
     snapshotCount,
     snapshotLoading,
   } = props;
@@ -60,7 +62,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
         autocomplete={props.autocomplete}
         defaultKuery={alertParams.search}
-        shouldUpdateUrl={false}
+        shouldUpdateUrl={shouldUpdateUrl}
         updateDefaultKuery={(value: string) => setAlertParams('search', value)}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
@@ -84,7 +86,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       <EuiSpacer size="xs" />
 
       <FiltersExpressionSelectContainer
-        setAlertParams={setAlertParams}
         alertParams={alertParams}
         newFilters={newFilters}
         onRemoveFilter={(removeFilter: string) => {
@@ -92,6 +93,8 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
             setNewFilters(newFilters.filter((item) => item !== removeFilter));
           }
         }}
+        setAlertParams={setAlertParams}
+        shouldUpdateUrl={shouldUpdateUrl}
       />
 
       <EuiSpacer size="xs" />

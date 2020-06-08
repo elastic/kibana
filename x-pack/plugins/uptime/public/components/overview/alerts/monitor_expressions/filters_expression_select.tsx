@@ -11,21 +11,30 @@ import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
 import { FilterExpressionsSelectProps } from './filters_expression_select_container';
 import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
+import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 
 type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'>;
 
 export const FiltersExpressionsSelect: React.FC<Props> = ({
   alertParams,
-  setAlertParams,
+  filters: overviewFilters,
   newFilters,
   onRemoveFilter,
-  filters: overviewFilters,
+  setAlertParams,
+  shouldUpdateUrl,
 }) => {
   const { tags, ports, schemes, locations } = overviewFilters;
   const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
   const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
   const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
   const selectedTags = alertParams?.filters?.tags ?? [];
+
+  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
+    fieldName: string;
+    values: string[];
+  }>({ fieldName: '', values: [] });
+
+  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values, shouldUpdateUrl);
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     // the `filters` field is no longer a string
@@ -46,6 +55,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
         )
       );
     }
+    setUpdatedFieldValues({ fieldName, values });
   };
 
   const monitorFilters = [

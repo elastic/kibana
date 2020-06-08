@@ -14,6 +14,7 @@ export interface FilterExpressionsSelectProps {
   newFilters: string[];
   onRemoveFilter: (val: string) => void;
   setAlertParams: (key: string, value: any) => void;
+  shouldUpdateUrl: boolean;
 }
 
 export const FiltersExpressionSelectContainer: React.FC<FilterExpressionsSelectProps> = (props) => {

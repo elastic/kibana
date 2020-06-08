@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { isRight } from 'fp-ts/lib/Either';
@@ -109,6 +110,9 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     }
   }, [alertParams, setAlertParams, selectedFilters]);
 
+  const { pathname } = useLocation();
+  const shouldUpdateUrl = useMemo(() => pathname.indexOf('app/uptime') !== -1, [pathname]);
+
   return (
     <AlertMonitorStatusComponent
       alertParams={alertParams}
@@ -119,6 +123,7 @@ export const AlertMonitorStatus: React.FC<Props> = ({
       locations={locations}
       numTimes={numTimes}
       setAlertParams={setAlertParams}
+      shouldUpdateUrl={shouldUpdateUrl}
       snapshotCount={count.total}
       snapshotLoading={loading}
       timerange={timerange}
