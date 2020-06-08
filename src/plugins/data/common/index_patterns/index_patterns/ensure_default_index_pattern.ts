@@ -24,7 +24,7 @@ import { IndexPatternsContract } from './index_patterns';
 export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
-  core: CoreStart,
+  uiSettings: CoreStart['uiSettings'],
   onRedirectNoIndexPattern: () => Promise<unknown> | void
 ) => {
   /**
@@ -33,12 +33,12 @@ export const createEnsureDefaultIndexPattern = (
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
     const patterns = await this.getIds();
-    let defaultId = core.uiSettings.get('defaultIndex');
+    let defaultId = uiSettings.get('defaultIndex');
     let defined = !!defaultId;
     const exists = contains(patterns, defaultId);
 
     if (defined && !exists) {
-      core.uiSettings.remove('defaultIndex');
+      uiSettings.remove('defaultIndex');
       defaultId = defined = false;
     }
 
@@ -49,7 +49,7 @@ export const createEnsureDefaultIndexPattern = (
     // If there is any index pattern created, set the first as default
     if (patterns.length >= 1) {
       defaultId = patterns[0];
-      core.uiSettings.set('defaultIndex', defaultId);
+      uiSettings.set('defaultIndex', defaultId);
     } else {
       return onRedirectNoIndexPattern();
     }

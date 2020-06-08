@@ -81,7 +81,7 @@ export class IndexPatternsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      core,
+      core.uiSettings,
       onRedirectNoIndexPattern
     );
     this.createFieldList = getIndexPatternFieldListCreator({
