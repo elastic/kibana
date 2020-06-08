@@ -12,7 +12,6 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
 
 // @ts-ignore
 import { DynamicSizeProperty } from './dynamic_size_property';
