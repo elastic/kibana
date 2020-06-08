@@ -17,14 +17,12 @@ import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
 import { EndpointAlertsPluginState } from '../../endpoint_alerts';
-import { EndpointHostsPluginState } from '../../endpoint_hosts';
 import { ManagementPluginState } from '../../management';
 
 export type StoreState = HostsPluginState &
   NetworkPluginState &
   TimelinePluginState &
   EndpointAlertsPluginState &
-  EndpointHostsPluginState &
   ManagementPluginState & {
     app: AppState;
     dragAndDrop: DragAndDropState;

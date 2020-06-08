@@ -42,8 +42,10 @@ export class ThemeService {
 
   /** A React hook for consuming the charts theme */
   public useChartsTheme = () => {
+    /* eslint-disable-next-line react-hooks/rules-of-hooks */
     const [value, update] = useState(this.chartsDefaultTheme);
 
+    /* eslint-disable-next-line react-hooks/rules-of-hooks */
     useEffect(() => {
       const s = this.chartsTheme$.subscribe(update);
       return () => s.unsubscribe();
