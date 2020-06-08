@@ -23,27 +23,23 @@ export const getIconHeaderColumns = ({
 }: {
   timelineType: TimelineTypeLiteralWithNull;
 }) => {
-  const templateColumns = [
-    {
+  const columns = {
+    note: {
       align: 'center',
-      field: 'favorite',
+      field: 'eventIdToNoteIds',
       name: (
-        <EuiToolTip content={i18n.FAVORITES}>
-          <EuiIcon data-test-subj="favorites-header-icon" size="m" type="starEmpty" />
+        <EuiToolTip content={i18n.NOTES}>
+          <EuiIcon data-test-subj="notes-count-header-icon" size="m" type="editorComment" />
         </EuiToolTip>
       ),
-      render: (favorite: FavoriteTimelineResult[] | null | undefined) => {
-        const isFavorite = favorite != null && favorite.length > 0;
-        const fill = isFavorite ? 'starFilled' : 'starEmpty';
-
-        return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
-      },
+      render: (
+        _: Record<string, string[]> | null | undefined,
+        timelineResult: OpenTimelineResult
+      ) => <span data-test-subj="notes-count">{getNotesCount(timelineResult)}</span>,
       sortable: false,
       width: ACTION_COLUMN_WIDTH,
     },
-  ];
-  const defaultColumns = [
-    {
+    pinnedEvent: {
       align: 'center',
       field: 'pinnedEventIds',
       name: (
@@ -60,23 +56,26 @@ export const getIconHeaderColumns = ({
       sortable: false,
       width: ACTION_COLUMN_WIDTH,
     },
-    {
+    favorite: {
       align: 'center',
-      field: 'eventIdToNoteIds',
+      field: 'favorite',
       name: (
-        <EuiToolTip content={i18n.NOTES}>
-          <EuiIcon data-test-subj="notes-count-header-icon" size="m" type="editorComment" />
+        <EuiToolTip content={i18n.FAVORITES}>
+          <EuiIcon data-test-subj="favorites-header-icon" size="m" type="starEmpty" />
         </EuiToolTip>
       ),
-      render: (
-        _: Record<string, string[]> | null | undefined,
-        timelineResult: OpenTimelineResult
-      ) => <span data-test-subj="notes-count">{getNotesCount(timelineResult)}</span>,
+      render: (favorite: FavoriteTimelineResult[] | null | undefined) => {
+        const isFavorite = favorite != null && favorite.length > 0;
+        const fill = isFavorite ? 'starFilled' : 'starEmpty';
+
+        return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
+      },
       sortable: false,
       width: ACTION_COLUMN_WIDTH,
     },
-    ...templateColumns,
-  ];
+  };
+  const templateColumns = [columns.note, columns.favorite];
+  const defaultColumns = [columns.note, columns.pinnedEvent, columns.favorite];
 
   return timelineType === TimelineType.template ? templateColumns : defaultColumns;
 };
