@@ -5,8 +5,18 @@
  */
 
 import React, { FunctionComponent, memo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiText,
+  EuiCode,
+  EuiLink,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ProcessorInternal } from '../types';
 
@@ -23,11 +33,13 @@ export interface Props {
   processor: ProcessorInternal;
   selected: boolean;
   handlers: Handlers;
+  description?: string;
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
   ({
     processor,
+    description,
     handlers: { onMove, onCancelMove, onAddOnFailure, onEdit, onDelete, onDuplicate },
     selected,
   }) => {
@@ -43,10 +55,48 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
               <b>{processor.type}</b>
             </EuiFlexItem>
+            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
+              {description ? (
+                <EuiText size="s" color="subdued">
+                  {description}
+                </EuiText>
+              ) : (
+                <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiCode>
+                      <EuiText size="s" color="subdued">
+                        {`${processor.id.slice(processor.id.length - 7, -1)}`}
+                      </EuiText>
+                    </EuiCode>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {/* TODO: Add link in href below */}
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        <FormattedMessage
+                          id="xpack.ingestPipelines.pipelineEditor.item.uniqueIdToolTipDescription"
+                          defaultMessage={
+                            'A unique identifier for this "{type}" processor. This value will not be saved for this processor. To provide your own processor description that can be saved use the tag field. Click on the help icon below to learn more.'
+                          }
+                          values={{
+                            type: processor.type,
+                          }}
+                        />
+                      }
+                    >
+                      <EuiLink target="_blank" href="">
+                        <EuiIcon color="primary" size="s" type="questionInCircle" />
+                      </EuiLink>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.editProcessorButtonLabel',
+                  'xpack.ingestPipelines.pipelineEditor.item.editButtonLabel',
                   {
                     defaultMessage: 'Edit this processor',
                   }
@@ -54,7 +104,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               >
                 <EuiButtonIcon
                   aria-label={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.editProcessorButtonAriaLabel',
+                    'xpack.ingestPipelines.pipelineEditor.item.editButtonAriaLabel',
                     {
                       defaultMessage: 'Edit this processor',
                     }
@@ -68,7 +118,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.addOnFailureHandlerProcessorButtonLabel',
+                  'xpack.ingestPipelines.pipelineEditor.item.addOnFailureHandlerButtonLabel',
                   {
                     defaultMessage: 'Add on failure handler',
                   }
@@ -76,7 +126,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               >
                 <EuiButtonIcon
                   aria-label={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.addOnFailureHandlerProcessorButtonAriaLabel',
+                    'xpack.ingestPipelines.pipelineEditor.item.addOnFailureHandlerButtonAriaLabel',
                     {
                       defaultMessage: 'Add on failure handler',
                     }
@@ -90,7 +140,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonLabel',
+                  'xpack.ingestPipelines.pipelineEditor.item.duplicateButtonLabel',
                   {
                     defaultMessage: 'Duplicate this processor',
                   }
@@ -98,7 +148,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               >
                 <EuiButtonIcon
                   aria-label={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.duplicateProcessorButtonAriaLabel',
+                    'xpack.ingestPipelines.pipelineEditor.item.duplicateButtonAriaLabel',
                     {
                       defaultMessage: 'Duplicate this processor',
                     }
@@ -113,7 +163,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               {selected ? (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel',
+                    'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonLabel',
                     {
                       defaultMessage: 'Cancel moving this processor',
                     }
@@ -121,7 +171,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 >
                   <EuiButtonIcon
                     aria-label={i18n.translate(
-                      'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonAriaLabel',
+                      'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonAriaLabel',
                       {
                         defaultMessage: 'Cancel moving this processor',
                       }
@@ -134,7 +184,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               ) : (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel',
+                    'xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel',
                     {
                       defaultMessage: 'Move this processor',
                     }
@@ -142,7 +192,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 >
                   <EuiButtonIcon
                     aria-label={i18n.translate(
-                      'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonAriaLabel',
+                      'xpack.ingestPipelines.pipelineEditor.item.moveButtonAriaLabel',
                       {
                         defaultMessage: 'Move this processor',
                       }
@@ -158,16 +208,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate(
-              'xpack.ingestPipelines.pipelineEditor.deleteProcessorButtonLabel',
-              {
-                defaultMessage: 'Delete this processor',
-              }
-            )}
+            content={i18n.translate('xpack.ingestPipelines.pipelineEditor.item.deleteButtonLabel', {
+              defaultMessage: 'Delete this processor',
+            })}
           >
             <EuiButtonIcon
               aria-label={i18n.translate(
-                'xpack.ingestPipelines.pipelineEditor.deleteProcessorButtonAriaLabel',
+                'xpack.ingestPipelines.pipelineEditor.item.deleteButtonAriaLabel',
                 {
                   defaultMessage: 'Delete this processor',
                 }
@@ -187,6 +234,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       prev.handlers === current.handlers &&
       prev.processor.id === current.processor.id &&
       prev.processor.type === current.processor.type &&
+      prev.description === current.description &&
       prev.selected === current.selected
     );
   }

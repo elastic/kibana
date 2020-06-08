@@ -72,6 +72,7 @@ export const TreeNode: FunctionComponent<Props> = ({
       <PipelineProcessorsEditorItem
         processor={processor}
         handlers={handlers}
+        description={processor.options.tag}
         selected={Boolean(selectedProcessorInfo?.id === processor.id)}
       />
       {processor.onFailure?.length ? (
