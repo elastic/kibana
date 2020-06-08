@@ -80,12 +80,14 @@ export function createSavedGisMapClass(services) {
       });
       this.showInRecentlyAccessed = true;
     }
-    getFullPath() {
+
+    getFullPath = () => {
       return `/app/maps/map/${this.id}`;
-    }
-    getLayerList() {
+    };
+
+    getLayerList = () => {
       return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
-    }
+    };
 
     syncWithStore = (state) => {
       const layerList = getLayerListRaw(state);

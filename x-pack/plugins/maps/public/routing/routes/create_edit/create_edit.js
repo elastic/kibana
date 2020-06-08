@@ -66,7 +66,10 @@ export const MapsCreateEditView = class extends React.Component {
   componentDidMount() {
     const { savedMap, currentPath } = this.props;
     this.setState({ currentPath });
-    getCoreChrome().docTitle.change(savedMap.title);
+
+    const { id, title, getFullPath } = savedMap;
+    getCoreChrome().docTitle.change(title);
+    getCoreChrome().recentlyAccessed.add(getFullPath(), title, id);
 
     // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -78,7 +81,6 @@ export const MapsCreateEditView = class extends React.Component {
     this.visibleSubscription = getCoreChrome()
       .getIsVisible$()
       .subscribe((isVisible) => this.setState({ isVisible }));
-
     this.initMap(savedMap);
   }
 
