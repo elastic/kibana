@@ -74,8 +74,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
         logSupertestApiErrorAndThrow('Unable to get full Agent Configuration', error);
       }
 
-      // @ts-ignore
-      return fullAgentConfig;
+      return fullAgentConfig!;
     },
 
     /**
