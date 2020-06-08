@@ -10,7 +10,6 @@ import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../..
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
-// import { defineFakeBuiltinAlertTypes } from './builtin_alert_types';
 import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
 
@@ -79,7 +78,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerts });
-    // defineFakeBuiltinAlertTypes({ alerts });
     defineRoutes(core);
   }
 
