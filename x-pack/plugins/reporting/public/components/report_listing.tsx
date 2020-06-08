@@ -266,7 +266,7 @@ class ReportListingUi extends Component<Props, State> {
     } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
         this.props.toasts.addDanger(this.state.badLicenseMessage);
-        this.props.redirect('kibana#/management');
+        this.props.redirect('management');
         return;
       }
 

@@ -20,6 +20,7 @@ export const Messages: FC<Props> = ({ messages }) => {
       {messages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
+            data-test-subj={`analyticsWizardCreationCallout_${i}`}
             title={requestMessage.message}
             color={requestMessage.error !== undefined ? 'danger' : 'primary'}
             iconType={requestMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
