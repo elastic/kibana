@@ -24,7 +24,7 @@ describe('api', () => {
     describe('create incident', () => {
       test('it creates an incident', async () => {
         const params = { ...apiParams, externalId: null };
-        const res = await api.pushToService({ externalService, mapping, params });
+        const res = await api.pushToService({ externalService, mapping, params, secrets: {} });
 
         expect(res).toEqual({
           id: 'incident-1',
@@ -46,7 +46,12 @@ describe('api', () => {
 
       test('it creates an incident without comments', async () => {
         const params = { ...apiParams, externalId: null, comments: [] };
-        const res = await api.pushToService({ externalService, mapping, params });
+        const res = await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+        });
 
         expect(res).toEqual({
           id: 'incident-1',
@@ -58,7 +63,7 @@ describe('api', () => {
 
       test('it calls createIncident correctly', async () => {
         const params = { ...apiParams, externalId: null };
-        await api.pushToService({ externalService, mapping, params });
+        await api.pushToService({ externalService, mapping, params, secrets: {} });
 
         expect(externalService.createIncident).toHaveBeenCalledWith({
           incident: {
@@ -73,9 +78,9 @@ describe('api', () => {
 
       test('it calls createComment correctly', async () => {
         const params = { ...apiParams, externalId: null };
-        await api.pushToService({ externalService, mapping, params });
-        expect(externalService.createComment).toHaveBeenCalledTimes(2);
-        expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
+        await api.pushToService({ externalService, mapping, params, secrets: {} });
+        expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
+        expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-1',
@@ -94,7 +99,7 @@ describe('api', () => {
           field: 'comments',
         });
 
-        expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
+        expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
           incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-2',
@@ -117,7 +122,12 @@ describe('api', () => {
 
     describe('update incident', () => {
       test('it updates an incident', async () => {
-        const res = await api.pushToService({ externalService, mapping, params: apiParams });
+        const res = await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+        });
 
         expect(res).toEqual({
           id: 'incident-2',
@@ -139,7 +149,12 @@ describe('api', () => {
 
       test('it updates an incident without comments', async () => {
         const params = { ...apiParams, comments: [] };
-        const res = await api.pushToService({ externalService, mapping, params });
+        const res = await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+        });
 
         expect(res).toEqual({
           id: 'incident-2',
@@ -151,7 +166,7 @@ describe('api', () => {
 
       test('it calls updateIncident correctly', async () => {
         const params = { ...apiParams };
-        await api.pushToService({ externalService, mapping, params });
+        await api.pushToService({ externalService, mapping, params, secrets: {} });
 
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
@@ -167,9 +182,9 @@ describe('api', () => {
 
       test('it calls createComment correctly', async () => {
         const params = { ...apiParams };
-        await api.pushToService({ externalService, mapping, params });
-        expect(externalService.createComment).toHaveBeenCalledTimes(2);
-        expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
+        await api.pushToService({ externalService, mapping, params, secrets: {} });
+        expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
+        expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incidentId: 'incident-2',
           comment: {
             commentId: 'case-comment-1',
@@ -188,7 +203,7 @@ describe('api', () => {
           field: 'comments',
         });
 
-        expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
+        expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
           incidentId: 'incident-2',
           comment: {
             commentId: 'case-comment-2',
@@ -231,7 +246,7 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -264,7 +279,7 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -295,7 +310,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -328,7 +343,7 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {},
@@ -356,7 +371,7 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -387,7 +402,7 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -420,7 +435,7 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -451,7 +466,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -484,7 +499,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -515,8 +530,8 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams });
-        expect(externalService.createComment).not.toHaveBeenCalled();
+        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        expect(externalService.updateIncident).not.toHaveBeenCalled();
       });
     });
   });

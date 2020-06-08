@@ -34,9 +34,8 @@ const pushToServiceHandler = async ({
   params,
   secrets,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { savedObjectId, externalId } = params;
-  const existingIncident = await externalService.findIncidents({ user_input: savedObjectId });
-  const updateIncident = existingIncident ? true : false;
+  const { externalId } = params;
+  const updateIncident = externalId ? true : false;
   const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
   let res: PushToServiceResponse;
@@ -63,15 +62,15 @@ const pushToServiceHandler = async ({
 
   if (updateIncident) {
     res = await externalService.updateIncident({
-      incidentId: existingIncident![0].sys_id,
+      incidentId: externalId,
       incident,
     });
   } else {
     res = await externalService.createIncident({
       incident: {
         ...incident,
+        short_description: params.title,
         caller_id: secrets.username,
-        user_input: savedObjectId,
       },
     });
   }
