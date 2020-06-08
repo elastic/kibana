@@ -78,7 +78,7 @@ const runTestFor = (Component, aggType) => {
   });
 };
 
-describe('Scripted Aggregations', () => {
+describe('ScriptField', () => {
   runTestFor(PercentileAgg, 'percentile');
   runTestFor(PercentileRankAgg, 'percentile_rank');
   runTestFor(PositiveRateAgg, 'positive_rate');
