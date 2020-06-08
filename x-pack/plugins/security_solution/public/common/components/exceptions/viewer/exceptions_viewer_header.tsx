@@ -51,7 +51,7 @@ const ExceptionsViewerHeaderComponent = ({
       filter: { filter, showDetectionsList, showEndpointList, tags },
       pagination: {},
     });
-  }, [filter, tags, showDetectionsList, showEndpointList]);
+  }, [filter, tags, showDetectionsList, showEndpointList, onFilterChange]);
 
   const onAddExceptionDropdownClick = useCallback(
     (): void => setAddExceptionMenuOpen(!isAddExceptionMenuOpen),

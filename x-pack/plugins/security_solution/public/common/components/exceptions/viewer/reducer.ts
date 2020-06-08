@@ -10,18 +10,18 @@ import {
   ExceptionListItemSchema,
   Pagination,
 } from '../types';
-import { ExceptionList, ExceptionIdentifiers } from '../../../../../public/lists_plugin_deps';
+import { ExceptionList } from '../../../../../public/lists_plugin_deps';
 
 export interface State {
   filterOptions: FilterOptions;
   pagination: ExceptionsPagination;
   endpointList: ExceptionList | null;
   detectionsList: ExceptionList | null;
+  allExceptions: ExceptionListItemSchema[];
   exceptions: ExceptionListItemSchema[];
   exceptionToEdit: ExceptionListItemSchema | null;
   loadingItemIds: ApiProps[];
   isModalOpen: boolean;
-  isLoading: boolean;
 }
 
 export type Action =
@@ -35,7 +35,6 @@ export type Action =
       type: 'updateFilterOptions';
       filterOptions: Partial<FilterOptions>;
       pagination: Partial<Pagination>;
-      ruleExceptionLists: ExceptionIdentifiers[];
     }
   | { type: 'updateModalOpen'; isOpen: boolean }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
@@ -49,20 +48,20 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
 
       return {
         ...state,
-        endpointList: state.filterOptions.showEndpointList
-          ? endpointList[0] ?? null
-          : state.endpointList,
-        detectionsList: state.filterOptions.showDetectionsList
-          ? detectionsList[0] ?? null
-          : state.detectionsList,
+        endpointList: state.filterOptions.showDetectionsList
+          ? state.endpointList
+          : endpointList[0] ?? null,
+        detectionsList: state.filterOptions.showEndpointList
+          ? state.detectionsList
+          : detectionsList[0] ?? null,
         pagination: {
           ...state.pagination,
           pageIndex: action.pagination.page - 1,
           pageSize: action.pagination.perPage,
           totalItemCount: action.pagination.total,
         },
+        allExceptions: action.exceptions,
         exceptions: action.exceptions,
-        isLoading: false,
       };
     }
     case 'updateFilterOptions': {
@@ -76,18 +75,17 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
           ...state.pagination,
           ...action.pagination,
         },
-        isLoading: true,
       };
 
       if (action.filterOptions.showEndpointList) {
-        const exceptions = state.exceptions.filter((t) => t.type === 'endpoint');
+        const exceptions = state.allExceptions.filter((t) => t._tags.includes('endpoint'));
 
         return {
           ...returnState,
           exceptions,
         };
       } else if (action.filterOptions.showDetectionsList) {
-        const exceptions = state.exceptions.filter((t) => t.type === 'detection');
+        const exceptions = state.allExceptions.filter((t) => t._tags.includes('detection'));
 
         return {
           ...returnState,
@@ -96,6 +94,7 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
       } else {
         return {
           ...returnState,
+          exceptions: state.allExceptions,
         };
       }
     }

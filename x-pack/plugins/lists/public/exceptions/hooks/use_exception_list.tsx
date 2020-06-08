@@ -35,7 +35,7 @@ export const useExceptionList = ({
   lists,
   pagination = {
     page: 1,
-    perPage: 5,
+    perPage: 20,
     total: 0,
   },
   filterOptions = {

@@ -9,7 +9,6 @@ import {
   EuiEmptyPrompt,
   EuiText,
   EuiLink,
-  EuiLoadingContent,
   EuiOverlayMask,
   EuiModal,
   EuiModalBody,
@@ -71,10 +70,10 @@ const initialState: State = {
   },
   endpointList: null,
   detectionsList: null,
+  allExceptions: [],
   exceptions: [],
   exceptionToEdit: null,
   loadingItemIds: [],
-  isLoading: false,
   isModalOpen: false,
 };
 
@@ -118,7 +117,6 @@ const ExceptionsViewerComponent = ({
   const { deleteExceptionItem } = useApi(services.http);
   const [
     {
-      isLoading,
       endpointList,
       detectionsList,
       exceptions,
@@ -184,10 +182,9 @@ const ExceptionsViewerComponent = ({
         type: 'updateFilterOptions',
         filterOptions: filter,
         pagination: pag,
-        ruleExceptionLists: exceptionListsMeta,
       });
     },
-    [dispatch, exceptionListsMeta]
+    [dispatch]
   );
 
   const onAddException = useCallback(
@@ -212,7 +209,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const onCloseExceptionModal = useCallback(
-    ({ actionType, listId, listNamespaceType }): void => {
+    ({ actionType, listId }): void => {
       setIsModalOpen(false);
 
       // TODO: This callback along with fetchList can probably get
@@ -257,14 +254,7 @@ const ExceptionsViewerComponent = ({
         },
       });
     },
-    [
-      dispatch,
-      setLoadingItemIds,
-      deleteExceptionItem,
-      loadingItemIds,
-      onFetchList,
-      onDispatchToaster,
-    ]
+    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, onFetchList, onDispatchToaster]
   );
 
   // Logic for initial render
@@ -321,8 +311,8 @@ const ExceptionsViewerComponent = ({
   }, [filterOptions.showEndpointList, filterOptions.showDetectionsList, ruleSettingsUrl]);
 
   const showEmpty = useMemo((): boolean => {
-    return !initLoading && !isLoading && exceptions.length === 0;
-  }, [initLoading, exceptions.length, isLoading]);
+    return !initLoading && exceptions.length === 0;
+  }, [initLoading, exceptions.length]);
 
   return (
     <>
@@ -338,10 +328,8 @@ const ExceptionsViewerComponent = ({
         </EuiOverlayMask>
       )}
 
-      <Panel loading={initLoading || isLoading}>
-        {initLoading && (
-          <EuiLoadingContent data-test-subj="initialLoadingAllExceptionItemsView" lines={10} />
-        )}
+      <Panel loading={initLoading}>
+        {initLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
 
         <ExceptionsViewerHeader
           isInitLoading={initLoading}
@@ -352,13 +340,14 @@ const ExceptionsViewerComponent = ({
           onAddExceptionClick={onAddException}
         />
 
-        <EuiSpacer size="l" />
-
         {(filterOptions.showEndpointList || filterOptions.showDetectionsList) && (
           <>
+            <EuiSpacer size="xs" />
             <StyledText size="s">{exceptionsSubtext}</StyledText>
           </>
         )}
+
+        <EuiSpacer size="l" />
 
         <UtilityBar>
           <UtilityBarSection>
@@ -379,8 +368,6 @@ const ExceptionsViewerComponent = ({
         <EuiSpacer size="s" />
 
         <MyExceptionsContainer className="eui-yScrollWithShadows">
-          {isLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
-
           {showEmpty && (
             <EuiEmptyPrompt
               iconType="advancedSettingsApp"
@@ -393,7 +380,6 @@ const ExceptionsViewerComponent = ({
 
           <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
             {!initLoading &&
-              !isLoading &&
               exceptions.length > 0 &&
               exceptions.map((exception, index) => (
                 <EuiFlexItem grow={false} key={exception.id}>

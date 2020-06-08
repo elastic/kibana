@@ -62,7 +62,7 @@ export const OPERATING_SYSTEM = i18n.translate(
 export const SEARCH_DEFAULT = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.searchDefaultPlaceholder',
   {
-    defaultMessage: 'Search field (default)',
+    defaultMessage: 'Search field (ex: host.name)',
   }
 );
 

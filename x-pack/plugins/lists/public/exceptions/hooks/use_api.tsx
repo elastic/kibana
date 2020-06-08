@@ -11,7 +11,7 @@ import { HttpStart } from '../../../../../../src/core/public';
 import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
 import { ApiCallMemoProps } from '../types';
 
-interface ExceptionsApi {
+export interface ExceptionsApi {
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
   deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
   getExceptionItem: (
@@ -24,7 +24,7 @@ interface ExceptionsApi {
 
 export const useApi = (http: HttpStart): ExceptionsApi => {
   return useMemo(
-    () => ({
+    (): ExceptionsApi => ({
       async deleteExceptionItem({
         id,
         namespaceType,
