@@ -33,7 +33,8 @@ interface PreviewMetricThresholdAlertParams {
 
 export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams,
-  iterations?: number
+  iterations?: number,
+  precalculatedNumberOfGroups?: number
 ) => Promise<Array<number | null | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION>> = async (
   {
     callCluster,
@@ -44,7 +45,8 @@ export const previewMetricThresholdAlert: (
     end = Date.now(),
     overrideLookbackIntervalInSeconds,
   },
-  iterations = 0
+  iterations = 0,
+  precalculatedNumberOfGroups
 ) => {
   // There are three different "intervals" we're dealing with here, so to disambiguate:
   // - The lookback interval, which is how long of a period of time we want to examine to count
@@ -116,11 +118,15 @@ export const previewMetricThresholdAlert: (
     if (isTooManyBucketsPreviewException(e)) {
       // If there's too much data on the first request, recursively slice the lookback interval
       // until all the data can be retrieved
+      const basePreviewParams = { callCluster, params, config, lookback, alertInterval };
       const { maxBuckets } = e;
-      const currentAlertResults = await evaluateAlert(callCluster, params, config);
-      // Try to get the number of groups in order to calculate max buckets. If this fails,
-      // just estimate based on 1 group
-      const numberOfGroups = Math.max(Object.keys(first(currentAlertResults)).length, 1);
+      // If this is still the first iteration, try to get the number of groups in order to
+      // calculate max buckets. If this fails, just estimate based on 1 group
+      const currentAlertResults = !precalculatedNumberOfGroups
+        ? await evaluateAlert(callCluster, params, config)
+        : [];
+      const numberOfGroups =
+        precalculatedNumberOfGroups ?? Math.max(Object.keys(first(currentAlertResults)).length, 1);
       const estimatedTotalBuckets =
         (lookbackIntervalInSeconds / bucketIntervalInSeconds) * numberOfGroups;
       // The minimum number of slices is 2. In case we underestimate the total number of buckets
@@ -130,10 +136,10 @@ export const previewMetricThresholdAlert: (
       const slicedLookback = Math.floor(lookbackIntervalInSeconds / slices);
 
       // Bail out if it looks like this is going to take too long
-      if (slicedLookback <= 0 || iterations >= MAX_ITERATIONS || slices >= MAX_ITERATIONS)
+      if (slicedLookback <= 0 || iterations > MAX_ITERATIONS || slices > MAX_ITERATIONS) {
         return [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION];
+      }
 
-      const basePreviewParams = { callCluster, params, config, lookback, alertInterval };
       const slicedRequests = [...Array(slices)].map((_, i) => {
         return previewMetricThresholdAlert(
           {
@@ -141,7 +147,8 @@ export const previewMetricThresholdAlert: (
             end: Math.min(end, start + slicedLookback * (i + 1) * 1000),
             overrideLookbackIntervalInSeconds: slicedLookback,
           },
-          iterations + slices
+          iterations + slices,
+          numberOfGroups
         );
       });
       const results = await Promise.all(slicedRequests);
