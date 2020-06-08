@@ -53,19 +53,19 @@ function findFile(paths: string[]) {
 }
 
 /**
- * Get the path where the config files are stored
+ * Get the path of kibana.yml
  * @internal
  */
 export const getConfigPath = () => findFile(CONFIG_PATHS);
 
 /**
- * Get the config directory path
+ * Get the directory containing configuration files
  * @internal
  */
 export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
 
 /**
- * Get the path where the data can be stored
+ * Get the directory containing runtime data
  * @internal
  */
 export const getDataPath = () => findFile(DATA_PATHS);

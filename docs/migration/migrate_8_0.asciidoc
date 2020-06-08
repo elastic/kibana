@@ -117,7 +117,7 @@ URL that it derived from the actual server address and `xpack.security.public` s
 
 [float]]
 === kibana.keystore has moved from the `data` folder to the `config` folder
-*Details:* By default, kibana.keystore has moved from the confgured `path.data` folder to `<root>/config` for archive distributions
+*Details:* By default, kibana.keystore has moved from the configured `path.data` folder to `<root>/config` for archive distributions
 and `/etc/kibana` for package distributions.
 
 [float]
