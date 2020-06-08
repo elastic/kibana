@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint']);
+  const pageObjects = getPageObjects(['common', 'endpoint', 'policy']);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
-      await pageObjects.endpoint.navigateToEndpointList();
+      await pageObjects.policy.navigateToPolicyList();
     });
 
     it('loads the Policy List Page', async () => {
@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // load/create a policy and then navigate back to the policy view so that the list is refreshed
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.endpoint.navigateToEndpointList();
+        await pageObjects.policy.navigateToPolicyList();
         await pageObjects.endpoint.waitForTableToHaveData('policyTable');
       });
       after(async () => {

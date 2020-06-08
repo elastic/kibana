@@ -14,10 +14,10 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
 
   return {
     /**
-     * Navigates to the Endpoints list
+     * Navigate to the Endpoints list page
      */
     async navigateToEndpointList() {
-      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
+      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/endpoints' });
     },
 
     /**
