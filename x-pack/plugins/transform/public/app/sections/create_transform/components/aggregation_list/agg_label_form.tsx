@@ -66,6 +66,7 @@ export const AggLabelForm: React.FC<Props> = ({
               color="subdued"
               className="eui-textTruncate"
               data-test-subj="transformAggHelperText"
+              style={{ lineHeight: '20px' }}
             >
               {helperText}
             </EuiTextColor>
