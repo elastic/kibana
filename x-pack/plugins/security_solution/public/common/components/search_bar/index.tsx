@@ -134,6 +134,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         window.setTimeout(() => updateSearch(updateSearchBar), 0);
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id, end, filterQuery, fromStr, queries, start, toStr]
     );
 
@@ -153,6 +154,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id, queries, filterManager]
     );
 
@@ -160,6 +162,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       (newSavedQuery: SavedQuery) => {
         setSavedQuery({ id, savedQuery: newSavedQuery });
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -196,6 +199,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         updateSearch(updateSearchBar);
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id, end, fromStr, start, toStr]
     );
 
@@ -218,6 +222,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           filterManager,
         });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, end, filterManager, fromStr, start, toStr, savedQuery]);
 
     useEffect(() => {
@@ -241,6 +246,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         isSubscribed = false;
         subscriptions.unsubscribe();
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     return (

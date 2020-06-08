@@ -11,8 +11,5 @@
     "visualizations",
     "dashboard"
   ],
-  "optionalPlugins": [
-    "home",
-    "share"
-  ]
+  "optionalPlugins": ["home", "share"]
 }

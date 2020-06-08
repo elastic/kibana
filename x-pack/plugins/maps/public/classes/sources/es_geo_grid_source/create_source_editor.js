@@ -14,7 +14,7 @@ import { NoIndexPatternCallout } from '../../../components/no_index_pattern_call
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { getAggregatableGeoFieldTypes, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { RenderAsSelect } from './render_as_select';
 
 export class CreateSourceEditor extends Component {
@@ -176,7 +176,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={AGGREGATABLE_GEO_FIELD_TYPES}
+          fieldTypes={getAggregatableGeoFieldTypes()}
           onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>

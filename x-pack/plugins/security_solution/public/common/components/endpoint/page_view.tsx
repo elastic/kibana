@@ -149,7 +149,9 @@ export const PageView = memo<PageViewProps>(
               )}
             </EuiPageHeader>
           )}
-          {tabs && <EuiTabs className="endpoint-navTabs">{tabComponents}</EuiTabs>}
+          {tabComponents.length > 0 && (
+            <EuiTabs className="endpoint-navTabs">{tabComponents}</EuiTabs>
+          )}
           <EuiPageContent className="endpoint-page-content">
             {bodyHeader && (
               <EuiPageContentHeader>

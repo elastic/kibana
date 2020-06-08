@@ -214,20 +214,58 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async getAnalyticsState(analyticsId: string): Promise<DATA_FRAME_TASK_STATE> {
-      log.debug(`Fetching analytics state for job ${analyticsId}`);
+    async getDFAJobStats(analyticsId: string): Promise<any> {
+      log.debug(`Fetching data frame analytics job stats for job ${analyticsId}...`);
       const analyticsStats = await esSupertest
         .get(`/_ml/data_frame/analytics/${analyticsId}/_stats`)
         .expect(200)
         .then((res: any) => res.body);
 
+      return analyticsStats;
+    },
+
+    async getAnalyticsState(analyticsId: string): Promise<DATA_FRAME_TASK_STATE> {
+      log.debug(`Fetching analytics state for job ${analyticsId}`);
+      const analyticsStats = await this.getDFAJobStats(analyticsId);
+
       expect(analyticsStats.data_frame_analytics).to.have.length(
         1,
         `Expected dataframe analytics stats to have exactly one object (got '${analyticsStats.data_frame_analytics.length}')`
       );
+
       const state: DATA_FRAME_TASK_STATE = analyticsStats.data_frame_analytics[0].state;
 
       return state;
+    },
+
+    async getDFAJobTrainingRecordCount(analyticsId: string): Promise<number> {
+      const analyticsStats = await this.getDFAJobStats(analyticsId);
+
+      expect(analyticsStats.data_frame_analytics).to.have.length(
+        1,
+        `Expected dataframe analytics stats to have exactly one object (got '${analyticsStats.data_frame_analytics.length}')`
+      );
+      const trainingRecordCount: number =
+        analyticsStats.data_frame_analytics[0].data_counts.training_docs_count;
+
+      return trainingRecordCount;
+    },
+
+    async waitForDFAJobTrainingRecordCountToBePositive(analyticsId: string) {
+      await retry.waitForWithTimeout(
+        `'${analyticsId}' to have training_docs_count > 0`,
+        10 * 1000,
+        async () => {
+          const trainingRecordCount = await this.getDFAJobTrainingRecordCount(analyticsId);
+          if (trainingRecordCount > 0) {
+            return true;
+          } else {
+            throw new Error(
+              `expected data frame analytics job '${analyticsId}' to have training_docs_count > 0 (got ${trainingRecordCount})`
+            );
+          }
+        }
+      );
     },
 
     async waitForAnalyticsState(

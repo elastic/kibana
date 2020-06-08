@@ -242,6 +242,7 @@ const ReputationLinkComponent: React.FC<{
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
         })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
