@@ -28,6 +28,8 @@ import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
 interface MatchParams {
   policyName?: SlmPolicy['name'];
 }
@@ -130,7 +132,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         }
         actions={
           <EuiButton
-            href={linkToAddPolicy()}
+            {...reactRouterNavigate(history, linkToAddPolicy())}
             fill
             iconType="plusInCircle"
             data-test-subj="createPolicyButton"
