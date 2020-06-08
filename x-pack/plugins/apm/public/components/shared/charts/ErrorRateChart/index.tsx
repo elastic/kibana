@@ -72,6 +72,7 @@ export const ErrorRateChart = () => {
             color: theme.euiColorVis7,
             data: [],
             legendValue: average,
+            legendClickDisabled: true,
             title: 'Avg.',
             type: 'linemark',
             hideTooltipValue: true,

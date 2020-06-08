@@ -118,6 +118,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             color: theme.euiColorVis1,
             legendValue: average,
             title: 'Avg.',
+            legendClickDisabled: true,
           },
         ]}
       />
