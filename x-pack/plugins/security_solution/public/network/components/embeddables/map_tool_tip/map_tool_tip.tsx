@@ -20,10 +20,8 @@ import * as i18n from '../translations';
 import { ITooltipProperty } from '../../../../../../maps/public';
 
 export const MapToolTipComponent = ({
-  addFilters,
   closeTooltip,
   features = [],
-  isLocked,
   getLayerName,
   loadFeatureProperties,
   loadFeatureGeometry,
@@ -78,8 +76,10 @@ export const MapToolTipComponent = ({
     };
 
     fetchFeatureProps();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     featureIndex,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     features
       .map((f) => `${f.id}-${f.layerId}`)
       .sort()

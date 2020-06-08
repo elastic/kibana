@@ -7604,7 +7604,6 @@
     "xpack.infra.logs.lastUpdate": "前回の更新 {timestamp}",
     "xpack.infra.logs.loadingNewEntriesText": "新しいエントリーを読み込み中",
     "xpack.infra.logs.logEntryActionsDetailsButton": "詳細を表示",
-    "xpack.infra.logs.logEntryActionsMenuTitle": "行詳細のログ",
     "xpack.infra.logs.logEntryCategories.analyzeCategoryInMlButtonLabel": "ML で分析",
     "xpack.infra.logs.logEntryCategories.analyzeCategoryInMlTooltipDescription": "ML アプリでこのカテゴリーを分析します。",
     "xpack.infra.logs.logEntryCategories.categoryColumnTitle": "カテゴリー",
