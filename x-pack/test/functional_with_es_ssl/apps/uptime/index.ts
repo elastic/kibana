@@ -22,7 +22,6 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./alert_flyout'));
-      loadTestFile(require.resolve('./flyout_loads'));
     });
   });
 };

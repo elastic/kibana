@@ -9,38 +9,19 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   return {
     async openFlyout(alertType: 'monitorStatus' | 'tls') {
-      await retry.try(
-        async () => {
-          await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
-          await testSubjects.click('xpack.uptime.openAlertContextPanel');
-          if (alertType === 'monitorStatus') {
-            await testSubjects.existOrFail('xpack.uptime.toggleAlertFlyout');
-            await testSubjects.click('xpack.uptime.toggleAlertFlyout');
-          } else if (alertType === 'tls') {
-            await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
-          }
-        },
-        async () => {
-          await browser.refresh();
-        }
-      );
+      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
+      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
+      if (alertType === 'monitorStatus') {
+        await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
+      } else if (alertType === 'tls') {
+        await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
+      }
     },
     async openMonitorStatusAlertType(alertType: string) {
       return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);
-    },
-    async assertTlsFieldExists(id: string) {
-      return testSubjects.existOrFail(`xpack.uptime.alerts.tls.expressionPopover.${id}`, {
-        timeout: 15 * 1000,
-      });
-    },
-    async assertMonitorStatusFlyoutSearchBarExists() {
-      return testSubjects.existOrFail('xpack.uptime.alerts.monitorStatus.filterBar', {
-        timeout: 15 * 1000,
-      });
     },
     async setAlertTags(tags: string[]) {
       for (let i = 0; i < tags.length; i += 1) {
