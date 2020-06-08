@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
 
 /*
  * Filters:
@@ -266,6 +265,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../common';
 
 /*
@@ -450,7 +450,7 @@ export {
 
 import { DataPublicPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataPublicPlugin(initializerContext);
 }
 
