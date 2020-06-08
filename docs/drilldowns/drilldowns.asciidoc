@@ -23,22 +23,21 @@ A panel can have multiple drilldowns.
 This example shows a dashboard panel that contains a pie chart.
 Typically, clicking a pie slice applies the current filter.
 When a panel has a drilldown, clicking a pie slice opens a menu with
-the default action and your drilldowns. See the <<drilldowns-example, Try it section>>
+the default action and your drilldowns. Refer to the <<drilldowns-example, Try it section>>
 for instructions on how to create this drilldown.
 
 [role="screenshot"]
 image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
 
 Third-party developers can create drilldowns.
-See https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples[this example plugin]
+Refer to https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples[this example plugin]
 to learn how to code drilldowns.
 
 [float]
 [[create-manage-drilldowns]]
 === Create and manage drilldowns
 
-To create and manage drilldowns, your dashboard must be in *Edit* mode.
-The panel menu will then include a *Create drilldown* action.
+Your dashboard must be in *Edit* mode to create a drilldown.
 Once a panel has at least one drilldown, the menu also includes a *Manage drilldowns* action
 for editing and deleting drilldowns.
 
@@ -56,7 +55,7 @@ This example shows how to create the *Host Overview* drilldown shown earlier in 
 
 . Add the <<get-data-in, sample web logs>> data set.
 
-. Create a new dashboard, called *Host Overview*, and include these visualizations
+. Create a new dashboard, called `Host Overview`, and include these visualizations
 from the sample data set:
 +
 [%hardbreaks]
@@ -94,11 +93,16 @@ Your input should look similar to this:
 [role="screenshot"]
 image::images/drilldown_create.png[Create drilldown with entries for drilldown name and destination]
 
+. Click *Create drilldown.*
+
 . Save the dashboard.
 +
 If you don’t save the drilldown, and then navigate away, the drilldown is lost.
 
-. In *[Logs] Visitors by OS*, click the `win 8` slice of the pie, and then click the name of your drilldown.
+. In *[Logs] Visitors by OS*, click the `win 8` slice of the pie, and then select the name of your drilldown.
++
+[role="screenshot"]
+image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to another dashboard]
 +
 You are navigated to your destination dashboard. Verify that the search query, filters,
 and time range are carried over.
