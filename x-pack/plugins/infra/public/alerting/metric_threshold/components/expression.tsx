@@ -179,7 +179,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
-      setAlertParams('groupBy', group || '');
+      setAlertParams('groupBy', group && group.length ? group : '');
     },
     [setAlertParams]
   );
@@ -556,9 +556,9 @@ export const Expressions: React.FC<Props> = (props) => {
               <EuiText>
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.tooManyBucketsError"
-                  defaultMessage="Too much data to preview. Please select a shorter preview length, or increase the amount of time in the {checkEvery} field."
+                  defaultMessage="Too much data to preview. Please select a shorter preview length, or increase the amount of time in the {forTheLast} field."
                   values={{
-                    checkEvery: <strong>check every</strong>,
+                    checkEvery: <strong>FOR THE LAST</strong>,
                   }}
                 />
               </EuiText>

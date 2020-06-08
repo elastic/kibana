@@ -57,7 +57,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
                 if (groupResult === TOO_MANY_BUCKETS_PREVIEW_EXCEPTION)
                   return { ...totals, tooManyBuckets: totals.tooManyBuckets + 1 };
                 if (groupResult === null) return { ...totals, noData: totals.noData + 1 };
-                if (groupResult === undefined) return { ...totals, error: totals.error + 1 };
+                if (isNaN(groupResult)) return { ...totals, error: totals.error + 1 };
                 return { ...totals, fired: totals.fired + groupResult };
               },
               {

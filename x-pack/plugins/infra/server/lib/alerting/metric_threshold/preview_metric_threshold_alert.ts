@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'lodash';
-import { TOO_MANY_BUCKETS_PREVIEW_EXCEPTION } from '../../../../common/alerting/metrics';
+import { first, zip } from 'lodash';
+import {
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
+  isTooManyBucketsPreviewException,
+} from '../../../../common/alerting/metrics';
 import { IScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { MetricExpressionParams } from './types';
 import { evaluateAlert } from './lib/evaluate_alert';
+
+const MAX_ITERATIONS = 50;
 
 interface PreviewMetricThresholdAlertParams {
   callCluster: IScopedClusterClient['callAsCurrentUser'];
@@ -22,13 +27,25 @@ interface PreviewMetricThresholdAlertParams {
   config: InfraSource['configuration'];
   lookback: 'h' | 'd' | 'w' | 'M';
   alertInterval: string;
+  end?: number;
+  overrideLookbackIntervalInSeconds?: number;
 }
 
 export const previewMetricThresholdAlert: (
-  params: PreviewMetricThresholdAlertParams
-) => Promise<
-  Array<number | null | undefined | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION>
-> = async ({ callCluster, params, config, lookback, alertInterval }) => {
+  params: PreviewMetricThresholdAlertParams,
+  iterations?: number
+) => Promise<Array<number | null | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION>> = async (
+  {
+    callCluster,
+    params,
+    config,
+    lookback,
+    alertInterval,
+    end = Date.now(),
+    overrideLookbackIntervalInSeconds,
+  },
+  iterations = 0
+) => {
   // There are three different "intervals" we're dealing with here, so to disambiguate:
   // - The lookback interval, which is how long of a period of time we want to examine to count
   //   how many times the alert fired
@@ -41,50 +58,106 @@ export const previewMetricThresholdAlert: (
   const bucketIntervalInSeconds = getIntervalInSeconds(bucketInterval);
 
   const lookbackInterval = `1${lookback}`;
-  const lookbackIntervalInSeconds = getIntervalInSeconds(lookbackInterval);
+  const lookbackIntervalInSeconds =
+    overrideLookbackIntervalInSeconds ?? getIntervalInSeconds(lookbackInterval);
 
-  const end = Date.now();
   const start = end - lookbackIntervalInSeconds * 1000;
   const timeframe = { start, end };
 
   // Get a date histogram using the bucket interval and the lookback interval
-  const alertResults = await evaluateAlert(callCluster, params, config, timeframe);
-  const groups = Object.keys(first(alertResults));
+  try {
+    const alertResults = await evaluateAlert(callCluster, params, config, timeframe);
+    const groups = Object.keys(first(alertResults));
 
-  // Now determine how to interpolate this histogram based on the alert interval
-  const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
-  const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
+    // Now determine how to interpolate this histogram based on the alert interval
+    const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
+    const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
+    const previewResults = await Promise.all(
+      groups.map(async (group) => {
+        const tooManyBuckets = alertResults.some((alertResult) =>
+          isTooManyBucketsPreviewException(alertResult[group])
+        );
+        if (tooManyBuckets) {
+          return TOO_MANY_BUCKETS_PREVIEW_EXCEPTION;
+        }
 
-  return groups.map((group) => {
-    const tooManyBuckets = alertResults.some((alertResult) => alertResult[group].tooManyBuckets);
-    if (tooManyBuckets) {
-      return TOO_MANY_BUCKETS_PREVIEW_EXCEPTION;
-    }
+        const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
+        if (isNoData) {
+          return null;
+        }
+        const isError = alertResults.some((alertResult) => alertResult[group].isError);
+        if (isError) {
+          return NaN;
+        }
 
-    const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
-    if (isNoData) {
-      return null;
-    }
-    const isError = alertResults.some((alertResult) => alertResult[group].isError);
-    if (isError) {
-      return undefined;
-    }
-
-    // Interpolate the buckets returned by evaluateAlert and return an array of how many of these
-    // buckets would have fired the alert. If the alert interval and bucket interval are the same,
-    // this will be a 1:1 evaluation of the alert results. If these are different, the interpolation
-    // will skip some buckets or read some buckets more than once, depending on the differential
-    const numberOfResultBuckets = first(alertResults)[group].shouldFire.length;
-    const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
-    return [...Array(numberOfExecutionBuckets)].reduce(
-      (totalFired, _, i) =>
-        totalFired +
-        (alertResults.every(
-          (alertResult) => alertResult[group].shouldFire[Math.floor(i * alertResultsPerExecution)]
-        )
-          ? 1
-          : 0),
-      0
+        // Interpolate the buckets returned by evaluateAlert and return a count of how many of these
+        // buckets would have fired the alert. If the alert interval and bucket interval are the same,
+        // this will be a 1:1 evaluation of the alert results. If these are different, the interpolation
+        // will skip some buckets or read some buckets more than once, depending on the differential
+        const numberOfResultBuckets = first(alertResults)[group].shouldFire.length;
+        const numberOfExecutionBuckets = Math.floor(
+          numberOfResultBuckets / alertResultsPerExecution
+        );
+        return [...Array(numberOfExecutionBuckets)].reduce(
+          (totalFired, _, i) =>
+            totalFired +
+            (alertResults.every(
+              (alertResult) =>
+                alertResult[group].shouldFire[Math.floor(i * alertResultsPerExecution)]
+            )
+              ? 1
+              : 0),
+          0
+        );
+      })
     );
-  });
+    return previewResults;
+  } catch (e) {
+    if (isTooManyBucketsPreviewException(e)) {
+      // If there's too much data on the first request, recursively slice the lookback interval
+      // until all the data can be retrieved
+      const { maxBuckets } = e;
+      const currentAlertResults = await evaluateAlert(callCluster, params, config);
+      // Try to get the number of groups in order to calculate max buckets. If this fails,
+      // just estimate based on 1 group
+      const numberOfGroups = Math.max(Object.keys(first(currentAlertResults)).length, 1);
+      const estimatedTotalBuckets =
+        (lookbackIntervalInSeconds / bucketIntervalInSeconds) * numberOfGroups;
+      // The minimum number of slices is 2. In case we underestimate the total number of buckets
+      // in the first iteration, we can bisect the remaining buckets on further recursions to get
+      // all the data needed
+      const slices = Math.max(Math.ceil(estimatedTotalBuckets / maxBuckets), 2);
+      const slicedLookback = Math.floor(lookbackIntervalInSeconds / slices);
+
+      // Bail out if it looks like this is going to take too long
+      if (slicedLookback <= 0 || iterations >= MAX_ITERATIONS || slices >= MAX_ITERATIONS)
+        return [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION];
+
+      const basePreviewParams = { callCluster, params, config, lookback, alertInterval };
+      const slicedRequests = [...Array(slices)].map((_, i) => {
+        return previewMetricThresholdAlert(
+          {
+            ...basePreviewParams,
+            end: Math.min(end, start + slicedLookback * (i + 1) * 1000),
+            overrideLookbackIntervalInSeconds: slicedLookback,
+          },
+          iterations + slices
+        );
+      });
+      const results = await Promise.all(slicedRequests);
+      const zippedResult = zip(...results).map((result) =>
+        result
+          // `undefined` values occur if there is no data at all in the resultB portion,
+          // and resultB returns an empty array. This is different from an error or no data state,
+          // so filter these results out entirely and only regard the resultA portion
+          .filter((value) => typeof value !== 'undefined')
+          .reduce((a, b) => {
+            if (typeof a !== 'number') return a;
+            if (typeof b !== 'number') return b;
+            return a + b;
+          })
+      );
+      return zippedResult;
+    } else throw e;
+  }
 };

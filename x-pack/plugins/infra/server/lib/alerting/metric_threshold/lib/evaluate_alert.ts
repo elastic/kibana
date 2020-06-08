@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues, first, last } from 'lodash';
-import { TOO_MANY_BUCKETS_PREVIEW_EXCEPTION } from '../../../../../common/alerting/metrics';
+import { mapValues, first, last, isNaN } from 'lodash';
+import {
+  TooManyBucketsPreviewExceptionMetadata,
+  isTooManyBucketsPreviewException,
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
+} from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/http_api/source_api';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
@@ -42,36 +46,34 @@ export const evaluateAlert = (
     filterQuery: string | undefined;
   };
   return Promise.all(
-    criteria.map((criterion) => {
-      return (async () => {
-        const currentValues = await getMetric(
-          callCluster,
-          criterion,
-          config.metricAlias,
-          config.fields.timestamp,
-          groupBy,
-          filterQuery,
-          timeframe
-        );
-        const { threshold, comparator } = criterion;
-        const comparisonFunction = comparatorMap[comparator];
-        return mapValues(
-          currentValues,
-          (values: number[] | null | undefined | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION) => {
-            return {
-              ...criterion,
-              metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-              currentValue: Array.isArray(values) ? last(values) : NaN,
-              shouldFire: Array.isArray(values)
-                ? values.map((value) => comparisonFunction(value, threshold))
-                : [false],
-              isNoData: values === null,
-              isError: values === undefined,
-              tooManyBuckets: values === TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
-            };
-          }
-        );
-      })();
+    criteria.map(async (criterion) => {
+      const currentValues = await getMetric(
+        callCluster,
+        criterion,
+        config.metricAlias,
+        config.fields.timestamp,
+        groupBy,
+        filterQuery,
+        timeframe
+      );
+      const { threshold, comparator } = criterion;
+      const comparisonFunction = comparatorMap[comparator];
+      return mapValues(
+        currentValues,
+        (values: number | number[] | null | TooManyBucketsPreviewExceptionMetadata) => {
+          if (isTooManyBucketsPreviewException(values)) throw values;
+          return {
+            ...criterion,
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            currentValue: Array.isArray(values) ? last(values) : NaN,
+            shouldFire: Array.isArray(values)
+              ? values.map((value) => comparisonFunction(value, threshold))
+              : [false],
+            isNoData: values === null,
+            isError: isNaN(values),
+          };
+        }
+      );
     })
   );
 };
@@ -94,16 +96,17 @@ const getMetric: (
   timeframe
 ) {
   const { aggType } = params;
+  const hasGroupBy = groupBy && groupBy.length;
   const searchBody = getElasticsearchMetricQuery(
     params,
     timefield,
-    groupBy,
+    hasGroupBy ? groupBy : undefined,
     filterQuery,
     timeframe
   );
 
   try {
-    if (groupBy) {
+    if (hasGroupBy) {
       const bucketSelector = (
         response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
       ) => response.aggregations?.groupings?.buckets || [];
@@ -138,10 +141,15 @@ const getMetric: (
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;
       if (causedByType === 'too_many_buckets_exception') {
-        return { '*': TOO_MANY_BUCKETS_PREVIEW_EXCEPTION };
+        return {
+          '*': {
+            [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
+            maxBuckets: e.body.error.caused_by.max_buckets,
+          },
+        };
       }
     }
-    return { '*': undefined }; // Trigger an Error state
+    return { '*': NaN }; // Trigger an Error state
   }
 };
 
@@ -165,7 +173,7 @@ const getValuesFromAggregations = (
     }
     return buckets.map((bucket) => bucket.aggregatedValue.value);
   } catch (e) {
-    return undefined; // Error state
+    return NaN; // Error state
   }
 };
 
