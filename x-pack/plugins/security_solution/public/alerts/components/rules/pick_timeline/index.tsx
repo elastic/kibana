@@ -39,6 +39,7 @@ export const PickTimeline = ({
       setTimelineId(id);
       setTimelineTitle(title);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field.value]);
 
   const handleOnTimelineChange = useCallback(
@@ -49,6 +50,7 @@ export const PickTimeline = ({
         field.setValue({ id, title });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [field]
   );
 
