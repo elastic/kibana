@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
-  const find = getService('find');
-  const log = getService('log');
   const retry = getService('retry');
 
   return {
@@ -42,10 +40,6 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
             .replace(/&nbsp;/g, '')
             .trim()
         );
-    },
-
-    async welcomeEndpointTitle() {
-      return await testSubjects.getVisibleText('welcomeTitle');
     },
 
     /**
@@ -119,36 +113,6 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
             .replace(/&nbsp;/g, '')
             .trim();
         });
-    },
-
-    async clickOnEuiCheckbox(euiCheckBoxTestId: string) {
-      const checkboxes = await find.allByCssSelector('.euiCheckbox');
-      const silentCatch = () => {};
-
-      log.debug(`Found ${checkboxes.length} EuiCheckbox's`);
-
-      for (const checkbox of checkboxes) {
-        log.debug('Checking EuiCheckBox');
-        const checkBoxInput: WebElementWrapper | void = await checkbox
-          .findByTestSubject(euiCheckBoxTestId)
-          .catch(silentCatch);
-        if (checkBoxInput !== undefined) {
-          log.debug(`Found EuiCheckBox with data-test-subj=${euiCheckBoxTestId}`);
-
-          const labelElement = await checkbox.findByCssSelector('.euiCheckbox__label');
-
-          // Want to ensure that the Click actually did an update - case the internals of
-          // EuiCheckbox change in the future
-          const beforeClickIsChecked = await checkBoxInput.isSelected();
-          await labelElement.click();
-          const afterClickIsChecked = await checkBoxInput.isSelected();
-          if (beforeClickIsChecked === afterClickIsChecked) {
-            throw new Error('click did not update checkbox!');
-          }
-          return checkbox;
-        }
-      }
-      throw new Error(`EuiCheckbox with data-test-subj of [${euiCheckBoxTestId}] not found!`);
     },
   };
 }
