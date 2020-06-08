@@ -10,4 +10,5 @@ import * as i18n from './translations';
 export const config: ExternalServiceConfiguration = {
   id: '.servicenow',
   name: i18n.NAME,
+  minimumLicenseRequired: 'platinum',
 };

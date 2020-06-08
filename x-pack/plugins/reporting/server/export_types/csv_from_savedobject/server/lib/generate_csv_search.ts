@@ -16,7 +16,12 @@ import {
   Filter,
   IIndexPattern,
   Query,
+  UI_SETTINGS,
 } from '../../../../../../../../src/plugins/data/server';
+import {
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+} from '../../../../../../../../src/plugins/share/server';
 import { CancellationToken } from '../../../../../common';
 import { LevelLogger } from '../../../../lib';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
@@ -32,9 +37,9 @@ import { getFilters } from './get_filters';
 
 const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
-    config.get('query:allowLeadingWildcards'),
-    config.get('query:queryString:options'),
-    config.get('courier:ignoreFilterIfFieldNotInIndex'),
+    config.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS),
+    config.get(UI_SETTINGS.QUERY_STRING_OPTIONS),
+    config.get(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX),
   ]);
   const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
   return {
@@ -45,7 +50,10 @@ const getEsQueryConfig = async (config: IUiSettingsClient) => {
 };
 
 const getUiSettings = async (config: IUiSettingsClient) => {
-  const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
+  const configs = await Promise.all([
+    config.get(CSV_SEPARATOR_SETTING),
+    config.get(CSV_QUOTE_VALUES_SETTING),
+  ]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };
 };
