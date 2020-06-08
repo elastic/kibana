@@ -20,14 +20,14 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiBadgeGroup,
+  EuiPageContent,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -36,7 +36,6 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
-import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -82,7 +81,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     indexPatternManagementStart,
     chrome,
   } = useKibana<IndexPatternManagmentContext>().services;
-  const [showFlyout, setShowFlyout] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
 
@@ -100,7 +98,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       );
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
-      setShowFlyout(gettedIndexPatterns.length === 0);
     })();
   }, [
     history.push,
@@ -157,30 +154,21 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   );
 
   return (
-    <EuiPanel
-      paddingSize="l"
-      data-test-subj="indexPatternTable"
-      role="region"
-      aria-label={ariaRegion}
-    >
-      {showFlyout && <CreateIndexPatternPrompt onClose={() => setShowFlyout(false)} />}
+    <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h2>{title}</h2>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconSize="l"
-                iconType="questionInCircle"
-                onClick={() => setShowFlyout(true)}
-                aria-label="Help"
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2>{title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="kbn.management.indexPatternTable.indexPatternExplanation"
+                defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
       </EuiFlexGroup>
@@ -195,7 +183,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         sorting={sorting}
         search={search}
       />
-    </EuiPanel>
+    </EuiPageContent>
   );
 };
 
