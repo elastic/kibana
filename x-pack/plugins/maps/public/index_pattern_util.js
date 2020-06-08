@@ -6,7 +6,7 @@
 
 import { getIndexPatternService, getIsGoldPlus } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
-import { ES_GEO_FIELD_TYPE } from '../common/constants';
+import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
@@ -36,6 +36,12 @@ export function getAggregatableGeoFieldTypes() {
     aggregatableFieldTypes.push(ES_GEO_FIELD_TYPE.GEO_SHAPE);
   }
   return aggregatableFieldTypes;
+}
+
+export function getGeoFields(fields) {
+  return fields.filter((field) => {
+    return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
+  });
 }
 
 export function getFieldsWithGeoTileAgg(fields) {

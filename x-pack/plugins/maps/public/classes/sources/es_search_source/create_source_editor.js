@@ -13,20 +13,10 @@ import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPES, SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ScalingForm } from './scaling_form';
-import { getTermsFields, supportsGeoTileAgg } from '../../../index_pattern_util';
-
-function getGeoFields(fields) {
-  return fields.filter((field) => {
-    return (
-      !indexPatterns.isNestedField(field) &&
-      [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type)
-    );
-  });
-}
+import { getGeoFields, getTermsFields, supportsGeoTileAgg } from '../../../index_pattern_util';
 
 function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
   return indexPattern ? supportsGeoTileAgg(indexPattern.fields.getByName(geoFieldName)) : false;
@@ -260,7 +250,7 @@ export class CreateSourceEditor extends Component {
                 defaultMessage: 'Select index pattern',
               }
             )}
-            fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
+            fieldTypes={ES_GEO_FIELD_TYPES}
             onNoIndexPatterns={this._onNoIndexPatterns}
           />
         </EuiFormRow>
