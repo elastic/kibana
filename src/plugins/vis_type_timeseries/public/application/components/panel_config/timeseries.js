@@ -97,7 +97,7 @@ class TimeseriesPanelConfigUi extends Component {
       {
         label: intl.formatMessage({
           id: 'visTypeTimeseries.timeseries.tooltipOptions.showFocused',
-          defaultMessage: 'Show single value',
+          defaultMessage: 'Show focused values',
         }),
         value: 'show_focused',
       },
