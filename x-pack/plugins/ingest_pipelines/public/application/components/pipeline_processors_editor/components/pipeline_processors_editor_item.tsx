@@ -10,17 +10,19 @@ import { i18n } from '@kbn/i18n';
 
 import { ProcessorInternal } from '../types';
 
+export interface Handlers {
+  onMove: () => void;
+  onCancelMove: () => void;
+  onAddOnFailure: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+}
+
 export interface Props {
   processor: ProcessorInternal;
   selected: boolean;
-  handlers: {
-    onMove: () => void;
-    onCancelMove: () => void;
-    onAddOnFailure: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
-    onDuplicate: () => void;
-  };
+  handlers: Handlers;
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(

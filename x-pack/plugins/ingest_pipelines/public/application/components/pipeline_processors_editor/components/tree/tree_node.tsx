@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiAccordion, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
-import { PipelineProcessorsEditorItem } from '../pipeline_processors_editor_item';
+import { PipelineProcessorsEditorItem, Handlers } from '../pipeline_processors_editor_item';
 
 import { PrivateTree, TreeMode, ProcessorInfo, PrivateOnActionHandler } from './tree';
 
@@ -32,7 +32,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   level,
 }) => {
   const stringSelector = processorInfo.selector.join('.');
-  const handlers = useMemo(() => {
+  const handlers = useMemo((): Handlers => {
     return {
       onMove: () => {
         privateOnAction({ type: 'selectToMove', payload: processorInfo });
