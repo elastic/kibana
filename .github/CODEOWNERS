@@ -37,6 +37,7 @@
 /examples/url_generators_examples/ @elastic/kibana-app-arch
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
+/packages/elastic-datemath/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
@@ -139,6 +140,7 @@
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
@@ -225,12 +227,12 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem
 
-# SIEM
-/x-pack/plugins/siem/ @elastic/siem @elastic/endpoint-app-team
+# Security Solution
+/x-pack/plugins/security_solution/ @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
-/x-pack/test/api_integration/apis/siem @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/security_solution @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
 
 # Security Intelligence And Analytics
-/x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
+/x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

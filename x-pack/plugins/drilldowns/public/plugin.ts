@@ -6,18 +6,18 @@
 
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
+import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/public';
 import { createFlyoutManageDrilldowns } from './components/connected_flyout_manage_drilldowns';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface SetupDependencies {
   uiActions: UiActionsSetup;
-  advancedUiActions: AdvancedUiActionsSetup;
+  uiActionsEnhanced: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   uiActions: UiActionsStart;
-  advancedUiActions: AdvancedUiActionsStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
 // eslint-disable-next-line
@@ -36,7 +36,7 @@ export class DrilldownsPlugin
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
     return {
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
-        advancedUiActions: plugins.advancedUiActions,
+        uiActionsEnhanced: plugins.uiActionsEnhanced,
         storage: new Storage(localStorage),
         notifications: core.notifications,
       }),

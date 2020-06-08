@@ -20,6 +20,8 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { VisualizationsPlugin } from './plugin';
 
+export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
