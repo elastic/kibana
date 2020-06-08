@@ -929,7 +929,9 @@ function discoverController(
   };
 
   $scope.resetQuery = function () {
-    history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    history.push(
+      $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
+    );
     $route.reload();
   };
 

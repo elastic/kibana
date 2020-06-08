@@ -18,6 +18,7 @@
  */
 
 import Fs from 'fs';
+import { resolve } from 'path';
 import { promisify } from 'util';
 
 import { importApi } from './server/routes/api/import';
@@ -41,8 +42,7 @@ export default function (kibana) {
     },
 
     uiExports: {
-      links: [],
-
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       uiSettingDefaults: getUiSettingDefaults(),
     },
 
