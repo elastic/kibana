@@ -9,6 +9,7 @@
  * Do not make direct changes to the file.
  */
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 export interface components {
   schemas: {
     AgentConfig: components['schemas']['NewAgentConfig'] & {
