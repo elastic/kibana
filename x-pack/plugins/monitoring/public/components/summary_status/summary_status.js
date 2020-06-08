@@ -11,9 +11,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './summary_status.scss';
 
 const wrapChild = ({ label, value, ...props }, index) => (
-  <EuiFlexItem key={`summary-status-item-${index}`} grow={false} {...props}>
+  <EuiFlexItem
+    className="monSummaryStatusNoWrap__flexItem"
+    key={`summary-status-item-${index}`}
+    grow={false}
+    {...props}
+  >
     <EuiStat title={value} titleSize="xs" textAlign="left" description={label ? `${label}` : ''} />
   </EuiFlexItem>
 );
