@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
   EmbeddableContext,
@@ -50,7 +51,9 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
   constructor(private readonly params: Params) {}
 
   public getDisplayName() {
-    return 'View in Discover';
+    return i18n.translate('xpack.discover.FlyoutCreateDrilldownAction.displayName', {
+      defaultMessage: 'Explore underlying data',
+    });
   }
 
   public getIconType() {
