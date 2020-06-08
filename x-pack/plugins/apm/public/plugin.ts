@@ -75,7 +75,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     core.application.register({
       id: 'apm',
       title: 'APM',
-      order: 8100,
+      order: 8300,
       euiIconType: 'apmApp',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
