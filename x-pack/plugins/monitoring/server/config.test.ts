@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createConfig, configSchema } from './config';
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
+  readFileSync: jest.fn().mockImplementation((path: string) => `contents-of-${path}`),
+}));
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -131,27 +135,30 @@ describe('createConfig()', () => {
     expect(config.ui.elasticsearch.hosts).toEqual(['http://localhost:9200']);
   });
 
-  it('should attempt to read ssl files', async () => {
-    let error;
-    try {
-      createConfig(
-        configSchema.validate({
-          ui: {
-            elasticsearch: {
-              hosts: 'http://localhost:9200',
-              ssl: {
-                certificate: 'packages/kbn-dev-utils/certs/elasticsearch.crt',
-                key: 'packages/kbn-dev-utils/certs/elasticsearch.key',
-                certificateAuthorities: 'packages/kbn-dev-utils/certs/ca.crt',
-                verificationMode: 'full',
-              },
-            },
+  it('should attempt to read PEM files', async () => {
+    const ssl = {
+      certificate: 'packages/kbn-dev-utils/certs/elasticsearch.crt',
+      key: 'packages/kbn-dev-utils/certs/elasticsearch.key',
+      certificateAuthorities: 'packages/kbn-dev-utils/certs/ca.crt',
+    };
+    const config = createConfig(
+      configSchema.validate({
+        elasticsearch: {
+          ssl,
+        },
+        ui: {
+          elasticsearch: {
+            ssl,
           },
-        })
-      );
-    } catch (err) {
-      error = err.message;
-    }
-    expect(error.includes('no such file or directory')).toBe(true);
+        },
+      })
+    );
+    const expected = expect.objectContaining({
+      certificate: 'contents-of-packages/kbn-dev-utils/certs/elasticsearch.crt',
+      key: 'contents-of-packages/kbn-dev-utils/certs/elasticsearch.key',
+      certificateAuthorities: ['contents-of-packages/kbn-dev-utils/certs/ca.crt'],
+    });
+    expect(config.elasticsearch.ssl).toEqual(expected);
+    expect(config.ui.elasticsearch.ssl).toEqual(expected);
   });
 });
