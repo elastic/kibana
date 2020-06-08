@@ -52,7 +52,6 @@ describe('alert monitor status component', () => {
             }
             data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
             defaultKuery="monitor.id: foo"
-            shouldUpdateUrl={false}
             updateDefaultKuery={[Function]}
           />
           <EuiSpacer

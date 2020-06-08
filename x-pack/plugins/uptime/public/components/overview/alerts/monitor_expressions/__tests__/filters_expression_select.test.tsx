@@ -22,6 +22,8 @@ describe('filters expression select component', () => {
           tags: [],
         }}
         setAlertParams={jest.fn()}
+        setUpdatedFieldValues={jest.fn()}
+        shouldUpdateUrl={false}
       />
     );
     expect(component).toMatchInlineSnapshot(`
@@ -46,6 +48,8 @@ describe('filters expression select component', () => {
           locations: [],
         }}
         setAlertParams={jest.fn()}
+        setUpdatedFieldValues={jest.fn()}
+        shouldUpdateUrl={false}
       />
     );
     expect(component).toMatchInlineSnapshot(`
@@ -111,6 +115,8 @@ describe('filters expression select component', () => {
           locations: [],
         }}
         setAlertParams={jest.fn()}
+        setUpdatedFieldValues={jest.fn()}
+        shouldUpdateUrl={false}
       />
     );
     expect(component).toMatchInlineSnapshot(`
