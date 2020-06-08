@@ -19,6 +19,7 @@ import { APMRequestHandlerContext } from '../../routes/typings';
 import { getESClient } from './es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
+import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 
 function decodeUiFilters(
   indexPattern: IIndexPattern | undefined,
@@ -36,6 +37,7 @@ function decodeUiFilters(
 export interface Setup {
   client: ESClient;
   internalClient: ESClient;
+  ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
   dynamicIndexPattern?: IIndexPattern;
@@ -93,6 +95,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     internalClient: getESClient(context, request, {
       clientAsInternalUser: true,
     }),
+    ml: getMlSetup(context, request),
     config,
     dynamicIndexPattern,
   };
@@ -103,4 +106,26 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     ...('uiFilters' in query ? { uiFiltersES } : {}),
     ...coreSetupRequest,
   } as InferSetup<TParams>;
+}
+
+function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
+  if (!context.plugins.ml) {
+    return;
+  }
+  const ml = context.plugins.ml;
+  const mlClient = ml.mlClient.asScoped(request).callAsCurrentUser;
+  return {
+    ...ml.mlSystemProvider(mlClient, request),
+    mlClient,
+    /**
+     * https://www.elastic.co/guide/en/elasticsearch/reference/7.x/ml-get-job.html#ml-get-job-desc
+     * @param {string | string[]} [jobId] - job id, group name, or a wildcard, returns all jobs if nothing passed in
+     */
+    mlJobs: async (
+      jobId?: string | string[]
+    ): Promise<AnomalyDetectionJob[]> => {
+      const mlJobsResponse = await mlClient('ml.jobs', { jobId });
+      return mlJobsResponse.jobs;
+    },
+  };
 }

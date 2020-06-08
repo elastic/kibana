@@ -116,6 +116,14 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   }
 );
 
+const ANOMALY_DETECTION_NO_DATA_TEXT = i18n.translate(
+  'xpack.apm.serviceMap.anomalyDetectionPopoverNoData',
+  {
+    defaultMessage:
+      'No anomaly score found with the current filters. See details in the anomaly explorer:',
+  }
+);
+
 export function Contents({
   selectedNodeData,
   isService,
@@ -124,21 +132,19 @@ export function Contents({
   selectedNodeServiceName,
 }: ContentsProps) {
   // Anomaly Detection
-  const severity = selectedNodeData.severity;
-  const maxScore = selectedNodeData.max_score;
+  const anomalySeverity = selectedNodeData.anomaly_severity;
+  const anomalyScore = selectedNodeData.anomaly_score;
   const actualValue = selectedNodeData.actual_value;
   const typicalValue = selectedNodeData.typical_value;
-  const jobId = selectedNodeData.job_id;
-  const hasAnomalyDetection = [
-    severity,
-    maxScore,
-    actualValue,
-    typicalValue,
-    jobId,
-  ].every((value) => value !== undefined);
-  const anomalyDescription = hasAnomalyDetection
-    ? getMetricChangeDescription(actualValue, typicalValue).message
-    : null;
+  const mlJobId = selectedNodeData.ml_job_id;
+  const hasAnomalyDetectionScore =
+    anomalySeverity !== undefined && anomalyScore !== undefined;
+  const anomalyDescription =
+    hasAnomalyDetectionScore &&
+    actualValue !== undefined &&
+    typicalValue !== undefined
+      ? getMetricChangeDescription(actualValue, typicalValue).message
+      : null;
 
   return (
     <FlexColumnGroup
@@ -154,49 +160,45 @@ export function Contents({
       </FlexColumnItem>
       {isService && (
         <FlexColumnItem>
-          {hasAnomalyDetection ? (
-            <>
-              <section>
-                <HealthStatusTitle size="xxs">
-                  <h3>{ANOMALY_DETECTION_TITLE}</h3>
-                </HealthStatusTitle>
-                &nbsp;
-                <EuiIconTip
-                  type="iInCircle"
-                  content={ANOMALY_DETECTION_TOOLTIP}
-                />
-              </section>
-              <ContentLine>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <VerticallyCentered>
-                      <EuiHealth color={getSeverityColor(severity)} />
-                      <SubduedText>
-                        {ANOMALY_DETECTION_SCORE_METRIC}
-                      </SubduedText>
-                    </VerticallyCentered>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <div>
-                      {asInteger(maxScore)}
-                      <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
-                    </div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </ContentLine>
-              <ContentLine>
-                <MLJobLink external jobId={jobId}>
-                  {ANOMALY_DETECTION_LINK}
-                </MLJobLink>
-              </ContentLine>
-            </>
-          ) : (
-            <>
-              <HealthStatusTitle size="xxs">
-                <h3>{ANOMALY_DETECTION_TITLE}</h3>
-              </HealthStatusTitle>
+          <section>
+            <HealthStatusTitle size="xxs">
+              <h3>{ANOMALY_DETECTION_TITLE}</h3>
+            </HealthStatusTitle>
+            &nbsp;
+            <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_TOOLTIP} />
+            {!mlJobId && (
               <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>
-            </>
+            )}
+          </section>
+          {hasAnomalyDetectionScore && (
+            <ContentLine>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <VerticallyCentered>
+                    <EuiHealth color={getSeverityColor(anomalySeverity)} />
+                    <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
+                  </VerticallyCentered>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div>
+                    {asInteger(anomalyScore)}
+                    {anomalyDescription && (
+                      <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
+                    )}
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </ContentLine>
+          )}
+          {mlJobId && !hasAnomalyDetectionScore && (
+            <EnableText>{ANOMALY_DETECTION_NO_DATA_TEXT}</EnableText>
+          )}
+          {mlJobId && (
+            <ContentLine>
+              <MLJobLink external jobId={mlJobId}>
+                {ANOMALY_DETECTION_LINK}
+              </MLJobLink>
+            </ContentLine>
           )}
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>

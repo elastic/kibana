@@ -13,7 +13,7 @@ import {
 import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
 
-export const getSeverityColor = (nodeSeverity: string) => {
+export const getSeverityColor = (nodeSeverity?: string) => {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.euiColorVis0;
@@ -27,24 +27,29 @@ export const getSeverityColor = (nodeSeverity: string) => {
   }
 };
 
-const getBorderColor = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = el.data('severity');
-  const severityColor = getSeverityColor(nodeSeverity);
-  if (severityColor) {
-    return severityColor;
+const getBorderColor: cytoscape.Css.MapperFunction<
+  cytoscape.NodeSingular,
+  string
+> = (el: cytoscape.NodeSingular) => {
+  const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
+  const nodeSeverity = el.data('anomaly_severity');
+  if (hasAnomalyDetectionJob) {
+    return (
+      getSeverityColor(nodeSeverity) ||
+      (getSeverityColor(severity.warning) as string)
+    );
   }
   if (el.hasClass('primary') || el.selected()) {
     return theme.euiColorPrimary;
-  } else {
-    return theme.euiColorMediumShade;
   }
+  return theme.euiColorMediumShade;
 };
 
 const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.NodeSingular,
   cytoscape.Css.LineStyle
 > = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = el.data('severity');
+  const nodeSeverity = el.data('anomaly_severity');
   if (nodeSeverity === severity.critical) {
     return 'double';
   } else {
@@ -53,7 +58,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
 };
 
 const getBorderWidth = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = el.data('severity');
+  const nodeSeverity = el.data('anomaly_severity');
 
   if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
     return 4;
@@ -183,7 +188,7 @@ const style: cytoscape.Stylesheet[] = [
   // actually "hidden"
   {
     selector: 'edge[isInverseEdge]',
-    style: { visibility: 'hidden' },
+    style: { visibility: 'none' },
   },
   {
     selector: 'edge.nodeHover',
