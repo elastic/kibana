@@ -32,6 +32,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
         });
         setIsInitializing(false);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
     useEffect(() => {
       if (pageName && !deepEqual(route.pathName, pathname)) {
@@ -81,6 +82,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           });
         }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
     return null;
   }
