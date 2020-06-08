@@ -17,30 +17,15 @@
  * under the License.
  */
 
-export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
-export { ScopedHistory } from './scoped_history';
-export {
-  App,
-  AppBase,
-  AppMount,
-  AppMountDeprecated,
-  AppUnmount,
-  AppMountContext,
-  AppMountParameters,
-  AppStatus,
-  AppNavLinkStatus,
-  AppUpdatableFields,
-  AppUpdater,
-  ApplicationSetup,
-  ApplicationStart,
-  AppLeaveHandler,
-  AppLeaveActionType,
-  AppLeaveAction,
-  AppLeaveDefaultAction,
-  AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationSetup,
-  InternalApplicationStart,
-  LegacyApp,
-} from './types';
+import { CoreApp } from './core_app';
+
+type CoreAppContract = PublicMethodsOf<CoreApp>;
+const createMock = (): jest.Mocked<CoreAppContract> => ({
+  setup: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+});
+
+export const coreAppMock = {
+  create: createMock,
+};

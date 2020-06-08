@@ -131,6 +131,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [URLMeaningfulParts](./kibana-plugin-core-public.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [URL\_MAX\_LENGTH](./kibana-plugin-core-public.url_max_length.md) | The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters cause URL to exceed this limit. |
+
 ## Type Aliases
 
 |  Type Alias | Description |

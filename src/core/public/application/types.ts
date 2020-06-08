@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { History } from 'history';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -722,6 +723,12 @@ export interface InternalApplicationStart
 
   // Internal APIs
   getComponent(): JSX.Element | null;
+
+  /**
+   * The global history instance, exposed only to Core. Undefined when rendering a legacy application.
+   * @internal
+   */
+  history: History<unknown> | undefined;
 }
 
 /** @internal */
