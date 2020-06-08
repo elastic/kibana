@@ -29,7 +29,7 @@ const { doStart } = embeddablePluginMock.createInstance();
 const start = doStart();
 const getFactory = start.getEmbeddableFactory;
 const applicationMock = applicationServiceMock.createStartContract();
-const stateTransferMock = embeddablePluginMock.createStartContract().stateTransfer;
+const stateTransferMock = embeddablePluginMock.createStartContract().getStateTransfer();
 
 class EditableEmbeddable extends Embeddable {
   public readonly type = 'EDITABLE_EMBEDDABLE';

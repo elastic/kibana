@@ -28,7 +28,6 @@ export interface DashboardViewportProps {
   container: DashboardContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   renderEmpty?: () => React.ReactNode;
-  stateTransfer?: EmbeddableStart['stateTransfer'];
 }
 
 interface State {
@@ -145,11 +144,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             toggleChrome={!isEmbeddedExternally}
           />
         )}
-        <DashboardGrid
-          container={container}
-          PanelComponent={PanelComponent}
-          stateTransfer={this.props.stateTransfer}
-        />
+        <DashboardGrid container={container} PanelComponent={PanelComponent} />
       </div>
     );
   }

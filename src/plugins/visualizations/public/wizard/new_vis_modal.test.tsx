@@ -147,7 +147,7 @@ describe('NewVisModal', () => {
     it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
-      const stateTransfer = embeddablePluginMock.createStartContract().stateTransfer;
+      const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}

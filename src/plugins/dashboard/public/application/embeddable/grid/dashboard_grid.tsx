@@ -117,7 +117,6 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
-  stateTransfer?: EmbeddableStart['stateTransfer'];
 }
 
 interface State {

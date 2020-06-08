@@ -42,6 +42,7 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
+import { EmbeddableStateTransfer } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -61,7 +62,7 @@ interface Props {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
-  stateTransfer?: EmbeddableStart['stateTransfer'];
+  stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
 }
 

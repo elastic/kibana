@@ -24,7 +24,7 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable, EmbeddableOriginatingAppState } from '../..';
+import { IEmbeddable, EmbeddableOriginatingAppState, EmbeddableStateTransfer } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -47,7 +47,7 @@ export class EditPanelAction implements Action<ActionContext> {
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
     private readonly application: ApplicationStart,
-    private readonly stateTransfer?: EmbeddableStart['stateTransfer']
+    private readonly stateTransfer?: EmbeddableStateTransfer
   ) {
     if (this.application?.currentAppId$) {
       this.application.currentAppId$

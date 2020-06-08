@@ -28,7 +28,7 @@ import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
-import { EmbeddableStart } from '../../../embeddable/public';
+import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 
 interface TypeSelectionProps {
@@ -42,7 +42,7 @@ interface TypeSelectionProps {
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
-  stateTransfer?: EmbeddableStart['stateTransfer'];
+  stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
 }
 

@@ -98,7 +98,7 @@ const createStartContract = (): Start => {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
+    getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
   };
   return startContract;
 };
