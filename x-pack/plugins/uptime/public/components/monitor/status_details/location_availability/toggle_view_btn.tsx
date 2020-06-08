@@ -8,6 +8,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import { EuiButtonGroup } from '@elastic/eui';
 import { useSelectedView } from './use_selected_view';
+import { ChangeToListView, ChangeToMapView, ToggleMapListView } from '../translations';
 
 const ToggleViewButtons = styled.span`
   margin-left: auto;
@@ -21,17 +22,19 @@ export const ToggleViewBtn = ({ onChange }: Props) => {
   const toggleButtons = [
     {
       id: `listBtn`,
-      label: 'Bold',
-      name: 'bold',
+      label: ChangeToMapView,
+      name: 'listView',
       iconType: 'list',
       'data-test-subj': 'uptimeMonitorToggleListBtn',
+      'aria-label': ChangeToMapView,
     },
     {
       id: `mapBtn`,
-      label: 'Italic',
-      name: 'italic',
+      label: ChangeToListView,
+      name: 'mapView',
       iconType: 'mapMarker',
       'data-test-subj': 'uptimeMonitorToggleMapBtn',
+      'aria-label': ChangeToListView,
     },
   ];
 

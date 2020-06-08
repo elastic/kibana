@@ -57,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays the overall availability', async () => {
-      await monitor().displayOverallAvailability();
+      await monitor().displayOverallAvailability('100.00%');
     });
 
     it('can change the view to map', async () => {

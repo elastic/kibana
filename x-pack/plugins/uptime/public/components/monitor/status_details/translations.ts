@@ -66,3 +66,24 @@ export const MonitoringFrom = i18n.translate(
     defaultMessage: 'Monitoring from',
   }
 );
+
+export const ToggleMapListView = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.toggleListToMap',
+  {
+    defaultMessage: 'Toggle between list and map view for location availability.',
+  }
+);
+
+export const ChangeToMapView = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.listToMap',
+  {
+    defaultMessage: 'Change to map view to check availability by location.',
+  }
+);
+
+export const ChangeToListView = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.listToMap',
+  {
+    defaultMessage: 'Change to list view to check availability by location.',
+  }
+);

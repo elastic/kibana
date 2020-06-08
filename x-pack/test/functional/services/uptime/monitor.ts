@@ -18,11 +18,11 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
         timeout: 3000,
       });
     },
-    async displayOverallAvailability() {
+    async displayOverallAvailability(availabilityVal: string) {
       return retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('uptimeOverallAvailability');
         const availability = await testSubjects.getVisibleText('uptimeOverallAvailability');
-        expect(availability).to.be('100.00%');
+        expect(availability).to.be(availabilityVal);
       });
     },
     async locationMapIsRendered() {
