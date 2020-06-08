@@ -1,14 +1,17 @@
 [role="xpack"]
 [[uptime-alerting]]
 
-== Uptime alerting
+=== Uptime alerting
 
 The Uptime app integrates with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions]
 feature. It provides a set of built-in actions and Uptime specific threshold alerts for you to use
-and enables central management of all alerts from <<management, Kibana Management>>.
+and enables central management of all alerts from {kibana-ref}/management.html[Kibana Management].
+
+[role="screenshot"]
+image::images/create-alert.png[Create alert]
 
 [float]
-=== Monitor status alerts
+==== Monitor status alerts
 
 To receive alerts when a monitor goes down, use the alerting menu at the top of the 
 overview page. Use a query in the alert flyout to determine which monitors to check
@@ -16,10 +19,10 @@ with your alert. If you already have a query in the overview page search bar it 
 be carried over into this box.
 
 [role="screenshot"]
-image::uptime/images/monitor-status-alert-flyout.png[Create monitor status alert flyout]
+image::images/monitor-status-alert.png[Create monitor status alert flyout]
 
 [float]
-=== TLS alerts
+==== TLS alerts
 
 Uptime also provides the ability to create an alert that will notify you when one or
 more of your monitors have a TLS certificate that will expire within some threshold,
@@ -27,4 +30,4 @@ or when its age exceeds a limit. The values for these thresholds are configurabl
 the <<uptime-settings, Settings page>>.
 
 [role="screenshot"]
-image::uptime/images/tls-alert-flyout.png[Create TLS alert flyout]
+image::images/tls-alert.png[Create TLS alert flyout]
