@@ -43,8 +43,10 @@ async function handleEndpointExceptionDownload(context, req, res) {
     });
     if (resp.total > 0) {
       const artifact = resp.saved_objects[0];
+      const outBuffer = Buffer.from(artifact.attributes.body, 'binary');
+
       return res.ok({
-        body: Buffer.from(artifact.attributes.body),
+        body: outBuffer,
         headers: {
           'content-encoding': 'xz',
           'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,

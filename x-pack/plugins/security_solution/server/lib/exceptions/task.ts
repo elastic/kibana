@@ -76,7 +76,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           sha256: sha256Hash,
           encoding: 'xz',
           created: Date.now(),
-          body: compressedExceptions.toString(),
+          body: compressedExceptions.toString('binary'),
           size: Buffer.from(JSON.stringify(exceptions)).byteLength,
         };
 
