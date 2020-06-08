@@ -59,3 +59,10 @@ export const OverallAvailability = i18n.translate(
     defaultMessage: 'Overall availability',
   }
 );
+
+export const MonitoringFrom = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom',
+  {
+    defaultMessage: 'Monitoring from',
+  }
+);

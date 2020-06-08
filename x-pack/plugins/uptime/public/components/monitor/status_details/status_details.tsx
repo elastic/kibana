@@ -7,7 +7,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import { LocationMap } from './location_map';
+import { LocationAvailability } from './location_availability/location_availability';
 import { UptimeRefreshContext } from '../../../contexts';
 import { MonitorLocations } from '../../../../common/runtime_types';
 import { MonitorStatusBar } from './status_bar';
@@ -20,9 +20,6 @@ const WrapFlexItem = styled(EuiFlexItem)`
   &&& {
     @media (max-width: 768px) {
       width: 100%;
-    }
-    @media (max-width: 1042px) {
-      // flex-basis: 520px;
     }
   }
 `;
@@ -57,7 +54,7 @@ export const MonitorStatusDetailsComponent = ({ monitorLocations }: MonitorStatu
           <MonitorStatusBar />
         </EuiFlexItem>
         <WrapFlexItem grow={1}>
-          <LocationMap monitorLocations={monitorLocations} />
+          <LocationAvailability monitorLocations={monitorLocations} />
         </WrapFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
