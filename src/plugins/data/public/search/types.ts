@@ -18,14 +18,12 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { SearchParams } from 'elasticsearch';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
-import { SearchRequest } from './fetch';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -86,9 +84,6 @@ export interface ISearchStart {
   searchSource: {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
-  };
-  searchParams: {
-    createFromRequest: (searchRequest: SearchRequest) => SearchParams;
   };
   __LEGACY: ISearchStartLegacy;
 }

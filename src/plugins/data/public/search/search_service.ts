@@ -40,7 +40,6 @@ import {
 } from './aggs';
 import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './i_search';
-import { getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
@@ -171,13 +170,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
-      },
-      searchParams: {
-        createFromRequest: (searchRequest: SearchRequest) =>
-          getSearchParamsFromRequest(searchRequest, {
-            injectedMetadata: core.injectedMetadata,
-            uiSettings: core.uiSettings,
-          }),
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an intercepror have a destroy method?

@@ -19,9 +19,16 @@
 
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DataPublicPluginStart, SearchRequest } from '../../../data/public';
+import { CoreStart, IUiSettingsClient } from 'kibana/public';
+import {
+  getSearchParamsFromRequest,
+  SearchRequest,
+  DataPublicPluginStart,
+} from '../../../data/public';
 
 export interface SearchAPIDependencies {
+  uiSettings: IUiSettingsClient;
+  injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
 }
 
@@ -32,11 +39,14 @@ export class SearchAPI {
   ) {}
 
   search(searchRequests: SearchRequest[]) {
-    const { search, searchParams } = this.dependencies.search;
+    const { search } = this.dependencies.search;
 
     return combineLatest(
       searchRequests.map((request, index) => {
-        const params = searchParams.createFromRequest(request);
+        const params = getSearchParamsFromRequest(request, {
+          uiSettings: this.dependencies.uiSettings,
+          injectedMetadata: this.dependencies.injectedMetadata,
+        });
 
         return search({ params }, { signal: this.abortSignal }).pipe(
           map((data) => ({

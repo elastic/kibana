@@ -278,9 +278,6 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
         },
       },
       "search": [MockFunction],
-      "searchParams": Object {
-        "createFromRequest": [MockFunction],
-      },
       "searchSource": Object {
         "create": [MockFunction],
         "createEmpty": [MockFunction],

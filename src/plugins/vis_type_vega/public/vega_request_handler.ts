@@ -26,7 +26,7 @@ import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
-import { getData } from './services';
+import { getData, getInjectedMetadata } from './services';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -50,7 +50,14 @@ export function createVegaRequestHandler(
     visParams,
   }: VegaRequestHandlerParams) {
     if (!searchAPI) {
-      searchAPI = new SearchAPI({ search: getData().search }, abortSignal);
+      searchAPI = new SearchAPI(
+        {
+          uiSettings,
+          search: getData().search,
+          injectedMetadata: getInjectedMetadata(),
+        },
+        abortSignal
+      );
     }
 
     timeCache.setTimeRange(timeRange);

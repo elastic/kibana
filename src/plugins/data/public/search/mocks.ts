@@ -31,9 +31,6 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   aggs: searchAggsStartMock(),
   setInterceptor: jest.fn(),
   search: jest.fn(),
-  searchParams: {
-    createFromRequest: jest.fn(),
-  },
   searchSource: searchSourceMock,
   __LEGACY: {
     esClient: {
