@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe.skip('host list', function () {
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
@@ -77,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(tableData).to.eql(expectedData);
     });
 
-    it('no details flyout when host page displayed', async () => {
+    it('no details flyout when endpoint page displayed', async () => {
       await testSubjects.missingOrFail('hostDetailsFlyout');
     });
 
@@ -125,7 +125,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.load('endpoint/metadata/api_feature');
       });
       it('displays no items found when empty', async () => {
-        // get the host list table data and verify message
+        // get the endpoint list table data and verify message
         const [, [noItemsFoundMessage]] = await pageObjects.endpoint.getEndpointAppTableData(
           'hostListTable'
         );
