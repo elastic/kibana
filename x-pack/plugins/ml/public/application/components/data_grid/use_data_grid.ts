@@ -20,6 +20,7 @@ import {
   OnSort,
   UseDataGridReturnType,
 } from './types';
+import { ChartData } from './use_column_chart';
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -33,6 +34,7 @@ export const useDataGrid = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
   const [rowCount, setRowCount] = useState(0);
+  const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
@@ -87,6 +89,7 @@ export const useDataGrid = (
   );
 
   return {
+    columnCharts,
     errorMessage,
     invalidSortingColumnns,
     noDataMessage,
@@ -96,6 +99,7 @@ export const useDataGrid = (
     pagination,
     resetPagination,
     rowCount,
+    setColumnCharts,
     setErrorMessage,
     setNoDataMessage,
     setPagination,

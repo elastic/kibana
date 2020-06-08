@@ -13,6 +13,8 @@ import { Dictionary } from '../../../../common/types/common';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
 
+import { ChartData } from './use_column_chart';
+
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
 
@@ -54,6 +56,7 @@ export interface SearchResponse7 extends SearchResponse<any> {
 export interface UseIndexDataReturnType
   extends Pick<
     UseDataGridReturnType,
+    | 'columnCharts'
     | 'errorMessage'
     | 'invalidSortingColumnns'
     | 'noDataMessage'
@@ -74,6 +77,7 @@ export interface UseIndexDataReturnType
 }
 
 export interface UseDataGridReturnType {
+  columnCharts: ChartData[];
   errorMessage: string;
   invalidSortingColumnns: ColumnId[];
   noDataMessage: string;
@@ -83,6 +87,7 @@ export interface UseDataGridReturnType {
   pagination: IndexPagination;
   resetPagination: () => void;
   rowCount: number;
+  setColumnCharts: Dispatch<SetStateAction<ChartData[]>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;
   setPagination: Dispatch<SetStateAction<IndexPagination>>;

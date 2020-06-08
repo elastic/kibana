@@ -15,7 +15,7 @@ const mlDataGridChartRowClassName = `${mlDataGridChartClassName}Row`;
 
 type RefValue = HTMLElement | null;
 
-export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPatternTitle: string) {
+export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: any) {
   const [histogramVisible, setHistogramVisible] = useState(false);
 
   const toggleHistogramVisibility = () => {
@@ -36,6 +36,10 @@ export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPat
         chartRow = chartRows[0];
         if (!histogramVisible) {
           chartRow.remove();
+          const columnHeaders = tBody.getElementsByClassName('euiDataGridHeaderCell');
+          for (let i = 0; i < columnHeaders.length; i++) {
+            columnHeaders[i].classList.remove('mlDataGridHeaderCell--paddingChart');
+          }
           return;
         }
       } else if (histogramVisible) {
@@ -43,11 +47,14 @@ export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPat
         chartRow.classList.add(mlDataGridChartRowClassName);
         chartRow.classList.add('euiDataGridRow');
         tBody.insertBefore(chartRow, tBody.childNodes[0]);
+
+        const columnHeaders = tBody.getElementsByClassName('euiDataGridHeaderCell');
+        for (let i = 0; i < columnHeaders.length; i++) {
+          columnHeaders[i].classList.add('mlDataGridHeaderCell--paddingChart');
+        }
       } else {
         return;
       }
-
-      const query = { match_all: {} };
 
       ReactDOM.render(
         <>
@@ -57,14 +64,7 @@ export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPat
               className={`${mlDataGridChartClassName} ${mlDataGridChartClassName}-${i}`}
               style={{ width: `${d.initialWidth}px` }}
             >
-              {!d.isExpandable && (
-                <ColumnChart
-                  indexPatternTitle={indexPatternTitle}
-                  columnType={d}
-                  query={query}
-                  api={api}
-                />
-              )}
+              {!d.isExpandable && <ColumnChart chartData={chartsData[i]} columnType={d} />}
             </div>
           ))}
         </>,

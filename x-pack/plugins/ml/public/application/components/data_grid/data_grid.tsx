@@ -32,6 +32,8 @@ import { UseIndexDataReturnType } from './types';
 // import { hoveredRow$ } from './column_chart';
 import { useColumnCharts } from './use_column_charts';
 
+import './data_grid.scss';
+
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
     <span>{title}</span>
@@ -58,6 +60,7 @@ type Props = PropsWithHeader | PropsWithoutHeader;
 export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
+      columnCharts,
       columns,
       dataTestSubj,
       errorMessage,
@@ -75,11 +78,6 @@ export const DataGrid: FC<Props> = memo(
       tableItems: data,
       toastNotifications,
       visibleColumns,
-      // TODO move mini charts data fetching to outer hook
-      // @ts-ignore
-      api,
-      // @ts-ignore
-      indexPatternTitle,
     } = props;
 
     const {
@@ -89,8 +87,7 @@ export const DataGrid: FC<Props> = memo(
       toggleHistogramVisibility,
     } = useColumnCharts(
       columns.filter((c) => visibleColumns.includes(c.id)),
-      api,
-      indexPatternTitle
+      columnCharts
     );
 
     // TODO Fix row hovering + bar highlighting

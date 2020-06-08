@@ -1,11 +1,11 @@
 .mlDataGridChart {
-  border-left: solid 1px #D3DAE6;
-  border-right: solid 1px #D3DAE6;
-  background-color: #f5f7fa;
+  border-left: solid 1px $euiColorLightShade;
+  border-right: solid 1px $euiColorLightShade;
+  background-color: $euiColorLightestShade;
 }
 
 .mlDataGridChart + .mlDataGridChart {
-  border-left: solid 0px #D3DAE6;
+  border-left: solid 0px $euiColorLightShade;
 }
 
 .mlDataGridChart__histogram {
@@ -14,6 +14,18 @@
 }
 
 .mlDataGridChart__legend {
-    display: block;
-    overflow: hidden;
+  color: $euiColorMediumShade;
+  display: block;
+  overflow: hidden;
+  margin: $euiSizeXS $euiSizeXS 0px $euiSizeXS;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-style: italic;
+  line-height: 1;
+  text-align: left;
+}
+
+.mlDataGridChart__legend--numeric {
+  text-align: right;
 }

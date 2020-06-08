@@ -7,32 +7,26 @@
 import React, { FC } from 'react';
 
 import { BarSeries, Chart, Settings } from '@elastic/charts';
-import { EuiText } from '@elastic/eui';
-
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
 
-import { useColumnChart } from './use_column_chart';
+import {
+  isNumericChartData,
+  isOrdinalChartData,
+  useColumnChart,
+  ChartData,
+} from './use_column_chart';
 
 export const mlDataGridChartClassName = 'mlDataGridChart';
 
 interface Props {
-  indexPatternTitle: string;
-  columnType: any;
-  query: any;
-  api: any;
+  chartData: ChartData;
+  columnType: EuiDataGridColumn;
 }
 
-export const ColumnChart: FC<Props> = ({ indexPatternTitle, columnType, query, api }) => {
-  const {
-    cardinality,
-    coloredData,
-    fieldType,
-    stats,
-    xScaleType,
-    MAX_CHART_COLUMNS,
-  } = useColumnChart(indexPatternTitle, columnType, query, api);
+export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
+  const { coloredData, xScaleType, MAX_CHART_COLUMNS } = useColumnChart(chartData, columnType);
 
   if (coloredData.length === 0) {
     return null;
@@ -71,31 +65,25 @@ export const ColumnChart: FC<Props> = ({ indexPatternTitle, columnType, query, a
           />
         </Chart>
       </div>
-      <div className="mlDataGridChart__legend">
-        <EuiText
-          size="xs"
-          color="subdued"
-          style={{
-            marginLeft: '4px',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <i>
-            {(fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) &&
-              cardinality === 1 &&
-              `${cardinality} category`}
-            {(fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) &&
-              cardinality > MAX_CHART_COLUMNS &&
-              `top ${MAX_CHART_COLUMNS} of ${cardinality} categories`}
-            {(fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) &&
-              cardinality <= MAX_CHART_COLUMNS &&
-              cardinality > 1 &&
-              `${cardinality} categories`}
-            {(fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) &&
-              `${Math.round(stats[0] * 100) / 100} - ${Math.round(stats[1] * 100) / 100}`}
-          </i>
-        </EuiText>
+      <div
+        className={`mlDataGridChart__legend${
+          isNumericChartData(chartData) ? ' mlDataGridChart__legend--numeric' : ''
+        }`}
+      >
+        {isOrdinalChartData(chartData) &&
+          chartData.cardinality === 1 &&
+          `${chartData.cardinality} category`}
+        {isOrdinalChartData(chartData) &&
+          chartData.cardinality > MAX_CHART_COLUMNS &&
+          `top ${MAX_CHART_COLUMNS} of ${chartData.cardinality} categories`}
+        {isOrdinalChartData(chartData) &&
+          chartData.cardinality <= MAX_CHART_COLUMNS &&
+          chartData.cardinality > 1 &&
+          `${chartData.cardinality} categories`}
+        {isNumericChartData(chartData) &&
+          `${Math.round(chartData.stats[0] * 100) / 100} - ${
+            Math.round(chartData.stats[1] * 100) / 100
+          }`}
       </div>
     </>
   );

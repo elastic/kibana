@@ -5,22 +5,15 @@
  */
 
 import moment from 'moment';
-import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { useObservable } from 'react-use';
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
-
-interface DataItem {
-  key: string;
-  x: string | number;
-  y: number;
-}
 
 const BAR_COLOR = euiPaletteColorBlind()[0];
 const BAR_COLOR_BLUR = euiPaletteColorBlind(2)[10];
@@ -41,22 +34,10 @@ const getXScaleType = (
   }
 };
 
-export const useColumnChart = (
-  indexPatternTitle: string,
-  columnType: any,
-  query: any,
-  api: any
-) => {
-  const [cardinality, setCardinality] = useState(0);
-  const [data, setData] = useState<DataItem[]>([]);
-  const [interval, setInterval] = useState(0);
-  const [stats, setStats] = useState([0, 0]);
-
-  const hoveredRow = useObservable(hoveredRow$);
-
+const getFieldType = (schema: EuiDataGridColumn['schema']) => {
   let fieldType: KBN_FIELD_TYPES;
 
-  switch (columnType.schema) {
+  switch (schema) {
     case 'datetime':
       fieldType = KBN_FIELD_TYPES.DATE;
       break;
@@ -72,6 +53,17 @@ export const useColumnChart = (
     default:
       fieldType = KBN_FIELD_TYPES.STRING;
   }
+
+  return fieldType;
+};
+
+export const fetchChartData = async (
+  indexPatternTitle: string,
+  api: any,
+  query: any,
+  columnType: any
+): Promise<ChartData> => {
+  const fieldType = getFieldType(columnType.schema);
 
   const fetchCardinality = async () => {
     try {
@@ -90,7 +82,7 @@ export const useColumnChart = (
           size: 0,
         },
       });
-      setCardinality(resp.aggregations.categories.value);
+      return resp.aggregations.categories.value;
     } catch (e) {
       throw new Error(e);
     }
@@ -114,7 +106,7 @@ export const useColumnChart = (
         },
       });
 
-      setStats([respStats.aggregations.min_max.min, respStats.aggregations.min_max.max]);
+      const stats = [respStats.aggregations.min_max.min, respStats.aggregations.min_max.max];
 
       const delta = respStats.aggregations.min_max.max - respStats.aggregations.min_max.min;
 
@@ -127,7 +119,6 @@ export const useColumnChart = (
       if (delta <= 1) {
         aggInterval = delta / MAX_CHART_COLUMNS;
       }
-      setInterval(aggInterval);
 
       const resp: any = await api.esSearch({
         index: indexPatternTitle,
@@ -146,11 +137,16 @@ export const useColumnChart = (
         },
       });
 
-      setData(resp.aggregations.chart.buckets);
+      return {
+        data: resp.aggregations.chart.buckets,
+        interval: aggInterval,
+        stats,
+      };
     } catch (e) {
       throw new Error(e);
     }
   };
+
   const fetchChartTermsData = async () => {
     try {
       const resp: any = await api.esSearch({
@@ -169,49 +165,94 @@ export const useColumnChart = (
           size: 0,
         },
       });
-      setData(resp.aggregations.chart.buckets);
+      return resp.aggregations.chart.buckets;
     } catch (e) {
       throw new Error(e);
     }
   };
 
-  useEffect(() => {
-    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-      fetchChartHistogramData();
-    }
-    if (
-      fieldType === KBN_FIELD_TYPES.STRING ||
-      fieldType === KBN_FIELD_TYPES.IP ||
-      fieldType === KBN_FIELD_TYPES.BOOLEAN
-    ) {
-      fetchCardinality();
-      fetchChartTermsData();
-    }
-  }, [JSON.stringify(query)]);
+  if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+    return (await fetchChartHistogramData()) as NumericChartData;
+  }
+  if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+    // TODO query in parallel
+    const cardinality = await fetchCardinality();
+    const terms = await fetchChartTermsData();
+    return { cardinality, data: terms } as OrdinalChartData;
+  }
+
+  throw new Error('Invalid fieldType');
+};
+
+interface NumericDataItem {
+  key: number;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+interface NumericChartData {
+  data: NumericDataItem[];
+  interval: number;
+  stats: [number, number];
+}
+
+export const isNumericChartData = (arg: any): arg is NumericChartData => {
+  return (
+    arg.hasOwnProperty('data') && arg.hasOwnProperty('interval') && arg.hasOwnProperty('stats')
+  );
+};
+
+interface OrdinalDataItem {
+  key: string;
+  doc_count: number;
+}
+
+interface OrdinalChartData {
+  cardinality: number;
+  data: OrdinalDataItem[];
+}
+
+export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
+  return arg.hasOwnProperty('data') && arg.hasOwnProperty('cardinality');
+};
+
+type ChartDataItem = NumericDataItem | OrdinalDataItem;
+export type ChartData = NumericChartData | OrdinalChartData;
+
+export const useColumnChart = (chartData: ChartData, columnType: EuiDataGridColumn) => {
+  const fieldType = getFieldType(columnType.schema);
+
+  const hoveredRow = useObservable(hoveredRow$);
 
   const xScaleType = getXScaleType(fieldType);
 
-  const getColor = (d: DataItem) => {
+  const getColor = (d: ChartDataItem) => {
     if (hoveredRow === undefined || hoveredRow === null) {
       return BAR_COLOR;
     }
 
-    if (xScaleType === 'ordinal' && hoveredRow._source[columnType.id] === d.key) {
-      return BAR_COLOR;
-    }
-
     if (
-      xScaleType === 'linear' &&
-      hoveredRow._source[columnType.id] >= +d.key &&
-      hoveredRow._source[columnType.id] < +d.key + interval
+      isOrdinalChartData(chartData) &&
+      xScaleType === 'ordinal' &&
+      hoveredRow._source[columnType.id] === d.key
     ) {
       return BAR_COLOR;
     }
 
     if (
+      isNumericChartData(chartData) &&
+      xScaleType === 'linear' &&
+      hoveredRow._source[columnType.id] >= +d.key &&
+      hoveredRow._source[columnType.id] < +d.key + chartData.interval
+    ) {
+      return BAR_COLOR;
+    }
+
+    if (
+      isNumericChartData(chartData) &&
       xScaleType === 'time' &&
       moment(hoveredRow._source[columnType.id]).unix() * 1000 >= +d.key &&
-      moment(hoveredRow._source[columnType.id]).unix() * 1000 < +d.key + interval
+      moment(hoveredRow._source[columnType.id]).unix() * 1000 < +d.key + chartData.interval
     ) {
       return BAR_COLOR;
     }
@@ -219,7 +260,27 @@ export const useColumnChart = (
     return BAR_COLOR_BLUR;
   };
 
-  const coloredData = data.map((d) => ({ ...d, color: getColor(d) }));
-
-  return { cardinality, coloredData, fieldType, stats, xScaleType, MAX_CHART_COLUMNS };
+  // The if/else if/else is a work-around because `.map()` doesn't work with union types.
+  // See TS Caveats for details: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-3.html#caveats
+  if (isOrdinalChartData(chartData)) {
+    const coloredData = chartData.data.map((d: ChartDataItem) => ({ ...d, color: getColor(d) }));
+    return {
+      cardinality: chartData.cardinality,
+      coloredData,
+      fieldType,
+      xScaleType,
+      MAX_CHART_COLUMNS,
+    };
+  } else if (isNumericChartData(chartData)) {
+    const coloredData = chartData.data.map((d: ChartDataItem) => ({ ...d, color: getColor(d) }));
+    return {
+      coloredData,
+      fieldType,
+      stats: chartData.stats,
+      xScaleType,
+      MAX_CHART_COLUMNS,
+    };
+  } else {
+    throw new Error('invalid chart data.');
+  }
 };

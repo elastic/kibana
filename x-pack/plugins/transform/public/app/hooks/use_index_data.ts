@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 
 import {
+  fetchChartData,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   getErrorMessage,
@@ -47,6 +48,7 @@ export const useIndexData = (
   const {
     pagination,
     resetPagination,
+    setColumnCharts,
     setErrorMessage,
     setRowCount,
     setStatus,
@@ -61,7 +63,7 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
-  const getIndexData = async function () {
+  const fetchDataGridData = async function () {
     setErrorMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
@@ -92,14 +94,36 @@ export const useIndexData = (
     } catch (e) {
       setErrorMessage(getErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);
+      return;
     }
   };
 
+  const fetchColumnChartsData = async function () {
+    const fetchers = dataGrid.visibleColumns.map((vc) => {
+      const columnType = columns.find((c) => c.id === vc);
+      return fetchChartData(
+        indexPattern.title,
+        api,
+        isDefaultQuery(query) ? matchAllQuery : query,
+        columnType
+      );
+    });
+
+    const data = await Promise.all(fetchers);
+    setColumnCharts(data);
+  };
+
   useEffect(() => {
-    getIndexData();
+    fetchDataGridData();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
+
+  useEffect(() => {
+    fetchColumnChartsData();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPattern.title, JSON.stringify([query, dataGrid.visibleColumns])]);
 
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
 
