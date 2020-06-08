@@ -79,6 +79,11 @@ export type PivotAggDict = {
   [key in AggName]: PivotAgg;
 };
 
+/**
+ * The maximum level of sub-aggregations
+ */
+export const MAX_NESTING_SUB_AGGS = 2;
+
 // The internal representation of an aggregation definition.
 export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;

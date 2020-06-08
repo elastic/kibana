@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButtonIcon,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiSpacer,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
 import {
   AggName,
@@ -27,9 +19,7 @@ import {
 
 import { PopoverForm } from './popover_form';
 import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
-import { DropDown } from '../aggregation_dropdown';
-import { AggListForm } from './list_form';
-import { PivotConfigurationContext } from '../pivot_configuration/pivot_configuration';
+import { SubAggsSection } from './sub_aggs_section';
 
 interface Props {
   item: PivotAggsConfig;
@@ -37,7 +27,6 @@ interface Props {
   options: PivotAggsConfigWithUiSupportDict;
   deleteHandler(l: AggName): void;
   onChange(item: PivotAggsConfig): void;
-  aggOptions: EuiComboBoxOptionOption[];
 }
 
 export const AggLabelForm: React.FC<Props> = ({
@@ -46,39 +35,15 @@ export const AggLabelForm: React.FC<Props> = ({
   otherAggNames,
   onChange,
   options,
-  aggOptions,
 }) => {
   const [isPopoverVisible, setPopoverVisibility] = useState(
     isPivotAggsWithExtendedForm(item) && !item.isValid()
   );
 
-  const { actions } = useContext(PivotConfigurationContext)!;
-
   function update(updateItem: PivotAggsConfig) {
     onChange({ ...updateItem });
     setPopoverVisibility(false);
   }
-
-  const addSubAggHandler = useCallback(
-    (d: EuiComboBoxOptionOption[]) => {
-      actions.addSubAggregation(item, d);
-    },
-    [actions, item]
-  );
-
-  const updateSubAggHandler = useCallback(
-    (prevSubItemName: string, subItem: PivotAggsConfig) => {
-      actions.updateSubAggregation(prevSubItemName, subItem);
-    },
-    [actions]
-  );
-
-  const deleteSubAggHandler = useCallback(
-    (subAggName: string) => {
-      actions.deleteSubAggregation(item, subAggName);
-    },
-    [actions, item]
-  );
 
   const helperText = isPivotAggsWithExtendedForm(item) && item.helperText && item.helperText();
 
@@ -145,31 +110,7 @@ export const AggLabelForm: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isSubAggSupported && (
-        <>
-          <EuiSpacer size="m" />
-          {item.subAggs && (
-            <AggListForm
-              aggOptions={aggOptions}
-              onChange={updateSubAggHandler}
-              deleteHandler={deleteSubAggHandler}
-              list={item.subAggs}
-              options={options}
-            />
-          )}
-          <DropDown
-            changeHandler={addSubAggHandler}
-            options={aggOptions}
-            placeholder={i18n.translate(
-              'xpack.transform.stepDefineForm.subAggregationsPlaceholder',
-              {
-                defaultMessage: 'Add a sub-aggregation ...',
-              }
-            )}
-            testSubj="transformSubAggregationSelection"
-          />
-        </>
-      )}
+      {isSubAggSupported && <SubAggsSection item={item} />}
     </>
   );
 };

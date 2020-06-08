@@ -16,14 +16,11 @@ import { GroupByListForm } from '../group_by_list';
 import { StepDefineFormHook } from '../step_define';
 
 export const PivotConfigurationContext = createContext<
-  { actions: StepDefineFormHook['pivotConfig']['actions'] } | undefined
+  StepDefineFormHook['pivotConfig'] | undefined
 >(undefined);
 
 export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
-  ({
-    actions,
-    state: { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData },
-  }) => {
+  ({ actions, state }) => {
     const {
       addAggregation,
       addGroupBy,
@@ -33,8 +30,17 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
       updateGroupBy,
     } = actions;
 
+    const {
+      aggList,
+      aggOptions,
+      aggOptionsData,
+      groupByList,
+      groupByOptions,
+      groupByOptionsData,
+    } = state;
+
     return (
-      <PivotConfigurationContext.Provider value={{ actions }}>
+      <PivotConfigurationContext.Provider value={{ actions, state }}>
         <EuiFormRow
           fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
@@ -71,7 +77,6 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
               options={aggOptionsData}
               onChange={updateAggregation}
               deleteHandler={deleteAggregation}
-              aggOptions={aggOptions}
             />
             <DropDown
               changeHandler={addAggregation}
