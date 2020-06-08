@@ -8,7 +8,8 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
   void setUp() {
     super.setUp()
 
-    slackNotifications = loadScript("vars/slackNotifications.groovy")
+    helper.registerAllowedMethod('slackSend', [Map.class], null)
+    slackNotifications = loadScript('vars/slackNotifications.groovy')
   }
 
   @Test
@@ -32,9 +33,9 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
     def args = fnMock('slackSend').args[0]
 
     def expected = [
-      channel: "#kibana-operations-alerts",
-      username: "Kibana Operations",
-      iconEmoji: ":jenkins:",
+      channel: '#kibana-operations-alerts',
+      username: 'Kibana Operations',
+      iconEmoji: ':jenkins:',
       color: 'danger',
       message: ':broken_heart: elastic / kibana # master #1',
     ]

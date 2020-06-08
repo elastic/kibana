@@ -3,5 +3,6 @@
 ## Running tests
 
 ```bash
+cd .ci/pipeline-library
 ./gradlew test
 ```

@@ -6,8 +6,8 @@ class KibanaBasePipelineTest extends BasePipelineTest {
   Map params = [:]
 
   public def Mocks = [
-    TEST_FAILURE_URL: "https://localhost/",
-    TEST_FAILURE_NAME: "Kibana Pipeline / kibana-xpack-agent / Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/fake/test·ts.Fake test <Component> should & pass &",
+    TEST_FAILURE_URL: 'https://localhost/',
+    TEST_FAILURE_NAME: 'Kibana Pipeline / kibana-xpack-agent / Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/fake/test·ts.Fake test <Component> should & pass &',
   ]
 
   @Before
@@ -28,7 +28,7 @@ class KibanaBasePipelineTest extends BasePipelineTest {
 
     props([
       buildUtils: [
-        getBuildStatus: { "SUCCESS" },
+        getBuildStatus: { 'SUCCESS' },
         printStacktrace: { ex -> print ex },
       ],
       jenkinsApi: [ getFailedSteps: { [] } ],
@@ -40,11 +40,15 @@ class KibanaBasePipelineTest extends BasePipelineTest {
       params: params,
     ])
 
-    ['withGithubCredentials'].each {
+    // Some wrappers that can just be mocked to immediately call the closure passed in
+    [
+      'catchError',
+      'catchErrors',
+      'timestamps',
+      'withGithubCredentials',
+    ].each {
       helper.registerAllowedMethod(it, [Closure.class], null)
     }
-
-    helper.registerAllowedMethod('slackSend', [Map.class], null)
   }
 
   void props(Map properties) {
@@ -74,17 +78,17 @@ class KibanaBasePipelineTest extends BasePipelineTest {
   void mockFailureBuild() {
     props([
       buildUtils: [
-        getBuildStatus: { "FAILURE" },
+        getBuildStatus: { 'FAILURE' },
         printStacktrace: { ex -> print ex },
       ],
       jenkinsApi: [ getFailedSteps: { [
         [
-          displayName: "Check out from version control",
-          logs: "http://jenkins.localhost:8080",
+          displayName: 'Check out from version control',
+          logs: 'http://jenkins.localhost:8080',
         ],
         [
-          displayName: "Execute test task",
-          logs: "http://jenkins.localhost:8080",
+          displayName: 'Execute test task',
+          logs: 'http://jenkins.localhost:8080',
         ],
       ] } ],
       testUtils: [
