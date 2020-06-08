@@ -118,7 +118,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   };
 
   const { originatingApp } =
-    embeddable.stateTransfer.getIncomingOriginatingApp(scopedHistory()) || {};
+    embeddable.getStateTransfer(scopedHistory()).getIncomingOriginatingApp() || {};
   $scope.getOriginatingApp = () => originatingApp;
 
   const visStateToEditorState = () => {
@@ -680,12 +680,11 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               history.replace(appPath);
               setActiveUrl(appPath);
               if (newlyCreated && embeddable) {
-                embeddable.stateTransfer.navigateToWithEmbeddablePackage(
-                  $scope.getOriginatingApp(),
-                  {
+                embeddable
+                  .getStateTransfer()
+                  .navigateToWithEmbeddablePackage($scope.getOriginatingApp(), {
                     state: { id: savedVis.id, type: VISUALIZE_EMBEDDABLE_TYPE },
-                  }
-                );
+                  });
               } else {
                 application.navigateToApp($scope.getOriginatingApp());
               }

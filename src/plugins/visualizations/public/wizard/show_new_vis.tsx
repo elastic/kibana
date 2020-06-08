@@ -69,7 +69,7 @@ export function showNewVisModal({
         isOpen={true}
         onClose={handleClose}
         originatingApp={originatingApp}
-        stateTransfer={getEmbeddable().stateTransfer}
+        stateTransfer={getEmbeddable().getStateTransfer()}
         outsideVisualizeApp={outsideVisualizeApp}
         editorParams={editorParams}
         visTypesRegistry={getTypes()}

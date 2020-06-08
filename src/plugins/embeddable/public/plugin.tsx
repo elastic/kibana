@@ -20,7 +20,13 @@ import React from 'react';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ScopedHistory,
+} from '../../../core/public';
 import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
 import { bootstrap } from './bootstrap';
 import {
@@ -61,7 +67,7 @@ export interface EmbeddableStart {
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
-  stateTransfer: EmbeddableStateTransfer;
+  getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
 }
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -71,7 +77,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   > = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
-  private stateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
+  private outgoingOnlyStateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -103,11 +109,17 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     });
-    this.stateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+
+    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
-      stateTransfer: this.stateTransfer,
+      getStateTransfer: (history?: ScopedHistory) => {
+        return history
+          ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
+          : this.outgoingOnlyStateTransfer;
+      },
       EmbeddablePanel: ({
         embeddable,
         hideHeader,
@@ -120,7 +132,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           embeddable={embeddable}
           getActions={uiActions.getTriggerCompatibleActions}
           getEmbeddableFactory={this.getEmbeddableFactory}
-          stateTransfer={this.stateTransfer}
+          stateTransfer={this.outgoingOnlyStateTransfer}
           getAllEmbeddableFactories={this.getEmbeddableFactories}
           overlays={core.overlays}
           notifications={core.notifications}

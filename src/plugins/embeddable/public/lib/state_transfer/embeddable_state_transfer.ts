@@ -33,7 +33,10 @@ import {
  * @public
  */
 export class EmbeddableStateTransfer {
-  constructor(private navigateToApp: ApplicationStart['navigateToApp']) {}
+  constructor(
+    private navigateToApp: ApplicationStart['navigateToApp'],
+    private scopedHistory?: ScopedHistory
+  ) {}
 
   /**
    * Fetches an {@link EmbeddableOriginatingAppState | originating app} argument from the scoped
@@ -43,11 +46,9 @@ export class EmbeddableStateTransfer {
    * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
    */
   public getIncomingOriginatingApp(
-    history: ScopedHistory,
     removeAfterFetch: boolean = false
   ): EmbeddableOriginatingAppState | undefined {
     return this.getIncomingState<EmbeddableOriginatingAppState>(
-      history,
       isEmbeddableOriginatingAppState,
       removeAfterFetch
     );
@@ -61,11 +62,9 @@ export class EmbeddableStateTransfer {
    * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
    */
   public getIncomingEmbeddablePackage(
-    history: ScopedHistory,
     removeAfterFetch: boolean = false
   ): EmbeddablePackageState | undefined {
     return this.getIncomingState<EmbeddablePackageState>(
-      history,
       isEmbeddablePackageState,
       removeAfterFetch
     );
@@ -94,18 +93,20 @@ export class EmbeddableStateTransfer {
   }
 
   private getIncomingState<IncomingStateType>(
-    history: ScopedHistory,
     guard: (state: unknown) => state is IncomingStateType,
     removeAfterFetch: boolean = false
   ): IncomingStateType | undefined {
-    const incomingState = history?.location?.state;
+    if (!this.scopedHistory) {
+      throw new TypeError('ScopedHistory is required to fetch incoming state');
+    }
+    const incomingState = this.scopedHistory.location?.state;
     const castState =
       !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
     if (castState && removeAfterFetch) {
       Object.keys(castState).forEach((key: string) => {
-        delete (history.location.state as { [key: string]: unknown })[key];
+        delete (this.scopedHistory!.location.state as { [key: string]: unknown })[key];
       });
-      history.push(history.location);
+      this.scopedHistory.push(this.scopedHistory.location);
     }
     return castState;
   }

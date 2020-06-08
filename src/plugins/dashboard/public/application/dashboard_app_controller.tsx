@@ -426,10 +426,9 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            const incomingState = embeddable.stateTransfer.getIncomingEmbeddablePackage(
-              scopedHistory(),
-              true
-            );
+            const incomingState = embeddable
+              .getStateTransfer(scopedHistory())
+              .getIncomingEmbeddablePackage();
             if (incomingState) {
               container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
                 savedObjectId: incomingState.id,
