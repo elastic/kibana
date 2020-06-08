@@ -40,7 +40,9 @@ export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void 
       <JsonEditor
         value={value}
         onUpdate={(v) => setValue(v.data.raw)}
-        data-test-subj={'dashboardEmbeddableByValueInputEditor'}
+        euiCodeEditorProps={{
+          'data-test-subj': 'dashboardEmbeddableByValueInputEditor',
+        }}
       />
       <EuiButton
         onClick={() => props.onSubmit(JSON.parse(value))}
