@@ -364,7 +364,7 @@ export const exampleFindRuleStatusResponse: (
   saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingSystemMock.createLogger();
+export const mockLogger: ReturnType<typeof loggingServiceMock.createLogger> = loggingServiceMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

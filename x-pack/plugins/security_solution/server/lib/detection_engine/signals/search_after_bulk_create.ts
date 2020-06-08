@@ -143,16 +143,15 @@ export const searchAfterAndBulkCreate = async ({
         //  but there is a gap of one minute, then the number of rule executions missed
         // due to the gap are (6 minutes - 5 minutes) / 5 minutes = 0.2 * MAX_SIGNALS = 20 signals allowed.
         // this is to keep our ratio of MAX_SIGNALS : rule intervals equivalent.
-        const gapDiffInSeconds = calculatedFromAsMoment.diff(
+        const gapDiffInUnits = calculatedFromAsMoment.diff(
           dateMath.parse(ruleParams.from),
           shorthandMap[unit].momentString as moment.DurationInputArg2
         );
-        const normalDiffInSeconds = calculatedNowAsMoment.diff(
+        const normalDiffInUnits = calculatedNowAsMoment.diff(
           dateMath.parse(ruleParams.from),
           shorthandMap[unit].momentString as moment.DurationInputArg2
         );
-        const ratio = Math.abs(gapDiffInSeconds / normalDiffInSeconds);
-
+        const ratio = Math.abs(gapDiffInUnits / normalDiffInUnits);
         // maxCatchup is to ensure we are not trying to catch up too far back.
         // This allows for a maximum of 4 consecutive rule execution misses
         // to be included in the number of signals generated.

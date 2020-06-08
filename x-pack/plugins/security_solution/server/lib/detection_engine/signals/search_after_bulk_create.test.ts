@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import {
   sampleRuleAlertParams,
   sampleEmptyDocSearchResults,
@@ -110,6 +111,8 @@ describe('searchAfterAndBulkCreate', () => {
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -135,6 +138,114 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.callCluster).toHaveBeenCalledTimes(8);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  test('should return success with number of searches less than max signals with gap', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      });
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleParams: sampleParams,
+      gap: moment.duration(2, 'm'),
+      previousStartedAt: moment().subtract(10, 'm').toDate(),
+      listClient,
+      exceptionsList: [
+        {
+          field: 'source.ip',
+          values_operator: 'included',
+          values_type: 'list',
+          values: [
+            {
+              id: 'ci-badguys.txt',
+              name: 'ip',
+            },
+          ],
+        },
+      ],
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(8);
+    expect(createdSignalsCount).toEqual(4);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+    const maxResults = parseInt(mockLogger.debug.mock.calls[0][0].toString().split(' ')[2], 10);
+    expect(maxResults).toBeGreaterThan(30);
   });
 
   test('should return success when no search results are in the allowlist', async () => {
@@ -184,6 +295,8 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -255,6 +368,8 @@ describe('searchAfterAndBulkCreate', () => {
     );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
       listClient,
       exceptionsList: [],
       services: mockService,
@@ -302,6 +417,8 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
+      gap: null,
+      previousStartedAt: new Date(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -354,6 +471,8 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
+      gap: null,
+      previousStartedAt: new Date(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -422,6 +541,8 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient,
       exceptionsList: [exceptionItem],
+      gap: null,
+      previousStartedAt: new Date(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
