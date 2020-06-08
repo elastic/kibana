@@ -17,5 +17,12 @@
  * under the License.
  */
 
-import './error_url_overflow';
-export { UrlOverflowService } from '../../../../plugins/kibana_legacy/public';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../src/plugins/data/public';
+
+export interface DemoDataSearchSetupDependencies {
+  data: DataPublicPluginSetup;
+}
+
+export interface DemoDataSearchStartDependencies {
+  data: DataPublicPluginStart;
+}
