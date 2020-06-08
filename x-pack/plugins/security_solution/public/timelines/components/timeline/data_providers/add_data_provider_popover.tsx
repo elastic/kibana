@@ -76,13 +76,15 @@ const AddDataProviderPopoverComponent: React.FC<{
           icon: <EuiIcon type="search" size="m" />,
           panel: 1,
         },
-        {
-          disabled: timelineType !== TimelineType.template,
-          name: 'Add Template Field',
-          icon: <EuiIcon type="search" size="m" />,
-          panel: 2,
-        },
-      ],
+        timelineType === TimelineType.template
+          ? {
+              disabled: timelineType !== TimelineType.template,
+              name: 'Add Template Field',
+              icon: <EuiIcon type="search" size="m" />,
+              panel: 2,
+            }
+          : null,
+      ].filter((item) => item !== null),
     },
     {
       id: 1,

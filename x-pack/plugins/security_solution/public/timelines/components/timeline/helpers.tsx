@@ -75,7 +75,12 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       const flatDataProviders = [dataProvider, ...dataProvider.and];
       const activeDataProviders = flatDataProviders.filter(
         (flatDataProvider) =>
-          flatDataProvider.enabled && flatDataProvider.type !== DataProviderType.template
+          flatDataProvider.enabled &&
+          // don't include template data providers using IS_OPERATOR to global query
+          !(
+            flatDataProvider.type === DataProviderType.template &&
+            flatDataProvider.queryMatch.operator === IS_OPERATOR
+          )
       );
 
       if (!activeDataProviders.length) return queries;

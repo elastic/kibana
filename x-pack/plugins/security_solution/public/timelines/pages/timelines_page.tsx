@@ -9,8 +9,6 @@ import ApolloClient from 'apollo-client';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { disableTemplate } from '../../../common/constants';
-
 import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
@@ -69,19 +67,13 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
                 />
               )}
             </EuiFlexItem>
-            {/**
-             * CreateTemplateTimelineBtn
-             * Remove the comment here to enable CreateTemplateTimelineBtn
-             */}
-            {!disableTemplate && (
-              <EuiFlexItem>
-                <NewTemplateTimeline
-                  outline={true}
-                  title={NEW_TEMPLATE_TIMELINE}
-                  data-test-subj="create-template-btn"
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <NewTemplateTimeline
+                outline={true}
+                title={NEW_TEMPLATE_TIMELINE}
+                data-test-subj="create-template-btn"
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>
 

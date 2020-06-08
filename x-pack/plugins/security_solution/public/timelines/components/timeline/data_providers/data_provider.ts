@@ -44,7 +44,7 @@ export interface DataProvider {
    */
   excluded: boolean;
   /**
-   * Return the KQL query who have been added by user
+   * Returns the KQL query who have been added by user
    */
   kqlQuery: string;
   /**
@@ -55,7 +55,9 @@ export interface DataProvider {
    * Additional query clauses that are ANDed with this query to narrow results
    */
   and: DataProvidersAnd[];
-
+  /**
+   * Returns a DataProviderType
+   */
   type?: DataProviderType.default | DataProviderType.template;
 }
 

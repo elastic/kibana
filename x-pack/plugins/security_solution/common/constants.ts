@@ -143,9 +143,3 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable template timeline
- */
-export const disableTemplate = true;

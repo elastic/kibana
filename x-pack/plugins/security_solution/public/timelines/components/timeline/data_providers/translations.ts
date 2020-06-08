@@ -90,7 +90,7 @@ export const CONVERT_TO_FIELD = i18n.translate(
 export const CONVERT_TO_TEMPLATE_FIELD = i18n.translate(
   'xpack.securitySolution.dataProviders.convertToTemplateFieldLabel',
   {
-    defaultMessage: 'Covert to template field',
+    defaultMessage: 'Convert to template field',
   }
 );
 

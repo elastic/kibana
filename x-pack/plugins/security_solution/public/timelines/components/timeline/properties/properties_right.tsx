@@ -15,7 +15,6 @@ import {
   EuiAvatar,
 } from '@elastic/eui';
 
-import { disableTemplate } from '../../../../../common/constants';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -144,19 +143,13 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                 </EuiFlexItem>
               )}
 
-              {/*
-               * CreateTemplateTimelineBtn
-               * Remove the comment here to enable CreateTemplateTimelineBtn
-               */}
-              {!disableTemplate && (
-                <EuiFlexItem grow={false}>
-                  <NewTemplateTimeline
-                    closeGearMenu={onClosePopover}
-                    timelineId={timelineId}
-                    title={i18n.NEW_TEMPLATE_TIMELINE}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewTemplateTimeline
+                  closeGearMenu={onClosePopover}
+                  timelineId={timelineId}
+                  title={i18n.NEW_TEMPLATE_TIMELINE}
+                />
+              </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />

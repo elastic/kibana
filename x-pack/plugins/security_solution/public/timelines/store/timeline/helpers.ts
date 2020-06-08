@@ -8,8 +8,6 @@ import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
-import { disableTemplate } from '../../../../common/constants';
-
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
@@ -189,7 +187,7 @@ export const addNewTimeline = ({
     isLoading: false,
     showCheckboxes,
     showRowRenderers,
-    timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
+    timelineType,
   },
 });
 

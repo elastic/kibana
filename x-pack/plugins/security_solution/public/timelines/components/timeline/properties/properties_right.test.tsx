@@ -10,7 +10,6 @@ import React from 'react';
 import { PropertiesRight } from './properties_right';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus } from '../../../../../common/types/timeline';
-import { disableTemplate } from '../../../../../common/constants';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -94,18 +93,8 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
       });
 
-      test('it renders create timelin btn', () => {
+      test('it renders create timeline btn', () => {
         expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
-      });
-
-      /*
-       * CreateTemplateTimelineBtn
-       * Remove the comment here to enable CreateTemplateTimelineBtn
-       */
-      test('it renders no create template timelin btn', () => {
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(
-          !disableTemplate
-        );
       });
 
       test('it renders create attach timeline to a case btn', () => {
@@ -205,14 +194,12 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
       });
 
-      test('it renders no create timelin btn', () => {
+      test('it renders no create timeline btn', () => {
         expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).not.toBeTruthy();
       });
 
-      test('it renders create template timelin btn if it is enabled', () => {
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(
-          !disableTemplate
-        );
+      test('it renders create template timeline btn', () => {
+        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(true);
       });
 
       test('it renders create attach timeline to a case btn', () => {

@@ -135,17 +135,20 @@ export const getProviderActions = ({
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
-      {
-        className: CONVERT_TO_FIELD_CLASS_NAME,
-        disabled:
-          isLoading || (type === DataProviderType.default && timelineType === TimelineType.default),
-        icon: 'logstashFilter',
-        name:
-          type === DataProviderType.template
-            ? i18n.CONVERT_TO_FIELD
-            : i18n.CONVERT_TO_TEMPLATE_FIELD,
-        onClick: toggleType,
-      },
+      !(timelineType === TimelineType.default && type === DataProviderType.default)
+        ? {
+            className: CONVERT_TO_FIELD_CLASS_NAME,
+            disabled:
+              isLoading ||
+              (type === DataProviderType.default && timelineType === TimelineType.default),
+            icon: 'logstashFilter',
+            name:
+              type === DataProviderType.template
+                ? i18n.CONVERT_TO_FIELD
+                : i18n.CONVERT_TO_TEMPLATE_FIELD,
+            onClick: toggleType,
+          }
+        : null,
       {
         className: DELETE_CLASS_NAME,
         disabled: isLoading,
@@ -153,7 +156,7 @@ export const getProviderActions = ({
         name: i18n.DELETE_DATA_PROVIDER,
         onClick: deleteItem,
       },
-    ],
+    ].filter((item) => item != null),
   },
   {
     content:
