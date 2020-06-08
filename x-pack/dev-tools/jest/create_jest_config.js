@@ -43,6 +43,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '!**/scripts/**',
       '!**/mocks/**',
       '!**/plugins/apm/e2e/**',
+      '!**/plugins/siem/cypress/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,

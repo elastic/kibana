@@ -13,7 +13,12 @@ import {
   getDescriptionItem,
 } from '.';
 
-import { esFilters, Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  Filter,
+  FilterManager,
+  UI_SETTINGS,
+} from '../../../../../../../../src/plugins/data/public';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -33,7 +38,7 @@ describe('description_step', () => {
   const setupMock = coreMock.createSetup();
   const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
     switch (key) {
-      case 'filters:pinnedByDefault':
+      case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
         return pinnedByDefault;
       default:
         throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);
