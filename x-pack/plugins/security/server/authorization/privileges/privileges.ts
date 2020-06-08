@@ -6,11 +6,10 @@
 
 import { uniq } from 'lodash';
 import { SecurityLicense } from '../../../common/licensing';
-import { Feature } from '../../../../features/server';
+import { Feature, PluginSetupContract as FeaturesPluginSetup } from '../../../../features/server';
 import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
-import { FeaturesService } from '../../plugin';
 import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
@@ -22,7 +21,7 @@ export interface PrivilegesService {
 
 export function privilegesFactory(
   actions: Actions,
-  featuresService: FeaturesService,
+  featuresService: FeaturesPluginSetup,
   licenseService: Pick<SecurityLicense, 'getFeatures'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);

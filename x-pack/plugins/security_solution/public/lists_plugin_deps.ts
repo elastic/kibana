@@ -11,3 +11,4 @@ export {
   mockNewExceptionItem,
   mockNewExceptionList,
 } from '../../lists/public';
+export { ExceptionListItemSchema, Entries } from '../../lists/common/schemas';

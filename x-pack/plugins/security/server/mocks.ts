@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityPluginSetup } from './plugin';
-
 import { authenticationMock } from './authentication/index.mock';
 import { authorizationMock } from './authorization/index.mock';
 import { licenseMock } from '../common/licensing/index.mock';
@@ -24,7 +22,6 @@ function createSetupMock() {
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
-    __legacyCompat: {} as SecurityPluginSetup['__legacyCompat'],
   };
 }
 

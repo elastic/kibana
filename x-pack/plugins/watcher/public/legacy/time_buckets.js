@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { search, FIELD_FORMAT_IDS } from '../../../../../src/plugins/data/public';
+import { search, FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
@@ -219,14 +219,14 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoIntervalNear(self.getConfig('histogram:barTarget'), Number(duration));
+    return calcAutoIntervalNear(self.getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
   function maybeScaleInterval(interval) {
     if (!self.hasBounds()) return interval;
 
-    const maxLength = self.getConfig('histogram:maxBars');
+    const maxLength = self.getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const approxLen = duration / interval;
     let scaled;
 
