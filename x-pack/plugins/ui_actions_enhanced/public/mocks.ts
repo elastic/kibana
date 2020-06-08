@@ -10,6 +10,7 @@ import { uiActionsPluginMock } from '../../../../src/plugins/ui_actions/public/m
 import { embeddablePluginMock } from '../../../../src/plugins/embeddable/public/mocks';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
+import { licensingMock } from '../../licensing/public/mocks';
 
 export type Setup = jest.Mocked<AdvancedUiActionsSetup>;
 export type Start = jest.Mocked<AdvancedUiActionsStart>;
@@ -61,6 +62,7 @@ const createPlugin = (
       return plugin.start(anotherCoreStart, {
         uiActions: uiActionsStart,
         embeddable: embeddableStart,
+        licensing: licensingMock.createStart(),
       });
     },
   };

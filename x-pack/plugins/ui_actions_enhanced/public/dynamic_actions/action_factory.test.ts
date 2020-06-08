@@ -6,7 +6,7 @@
 
 import { ActionFactory } from './action_factory';
 import { ActionFactoryDefinition } from './action_factory_definition';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licensingMock } from '../../../licensing/public/mocks';
 
 const def: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -22,14 +22,14 @@ const def: ActionFactoryDefinition = {
 
 describe('License & ActionFactory', () => {
   test('no license requirements', async () => {
-    const factory = new ActionFactory(def, () => licenseMock.createLicense());
+    const factory = new ActionFactory(def, () => licensingMock.createLicense());
     expect(await factory.isCompatible({})).toBe(true);
     expect(factory.isCompatibleLicence()).toBe(true);
   });
 
   test('not enough license level', async () => {
     const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
-      licenseMock.createLicense()
+      licensingMock.createLicense()
     );
     expect(await factory.isCompatible({})).toBe(true);
     expect(factory.isCompatibleLicence()).toBe(false);
@@ -37,7 +37,7 @@ describe('License & ActionFactory', () => {
 
   test('enough license level', async () => {
     const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
-      licenseMock.createLicense({ license: { type: 'gold' } })
+      licensingMock.createLicense({ license: { type: 'gold' } })
     );
     expect(await factory.isCompatible({})).toBe(true);
     expect(factory.isCompatibleLicence()).toBe(true);

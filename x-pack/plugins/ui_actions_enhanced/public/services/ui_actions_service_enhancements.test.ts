@@ -6,9 +6,9 @@
 
 import { UiActionsServiceEnhancements } from './ui_actions_service_enhancements';
 import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licensingMock } from '../../../licensing/public/mocks';
 
-const getLicenseInfo = () => licenseMock.createLicense();
+const getLicenseInfo = () => licensingMock.createLicense();
 
 describe('UiActionsService', () => {
   describe('action factories', () => {

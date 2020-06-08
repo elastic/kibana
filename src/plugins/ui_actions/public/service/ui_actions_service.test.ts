@@ -20,7 +20,7 @@
 import { UiActionsService } from './ui_actions_service';
 import { Action, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
+import { TriggerRegistry, TriggerId, ActionType, ActionDefinitionRegistry } from '../types';
 import { Trigger } from '../triggers';
 
 // Casting to ActionType or TriggerId is a hack - in a real situation use
@@ -174,13 +174,12 @@ describe('UiActionsService', () => {
 
   describe('.getTriggerCompatibleActions()', () => {
     test('can register and get actions', async () => {
-      const actions: ActionRegistry = new Map();
-      const service = new UiActionsService({ actions });
+      const actions: ActionDefinitionRegistry = new Map();
+      const service = new UiActionsService({ actionDefinitions: actions });
       const helloWorldAction = createHelloWorldAction({} as any);
       const length = actions.size;
 
       service.registerAction(helloWorldAction);
-      service.ensureActionsExist();
 
       expect(actions.size - length).toBe(1);
       expect(actions.get(helloWorldAction.id)!.id).toBe(helloWorldAction.id);
@@ -385,15 +384,13 @@ describe('UiActionsService', () => {
     });
 
     test('can register action', () => {
-      const actions: ActionRegistry = new Map();
-      const service = new UiActionsService({ actions });
+      const actions: ActionDefinitionRegistry = new Map();
+      const service = new UiActionsService({ actionDefinitions: actions });
 
       service.registerAction({
         id: ACTION_HELLO_WORLD,
         order: 13,
       } as any);
-
-      service.ensureActionsExist();
 
       expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
         id: ACTION_HELLO_WORLD,

@@ -7,12 +7,12 @@
 import { DynamicActionManager } from './dynamic_action_manager';
 import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
 import { UiActionsService } from '../../../../../src/plugins/ui_actions/public';
-import { ActionInternal } from '../../../../../src/plugins/ui_actions/public/actions';
 import { of } from '../../../../../src/plugins/kibana_utils';
 import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licensingMock } from '../../../licensing/public/mocks';
+import { ActionDefinitionRegistry } from '../../../../../src/plugins/ui_actions/public/types';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -71,12 +71,12 @@ const event3: SerializedEvent = {
 const setup = (events: readonly SerializedEvent[] = []) => {
   const isCompatible = async () => true;
   const storage: ActionStorage = new MemoryActionStorage(events);
-  const actions = new Map<string, ActionInternal>();
+  const actionDefinitions: ActionDefinitionRegistry = new Map();
   const uiActions = new UiActionsService({
-    actions,
+    actionDefinitions,
   });
   const uiActionsEnhancements = new UiActionsServiceEnhancements({
-    getLicenseInfo: () => licenseMock.createLicense(),
+    getLicenseInfo: () => licensingMock.createLicense(),
   });
   const manager = new DynamicActionManager({
     isCompatible,
@@ -90,7 +90,7 @@ const setup = (events: readonly SerializedEvent[] = []) => {
 
   return {
     isCompatible,
-    actions,
+    actions: actionDefinitions,
     storage,
     uiActions: { ...uiActions, ...uiActionsEnhancements },
     manager,
