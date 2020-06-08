@@ -31,6 +31,7 @@ import styled from 'styled-components';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiTextColor } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
+import { EuiBreadcrumbs } from '@elastic/eui';
 
 /**
  * The two query parameters we read/write on
@@ -86,7 +87,7 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
           process: processTableViewItem.event,
         },
       });
-      pushToQueryParams({crumbId: event.entityId(processTableViewItem.event), crumbEvent: 'all'});
+      pushToQueryParams({crumbId: event.entityId(processTableViewItem.event), crumbEvent: ''});
     },
     [dispatch, timestamp, pushToQueryParams]
   );
@@ -208,7 +209,10 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
   }
 `;
 
-const ProcessDetails = memo(function ProcessListWithCounts({processEvent} : {processEvent: ResolverEvent}) {
+const ProcessDetails = memo(function ProcessListWithCounts({processEvent, pushToQueryParams} : {
+  processEvent: ResolverEvent;
+  pushToQueryParams: (arg0: crumbInfo)=>unknown
+}) {
   console.log('rendering process details');
   const processName = processEvent && event.eventName(processEvent);
   const processInfoEntry = useMemo(() =>{
@@ -267,10 +271,25 @@ const ProcessDetails = memo(function ProcessListWithCounts({processEvent} : {pro
     return cubeAssetsForNode(processEvent);
   },
   [processEvent]);
+
+  const crumbs = useMemo(()=>{
+    return [
+      {
+        text: 'All Events',
+        onClick: ()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) },
+      },
+      {
+        text: 'Details',
+        onClick: ()=>{}
+      }
+    ]
+  },[])
   
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
+    <EuiBreadcrumbs breadcrumbs={crumbs} />
+    <EuiSpacer size="l" />
     <EuiTitle size="xs">
         <h4 id={titleId}>
           {descriptionText && (<svg style={{position: 'relative', top: '0.4em', marginRight: '.25em'}} className="table-process-icon" width="1.5em" height="1.5em" viewBox="0 0 1 1">
@@ -422,7 +441,7 @@ const PanelContent = memo(function PanelContent() {
       if(crumbEvent === ''){
         //If there is no crumbEvent param, it's for the process detail
         //Note: this view should handle its own effect for requesting /events
-        return console.log('processDetail'), <ProcessDetails processEvent={uiSelectedEvent} />;
+        return console.log('processDetail'), <ProcessDetails processEvent={uiSelectedEvent} pushToQueryParams={pushToQueryParams} />;
       }
       if(crumbEvent === 'all'){
         //If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
