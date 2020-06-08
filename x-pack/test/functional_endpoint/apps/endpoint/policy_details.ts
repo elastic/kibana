@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'policy']);
+  const pageObjects = getPageObjects(['common', 'endpoint', 'policy', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
@@ -45,28 +45,177 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.datasource.name
         );
       });
+    });
 
-      describe('and the save button is clicked', () => {
-        it('should display success toast on successful save', async () => {
-          await pageObjects.endpoint.clickOnEuiCheckbox('policyWindowsEvent_dns');
-          await pageObjects.policy.confirmAndSave();
+    describe('and the save button is clicked', () => {
+      let policyInfo: PolicyTestResourceInfo;
 
-          await testSubjects.existOrFail('policyDetailsSuccessMessage');
-          expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-            `Policy ${policyInfo.datasource.name} has been updated.`
-          );
-        });
-        it('should persist update', async () => {
-          await pageObjects.endpoint.clickOnEuiCheckbox('policyWindowsEvent_process');
-          await pageObjects.policy.confirmAndSave();
+      beforeEach(async () => {
+        policyInfo = await policyTestResources.createPolicy();
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+      });
 
-          await testSubjects.existOrFail('policyDetailsSuccessMessage');
-          await pageObjects.policy.navigateToPolicyList();
-          await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+      afterEach(async () => {
+        if (policyInfo) {
+          await policyInfo.cleanup();
+        }
+      });
 
-          expect(
-            await (await testSubjects.find('policyWindowsEvent_process')).isSelected()
-          ).to.equal(false);
+      it('should display success toast on successful save', async () => {
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
+        await pageObjects.policy.confirmAndSave();
+
+        await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
+          `Policy ${policyInfo.datasource.name} has been updated.`
+        );
+      });
+      it('should persist update on the screen', async () => {
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_process');
+        await pageObjects.policy.confirmAndSave();
+
+        await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await pageObjects.policy.navigateToPolicyList();
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+
+        expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
+          false
+        );
+      });
+      it('should have updated policy data in overall agent configuration', async () => {
+        // Turn off file events.
+        await Promise.all([
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_file'),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMaxEvent_file'),
+        ]);
+        await pageObjects.policy.confirmAndSave();
+        await testSubjects.existOrFail('policyDetailsSuccessMessage');
+
+        const agentFullConfig = await policyTestResources.getFullAgentConfig(
+          policyInfo.agentConfig.id
+        );
+
+        expect(agentFullConfig).to.eql({
+          datasources: [
+            {
+              enabled: true,
+              id: 'e5cfd120-a9b8-11ea-8cdc-f3228a168e40',
+              inputs: [
+                {
+                  enabled: true,
+                  policy: {
+                    linux: {
+                      advanced: {
+                        elasticsearch: {
+                          indices: {
+                            control: 'control-index',
+                            event: 'event-index',
+                            logging: 'logging-index',
+                          },
+                          kernel: {
+                            connect: true,
+                            process: true,
+                          },
+                        },
+                      },
+                      events: {
+                        file: true,
+                        network: true,
+                        process: true,
+                      },
+                      logging: {
+                        file: 'info',
+                        stdout: 'debug',
+                      },
+                    },
+                    mac: {
+                      advanced: {
+                        elasticsearch: {
+                          indices: {
+                            control: 'control-index',
+                            event: 'event-index',
+                            logging: 'logging-index',
+                          },
+                          kernel: {
+                            connect: true,
+                            process: true,
+                          },
+                        },
+                      },
+                      events: {
+                        file: true,
+                        network: true,
+                        process: true,
+                      },
+                      logging: {
+                        file: 'info',
+                        stdout: 'debug',
+                      },
+                      malware: {
+                        mode: 'detect',
+                      },
+                    },
+                    windows: {
+                      advanced: {
+                        elasticsearch: {
+                          indices: {
+                            control: 'control-index',
+                            event: 'event-index',
+                            logging: 'logging-index',
+                          },
+                          kernel: {
+                            connect: true,
+                            process: true,
+                          },
+                        },
+                      },
+                      events: {
+                        dll_and_driver_load: true,
+                        dns: false,
+                        file: true,
+                        network: true,
+                        process: true,
+                        registry: true,
+                        security: true,
+                      },
+                      logging: {
+                        file: 'info',
+                        stdout: 'debug',
+                      },
+                      malware: {
+                        mode: 'prevent',
+                      },
+                    },
+                  },
+                  streams: [],
+                  type: 'endpoint',
+                },
+              ],
+              name: 'Protect East Coast',
+              namespace: 'default',
+              package: {
+                name: 'endpoint',
+                version: '0.2.0',
+              },
+              use_output: 'default',
+            },
+          ],
+          id: 'e59252f0-a9b8-11ea-8cdc-f3228a168e40',
+          outputs: {
+            default: {
+              hosts: ['http://localhost:9200'],
+              type: 'elasticsearch',
+            },
+          },
+          revision: 5,
+          settings: {
+            monitoring: {
+              enabled: false,
+              logs: false,
+              metrics: false,
+            },
+          },
         });
       });
     });
