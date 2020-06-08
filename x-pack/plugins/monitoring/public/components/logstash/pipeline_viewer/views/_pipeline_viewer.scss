@@ -81,24 +81,24 @@
 //   vertical-align: middle;
 // }
 
-// SASSTODO: Why is this width here?
-.lspvDetailDrawerSparklineContainer {
-  width: 7vw;
-}
+// // SASSTODO: Why is this width here?
+// .lspvDetailDrawerSparklineContainer {
+//   width: 7vw;
+// }
 
-@include euiBreakpoint('m') {
-  .monPipelineViewer {
-    .monPipelineViewer__spacer {
-      border: none;
-    }
+// @include euiBreakpoint('m') {
+//   .monPipelineViewer {
+//     .monPipelineViewer__spacer {
+//       border: none;
+//     }
 
-    .monPipelineViewer__metricFlexItem {
-      margin-bottom: $euiSizeXS !important;
-    }
+//     .monPipelineViewer__metricFlexItem {
+//       margin-bottom: $euiSizeXS !important;
+//     }
 
-    .monPipelineViewer__metric {
-      text-align: left;
-      padding-left: $euiSizeXL;
-    }
-  }
-}
+//     .monPipelineViewer__metric {
+//       text-align: left;
+//       padding-left: $euiSizeXL;
+//     }
+//   }
+// }
