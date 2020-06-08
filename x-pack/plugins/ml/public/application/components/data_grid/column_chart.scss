@@ -1,0 +1,19 @@
+.mlDataGridChart {
+  border-left: solid 1px #D3DAE6;
+  border-right: solid 1px #D3DAE6;
+  background-color: #f5f7fa;
+}
+
+.mlDataGridChart + .mlDataGridChart {
+  border-left: solid 0px #D3DAE6;
+}
+
+.mlDataGridChart__histogram {
+  width: 100%;
+  height: $euiSizeXL + $euiSizeXXL;
+}
+
+.mlDataGridChart__legend {
+    display: block;
+    overflow: hidden;
+}

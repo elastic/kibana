@@ -9,9 +9,8 @@ import ReactDOM from 'react-dom';
 
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeHandler } from '@elastic/eui';
 
-import { ColumnChart } from './column_chart';
+import { mlDataGridChartClassName, ColumnChart } from './column_chart';
 
-const mlDataGridChartClassName = 'mlDataGridChart';
 const mlDataGridChartRowClassName = `${mlDataGridChartClassName}Row`;
 
 type RefValue = HTMLElement | null;
@@ -54,8 +53,8 @@ export function useColumnCharts(columns: EuiDataGridColumn[], api: any, indexPat
         <>
           {columns.map((d, i) => (
             <div
-              key={i}
-              className={`${mlDataGridChartClassName}-${i}`}
+              key={d.id}
+              className={`${mlDataGridChartClassName} ${mlDataGridChartClassName}-${i}`}
               style={{ width: `${d.initialWidth}px` }}
             >
               {!d.isExpandable && (
