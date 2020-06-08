@@ -24,18 +24,25 @@ export interface SetEventsDeletedProps {
 export interface UpdateAlertsStatusProps {
   alertIds: string[];
   status: AlertStateStatus;
+  selectedStatus: AlertStateStatus;
 }
 
 export type UpdateAlertsStatusCallback = (
   refetchQuery: inputsModel.Refetch,
-  { alertIds, status }: UpdateAlertsStatusProps
+  { alertIds, status, selectedStatus }: UpdateAlertsStatusProps
 ) => void;
-export type UpdateAlertsStatus = ({ alertIds, status }: UpdateAlertsStatusProps) => void;
+
+export type UpdateAlertsStatus = ({
+  alertIds,
+  status,
+  selectedStatus,
+}: UpdateAlertsStatusProps) => void;
 
 export interface UpdateAlertStatusActionProps {
   query?: string;
   alertIds: string[];
   status: AlertStateStatus;
+  selectedStatus: AlertStateStatus;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   onAlertStatusUpdateSuccess: (count: number, status: string) => void;

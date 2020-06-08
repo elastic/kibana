@@ -22,7 +22,7 @@ import {
 import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
-import { FILTER_OPEN } from './alerts_filter_group';
+import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from './alerts_filter_group';
 import { sendAlertToTimelineAction, updateAlertStatusAction } from './actions';
 import * as i18n from './translations';
 import {
@@ -210,40 +210,87 @@ export const getAlertActions = ({
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   status: AlertStateStatus;
   updateTimelineIsLoading: UpdateTimelineLoading;
-}): TimelineRowAction[] => [
-  {
-    ariaLabel: 'Send alert to timeline',
-    content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
-    dataTestSubj: 'send-alert-to-timeline',
-    displayType: 'icon',
-    iconType: 'timeline',
-    id: 'sendAlertToTimeline',
-    onClick: ({ ecsData }: TimelineRowActionOnClick) =>
-      sendAlertToTimelineAction({
-        apolloClient,
-        createTimeline,
-        ecsData,
-        updateTimelineIsLoading,
-      }),
-    width: 26,
-  },
-  {
-    ariaLabel: 'Update alert status',
-    content: status === FILTER_OPEN ? i18n.ACTION_OPEN_ALERT : i18n.ACTION_CLOSE_ALERT,
-    dataTestSubj: 'update-alert-status',
-    displayType: 'icon',
-    iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
-    id: 'updateAlertStatus',
-    isActionDisabled: !canUserCRUD || !hasIndexWrite,
-    onClick: ({ eventId }: TimelineRowActionOnClick) =>
-      updateAlertStatusAction({
-        alertIds: [eventId],
-        onAlertStatusUpdateFailure,
-        onAlertStatusUpdateSuccess,
-        setEventsDeleted,
-        setEventsLoading,
-        status,
-      }),
-    width: 26,
-  },
-];
+}): TimelineRowAction[] => {
+  const rowContextMenuItems: TimelineRowAction[] = [
+    {
+      ariaLabel: 'Open alert',
+      content: i18n.ACTION_OPEN_ALERT,
+      dataTestSubj: 'update-alert-status',
+      displayType: 'contextMenu',
+      iconType: 'securitySignalDetected',
+      id: FILTER_OPEN,
+      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      onClick: ({ eventId }: TimelineRowActionOnClick) =>
+        updateAlertStatusAction({
+          alertIds: [eventId],
+          onAlertStatusUpdateFailure,
+          onAlertStatusUpdateSuccess,
+          setEventsDeleted,
+          setEventsLoading,
+          status,
+          selectedStatus: FILTER_OPEN,
+        }),
+      width: 26,
+    },
+    {
+      ariaLabel: 'Close alert',
+      content: i18n.ACTION_CLOSE_ALERT,
+      dataTestSubj: 'update-alert-status',
+      displayType: 'contextMenu',
+      iconType: 'securitySignalResolved',
+      id: FILTER_CLOSED,
+      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      onClick: ({ eventId }: TimelineRowActionOnClick) =>
+        updateAlertStatusAction({
+          alertIds: [eventId],
+          onAlertStatusUpdateFailure,
+          onAlertStatusUpdateSuccess,
+          setEventsDeleted,
+          setEventsLoading,
+          status,
+          selectedStatus: FILTER_CLOSED,
+        }),
+      width: 26,
+    },
+    {
+      ariaLabel: 'Update alert status',
+      content: i18n.ACTION_IN_PROGRESS_ALERT,
+      dataTestSubj: 'update-alert-status',
+      displayType: 'contextMenu',
+      iconType: 'alert',
+      id: FILTER_IN_PROGRESS,
+      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      onClick: ({ eventId }: TimelineRowActionOnClick) =>
+        updateAlertStatusAction({
+          alertIds: [eventId],
+          onAlertStatusUpdateFailure,
+          onAlertStatusUpdateSuccess,
+          setEventsDeleted,
+          setEventsLoading,
+          status,
+          selectedStatus: FILTER_IN_PROGRESS,
+        }),
+      width: 26,
+    },
+  ];
+
+  return [
+    {
+      ariaLabel: 'Send alert to timeline',
+      content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
+      dataTestSubj: 'send-alert-to-timeline',
+      displayType: 'icon',
+      iconType: 'timeline',
+      id: 'sendAlertToTimeline',
+      onClick: ({ ecsData }: TimelineRowActionOnClick) =>
+        sendAlertToTimelineAction({
+          apolloClient,
+          createTimeline,
+          ecsData,
+          updateTimelineIsLoading,
+        }),
+      width: 26,
+    },
+    ...rowContextMenuItems.filter((item) => item.id !== status), // Only gets the options available for the current status
+  ];
+};

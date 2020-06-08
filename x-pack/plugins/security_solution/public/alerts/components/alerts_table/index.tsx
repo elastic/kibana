@@ -213,11 +213,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [setSelectAll, setShowClearSelectionAction]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
-    async (refetchQuery: inputsModel.Refetch, { status }: UpdateAlertsStatusProps) => {
+    async (
+      refetchQuery: inputsModel.Refetch,
+      { status, selectedStatus }: UpdateAlertsStatusProps
+    ) => {
       await updateAlertStatusAction({
         query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
         alertIds: Object.keys(selectedEventIds),
         status,
+        selectedStatus,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         onAlertStatusUpdateSuccess,
@@ -245,7 +249,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
-          isFilteredToOpen={filterGroup === FILTER_OPEN}
+          currentFilter={filterGroup}
           selectAll={selectAllCallback}
           selectedEventIds={selectedEventIds}
           showClearSelection={showClearSelectionAction}
@@ -277,7 +281,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         createTimeline: createTimelineCallback,
         setEventsLoading: setEventsLoadingCallback,
         setEventsDeleted: setEventsDeletedCallback,
-        status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
+        status: filterGroup,
         updateTimelineIsLoading,
         onAlertStatusUpdateSuccess,
         onAlertStatusUpdateFailure,

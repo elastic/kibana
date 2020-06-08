@@ -108,6 +108,13 @@ export const ACTION_CLOSE_ALERT = i18n.translate(
   }
 );
 
+export const ACTION_IN_PROGRESS_ALERT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.inProgressAlertTitle',
+  {
+    defaultMessage: 'Mark in progress',
+  }
+);
+
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {

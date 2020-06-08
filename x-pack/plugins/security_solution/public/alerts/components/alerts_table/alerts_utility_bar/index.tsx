@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AlertStateStatus } from '../../../../../common/detection_engine/types';
 import { LinkIcon } from '../../../../common/components/link_icon';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import {
@@ -22,14 +23,13 @@ import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { UpdateAlertsStatus } from '../types';
-import { FILTER_CLOSED, FILTER_OPEN } from '../alerts_filter_group';
 
 interface AlertsUtilityBarProps {
   canUserCRUD: boolean;
   hasIndexWrite: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
-  isFilteredToOpen: boolean;
+  currentFilter: AlertStateStatus;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showClearSelection: boolean;
@@ -44,19 +44,23 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   clearSelection,
   totalCount,
   selectedEventIds,
-  isFilteredToOpen,
+  currentFilter,
   selectAll,
   showClearSelection,
   updateAlertsStatus,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const handleUpdateStatus = useCallback(async () => {
-    await updateAlertsStatus({
-      alertIds: Object.keys(selectedEventIds),
-      status: isFilteredToOpen ? FILTER_CLOSED : FILTER_OPEN,
-    });
-  }, [selectedEventIds, updateAlertsStatus, isFilteredToOpen]);
+  const handleUpdateStatus = useCallback(
+    async (selectedStatus: AlertStateStatus) => {
+      await updateAlertsStatus({
+        alertIds: Object.keys(selectedEventIds),
+        status: currentFilter,
+        selectedStatus,
+      });
+    },
+    [selectedEventIds, updateAlertsStatus]
+  );
 
   const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
   const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
@@ -66,14 +70,17 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   const UtilityToolbar = (closePopover: () => void) => {
     return (
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <LinkIcon iconType={'securityAlertResolved'} onClick={() => {}}>
+        <EuiFlexItem style={{ minWidth: 175 }}>
+          <LinkIcon
+            iconType={'securitySignalResolved'}
+            onClick={() => handleUpdateStatus('closed')}
+          >
             {'Close Selected'}
           </LinkIcon>
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <LinkIcon iconType={'securityAlertDetected'} onClick={() => {}}>
+        <EuiFlexItem style={{ minWidth: 175 }}>
+          <LinkIcon iconType={'alert'} onClick={() => handleUpdateStatus('in-progress')}>
             {'Mark in progress'}
           </LinkIcon>
         </EuiFlexItem>
@@ -104,13 +111,11 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                 <UtilityBarAction
                   dataTestSubj="openCloseAlert"
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
-                  iconType={isFilteredToOpen ? 'securityAlertResolved' : 'securityAlertDetected'}
-                  onClick={handleUpdateStatus}
+                  iconType="arrowDown"
+                  iconSide="right"
                   popoverContent={UtilityToolbar}
                 >
-                  {isFilteredToOpen
-                    ? i18n.BATCH_ACTION_CLOSE_SELECTED
-                    : i18n.BATCH_ACTION_OPEN_SELECTED}
+                  {'Take Action'}
                 </UtilityBarAction>
 
                 <UtilityBarAction
