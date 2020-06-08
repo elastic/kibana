@@ -12,16 +12,23 @@ import { ProcessorInternal } from '../types';
 
 export interface Props {
   processor: ProcessorInternal;
-  onMove: () => void;
-  onCancelMove: () => void;
-  onAddOnFailure: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
+  selected: boolean;
+  handlers: {
+    onMove: () => void;
+    onCancelMove: () => void;
+    onAddOnFailure: () => void;
+    onEdit: () => void;
+    onDelete: () => void;
+    onDuplicate: () => void;
+  };
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
-  ({ processor, onMove, onCancelMove, onAddOnFailure, onEdit, onDelete, onDuplicate }) => {
+  ({
+    processor,
+    handlers: { onMove, onCancelMove, onAddOnFailure, onEdit, onDelete, onDuplicate },
+    selected,
+  }) => {
     return (
       <EuiFlexGroup
         gutterSize="none"
@@ -101,26 +108,49 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel',
-                  {
-                    defaultMessage: 'Move this processor',
-                  }
-                )}
-              >
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonAriaLabel',
+              {selected ? (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel',
+                    {
+                      defaultMessage: 'Cancel moving this processor',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonAriaLabel',
+                      {
+                        defaultMessage: 'Cancel moving this processor',
+                      }
+                    )}
+                    size="s"
+                    onClick={onCancelMove}
+                    iconType="crossInACircleFilled"
+                  />
+                </EuiToolTip>
+              ) : (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel',
                     {
                       defaultMessage: 'Move this processor',
                     }
                   )}
-                  size="s"
-                  onClick={onMove}
-                  iconType="sortable"
-                />
-              </EuiToolTip>
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.moveProcessorButtonAriaLabel',
+                      {
+                        defaultMessage: 'Move this processor',
+                      }
+                    )}
+                    size="s"
+                    onClick={onMove}
+                    iconType="sortable"
+                  />
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -151,6 +181,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     );
   },
   (prev, current) => {
-    return prev.onEdit === current.onEdit && prev.processor.id === current.processor.id;
+    return (
+      prev.handlers === current.handlers &&
+      prev.processor.id === current.processor.id &&
+      prev.selected === current.selected
+    );
   }
 );

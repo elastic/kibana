@@ -32,7 +32,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   level,
 }) => {
   const stringSelector = processorInfo.selector.join('.');
-  const { onMove, onAddFailure, onCancelMove, onDuplicate, onDelete, onEdit } = useMemo(() => {
+  const handlers = useMemo(() => {
     return {
       onMove: () => {
         privateOnAction({ type: 'selectToMove', payload: processorInfo });
@@ -71,12 +71,8 @@ export const TreeNode: FunctionComponent<Props> = ({
     <EuiPanel className={panelClasses} paddingSize="s">
       <PipelineProcessorsEditorItem
         processor={processor}
-        onMove={onMove}
-        onCancelMove={onCancelMove}
-        onDuplicate={onDuplicate}
-        onDelete={onDelete}
-        onEdit={onEdit}
-        onAddOnFailure={onAddFailure}
+        handlers={handlers}
+        selected={Boolean(selectedProcessorInfo?.id === processor.id)}
       />
       {processor.onFailure?.length && (
         <div style={{ marginLeft: `${level * 30}px` }}>
