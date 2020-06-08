@@ -38,6 +38,13 @@ export const CLOSED_ALERTS = i18n.translate(
   }
 );
 
+export const IN_PROGRESS_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
+  {
+    defaultMessage: 'In-progress alerts',
+  }
+);
+
 export const LOADING_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.loadingAlertsTitle',
   {

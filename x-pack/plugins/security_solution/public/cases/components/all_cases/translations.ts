@@ -75,6 +75,12 @@ export const OPEN_CASES = i18n.translate('xpack.securitySolution.case.caseTable.
 export const CLOSED_CASES = i18n.translate('xpack.securitySolution.case.caseTable.closedCases', {
   defaultMessage: 'Closed cases',
 });
+export const IN_PROGRESS_CASES = i18n.translate(
+  'xpack.securitySolution.case.caseTable.inProgressCases',
+  {
+    defaultMessage: 'In progress cases',
+  }
+);
 
 export const CLOSED = i18n.translate('xpack.securitySolution.case.caseTable.closed', {
   defaultMessage: 'Closed',

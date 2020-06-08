@@ -10,7 +10,11 @@ import * as i18n from '../translations';
 
 export const FILTER_OPEN = 'open';
 export const FILTER_CLOSED = 'closed';
-export type AlertFilterOption = typeof FILTER_OPEN | typeof FILTER_CLOSED;
+export const FILTER_IN_PROGRESS = 'in-progress';
+export type AlertFilterOption =
+  | typeof FILTER_OPEN
+  | typeof FILTER_CLOSED
+  | typeof FILTER_IN_PROGRESS;
 
 interface Props {
   onFilterGroupChanged: (filterGroup: AlertFilterOption) => void;
@@ -29,6 +33,11 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
     onFilterGroupChanged(FILTER_CLOSED);
   }, [setFilterGroup, onFilterGroupChanged]);
 
+  const onClickInProgressFilterCallback = useCallback(() => {
+    setFilterGroup(FILTER_IN_PROGRESS);
+    onFilterGroupChanged(FILTER_IN_PROGRESS);
+  }, [setFilterGroup, onFilterGroupChanged]);
+
   return (
     <EuiFilterGroup>
       <EuiFilterButton
@@ -38,6 +47,15 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
         withNext
       >
         {i18n.OPEN_ALERTS}
+      </EuiFilterButton>
+
+      <EuiFilterButton
+        data-test-subj="inProgressAlerts"
+        hasActiveFilters={filterGroup === FILTER_IN_PROGRESS}
+        onClick={onClickInProgressFilterCallback}
+        withNext
+      >
+        {i18n.IN_PROGRESS_ALERTS}
       </EuiFilterButton>
 
       <EuiFilterButton

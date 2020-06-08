@@ -8,6 +8,8 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { LinkIcon } from '../../../../common/components/link_icon';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import {
   UtilityBar,
@@ -61,6 +63,24 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     defaultNumberFormat
   );
 
+  const UtilityToolbar = (closePopover: () => void) => {
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <LinkIcon iconType={'securityAlertResolved'} onClick={() => {}}>
+            {'Close Selected'}
+          </LinkIcon>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <LinkIcon iconType={'securityAlertDetected'} onClick={() => {}}>
+            {'Mark in progress'}
+          </LinkIcon>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <>
       <UtilityBar>
@@ -86,6 +106,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
                   iconType={isFilteredToOpen ? 'securityAlertResolved' : 'securityAlertDetected'}
                   onClick={handleUpdateStatus}
+                  popoverContent={UtilityToolbar}
                 >
                   {isFilteredToOpen
                     ? i18n.BATCH_ACTION_CLOSE_SELECTED
