@@ -9,17 +9,15 @@ import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { URL_MAX_LENGTH } from '../../../../../../../src/core/public';
 import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 
-import { UrlOverflowService } from '../../../../../../../src/plugins/kibana_legacy/public';
 import rison from 'rison-node';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
 const META_OVERHEAD = 100;
-
-const urlOverflow = new UrlOverflowService();
 
 export class FeatureGeometryFilterForm extends Component {
   state = {
@@ -82,7 +80,7 @@ export class FeatureGeometryFilterForm extends Component {
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
       window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
-      urlOverflow.failLength()
+      URL_MAX_LENGTH
     ) {
       this.setState({
         errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {

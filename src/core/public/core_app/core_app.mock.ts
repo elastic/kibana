@@ -17,11 +17,15 @@
  * under the License.
  */
 
-export * from './migrate_legacy_query';
-export * from './system_api';
-// @ts-ignore
-export { KbnAccessibleClickProvider } from './kbn_accessible_click';
-// @ts-ignore
-export { PrivateProvider, IPrivate } from './private';
-// @ts-ignore
-export { registerListenEventListener } from './register_listen_event_listener';
+import { CoreApp } from './core_app';
+
+type CoreAppContract = PublicMethodsOf<CoreApp>;
+const createMock = (): jest.Mocked<CoreAppContract> => ({
+  setup: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+});
+
+export const coreAppMock = {
+  create: createMock,
+};

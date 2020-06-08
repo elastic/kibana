@@ -20,6 +20,8 @@ interface Props {
 const Container = styled.div`
   min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
+  display: flex;
+  flex-direction: column;
 `;
 
 const Nav = styled.nav`
@@ -53,87 +55,89 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         />
       )}
       <Container>
-        <Nav>
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            {uiSettings.get('pageNavigation') === 'legacy' ? (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="savedObjectsApp" size="l" />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <EuiTabs display="condensed">
-                <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
-                  <FormattedMessage
-                    id="xpack.ingestManager.appNavigation.overviewLinkText"
-                    defaultMessage="Overview"
-                  />
-                </EuiTab>
-                <EuiTab
-                  isSelected={section === 'epm'}
-                  href={getHref('integrations_all')}
-                  disabled={!epm?.enabled}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.appNavigation.epmLinkText"
-                    defaultMessage="Integrations"
-                  />
-                </EuiTab>
-                <EuiTab
-                  isSelected={section === 'agent_config'}
-                  href={getHref('configurations_list')}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.appNavigation.configurationsLinkText"
-                    defaultMessage="Configurations"
-                  />
-                </EuiTab>
-                <EuiTab
-                  isSelected={section === 'fleet'}
-                  href={getHref('fleet')}
-                  disabled={!fleet?.enabled}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.appNavigation.fleetLinkText"
-                    defaultMessage="Fleet"
-                  />
-                </EuiTab>
-                <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
-                  <FormattedMessage
-                    id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
-                    defaultMessage="Data streams"
-                  />
-                </EuiTab>
-              </EuiTabs>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" direction="row">
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    iconType="popout"
-                    href="https://ela.st/ingest-manager-feedback"
-                    target="_blank"
+        <div>
+          <Nav>
+            <EuiFlexGroup gutterSize="l" alignItems="center">
+              {uiSettings.get('pageNavigation') === 'legacy' ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="savedObjectsApp" size="l" />
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem>
+                <EuiTabs display="condensed">
+                  <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.appNavigation.overviewLinkText"
+                      defaultMessage="Overview"
+                    />
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={section === 'epm'}
+                    href={getHref('integrations_all')}
+                    disabled={!epm?.enabled}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.sendFeedbackButton"
-                      defaultMessage="Send Feedback"
+                      id="xpack.ingestManager.appNavigation.epmLinkText"
+                      defaultMessage="Integrations"
                     />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                {showSettings ? (
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={section === 'agent_config'}
+                    href={getHref('configurations_list')}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.appNavigation.configurationsLinkText"
+                      defaultMessage="Configurations"
+                    />
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={section === 'fleet'}
+                    href={getHref('fleet')}
+                    disabled={!fleet?.enabled}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.appNavigation.fleetLinkText"
+                      defaultMessage="Fleet"
+                    />
+                  </EuiTab>
+                  <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
+                      defaultMessage="Data streams"
+                    />
+                  </EuiTab>
+                </EuiTabs>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" direction="row">
                   <EuiFlexItem>
-                    <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                    <EuiButtonEmpty
+                      iconType="popout"
+                      href="https://ela.st/ingest-manager-feedback"
+                      target="_blank"
+                    >
                       <FormattedMessage
-                        id="xpack.ingestManager.appNavigation.settingsButton"
-                        defaultMessage="Settings"
+                        id="xpack.ingestManager.appNavigation.sendFeedbackButton"
+                        defaultMessage="Send Feedback"
                       />
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Nav>
-        {children}
+                  {showSettings ? (
+                    <EuiFlexItem>
+                      <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                        <FormattedMessage
+                          id="xpack.ingestManager.appNavigation.settingsButton"
+                          defaultMessage="Settings"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Nav>
+          {children}
+        </div>
         <AlphaMessaging />
       </Container>
     </>
