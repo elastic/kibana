@@ -127,6 +127,25 @@ Uptime::
 See <<breaking-changes-7.7,breaking changes in 7.7>>.
 
 [float]
+[[security-update-7.7.0]]
+=== Security updates
+* In 7.7.0 to 7.6.2, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with 
+privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This 
+could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7012.
++
+By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
++
+For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `xpack.upgrade_assistant_enabled:false` in your kibana.yml file to disable the Upgrade Assistant.
+
+* In 7.7.0 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create 
+TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This 
+could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7013.
++
+By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
++
+For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
+
+[float]
 [[known-issues-7.7.0]]
 === Known issues
 
