@@ -17,29 +17,12 @@
  * under the License.
  */
 
-import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { ISearchSetup, ISearchStart } from './types';
-import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../src/plugins/data/public';
 
-export * from './search_source/mocks';
+export interface DemoDataSearchSetupDependencies {
+  data: DataPublicPluginSetup;
+}
 
-const searchSetupMock: jest.Mocked<ISearchSetup> = {
-  aggs: searchAggsSetupMock(),
-  registerSearchStrategy: jest.fn(),
-};
-
-const searchStartMock: jest.Mocked<ISearchStart> = {
-  aggs: searchAggsStartMock(),
-  setInterceptor: jest.fn(),
-  getSearchStrategy: jest.fn(),
-  search: jest.fn(),
-  searchSource: searchSourceMock,
-  __LEGACY: {
-    esClient: {
-      search: jest.fn(),
-      msearch: jest.fn(),
-    },
-  },
-};
-
-export { searchSetupMock, searchStartMock, createSearchSourceMock };
+export interface DemoDataSearchStartDependencies {
+  data: DataPublicPluginStart;
+}
