@@ -5,6 +5,7 @@
  */
 
 /* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable complexity */
 
 import {
   EuiButton,
@@ -403,20 +404,10 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           ExceptionListType.ENDPOINT,
                         ]}
                         commentsAccordionId={'ruleDetailsTabExceptions'}
-                        exceptionListsMeta={[
-                          {
-                            id: '5b543420-a6c3-11ea-989f-53aa81611022',
-                            type: 'endpoint',
-                            namespaceType: 'single',
-                          },
-                          {
-                            id: '98440bc0-a750-11ea-989f-53aa81611022',
-                            type: 'detection',
-                            namespaceType: 'single',
-                          },
-                        ]}
+                        exceptionListsMeta={[]}
                       />
                     )}
+                    {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
                   </WrapperPage>
                 </StickyContainer>
               )}
