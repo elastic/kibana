@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetcher } from '../../../hooks/useFetcher';
+import { ClientMetrics } from './ClientMetrics';
+import { ImpressionTrend } from './ImpressionTrend';
+import { PageLoadDistribution } from './PageLoadDistribution';
 
 export function RumDashboard() {
-  const {
-    date: { avg },
-  } = useFetcher((callApmApi) => {
-    return callApmApi({
-      pathname: '/api/apm/rum-client/metrics',
-      params: {},
-    });
-  }, []);
-
   return (
     <>
       <EuiTitle>
@@ -28,7 +21,15 @@ export function RumDashboard() {
           })}
         </h1>
       </EuiTitle>
-      <EuiStat title={avg ?? '--'} description="Backend" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <ClientMetrics />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <PageLoadDistribution />
+          <ImpressionTrend />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

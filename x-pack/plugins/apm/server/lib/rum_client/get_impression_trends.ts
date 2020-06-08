@@ -13,7 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { IEnvOptions } from '../service_map/get_service_map';
 
-export async function getClientMetrics(options: IEnvOptions) {
+export async function getImpressionTrends(options: IEnvOptions) {
   const { setup } = options;
 
   const projection = getServicesProjection({
@@ -36,21 +36,16 @@ export async function getClientMetrics(options: IEnvOptions) {
         },
       },
       aggs: {
-        pageViews: { value_count: { field: 'transaction.type' } },
-        backEnd: {
-          stats: {
-            field: 'transaction.marks.agent.timeToFirstByte',
-            missing: 0,
+        impressions: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: 50,
           },
-        },
-        frontEnd: {
-          stats: {
-            script: {
-              lang: 'painless',
-              source: `
-              if(doc[\'transaction.marks.agent.timeToFirstByte\'].size()!==0 &&  doc[\'transaction.marks.agent.domInteractive\'].size()!==0)  {
-                  doc[\'transaction.marks.agent.domInteractive\'].value - doc[\'transaction.marks.agent.timeToFirstByte\'].value
-              }`,
+          aggs: {
+            trans_count: {
+              value_count: {
+                field: 'transaction.type',
+              },
             },
           },
         },
@@ -62,5 +57,9 @@ export async function getClientMetrics(options: IEnvOptions) {
 
   const response = await client.search(params);
 
-  return response.aggregations;
+  const result = response.aggregations.impressions.buckets;
+  return result.map(({ key, trans_count }) => ({
+    x: key,
+    y: trans_count.value,
+  }));
 }

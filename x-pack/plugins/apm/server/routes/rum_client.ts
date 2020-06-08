@@ -12,14 +12,13 @@ import {
 } from '../../common/service_map';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
+import { rangeRt } from './default_api_types';
+import { getImpressionTrends } from '../lib/rum_client/get_impression_trends';
+import { getPageLoadDistribution } from '../lib/rum_client/get_page_load_distribution';
 
-export const rumClientRoute = createRoute(() => ({
+export const rumClientMetricsRoute = createRoute(() => ({
   path: '/api/apm/rum-client/metrics',
-  params: {},
   handler: async ({ context, request }) => {
-    if (!context.config['xpack.apm.serviceMapEnabled']) {
-      throw Boom.notFound();
-    }
     if (!isValidPlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
@@ -29,5 +28,35 @@ export const rumClientRoute = createRoute(() => ({
       query: { serviceName, environment },
     } = context.params;
     return getClientMetrics({ setup, serviceName, environment });
+  },
+}));
+
+export const rumPageLoadDistributionRoute = createRoute(() => ({
+  path: '/api/apm/rum-client/page-load-distribution',
+  handler: async ({ context, request }) => {
+    if (!isValidPlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const setup = await setupRequest(context, request);
+    const {
+      query: { serviceName, environment },
+    } = context.params;
+    return getPageLoadDistribution({ setup, serviceName, environment });
+  },
+}));
+
+export const rumImpressionTrendRoute = createRoute(() => ({
+  path: '/api/apm/rum-client/impression-trend',
+  handler: async ({ context, request }) => {
+    if (!isValidPlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const setup = await setupRequest(context, request);
+    const {
+      query: { serviceName, environment },
+    } = context.params;
+    return getImpressionTrends({ setup, serviceName, environment });
   },
 }));
