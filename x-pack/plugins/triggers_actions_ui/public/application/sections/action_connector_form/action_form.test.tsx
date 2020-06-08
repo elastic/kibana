@@ -18,6 +18,9 @@ jest.mock('../../lib/action_connector_api', () => ({
 const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('action_form', () => {
   let deps: any;
+
+  const mockedActionParamsFields = () => <Fragment />;
+
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
@@ -41,7 +44,7 @@ describe('action_form', () => {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
   const disabledByConfigActionType = {
@@ -56,7 +59,7 @@ describe('action_form', () => {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
   const disabledByLicenseActionType = {
@@ -71,11 +74,26 @@ describe('action_form', () => {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
   const preconfiguredOnly = {
     id: 'preconfigured',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+  };
+
+  const actionTypeWithoutParams = {
+    id: 'my-action-type-without-params',
     iconClass: 'test',
     selectMessage: 'test',
     validateConnector: (): ValidationResult => {
@@ -153,6 +171,7 @@ describe('action_form', () => {
         disabledByConfigActionType,
         disabledByLicenseActionType,
         preconfiguredOnly,
+        actionTypeWithoutParams,
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
@@ -236,6 +255,14 @@ describe('action_form', () => {
               enabledInConfig: true,
               enabledInLicense: false,
               minimumLicenseRequired: 'gold',
+            },
+            {
+              id: actionTypeWithoutParams.id,
+              name: 'Action type without params',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
           ]}
           toastNotifications={deps!.toastNotifications}
@@ -339,6 +366,14 @@ describe('action_form', () => {
           .find('EuiToolTip [data-test-subj="disabled-by-license-ActionTypeSelectOption"]')
           .exists()
       ).toBeTruthy();
+    });
+
+    it(`shouldn't render action types without params component`, async () => {
+      await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
+      );
+      expect(actionOption.exists()).toBeFalsy();
     });
   });
 });
