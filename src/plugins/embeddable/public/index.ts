@@ -70,7 +70,7 @@ export {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   EmbeddableRenderer,
-  EmeddableRendererProps,
+  EmbeddableRendererProps,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
