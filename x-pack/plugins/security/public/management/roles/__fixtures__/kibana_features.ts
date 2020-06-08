@@ -7,12 +7,10 @@
 import { Feature, FeatureConfig } from '../../../../../features/public';
 
 export const createFeature = (
-  config: Pick<
-    FeatureConfig,
-    'id' | 'name' | 'privileges' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
-  > & {
+  config: Pick<FeatureConfig, 'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'> & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
+    privileges?: FeatureConfig['privileges'];
   }
 ) => {
   const { excludeFromBaseAll, excludeFromBaseRead, privileges, ...rest } = config;
