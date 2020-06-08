@@ -17,7 +17,7 @@ It is enabled by default.
 
 [float]
 [[apm-indices-settings-kb]]
-==== APM Indices
+==== APM indices
 
 // This content is reused in the APM app documentation.
 // Any changes made in this file will be seen there as well.
