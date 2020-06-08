@@ -70,7 +70,7 @@ async function handleAllowlistManifest(context, req, res) {
         .update(JSON.stringify(manifestResp), 'utf8')
         .digest('hex');
 
-      return res.ok({ headers: { 'e-tag': manifestHash } });
+      return res.ok({ headers: { ETag: manifestHash } });
     }
 
     // transform and validate response
