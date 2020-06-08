@@ -90,6 +90,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentData, agentId, getHref]
   );
 
@@ -141,6 +142,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           ))}
         </EuiFlexGroup>
       ) : undefined,
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentConfigData, agentData, getHref, isAgentConfigLoading]
   );
 

@@ -30,6 +30,7 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
         inputId,
         inspect: null,
         loading: false,
+        /* eslint-disable-next-line react-hooks/rules-of-hooks */
         refetch: useUpdateKql({
           indexPattern,
           kueryFilterQuery,
@@ -38,6 +39,7 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
           timelineId: id,
         }),
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [kueryFilterQueryDraft, kueryFilterQuery, id]);
     return null;
   },

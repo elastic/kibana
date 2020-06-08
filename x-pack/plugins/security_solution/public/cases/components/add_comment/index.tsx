@@ -59,6 +59,7 @@ export const AddComment = React.memo<AddCommentProps>(
           `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [insertQuote]);
 
     const onSubmit = useCallback(async () => {
@@ -67,9 +68,10 @@ export const AddComment = React.memo<AddCommentProps>(
         if (onCommentSaving != null) {
           onCommentSaving();
         }
-        await postComment(data, onCommentPosted);
+        postComment(data, onCommentPosted);
         form.reset();
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form, onCommentPosted, onCommentSaving]);
     return (
       <span id="add-comment-permLink">
