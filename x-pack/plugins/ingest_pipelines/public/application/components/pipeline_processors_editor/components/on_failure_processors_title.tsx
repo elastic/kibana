@@ -8,13 +8,10 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export interface Props {
-  learnMoreAboutOnFailureProcessorsUrl: string;
-}
+import { usePipelineProcessorsContext } from '../context';
 
-export const OnFailureProcessorsTitle: FunctionComponent<Props> = ({
-  learnMoreAboutOnFailureProcessorsUrl,
-}) => {
+export const OnFailureProcessorsTitle: FunctionComponent = () => {
+  const { links } = usePipelineProcessorsContext();
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -37,7 +34,7 @@ export const OnFailureProcessorsTitle: FunctionComponent<Props> = ({
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={learnMoreAboutOnFailureProcessorsUrl} target="_blank">
+                <EuiLink href={links.learnMoreAboutOnFailureProcessorsUrl} target="_blank">
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.onFailureProcessorsDocumentationLink',
                     {

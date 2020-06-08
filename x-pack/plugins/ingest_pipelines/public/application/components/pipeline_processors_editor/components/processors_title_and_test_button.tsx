@@ -9,8 +9,9 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { usePipelineProcessorsContext } from '../context';
+
 export interface Props {
-  learnMoreAboutProcessorsUrl: string;
   onTestPipelineClick: () => void;
   isTestButtonDisabled: boolean;
 }
@@ -18,8 +19,8 @@ export interface Props {
 export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
   onTestPipelineClick,
   isTestButtonDisabled,
-  learnMoreAboutProcessorsUrl,
 }) => {
+  const { links } = usePipelineProcessorsContext();
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -41,7 +42,7 @@ export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={learnMoreAboutProcessorsUrl} target="_blank">
+                <EuiLink href={links.learnMoreAboutProcessorsUrl} target="_blank">
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {

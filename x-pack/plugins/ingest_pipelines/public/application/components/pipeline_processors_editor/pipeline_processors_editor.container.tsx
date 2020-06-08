@@ -9,7 +9,10 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { Processor } from '../../../../common/types';
 
 import { deserialize } from './deserialize';
+
 import { useProcessorsState } from './processors_reducer';
+
+import { PipelineProcessorsContextProvider } from './context';
 
 import { OnUpdateHandlerArg } from './types';
 
@@ -45,7 +48,9 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   const { processors, onFailure } = processorsState;
 
   return (
-    <>
+    <PipelineProcessorsContextProvider
+      links={{ learnMoreAboutOnFailureProcessorsUrl, learnMoreAboutProcessorsUrl }}
+    >
       <PipelineProcessorsEditorUI
         onUpdate={onUpdate}
         processors={processors}
@@ -53,9 +58,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         processorsDispatch={processorsDispatch}
         isTestButtonDisabled={isTestButtonDisabled}
         onTestPipelineClick={onTestPipelineClick}
-        learnMoreAboutProcessorsUrl={learnMoreAboutProcessorsUrl}
-        learnMoreAboutOnFailureProcessorsUrl={learnMoreAboutOnFailureProcessorsUrl}
       />
-    </>
+    </PipelineProcessorsContextProvider>
   );
 };

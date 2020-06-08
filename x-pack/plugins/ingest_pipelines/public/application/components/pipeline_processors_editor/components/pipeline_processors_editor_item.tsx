@@ -20,6 +20,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ProcessorInternal } from '../types';
 
+import { usePipelineProcessorsContext } from '../context';
+
 export interface Handlers {
   onMove: () => void;
   onCancelMove: () => void;
@@ -43,6 +45,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     handlers: { onMove, onCancelMove, onAddOnFailure, onEdit, onDelete, onDuplicate },
     selected,
   }) => {
+    const { links } = usePipelineProcessorsContext();
     return (
       <EuiFlexGroup
         gutterSize="none"
@@ -70,7 +73,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                     </EuiCode>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    {/* TODO: Add link in href below */}
                     <EuiToolTip
                       position="top"
                       content={
@@ -85,7 +87,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                         />
                       }
                     >
-                      <EuiLink target="_blank" href="">
+                      <EuiLink target="_blank" href={links.learnMoreAboutProcessorsUrl}>
                         <EuiIcon color="primary" size="s" type="questionInCircle" />
                       </EuiLink>
                     </EuiToolTip>

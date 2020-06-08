@@ -49,8 +49,6 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
-  learnMoreAboutProcessorsUrl: string;
-  learnMoreAboutOnFailureProcessorsUrl: string;
 }
 
 const PROCESSOR_STATE_SCOPE: ProcessorSelector = ['processors'];
@@ -62,9 +60,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     onFailureProcessors,
     processorsDispatch,
     onTestPipelineClick,
-    learnMoreAboutProcessorsUrl,
     isTestButtonDisabled,
-    learnMoreAboutOnFailureProcessorsUrl,
     onUpdate,
   }) {
     const [processorToDeleteSelector, setProcessorToDeleteSelector] = useState<
@@ -206,7 +202,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
         <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
           <EuiFlexItem grow={false}>
             <ProcessorsTitleAndTestButton
-              learnMoreAboutProcessorsUrl={learnMoreAboutProcessorsUrl}
               onTestPipelineClick={onTestPipelineClick}
               isTestButtonDisabled={isTestButtonDisabled}
             />
@@ -259,9 +254,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             <EuiSpacer size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <OnFailureProcessorsTitle
-              learnMoreAboutOnFailureProcessorsUrl={learnMoreAboutOnFailureProcessorsUrl}
-            />
+            <OnFailureProcessorsTitle />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
