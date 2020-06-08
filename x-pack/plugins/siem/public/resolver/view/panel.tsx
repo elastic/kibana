@@ -64,7 +64,7 @@ const EventCountsForProcess = memo(function EventCountsForProcess(){
       </EuiTitle>
     </>
   )
-})
+});
 
 const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryParams}: {
   pushToQueryParams: (arg0: crumbInfo)=>unknown
@@ -86,7 +86,7 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
           process: processTableViewItem.event,
         },
       });
-      pushToQueryParams({crumbId: event.entityId(processTableViewItem.event), crumbEvent: ''});
+      pushToQueryParams({crumbId: event.entityId(processTableViewItem.event), crumbEvent: 'all'});
     },
     [dispatch, timestamp, pushToQueryParams]
   );
@@ -208,13 +208,8 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
   }
 `;
 
-const ProcessDetails = memo(function ProcessListWithCounts() {
+const ProcessDetails = memo(function ProcessListWithCounts({processEvent} : {processEvent: ResolverEvent}) {
   console.log('rendering process details');
-  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
-  const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
-  const [processEvent] = useMemo(()=>{
-    return [...processNodePositions.keys()].filter(processEvent=>event.entityId(processEvent)===selectedDescendantProcessId);  
-  },[processNodePositions, selectedDescendantProcessId]);
   const processName = processEvent && event.eventName(processEvent);
   const processInfoEntry = useMemo(() =>{
     let dateTime = '';
@@ -258,7 +253,7 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
       .map(([title,description])=>{ 
         return {title, description: String(description)}
       });
-  }, [processNodePositions,selectedDescendantProcessId,processEvent]);
+  }, [processEvent]);
   
   
   /**
@@ -271,7 +266,7 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
     }
     return cubeAssetsForNode(processEvent);
   },
-  [processEvent])
+  [processEvent]);
   
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
@@ -332,29 +327,35 @@ const PanelContent = memo(function PanelContent() {
    * dispatch a selection action to repair the UI to hold the query id as "selected".
    * This is to cover cases where users e.g. share links to reconstitute a Resolver state and it _should never run otherwise_ under the assumption that the query parameters are updated along with the selection in state
   */
+  const idFromParams = useMemo(()=>{
+    const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
+    return (graphableProcessEntityIds.has(queryParams.crumbId) && queryParams.crumbId) || (graphableProcessEntityIds.has(queryParams.crumbEvent) && queryParams.crumbEvent);
+  },[graphableProcesses, queryParams]);
+
+  const uiSelectedEvent = useMemo(()=>{
+    return graphableProcesses.find(evt=>event.entityId(evt)===selectedDescendantProcessId);
+  },[graphableProcesses, selectedDescendantProcessId]);
+
   useLayoutEffect(() => {
     if(lockNodeSelectionByParam){
       return;
     }
     console.log('running layout effect');
-    const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
-    console.log('all ids: ', graphableProcessEntityIds);
-    const idOnTree = (graphableProcessEntityIds.has(queryParams.crumbId) && queryParams.crumbId) || (graphableProcessEntityIds.has(queryParams.crumbEvent) && queryParams.crumbEvent);
-    console.log('id on tree:', idOnTree);
-     if(idOnTree && idOnTree !== selectedDescendantProcessId) {
-      const nodeId = htmlIdGenerator('resolverNode')(idOnTree);
+    console.log('id on tree:', idFromParams);
+     if(idFromParams && idFromParams !== selectedDescendantProcessId) {
+      const nodeId = htmlIdGenerator('resolverNode')(idFromParams);
       //Prevent this effect from running again:
       lockNodeSelectionByParam = true;
       dispatch({
         type: 'userSelectedResolverNode',
         payload: {
           nodeId,
-          selectedProcessId: idOnTree,
+          selectedProcessId: idFromParams,
         },
       });
      }
   }, [dispatch, selectedDescendantProcessId, queryParams, graphableProcesses]);
-
+;
   /**
    * This updates the breadcrumb nav, the table view and URL history
    */
@@ -372,7 +373,7 @@ const PanelContent = memo(function PanelContent() {
       crumbsToPass.crumbEvent === '' && delete crumbsToPass.crumbEvent;
       const relativeURL = {search: querystring.stringify(crumbsToPass)};
       
-      return history.push(relativeURL);
+      return history.replace(relativeURL);
     },
     [history, queryParams]
   );
@@ -386,12 +387,11 @@ const PanelContent = memo(function PanelContent() {
     const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
     const {crumbId, crumbEvent} = queryParams;
     if(graphableProcessEntityIds.has(crumbEvent)){
-      const processSubject = graphableProcesses.find(evt=>event.entityId(evt)===crumbEvent);
-      if(!processSubject){
+      if(!uiSelectedEvent){
         //should never happen, but bail out to default
         return console.log('default'), (<ProcessListWithCounts pushToQueryParams={pushToQueryParams} />);
       }
-      const relatedEventsState = relatedEvents.get(processSubject)!;
+      const relatedEventsState = relatedEvents.get(uiSelectedEvent)!;
       if(relatedEventsState === 'waitingForRelatedEventData'){
         //Related event data hasn't been fetched for this process yet:
         //The UI around the menu should dispatch the /events effect for this.
@@ -415,10 +415,14 @@ const PanelContent = memo(function PanelContent() {
       }
     }
     else if(graphableProcessEntityIds.has(crumbId)) {
+      if(!uiSelectedEvent){
+        //should never happen, but bail out to default
+        return console.log('default'), (<ProcessListWithCounts pushToQueryParams={pushToQueryParams} />);
+      }
       if(crumbEvent === ''){
         //If there is no crumbEvent param, it's for the process detail
         //Note: this view should handle its own effect for requesting /events
-        return console.log('processDetail'), <ProcessDetails />;
+        return console.log('processDetail'), <ProcessDetails processEvent={uiSelectedEvent} />;
       }
       if(crumbEvent === 'all'){
         //If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
@@ -432,10 +436,7 @@ const PanelContent = memo(function PanelContent() {
     }
     //The default 'Event List' / 'List of all processes' view
     return console.log('default'),(<ProcessListWithCounts pushToQueryParams={pushToQueryParams} />);
-  },[queryParams,graphableProcesses,relatedEvents]);
-
-  
-  console.log(queryParams);
+  },[queryParams,graphableProcesses,relatedEvents, uiSelectedEvent]);
 
   return (
     <>{whichTableViewAndBreadcrumbsToRender}</>

@@ -13,7 +13,7 @@ import {
 import { AlertConstants } from '../../../common/endpoint_alerts/alert_constants';
 import { ImmutableMiddlewareFactory } from '../../common/store';
 import { cloneHttpFetchQuery } from '../../common/utils/clone_http_fetch_query';
-import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams, selectedAlertHasChanged } from './selectors';
+import { isOnAlertPage, apiQueryParams, uiQueryParams, selectedAlertHasChanged } from './selectors';
 import { Immutable } from '../../../common/endpoint/types';
 
 export const alertMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<AlertListState>> = (
