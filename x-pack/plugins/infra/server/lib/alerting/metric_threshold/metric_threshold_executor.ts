@@ -338,6 +338,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           alertState: stateToAlertMessage[nextState],
           reason,
           timestamp: moment().toISOString(),
+          value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
+          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
 
@@ -354,3 +357,14 @@ export const FIRED_ACTIONS = {
     defaultMessage: 'Fired',
   }),
 };
+
+const mapToConditionsLookup = (
+  list: any[],
+  mapFn: (value: any, index: number, array: any[]) => unknown
+) =>
+  list
+    .map(mapFn)
+    .reduce(
+      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
+      {}
+    );

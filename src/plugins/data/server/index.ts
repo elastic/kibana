@@ -146,6 +146,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../common';
 
 /**

@@ -59,6 +59,7 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
     return () => {
       deleteAllQuery({ id: 'global' });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
