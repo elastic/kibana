@@ -36,7 +36,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-// jest.spyOn(all, 'useGetUserSavedObjectPermissions').mockImplementation(() => ({}));
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {

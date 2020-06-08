@@ -151,7 +151,7 @@ describe('AllCases', () => {
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
-    getCasesColumns([], 'open').map((i, key) => i.name != null && checkIt(`${i.name}`, key));
+    getCasesColumns([], 'open', false).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
   });
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(

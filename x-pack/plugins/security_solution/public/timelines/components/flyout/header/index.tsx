@@ -22,7 +22,6 @@ import { timelineDefaults } from '../../../../timelines/store/timeline/defaults'
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 
 interface OwnProps {
-  onClose: () => void;
   timelineId: string;
   usersViewing: string[];
 }
@@ -39,7 +38,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
     isFavorite,
     noteIds,
     notesById,
-    onClose,
     status,
     timelineId,
     title,
@@ -64,7 +62,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
         isDatepickerLocked={isDatepickerLocked}
         isFavorite={isFavorite}
         noteIds={noteIds}
-        onClose={onClose}
         status={status}
         timelineId={timelineId}
         title={title}
