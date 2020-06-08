@@ -29,6 +29,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   const logEntryRateSeries = useMemo(
     () =>
       results?.histogramBuckets ? getLogEntryRateSeriesForPartition(results, partitionId) : [],
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [results, partitionId]
   );
   const anomalyAnnotations = useMemo(
@@ -41,6 +42,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             major: [],
             critical: [],
           },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [results, partitionId]
   );
   const totalNumberOfLogEntries = useMemo(
@@ -48,6 +50,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
       results?.histogramBuckets
         ? getTotalNumberOfLogEntriesForPartition(results, partitionId)
         : undefined,
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [results, partitionId]
   );
   return (
