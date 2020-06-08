@@ -4137,11 +4137,6 @@
   resolved "https://registry.yarnpkg.com/@types/http-cache-semantics/-/http-cache-semantics-4.0.0.tgz#9140779736aa2655635ee756e2467d787cfe8a2a"
   integrity sha512-c3Xy026kOF7QOTn00hbIllV1dLR9hG9NkSrLQgCVs8NF6sBU+VGWjD3wLPhmh1TYAc7ugCFsvHYMN4VcBN1U1A==
 
-"@types/indent-string@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/indent-string/-/indent-string-3.0.0.tgz#9ebb391ceda548926f5819ad16405349641b999f"
-  integrity sha1-nrs5HO2lSJJvWBmtFkBTSWQbmZ8=
-
 "@types/inert@^5.1.2":
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/@types/inert/-/inert-5.1.2.tgz#2bb8bef3b2462f904c960654c9edfa39285a85c6"
@@ -5125,11 +5120,6 @@
     "@types/uglify-js" "*"
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
-
-"@types/wrap-ansi@^2.0.15":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@types/wrap-ansi/-/wrap-ansi-2.0.15.tgz#87affc11a46864cb6853b642e89363633d544aa7"
-  integrity sha512-kPagHsyqrq5Qg4dSbxFmcX8ea0JYs43PfBcuKK53LT4XTZxbvGnmnY6U6a5QgySb5lEGYiqpg0/HESvTYrlzyQ==
 
 "@types/write-pkg@^3.1.0":
   version "3.1.0"
