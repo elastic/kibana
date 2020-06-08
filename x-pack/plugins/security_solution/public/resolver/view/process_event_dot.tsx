@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -404,7 +404,7 @@ const ProcessEventDotComponents = React.memo(
       });
     }, [animationTarget, dispatch, nodeId]);
 
-    useEffect(() => {
+    const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
         payload: event,
@@ -422,7 +422,6 @@ const ProcessEventDotComponents = React.memo(
      * generally in the form `number of related events in category` `category title`
      * e.g. "10 DNS", "230 File"
      */
-    const [isShowingRelatedEvents, updateIsShowingRelatedEvents] = useState(false);
     const relatedEventOptions = useMemo(() => {
       if (!relatedEventsStats) {
         // Return an empty set of options if there are no stats to report
@@ -577,16 +576,15 @@ const ProcessEventDotComponents = React.memo(
                   margin: 0,
                 }}
               >
-                {isShowingRelatedEvents && (
-                  <EuiFlexItem grow={false} className="related-dropdown">
-                    <NodeSubMenu
-                      buttonBorderColor={labelButtonFill}
-                      buttonFill={colorMap.resolverBackground}
-                      menuTitle={subMenuAssets.relatedEvents.title}
-                      optionsWithActions={relatedEventStatusOrOptions}
-                    />
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem grow={false} className="related-dropdown">
+                  <NodeSubMenu
+                    buttonBorderColor={labelButtonFill}
+                    buttonFill={colorMap.resolverBackground}
+                    menuAction={handleRelatedEventRequest}
+                    menuTitle={subMenuAssets.relatedEvents.title}
+                    optionsWithActions={relatedEventStatusOrOptions}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NodeSubMenu
                     buttonBorderColor={labelButtonFill}
