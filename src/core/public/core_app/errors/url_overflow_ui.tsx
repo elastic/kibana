@@ -20,67 +20,54 @@
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiHorizontalRule } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 import { IBasePath } from '../../http';
 import { IS_IE } from './url_overflow';
 
 export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) => {
   return (
-    <React.Fragment>
-      <EuiText>
-        <p>
+    <EuiText textAlign="left">
+      <p>
+        <FormattedMessage
+          id="core.ui.errorUrlOverflow.optionsToFixErrorDescription"
+          defaultMessage="Things to try:"
+        />
+      </p>
+
+      <ul>
+        <li>
           <FormattedMessage
-            id="core.ui.errorUrlOverflow.errorDescription"
-            defaultMessage="The URL for this dashboard is too long, and we can't display the dashboard."
+            id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText"
+            defaultMessage="Enable the {storeInSessionStorageConfig} option in {kibanaSettingsLink}."
+            values={{
+              storeInSessionStorageConfig: <code>state:storeInSessionStorage</code>,
+              kibanaSettingsLink: (
+                <a href={basePath.prepend('/app/management/kibana/settings')}>
+                  <FormattedMessage
+                    id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText"
+                    defaultMessage="Advanced Settings"
+                  />
+                </a>
+              ),
+            }}
           />
-        </p>
-      </EuiText>
-
-      <EuiHorizontalRule size="half" />
-
-      <EuiText textAlign="left">
-        <p>
+        </li>
+        <li>
           <FormattedMessage
-            id="core.ui.errorUrlOverflow.optionsToFixErrorDescription"
-            defaultMessage="Things to try:"
+            id="core.ui.errorUrlOverflow.optionsToFixError.removeStuffFromDashboardText"
+            defaultMessage="Simplify the object you are editing by removing content or filters."
           />
-        </p>
-
-        <ol>
+        </li>
+        {IS_IE && (
           <li>
             <FormattedMessage
-              id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText"
-              defaultMessage="Enable the {storeInSessionStorageConfig} option in the {kibanaSettingsLink}."
-              values={{
-                storeInSessionStorageConfig: <code>state:storeInSessionStorage</code>,
-                kibanaSettingsLink: (
-                  <a href={basePath.prepend('/app/management/kibana/settings')}>
-                    <FormattedMessage
-                      id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText"
-                      defaultMessage="Advanced Settings"
-                    />
-                  </a>
-                ),
-              }}
+              id="core.ui.errorUrlOverflow.optionsToFixError.doNotUseIEText"
+              defaultMessage="Upgrade to a modern browser. Every other supported browser we know of doesn't have this limit."
             />
           </li>
-          <li>
-            <FormattedMessage
-              id="core.ui.errorUrlOverflow.optionsToFixError.removeStuffFromDashboardText"
-              defaultMessage="Remove content from your dashboard. This error occurs only for complex dashboards."
-            />
-          </li>
-          {IS_IE && (
-            <li>
-              <FormattedMessage
-                id="core.ui.errorUrlOverflow.optionsToFixError.doNotUseIEText"
-                defaultMessage="Upgrade to a modern browser. Every other supported browser we know of doesn't have this limit."
-              />
-            </li>
-          )}
-        </ol>
-      </EuiText>
-    </React.Fragment>
+        )}
+      </ul>
+    </EuiText>
   );
 };

@@ -35,7 +35,7 @@ describe('url overflow detection', () => {
   let history: History;
   let toasts: jest.Mocked<IToasts>;
   let uiSettings: jest.Mocked<IUiSettingsClient>;
-  let reloadSpy: jest.SpyInstance<void, [boolean]>;
+  let assignSpy: jest.SpyInstance<void, [string]>;
   let unlisten: any;
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe('url overflow detection', () => {
     uiSettings = uiSettingsServiceMock.createStartContract();
 
     // No-op mock impl to avoid jsdom warning about navigation not being implemented
-    reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(() => {});
+    assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(() => {});
 
     unlisten = setupUrlOverflowDetection({
       basePath,
@@ -57,21 +57,19 @@ describe('url overflow detection', () => {
 
   afterEach(() => {
     unlisten();
-    reloadSpy.mockRestore();
+    assignSpy.mockRestore();
   });
 
   it('redirects to error page when URL is too long', () => {
     history.push(longUrl);
-    expect(history.location.pathname).toEqual('/app/error');
-    expect(history.location.search).toEqual('?errorType=urlOverflow');
-    expect(reloadSpy).toHaveBeenCalled();
+    expect(assignSpy).toHaveBeenCalledWith('/app/error?errorType=urlOverflow');
   });
 
   it('displays a toast if URL exceeds warning threshold', () => {
     const warningUrl = '/' + 'a'.repeat(URL_WARNING_LENGTH);
     history.push(warningUrl);
     expect(history.location.pathname).toEqual(warningUrl);
-    expect(reloadSpy).not.toHaveBeenCalled();
+    expect(assignSpy).not.toHaveBeenCalled();
     expect(toasts.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'The URL is big and Kibana might stop working',
@@ -104,7 +102,7 @@ describe('url overflow detection', () => {
   it('does not redirect or show warning if URL is not too long', () => {
     history.push('/regular-length-url');
     expect(history.location.pathname).toEqual('/regular-length-url');
-    expect(reloadSpy).not.toHaveBeenCalled();
+    expect(assignSpy).not.toHaveBeenCalled();
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 
@@ -112,18 +110,18 @@ describe('url overflow detection', () => {
     uiSettings.get.mockReturnValue(true);
     history.push(longUrl);
     expect(history.location.pathname).toEqual(longUrl);
-    expect(reloadSpy).not.toHaveBeenCalled();
+    expect(assignSpy).not.toHaveBeenCalled();
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 
-  it('does not redirect or show arning if already on the error page', () => {
+  it('does not redirect or show warning if already on the error page', () => {
     history.push('/app/error');
     const longQueryParam = 'a'.repeat(URL_MAX_LENGTH);
     const longErrorUrl = `/app/error?q=${longQueryParam}`;
     history.push(longErrorUrl);
     expect(history.location.pathname).toEqual('/app/error');
     expect(history.location.search).toEqual(`?q=${longQueryParam}`);
-    expect(reloadSpy).not.toHaveBeenCalled();
+    expect(assignSpy).not.toHaveBeenCalled();
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 });

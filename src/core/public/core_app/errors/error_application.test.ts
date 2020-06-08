@@ -53,7 +53,9 @@ describe('renderApp', () => {
     act(() => {
       history.push('/app/error?errorType=urlOverflow');
     });
-    expect(element.querySelector('.euiTitle')!.innerHTML).toMatchInlineSnapshot(`"Woah there!"`);
-    expect(element.innerHTML).toMatch("That's a big URL you have there");
+    expect(element.querySelector('.euiTitle')!.innerHTML).toMatchInlineSnapshot(
+      `"The URL for this object is too long, and we can't display it"`
+    );
+    expect(element.innerHTML).toMatch('Things to try');
   });
 });

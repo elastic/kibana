@@ -69,7 +69,7 @@ const ErrorApp: React.FC<{ basePath: IBasePath; history: History }> = ({ basePat
     return (
       <ErrorPage
         title={i18n.translate('core.ui.errorUrlOverflow.errorTitle', {
-          defaultMessage: 'Woah there!',
+          defaultMessage: "The URL for this object is too long, and we can't display it",
         })}
       >
         <UrlOverflowUi basePath={basePath} />

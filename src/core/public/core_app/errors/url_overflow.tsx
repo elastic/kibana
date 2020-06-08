@@ -28,7 +28,6 @@ import { IToasts } from '../../notifications';
 import { IBasePath } from '../../http';
 import { IUiSettingsClient } from '../../ui_settings';
 
-// Exported for testing only
 const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 export const IS_IE = IE_REGEX.test(window.navigator.userAgent);
 /**
@@ -61,9 +60,14 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
     const absUrlLength = absUrl.length;
 
     if (absUrlLength > URL_MAX_LENGTH) {
-      history.push(`${ERROR_ROUTE}?errorType=urlOverflow`);
+      const href = history.createHref({
+        pathname: ERROR_ROUTE,
+        search: `errorType=urlOverflow`,
+      });
       // Force the browser to reload so that any potentially unstable state is unloaded
-      window.location.reload();
+      window.location.assign(href);
+      // window.location.href = href;
+      // window.location.reload();
     } else if (absUrlLength >= URL_WARNING_LENGTH) {
       toasts.addWarning({
         title: i18n.translate('core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle', {
