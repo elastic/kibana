@@ -64,7 +64,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   const selected = selectedProcessorInfo?.id === processor.id;
 
   const panelClasses = classNames({
-    'processorsEditor__tree__item--selected': selected,
+    'pipelineProcessorsEditor__tree__item--selected': selected,
   });
 
   return (
@@ -74,14 +74,17 @@ export const TreeNode: FunctionComponent<Props> = ({
         handlers={handlers}
         selected={Boolean(selectedProcessorInfo?.id === processor.id)}
       />
-      {processor.onFailure?.length && (
+      {processor.onFailure?.length ? (
         <div style={{ marginLeft: `${level * 30}px` }}>
           <EuiAccordion
-            className="processorsEditor__tree__onFailureHandlerContainer"
+            className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
             id={`onFailureHandlers-${processor.id}`}
             initialIsOpen
             buttonContent={
-              <EuiText className="processorsEditor__tree__onFailureHandlerLabel" color="subdued">
+              <EuiText
+                className="pipelineProcessorsEditor__tree__onFailureHandlerLabel"
+                color="subdued"
+              >
                 {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
                   defaultMessage: 'Failure Handlers',
                 })}
@@ -98,7 +101,7 @@ export const TreeNode: FunctionComponent<Props> = ({
             />
           </EuiAccordion>
         </div>
-      )}
+      ) : undefined}
     </EuiPanel>
   );
 };

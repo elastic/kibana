@@ -3,13 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import uuid from 'uuid';
 import { State } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from '../types';
 import { DropSpecialLocations } from '../constants';
 import { checkIfSamePath, getValue } from '../utils';
 
 export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
+
+export const duplicateProcessor = (sourceProcessor: ProcessorInternal): ProcessorInternal => {
+  const onFailure = sourceProcessor.onFailure
+    ? sourceProcessor.onFailure.map(duplicateProcessor)
+    : undefined;
+  return {
+    ...sourceProcessor,
+    onFailure,
+    id: uuid.v4(),
+    options: {
+      ...sourceProcessor.options,
+    },
+  };
+};
 
 export const isChildPath = (a: ProcessorSelector, b: ProcessorSelector) => {
   return a.every((pathSegment, idx) => pathSegment === b[idx]);
@@ -74,7 +88,7 @@ export const unsafeProcessorMove = (
 
     // If onFailure is empty, delete the array.
     if (!sourceProcessors.length && !((sourceProcessor as unknown) as State).isRoot) {
-      sourceProcessor.onFailure = undefined;
+      delete sourceProcessor.onFailure;
     }
   } else {
     destinationProcessors.splice(destIndex, 0, processor);

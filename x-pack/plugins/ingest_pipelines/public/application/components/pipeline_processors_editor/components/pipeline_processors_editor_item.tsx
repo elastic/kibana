@@ -40,7 +40,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       >
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} className="processorsEditor__tree__item__name">
+            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
               <b>{processor.type}</b>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -186,6 +186,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     return (
       prev.handlers === current.handlers &&
       prev.processor.id === current.processor.id &&
+      prev.processor.type === current.processor.type &&
       prev.selected === current.selected
     );
   }

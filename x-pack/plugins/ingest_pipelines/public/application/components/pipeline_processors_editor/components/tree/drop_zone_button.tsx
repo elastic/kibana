@@ -20,16 +20,18 @@ const MOVE_HERE_COPY = i18n.translate('xpack.ingestPipelines.pipelineEditor.move
 
 export const DropZoneButton: FunctionComponent<Props> = ({ isDisabled, onClick }) => {
   const containerClasses = classNames({
-    'processorsEditor__tree__dropZoneContainer--active': !isDisabled,
+    'pipelineProcessorsEditor__tree__dropZoneContainer--active': !isDisabled,
   });
   const buttonClasses = classNames({
-    'processorsEditor__tree__dropZoneButton--active': !isDisabled,
+    'pipelineProcessorsEditor__tree__dropZoneButton--active': !isDisabled,
   });
 
   return (
-    <EuiFlexItem className={`processorsEditor__tree__dropZoneContainer ${containerClasses}`}>
+    <EuiFlexItem
+      className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}
+    >
       <EuiButtonEmpty
-        className={`processorsEditor__tree__dropZoneButton ${buttonClasses}`}
+        className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
         aria-label={MOVE_HERE_COPY}
         disabled={isDisabled}
         onClick={onClick}

@@ -10,7 +10,7 @@ import { DeserializeResult } from '../deserialize';
 import { getValue, setValue } from '../utils';
 import { ProcessorInternal, ProcessorSelector } from '../types';
 
-import { unsafeProcessorMove } from './utils';
+import { unsafeProcessorMove, duplicateProcessor } from './utils';
 
 export type State = Omit<DeserializeResult, 'onFailure'> & {
   onFailure: ProcessorInternal[];
@@ -116,13 +116,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const sourceProcessorsArray = [
       ...getValue<ProcessorInternal[]>(sourceProcessorsArraySelector, state),
     ];
-    const copy: ProcessorInternal = {
-      ...sourceProcessor,
-      id: uuid.v4(),
-      options: {
-        ...sourceProcessor.options,
-      },
-    };
+    const copy = duplicateProcessor(sourceProcessor);
     sourceProcessorsArray.splice(sourceIdx + 1, 0, copy);
     return setValue(sourceProcessorsArraySelector, state, sourceProcessorsArray);
   }
