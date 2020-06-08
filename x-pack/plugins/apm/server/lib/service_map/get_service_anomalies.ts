@@ -50,7 +50,7 @@ export async function getServiceAnomalies(
     return [];
   }
 
-  const apmMlJobs = await ml.mlJobs('apm');
+  const { jobs: apmMlJobs } = await ml.anomalyDetectors.jobs('apm');
   const apmMlJobCategories = apmMlJobs
     .map((job) => getApmMlJobCategory(job, serviceNames))
     .filter(
@@ -91,7 +91,7 @@ export async function getServiceAnomalies(
     },
   };
 
-  const response = await ml.mlAnomalySearch(params);
+  const response = await ml.mlSystem.mlAnomalySearch(params);
   const anomalyScores: Array<{
     jobId: string;
     anomalyScore: number;
@@ -109,7 +109,7 @@ export async function getServiceAnomalies(
     ({ jobId, timestamp }) => {
       return (async () => {
         try {
-          const modelPlotResponse = await ml.mlAnomalySearch({
+          const modelPlotResponse = await ml.mlSystem.mlAnomalySearch({
             body: {
               size: 1,
               query: {

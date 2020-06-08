@@ -119,8 +119,7 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
 const ANOMALY_DETECTION_NO_DATA_TEXT = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverNoData',
   {
-    defaultMessage:
-      'No anomaly score found with the current filters. See details in the anomaly explorer:',
+    defaultMessage: `We couldn't find an anomaly score within the selected time range. See details in the anomaly explorer.`,
   }
 );
 

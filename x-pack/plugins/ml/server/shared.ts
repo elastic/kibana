@@ -5,4 +5,4 @@
  */
 
 export * from '../common/types/anomalies';
-export { Job } from '../common/types/anomaly_detection_jobs';
+export * from '../common/types/anomaly_detection_jobs';
