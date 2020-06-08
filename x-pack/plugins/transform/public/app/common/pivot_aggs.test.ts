@@ -44,4 +44,29 @@ describe('getAggConfigFromEsAgg', () => {
       },
     });
   });
+
+  test('should resolve sub-aggregations', () => {
+    const esConfig = {
+      filter: {
+        term: { region: 'sa-west-1' },
+      },
+      aggs: {
+        test_avg: {
+          avg: {
+            field: 'test_field',
+          },
+        },
+      },
+    };
+
+    const result = getAggConfigFromEsAgg(esConfig, 'test_3');
+
+    expect(result.subAggs!.test_avg).toEqual({
+      agg: 'avg',
+      aggName: 'test_avg',
+      dropDownName: 'test_avg',
+      field: 'test_field',
+      parentAgg: result,
+    });
+  });
 });
