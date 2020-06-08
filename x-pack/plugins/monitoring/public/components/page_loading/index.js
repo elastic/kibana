@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './page_loading.scss';
 
 export function PageLoading() {
   return (
