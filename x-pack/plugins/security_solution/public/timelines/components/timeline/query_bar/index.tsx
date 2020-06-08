@@ -285,6 +285,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
+        filterQueryDraft={filterQueryDraft}
         filterManager={filterManager}
         filters={queryBarFilters}
         onChangedQuery={onChangedQuery}
