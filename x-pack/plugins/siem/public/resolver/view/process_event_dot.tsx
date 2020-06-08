@@ -614,7 +614,6 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
 
 function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
-
   if (processType in processTypeToCube) {
     return processTypeToCube[processType];
   }

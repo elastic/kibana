@@ -32,6 +32,14 @@ import { EuiSpacer } from '@elastic/eui';
 import { EuiTextColor } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 
+/**
+ * The two query parameters we read/write on
+ */
+interface crumbInfo {
+  readonly crumbId: string;
+  readonly crumbEvent: string;
+}
+
 //To control "just-once" behavior of the node selection layout effect:
 let lockNodeSelectionByParam = false;
 
@@ -44,7 +52,23 @@ const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   second: '2-digit',
 });
 
-const ProcessListWithCounts = memo(function ProcessListWithCounts() {
+const EventCountsForProcess = memo(function EventCountsForProcess(){
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
+            defaultMessage: 'Events For Process',
+          })}
+        </h4>
+      </EuiTitle>
+    </>
+  )
+})
+
+const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryParams}: {
+  pushToQueryParams: (arg0: crumbInfo)=>unknown
+}) {
   interface ProcessTableView {
     name: string;
     timestamp?: Date;
@@ -62,8 +86,9 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts() {
           process: processTableViewItem.event,
         },
       });
+      pushToQueryParams({crumbId: '', crumbEvent: ''});
     },
-    [dispatch, timestamp]
+    [dispatch, timestamp, pushToQueryParams]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
@@ -293,7 +318,7 @@ const ProcessDetails = memo(function ProcessListWithCounts() {
    */
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();
-  const urlSearch = location.search;
+  const urlSearch = history.location.search;
   const queryParams: {readonly crumbId: string, readonly crumbEvent: string} = useMemo(() => { 
     return Object.assign({crumbId: '', crumbEvent: ''}, querystring.parse(urlSearch.slice(1)))},
   [urlSearch]);
@@ -330,6 +355,27 @@ const PanelContent = memo(function PanelContent() {
      }
   }, [dispatch, selectedDescendantProcessId, queryParams, graphableProcesses]);
 
+  /**
+   * This updates the breadcrumb nav, the table view and URL history
+   */
+  const pushToQueryParams = useCallback(
+    (newCrumbs: typeof queryParams) => {
+      console.log('push to query params');
+      console.log(newCrumbs);
+      //Construct a new set of params from the current set (minus the params)
+      //by assigning the new set of params provided in `newCrumbs`
+      const currentParams = querystring.parse(urlSearch.slice(1));
+      delete currentParams.crumbId;
+      delete currentParams.crumbEvent;
+      const crumbsToPass = newCrumbs.crumbEvent===''?{crumbId: newCrumbs.crumbId}:newCrumbs;
+      //const newSearch = {...currentParams, ...crumbsToPass};
+      const newSearch = {...currentParams};
+      const relativeURL = {search: querystring.stringify(newSearch)};
+      
+      return history.push(relativeURL);
+    },
+    [history, queryParams]
+  );
   
   const relatedEvents = useSelector(selectors.relatedEvents);
   /**
@@ -343,7 +389,7 @@ const PanelContent = memo(function PanelContent() {
       const processSubject = graphableProcesses.find(evt=>event.entityId(evt)===crumbEvent);
       if(!processSubject){
         //should never happen, but bail out to default
-        return console.log('default'), (<ProcessListWithCounts />);
+        return console.log('default'), (<ProcessListWithCounts pushToQueryParams={pushToQueryParams} />);
       }
       const relatedEventsState = relatedEvents.get(processSubject)!;
       if(relatedEventsState === 'waitingForRelatedEventData'){
@@ -377,7 +423,7 @@ const PanelContent = memo(function PanelContent() {
       if(crumbEvent === 'all'){
         //If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
         //Note: this view should handle its own effect for requesting /events
-        return console.log('processEventList'),'processEventList';
+        return console.log('processEventList'), <EventCountsForProcess />;
       }
       if(crumbEvent in displayNameRecord){
         //If crumbEvent is one of the known event types, it's for a related event view narrowed by that type
@@ -385,21 +431,10 @@ const PanelContent = memo(function PanelContent() {
       }
     }
     //The default 'Event List' / 'List of all processes' view
-    return console.log('default'),(<ProcessListWithCounts />);
+    return console.log('default'),(<ProcessListWithCounts pushToQueryParams={pushToQueryParams} />);
   },[queryParams,graphableProcesses,relatedEvents]);
 
-  /**
-   * This updates the breadcrumb nav, the table view and URL history
-   */
-  const updateCrumbs = useCallback(
-    (newCrumbs: typeof queryParams) => {
-      const newQueryParms = {...queryParams, ...newCrumbs};
-      const relativeURL = {search: querystring.stringify(newQueryParms)};
-      return history.push(relativeURL);
-    },
-    [history, queryParams]
-  );
-
+  
   console.log(queryParams);
 
   return (
