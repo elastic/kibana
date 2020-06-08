@@ -147,8 +147,8 @@ export const previewMetricThresholdAlert: (
       const results = await Promise.all(slicedRequests);
       const zippedResult = zip(...results).map((result) =>
         result
-          // `undefined` values occur if there is no data at all in the resultB portion,
-          // and resultB returns an empty array. This is different from an error or no data state,
+          // `undefined` values occur if there is no data at all in a certain slice, and that slice
+          // returns an empty array. This is different from an error or no data state,
           // so filter these results out entirely and only regard the resultA portion
           .filter((value) => typeof value !== 'undefined')
           .reduce((a, b) => {
