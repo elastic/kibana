@@ -28,7 +28,10 @@ import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
 
-const SCRIPT_OPTION = { label: 'Script', value: SCRIPTED_FIELD_VALUE };
+const SCRIPT_OPTION = {
+  label: i18n.translate('visTypeTimeseries.fieldSelect.scriptLabel', { defaultMessage: 'Script' }),
+  value: SCRIPTED_FIELD_VALUE,
+};
 
 function FieldSelectUi({
   type,
