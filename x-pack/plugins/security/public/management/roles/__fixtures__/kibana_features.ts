@@ -7,35 +7,41 @@
 import { Feature, FeatureConfig } from '../../../../../features/public';
 
 export const createFeature = (
-  config: Pick<FeatureConfig, 'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'> & {
+  config: Pick<
+    FeatureConfig,
+    'id' | 'name' | 'privileges' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
+  > & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, ...rest } = config;
+  const { excludeFromBaseAll, excludeFromBaseRead, privileges, ...rest } = config;
   return new Feature({
     icon: 'discoverApp',
     navLinkId: 'discover',
     app: [],
     catalogue: [],
-    privileges: {
-      all: {
-        excludeFromBasePrivileges: excludeFromBaseAll,
-        savedObject: {
-          all: ['all-type'],
-          read: ['read-type'],
-        },
-        ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
-      },
-      read: {
-        excludeFromBasePrivileges: excludeFromBaseRead,
-        savedObject: {
-          all: [],
-          read: ['read-type'],
-        },
-        ui: ['read-ui', `read-${config.id}`],
-      },
-    },
+    privileges:
+      privileges === null
+        ? null
+        : {
+            all: {
+              excludeFromBasePrivileges: excludeFromBaseAll,
+              savedObject: {
+                all: ['all-type'],
+                read: ['read-type'],
+              },
+              ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
+            },
+            read: {
+              excludeFromBasePrivileges: excludeFromBaseRead,
+              savedObject: {
+                all: [],
+                read: ['read-type'],
+              },
+              ui: ['read-ui', `read-${config.id}`],
+            },
+          },
     ...rest,
   });
 };
