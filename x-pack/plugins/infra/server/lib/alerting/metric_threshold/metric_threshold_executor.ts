@@ -19,6 +19,7 @@ import {
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
   async function (options: AlertExecutorOptions) {
     const { services, params } = options;
+    const { criteria } = params;
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
