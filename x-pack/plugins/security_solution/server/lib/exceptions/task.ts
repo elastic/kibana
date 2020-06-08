@@ -24,7 +24,7 @@ const PackagerTaskConstants = {
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-allowlist',
   SAVED_OBJECT_TYPE: 'securitySolution-exceptions-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['windows'],
+  SUPPORTED_OPERATING_SYSTEMS: ['linux', 'windows'],
   SUPPORTED_SCHEMA_VERSIONS: ['1.0.0'],
 };
 
@@ -92,7 +92,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           const soResponse = await soClient.create(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,
-            { id: sha256Hash }
+            { id: `${artifactName}-${sha256Hash}` }
           );
           context.logger.debug(JSON.stringify(soResponse));
 
@@ -129,19 +129,20 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
     return {
       run: async () => {
+        const taskId = getTaskId();
         try {
-          const taskId = getTaskId();
-          const taskInstance = await runnerContext.taskManager.ensureScheduled({
+          await runnerContext.taskManager.ensureScheduled({
             id: taskId,
             taskType: PackagerTaskConstants.TYPE,
             scope: ['securitySolution'],
             state: {},
             params: { version: PackagerTaskConstants.VERSION },
           });
-          await runnerContext.taskManager.runNow(taskInstance.id);
         } catch (e) {
           context.logger.debug(`Error scheduling task, received ${e.message}`);
         }
+
+        await runnerContext.taskManager.runNow(taskId);
       },
     };
   };
