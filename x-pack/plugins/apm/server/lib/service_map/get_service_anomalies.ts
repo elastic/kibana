@@ -5,7 +5,6 @@
  */
 import { intersection } from 'lodash';
 import { leftJoin } from '../../../common/utils/left_join';
-import { rangeFilter } from '../helpers/range_filter';
 import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { IEnvOptions } from './get_service_map';
@@ -57,7 +56,6 @@ export async function getServiceAnomalies(
       (apmJobCategory) => apmJobCategory !== undefined
     ) as ApmMlJobCategory[];
   const apmJobIds = apmMlJobs.map((job) => job.job_id);
-  const rangeQuery = { range: rangeFilter(start, end, 'timestamp') };
   const params = {
     body: {
       size: 0,
@@ -70,7 +68,11 @@ export async function getServiceAnomalies(
                 job_id: apmJobIds,
               },
             },
-            rangeQuery,
+            {
+              range: {
+                timestamp: { gte: start, lte: end, format: 'epoch_millis' },
+              },
+            },
           ],
         },
       },
@@ -91,12 +93,23 @@ export async function getServiceAnomalies(
     },
   };
 
-  const response = await ml.mlSystem.mlAnomalySearch(params);
-  const anomalyScores: Array<{
-    jobId: string;
-    anomalyScore: number;
-    timestamp: number;
-  }> = response.aggregations.jobs.buckets.map((jobBucket: any) => {
+  const response = (await ml.mlSystem.mlAnomalySearch(params)) as {
+    aggregations: {
+      jobs: {
+        buckets: Array<{
+          key: string;
+          top_score_hits: {
+            hits: {
+              hits: Array<{
+                _source: { anomaly_score: number; timestamp: number };
+              }>;
+            };
+          };
+        }>;
+      };
+    };
+  };
+  const anomalyScores = response.aggregations.jobs.buckets.map((jobBucket) => {
     const jobId = jobBucket.key;
     const bucketSource = jobBucket.top_score_hits.hits.hits?.[0]?._source;
     return {
@@ -140,19 +153,13 @@ export async function getServiceAnomalies(
     }
   );
 
-  const anomalyModelValues = filterNonNullable(
+  const anomalyModelValues = (
     await Promise.all(anomalyModelValuePromises)
-  );
+  ).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
   return leftJoin(
     apmMlJobCategories,
     'jobId',
     leftJoin(anomalyScores, 'jobId', anomalyModelValues)
   );
-}
-
-function filterNonNullable<T>(array: T[]) {
-  return array.filter(
-    (element) => element !== undefined || element !== null
-  ) as Array<NonNullable<T>>;
 }

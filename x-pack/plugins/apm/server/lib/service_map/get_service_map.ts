@@ -138,11 +138,10 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData]: [
-    // explicit types to avoid TS "excessively deep" error
-    ConnectionsResponse,
-    ServicesResponse
-  ] = await Promise.all([getConnectionData(options), getServicesData(options)]);
+  const [connectionData, servicesData] = await Promise.all([
+    getConnectionData(options),
+    getServicesData(options),
+  ]);
 
   // Derive all related service names from connection and service data
   const allNodes = getAllNodes(servicesData, connectionData.connections);
