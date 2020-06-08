@@ -106,6 +106,7 @@ export const EventColumnView = React.memo<Props>(
     const onClickCb = useCallback((cb: () => void) => {
       cb();
       closePopover();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const additionalActions = useMemo<JSX.Element[]>(() => {
@@ -175,6 +176,7 @@ export const EventColumnView = React.memo<Props>(
             </EventsTdContent>,
           ]
         : grouped.icon;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [button, ecsData, timelineActions, isPopoverOpen]); // , isPopoverOpen, closePopover, onButtonClick]);
 
     return (
