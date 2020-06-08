@@ -1,5 +1,5 @@
 [[docker]]
-== Running Kibana on Docker
+=== Install Kibana with Docker
 Docker images for Kibana are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/centos/[centos:7].
 
@@ -16,7 +16,7 @@ Elastic license levels.
 
 [float]
 [[pull-image]]
-=== Pulling the image
+=== Pull the image
 
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
 against the Elastic Docker registry.
@@ -40,7 +40,7 @@ available under the Apache 2.0 license. To download the images, go to
 https://www.docker.elastic.co[www.docker.elastic.co].
 
 [float]
-=== Running Kibana on Docker for development
+=== Run Kibana on Docker for development
 Kibana can be quickly started and connected to a local Elasticsearch container for development
 or testing use with the following command:
 --------------------------------------------
@@ -50,7 +50,7 @@ endif::[]
 
 [float]
 [[configuring-kibana-docker]]
-=== Configuring Kibana on Docker
+=== Configure Kibana on Docker
 
 The Docker images provide several methods for configuring Kibana. The
 conventional approach is to provide a `kibana.yml` file as described in
