@@ -17,18 +17,24 @@
  * under the License.
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from 'kibana/public';
+import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
+
+interface SetupDeps {
+  developerExamples: DeveloperExamplesSetup;
+}
 
 interface StartDeps {
   dashboard: DashboardStart;
 }
 
 export class DashboardEmbeddableExamples implements Plugin<void, void, {}, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>) {
+  public setup(core: CoreSetup<StartDeps>, { developerExamples }: SetupDeps) {
     core.application.register({
       id: 'dashboardEmbeddableExamples',
       title: 'Dashboard embeddable examples',
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
@@ -41,6 +47,12 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
           params.element
         );
       },
+    });
+
+    developerExamples.register({
+      appId: 'dashboardEmbeddableExamples',
+      title: 'Dashboard Container',
+      description: `Showcase different ways how to embed dashboard container into your app`,
     });
   }
 

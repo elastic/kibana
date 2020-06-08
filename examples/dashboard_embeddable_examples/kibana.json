@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["embeddable", "embeddableExamples", "dashboard"],
+  "requiredPlugins": ["embeddable", "embeddableExamples", "dashboard", "developerExamples"],
   "optionalPlugins": []
 }
