@@ -36,10 +36,6 @@ const privilegeSchema = Joi.object({
   alerting: Joi.object({
     all: Joi.array().items(Joi.string()),
     read: Joi.array().items(Joi.string()),
-    globally: Joi.object({
-      all: Joi.array().items(Joi.string()),
-      read: Joi.array().items(Joi.string()),
-    }),
   }),
   savedObject: Joi.object({
     all: Joi.array().items(Joi.string()).required(),

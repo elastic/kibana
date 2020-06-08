@@ -47,19 +47,6 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
               });
               break;
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(noOpAlertType).to.eql({
-                actionGroups: [{ id: 'default', name: 'Default' }],
-                defaultActionGroupId: 'default',
-                id: 'test.noop',
-                name: 'Test: Noop',
-                actionVariables: {
-                  state: [],
-                  context: [],
-                },
-                authorizedConsumers: ['alertsRestrictedFixture', 'alertsFixture'],
-                producer: 'alertsFixture',
-              });
-              break;
             case 'superuser at space1':
               const { authorizedConsumers, ...superUserFixtureAlertType } = noOpAlertType;
               expect(superUserFixtureAlertType).to.eql({

@@ -13,7 +13,7 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
-  getUnauthorizedErrorMessage,
+  getConsumerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -47,7 +47,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('updateApiKey', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -104,7 +108,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('updateApiKey', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;

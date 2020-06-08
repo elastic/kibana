@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, pluck } from 'lodash';
+import { omit, isEqual, pluck, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -670,29 +670,41 @@ export class AlertsClient {
     const { authorization } = this;
     if (authorization) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
-      const requiredPrivilegedScopes =
+      const requiredPrivilegesByScope = {
+        consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
+        producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
+      };
+
+      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+      const { hasAllRequested, privileges } = await checkPrivileges(
         consumer === AlertsFeatureId || consumer === alertType.producer
           ? [
               // skip consumer privilege checks under `alerts` as all alert types can
               // be created under `alerts` if you have producer level privileges
-              alertType.producer,
+              requiredPrivilegesByScope.producer,
             ]
           : [
               // check for access at consumer level
-              consumer,
+              requiredPrivilegesByScope.consumer,
               // check for access at producer level
-              alertType.producer,
-            ];
-
-      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested } = await checkPrivileges(
-        requiredPrivilegedScopes.map((scope) =>
-          authorization.actions.alerting.get(alertTypeId, scope, operation)
-        )
+              requiredPrivilegesByScope.producer,
+            ]
       );
+
       if (!hasAllRequested) {
+        const authorizedPrivileges = pluck(
+          privileges.filter((privilege) => privilege.authorized),
+          'privilege'
+        );
+        const unauthorizedScopes = mapValues(
+          requiredPrivilegesByScope,
+          (privilege) => !authorizedPrivileges.includes(privilege)
+        );
+
         throw Boom.forbidden(
-          `Unauthorized to ${operation} a "${alertTypeId}" alert for "${consumer}"`
+          `Unauthorized to ${operation} a "${alertTypeId}" alert ${
+            unauthorizedScopes.consumer ? `for "${consumer}"` : `by "${alertType.producer}"`
+          }`
         );
       }
     }

@@ -267,12 +267,20 @@ export class AlertUtils {
   }
 }
 
-export function getUnauthorizedErrorMessage(
+export function getConsumerUnauthorizedErrorMessage(
   operation: string,
   alertType: string,
   consumer: string
 ) {
   return `Unauthorized to ${operation} a "${alertType}" alert for "${consumer}"`;
+}
+
+export function getProducerUnauthorizedErrorMessage(
+  operation: string,
+  alertType: string,
+  producer: string
+) {
+  return `Unauthorized to ${operation} a "${alertType}" alert by "${producer}"`;
 }
 
 function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {

@@ -42,9 +42,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            globally: {
-              all: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
-            },
+            all: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
           },
           savedObject: {
             all: [],
@@ -54,9 +52,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            globally: {
-              read: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
-            },
+            read: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
           },
           savedObject: {
             all: [],

@@ -13,7 +13,7 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
-  getUnauthorizedErrorMessage,
+  getConsumerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -48,7 +48,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('muteInstance', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteInstance',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -100,7 +104,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('muteInstance', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteInstance',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;

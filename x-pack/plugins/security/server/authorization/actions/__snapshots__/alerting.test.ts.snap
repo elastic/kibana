@@ -12,15 +12,17 @@ exports[`#get alertType of true throws error 1`] = `"alertTypeId is required and
 
 exports[`#get alertType of undefined throws error 1`] = `"alertTypeId is required and must be a string"`;
 
-exports[`#get consumer of "" throws error 1`] = `"consumer is optional but must be a string when specified"`;
+exports[`#get consumer of "" throws error 1`] = `"consumer is required and must be a string"`;
 
-exports[`#get consumer of {} throws error 1`] = `"consumer is optional but must be a string when specified"`;
+exports[`#get consumer of {} throws error 1`] = `"consumer is required and must be a string"`;
 
-exports[`#get consumer of 1 throws error 1`] = `"consumer is optional but must be a string when specified"`;
+exports[`#get consumer of 1 throws error 1`] = `"consumer is required and must be a string"`;
 
-exports[`#get consumer of null throws error 1`] = `"consumer is optional but must be a string when specified"`;
+exports[`#get consumer of null throws error 1`] = `"consumer is required and must be a string"`;
 
-exports[`#get consumer of true throws error 1`] = `"consumer is optional but must be a string when specified"`;
+exports[`#get consumer of true throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get consumer of undefined throws error 1`] = `"consumer is required and must be a string"`;
 
 exports[`#get operation of "" throws error 1`] = `"operation is required and must be a string"`;
 

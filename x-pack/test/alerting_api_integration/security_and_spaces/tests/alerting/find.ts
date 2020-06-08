@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { chunk } from 'lodash';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -77,6 +78,90 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should filter out types that the user is not authorized to `get` retaining pagination', async () => {
+          async function createNoOpAlert(overrides = {}) {
+            const alert = getTestAlertData(overrides);
+            const { body: createdAlert } = await supertest
+              .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+              .set('kbn-xsrf', 'foo')
+              .send(alert)
+              .expect(200);
+            objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+            return {
+              id: createdAlert.id,
+              alertTypeId: alert.alertTypeId,
+            };
+          }
+          function createRestrictedNoOpAlert() {
+            return createNoOpAlert({
+              alertTypeId: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            });
+          }
+          const allAlerts = [];
+          allAlerts.push(await createNoOpAlert());
+          allAlerts.push(await createNoOpAlert());
+          allAlerts.push(await createRestrictedNoOpAlert());
+          allAlerts.push(await createRestrictedNoOpAlert());
+          allAlerts.push(await createNoOpAlert());
+          allAlerts.push(await createNoOpAlert());
+
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/alerts/_find?per_page=3&sort_field=createdAt`)
+            .auth(user.username, user.password);
+
+          expect(response.statusCode).to.eql(200);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.body.page).to.equal(0);
+              expect(response.body.perPage).to.equal(0);
+              expect(response.body.total).to.equal(0);
+              expect(response.body.data.length).to.equal(0);
+              break;
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+              expect(response.body.page).to.equal(1);
+              expect(response.body.perPage).to.be.equal(3);
+              expect(response.body.total).to.be.equal(4);
+              {
+                const [firstPage] = chunk(
+                  allAlerts
+                    .filter((alert) => alert.alertTypeId !== 'test.restricted-noop')
+                    .map((alert) => alert.id),
+                  3
+                );
+                expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
+              }
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body.page).to.equal(1);
+              expect(response.body.perPage).to.be.equal(3);
+              expect(response.body.total).to.be.equal(6);
+              {
+                const [firstPage, secondPage] = chunk(
+                  allAlerts.map((alert) => alert.id),
+                  3
+                );
+                expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
+
+                const secondResponse = await supertestWithoutAuth
+                  .get(
+                    `${getUrlPrefix(
+                      space.id
+                    )}/api/alerts/_find?per_page=3&sort_field=createdAt&page=2`
+                  )
+                  .auth(user.username, user.password);
+                expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
+              }
+
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

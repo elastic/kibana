@@ -13,7 +13,7 @@ import {
   getTestAlertData,
   ObjectRemover,
   ensureDatetimeIsWithinRange,
-  getUnauthorizedErrorMessage,
+  getConsumerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -69,7 +69,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -153,7 +157,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -340,7 +348,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('update', 'test.validation', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.validation',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -434,7 +446,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;

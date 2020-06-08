@@ -79,7 +79,6 @@ const Space1All: User = {
           alerts: ['all'],
           actions: ['all'],
           alertsFixture: ['all'],
-          alertsRestrictedFixture: ['read'],
         },
         spaces: ['space1'],
       },

@@ -35,12 +35,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             read: [],
           },
           alerting: {
-            all: [
-              'test.restricted-noop',
-              'test.unrestricted-noop',
-              'test.fake-built-in',
-              'test.noop',
-            ],
+            all: ['test.restricted-noop', 'test.unrestricted-noop', 'test.noop'],
           },
           ui: [],
         },
@@ -51,7 +46,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             read: ['alert'],
           },
           alerting: {
-            read: ['test.restricted-noop', 'test.unrestricted-noop', 'test.fake-built-in'],
+            read: ['test.restricted-noop', 'test.unrestricted-noop'],
           },
           ui: [],
         },

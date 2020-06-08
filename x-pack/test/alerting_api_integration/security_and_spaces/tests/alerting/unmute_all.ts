@@ -13,7 +13,7 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
-  getUnauthorizedErrorMessage,
+  getConsumerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -53,7 +53,11 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('unmuteAll', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'unmuteAll',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;

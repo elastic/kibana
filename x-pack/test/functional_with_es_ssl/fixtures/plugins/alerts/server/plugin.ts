@@ -28,9 +28,7 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            globally: {
-              all: ['test.always-firing', 'test.noop'],
-            },
+            all: ['test.always-firing', 'test.noop'],
           },
           savedObject: {
             all: [],
@@ -40,9 +38,7 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            globally: {
-              all: ['test.always-firing', 'test.noop'],
-            },
+            all: ['test.always-firing', 'test.noop'],
           },
           savedObject: {
             all: [],

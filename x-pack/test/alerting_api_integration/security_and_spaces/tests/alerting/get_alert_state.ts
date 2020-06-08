@@ -9,7 +9,8 @@ import {
   getUrlPrefix,
   ObjectRemover,
   getTestAlertData,
-  getUnauthorizedErrorMessage,
+  getConsumerUnauthorizedErrorMessage,
+  getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../scenarios';
@@ -45,7 +46,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -61,6 +62,55 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           }
         });
 
+        it('should handle getAlertState alert request appropriately', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/state`)
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'get',
+                  'test.noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.key('alertInstances', 'previousStartedAt');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
         it(`shouldn't getAlertState for an alert from another space`, async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)

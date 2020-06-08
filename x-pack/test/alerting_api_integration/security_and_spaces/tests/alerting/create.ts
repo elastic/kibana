@@ -9,9 +9,10 @@ import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   checkAAD,
   getTestAlertData,
-  getUnauthorizedErrorMessage,
+  getConsumerUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
+  getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -71,7 +72,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -151,7 +156,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
+                message: getConsumerUnauthorizedErrorMessage(
                   'create',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -182,14 +187,25 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
+                message: getProducerUnauthorizedErrorMessage(
                   'create',
                   'test.unrestricted-noop',
-                  'alertsFixture'
+                  'alertsRestrictedFixture'
                 ),
                 statusCode: 403,
               });
@@ -223,7 +239,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
+                message: getConsumerUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -252,7 +268,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -342,7 +362,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('create', 'test.validation', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.validation',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
