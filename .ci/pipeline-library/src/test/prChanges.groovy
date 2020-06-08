@@ -20,7 +20,7 @@ class PrChangesTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void 'areChangesSkippable with no changes'() {
+  void 'areChangesSkippable() with no changes'() {
     props([
       githubPrs: [
         getChanges: { [] },
@@ -31,7 +31,7 @@ class PrChangesTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void 'areChangesSkippable with skippable changes'() {
+  void 'areChangesSkippable() with skippable changes'() {
     props([
       githubPrs: [
         getChanges: { [
@@ -45,7 +45,7 @@ class PrChangesTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void 'areChangesSkippable with skippable renames'() {
+  void 'areChangesSkippable() with skippable renames'() {
     props([
       githubPrs: [
         getChanges: { [
@@ -59,7 +59,7 @@ class PrChangesTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void 'areChangesSkippable with unskippable changes'() {
+  void 'areChangesSkippable() with unskippable changes'() {
     props([
       githubPrs: [
         getChanges: { [
@@ -72,7 +72,7 @@ class PrChangesTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void 'areChangesSkippable with skippable and unskippable changes'() {
+  void 'areChangesSkippable() with skippable and unskippable changes'() {
     props([
       githubPrs: [
         getChanges: { [

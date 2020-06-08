@@ -12,7 +12,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void testFailures() {
+  void 'getTestFailures() should properly format failure steps'() {
     mockFailureBuild()
 
     def failureMessage = slackNotifications.getTestFailures()
@@ -24,7 +24,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
   }
 
   @Test
-  void testSendFailedBuild() {
+  void 'sendFailedBuild() should call slackSend() with message'() {
     mockFailureBuild()
 
     slackNotifications.sendFailedBuild()
