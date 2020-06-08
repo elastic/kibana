@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchExceptionListById, fetchExceptionListItemsByListId } from '../api';
 import { ExceptionIdentifiers, ExceptionList, Pagination, UseExceptionListProps } from '../types';
-import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
+import { ExceptionListItemSchema } from '../../../common/schemas';
 
 type Func = () => void;
 export type ReturnExceptionListAndItems = [
@@ -45,9 +45,7 @@ export const useExceptionList = ({
   onError,
   dispatchListsInReducer,
 }: UseExceptionListProps): ReturnExceptionListAndItems => {
-  const [exceptionLists, setExceptionLists] = useState<
-    Array<ExceptionListSchema & { totalItems: number }>
-  >([]);
+  const [exceptionLists, setExceptionLists] = useState<ExceptionList[]>([]);
   const [exceptionItems, setExceptionListItems] = useState<ExceptionListItemSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
   const fetchExceptionList = useRef<Func | null>(null);
@@ -142,10 +140,6 @@ export const useExceptionList = ({
               onError(error);
             }
           }
-
-          if (isSubscribed) {
-            setLoading(false);
-          }
         };
 
         // TODO: Workaround for now. Once api updated, we can pass in array of lists to fetch
@@ -155,6 +149,10 @@ export const useExceptionList = ({
               fetchData({ id, namespaceType })
           )
         );
+
+        if (isSubscribed) {
+          setLoading(false);
+        }
       };
 
       fetchLists();

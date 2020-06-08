@@ -71,7 +71,11 @@ const ExceptionsViewerPaginationComponent = ({
   }, [pagination, onPaginationChange]);
 
   const totalPages = useMemo((): number => {
-    return Math.ceil(pagination.totalItemCount / pagination.pageSize);
+    if (pagination.totalItemCount > 0) {
+      return Math.ceil(pagination.totalItemCount / pagination.pageSize);
+    } else {
+      return 1;
+    }
   }, [pagination]);
 
   return (

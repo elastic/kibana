@@ -311,8 +311,8 @@ const ExceptionsViewerComponent = ({
   }, [filterOptions.showEndpointList, filterOptions.showDetectionsList, ruleSettingsUrl]);
 
   const showEmpty = useMemo((): boolean => {
-    return !initLoading && exceptions.length === 0;
-  }, [initLoading, exceptions.length]);
+    return !initLoading && !loadingList && exceptions.length === 0;
+  }, [initLoading, exceptions.length, loadingList]);
 
   return (
     <>
