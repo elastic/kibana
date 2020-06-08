@@ -18,6 +18,10 @@ and navigate to the Embeddable explorer app.
 
 There is also an example of rendering dashboard container outside of dashboard app [here](https://github.com/elastic/kibana/tree/master/examples/dashboard_embeddable_examples).
 
+## Docs
+
+[Embeddable docs, guides & caveats](./docs/README.md)
+
 ## Testing
 
 Run unit tests
