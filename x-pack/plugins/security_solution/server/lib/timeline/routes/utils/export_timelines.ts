@@ -18,7 +18,6 @@ import {
   ExportedNotes,
   TimelineSavedObject,
   ExportTimelineNotFoundError,
-  TimelineStatus,
 } from '../../../../../common/types/timeline';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';

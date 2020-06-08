@@ -44,6 +44,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     sortDirection,
     sortField,
     timelineFilter,
+    timelineType,
     templateTimelineFilter,
     title,
     totalSearchResultsCount,
@@ -110,6 +111,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             showExtendedColumns={false}
             sortDirection={sortDirection}
             sortField={sortField}
+            timelineType={timelineType}
             totalSearchResultsCount={totalSearchResultsCount}
           />
         </EuiModalBody>
