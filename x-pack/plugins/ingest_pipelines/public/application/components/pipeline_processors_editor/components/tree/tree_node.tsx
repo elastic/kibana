@@ -55,7 +55,7 @@ export const TreeNode: FunctionComponent<Props> = ({
           payload: { processor, selector: processorInfo.selector },
         });
       },
-      onAddFailure: () => {
+      onAddOnFailure: () => {
         privateOnAction({ type: 'addOnFailure', payload: { target: processorInfo.selector } });
       },
     };
