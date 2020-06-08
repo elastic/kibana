@@ -91,7 +91,6 @@ export const ErrorRateChart = () => {
           return asPercent(y, 1);
         }}
         height={unit * 10}
-        xAxisTickSizeOuter={10}
       />
     </>
   );

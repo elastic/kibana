@@ -156,8 +156,7 @@ export class HistogramInner extends PureComponent {
             <XAxis
               style={{ strokeWidth: '1px' }}
               marginRight={10}
-              tickSizeOuter={10}
-              tickSizeInner={0}
+              tickSize={0}
               tickTotal={X_TICK_TOTAL}
               tickFormat={formatX}
               tickValues={xTickValues}

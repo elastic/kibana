@@ -158,13 +158,7 @@ class StaticPlot extends PureComponent {
   };
 
   render() {
-    const {
-      series,
-      tickFormatY,
-      plotValues,
-      noHits,
-      xAxisTickSizeOuter = 0,
-    } = this.props;
+    const { series, tickFormatY, plotValues, noHits } = this.props;
     const { xTickValues, yTickValues } = plotValues;
 
     const tickFormatX = this.props.tickFormatX || this.tickFormatXTime;
@@ -173,10 +167,9 @@ class StaticPlot extends PureComponent {
       <SharedPlot plotValues={plotValues}>
         <XAxis
           type="time-utc"
+          tickSize={0}
           tickFormat={tickFormatX}
           tickValues={xTickValues}
-          tickSizeOuter={xAxisTickSizeOuter}
-          tickSizeInner={0}
         />
         {noHits ? (
           <StatusText
@@ -214,5 +207,4 @@ StaticPlot.propTypes = {
   tickFormatX: PropTypes.func,
   tickFormatY: PropTypes.func.isRequired,
   width: PropTypes.number.isRequired,
-  xAxisTickSizeOuter: PropTypes.number,
 };
