@@ -63,6 +63,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
@@ -96,6 +97,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -148,6 +150,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {

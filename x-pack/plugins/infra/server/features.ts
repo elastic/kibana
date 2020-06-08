@@ -29,13 +29,11 @@ export const METRICS_FEATURE = {
         read: ['index-pattern'],
       },
       alerting: {
-        globally: {
-          all: [
-            METRIC_THRESHOLD_ALERT_TYPE_ID,
-            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-          ],
-        },
+        all: [
+          METRIC_THRESHOLD_ALERT_TYPE_ID,
+          METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+          LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+        ],
       },
       ui: [
         'show',
@@ -58,13 +56,11 @@ export const METRICS_FEATURE = {
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
-        globally: {
-          all: [
-            METRIC_THRESHOLD_ALERT_TYPE_ID,
-            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-          ],
-        },
+        all: [
+          METRIC_THRESHOLD_ALERT_TYPE_ID,
+          METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+          LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+        ],
       },
       ui: [
         'show',

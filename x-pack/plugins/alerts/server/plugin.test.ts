@@ -73,20 +73,16 @@ describe('Alerting Plugin', () => {
 
       expect(privileges?.all.alerting).toMatchInlineSnapshot(`
         Object {
-          "globally": Object {
-            "all": Array [
-              ".index-threshold",
-            ],
-          },
+          "all": Array [
+            ".index-threshold",
+          ],
         }
       `);
       expect(privileges?.read.alerting).toMatchInlineSnapshot(`
         Object {
-          "globally": Object {
-            "read": Array [
-              ".index-threshold",
-            ],
-          },
+          "read": Array [
+            ".index-threshold",
+          ],
         }
       `);
     });
@@ -120,20 +116,16 @@ describe('Alerting Plugin', () => {
 
       expect(privileges?.all.alerting).toMatchInlineSnapshot(`
         Object {
-          "globally": Object {
-            "all": Array [
-              ".index-threshold",
-            ],
-          },
+          "all": Array [
+            ".index-threshold",
+          ],
         }
       `);
       expect(privileges?.read.alerting).toMatchInlineSnapshot(`
         Object {
-          "globally": Object {
-            "read": Array [
-              ".index-threshold",
-            ],
-          },
+          "read": Array [
+            ".index-threshold",
+          ],
         }
       `);
     });

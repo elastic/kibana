@@ -72,9 +72,9 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/get",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/find",
           ]
         `);
       });
@@ -108,19 +108,19 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/get",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/find",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/create",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/delete",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/update",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/updateApiKey",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/enable",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/disable",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/muteAll",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/unmuteAll",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/muteInstance",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/unmuteInstance",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/create",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/delete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/update",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/updateApiKey",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/enable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/disable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/muteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/muteInstance",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteInstance",
           ]
         `);
       });
@@ -154,161 +154,22 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/get",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/find",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/create",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/delete",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/update",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/updateApiKey",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/enable",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/disable",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/muteAll",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/unmuteAll",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/muteInstance",
-            "alerting:1.0.0-zeta1:alert-type/feature/my-feature/unmuteInstance",
-            "alerting:1.0.0-zeta1:readonly-alert-type/feature/my-feature/get",
-            "alerting:1.0.0-zeta1:readonly-alert-type/feature/my-feature/getAlertState",
-            "alerting:1.0.0-zeta1:readonly-alert-type/feature/my-feature/find",
-          ]
-        `);
-      });
-    });
-
-    describe(`globally`, () => {
-      test('grants global `read` privileges under feature consumer', () => {
-        const actions = new Actions(version);
-        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
-
-        const privilege: FeatureKibanaPrivileges = {
-          alerting: {
-            globally: {
-              all: [],
-              read: ['alert-type'],
-            },
-          },
-
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        };
-
-        const feature = new Feature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-          Array [
-            "alerting:1.0.0-zeta1:alert-type/_global/get",
-            "alerting:1.0.0-zeta1:alert-type/_global/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/_global/find",
-          ]
-        `);
-      });
-
-      test('grants global `all` privileges under feature consumer', () => {
-        const actions = new Actions(version);
-        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
-
-        const privilege: FeatureKibanaPrivileges = {
-          alerting: {
-            globally: {
-              all: ['alert-type'],
-              read: [],
-            },
-          },
-
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        };
-
-        const feature = new Feature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-          Array [
-            "alerting:1.0.0-zeta1:alert-type/_global/get",
-            "alerting:1.0.0-zeta1:alert-type/_global/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/_global/find",
-            "alerting:1.0.0-zeta1:alert-type/_global/create",
-            "alerting:1.0.0-zeta1:alert-type/_global/delete",
-            "alerting:1.0.0-zeta1:alert-type/_global/update",
-            "alerting:1.0.0-zeta1:alert-type/_global/updateApiKey",
-            "alerting:1.0.0-zeta1:alert-type/_global/enable",
-            "alerting:1.0.0-zeta1:alert-type/_global/disable",
-            "alerting:1.0.0-zeta1:alert-type/_global/muteAll",
-            "alerting:1.0.0-zeta1:alert-type/_global/unmuteAll",
-            "alerting:1.0.0-zeta1:alert-type/_global/muteInstance",
-            "alerting:1.0.0-zeta1:alert-type/_global/unmuteInstance",
-          ]
-        `);
-      });
-
-      test('grants both global `all` and global `read` privileges under feature consumer', () => {
-        const actions = new Actions(version);
-        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
-
-        const privilege: FeatureKibanaPrivileges = {
-          alerting: {
-            globally: {
-              all: ['alert-type'],
-              read: ['readonly-alert-type'],
-            },
-          },
-
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        };
-
-        const feature = new Feature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-          Array [
-            "alerting:1.0.0-zeta1:alert-type/_global/get",
-            "alerting:1.0.0-zeta1:alert-type/_global/getAlertState",
-            "alerting:1.0.0-zeta1:alert-type/_global/find",
-            "alerting:1.0.0-zeta1:alert-type/_global/create",
-            "alerting:1.0.0-zeta1:alert-type/_global/delete",
-            "alerting:1.0.0-zeta1:alert-type/_global/update",
-            "alerting:1.0.0-zeta1:alert-type/_global/updateApiKey",
-            "alerting:1.0.0-zeta1:alert-type/_global/enable",
-            "alerting:1.0.0-zeta1:alert-type/_global/disable",
-            "alerting:1.0.0-zeta1:alert-type/_global/muteAll",
-            "alerting:1.0.0-zeta1:alert-type/_global/unmuteAll",
-            "alerting:1.0.0-zeta1:alert-type/_global/muteInstance",
-            "alerting:1.0.0-zeta1:alert-type/_global/unmuteInstance",
-            "alerting:1.0.0-zeta1:readonly-alert-type/_global/get",
-            "alerting:1.0.0-zeta1:readonly-alert-type/_global/getAlertState",
-            "alerting:1.0.0-zeta1:readonly-alert-type/_global/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/getAlertState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/create",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/delete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/update",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/updateApiKey",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/enable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/disable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/muteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/muteInstance",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/unmuteInstance",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/get",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/getAlertState",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/find",
           ]
         `);
       });

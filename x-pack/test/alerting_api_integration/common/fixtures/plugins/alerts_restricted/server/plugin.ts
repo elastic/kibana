@@ -10,9 +10,6 @@ import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../..
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
-// import { defineFakeBuiltinAlertTypes } from './builtin_alert_types';
-import { defineActionTypes } from './action_types';
-import { defineRoutes } from './routes';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -25,10 +22,10 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
+  public setup(core: CoreSetup<FixtureStartDeps>, { features, alerts }: FixtureSetupDeps) {
     features.registerFeature({
-      id: 'alertsFixture',
-      name: 'Alerts',
+      id: 'alertsRestrictedFixture',
+      name: 'AlertRestricted',
       app: ['alerts', 'kibana'],
       privileges: {
         all: {
@@ -39,16 +36,10 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             all: [
-              'test.always-firing',
-              'test.cumulative-firing',
-              'test.never-firing',
-              'test.failing',
-              'test.authorization',
-              'test.validation',
-              'test.onlyContextVariables',
-              'test.onlyStateVariables',
-              'test.noop',
+              'test.restricted-noop',
               'test.unrestricted-noop',
+              'test.fake-built-in',
+              'test.noop',
             ],
           },
           ui: [],
@@ -60,27 +51,14 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             read: ['alert'],
           },
           alerting: {
-            read: [
-              'test.always-firing',
-              'test.cumulative-firing',
-              'test.never-firing',
-              'test.failing',
-              'test.authorization',
-              'test.validation',
-              'test.onlyContextVariables',
-              'test.onlyStateVariables',
-              'test.noop',
-            ],
+            read: ['test.restricted-noop', 'test.unrestricted-noop', 'test.fake-built-in'],
           },
           ui: [],
         },
       },
     });
 
-    defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerts });
-    // defineFakeBuiltinAlertTypes({ alerts });
-    defineRoutes(core);
   }
 
   public start() {}

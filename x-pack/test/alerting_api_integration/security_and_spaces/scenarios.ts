@@ -79,6 +79,7 @@ const Space1All: User = {
           alerts: ['all'],
           actions: ['all'],
           alertsFixture: ['all'],
+          alertsRestrictedFixture: ['read'],
         },
         spaces: ['space1'],
       },
@@ -96,7 +97,43 @@ const Space1All: User = {
   },
 };
 
-export const Users: User[] = [NoKibanaPrivileges, Superuser, GlobalRead, Space1All];
+const Space1AllWithRestrictedFixture: User = {
+  username: 'space_1_all_with_restricted_fixture',
+  fullName: 'space_1_all_with_restricted_fixture',
+  password: 'space_1_all_with_restricted_fixture-password',
+  role: {
+    name: 'space_1_all_with_restricted_fixture_role',
+    kibana: [
+      {
+        feature: {
+          alerts: ['all'],
+          actions: ['all'],
+          alertsFixture: ['all'],
+          alertsRestrictedFixture: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
+      cluster: ['manage_api_key'],
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
+export const Users: User[] = [
+  NoKibanaPrivileges,
+  Superuser,
+  GlobalRead,
+  Space1All,
+  Space1AllWithRestrictedFixture,
+];
 
 const Space1: Space = {
   id: 'space1',
@@ -162,6 +199,14 @@ const Space1AllAtSpace1: Space1AllAtSpace1 = {
   user: Space1All,
   space: Space1,
 };
+interface Space1AllWithRestrictedFixtureAtSpace1 extends Scenario {
+  id: 'space_1_all_with_restricted_fixture at space1';
+}
+const Space1AllWithRestrictedFixtureAtSpace1: Space1AllWithRestrictedFixtureAtSpace1 = {
+  id: 'space_1_all_with_restricted_fixture at space1',
+  user: Space1AllWithRestrictedFixture,
+  space: Space1,
+};
 
 interface Space1AllAtSpace2 extends Scenario {
   id: 'space_1_all at space2';
@@ -177,11 +222,13 @@ export const UserAtSpaceScenarios: [
   SuperuserAtSpace1,
   GlobalReadAtSpace1,
   Space1AllAtSpace1,
-  Space1AllAtSpace2
+  Space1AllAtSpace2,
+  Space1AllWithRestrictedFixtureAtSpace1
 ] = [
   NoKibanaPrivilegesAtSpace1,
   SuperuserAtSpace1,
   GlobalReadAtSpace1,
   Space1AllAtSpace1,
   Space1AllAtSpace2,
+  Space1AllWithRestrictedFixtureAtSpace1,
 ];

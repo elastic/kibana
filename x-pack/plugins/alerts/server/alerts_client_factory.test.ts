@@ -18,11 +18,13 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 import { AuthenticatedUser } from '../../security/public';
 import { securityMock } from '../../security/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 
 jest.mock('./alerts_client');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+const features = featuresPluginMock.createStart();
 
 const securityPluginSetup = securityMock.createSetup();
 const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
@@ -33,6 +35,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
+  features,
 };
 const fakeRequest = ({
   headers: {},
@@ -84,6 +87,7 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
+    features: alertsClientFactoryParams.features,
   });
 });
 
@@ -113,6 +117,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
+    features: alertsClientFactoryParams.features,
     getActionsClient: expect.any(Function),
   });
 });

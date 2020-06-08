@@ -97,6 +97,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
@@ -195,6 +196,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
@@ -386,6 +388,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
@@ -473,6 +476,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
@@ -591,6 +595,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
@@ -679,6 +684,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
@@ -749,6 +755,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
@@ -803,6 +810,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               // Actions should execute twice before widning things down
@@ -849,6 +857,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               await alertUtils.muteAll(response.body.id);
               await alertUtils.enable(response.body.id);
@@ -898,6 +907,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               await alertUtils.muteInstance(response.body.id, '1');
               await alertUtils.enable(response.body.id);
@@ -947,6 +957,7 @@ instanceStateValue: true
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               await alertUtils.muteInstance(response.body.id, '1');
               await alertUtils.muteAll(response.body.id);

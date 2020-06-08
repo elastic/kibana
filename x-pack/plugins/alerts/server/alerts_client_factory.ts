@@ -11,6 +11,7 @@ import { KibanaRequest, Logger, SavedObjectsServiceStart } from '../../../../src
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
+import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -21,6 +22,7 @@ export interface AlertsClientFactoryOpts {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
+  features: FeaturesPluginStart;
 }
 
 export class AlertsClientFactory {
@@ -33,6 +35,7 @@ export class AlertsClientFactory {
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private actions!: ActionsPluginStartContract;
+  private features!: FeaturesPluginStart;
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -47,14 +50,16 @@ export class AlertsClientFactory {
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
     this.actions = options.actions;
+    this.features = options.features;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
-    const { securityPluginSetup, actions } = this;
+    const { securityPluginSetup, actions, features } = this;
     const spaceId = this.getSpaceId(request);
     return new AlertsClient({
       spaceId,
       logger: this.logger,
+      features: features!,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {

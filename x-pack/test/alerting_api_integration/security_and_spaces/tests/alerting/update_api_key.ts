@@ -53,6 +53,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
@@ -109,6 +110,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
@@ -147,6 +149,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',

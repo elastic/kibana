@@ -76,11 +76,13 @@ export interface FeatureKibanaPrivileges {
   app?: string[];
 
   /**
-   * If your feature registers its own Alert types you may specify the access privileges for them here.
+   * If your feature requires access to specific Alert Types, then specify your access needs here.
+   * Include both Alert Types registered by the feature and external Alert Types such as built-in
+   * Alert Types and Alert Types provided by other features to which you wish to grant access.
    */
   alerting?: {
     /**
-     * List of alert types which users should have full read/write access to within the feature.
+     * List of alert types which users should have full read/write access to when granted this privilege.
      * @example
      * ```ts
      *  {
@@ -91,7 +93,7 @@ export interface FeatureKibanaPrivileges {
     all?: string[];
 
     /**
-     * List of alert types which users should have read-only access to from within the feature.
+     * List of alert types which users should have read-only access to when granted this privilege.
      * @example
      * ```ts
      *  {
@@ -100,33 +102,6 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     read?: string[];
-
-    /**
-     * If your feature registers its own Alert types you may specify global access privileges for them here.
-     */
-    globally?: {
-      /**
-       * List of alert types types which users should have full read/write access to throughout kibana.
-       * @example
-       * ```ts
-       *  {
-       *    all: ['my-alert-type-globally-available']
-       *  }
-       * ```
-       */
-      all?: string[];
-
-      /**
-       * List of alert types which users should have read-only access to throughout kibana.
-       * @example
-       * ```ts
-       *  {
-       *    read: ['my-alert-type']
-       *  }
-       * ```
-       */
-      read?: string[];
-    };
   };
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.

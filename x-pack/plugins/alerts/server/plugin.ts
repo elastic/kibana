@@ -58,7 +58,10 @@ import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import { registerFeature } from './feature';
 
@@ -93,6 +96,7 @@ export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   taskManager: TaskManagerStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  features: FeaturesPluginStart;
 }
 
 export class AlertingPlugin {
@@ -221,6 +225,7 @@ export class AlertingPlugin {
         return spaces?.getSpaceId(request);
       },
       actions: plugins.actions,
+      features: plugins.features,
     });
 
     taskRunnerFactory.initialize({

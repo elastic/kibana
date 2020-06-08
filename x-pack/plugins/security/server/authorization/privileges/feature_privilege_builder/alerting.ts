@@ -28,7 +28,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
     const getAlertingPrivilege = (
       operations: string[],
       privilegedTypes: string[],
-      consumer?: string
+      consumer: string
     ) =>
       privilegedTypes.flatMap((type) =>
         operations.map((operation) => this.actions.alerting.get(type, consumer, operation))
@@ -37,8 +37,6 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
     return uniq([
       ...getAlertingPrivilege(allOperations, privilegeDefinition.alerting?.all ?? [], feature.id),
       ...getAlertingPrivilege(readOperations, privilegeDefinition.alerting?.read ?? [], feature.id),
-      ...getAlertingPrivilege(allOperations, privilegeDefinition.alerting?.globally?.all ?? []),
-      ...getAlertingPrivilege(readOperations, privilegeDefinition.alerting?.globally?.read ?? []),
     ]);
   }
 }

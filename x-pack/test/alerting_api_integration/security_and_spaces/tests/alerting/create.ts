@@ -77,6 +77,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
               expect(response.body).to.eql({
@@ -130,6 +131,151 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should handle create alert request appropriately when consumer is the same as producer', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'create',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately when consumer is not the producer', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({ alertTypeId: 'test.unrestricted-noop', consumer: 'alertsFixture' })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'create',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        // it.only('should handle create alert request appropriately when alert type is a built-in type', async () => {
+        //   const response = await supertestWithoutAuth
+        //     .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+        //     .set('kbn-xsrf', 'foo')
+        //     .auth(user.username, user.password)
+        //     .send(
+        //       getTestAlertData({
+        //         alertTypeId: 'test.fake-built-in',
+        //         consumer: 'alertsRestrictedFixture',
+        //       })
+        //     );
+
+        //   switch (scenario.id) {
+        //     case 'no_kibana_privileges at space1':
+        //     case 'global_read at space1':
+        //     case 'space_1_all at space2':
+        //     case 'space_1_all at space1':
+        //       expect(response.statusCode).to.eql(403);
+        //       expect(response.body).to.eql({
+        //         error: 'Forbidden',
+        //         message: getUnauthorizedErrorMessage(
+        //           'create',
+        //           'test.fake-built-in',
+        //           'alertsRestrictedFixture'
+        //         ),
+        //         statusCode: 403,
+        //       });
+        //       break;
+        //     case 'superuser at space1':
+        //     case 'space_1_all_with_restricted_fixture at space1':
+        //       expect(response.statusCode).to.eql(200);
+        //       objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+        //       break;
+        //     default:
+        //       throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+        //   }
+        // });
+
+        it('should handle create alert request appropriately when consumer is "alerts"', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.noop',
+                consumer: 'alerts',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should handle create alert request appropriately when an alert is disabled ', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
@@ -150,6 +296,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
               expect(response.body.scheduledTaskId).to.eql(undefined);
@@ -175,17 +322,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'create',
-                  'test.unregistered-alert-type',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
@@ -212,6 +349,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -248,6 +386,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -274,6 +413,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 error: 'Bad Request',
@@ -299,6 +439,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 error: 'Bad Request',

@@ -56,6 +56,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
@@ -98,6 +99,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -135,6 +137,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: 'my-slack1',

@@ -75,6 +75,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -158,6 +159,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -221,6 +223,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -263,6 +266,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -288,6 +292,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -341,6 +346,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -373,6 +379,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -433,6 +440,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];

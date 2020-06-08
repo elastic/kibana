@@ -41,6 +41,7 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               // Check for values explicitly in order to avoid this test failing each time plugins register
               // a new action type

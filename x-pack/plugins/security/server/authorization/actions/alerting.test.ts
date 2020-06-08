@@ -27,7 +27,7 @@ describe('#get', () => {
     });
   });
 
-  [null, '', 1, true, {}].forEach((consumer: any) => {
+  [null, '', 1, true, undefined, {}].forEach((consumer: any) => {
     test(`consumer of ${JSON.stringify(consumer)} throws error`, () => {
       const alertingActions = new AlertingActions(version);
       expect(() =>
@@ -36,17 +36,10 @@ describe('#get', () => {
     });
   });
 
-  test('returns `alerting:${alertType}/feature/${consumer}/${operation}`', () => {
+  test('returns `alerting:${alertType}/${consumer}/${operation}`', () => {
     const alertingActions = new AlertingActions(version);
     expect(alertingActions.get('foo-alertType', 'consumer', 'bar-operation')).toBe(
-      'alerting:1.0.0-zeta1:foo-alertType/feature/consumer/bar-operation'
-    );
-  });
-
-  test('returns `alerting:${alertType}/_global/${operation}` when no consumer is specified', () => {
-    const alertingActions = new AlertingActions(version);
-    expect(alertingActions.get('foo-alertType', undefined, 'bar-operation')).toBe(
-      'alerting:1.0.0-zeta1:foo-alertType/_global/bar-operation'
+      'alerting:1.0.0-zeta1:foo-alertType/consumer/bar-operation'
     );
   });
 });

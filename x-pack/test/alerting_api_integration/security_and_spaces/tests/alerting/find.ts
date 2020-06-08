@@ -50,6 +50,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body.page).to.equal(1);
               expect(response.body.perPage).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -131,6 +132,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.perPage).to.be.greaterThan(0);
@@ -188,6 +190,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body.page).to.equal(0);
               expect(response.body.perPage).to.equal(0);
               expect(response.body.total).to.equal(0);

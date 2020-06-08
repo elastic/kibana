@@ -38,6 +38,7 @@ import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
+import { AlertsFeatureId } from '../../../../../alerts/common';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -168,7 +169,7 @@ export const AlertForm = ({
     : null;
 
   const alertTypeRegistryList =
-    alert.consumer === 'alerts'
+    alert.consumer === AlertsFeatureId
       ? alertTypeRegistry
           .list()
           .filter(
