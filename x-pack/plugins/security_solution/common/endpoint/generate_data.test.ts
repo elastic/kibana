@@ -3,7 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointDocGenerator, Event, Tree, TreeNode } from './generate_data';
+import {
+  EndpointDocGenerator,
+  Event,
+  Tree,
+  TreeNode,
+  RelatedEventCategory,
+  ECSCategory,
+} from './generate_data';
 
 interface Node {
   events: Event[];
@@ -106,7 +113,11 @@ describe('data generator', () => {
         generations,
         percentTerminated: 100,
         percentWithRelated: 100,
-        relatedEvents: 4,
+        relatedEvents: [
+          { category: RelatedEventCategory.Driver, count: 1 },
+          { category: RelatedEventCategory.File, count: 2 },
+          { category: RelatedEventCategory.Network, count: 1 },
+        ],
       });
     });
 
@@ -116,6 +127,36 @@ describe('data generator', () => {
 
       return (inRelated || inLifecycle) && event.process.entity_id === node.id;
     };
+
+    it('has the right related events for each node', () => {
+      const checkRelatedEvents = (node: TreeNode) => {
+        expect(node.relatedEvents.length).toEqual(4);
+
+        const counts: Record<string, number> = {};
+        for (const event of node.relatedEvents) {
+          if (Array.isArray(event.event.category)) {
+            for (const cat of event.event.category) {
+              counts[cat] = counts[cat] + 1 || 1;
+            }
+          } else {
+            counts[event.event.category] = counts[event.event.category] + 1 || 1;
+          }
+        }
+        expect(counts[ECSCategory.Driver]).toEqual(1);
+        expect(counts[ECSCategory.File]).toEqual(2);
+        expect(counts[ECSCategory.Network]).toEqual(1);
+      };
+
+      for (const node of tree.ancestry.values()) {
+        checkRelatedEvents(node);
+      }
+
+      for (const node of tree.children.values()) {
+        checkRelatedEvents(node);
+      }
+
+      checkRelatedEvents(tree.origin);
+    });
 
     it('has the right number of ancestors', () => {
       expect(tree.ancestry.size).toEqual(ancestors);
