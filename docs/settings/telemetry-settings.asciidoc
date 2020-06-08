@@ -1,5 +1,5 @@
 [[telemetry-settings-kbn]]
-=== Telemetry settings in Kibana
+=== Telemetry settings in {kib}
 ++++
 <titleabbrev>Telemetry settings</titleabbrev>
 ++++
