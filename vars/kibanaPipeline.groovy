@@ -239,7 +239,7 @@ def call(Map params = [:], Closure closure) {
 
 def pipelineLibraryTests() {
   whenChanged(['vars/', '.ci/pipeline-library/']) {
-    worker.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {
         sh './gradlew test'
       }
