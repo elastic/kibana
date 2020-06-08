@@ -8,28 +8,45 @@ import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
 
-// Template serialized (from Elasticsearch)
-interface TemplateBaseSerialized {
-  name: string;
+/**
+ * Index template format from Elasticsearch
+ */
+export interface TemplateSerialized {
   index_patterns: string[];
-  version?: number;
-  order?: number;
-}
-
-export interface TemplateV1Serialized extends TemplateBaseSerialized {
-  settings?: IndexSettings;
-  aliases?: Aliases;
-  mappings?: Mappings;
-}
-
-export interface TemplateV2Serialized extends TemplateBaseSerialized {
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
   };
-  priority?: number;
   composed_of?: string[];
+  version?: number;
+  priority?: number;
+}
+
+/**
+ * TemplateDeserialized is the format the UI will be working with,
+ * regardless if we are loading the new format (composable) index template,
+ * or the legacy one. Serialization is done server side.
+ */
+export interface TemplateDeserialized {
+  name: string;
+  indexPatterns: string[];
+  template: {
+    settings?: IndexSettings;
+    aliases?: Aliases;
+    mappings?: Mappings;
+  };
+  composedOf?: string[]; // Used on composable index template
+  version?: number;
+  priority?: number;
+  order?: number; // Used on legacy index template
+  ilmPolicy?: {
+    name: string;
+  };
+  _kbnMeta: {
+    isManaged: boolean;
+    isLegacy?: boolean;
+  };
 }
 
 /**
@@ -42,42 +59,30 @@ export interface TemplateListItem {
   indexPatterns: string[];
   version?: number;
   order?: number;
+  priority?: number;
   hasSettings: boolean;
   hasAliases: boolean;
   hasMappings: boolean;
   ilmPolicy?: {
     name: string;
   };
-  isManaged: boolean;
   _kbnMeta: {
-    formatVersion: IndexTemplateFormatVersion;
+    isManaged: boolean;
+    isLegacy?: boolean;
   };
 }
 
 /**
- * TemplateDeserialized falls back to index template V2 format
- * The UI will only be dealing with this interface, conversion from and to V1 format
- * is done server side.
+ * ------------------------------------------
+ * --------- LEGACY INDEX TEMPLATES ---------
+ * ------------------------------------------
  */
-export interface TemplateDeserialized {
-  name: string;
-  indexPatterns: string[];
-  isManaged: boolean;
-  template: {
-    settings?: IndexSettings;
-    aliases?: Aliases;
-    mappings?: Mappings;
-  };
-  _kbnMeta: {
-    formatVersion: IndexTemplateFormatVersion;
-  };
-  version?: number;
-  priority?: number;
-  order?: number;
-  ilmPolicy?: {
-    name: string;
-  };
-  composedOf?: string[];
-}
 
-export type IndexTemplateFormatVersion = 1 | 2;
+export interface LegacyTemplateSerialized {
+  index_patterns: string[];
+  version?: number;
+  settings?: IndexSettings;
+  aliases?: Aliases;
+  mappings?: Mappings;
+  order?: number;
+}
