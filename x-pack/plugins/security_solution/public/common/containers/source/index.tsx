@@ -75,7 +75,7 @@ export const getIndexFields = memoizeOne(
 );
 
 export const getBrowserFields = memoizeOne(
-  (title: string, fields: IndexField[]): BrowserFields =>
+  (fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
@@ -107,10 +107,7 @@ export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, s
       {({ data }) =>
         children({
           indicesExist: get('source.status.indicesExist', data),
-          browserFields: getBrowserFields(
-            defaultIndex.join(),
-            get('source.status.indexFields', data)
-          ),
+          browserFields: getBrowserFields(get('source.status.indexFields', data)),
           indexPattern: getIndexFields(defaultIndex.join(), get('source.status.indexFields', data)),
         })
       }
@@ -160,12 +157,8 @@ export const useWithSource = (sourceId: string, indexToAdd?: string[]) => {
             updateLoading(false);
             updateErrorMessage(null);
             setIndicesExist(get('data.source.status.indicesExist', result));
-            setBrowserFields(
-              getBrowserFields(defaultIndex.join(), get('data.source.status.indexFields', result))
-            );
-            setIndexPattern(
-              getIndexFields(defaultIndex.join(), get('data.source.status.indexFields', result))
-            );
+            setBrowserFields(getBrowserFields(get('data.source.status.indexFields', result)));
+            setIndexPattern(getIndexFields(get('data.source.status.indexFields', result)));
           },
           (error) => {
             updateLoading(false);
@@ -180,6 +173,7 @@ export const useWithSource = (sourceId: string, indexToAdd?: string[]) => {
     const signal = abortCtrl.signal;
     fetchSource(signal);
     return () => abortCtrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apolloClient, sourceId, defaultIndex]);
 
   return { indicesExist, browserFields, indexPattern, loading, errorMessage };

@@ -78,17 +78,17 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();
       closePopover();
-    }, [toggleEnabledProvider]);
+    }, [closePopover, toggleEnabledProvider]);
 
     const onToggleExcludedProvider = useCallback(() => {
       toggleExcludedProvider();
       closePopover();
-    }, [toggleExcludedProvider]);
+    }, [toggleExcludedProvider, closePopover]);
 
     const onToggleTypeProvider = useCallback(() => {
       toggleTypeProvider();
       closePopover();
-    }, [toggleTypeProvider]);
+    }, [toggleTypeProvider, closePopover]);
 
     const [providerRegistered, setProviderRegistered] = useState(false);
 
@@ -112,6 +112,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       () => () => {
         unRegisterProvider();
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
 

@@ -78,8 +78,6 @@ export const getAllTimeline = memoizeOne((timelines: TimelineResult[]): OpenTime
     title: timeline.title,
     updated: timeline.updated,
     updatedBy: timeline.updatedBy,
-    timelineType: timeline.timelineType ?? TimelineType.default,
-    templateTimelineId: timeline.templateTimelineId,
   }))
 );
 
@@ -169,6 +167,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apolloClient, allTimelines]
   );
 

@@ -81,7 +81,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
-      [id]
+      [id, removeProvider]
     );
 
     const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
@@ -92,7 +92,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
-      [id]
+      [id, updateDataProviderEnabled]
     );
 
     const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
@@ -103,7 +103,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
-      [id]
+      [id, updateDataProviderExcluded]
     );
 
     const onToggleDataProviderType: OnToggleDataProviderType = useCallback(
@@ -113,7 +113,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           type,
           providerId,
         }),
-      [id]
+      [id, updateDataProviderType]
     );
 
     const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
@@ -127,12 +127,12 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           value,
         }),
-      [id]
+      [id, onDataProviderEdited]
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id]
+      [id, updateItemsPerPage]
     );
 
     const toggleColumn = useCallback(
@@ -154,6 +154,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [columns, id]
     );
 
@@ -161,6 +162,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       if (createTimeline != null) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
