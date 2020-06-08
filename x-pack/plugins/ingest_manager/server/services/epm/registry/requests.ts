@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import fetch, { Response } from 'node-fetch';
 import { streamToString } from './streams';
+import { IngestManagerError, IngestManagerErrorType } from '../../../errors';
 
 export async function getResponse(url: string): Promise<Response> {
   try {
@@ -14,10 +14,16 @@ export async function getResponse(url: string): Promise<Response> {
     if (response.ok) {
       return response;
     } else {
-      throw new Boom(response.statusText, { statusCode: response.status });
+      throw new IngestManagerError(
+        IngestManagerErrorType.RegistryError,
+        `Error connecting to package registry at ${url}: ${response.statusText}`
+      );
     }
   } catch (e) {
-    throw new Boom(`Error connecting to package registry: ${e.message}`, { statusCode: 502 });
+    throw new IngestManagerError(
+      IngestManagerErrorType.RegistryError,
+      `Error connecting to package registry at ${url}: ${e.message}`
+    );
   }
 }
 

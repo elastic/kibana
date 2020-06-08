@@ -37,7 +37,10 @@ export function registerRetryRoute({ router, license, lib }: RouteDependencies) 
       const { indexNames } = body;
 
       try {
-        await retryLifecycle(context.core.elasticsearch.dataClient.callAsCurrentUser, indexNames);
+        await retryLifecycle(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          indexNames
+        );
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

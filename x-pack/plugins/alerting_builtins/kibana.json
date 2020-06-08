@@ -3,7 +3,7 @@
   "server": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["alerting"],
+  "requiredPlugins": ["alerts"],
   "configPath": ["xpack", "alerting_builtins"],
   "ui": false
 }
