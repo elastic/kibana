@@ -11,5 +11,7 @@ Information about a registered [legacy application](./kibana-plugin-core-public.
 ```typescript
 export declare type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
     legacy: true;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
 };
 ```

@@ -125,12 +125,17 @@ export function getAppInfo(app: App<unknown> | LegacyApp): PublicAppInfo | Publi
     const { updater$, ...infos } = app;
     return {
       ...infos,
+      status: app.status!,
+      navLinkStatus: app.navLinkStatus!,
       legacy: true,
     };
   } else {
     const { updater$, mount, ...infos } = app;
     return {
       ...infos,
+      status: app.status!,
+      navLinkStatus: app.navLinkStatus!,
+      appRoute: app.appRoute!,
       legacy: false,
     };
   }

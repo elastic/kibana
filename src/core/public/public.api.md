@@ -1012,11 +1012,16 @@ export type PluginOpaqueId = symbol;
 // @public
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
     legacy: false;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+    appRoute: string;
 };
 
 // @public
 export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
     legacy: true;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
 };
 
 // @public
