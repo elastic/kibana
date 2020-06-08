@@ -11,7 +11,7 @@ import dateMath from '@elastic/datemath';
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/data/public';
+import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
@@ -21,8 +21,8 @@ const calcAuto = timeBucketsCalcAutoIntervalProvider();
 export function getTimeBucketsFromCache() {
   const uiSettings = getUiSettings();
   return new TimeBuckets({
-    'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-    'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+    [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     dateFormat: uiSettings.get('dateFormat'),
     'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
   });
@@ -35,8 +35,8 @@ export function getTimeBucketsFromCache() {
  */
 export function TimeBuckets(timeBucketsConfig) {
   this._timeBucketsConfig = timeBucketsConfig;
-  this.barTarget = this._timeBucketsConfig['histogram:barTarget'];
-  this.maxBars = this._timeBucketsConfig['histogram:maxBars'];
+  this.barTarget = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_BAR_TARGET];
+  this.maxBars = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_MAX_BARS];
 }
 
 /**
