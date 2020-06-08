@@ -14,7 +14,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiToolTip,
   EuiCallOut,
   EuiSpacer,
   EuiIcon,
@@ -30,34 +29,6 @@ const IsClusterSupported = ({ isSupported, children }) => {
 };
 
 const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
-
-/*
- * This checks if alerts feature is supported via monitoring cluster
- * license. If the alerts feature is not supported because the prod cluster
- * license is basic, IsClusterSupported makes the status col hidden
- * completely
- */
-const IsAlertsSupported = (props) => {
-  const { alertsMeta = { enabled: true }, clusterMeta = { enabled: true } } = props.cluster.alerts;
-  if (alertsMeta.enabled && clusterMeta.enabled) {
-    return <span>{props.children}</span>;
-  }
-
-  const message =
-    alertsMeta.message ||
-    clusterMeta.message ||
-    i18n.translate('xpack.monitoring.cluster.listing.unknownHealthMessage', {
-      defaultMessage: 'Unknown',
-    });
-
-  return (
-    <EuiToolTip content={message} position="bottom">
-      <EuiHealth color="subdued" data-test-subj="alertIcon">
-        N/A
-      </EuiHealth>
-    </EuiToolTip>
-  );
-};
 
 const getColumns = (
   showLicenseExpiration,
