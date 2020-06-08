@@ -29,6 +29,7 @@ import {
   PaginateDirectiveProvider,
 } from '../../../../../plugins/kibana_legacy/public';
 import { PER_PAGE_SETTING } from '../../../../../plugins/saved_objects/common';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../../plugins/visualizations/public';
 
 const module = uiModules.get('kibana');
 
@@ -294,7 +295,7 @@ module
 
           prevSearch = filter;
 
-          const isLabsEnabled = config.get('visualize:enableLabs');
+          const isLabsEnabled = config.get(VISUALIZE_ENABLE_LABS_SETTING);
           self.service.find(filter).then(function (hits) {
             hits.hits = hits.hits.filter(
               (hit) => isLabsEnabled || _.get(hit, 'type.stage') !== 'experimental'

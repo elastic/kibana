@@ -12,7 +12,6 @@ import {
   TestBed,
   TestBedConfig,
   findTestSubject,
-  nextTick,
 } from '../../../../../test_utils';
 // NOTE: We have to use the Home component instead of the TemplateList component because we depend
 // upon react router to provide the name of the template to load in the detail panel.
@@ -45,6 +44,7 @@ export interface IndexTemplatesTabTestBed extends TestBed<TestSubjects> {
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
     clickActionMenu: (name: TemplateDeserialized['name']) => void;
+    toggleViewItem: (view: 'composable' | 'system') => void;
   };
 }
 
@@ -102,21 +102,37 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
 
   const clickTemplateAt = async (index: number) => {
     const { component, table, router } = testBed;
-    const { rows } = table.getMetaData('templateTable');
+    const { rows } = table.getMetaData('legacyTemplateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
+    const { href } = templateLink.props();
     await act(async () => {
-      const { href } = templateLink.props();
       router.navigateTo(href!);
-      await nextTick();
-      component.update();
     });
+    component.update();
   };
 
   const clickCloseDetailsButton = () => {
     const { find } = testBed;
 
     find('closeDetailsButton').simulate('click');
+  };
+
+  const toggleViewItem = (view: 'composable' | 'system') => {
+    const { find, component } = testBed;
+    const views = ['composable', 'system'];
+
+    // First open the pop over
+    act(() => {
+      find('viewButton').simulate('click');
+    });
+    component.update();
+
+    // Then click on a filter item
+    act(() => {
+      find('filterList.filterItem').at(views.indexOf(view)).simulate('click');
+    });
+    component.update();
   };
 
   return {
@@ -130,6 +146,7 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
       clickTemplateAt,
       clickCloseDetailsButton,
       clickActionMenu,
+      toggleViewItem,
     },
   };
 };
