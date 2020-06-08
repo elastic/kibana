@@ -10,7 +10,7 @@ import {
   SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
-import { PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
+import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../utils/range_filter';
 
 export function getRumOverviewProjection({
@@ -24,6 +24,7 @@ export function getRumOverviewProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [PROCESSOR_EVENT]: 'transaction' } },
+      { term: { [TRANSACTION_TYPE]: 'page-load' } },
       ...uiFiltersES,
     ],
   };
