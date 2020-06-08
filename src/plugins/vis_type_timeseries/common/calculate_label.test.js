@@ -18,6 +18,7 @@
  */
 
 import { calculateLabel } from './calculate_label';
+import { SCRIPTED_FIELD_VALUE } from './constants';
 
 describe('calculateLabel(metric, metrics)', () => {
   test('returns "Unknown" for empty metric', () => {
@@ -82,7 +83,7 @@ describe('calculateLabel(metric, metrics)', () => {
   });
 
   test('returns formated label for scripted aggs', () => {
-    const label = calculateLabel({ type: 'avg', field: '__SCRIPT__' });
+    const label = calculateLabel({ type: 'avg', field: SCRIPTED_FIELD_VALUE });
     expect(label).toEqual('Average of Script');
   });
 });
