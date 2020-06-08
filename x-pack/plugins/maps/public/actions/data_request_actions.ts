@@ -42,12 +42,7 @@ import { DataRequestAbortError } from '../classes/util/data_request';
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
-  stopLoading(
-    dataId: string,
-    requestToken: symbol,
-    data: FeatureCollection | object,
-    meta: DataMeta
-  ): void;
+  stopLoading(dataId: string, requestToken: symbol, data: object, meta: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
@@ -106,12 +101,8 @@ function getDataRequestContext(
     dataFilters: getDataFilters(getState()),
     startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) =>
       dispatch<any>(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (
-      dataId: string,
-      requestToken: symbol,
-      data: FeatureCollection | object,
-      meta: DataMeta
-    ) => dispatch<any>(endDataLoad(layerId, dataId, requestToken, data, meta)),
+    stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) =>
+      dispatch<any>(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch<any>(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     updateSourceData: (newData: unknown) => {
