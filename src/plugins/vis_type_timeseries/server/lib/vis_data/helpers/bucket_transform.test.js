@@ -18,6 +18,7 @@
  */
 
 import { bucketTransform } from './bucket_transform';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
 
 describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_transform.js', () => {
   describe('bucketTransform', () => {
@@ -456,6 +457,97 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
               source: 'params.value > 0.0 ? params.value : 0.0',
               lang: 'painless',
             },
+          },
+        });
+      });
+    });
+
+    describe('scripted aggregations', () => {
+      test('basic metric aggregation', () => {
+        const metric = {
+          field: SCRIPTED_FIELD_VALUE,
+          type: 'avg',
+          script: 'doc["system.cpu.user.pct"].value * 100',
+        };
+        const fn = bucketTransform.avg;
+        expect(fn(metric, [metric], '10s')).toEqual({
+          avg: {
+            script: metric.script,
+          },
+        });
+      });
+
+      test('extended stats aggregation', () => {
+        const metric = {
+          field: SCRIPTED_FIELD_VALUE,
+          type: 'std_deviation',
+          script: 'doc["system.cpu.user.pct"].value * 100',
+        };
+        const fn = bucketTransform.std_deviation;
+        expect(fn(metric, [metric], '10s')).toEqual({
+          extended_stats: {
+            script: metric.script,
+          },
+        });
+      });
+
+      test('top_hits aggregation', () => {
+        const metric = {
+          field: SCRIPTED_FIELD_VALUE,
+          type: 'top_hit',
+          script: 'doc["system.cpu.user.pct"].value * 100',
+          size: 1,
+        };
+        const fn = bucketTransform.top_hit;
+        expect(fn(metric, [metric], '10s')).toEqual({
+          filter: {
+            bool: {
+              filter: [{ exists: { field: 'system.cpu.user.pct' } }],
+            },
+          },
+          aggs: {
+            docs: {
+              top_hits: {
+                size: 1,
+                script_fields: {
+                  [SCRIPTED_FIELD_VALUE]: {
+                    script: metric.script,
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+
+      test('percentile aggregation', () => {
+        const metric = {
+          field: SCRIPTED_FIELD_VALUE,
+          type: 'percentile',
+          script: 'doc["system.cpu.user.pct"].value * 100',
+          percentiles: [{ value: 50 }],
+        };
+        const fn = bucketTransform.percentile;
+        expect(fn(metric, [metric], '10s')).toEqual({
+          percentiles: {
+            script: metric.script,
+            percents: [50],
+          },
+        });
+      });
+
+      test('percentile_rank aggregation', () => {
+        const metric = {
+          field: SCRIPTED_FIELD_VALUE,
+          type: 'percentile_rank',
+          script: 'doc["system.cpu.user.pct"].value * 100',
+          values: ['50'],
+        };
+        const fn = bucketTransform.percentile_rank;
+        expect(fn(metric, [metric], '10s')).toEqual({
+          percentile_ranks: {
+            script: metric.script,
+            values: ['50'],
           },
         });
       });

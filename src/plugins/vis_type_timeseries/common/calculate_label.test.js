@@ -80,4 +80,9 @@ describe('calculateLabel(metric, metrics)', () => {
     const label = calculateLabel(metric, metrics);
     expect(label).toEqual('Derivative of Outbound Traffic');
   });
+
+  test('returns formated label for scripted aggs', () => {
+    const label = calculateLabel({ type: 'avg', field: '__SCRIPT__' });
+    expect(label).toEqual('Average of Script');
+  });
 });

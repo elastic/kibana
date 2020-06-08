@@ -18,6 +18,7 @@
  */
 
 import { positiveRate } from './positive_rate';
+import { SCRIPTED_FIELD_VALUE } from '../../../../../common/constants';
 describe('positiveRate(req, panel, series)', () => {
   let panel;
   let series;
@@ -67,6 +68,58 @@ describe('positiveRate(req, panel, series)', () => {
               aggs: {
                 'metric-1-positive-rate-max': {
                   max: { field: 'system.network.out.bytes' },
+                },
+                'metric-1-positive-rate-derivative': {
+                  derivative: {
+                    buckets_path: 'metric-1-positive-rate-max',
+                    gap_policy: 'skip',
+                    unit: '1s',
+                  },
+                },
+                'metric-1': {
+                  bucket_script: {
+                    buckets_path: { value: 'metric-1-positive-rate-derivative[normalized_value]' },
+                    script: {
+                      source: 'params.value > 0.0 ? params.value : 0.0',
+                      lang: 'painless',
+                    },
+                    gap_policy: 'skip',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('returns positive rate aggs with scripted aggregation', () => {
+    const next = (doc) => doc;
+    const newSeries = {
+      ...series,
+      metrics: [
+        {
+          id: 'metric-1',
+          type: 'positive_rate',
+          field: SCRIPTED_FIELD_VALUE,
+          script: 'doc["system.network.out.bytes"].value + doc["system.network.in.bytes"].value',
+          unit: '1s',
+        },
+      ],
+    };
+    const doc = positiveRate(req, panel, newSeries)(next)({});
+    expect(doc).toEqual({
+      aggs: {
+        test: {
+          aggs: {
+            timeseries: {
+              aggs: {
+                'metric-1-positive-rate-max': {
+                  max: {
+                    script:
+                      'doc["system.network.out.bytes"].value + doc["system.network.in.bytes"].value',
+                  },
                 },
                 'metric-1-positive-rate-derivative': {
                   derivative: {

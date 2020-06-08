@@ -16,10 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const REGEX = /doc\['([^']+)'\].value/g;
+const REGEX = /doc\[['"]([^'"]+)['"]\].value/g;
 export const collectScriptFields = (script) => {
   if (!script) {
     return [];
   }
-  return script.match(REGEX).map((m) => m.replace(REGEX, '$1'));
+  const matches = script.match(REGEX);
+  if (!matches) {
+    return [];
+  }
+  return matches.map((m) => m.replace(REGEX, '$1'));
 };
