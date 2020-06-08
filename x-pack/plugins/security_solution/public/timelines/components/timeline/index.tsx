@@ -77,6 +77,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -88,6 +89,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -99,6 +101,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -113,11 +116,13 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           value,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -140,6 +145,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [columns, id]
     );
 
@@ -147,6 +153,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       if (createTimeline != null) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

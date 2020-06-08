@@ -35,6 +35,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
         href: getManagementUrl({ name: 'policyList' }),
       },
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabName]);
   return <PageView {...options} tabs={tabs} />;
 });

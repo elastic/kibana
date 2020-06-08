@@ -78,6 +78,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
           },
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [indexPattern, timelineId]
     );
 
@@ -90,6 +91,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             expression,
           },
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [timelineId]
     );
 
@@ -99,6 +101,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           filters: newFilters,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [timelineId]
     );
 
@@ -108,6 +111,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           savedQueryId: newSavedQueryId,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [timelineId]
     );
 
@@ -117,6 +121,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           eventType: newEventType,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [timelineId]
     );
 

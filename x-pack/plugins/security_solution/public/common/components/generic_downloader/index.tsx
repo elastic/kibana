@@ -95,6 +95,7 @@ export const GenericDownloaderComponent = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids]);
 
   return <InvisibleAnchor ref={anchorRef} />;
