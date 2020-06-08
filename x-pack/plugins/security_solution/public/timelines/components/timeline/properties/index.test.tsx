@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-
+import { TestProviders } from '../../../../common/mock';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
@@ -14,15 +14,21 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
-import { TestProviders } from '../../../../common/mock/test_providers';
+import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...originalModule,
-    useGetUserSavedObjectPermissions: jest.fn().mockReturnValue({ crud: true }),
+    useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
+let mockedWidth = 1000;
+jest.mock('../../../../common/components/utils');
+(useThrottledResizeObserver as jest.Mock).mockImplementation(() => ({
+  width: mockedWidth,
+}));
 
 jest.mock('react-redux', () => {
   const originalModule = jest.requireActual('react-redux');
@@ -30,7 +36,6 @@ jest.mock('react-redux', () => {
   return {
     ...originalModule,
     useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
-    useHistory: jest.fn(),
   };
 });
 
@@ -42,19 +47,28 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-let mockedWidth = 1000;
-jest.mock('../../../../common/components/utils', () => {
-  const originalModule = jest.requireActual('../../../../common/components/utils');
 
-  return {
-    ...originalModule,
-    useThrottledResizeObserver: jest.fn().mockReturnValue({ width: mockedWidth }),
-  };
-});
-
+const usersViewing = ['elastic'];
+const defaultProps = {
+  associateNote: jest.fn(),
+  createTimeline: jest.fn(),
+  isDataInTimeline: false,
+  isDatepickerLocked: false,
+  isFavorite: false,
+  title: '',
+  description: '',
+  getNotesByIds: jest.fn(),
+  noteIds: [],
+  status: TimelineStatus.active,
+  timelineId: 'abc',
+  toggleLock: jest.fn(),
+  updateDescription: jest.fn(),
+  updateIsFavorite: jest.fn(),
+  updateTitle: jest.fn(),
+  updateNote: jest.fn(),
+  usersViewing,
+};
 describe('Properties', () => {
-  const usersViewing = ['elastic'];
-
   const state: State = mockGlobalState;
   let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
@@ -67,25 +81,7 @@ describe('Properties', () => {
   test('renders correctly', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 
@@ -100,25 +96,7 @@ describe('Properties', () => {
   test('renders correctly draft timeline', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.draft}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, status: TimelineStatus.draft }} />
       </TestProviders>
     );
 
@@ -132,25 +110,7 @@ describe('Properties', () => {
   test('it renders an empty star icon when it is NOT a favorite', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 
@@ -160,25 +120,7 @@ describe('Properties', () => {
   test('it renders a filled star icon when it is a favorite', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={true}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, isFavorite: true }} />
       </TestProviders>
     );
 
@@ -190,25 +132,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title={title}
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, title }} />
       </TestProviders>
     );
 
@@ -218,25 +142,7 @@ describe('Properties', () => {
   test('it renders the date picker with the lock icon', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 
@@ -251,25 +157,7 @@ describe('Properties', () => {
   test('it renders the lock icon when isDatepickerLocked is true', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={true}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, isDatepickerLocked: true }} />
       </TestProviders>
     );
     expect(
@@ -283,25 +171,7 @@ describe('Properties', () => {
   test('it renders the unlock icon when isDatepickerLocked is false', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
     expect(
@@ -318,25 +188,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description={description}
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, description }} />
       </TestProviders>
     );
 
@@ -355,25 +207,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description={description}
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, description }} />
       </TestProviders>
     );
 
@@ -390,25 +224,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 
@@ -425,25 +241,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 
@@ -458,25 +256,7 @@ describe('Properties', () => {
   test('it renders a settings icon', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 
@@ -488,25 +268,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title={title}
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...{ ...defaultProps, title }} />
       </TestProviders>
     );
 
@@ -516,25 +278,7 @@ describe('Properties', () => {
   test('it does NOT render an avatar for the current user viewing the timeline when it does NOT have a title', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...defaultProps} />
       </TestProviders>
     );
 

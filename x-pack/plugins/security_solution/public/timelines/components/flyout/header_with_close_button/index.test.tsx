@@ -10,6 +10,20 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
 describe('FlyoutHeaderWithCloseButton', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
