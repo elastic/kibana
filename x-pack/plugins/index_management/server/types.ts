@@ -32,6 +32,7 @@ export interface Index {
   size: any;
   isFrozen: boolean;
   aliases: string | string[];
+  data_stream?: string;
   [key: string]: any;
 }
 
