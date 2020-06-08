@@ -34,7 +34,7 @@ const runTestFor = (Component, aggType) => {
       ...METRIC,
       type: aggType,
       field: SCRIPTED_FIELD_VALUE,
-      script: 'system.cpu.user.pct',
+      script: 'doc["system.cpu.user.pct"].value * 100',
     };
     const series = { ...SERIES, metrics: [metric] };
     const panel = { ...PANEL, series };
@@ -56,6 +56,7 @@ const runTestFor = (Component, aggType) => {
         </div>
       );
       expect(wrapper.find(ScriptField).length).toBe(1);
+      expect(wrapper.find(ScriptField).html()).not.toBe(null);
     });
     it('should NOT display ScriptField component when script field not selected', () => {
       const wrapper = mountWithIntl(
