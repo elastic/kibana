@@ -64,9 +64,22 @@
           "properties": {
             "policy": {
               "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                "applied": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "object"
                 }
               },
               "type": "object"
