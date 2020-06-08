@@ -8,22 +8,22 @@ import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import {
+  deepFreeze,
   ICustomClusterClient,
   CoreSetup,
+  CoreStart,
   Logger,
   PluginInitializerContext,
-  CoreStart,
 } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import {
-  PluginSetupContract as FeaturesSetupContract,
-  PluginStartContract as FeaturesStartContract,
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
-import { Authorization, setupAuthorization } from './authorization';
+import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
 import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
@@ -36,8 +36,6 @@ export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
 >;
-
-export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
 
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
@@ -53,7 +51,7 @@ export interface SecurityPluginSetup {
     | 'grantAPIKeyAsInternalUser'
     | 'invalidateAPIKeyAsInternalUser'
   >;
-  authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  authz: Pick<AuthorizationServiceSetup, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
   license: SecurityLicense;
   audit: Pick<AuditServiceSetup, 'getLogger'>;
 
@@ -66,19 +64,15 @@ export interface SecurityPluginSetup {
    * @param service Spaces service exposed by the Spaces plugin.
    */
   registerSpacesService: (service: SpacesService) => void;
-
-  __legacyCompat: {
-    registerPrivilegesWithCluster: () => void;
-  };
 }
 
 export interface PluginSetupDependencies {
-  features: FeaturesService;
+  features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
 }
 
 export interface PluginStartDependencies {
-  features: FeaturesStartContract;
+  features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
 }
 
@@ -101,6 +95,7 @@ export class Plugin {
   };
 
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
+  private readonly authorizationService = new AuthorizationService();
 
   private readonly getSpacesService = () => {
     // Changing property value from Symbol to undefined denotes the fact that property was accessed.
@@ -156,15 +151,17 @@ export class Plugin {
       loggers: this.initializerContext.logger,
     });
 
-    const authz = await setupAuthorization({
+    const authz = this.authorizationService.setup({
       http: core.http,
+      capabilities: core.capabilities,
+      status: core.status,
       clusterClient: this.clusterClient,
       license,
       loggers: this.initializerContext.logger,
       kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
-      featuresService: features,
+      features,
     });
 
     setupSavedObjects({
@@ -173,8 +170,6 @@ export class Plugin {
       savedObjects: core.savedObjects,
       getSpacesService: this.getSpacesService,
     });
-
-    core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
 
     defineRoutes({
       router: core.http.createRouter(),
@@ -223,18 +218,15 @@ export class Plugin {
 
         this.spacesService = service;
       },
-
-      __legacyCompat: {
-        registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
-      },
     });
   }
 
-  public start(core: CoreStart, { licensing }: PluginStartDependencies) {
+  public start(core: CoreStart, { features, licensing }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
     this.featureUsageServiceStart = this.featureUsageService.start({
       featureUsage: licensing.featureUsage,
     });
+    this.authorizationService.start({ features, clusterClient: this.clusterClient! });
   }
 
   public stop() {
@@ -254,6 +246,7 @@ export class Plugin {
       this.featureUsageServiceStart = undefined;
     }
     this.auditService.stop();
+    this.authorizationService.stop();
   }
 
   private wasSpacesServiceAccessed() {

@@ -50,9 +50,6 @@ describe('Security Plugin', () => {
     it('exposes proper contract', async () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
-                "__legacyCompat": Object {
-                  "registerPrivilegesWithCluster": [Function],
-                },
                 "audit": Object {
                   "getLogger": [Function],
                 },

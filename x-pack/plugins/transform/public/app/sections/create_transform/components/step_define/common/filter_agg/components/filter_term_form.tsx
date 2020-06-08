@@ -30,6 +30,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const fetchOptions = useCallback(
     debounce(async (searchValue: string) => {
       const esSearchRequest = {

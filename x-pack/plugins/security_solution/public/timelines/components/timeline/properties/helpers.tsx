@@ -142,6 +142,7 @@ export const NewCase = React.memo<NewCaseProps>(
           },
         },
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onClosePopover, history, timelineId, timelineTitle]);
 
     return (
