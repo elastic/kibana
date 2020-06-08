@@ -18,10 +18,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCodeEditor } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import { JsonEditor } from '../../../../src/plugins/es_ui_shared/public';
 
-// @ts-ignore
-const TextMode = window.ace.acequire('ace/mode/json').Mode;
 export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
   const input = JSON.stringify(props.input, null, 4);
   const [value, setValue] = React.useState(input);
@@ -38,13 +37,9 @@ export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void 
   }, [input]);
   return (
     <>
-      <EuiCodeEditor
-        mode={new TextMode()}
-        theme="github"
-        width="100%"
+      <JsonEditor
         value={value}
-        onChange={setValue}
-        setOptions={{ fontSize: '14px' }}
+        onUpdate={(v) => setValue(v.data.raw)}
         data-test-subj={'dashboardEmbeddableByValueInputEditor'}
       />
       <EuiButton
