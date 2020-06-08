@@ -65,11 +65,11 @@ export const ConnectorEditFlyout = ({
     ...actionTypeModel?.validateConnector(connector).errors,
     ...validateBaseProperties(connector).errors,
   } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         toastNotifications.addSuccess(
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
@@ -83,7 +83,7 @@ export const ConnectorEditFlyout = ({
         );
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
           errorRes.body?.message ??
             i18n.translate(

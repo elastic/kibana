@@ -44,7 +44,7 @@ describe('state selectors', () => {
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
-      lastRefresh: 125,
+      searchText: '',
     },
     monitorStatus: {
       status: null,

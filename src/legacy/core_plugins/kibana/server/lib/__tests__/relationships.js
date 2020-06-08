@@ -65,11 +65,11 @@ const savedObjectsManagement = getManagementaMock({
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+      return `/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
+        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.index_patterns',
       };
     },
@@ -323,9 +323,9 @@ describe('findRelationships', () => {
         meta: {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
-          editUrl: '/management/kibana/index_patterns/1',
+          editUrl: '/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/app/kibana#/management/kibana/index_patterns/1',
+            path: '/app/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },
@@ -437,9 +437,9 @@ describe('findRelationships', () => {
         meta: {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
-          editUrl: '/management/kibana/index_patterns/1',
+          editUrl: '/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/app/kibana#/management/kibana/index_patterns/1',
+            path: '/app/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },

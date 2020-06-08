@@ -5,16 +5,7 @@
  */
 
 import {
-  GIS_API_PATH,
-  EMS_FILES_CATALOGUE_PATH,
-  EMS_TILES_CATALOGUE_PATH,
-  EMS_GLYPHS_PATH,
-  EMS_APP_NAME,
-} from '../common/constants';
-import { i18n } from '@kbn/i18n';
-import { EMSClient } from '@elastic/ems-client';
-import {
-  getInjectedVarFunc,
+  getHttp,
   getLicenseId,
   getIsEmsEnabled,
   getRegionmapLayers,
@@ -23,7 +14,20 @@ import {
   getEmsTileApiUrl,
   getEmsLandingPageUrl,
   getEmsFontLibraryUrl,
+  getProxyElasticMapsServiceInMaps,
+  getKibanaVersion,
 } from './kibana_services';
+import {
+  GIS_API_PATH,
+  EMS_FILES_CATALOGUE_PATH,
+  EMS_TILES_CATALOGUE_PATH,
+  EMS_GLYPHS_PATH,
+  EMS_APP_NAME,
+  FONTS_API_PATH,
+} from '../common/constants';
+import { i18n } from '@kbn/i18n';
+import { EMSClient } from '@elastic/ems-client';
+
 import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
@@ -52,10 +56,7 @@ export function getEMSClient() {
   if (!emsClient) {
     const isEmsEnabled = getIsEmsEnabled();
     if (isEmsEnabled) {
-      const proxyElasticMapsServiceInMaps = getInjectedVarFunc()(
-        'proxyElasticMapsServiceInMaps',
-        false
-      );
+      const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
       const proxyPath = '';
       const tileApiUrl = proxyElasticMapsServiceInMaps
         ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`)
@@ -66,7 +67,7 @@ export function getEMSClient() {
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
-        appVersion: getInjectedVarFunc()('kbnPkgVersion'),
+        appVersion: getKibanaVersion(),
         appName: EMS_APP_NAME,
         tileApiUrl,
         fileApiUrl,
@@ -97,9 +98,9 @@ export function getEMSClient() {
 
 export function getGlyphUrl() {
   if (!getIsEmsEnabled()) {
-    return '';
+    return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
-  return getInjectedVarFunc()('proxyElasticMapsServiceInMaps', false)
+  return getProxyElasticMapsServiceInMaps()
     ? relativeToAbsolute(`../${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`) +
         `/{fontstack}/{range}`
     : getEmsFontLibraryUrl();

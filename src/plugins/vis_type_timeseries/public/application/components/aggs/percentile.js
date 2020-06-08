@@ -38,7 +38,7 @@ import { Percentiles, newPercentile } from './percentile_ui';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
-const checkModel = model => Array.isArray(model.percentiles);
+const checkModel = (model) => Array.isArray(model.percentiles);
 
 export function PercentileAgg(props) {
   const { series, model, panel, fields } = props;

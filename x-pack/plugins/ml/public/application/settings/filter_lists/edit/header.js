@@ -88,7 +88,7 @@ export const EditFilterListHeader = ({
           name="new_filter_id"
           value={newFilterId}
           isInvalid={isNewFilterIdInvalid}
-          onChange={e => updateNewFilterId(e.target.value)}
+          onChange={(e) => updateNewFilterId(e.target.value)}
         />
       </EuiFormRow>
     );

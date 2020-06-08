@@ -9,11 +9,11 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants'
 export default {
   rootDir: '../../',
   roots: [
+    '<rootDir>/plugins',
     '<rootDir>/legacy/plugins',
     '<rootDir>/legacy/server',
     '<rootDir>/legacy/common',
     '<rootDir>/test_utils/jest/integration_tests',
-    '<rootDir>/test_utils/jest/contract_tests',
   ],
   collectCoverageFrom: ['legacy/plugins/**/*.js', 'legacy/common/**/*.js', 'legacy/server/**/*.js'],
   moduleNameMapper: {

@@ -156,8 +156,8 @@ export class SavedObjectsClient {
 
       this.bulkGet(queue)
         .then(({ savedObjects }) => {
-          queue.forEach(queueItem => {
-            const foundObject = savedObjects.find(savedObject => {
+          queue.forEach((queueItem) => {
+            const foundObject = savedObjects.find((savedObject) => {
               return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
             });
 
@@ -168,8 +168,8 @@ export class SavedObjectsClient {
             queueItem.resolve(foundObject);
           });
         })
-        .catch(err => {
-          queue.forEach(queueItem => {
+        .catch((err) => {
+          queue.forEach((queueItem) => {
             queueItem.reject(err);
           });
         });
@@ -216,7 +216,7 @@ export class SavedObjectsClient {
       }),
     });
 
-    return createRequest.then(resp => this.createSavedObject(resp));
+    return createRequest.then((resp) => this.createSavedObject(resp));
   };
 
   /**
@@ -239,8 +239,8 @@ export class SavedObjectsClient {
       query,
       body: JSON.stringify(objects),
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
         SavedObjectsBatchResponse
@@ -301,8 +301,8 @@ export class SavedObjectsClient {
       method: 'GET',
       query,
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['find']>>,
         SavedObjectsFindResponsePublic
@@ -350,14 +350,14 @@ export class SavedObjectsClient {
    */
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
     const path = this.getPath(['_bulk_get']);
-    const filteredObjects = objects.map(obj => pick(obj, ['id', 'type']));
+    const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
 
     const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(filteredObjects),
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
         SavedObjectsBatchResponse
@@ -414,7 +414,7 @@ export class SavedObjectsClient {
     return this.savedObjectsFetch(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
-    }).then(resp => {
+    }).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,

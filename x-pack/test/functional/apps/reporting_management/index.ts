@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('reporting management app', function() {
+  describe('reporting management app', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./report_delete_pagination'));
   });

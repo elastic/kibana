@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -41,11 +41,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     );
     await PageObjects.lens.assertExactText(
       '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValue"]',
-      '19,985'
-    );
-    await PageObjects.lens.assertExactText(
-      '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValueFilterable"]',
-      'IN'
+      '19,986'
     );
   }
 
@@ -65,14 +61,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   async function clickOnBarHistogram() {
     const el = await elasticChart.getCanvas();
 
-    await browser
-      .getActions()
-      .move({ x: 5, y: 5, origin: el._webElement })
-      .click()
-      .perform();
+    await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
-  describe('lens smokescreen tests', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/67838
+  describe.skip('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
@@ -106,22 +99,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
-    it('should allow seamless transition to and from table view and add a filter', async () => {
+    it('should allow seamless transition to and from table view', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
       await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
-      await PageObjects.lens.configureDimension({
-        dimension: '[data-test-subj="lnsDatatable_column"] [data-test-subj="lns-empty-dimension"]',
-        operation: 'terms',
-        field: 'geo.dest',
-      });
-      await PageObjects.lens.save('Artistpreviouslyknownaslens');
-      await find.clickByCssSelector('[data-test-subj="lensDatatableFilterOut"]');
       await assertExpectedTable();
       await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsMetric');
-      await assertExpectedMetric('19,985');
+      await assertExpectedMetric();
     });
 
     it('should allow creation of lens visualizations', async () => {

@@ -26,7 +26,7 @@ import { npSetup } from '../legacy/ui/public/new_platform/new_platform.karma_moc
 export default function stubbedLogstashIndexPatternService() {
   const mockLogstashFields = stubbedLogstashFields();
 
-  const fields = mockLogstashFields.map(function(field) {
+  const fields = mockLogstashFields.map(function (field) {
     const kbnType = getKbnFieldType(field.type);
 
     if (!kbnType || kbnType.name === 'unknown') {
@@ -41,7 +41,13 @@ export default function stubbedLogstashIndexPatternService() {
     };
   });
 
-  const indexPattern = new StubIndexPattern('logstash-*', cfg => cfg, 'time', fields, npSetup.core);
+  const indexPattern = new StubIndexPattern(
+    'logstash-*',
+    (cfg) => cfg,
+    'time',
+    fields,
+    npSetup.core
+  );
 
   indexPattern.id = 'logstash-*';
   indexPattern.isTimeNanosBased = () => false;

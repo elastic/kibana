@@ -59,7 +59,7 @@ export const CopyToSpaceForm = (props: Props) => {
           />
         }
         checked={props.copyOptions.overwrite}
-        onChange={e => setOverwrite(e.target.checked)}
+        onChange={(e) => setOverwrite(e.target.checked)}
       />
 
       <EuiHorizontalRule margin="m" />
@@ -76,7 +76,7 @@ export const CopyToSpaceForm = (props: Props) => {
         <SelectableSpacesControl
           spaces={props.spaces}
           selectedSpaceIds={props.copyOptions.selectedSpaceIds}
-          onChange={selection => setSelectedSpaceIds(selection)}
+          onChange={(selection) => setSelectedSpaceIds(selection)}
         />
       </EuiFormRow>
     </div>

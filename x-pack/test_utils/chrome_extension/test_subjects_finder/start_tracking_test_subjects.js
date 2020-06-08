@@ -6,13 +6,13 @@
 
 /* eslint-disable no-undef */
 
-(function() {
+(function () {
   /**
    * Go from ['a', 'b', 'c', 'd', 'e']
    * To ['a.b.c.d.e', 'a.b.c.d', 'a.b.c', 'a.b']
    * @param arr The array to outpu
    */
-  const outputArray = arr => {
+  const outputArray = (arr) => {
     const output = [];
     let i = 0;
     while (i < arr.length - 1) {
@@ -62,17 +62,17 @@
         throw new Error(`DOM node "${domTreeRoot}" not found.`);
       }
 
-      const arrayToType = array =>
+      const arrayToType = (array) =>
         array.reduce((string, subject) => {
           return string === '' ? `'${subject}'` : `${string}\n | '${subject}'`;
         }, '');
 
-      const arrayToList = array =>
+      const arrayToList = (array) =>
         array.reduce((string, subject) => {
           return string === '' ? `'${subject}'` : `${string}\n\'${subject}'`;
         }, '');
 
-      const addTestSubject = testSubject => {
+      const addTestSubject = (testSubject) => {
         const subjectDepth = testSubject.split('.').length;
         if (subjectDepth <= parseInt(depth, 10)) {
           window.__test_utils__.dataTestSubjects.add(testSubject);

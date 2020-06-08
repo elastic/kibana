@@ -41,17 +41,17 @@ export class GeometryFilterForm extends Component {
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
-  _onGeoFieldChange = selectedField => {
+  _onGeoFieldChange = (selectedField) => {
     this.setState({ selectedField });
   };
 
-  _onGeometryLabelChange = e => {
+  _onGeometryLabelChange = (e) => {
     this.setState({
       geometryLabel: e.target.value,
     });
   };
 
-  _onRelationChange = e => {
+  _onRelationChange = (e) => {
     this.setState({
       relation: e.target.value,
     });
@@ -78,11 +78,11 @@ export class GeometryFilterForm extends Component {
 
     const spatialRelations = this.props.isFilterGeometryClosed
       ? Object.values(ES_SPATIAL_RELATIONS)
-      : Object.values(ES_SPATIAL_RELATIONS).filter(relation => {
+      : Object.values(ES_SPATIAL_RELATIONS).filter((relation) => {
           // can not filter by within relation when filtering geometry is not closed
           return relation !== ES_SPATIAL_RELATIONS.WITHIN;
         });
-    const options = spatialRelations.map(relation => {
+    const options = spatialRelations.map((relation) => {
       return {
         value: relation,
         text: getEsSpatialRelationLabel(relation),

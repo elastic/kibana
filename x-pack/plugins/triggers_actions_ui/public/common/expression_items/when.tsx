@@ -76,7 +76,7 @@ export const WhenExpression = ({
           data-test-subj="whenExpressionSelect"
           value={aggType}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             onChangeSelectedAggType(e.target.value);
             setAggTypePopoverOpen(false);
           }}

@@ -55,7 +55,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
                 onClick={() => {
                   setAlertFlyoutVisible(false);
                 }}
-                onKeyUp={e => {
+                onKeyUp={(e) => {
                   if (e.key === 'Enter') {
                     setAlertFlyoutVisible(false);
                   }

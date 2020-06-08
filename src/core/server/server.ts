@@ -195,12 +195,13 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
+    const elasticsearchStart = await this.elasticsearch.start();
     const savedObjectsStart = await this.savedObjects.start({
+      elasticsearch: elasticsearchStart,
       pluginsInitialized: this.pluginsInitialized,
     });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-    const elasticsearchStart = await this.elasticsearch.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -247,20 +248,21 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
-        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+        const coreStart = this.coreStart!;
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
 
         return {
           savedObjects: {
             client: savedObjectsClient,
-            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
+            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
-            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
-            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+            legacy: {
+              client: coreStart.elasticsearch.legacy.client.asScoped(req),
+            },
           },
           uiSettings: {
-            client: uiSettingsClient,
+            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
         };
       }

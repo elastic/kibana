@@ -34,7 +34,7 @@ import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/c
 function getColor(rules, colorKey, value) {
   let color;
   if (rules) {
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
         if (_[rule.operator](value, rule.value)) {
           color = rule[colorKey];
@@ -56,10 +56,10 @@ export class TableVis extends Component {
   }
 
   get visibleSeries() {
-    return get(this.props, 'model.series', []).filter(series => !series.hidden);
+    return get(this.props, 'model.series', []).filter((series) => !series.hidden);
   }
 
-  renderRow = row => {
+  renderRow = (row) => {
     const { model } = this.props;
     let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
@@ -67,9 +67,9 @@ export class TableVis extends Component {
       rowDisplay = <a href={url}>{rowDisplay}</a>;
     }
     const columns = row.series
-      .filter(item => item)
-      .map(item => {
-        const column = this.visibleSeries.find(c => c.id === item.id);
+      .filter((item) => item)
+      .map((item) => {
+        const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
         const formatter = createTickFormatter(
           column.formatter,
@@ -128,7 +128,7 @@ export class TableVis extends Component {
       }
     };
 
-    const columns = this.visibleSeries.map(item => {
+    const columns = this.visibleSeries.map((item) => {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
 

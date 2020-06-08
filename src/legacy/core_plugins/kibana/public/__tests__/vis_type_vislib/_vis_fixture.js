@@ -42,15 +42,13 @@ const $visCanvas = $('<div>')
 let count = 0;
 const visHeight = $visCanvas.height();
 
-$visCanvas.new = function() {
+$visCanvas.new = function () {
   count += 1;
   if (count > 1) $visCanvas.height(visHeight * count);
-  return $('<div>')
-    .addClass('visChart')
-    .appendTo($visCanvas);
+  return $('<div>').addClass('visChart').appendTo($visCanvas);
 };
 
-afterEach(function() {
+afterEach(function () {
   $visCanvas.empty();
   if (count > 1) $visCanvas.height(visHeight);
   count = 0;

@@ -36,14 +36,14 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : internals.any().custom(value => {
+        : internals.any().custom((value) => {
             if (typeof value !== 'string') {
               return `expected value of type [string] but got [${typeDetect(value)}]`;
             }
           });
 
     if (options.minLength !== undefined) {
-      schema = schema.custom(value => {
+      schema = schema.custom((value) => {
         if (value.length < options.minLength!) {
           return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
         }
@@ -51,7 +51,7 @@ export class StringType extends Type<string> {
     }
 
     if (options.maxLength !== undefined) {
-      schema = schema.custom(value => {
+      schema = schema.custom((value) => {
         if (value.length > options.maxLength!) {
           return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
         }

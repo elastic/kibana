@@ -76,7 +76,7 @@ export class WorkpadConfig extends PureComponent {
         <EuiSpacer size="m" />
 
         <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
-          <EuiFieldText compressed value={name} onChange={e => setName(e.target.value)} />
+          <EuiFieldText compressed value={name} onChange={(e) => setName(e.target.value)} />
         </EuiFormRow>
 
         <EuiSpacer size="s" />
@@ -86,7 +86,7 @@ export class WorkpadConfig extends PureComponent {
             <EuiFormRow label={strings.getPageWidthLabel()} display="rowCompressed">
               <EuiFieldNumber
                 compressed
-                onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
+                onChange={(e) => setSize({ width: Number(e.target.value), height: size.height })}
                 value={size.width}
               />
             </EuiFormRow>
@@ -107,7 +107,7 @@ export class WorkpadConfig extends PureComponent {
             <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
               <EuiFieldNumber
                 compressed
-                onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
+                onChange={(e) => setSize({ height: Number(e.target.value), width: size.width })}
                 value={size.height}
               />
             </EuiFormRow>
@@ -152,7 +152,7 @@ export class WorkpadConfig extends PureComponent {
                 aria-label={strings.getGlobalCSSTooltip()}
                 value={css}
                 compressed
-                onChange={e => this.setState({ css: e.target.value })}
+                onChange={(e) => this.setState({ css: e.target.value })}
                 rows={10}
               />
               <EuiSpacer size="s" />

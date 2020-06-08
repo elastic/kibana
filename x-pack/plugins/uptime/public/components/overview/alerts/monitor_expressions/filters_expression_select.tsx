@@ -12,6 +12,7 @@ import { overviewFiltersSelector } from '../../../../state/selectors';
 import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
+import { StatusCheckFilters } from '../../../../../common/runtime_types';
 
 interface Props {
   newFilters: string[];
@@ -24,7 +25,9 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   newFilters,
   onRemoveFilter,
 }) => {
-  const { tags, ports, schemes, locations } = useSelector(overviewFiltersSelector);
+  const {
+    filters: { tags, ports, schemes, locations },
+  } = useSelector(overviewFiltersSelector);
 
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
@@ -36,19 +39,22 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
     updatedFieldValues.values
   );
 
-  useEffect(() => {
-    if (updatedFieldValues.fieldName === 'observer.geo.name') {
-      setAlertParams('locations', updatedFieldValues.values);
-    }
-  }, [setAlertParams, updatedFieldValues]);
+  const [filters, setFilters] = useState<StatusCheckFilters>({
+    'observer.geo.name': selectedLocations,
+    'url.port': selectedPorts,
+    tags: selectedTags,
+    'monitor.type': selectedSchemes,
+  });
 
   useEffect(() => {
-    setAlertParams('locations', []);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setAlertParams('filters', filters);
+  }, [filters, setAlertParams]);
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
+    setFilters({
+      ...filters,
+      [fieldName]: values,
+    });
     setUpdatedFieldValues({ fieldName, values });
   };
 
@@ -116,7 +122,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   });
 
   const filtersToDisplay = monitorFilters.filter(
-    curr => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
+    (curr) => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
   );
 
   return (

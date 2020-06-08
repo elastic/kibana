@@ -17,9 +17,7 @@ describe('SSL Certificate component', () => {
   let monitorTls: Tls;
 
   beforeEach(() => {
-    const dateInTwoMonths = moment()
-      .add(2, 'month')
-      .toString();
+    const dateInTwoMonths = moment().add(2, 'month').toString();
 
     monitorTls = {
       not_after: dateInTwoMonths,
@@ -54,9 +52,7 @@ describe('SSL Certificate component', () => {
   });
 
   it('renders expiration date with a warning state if ssl expiry date is less than 5 days', () => {
-    const dateIn5Days = moment()
-      .add(5, 'day')
-      .toString();
+    const dateIn5Days = moment().add(5, 'day').toString();
     monitorTls = {
       not_after: dateIn5Days,
     };
@@ -73,9 +69,7 @@ describe('SSL Certificate component', () => {
   });
 
   it('does not render the expiration date with a warning state if expiry date is greater than a month', () => {
-    const dateIn40Days = moment()
-      .add(40, 'day')
-      .toString();
+    const dateIn40Days = moment().add(40, 'day').toString();
     monitorTls = {
       not_after: dateIn40Days,
     };

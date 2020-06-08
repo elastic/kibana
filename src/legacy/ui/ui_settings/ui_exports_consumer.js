@@ -41,7 +41,7 @@ export class UiExportsConsumer {
     switch (type) {
       case 'uiSettingDefaults':
         return (plugin, settingDefinitions) => {
-          Object.keys(settingDefinitions).forEach(key => {
+          Object.keys(settingDefinitions).forEach((key) => {
             if (key in this._uiSettingDefaults) {
               throw new Error(`uiSettingDefaults for key "${key}" are already defined`);
             }

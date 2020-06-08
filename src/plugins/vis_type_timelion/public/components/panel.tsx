@@ -83,13 +83,13 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const [legendValueNumbers, setLegendValueNumbers] = useState();
   const [legendCaption, setLegendCaption] = useState();
 
-  const canvasRef = useCallback(node => {
+  const canvasRef = useCallback((node) => {
     if (node !== null) {
       setCanvasElem(node);
     }
   }, []);
 
-  const elementRef = useCallback(node => {
+  const elementRef = useCallback((node) => {
     if (node !== null) {
       setChartElem(node);
     }
@@ -97,14 +97,12 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   useEffect(
     () => () => {
-      $(chartElem)
-        .off('plotselected')
-        .off('plothover')
-        .off('mouseleave');
+      $(chartElem).off('plotselected').off('plothover').off('mouseleave');
     },
     [chartElem]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const highlightSeries = useCallback(
     debounce(({ currentTarget }: JQuery.TriggeredEvent) => {
       const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
@@ -113,7 +111,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       }
 
       setHighlightedSeries(id);
-      setChart(chartState =>
+      setChart((chartState) =>
         chartState.map((series: Series, seriesIndex: number) => {
           series.color =
             seriesIndex === id
@@ -139,7 +137,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const toggleSeries = useCallback(({ currentTarget }: JQuery.TriggeredEvent) => {
     const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
 
-    setChart(chartState =>
+    setChart((chartState) =>
       chartState.map((series: Series, seriesIndex: number) => {
         if (seriesIndex === id) {
           series._hide = !series._hide;
@@ -169,10 +167,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
         // legend has been re-created. Apply focus on legend element when previously set
         if (focusedSeries || focusedSeries === 0) {
-          canvasNode
-            .find('div.legend table .legendLabel>span')
-            .get(focusedSeries)
-            .focus();
+          canvasNode.find('div.legend table .legendLabel>span').get(focusedSeries).focus();
         }
       }
     },
@@ -241,7 +236,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     setHighlightedSeries(null);
     setFocusedSeries(null);
 
-    setChart(chartState =>
+    setChart((chartState) =>
       chartState.map((series: Series) => {
         series.color = originalColorMap.get(series); // reset the colors
         return series;
@@ -301,6 +296,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     [plot, legendValueNumbers, unhighlightSeries, legendCaption]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedSetLegendNumbers = useCallback(
     debounce(setLegendNumbers, DEBOUNCE_DELAY, {
       maxWait: DEBOUNCE_DELAY,
@@ -349,25 +345,19 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   useEffect(() => {
     if (chartElem) {
-      $(chartElem)
-        .off('plotselected')
-        .on('plotselected', plotSelectedHandler);
+      $(chartElem).off('plotselected').on('plotselected', plotSelectedHandler);
     }
   }, [chartElem, plotSelectedHandler]);
 
   useEffect(() => {
     if (chartElem) {
-      $(chartElem)
-        .off('mouseleave')
-        .on('mouseleave', mouseLeaveHandler);
+      $(chartElem).off('mouseleave').on('mouseleave', mouseLeaveHandler);
     }
   }, [chartElem, mouseLeaveHandler]);
 
   useEffect(() => {
     if (chartElem) {
-      $(chartElem)
-        .off('plothover')
-        .on('plothover', plotHoverHandler);
+      $(chartElem).off('plothover').on('plothover', plotHoverHandler);
     }
   }, [chartElem, plotHoverHandler]);
 

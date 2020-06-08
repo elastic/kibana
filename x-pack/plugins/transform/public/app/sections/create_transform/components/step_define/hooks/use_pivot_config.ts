@@ -41,7 +41,7 @@ export const usePivotConfig = (
 
     const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -59,7 +59,7 @@ export const usePivotConfig = (
       groupByListWithoutPrevious
     );
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -75,6 +75,9 @@ export const usePivotConfig = (
   // The list of selected aggregations
   const [aggList, setAggList] = useState(defaults.aggList);
 
+  /**
+   * Adds an aggregation to the list.
+   */
   const addAggregation = (d: DropDownLabel[]) => {
     const label: AggName = d[0].label;
     const config: PivotAggsConfig = aggOptionsData[label];
@@ -82,7 +85,7 @@ export const usePivotConfig = (
 
     const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -90,6 +93,9 @@ export const usePivotConfig = (
     setAggList({ ...aggList });
   };
 
+  /**
+   * Adds updated aggregation to the list
+   */
   const updateAggregation = (previousAggName: AggName, item: PivotAggsConfig) => {
     const aggListWithoutPrevious = { ...aggList };
     delete aggListWithoutPrevious[previousAggName];
@@ -100,7 +106,7 @@ export const usePivotConfig = (
       groupByList
     );
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -108,6 +114,9 @@ export const usePivotConfig = (
     setAggList(aggListWithoutPrevious);
   };
 
+  /**
+   * Deletes aggregation from the list
+   */
   const deleteAggregation = (aggName: AggName) => {
     delete aggList[aggName];
     setAggList({ ...aggList });

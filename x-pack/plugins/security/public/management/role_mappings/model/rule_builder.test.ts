@@ -252,7 +252,7 @@ describe('generateRulesFromRaw', () => {
       expect((rules as FieldRule).value).toEqual([0, '*', null, 'foo', true, false]);
     });
 
-    [{}, () => null, undefined, [{}, undefined, [], () => null]].forEach(invalidValue => {
+    [{}, () => null, undefined, [{}, undefined, [], () => null]].forEach((invalidValue) => {
       it(`does not support a value of ${invalidValue}`, () => {
         expect(() => {
           generateRulesFromRaw({

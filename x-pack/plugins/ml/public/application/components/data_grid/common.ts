@@ -55,8 +55,8 @@ export const euiDataGridToolbarSettings = {
 };
 
 export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): string[] => {
-  const allFields = indexPattern.fields.map(f => f.name);
-  const indexPatternFields: string[] = allFields.filter(f => {
+  const allFields = indexPattern.fields.map((f) => f.name);
+  const indexPatternFields: string[] = allFields.filter((f) => {
     if (indexPattern.metaFields.includes(f)) {
       return false;
     }
@@ -78,7 +78,7 @@ export interface FieldTypes {
 }
 
 export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, resultsField: string) => {
-  return Object.keys(fieldTypes).map(field => {
+  return Object.keys(fieldTypes).map((field) => {
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
     // To fall back to the default string schema it needs to be undefined.
     let schema;

@@ -18,11 +18,12 @@ import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 import { ModelPlotOutput } from '../services/results_service/result_service_rx';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
+import { EntityField } from '../..';
 
 function getMetricData(
   job: Job,
   detectorIndex: number,
-  entityFields: object[],
+  entityFields: EntityField[],
   earliestMs: number,
   latestMs: number,
   interval: string
@@ -95,7 +96,7 @@ function getMetricData(
         interval
       )
       .pipe(
-        map(resp => {
+        map((resp) => {
           _.each(resp.results, (value, time) => {
             // @ts-ignore
             obj.results[time] = {
@@ -133,7 +134,7 @@ function getChartDetails(
     }
     obj.results.functionLabel = functionLabel;
 
-    const blankEntityFields = _.filter(entityFields, entity => {
+    const blankEntityFields = _.filter(entityFields, (entity) => {
       return entity.fieldValue === null;
     });
 
@@ -154,7 +155,7 @@ function getChartDetails(
         latestMs,
       })
         .then((results: any) => {
-          _.each(blankEntityFields, field => {
+          _.each(blankEntityFields, (field) => {
             // results will not contain keys for non-aggregatable fields,
             // so store as 0 to indicate over all field values.
             obj.results.entityData.entities.push({

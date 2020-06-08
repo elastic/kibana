@@ -13,13 +13,13 @@ describe('addAnomaliesDataToNodes', () => {
       {
         'service.name': 'opbeans-ruby',
         'agent.name': 'ruby',
-        'service.environment': null
+        'service.environment': null,
       },
       {
         'service.name': 'opbeans-java',
         'agent.name': 'java',
-        'service.environment': null
-      }
+        'service.environment': null,
+      },
     ];
 
     const anomaliesResponse = {
@@ -36,12 +36,12 @@ describe('addAnomaliesDataToNodes', () => {
                         record_score: 50,
                         actual: [2000],
                         typical: [1000],
-                        job_id: 'opbeans-ruby-request-high_mean_response_time'
-                      }
-                    }
-                  ]
-                }
-              }
+                        job_id: 'opbeans-ruby-request-high_mean_response_time',
+                      },
+                    },
+                  ],
+                },
+              },
             },
             {
               key: 'opbeans-java-request-high_mean_response_time',
@@ -53,16 +53,16 @@ describe('addAnomaliesDataToNodes', () => {
                         record_score: 100,
                         actual: [9000],
                         typical: [3000],
-                        job_id: 'opbeans-java-request-high_mean_response_time'
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          ]
-        }
-      }
+                        job_id: 'opbeans-java-request-high_mean_response_time',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
     };
 
     const result = [
@@ -74,7 +74,7 @@ describe('addAnomaliesDataToNodes', () => {
         severity: 'major',
         actual_value: 2000,
         typical_value: 1000,
-        job_id: 'opbeans-ruby-request-high_mean_response_time'
+        job_id: 'opbeans-ruby-request-high_mean_response_time',
       },
       {
         'service.name': 'opbeans-java',
@@ -84,8 +84,8 @@ describe('addAnomaliesDataToNodes', () => {
         severity: 'critical',
         actual_value: 9000,
         typical_value: 3000,
-        job_id: 'opbeans-java-request-high_mean_response_time'
-      }
+        job_id: 'opbeans-java-request-high_mean_response_time',
+      },
     ];
 
     expect(
