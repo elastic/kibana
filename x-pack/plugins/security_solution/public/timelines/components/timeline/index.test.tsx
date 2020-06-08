@@ -25,6 +25,7 @@ import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -72,6 +73,7 @@ describe('StatefulTimeline', () => {
       showCallOutUnauthorizedMsg: false,
       sort,
       start: startDate,
+      timelineType: TimelineType.default,
       updateColumns: timelineActions.updateColumns,
       updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
       updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,

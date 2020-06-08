@@ -7,6 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
@@ -17,6 +18,7 @@ describe('FlyoutHeaderWithCloseButton', () => {
         <FlyoutHeaderWithCloseButton
           onClose={jest.fn()}
           timelineId={'test'}
+          timelineType={TimelineType.default}
           usersViewing={['elastic']}
         />
       </TestProviders>
@@ -31,6 +33,7 @@ describe('FlyoutHeaderWithCloseButton', () => {
         <FlyoutHeaderWithCloseButton
           onClose={closeMock}
           timelineId={'test'}
+          timelineType={TimelineType.default}
           usersViewing={['elastic']}
         />
       </TestProviders>

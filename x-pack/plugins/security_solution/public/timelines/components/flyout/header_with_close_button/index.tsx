@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { FlyoutHeader } from '../header';
 import * as i18n from './translations';
+import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 const FlyoutHeaderContainer = styled.div`
   align-items: center;
@@ -27,8 +28,9 @@ const WrappedCloseButton = styled.div`
 const FlyoutHeaderWithCloseButtonComponent: React.FC<{
   onClose: () => void;
   timelineId: string;
+  timelineType: TimelineTypeLiteral;
   usersViewing: string[];
-}> = ({ onClose, timelineId, usersViewing }) => (
+}> = ({ onClose, timelineId, timelineType, usersViewing }) => (
   <FlyoutHeaderContainer>
     <WrappedCloseButton>
       <EuiToolTip content={i18n.CLOSE_TIMELINE}>
@@ -40,7 +42,7 @@ const FlyoutHeaderWithCloseButtonComponent: React.FC<{
         />
       </EuiToolTip>
     </WrappedCloseButton>
-    <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
+    <FlyoutHeader timelineId={timelineId} timelineType={timelineType} usersViewing={usersViewing} />
   </FlyoutHeaderContainer>
 );
 

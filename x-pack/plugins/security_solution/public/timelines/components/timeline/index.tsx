@@ -55,6 +55,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     showCallOutUnauthorizedMsg,
     sort,
     start,
+    timelineType,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
     updateItemsPerPage,
@@ -179,6 +180,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             sort={sort!}
             start={start}
+            timelineType={timelineType}
             toggleColumn={toggleColumn}
             usersViewing={usersViewing}
           />
@@ -228,6 +230,7 @@ const makeMapStateToProps = () => {
       kqlMode,
       show,
       sort,
+      timelineType,
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
 
@@ -249,6 +252,7 @@ const makeMapStateToProps = () => {
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       sort,
       start: input.timerange.from,
+      timelineType,
     };
   };
   return mapStateToProps;

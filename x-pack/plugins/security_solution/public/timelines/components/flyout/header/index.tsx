@@ -20,9 +20,11 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 interface OwnProps {
   timelineId: string;
+  timelineType: TimelineTypeLiteral;
   usersViewing: string[];
 }
 
@@ -37,6 +39,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
     isDataInTimeline,
     isDatepickerLocked,
     title,
+    timelineType,
     noteIds,
     notesById,
     status,
@@ -62,6 +65,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
         isDatepickerLocked={isDatepickerLocked}
         isFavorite={isFavorite}
         title={title}
+        timelineType={timelineType}
         noteIds={noteIds}
         status={status}
         timelineId={timelineId}

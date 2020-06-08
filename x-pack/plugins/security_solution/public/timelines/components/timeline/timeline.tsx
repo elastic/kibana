@@ -38,6 +38,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -107,6 +108,7 @@ export interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  timelineType: TimelineTypeLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -138,6 +140,7 @@ export const TimelineComponent: React.FC<Props> = ({
   showCallOutUnauthorizedMsg,
   start,
   sort,
+  timelineType,
   toggleColumn,
   usersViewing,
 }) => {
@@ -185,6 +188,7 @@ export const TimelineComponent: React.FC<Props> = ({
         <FlyoutHeaderWithCloseButton
           onClose={onClose}
           timelineId={id}
+          timelineType={timelineType}
           usersViewing={usersViewing}
         />
         <TimelineHeaderContainer data-test-subj="timelineHeader">

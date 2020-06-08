@@ -148,7 +148,7 @@ export const Actions = React.memo<Props>(
                     data-test-subj="pin-event"
                     onClick={onPinClicked}
                     pinned={eventIsPinned}
-                    status={timeline.status}
+                    timelineType={timeline.timelineType}
                   />
                 </EuiToolTip>
               </EventsTdContent>
@@ -167,7 +167,7 @@ export const Actions = React.memo<Props>(
                   toggleShowNotes={toggleShowNotes}
                   toolTip={i18n.NOTES_TOOLTIP}
                   updateNote={updateNote}
-                  timelineStatus={timeline.status}
+                  timelineType={timeline.timelineType}
                 />
               </EventsTdContent>
             </EventsTd>
