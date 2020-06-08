@@ -75,7 +75,7 @@ export const machine_learning_job_id = t.string;
  * TODO: Strip away extra information and possibly even "freeze" this object
  * so we have tighter control over 3rd party data structures.
  */
-export const meta = t.record(t.string, t.string);
+export const meta = t.record(t.string, t.unknown);
 export const max_signals = PositiveIntegerGreaterThanZero;
 export const name = t.string;
 export const risk_score = RiskScore;
