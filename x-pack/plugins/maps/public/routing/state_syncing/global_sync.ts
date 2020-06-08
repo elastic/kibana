@@ -6,6 +6,7 @@
 
 import { syncQueryStateWithUrl } from '../../../../../../src/plugins/data/public';
 import { getData } from '../../kibana_services';
+// @ts-ignore
 import { kbnUrlStateStorage } from '../maps_router';
 
 export function useGlobalStateSyncing() {
@@ -18,12 +19,13 @@ export function getGlobalState() {
 }
 
 export function updateGlobalState(newState: unknown) {
-  const globalState = getGlobalState(kbnUrlStateStorage);
+  const globalState = getGlobalState();
   kbnUrlStateStorage.set(
     '_g',
     {
       // @ts-ignore
       ...globalState,
+      // @ts-ignore
       ...newState,
     },
     {

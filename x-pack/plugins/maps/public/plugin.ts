@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import {
-  Plugin,
   CoreSetup,
   CoreStart,
+  Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
