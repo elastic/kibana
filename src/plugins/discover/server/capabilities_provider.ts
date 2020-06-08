@@ -23,6 +23,5 @@ export const capabilitiesProvider = () => ({
     createShortUrl: true,
     save: true,
     saveQuery: true,
-    saveIndexPattern: true,
   },
 });
