@@ -63,7 +63,7 @@ describe('IndexPatterns', () => {
     );
 
     indexPatterns = new IndexPatternsService(
-      core.uiSettings,
+      core,
       savedObjectsClient,
       http,
       fieldFormats,

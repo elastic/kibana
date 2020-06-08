@@ -66,7 +66,7 @@ export class IndexPatternsService {
   ) => Field;
 
   constructor(
-    uiSettings: CoreStart['uiSettings'],
+    core: CoreStart,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpStart,
     fieldFormats: FieldFormatsStartCommon,
@@ -75,13 +75,13 @@ export class IndexPatternsService {
     onRedirectNoIndexPattern: () => void
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-    this.config = uiSettings;
+    this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      uiSettings,
+      core,
       onRedirectNoIndexPattern
     );
     this.createFieldList = getIndexPatternFieldListCreator({
