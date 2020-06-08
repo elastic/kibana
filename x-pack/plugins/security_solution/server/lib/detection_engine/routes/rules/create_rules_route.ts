@@ -35,7 +35,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         ),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
