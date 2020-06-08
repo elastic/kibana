@@ -68,10 +68,10 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
     if (!isVisualizeEmbeddable(embeddable)) return;
 
     const { core } = this.params.start();
-    const url = await this.getUrl(embeddable);
+    const path = await this.getPath(embeddable);
 
-    await core.application.navigateToApp('kibana', {
-      path: '#' + url.split('#')[1],
+    await core.application.navigateToApp('discover', {
+      path,
     });
   }
 
@@ -80,21 +80,18 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
       throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
-    const { core } = this.params.start();
-    const url = await this.getUrl(embeddable);
+    const path = await this.getPath(embeddable);
 
-    return core.application.getUrlForApp('kibana', {
-      path: '#' + url.split('#')[1],
-    });
+    return `discover${path}`;
   }
 
-  private async getUrl(embeddable: VisualizeEmbeddableContract): Promise<string> {
+  private async getPath(embeddable: VisualizeEmbeddableContract): Promise<string> {
     const { plugins } = this.params.start();
 
     const { timeRange, query, filters } = embeddable.getInput();
     const indexPatternId = this.getIndexPattern(embeddable);
 
-    const url = await plugins
+    const path = await plugins
       .share!.urlGenerators.getUrlGenerator(DISCOVER_APP_URL_GENERATOR)
       .createUrl({
         indexPatternId,
@@ -103,7 +100,7 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
         timeRange,
       });
 
-    return url;
+    return path;
   }
 
   /**
