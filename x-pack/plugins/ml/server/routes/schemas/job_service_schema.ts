@@ -74,9 +74,12 @@ export const revertModelSnapshotSchema = schema.object({
   end: schema.maybe(schema.number()),
   deleteInterveningResults: schema.maybe(schema.boolean()),
   skip: schema.maybe(
-    schema.object({
-      start: schema.number(),
-      end: schema.number(),
-    })
+    schema.arrayOf(
+      schema.object({
+        start: schema.number(),
+        end: schema.number(),
+        description: schema.string(),
+      })
+    )
   ),
 });

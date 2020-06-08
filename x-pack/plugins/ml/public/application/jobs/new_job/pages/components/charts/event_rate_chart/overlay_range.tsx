@@ -14,6 +14,7 @@ import { LineChartPoint } from '../../../../common/chart_loader';
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
+  overlayKey: number;
   eventRateChartData: LineChartPoint[];
   start: number;
   end: number;
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export const OverlayRange: FC<Props> = ({
+  overlayKey,
   eventRateChartData,
   start,
   end,
@@ -33,7 +35,7 @@ export const OverlayRange: FC<Props> = ({
   return (
     <>
       <RectAnnotation
-        id="asd"
+        id={`rect_annotation_${overlayKey}`}
         zIndex={1}
         hideTooltips={true}
         dataValues={[

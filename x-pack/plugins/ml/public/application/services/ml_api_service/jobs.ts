@@ -275,7 +275,7 @@ export const jobs = {
     snapshotId: string,
     replay: boolean,
     end?: number,
-    skip?: { start: number; end: number }
+    skip?: Array<{ start: number; end: number; description: string }>
   ) {
     const body = JSON.stringify({ jobId, snapshotId, replay, end, skip });
     return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({

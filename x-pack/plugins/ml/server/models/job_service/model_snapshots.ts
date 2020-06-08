@@ -40,7 +40,7 @@ export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
     replay: boolean,
     end: number,
     deleteInterveningResults: boolean = true,
-    skip?: { start: number; end: number }
+    skip?: [{ start: number; end: number; description: string }]
   ) {
     const job = await callAsCurrentUser<MlJobsResponse>('ml.jobs', { jobId: [jobId] });
     const jobStats = await callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats', {
@@ -56,18 +56,16 @@ export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
       datafeedId: [datafeedId],
     });
 
-    if (skip !== undefined) {
+    if (skip !== undefined && skip.length) {
       const calendar: FormCalendar = {
         calendarId: String(Date.now()),
         job_ids: [jobId],
         description: 'auto created',
-        events: [
-          {
-            description: 'Auto created',
-            start_time: skip.start,
-            end_time: skip.end,
-          },
-        ],
+        events: skip.map((s) => ({
+          description: s.description,
+          start_time: s.start,
+          end_time: s.end,
+        })),
       };
       const cm = new CalendarManager(callAsCurrentUser);
       await cm.newCalendar(calendar);

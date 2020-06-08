@@ -29,12 +29,12 @@ interface Props {
   showAxis?: boolean;
   loading?: boolean;
   fadeChart?: boolean;
-  overlayRange?: {
+  overlayRanges?: Array<{
     start: number;
     end: number;
     color: string;
     showMarker?: boolean;
-  };
+  }>;
   onBrushEnd?: BrushEndListener;
 }
 
@@ -46,7 +46,7 @@ export const EventRateChart: FC<Props> = ({
   showAxis,
   loading = false,
   fadeChart,
-  overlayRange,
+  overlayRanges,
   onBrushEnd,
 }) => {
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
@@ -67,15 +67,18 @@ export const EventRateChart: FC<Props> = ({
             <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} />
           )}
 
-          {overlayRange && (
-            <OverlayRange
-              eventRateChartData={eventRateChartData}
-              start={overlayRange.start}
-              end={overlayRange.end}
-              color={overlayRange.color}
-              showMarker={overlayRange.showMarker}
-            />
-          )}
+          {overlayRanges &&
+            overlayRanges.map((range, i) => (
+              <OverlayRange
+                key={i}
+                overlayKey={i}
+                eventRateChartData={eventRateChartData}
+                start={range.start}
+                end={range.end}
+                color={range.color}
+                showMarker={range.showMarker}
+              />
+            ))}
 
           <Anomalies anomalyData={anomalyData} />
           <BarSeries
