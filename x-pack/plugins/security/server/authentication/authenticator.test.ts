@@ -29,6 +29,7 @@ import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
 import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 
 function getMockOptions({
   session,
@@ -54,6 +55,9 @@ function getMockOptions({
       { isTLSEnabled: false }
     ),
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
+    getFeatureUsageService: jest
+      .fn()
+      .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
   };
 }
 
@@ -1451,6 +1455,9 @@ describe('Authenticator', () => {
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).not.toHaveBeenCalled();
     });
 
     it('fails if cannot retrieve user session', async () => {
@@ -1463,6 +1470,9 @@ describe('Authenticator', () => {
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).not.toHaveBeenCalled();
     });
 
     it('fails if license doesn allow access agreement acknowledgement', async () => {
@@ -1477,6 +1487,9 @@ describe('Authenticator', () => {
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).not.toHaveBeenCalled();
     });
 
     it('properly acknowledges access agreement for the authenticated user', async () => {
@@ -1493,6 +1506,10 @@ describe('Authenticator', () => {
         type: 'basic',
         name: 'basic1',
       });
+
+      expect(
+        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
+      ).toHaveBeenCalledTimes(1);
     });
   });
 });

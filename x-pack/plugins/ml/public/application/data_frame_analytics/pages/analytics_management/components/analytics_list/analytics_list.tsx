@@ -53,6 +53,7 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
 import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
+import { SourceSelection } from '../source_selection';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -90,6 +91,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
@@ -271,7 +273,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             !isManagementTable && createAnalyticsForm
               ? [
                   <EuiButtonEmpty
-                    onClick={createAnalyticsForm.actions.openModal}
+                    onClick={() => setIsSourceIndexModalVisible(true)}
                     isDisabled={disabled}
                     data-test-subj="mlAnalyticsCreateFirstButton"
                   >
@@ -286,6 +288,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         />
         {!isManagementTable && createAnalyticsForm && (
           <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+        )}
+        {isSourceIndexModalVisible === true && (
+          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
       </Fragment>
     );
@@ -402,7 +407,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </EuiFlexItem>
             {!isManagementTable && createAnalyticsForm && (
               <EuiFlexItem grow={false}>
-                <CreateAnalyticsButton {...createAnalyticsForm} />
+                <CreateAnalyticsButton
+                  {...createAnalyticsForm}
+                  setIsSourceIndexModalVisible={setIsSourceIndexModalVisible}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -434,6 +442,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
       {!isManagementTable && createAnalyticsForm?.state.isModalVisible && (
         <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+      )}
+      {isSourceIndexModalVisible === true && (
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </Fragment>
   );

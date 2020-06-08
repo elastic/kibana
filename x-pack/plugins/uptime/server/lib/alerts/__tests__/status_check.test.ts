@@ -6,17 +6,19 @@
 
 import {
   contextMessage,
-  uniqueMonitorIds,
-  statusCheckAlertFactory,
   fullListByIdAndLocation,
+  genFilterString,
+  hasFilters,
+  statusCheckAlertFactory,
+  uniqueMonitorIds,
 } from '../status_check';
 import { GetMonitorStatusResult } from '../../requests';
-import { AlertType } from '../../../../../alerting/server';
+import { AlertType } from '../../../../../alerts/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -39,7 +41,7 @@ const bootstrapDependencies = (customRequests?: any) => {
  * This function aims to provide an easy way to give mock props that will
  * reduce boilerplate for tests.
  * @param params the params received at alert creation time
- * @param services the core services provided by kibana/alerting platforms
+ * @param services the core services provided by kibana/alerts platforms
  * @param state the state the alert maintains
  */
 const mockOptions = (
@@ -310,9 +312,12 @@ describe('status check alert', () => {
       expect(Object.keys(alert.validate?.params?.props ?? {})).toMatchInlineSnapshot(`
         Array [
           "filters",
-          "numTimes",
-          "timerange",
           "locations",
+          "numTimes",
+          "search",
+          "timerangeCount",
+          "timerangeUnit",
+          "timerange",
         ]
       `);
     });
@@ -328,6 +333,205 @@ describe('status check alert', () => {
             "name": "Uptime Down Monitor",
           },
         ]
+      `);
+    });
+  });
+
+  describe('hasFilters', () => {
+    it('returns false for undefined filters', () => {
+      expect(hasFilters()).toBe(false);
+    });
+
+    it('returns false for empty filters', () => {
+      expect(
+        hasFilters({
+          'monitor.type': [],
+          'observer.geo.name': [],
+          tags: [],
+          'url.port': [],
+        })
+      ).toBe(false);
+    });
+
+    it('returns true for an object with a filter', () => {
+      expect(
+        hasFilters({
+          'monitor.type': [],
+          'observer.geo.name': ['us-east', 'us-west'],
+          tags: [],
+          'url.port': [],
+        })
+      ).toBe(true);
+    });
+  });
+
+  describe('genFilterString', () => {
+    const mockGetIndexPattern = jest.fn();
+    mockGetIndexPattern.mockReturnValue(undefined);
+
+    it('returns `undefined` for no filters or search', async () => {
+      expect(await genFilterString(mockGetIndexPattern)).toBeUndefined();
+    });
+
+    it('creates a filter string for filters only', async () => {
+      const res = await genFilterString(mockGetIndexPattern, {
+        'monitor.type': [],
+        'observer.geo.name': ['us-east', 'us-west'],
+        tags: [],
+        'url.port': [],
+      });
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "observer.geo.name": "us-east",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "observer.geo.name": "us-west",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    it('creates a filter string for search only', async () => {
+      expect(await genFilterString(mockGetIndexPattern, undefined, 'monitor.id: "kibana-dev"'))
+        .toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "monitor.id": "kibana-dev",
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    it('creates a filter string for filters and string', async () => {
+      const res = await genFilterString(
+        mockGetIndexPattern,
+        {
+          'monitor.type': [],
+          'observer.geo.name': ['us-east', 'apj', 'sydney', 'us-west'],
+          tags: [],
+          'url.port': [],
+        },
+        'monitor.id: "kibana-dev"'
+      );
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "observer.geo.name": "us-east",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "observer.geo.name": "apj",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match": Object {
+                                          "observer.geo.name": "sydney",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match": Object {
+                                          "observer.geo.name": "us-west",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "monitor.id": "kibana-dev",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
       `);
     });
   });
