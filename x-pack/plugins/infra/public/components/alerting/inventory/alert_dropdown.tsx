@@ -41,6 +41,7 @@ export const InventoryAlertDropdown = () => {
         <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />
       </EuiContextMenuItem>,
     ];
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [kibana.services]);
 
   return (

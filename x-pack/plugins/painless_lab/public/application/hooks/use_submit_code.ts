@@ -19,6 +19,7 @@ export const useSubmitCode = (http: HttpSetup) => {
   const [response, setResponse] = useState<Response | undefined>(undefined);
   const [inProgress, setInProgress] = useState(false);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const submit = useCallback(
     debounce(
       async (config: Payload) => {
