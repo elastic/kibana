@@ -88,7 +88,12 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     <ActionsColumnContent>
       {isHovered || isMenuOpen ? (
         <AbsoluteWrapper>
-          <EuiPopover closePopover={onCloseMenu} isOpen={isMenuOpen} button={button}>
+          <EuiPopover
+            closePopover={onCloseMenu}
+            isOpen={isMenuOpen}
+            button={button}
+            ownFocus={true}
+          >
             <EuiContextMenuPanel items={items} />
           </EuiPopover>
         </AbsoluteWrapper>
