@@ -123,6 +123,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as DefineStepRule);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   useEffect(() => {
@@ -132,12 +133,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       setMyStepData(newValues);
       setFieldValue(form, schema, newValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues, setMyStepData, setFieldValue]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.defineRule, form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   const handleResetIndices = useCallback(() => {

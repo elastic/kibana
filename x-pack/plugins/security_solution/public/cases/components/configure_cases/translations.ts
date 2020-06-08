@@ -17,7 +17,7 @@ export const INCIDENT_MANAGEMENT_SYSTEM_DESC = i18n.translate(
   'xpack.securitySolution.case.configureCases.incidentManagementSystemDesc',
   {
     defaultMessage:
-      'You may optionally connect SIEM cases to an external incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system.',
+      'You may optionally connect Security cases to an external incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system.',
   }
 );
 
@@ -53,7 +53,7 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   'xpack.securitySolution.case.configureCases.caseClosureOptionsDesc',
   {
     defaultMessage:
-      'Define how you wish SIEM cases to be closed. Automated case closures require an established connection to an external incident management system.',
+      'Define how you wish Security cases to be closed. Automated case closures require an established connection to an external incident management system.',
   }
 );
 
@@ -67,21 +67,22 @@ export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
 export const CASE_CLOSURE_OPTIONS_MANUAL = i18n.translate(
   'xpack.securitySolution.case.configureCases.caseClosureOptionsManual',
   {
-    defaultMessage: 'Manually close SIEM cases',
+    defaultMessage: 'Manually close Security cases',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_NEW_INCIDENT = i18n.translate(
   'xpack.securitySolution.case.configureCases.caseClosureOptionsNewIncident',
   {
-    defaultMessage: 'Automatically close SIEM cases when pushing new incident to external system',
+    defaultMessage:
+      'Automatically close Security cases when pushing new incident to external system',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
   'xpack.securitySolution.case.configureCases.caseClosureOptionsClosedIncident',
   {
-    defaultMessage: 'Automatically close SIEM cases when incident is closed in external system',
+    defaultMessage: 'Automatically close Security cases when incident is closed in external system',
   }
 );
 
@@ -96,14 +97,14 @@ export const FIELD_MAPPING_DESC = i18n.translate(
   'xpack.securitySolution.case.configureCases.fieldMappingDesc',
   {
     defaultMessage:
-      'Map SIEM case fields when pushing data to a third-party. Field mappings require an established connection to an external incident management system.',
+      'Map Security case fields when pushing data to a third-party. Field mappings require an established connection to an external incident management system.',
   }
 );
 
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   'xpack.securitySolution.case.configureCases.fieldMappingFirstCol',
   {
-    defaultMessage: 'SIEM case field',
+    defaultMessage: 'Security case field',
   }
 );
 

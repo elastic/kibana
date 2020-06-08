@@ -9,10 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import {
-  EmbeddablePanel,
-  ErrorEmbeddable,
-} from '../../../../../../../src/plugins/embeddable/public';
+import { ErrorEmbeddable } from '../../../../../../../src/plugins/embeddable/public';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../../common/hooks/api/helpers';
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
@@ -28,7 +25,6 @@ import { SetQuery } from './types';
 import { MapEmbeddable } from '../../../../../../legacy/plugins/maps/public';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -153,6 +149,7 @@ export const EmbeddedMapComponent = ({
     return () => {
       isSubscribed = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
 
   // queryExpression updated useEffect
@@ -160,12 +157,14 @@ export const EmbeddedMapComponent = ({
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // DateRange updated useEffect
@@ -177,6 +176,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   return isError ? null : (
@@ -198,18 +198,7 @@ export const EmbeddedMapComponent = ({
 
       <EmbeddableMap maintainRatio={!isIndexError}>
         {embeddable != null ? (
-          <EmbeddablePanel
-            data-test-subj="embeddable-panel"
-            embeddable={embeddable}
-            getActions={services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={services.embeddable.getEmbeddableFactory}
-            getAllEmbeddableFactories={services.embeddable.getEmbeddableFactories}
-            notifications={services.notifications}
-            overlays={services.overlays}
-            inspector={services.inspector}
-            application={services.application}
-            SavedObjectFinder={getSavedObjectFinder(services.savedObjects, services.uiSettings)}
-          />
+          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
         ) : !isLoading && isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
         ) : (

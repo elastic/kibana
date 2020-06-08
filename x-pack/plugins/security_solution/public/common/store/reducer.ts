@@ -17,7 +17,6 @@ import { TimelinePluginReducer } from '../../timelines/store/timeline';
 import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { EndpointAlertsPluginReducer } from '../../endpoint_alerts';
-import { EndpointHostsPluginReducer } from '../../endpoint_hosts';
 import { State } from './types';
 import { AppAction } from './actions';
 
@@ -25,7 +24,6 @@ export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   EndpointAlertsPluginReducer &
-  EndpointHostsPluginReducer &
   ManagementPluginReducer;
 
 /**

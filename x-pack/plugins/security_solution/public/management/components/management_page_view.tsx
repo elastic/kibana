@@ -13,7 +13,10 @@ import { getManagementUrl } from '..';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
-  const tabs = useMemo((): PageViewProps['tabs'] => {
+  const tabs = useMemo((): PageViewProps['tabs'] | undefined => {
+    if (options.viewType === 'details') {
+      return undefined;
+    }
     return [
       {
         name: i18n.translate('xpack.securitySolution.managementTabs.endpoints', {
@@ -32,6 +35,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
         href: getManagementUrl({ name: 'policyList' }),
       },
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabName]);
   return <PageView {...options} tabs={tabs} />;
 });
