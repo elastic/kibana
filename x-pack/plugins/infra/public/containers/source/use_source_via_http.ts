@@ -76,6 +76,7 @@ export const useSourceViaHttp = ({
         title: pickIndexPattern(response?.source, indexType),
       };
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [response, type]
   );
 
