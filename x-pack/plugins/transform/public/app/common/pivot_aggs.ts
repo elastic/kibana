@@ -95,7 +95,11 @@ export interface PivotAggsConfigBase {
 /**
  * Resolves agg UI config from provided ES agg definition
  */
-export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggName: string) {
+export function getAggConfigFromEsAgg(
+  esAggDefinition: Record<string, any>,
+  aggName: string,
+  parentRef?: PivotAggsConfig
+) {
   const aggKeys = Object.keys(esAggDefinition);
 
   // Find the main aggregation key
@@ -114,6 +118,10 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
   const config = getAggFormConfig(agg, commonConfig);
 
+  if (parentRef) {
+    config.parentAgg = parentRef;
+  }
+
   if (isPivotAggsWithExtendedForm(config)) {
     config.setUiConfigFromEs(esAggDefinition[agg]);
   }
@@ -123,7 +131,7 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
     for (const [subAggName, subAggConfigs] of Object.entries(
       esAggDefinition.aggs as Record<string, object>
     )) {
-      config.subAggs[subAggName] = getAggConfigFromEsAgg(subAggConfigs, subAggName);
+      config.subAggs[subAggName] = getAggConfigFromEsAgg(subAggConfigs, subAggName, config);
     }
   }
 
