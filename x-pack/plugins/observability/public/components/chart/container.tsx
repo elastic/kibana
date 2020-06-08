@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiAccordion, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiSpacer } from '@elastic/eui';
 
 interface Props {
   title: string;
@@ -36,7 +35,7 @@ export const ChartContainer = ({ title, children }: Props) => {
         }
       >
         <EuiSpacer size="s" />
-        {children}
+        <EuiPanel style={{ height: '296px' }}>{children}</EuiPanel>
       </EuiAccordion>
     </Container>
   );
