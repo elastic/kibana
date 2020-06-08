@@ -57,7 +57,7 @@ const runTestFor = (Component, aggType) => {
       );
       expect(wrapper.find(ScriptField).length).toBe(1);
     });
-    it('should NOT have ScriptField component when script field selected', () => {
+    it('should NOT display ScriptField component when script field not selected', () => {
       const wrapper = mountWithIntl(
         <div>
           <Component
@@ -73,7 +73,7 @@ const runTestFor = (Component, aggType) => {
           />
         </div>
       );
-      expect(wrapper.find(ScriptField).length).toBe(1);
+      expect(wrapper.find(ScriptField).html()).toBe(null);
     });
   });
 };
@@ -92,7 +92,7 @@ describe('ScriptField', () => {
     };
     const series = { ...SERIES, metrics: [metric] };
     const panel = { ...PANEL, series };
-    it('should NOT have ScriptField component when script field selected', () => {
+    it('should NOT display ScriptField component when script field not selected', () => {
       const wrapper = mountWithIntl(
         <div>
           <StandardAgg
@@ -108,7 +108,7 @@ describe('ScriptField', () => {
           />
         </div>
       );
-      expect(wrapper.find(ScriptField).length).toBe(1);
+      expect(wrapper.find(ScriptField).html()).toBe(null);
     });
   });
 });
