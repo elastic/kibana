@@ -22,7 +22,7 @@ const isOutputWithIndexPatterns = (
 };
 
 export interface Params {
-  start: StartServicesGetter<Pick<Start, 'data'>>;
+  start: StartServicesGetter<Pick<Start, 'data' | 'discover'>>;
 }
 
 export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionContext> {
@@ -54,6 +54,10 @@ export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionCon
   };
 
   private readonly getPath = async (config: Config, context: ActionContext): Promise<string> => {
+    const { urlGenerator } = this.params.start().plugins.discover;
+
+    if (!urlGenerator) throw new Error('Discover URL generator not available.');
+
     let indexPatternId =
       !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
 
@@ -64,8 +68,9 @@ export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionCon
       }
     }
 
-    const index = indexPatternId ? `,index:'${indexPatternId}'` : '';
-    return `#/?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!()${index},interval:auto,query:(language:kuery,query:''),sort:!())`;
+    return await urlGenerator.createUrl({
+      indexPatternId,
+    });
   };
 
   public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {

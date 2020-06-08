@@ -143,7 +143,7 @@ export const CASE_REFRESH = i18n.translate('xpack.securitySolution.case.caseView
 export const EMAIL_SUBJECT = (caseTitle: string) =>
   i18n.translate('xpack.securitySolution.case.caseView.emailSubject', {
     values: { caseTitle },
-    defaultMessage: 'SIEM Case - {caseTitle}',
+    defaultMessage: 'Security Case - {caseTitle}',
   });
 
 export const EMAIL_BODY = (caseUrl: string) =>
