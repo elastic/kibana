@@ -1,5 +1,5 @@
 {
-  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/legacy/plugins/reporting/server/browsers/extract/unzip.js": {
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js": {
     "lines": {
       "total": 4,
       "covered": 4,

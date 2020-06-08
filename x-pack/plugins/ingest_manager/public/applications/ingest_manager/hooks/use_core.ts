@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from 'kibana/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-export const CoreContext = React.createContext<CoreStart | null>(null);
-
-export function useCore() {
-  const core = useContext(CoreContext);
-  if (core === null) {
-    throw new Error('CoreContext not initialized');
+export function useCore(): CoreStart {
+  const { services } = useKibana();
+  if (services === null) {
+    throw new Error('KibanaContextProvider not initialized');
   }
-  return core;
+  return services;
 }
