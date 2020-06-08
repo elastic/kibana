@@ -5,7 +5,7 @@
  */
 import { ReactNode } from 'react';
 
-import { NamespaceType } from '../../../lists_plugin_deps';
+import { NamespaceType, ExceptionList } from '../../../lists_plugin_deps';
 
 export interface OperatorOption {
   message: string;
@@ -58,31 +58,51 @@ export interface Comment {
   comment: string;
 }
 
-export enum ToggleId {
+export enum ExceptionListType {
   DETECTION_ENGINE = 'detection',
   ENDPOINT = 'endpoint',
 }
 
-export interface RuleExceptionList {
-  id: string | null;
-  type: string | null;
-  namespaceType: NamespaceType | null;
-}
-
 export interface FilterOptions {
   filter: string;
+  showDetectionsList: boolean;
+  showEndpointList: boolean;
   tags: string[];
 }
 
+export interface Filter {
+  filter: Partial<FilterOptions>;
+  pagination: Partial<Pagination>;
+}
+
+export interface SetExceptionsProps {
+  lists: ExceptionList[];
+  exceptions: ExceptionListItemSchema[];
+  pagination: Pagination;
+}
+
 export interface ApiProps {
-  id: string | null;
-  namespaceType: NamespaceType | null;
+  id: string;
+  namespaceType: NamespaceType;
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface ExceptionsPagination {
+  pageIndex: number;
+  pageSize: number;
+  totalItemCount: number;
+  pageSizeOptions: number[];
 }
 
 // TODO: Delete once types are updated
 export interface ExceptionListItemSchema {
   _tags: string[];
-  comments: Comment[];
+  comment: Comment[];
   created_at: string;
   created_by: string;
   description?: string;

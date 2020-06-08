@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { ReactElement, useCallback, useState, useMemo } from 'react';
 import {
   EuiContextMenuItem,
   EuiButtonEmpty,
@@ -16,11 +16,11 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { ExceptionsPagination, Pagination } from '../types';
+import { ExceptionsPagination, Filter } from '../types';
 
 interface ExceptionsViewerPaginationProps {
   pagination: ExceptionsPagination;
-  onPaginationChange: (arg: Pagination) => void;
+  onPaginationChange: (arg: Filter) => void;
 }
 
 const ExceptionsViewerPaginationComponent = ({
@@ -38,24 +38,30 @@ const ExceptionsViewerPaginationComponent = ({
   const onPageClick = useCallback(
     (pageIndex: number): void => {
       onPaginationChange({
-        page: pageIndex + 1,
-        pageSize: pagination.pageSize,
-        total: pagination.totalItemCount,
+        filter: {},
+        pagination: {
+          page: pageIndex + 1,
+          perPage: pagination.pageSize,
+          total: pagination.totalItemCount,
+        },
       });
     },
     [pagination, onPaginationChange]
   );
 
-  const items = useMemo(() => {
+  const items = useMemo((): ReactElement[] => {
     return pagination.pageSizeOptions.map((rows) => (
       <EuiContextMenuItem
         key={rows}
         icon="empty"
         onClick={() => {
           onPaginationChange({
-            page: pagination.pageIndex,
-            pageSize: rows,
-            total: pagination.totalItemCount,
+            filter: {},
+            pagination: {
+              page: pagination.pageIndex,
+              perPage: rows,
+              total: pagination.totalItemCount,
+            },
           });
         }}
       >

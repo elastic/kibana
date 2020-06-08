@@ -44,7 +44,7 @@ export const getExceptionItemMock = (): ExceptionListItemSchema => ({
   namespace_type: 'single',
   name: '',
   description: 'This is a description',
-  comments: [
+  comment: [
     {
       user: 'user_name',
       timestamp: '2020-04-23T00:19:13.289Z',

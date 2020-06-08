@@ -5,11 +5,18 @@
  */
 
 export {
+  useApi,
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
-  deleteExceptionListItemById,
+  ExceptionIdentifiers,
+  ExceptionList,
   mockNewExceptionItem,
   mockNewExceptionList,
 } from '../../lists/public';
-export { ExceptionListItemSchema, Entries, NamespaceType } from '../../lists/common/schemas';
+export {
+  ExceptionListSchema,
+  ExceptionListItemSchema,
+  Entries,
+  NamespaceType,
+} from '../../lists/common/schemas';

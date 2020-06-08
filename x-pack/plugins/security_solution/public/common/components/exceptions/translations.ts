@@ -5,6 +5,17 @@
  */
 import { i18n } from '@kbn/i18n';
 
+export const DETECTION_LIST = i18n.translate(
+  'xpack.securitySolution.exceptions.detectionListLabel',
+  {
+    defaultMessage: 'Detection list',
+  }
+);
+
+export const ENDPOINT_LIST = i18n.translate('xpack.securitySolution.exceptions.endpointListLabel', {
+  defaultMessage: 'Endpoint list',
+});
+
 export const EDIT = i18n.translate('xpack.securitySolution.exceptions.editButtonLabel', {
   defaultMessage: 'Edit',
 });
@@ -87,7 +98,7 @@ export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
   {
     defaultMessage:
-      'This could be a description of what exceptions are and what their use case could be. Wow such tempt much ruin diet wrinkler clouds, you are doin me a concern. H*cksub woofer shibe clouds.',
+      'You can add an exception to fine tune the rule so that it suppresses alerts that meet specified conditions. Exceptions leverage detection accuracy, which can help reduce the number of false positives.',
   }
 );
 
@@ -104,3 +115,25 @@ export const DELETE_EXCEPTION_ERROR = i18n.translate(
     defaultMessage: 'Error deleting exception',
   }
 );
+
+export const ITEMS_PER_PAGE = (items: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.exceptionsPaginationLabel', {
+    values: { items },
+    defaultMessage: 'Items per page: {items}',
+  });
+
+export const NUMBER_OF_ITEMS = (items: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.paginationNumberOfItemsLabel', {
+    values: { items },
+    defaultMessage: '{items} items',
+  });
+
+export const REFRESH = i18n.translate('xpack.securitySolution.exceptions.utilityRefreshLabel', {
+  defaultMessage: 'Refresh',
+});
+
+export const SHOWING_EXCEPTIONS = (items: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.utilityNumberExceptionsLabel', {
+    values: { items },
+    defaultMessage: 'Showing {items} exceptions',
+  });

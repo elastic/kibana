@@ -6,50 +6,67 @@
 
 import {
   EuiFieldSearch,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiContextMenu,
   EuiButton,
+  EuiFilterGroup,
+  EuiFilterButton,
   EuiContextMenuPanelDescriptor,
-  EuiButtonGroupOption,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import * as i18n from '../translations';
-import { ToggleId } from '../types';
+import { ExceptionListType, Filter } from '../types';
 
 interface ExceptionsViewerHeaderProps {
-  selectedListType: ToggleId;
   isInitLoading: boolean;
-  listTypes: ToggleId[];
-  onFiltersChange: ({ filter, tags }: { filter: string; tags: string[] }) => void;
-  onAddExceptionClick: (type: ToggleId) => void;
-  onToggleListType: (type: ToggleId) => void;
+  supportedListTypes: ExceptionListType[];
+  detectionsListItems: number;
+  endpointListItems: number;
+  onFilterChange: (arg: Filter) => void;
+  onAddExceptionClick: (type: ExceptionListType) => void;
 }
 
 /**
  * Collection of filters and toggles for filtering exception items.
  */
 const ExceptionsViewerHeaderComponent = ({
-  selectedListType,
   isInitLoading,
-  listTypes,
-  onFiltersChange,
-  onToggleListType,
+  supportedListTypes,
+  detectionsListItems,
+  endpointListItems,
+  onFilterChange,
   onAddExceptionClick,
 }: ExceptionsViewerHeaderProps): JSX.Element => {
+  const [filter, setFilter] = useState<string>('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [showDetectionsList, setShowDetectionsList] = useState(false);
+  const [showEndpointList, setShowEndpointList] = useState(false);
   const [isAddExceptionMenuOpen, setAddExceptionMenuOpen] = useState(false);
 
-  const onToggle = useCallback(
-    (id: string): void => {
-      const toggle =
-        id === ToggleId.DETECTION_ENGINE ? ToggleId.DETECTION_ENGINE : ToggleId.ENDPOINT;
-      onToggleListType(toggle);
-    },
-    [onToggleListType]
+  useEffect((): void => {
+    onFilterChange({
+      filter: { filter, showDetectionsList, showEndpointList, tags },
+      pagination: {},
+    });
+  }, [filter, tags, showDetectionsList, showEndpointList]);
+
+  const onAddExceptionDropdownClick = useCallback(
+    (): void => setAddExceptionMenuOpen(!isAddExceptionMenuOpen),
+    [setAddExceptionMenuOpen, isAddExceptionMenuOpen]
   );
+
+  const handleDetectionsListClick = useCallback((): void => {
+    setShowDetectionsList(!showDetectionsList);
+    setShowEndpointList(false);
+  }, [showDetectionsList, setShowDetectionsList, setShowEndpointList]);
+
+  const handleEndpointListClick = useCallback((): void => {
+    setShowEndpointList(!showEndpointList);
+    setShowDetectionsList(false);
+  }, [showEndpointList, setShowEndpointList, setShowDetectionsList]);
 
   const handleOnSearch = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -58,44 +75,37 @@ const ExceptionsViewerHeaderComponent = ({
       const tagsMatch = searchValue.match(tagsRegex);
       const foundTags: string = tagsMatch != null ? tagsMatch[0].split(':')[1] : '';
       const filterString = tagsMatch != null ? searchValue.replace(tagsRegex, '') : searchValue;
-      onFiltersChange({
-        filter: filterString.trim(),
-        tags: foundTags.length ? foundTags.split(',') : [],
-      });
-    },
-    [onFiltersChange]
-  );
 
-  const onAddExceptionDropdownClick = useCallback(
-    (): void => setAddExceptionMenuOpen(!isAddExceptionMenuOpen),
-    [setAddExceptionMenuOpen]
+      if (foundTags.length > 0) {
+        setTags(foundTags.split(','));
+      }
+
+      setFilter(filterString.trim());
+    },
+    [setTags, setFilter]
   );
 
   const onAddException = useCallback(
-    (type: ToggleId): void => {
+    (type: ExceptionListType): void => {
       onAddExceptionClick(type);
       setAddExceptionMenuOpen(false);
     },
     [onAddExceptionClick, setAddExceptionMenuOpen]
   );
 
-  const getAddExceptionOptions = useMemo(
+  const addExceptionButtonOptions = useMemo(
     (): EuiContextMenuPanelDescriptor[] => [
       {
         id: 0,
         items: [
           {
             name: i18n.ADD_TO_ENDPOINT_LIST,
-            onClick: () => {
-              onAddException(ToggleId.ENDPOINT);
-            },
+            onClick: () => onAddException(ExceptionListType.ENDPOINT),
             'data-test-subj': 'addEndpointExceptionBtn',
           },
           {
             name: i18n.ADD_TO_DETECTIONS_LIST,
-            onClick: () => {
-              onAddException(ToggleId.DETECTION_ENGINE);
-            },
+            onClick: () => onAddException(ExceptionListType.DETECTION_ENGINE),
             'data-test-subj': 'addDetectionsExceptionBtn',
           },
         ],
@@ -104,72 +114,85 @@ const ExceptionsViewerHeaderComponent = ({
     [onAddException]
   );
 
-  const toggleOptions = useMemo((): EuiButtonGroupOption[] => {
-    return [
-      {
-        id: ToggleId.DETECTION_ENGINE,
-        label: 'Detection Engine',
-        isDisabled: !listTypes.includes(ToggleId.DETECTION_ENGINE),
-        'data-test-subj': 'detectionsToggle',
-      },
-      {
-        id: ToggleId.ENDPOINT,
-        label: 'Endpoint',
-        isDisabled: !listTypes.includes(ToggleId.ENDPOINT),
-        'data-test-subj': 'endpointToggle',
-      },
-    ];
-  }, [listTypes]);
-
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
+          data-test-subj="exceptionsHeaderSearch"
           aria-label={i18n.SEARCH_DEFAULT}
-          incremental={false}
           placeholder={i18n.SEARCH_DEFAULT}
           onChange={handleOnSearch}
-          disabled={isInitLoading || listTypes.length === 0}
+          disabled={isInitLoading}
+          incremental={false}
           fullWidth
-          data-test-subj="exceptionsHeaderSearch"
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          legend={'Exception list type toggle'}
-          options={toggleOptions}
-          idSelected={selectedListType}
-          onChange={onToggle}
-          isDisabled={isInitLoading}
-          data-test-subj="exceptionsHeaderListToggle"
-        />
-      </EuiFlexItem>
+      {supportedListTypes.length < 2 && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="exceptionsHeaderAddExceptionBtn"
+            onClick={() => onAddException(supportedListTypes[0])}
+            isDisabled={isInitLoading}
+            fill
+          >
+            {i18n.ADD_EXCEPTION_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
 
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="contextMenuNormal"
-          button={
-            <EuiButton
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={onAddExceptionDropdownClick}
-              isDisabled={isInitLoading}
-              fill
-              data-test-subj="exceptionsHeaderAddExceptionBtn"
-            >
-              {i18n.ADD_EXCEPTION_LABEL}
-            </EuiButton>
-          }
-          isOpen={isAddExceptionMenuOpen}
-          closePopover={onAddExceptionDropdownClick}
-          panelPaddingSize="none"
-          withTitle
-          anchorPosition="upLeft"
-        >
-          <EuiContextMenu initialPanelId={0} panels={getAddExceptionOptions} />
-        </EuiPopover>
-      </EuiFlexItem>
+      {supportedListTypes.length > 1 && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup data-test-subj="exceptionsFilterGroupBtns">
+                <EuiFilterButton
+                  data-test-subj="exceptionsDetectionFilterBtn"
+                  hasActiveFilters={showDetectionsList}
+                  onClick={handleDetectionsListClick}
+                  isDisabled={isInitLoading}
+                >
+                  {i18n.DETECTION_LIST}
+                  {detectionsListItems != null ? ` (${detectionsListItems})` : ''}
+                </EuiFilterButton>
+                <EuiFilterButton
+                  data-test-subj="exceptionsEndpointFilterBtn"
+                  hasActiveFilters={showEndpointList}
+                  onClick={handleEndpointListClick}
+                  isDisabled={isInitLoading}
+                >
+                  {i18n.ENDPOINT_LIST}
+                  {endpointListItems != null ? ` (${endpointListItems})` : ''}
+                </EuiFilterButton>
+              </EuiFilterGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButton
+                    data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                    onClick={onAddExceptionDropdownClick}
+                    isDisabled={isInitLoading}
+                    iconType="arrowDown"
+                    iconSide="right"
+                    fill
+                  >
+                    {i18n.ADD_EXCEPTION_LABEL}
+                  </EuiButton>
+                }
+                isOpen={isAddExceptionMenuOpen}
+                closePopover={onAddExceptionDropdownClick}
+                anchorPosition="downCenter"
+                panelPaddingSize="none"
+                repositionOnScroll
+              >
+                <EuiContextMenu initialPanelId={0} panels={addExceptionButtonOptions} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

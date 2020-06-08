@@ -24,11 +24,6 @@ export interface Pagination {
   total: number;
 }
 
-export interface ExceptionItemsAndPagination {
-  items: ExceptionListItemSchema[];
-  pagination: Pagination;
-}
-
 export type AddExceptionList = ExceptionListSchema | CreateExceptionListSchemaPartial;
 
 export type AddExceptionListItem = CreateExceptionListItemSchemaPartial | ExceptionListItemSchema;
@@ -38,18 +33,31 @@ export interface PersistHookProps {
   onError: (arg: Error) => void;
 }
 
-export interface UseExceptionListProps {
-  filterOptions?: FilterExceptionsOptions;
-  http: HttpStart;
-  id: string | undefined;
-  namespaceType: NamespaceType;
-  onError: (arg: Error) => void;
-  pagination?: Pagination;
+export interface ExceptionList extends ExceptionListSchema {
+  totalItems: number;
 }
 
-export interface UseExceptionListRefreshProps {
-  listId: string;
-  listNamespaceType: NamespaceType;
+export interface UseExceptionListProps {
+  http: HttpStart;
+  lists: ExceptionIdentifiers[];
+  onError: (arg: Error) => void;
+  filterOptions?: FilterExceptionsOptions;
+  pagination?: Pagination;
+  dispatchListsInReducer?: ({
+    lists,
+    exceptions,
+    pagination,
+  }: {
+    lists: ExceptionList[];
+    exceptions: ExceptionListItemSchema[];
+    pagination: Pagination;
+  }) => void;
+}
+
+export interface ExceptionIdentifiers {
+  id: string;
+  namespaceType: NamespaceType;
+  type?: string;
 }
 
 export interface ApiCallByListIdProps {
@@ -66,6 +74,13 @@ export interface ApiCallByIdProps {
   id: string;
   namespaceType: NamespaceType;
   signal: AbortSignal;
+}
+
+export interface ApiCallMemoProps {
+  id: string;
+  namespaceType: NamespaceType;
+  onError: (arg: Error) => void;
+  onSuccess: () => void;
 }
 
 export interface AddExceptionListProps {

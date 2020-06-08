@@ -10,18 +10,18 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ToggleId } from '../types';
+import { ExceptionListType } from '../types';
 
 describe('ExceptionsViewerHeader', () => {
   it('it renders all disabled if "isInitLoading" is true', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.DETECTION_ENGINE}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={true}
-          listTypes={[]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
           onAddExceptionClick={jest.fn()}
         />
       </ThemeProvider>
@@ -31,193 +31,254 @@ describe('ExceptionsViewerHeader', () => {
       wrapper.find('input[data-test-subj="exceptionsHeaderSearch"]').at(0).prop('disabled')
     ).toBeTruthy();
     expect(
-      wrapper.find('[data-test-subj="exceptionsHeaderListToggle"] button').at(0).prop('disabled')
+      wrapper.find('[data-test-subj="exceptionsDetectionFilterBtn"] button').at(0).prop('disabled')
     ).toBeTruthy();
     expect(
-      wrapper.find('[data-test-subj="exceptionsHeaderListToggle"] button').at(1).prop('disabled')
+      wrapper.find('[data-test-subj="exceptionsEndpointFilterBtn"] button').at(0).prop('disabled')
     ).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="exceptionsHeaderAddExceptionBtn"] button')
+        .find('[data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"] button')
         .at(0)
         .prop('disabled')
     ).toBeTruthy();
   });
 
-  it('it disables Endpoint toggle when only Detections list available', () => {
+  it('it displays toggles and add exception popover when more than one list type available', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.DETECTION_ENGINE}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={false}
-          listTypes={[ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
           onAddExceptionClick={jest.fn()}
         />
       </ThemeProvider>
     );
 
+    expect(wrapper.find('[data-test-subj="exceptionsFilterGroupBtns"]').exists()).toBeTruthy();
     expect(
-      wrapper.find('input[data-test-subj="detectionsToggle"]').at(0).prop('disabled')
-    ).toBeFalsy();
-    expect(
-      wrapper.find('input[data-test-subj="detectionsToggle"]').at(0).prop('checked')
-    ).toBeTruthy();
-    expect(
-      wrapper.find('input[data-test-subj="endpointToggle"]').at(0).prop('disabled')
-    ).toBeTruthy();
-    expect(
-      wrapper.find('input[data-test-subj="endpointToggle"]').at(0).prop('checked')
-    ).toBeFalsy();
-  });
-
-  it('it disables Detections toggle when only Endpoint list available', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
-          isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
-          onAddExceptionClick={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    expect(
-      wrapper.find('input[data-test-subj="detectionsToggle"]').at(0).prop('disabled')
-    ).toBeTruthy();
-    expect(
-      wrapper.find('input[data-test-subj="detectionsToggle"]').at(0).prop('checked')
-    ).toBeFalsy();
-    expect(
-      wrapper.find('input[data-test-subj="endpointToggle"]').at(0).prop('disabled')
-    ).toBeFalsy();
-    expect(
-      wrapper.find('input[data-test-subj="endpointToggle"]').at(0).prop('checked')
+      wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"]').exists()
     ).toBeTruthy();
   });
 
-  it('it renders Detections toggle selected when "selectedListType" is detections', () => {
+  it('it does not display toggles and add exception popover if only one list type is available', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.DETECTION_ENGINE}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
           isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
+          onAddExceptionClick={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionsFilterGroupBtns"]')).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"]')).toHaveLength(
+      0
+    );
+  });
+
+  it('it displays add exception button without popover if only one list type is available', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionsViewerHeader
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          isInitLoading={false}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
           onAddExceptionClick={jest.fn()}
         />
       </ThemeProvider>
     );
 
     expect(
-      wrapper.find('input[data-test-subj="detectionsToggle"]').at(0).prop('checked')
+      wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"]').exists()
     ).toBeTruthy();
   });
 
-  it('it renders Endpoint toggle selected when "selectedListType" is endpoint', () => {
+  it('it renders detections filter toggle selected when clicked', () => {
+    const mockOnFilterChange = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={mockOnFilterChange}
           onAddExceptionClick={jest.fn()}
         />
       </ThemeProvider>
     );
+
+    wrapper.find('[data-test-subj="exceptionsDetectionFilterBtn"] button').simulate('click');
 
     expect(
-      wrapper.find('input[data-test-subj="endpointToggle"]').at(0).prop('checked')
+      wrapper
+        .find('EuiFilterButton[data-test-subj="exceptionsDetectionFilterBtn"]')
+        .at(0)
+        .prop('hasActiveFilters')
     ).toBeTruthy();
-  });
-
-  it('it invokes "onToggleListType" with appropriate toggle value on click', () => {
-    const mockOnToggleListType = jest.fn();
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionsViewerHeader
-          selectedListType={ToggleId.DETECTION_ENGINE}
-          isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={mockOnToggleListType}
-          onAddExceptionClick={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    wrapper.find('input[data-test-subj="endpointToggle"]').simulate('change', {
-      target: { value: 'endpoint' },
+    expect(
+      wrapper
+        .find('EuiFilterButton[data-test-subj="exceptionsEndpointFilterBtn"]')
+        .at(0)
+        .prop('hasActiveFilters')
+    ).toBeFalsy();
+    expect(mockOnFilterChange).toHaveBeenCalledWith({
+      filter: {
+        filter: '',
+        showDetectionsList: true,
+        showEndpointList: false,
+        tags: [],
+      },
+      pagination: {},
     });
-
-    expect(mockOnToggleListType).toHaveBeenCalledWith('endpoint');
-
-    wrapper.find('input[data-test-subj="detectionsToggle"]').simulate('change', {
-      target: { value: 'detection' },
-    });
-
-    expect(mockOnToggleListType).toHaveBeenCalledWith('detection');
   });
 
-  it('it invokes "onAddExceptionClick" with value "endpoint" when add exception to endpoint list clicked', () => {
-    const mockAddExceptionClick = jest.fn();
+  it('it renders endpoint filter toggle selected and invokes "onFilterChange" when clicked', () => {
+    const mockOnFilterChange = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
-          onAddExceptionClick={mockAddExceptionClick}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={mockOnFilterChange}
+          onAddExceptionClick={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="exceptionsEndpointFilterBtn"] button').simulate('click');
+
+    expect(
+      wrapper
+        .find('EuiFilterButton[data-test-subj="exceptionsEndpointFilterBtn"]')
+        .at(0)
+        .prop('hasActiveFilters')
+    ).toBeTruthy();
+    expect(
+      wrapper
+        .find('EuiFilterButton[data-test-subj="exceptionsDetectionFilterBtn"]')
+        .at(0)
+        .prop('hasActiveFilters')
+    ).toBeFalsy();
+    expect(mockOnFilterChange).toHaveBeenCalledWith({
+      filter: {
+        filter: '',
+        showDetectionsList: false,
+        showEndpointList: true,
+        tags: [],
+      },
+      pagination: {},
+    });
+  });
+
+  it('it invokes "onAddExceptionClick" when user selects to add an exception item and only endpoint exception lists are available', () => {
+    const mockOnAddExceptionClick = jest.fn();
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionsViewerHeader
+          supportedListTypes={[ExceptionListType.ENDPOINT]}
+          isInitLoading={false}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
+          onAddExceptionClick={mockOnAddExceptionClick}
         />
       </ThemeProvider>
     );
 
     wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"] button').simulate('click');
+
+    expect(mockOnAddExceptionClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('it invokes "onAddDetectionsExceptionClick" when user selects to add an exception item and only endpoint detections lists are available', () => {
+    const mockOnAddExceptionClick = jest.fn();
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionsViewerHeader
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          isInitLoading={false}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
+          onAddExceptionClick={mockOnAddExceptionClick}
+        />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"] button').simulate('click');
+
+    expect(mockOnAddExceptionClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('it invokes "onAddEndpointExceptionClick" when user selects to add an exception item to endpoint list from popover', () => {
+    const mockOnAddExceptionClick = jest.fn();
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionsViewerHeader
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          isInitLoading={false}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
+          onAddExceptionClick={mockOnAddExceptionClick}
+        />
+      </ThemeProvider>
+    );
+
+    wrapper
+      .find('[data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"] button')
+      .simulate('click');
     wrapper.find('[data-test-subj="addEndpointExceptionBtn"] button').simulate('click');
 
-    expect(mockAddExceptionClick).toHaveBeenCalledWith('endpoint');
+    expect(mockOnAddExceptionClick).toHaveBeenCalledTimes(1);
   });
 
-  it('it invokes "onAddExceptionClick" with value "detection" when add exception to detections list clicked', () => {
-    const mockAddExceptionClick = jest.fn();
+  it('it invokes "onAddDetectionsExceptionClick" when user selects to add an exception item to endpoint list from popover', () => {
+    const mockOnAddExceptionClick = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={jest.fn()}
-          onToggleListType={jest.fn()}
-          onAddExceptionClick={mockAddExceptionClick}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={jest.fn()}
+          onAddExceptionClick={mockOnAddExceptionClick}
         />
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"] button').simulate('click');
+    wrapper
+      .find('[data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"] button')
+      .simulate('click');
     wrapper.find('[data-test-subj="addDetectionsExceptionBtn"] button').simulate('click');
 
-    expect(mockAddExceptionClick).toHaveBeenCalledWith('detection');
+    expect(mockOnAddExceptionClick).toHaveBeenCalledTimes(1);
   });
 
-  it('it invokes "onFiltersChange" with filter value "host" when "host" searched', () => {
-    const mockOnFiltersChange = jest.fn();
+  it('it invokes "onFilterChange" with filter value when search used', () => {
+    const mockOnFilterChange = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={mockOnFiltersChange}
-          onToggleListType={jest.fn()}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={mockOnFilterChange}
           onAddExceptionClick={jest.fn()}
         />
       </ThemeProvider>
@@ -230,19 +291,27 @@ describe('ExceptionsViewerHeader', () => {
         target: { value: 'host' },
       });
 
-    expect(mockOnFiltersChange).toHaveBeenCalledWith({ filter: 'host', tags: [] });
+    expect(mockOnFilterChange).toHaveBeenCalledWith({
+      filter: {
+        filter: 'host',
+        showDetectionsList: false,
+        showEndpointList: false,
+        tags: [],
+      },
+      pagination: {},
+    });
   });
 
-  it('it invokes "onFiltersChange" with tags value when tags searched', () => {
-    const mockOnFiltersChange = jest.fn();
+  it('it invokes "onFilterChange" with tags values when search value includes "tags:..."', () => {
+    const mockOnFilterChange = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={mockOnFiltersChange}
-          onToggleListType={jest.fn()}
+          detectionsListItems={0}
+          endpointListItems={0}
+          onFilterChange={mockOnFilterChange}
           onAddExceptionClick={jest.fn()}
         />
       </ThemeProvider>
@@ -255,31 +324,14 @@ describe('ExceptionsViewerHeader', () => {
         target: { value: 'tags:malware' },
       });
 
-    expect(mockOnFiltersChange).toHaveBeenCalledWith({ filter: '', tags: ['malware'] });
-  });
-
-  it('it invokes "onFiltersChange" with tags and filter value when tags and fields searched', () => {
-    const mockOnFiltersChange = jest.fn();
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionsViewerHeader
-          selectedListType={ToggleId.ENDPOINT}
-          isInitLoading={false}
-          listTypes={[ToggleId.ENDPOINT, ToggleId.DETECTION_ENGINE]}
-          onFiltersChange={mockOnFiltersChange}
-          onToggleListType={jest.fn()}
-          onAddExceptionClick={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    wrapper
-      .find('input[data-test-subj="exceptionsHeaderSearch"]')
-      .at(0)
-      .simulate('change', {
-        target: { value: 'host.name tags:malware' },
-      });
-
-    expect(mockOnFiltersChange).toHaveBeenCalledWith({ filter: 'host.name', tags: ['malware'] });
+    expect(mockOnFilterChange).toHaveBeenCalledWith({
+      filter: {
+        filter: '',
+        showDetectionsList: false,
+        showEndpointList: false,
+        tags: ['malware'],
+      },
+      pagination: {},
+    });
   });
 });
