@@ -15,8 +15,6 @@ import {
   Matrix3,
   AdjacentProcessMap,
   Vector2,
-  RelatedEventData,
-  RelatedEventDataEntryWithStats,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 
@@ -410,77 +408,25 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 });
 
 /**
- * Process events that will be graphed.
+ * Statistics for each node in the resolver tree.
  */
-export const relatedEventResults = function (data: DataState) {
-  return data.resultsEnrichedWithRelatedEventInfo;
-};
-
-/**
- * This selector compiles the related event data attached in `relatedEventResults`
- * into a `RelatedEventData` map of ResolverEvents to statistics about their related events
- */
-export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
-  /* eslint-disable no-shadow */
-  relatedEventResults
-  /* eslint-enable no-shadow */
-) {
-  /* eslint-disable no-shadow */
-  const relatedEventStats: RelatedEventData = new Map();
-  /* eslint-enable no-shadow */
-  if (!relatedEventResults) {
-    return relatedEventStats;
-  }
-
-  for (const updatedEvent of relatedEventResults.keys()) {
-    const newStatsEntry = relatedEventResults.get(updatedEvent);
-    if (newStatsEntry === 'error') {
-      // If the entry is an error, return it as is
-      relatedEventStats.set(updatedEvent, newStatsEntry);
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    if (typeof newStatsEntry === 'object') {
-      /**
-       * Otherwise, it should be a valid stats entry.
-       * Do the work to compile the stats.
-       * Folowing reduction, this will be a record like
-       * {DNS: 10, File: 2} etc.
-       */
-      const statsForEntry = newStatsEntry?.relatedEvents.reduce(
-        (compiledStats: Record<string, number>, relatedEvent: { relatedEventType: string }) => {
-          compiledStats[relatedEvent.relatedEventType] =
-            (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
-          return compiledStats;
-        },
-        {}
-      );
-
-      const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(newStatsEntry, {
-        stats: statsForEntry,
-      });
-      relatedEventStats.set(updatedEvent, newRelatedEventStats);
-    }
-  }
-  return relatedEventStats;
-});
+/* export const relatedEventsStats = function (data: DataState) {
+  return data.relatedEventsStats;
+};*/
 
 /**
  * This selects `RelatedEventData` maps specifically for graphable processes
+ * TODO does this HAVE to be for only graphable processes? it's just the stats does it matter?
  */
-export const relatedEvents = createSelector(
+/* export const relatedEvents = createSelector(
   graphableProcesses,
   relatedEventStats,
   function getRelatedEvents(
-    /* eslint-disable no-shadow */
     graphableProcesses,
     relatedEventStats
-    /* eslint-enable no-shadow */
   ) {
     const eventsRelatedByProcess: RelatedEventData = new Map();
-    /* eslint-disable no-shadow */
     return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
-      /* eslint-enable no-shadow */
       const relatedEventDataEntry = relatedEventStats?.get(graphableProcess);
       if (relatedEventDataEntry) {
         relatedEvents.set(graphableProcess, relatedEventDataEntry);
@@ -488,6 +434,12 @@ export const relatedEvents = createSelector(
       return relatedEvents;
     }, eventsRelatedByProcess);
   }
+);*/
+
+// Heeeallp
+export const relatedEventsStats = createSelector(
+  (data: DataState) => data.relatedEventsStats,
+  (stats) => stats
 );
 
 export const processAdjacencies = createSelector(
