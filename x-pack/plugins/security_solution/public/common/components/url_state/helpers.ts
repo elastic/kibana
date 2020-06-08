@@ -193,7 +193,6 @@ export const updateUrlStateString = ({
   if (urlKey === CONSTANTS.appQuery) {
     const queryState = decodeRisonUrlState<Query>(newUrlStateString);
     if (queryState != null && queryState.query === '') {
-      console.log('1', history);
       return replaceStateInLocation({
         history,
         pathName,
@@ -205,7 +204,6 @@ export const updateUrlStateString = ({
   } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
     const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
     if (queryState != null && queryState.global != null) {
-      console.log('2', history);
       return replaceStateInLocation({
         history,
         pathName,
@@ -217,7 +215,6 @@ export const updateUrlStateString = ({
   } else if (urlKey === CONSTANTS.filters) {
     const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {
-      console.log('3', history);
       return replaceStateInLocation({
         history,
         pathName,
@@ -229,7 +226,6 @@ export const updateUrlStateString = ({
   } else if (urlKey === CONSTANTS.timeline) {
     const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
     if (queryState != null && queryState.id === '') {
-      console.log('4', history);
       return replaceStateInLocation({
         history,
         pathName,
@@ -239,7 +235,6 @@ export const updateUrlStateString = ({
       });
     }
   }
-  console.log('5', history);
   return search;
 };
 

@@ -153,6 +153,20 @@ describe('AllCases', () => {
     };
     getCasesColumns([], 'open', false).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
   });
+
+  it('should not render case link or actions on modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+    const checkIt = (columnName: string) => {
+      expect(columnName).not.toEqual(i18n.ACTIONS);
+    };
+    getCasesColumns([], 'open', true).map((i, key) => i.name != null && checkIt(`${i.name}`));
+    expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
+  });
+
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>

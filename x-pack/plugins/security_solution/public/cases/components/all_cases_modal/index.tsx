@@ -31,7 +31,7 @@ export const AllCasesModalComponent = ({
   let modal;
   if (showCaseModal) {
     modal = (
-      <EuiOverlayMask>
+      <EuiOverlayMask data-test-subj="all-cases-modal">
         <EuiModal onClose={onCloseCaseModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>

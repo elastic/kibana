@@ -358,7 +358,7 @@ export const AllCases = React.memo<AllCasesProps>(
         {(isCasesLoading || isDeleting || isUpdating) && !isDataEmpty && (
           <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
         )}
-        <TableWrap loading={!isModal ? isCasesLoading : undefined}>
+        <TableWrap data-test-subj="table-wrap" loading={!isModal ? isCasesLoading : undefined}>
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
             countOpenCases={data.countOpenCases}

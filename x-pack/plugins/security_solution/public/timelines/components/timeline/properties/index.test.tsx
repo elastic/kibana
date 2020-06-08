@@ -6,16 +6,21 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  TestProviders,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
+import { SiemPageName } from '../../../../app/types';
+import { setInsertTimeline } from '../../../store/timeline/actions';
+export { nextTick } from '../../../../../../../test_utils';
+
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -30,24 +35,21 @@ jest.mock('../../../../common/components/utils');
   width: mockedWidth,
 }));
 
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+const mockDispatch = jest.fn();
 
-  return {
-    ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
-  };
-});
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => mockDispatch,
+  useSelector: jest.fn().mockReturnValue({ savedObjectId: '1', urlState: {} }),
+}));
+const mockHistoryPush = jest.fn();
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
-
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    push: mockHistoryPush,
+  }),
+}));
 const usersViewing = ['elastic'];
 const defaultProps = {
   associateNote: jest.fn(),
@@ -91,6 +93,9 @@ describe('Properties', () => {
     expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
       false
     );
+    expect(
+      wrapper.find('button[data-test-subj="attach-timeline-existing-case"]').prop('disabled')
+    ).toEqual(false);
   });
 
   test('renders correctly draft timeline', () => {
@@ -105,6 +110,9 @@ describe('Properties', () => {
     expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
       true
     );
+    expect(
+      wrapper.find('button[data-test-subj="attach-timeline-existing-case"]').prop('disabled')
+    ).toEqual(true);
   });
 
   test('it renders an empty star icon when it is NOT a favorite', () => {
@@ -283,5 +291,39 @@ describe('Properties', () => {
     );
 
     expect(wrapper.find('[data-test-subj="avatar"]').exists()).toEqual(false);
+  });
+
+  test('insert timeline - new case', () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, title: 'coolness' }} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
+
+    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SiemPageName.case}/create` });
+    expect(mockDispatch).toBeCalledWith(
+      setInsertTimeline({
+        timelineId: defaultProps.timelineId,
+        timelineSavedObjectId: '1',
+        timelineTitle: 'coolness',
+      })
+    );
+  });
+
+  test('insert timeline - existing case', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Properties {...{ ...defaultProps, title: 'coolness' }} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="attach-timeline-existing-case"]').first().simulate('click');
+
+    await act(async () => {
+      await Promise.resolve({});
+    });
+    expect(wrapper.find('[data-test-subj="all-cases-modal"]').exists()).toBeTruthy();
   });
 });
