@@ -19,6 +19,7 @@ import { XYBrushArea } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
+  EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,11 +31,14 @@ import {
   EuiTextArea,
   EuiFormRow,
   EuiCheckbox,
+  EuiSwitch,
   EuiConfirmModal,
   EuiOverlayMask,
   EuiCallOut,
   EuiDatePicker,
   EuiHorizontalRule,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 
 import {
@@ -61,11 +65,11 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const { toasts } = useNotifications();
   const [currentSnapshot, setCurrentSnapshot] = useState(snapshot);
   const [revertModalVisible, setRevertModalVisible] = useState(false);
-  const [replay, setReplay] = useState(true);
+  const [replay, setReplay] = useState(false);
   const [runInRealTime, setRunInRealTime] = useState(false);
   const [createCalendar, setCreateCalendar] = useState(false);
   const [startDate, setStartDate] = useState<moment.Moment | null>(
-    // moment(snapshot.latest_record_time_stamp)
+    // moment(currentSnapshot.latest_record_time_stamp)
     null
   );
   const [endDate, setEndDate] = useState<moment.Moment | null>(
@@ -77,9 +81,13 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [chartReady, setChartReady] = useState(false);
 
+  // useEffect(() => {
+  //   createChartData();
+  // }, []);
+
   useEffect(() => {
     createChartData();
-  }, []);
+  }, [currentSnapshot]);
 
   async function createChartData() {
     // setTimeout(async () => {
@@ -108,8 +116,15 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
 
   function onBrushEnd({ x }: XYBrushArea) {
     if (x && x.length === 2) {
-      setStartDate(moment(x[0]));
-      setEndDate(moment(x[1]));
+      const end = x[1] < currentSnapshot.latest_record_time_stamp ? null : x[1];
+      if (end !== null) {
+        const start =
+          x[0] < currentSnapshot.latest_record_time_stamp
+            ? currentSnapshot.latest_record_time_stamp
+            : x[0];
+        setStartDate(moment(start));
+        setEndDate(moment(end));
+      }
     }
   }
 
@@ -137,10 +152,17 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     }
   }
 
+  function onSnapshotChange(ssId: string) {
+    const ss = snapshots.find((s) => s.snapshot_id === ssId);
+    if (ss !== undefined) {
+      setCurrentSnapshot(ss);
+    }
+  }
+
   return (
     <>
       <EuiFlyout onClose={closeWithoutReload} hideCloseButton size="m">
-        <EuiFlyoutBody>
+        <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h5>
               <FormattedMessage
@@ -151,7 +173,49 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             </h5>
           </EuiTitle>
 
-          <EuiSpacer size="l" />
+          <EuiText size="s">
+            <p>{currentSnapshot.description}</p>
+          </EuiText>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {false && (
+            <>
+              <EuiSpacer size="s" />
+
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
+                  {
+                    defaultMessage: 'Change snapshot',
+                  }
+                )}
+              >
+                <EuiSuperSelect
+                  options={snapshots
+                    .map((s) => ({
+                      value: s.snapshot_id,
+                      inputDisplay: s.snapshot_id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{s.snapshot_id}</strong>
+                          <EuiText size="s" color="subdued">
+                            <p className="euiTextColor--subdued">{s.description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                    }))
+                    .reverse()}
+                  valueOfSelected={currentSnapshot.snapshot_id}
+                  onChange={onSnapshotChange}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+            </>
+          )}
+          {/* <EuiHorizontalRule margin="m" /> */}
+          {/* <EuiSpacer size="l" /> */}
 
           <EventRateChart
             eventRateChartData={eventRateData}
@@ -161,7 +225,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             width={'100%'}
             fadeChart={true}
             overlayRange={{
-              start: snapshot.latest_record_time_stamp,
+              start: currentSnapshot.latest_record_time_stamp,
               end: job.data_counts.latest_record_timestamp,
               color: '#ff0000',
             }}
@@ -174,7 +238,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             title={i18n.translate(
               'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.title',
               {
-                defaultMessage: 'Anomalies will be deleted',
+                defaultMessage: 'Anomaly data will be deleted',
               }
             )}
             color="warning"
@@ -183,102 +247,124 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <FormattedMessage
               id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
               defaultMessage="All anomaly detection results after {date} will be deleted."
-              values={{ date: formatDate(snapshot.latest_record_time_stamp, TIME_FORMAT) }}
+              values={{ date: formatDate(currentSnapshot.latest_record_time_stamp, TIME_FORMAT) }}
             />
           </EuiCallOut>
 
           <EuiHorizontalRule margin="xl" />
 
-          <EuiFormRow fullWidth>
-            <EuiCheckbox
+          <EuiFormRow
+            fullWidth
+            helpText="Reopen job and replay analysis after the revert has been applied."
+          >
+            <EuiSwitch
               id="replaySwitch"
               label={i18n.translate(
                 'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.replaySwitchLabel',
                 {
-                  defaultMessage: 'Reopen job and replay analysis after revert has been applied?',
+                  defaultMessage: 'Replay analysis',
                 }
               )}
               checked={replay}
               onChange={(e) => setReplay(e.target.checked)}
             />
           </EuiFormRow>
-          <EuiFormRow fullWidth>
-            <EuiCheckbox
-              id="realTimeSwitch"
-              label={i18n.translate(
-                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchLabel',
-                {
-                  defaultMessage: 'Run job in real time',
-                }
-              )}
-              checked={runInRealTime}
-              disabled={replay === false}
-              onChange={(e) => setRunInRealTime(e.target.checked)}
-            />
-          </EuiFormRow>
 
-          <EuiFormRow fullWidth>
-            <EuiCheckbox
-              id="createCalendarSwitch"
-              label={i18n.translate(
-                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchLabel',
-                {
-                  defaultMessage: 'Skip some time',
-                }
-              )}
-              checked={createCalendar}
-              disabled={replay === false}
-              onChange={(e) => setCreateCalendar(e.target.checked)}
-            />
-          </EuiFormRow>
-
-          {createCalendar && replay && (
+          {replay && (
             <>
-              <EuiSpacer size="l" />
-
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFormRow label="From">
-                    <EuiDatePicker
-                      showTimeSelect
-                      selected={startDate}
-                      minDate={moment(snapshot.latest_record_time_stamp)}
-                      maxDate={endDate || moment(job.data_counts.latest_record_timestamp)}
-                      onChange={(d) => setStartDate(d)}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow label="To">
-                    <EuiDatePicker
-                      showTimeSelect
-                      selected={endDate}
-                      minDate={startDate || moment(snapshot.latest_record_time_stamp)}
-                      onChange={(d) => setEndDate(d)}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EventRateChart
-                eventRateChartData={eventRateData}
-                anomalyData={anomalies}
-                loading={chartReady === false}
-                height={'100px'}
-                width={'100%'}
-                fadeChart={true}
-                overlayRange={
-                  startDate !== null && endDate !== null
-                    ? {
-                        start: startDate.valueOf(),
-                        end: endDate.valueOf(),
-                        color: '#0000ff',
-                        showMarker: false,
-                      }
-                    : undefined
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  runInRealTime
+                    ? 'Job will continue to run until manually stopped. All new data added to the index will be analyzed.'
+                    : `Job will run for the same length of time as it is currently (${formatDate(
+                        job.data_counts.latest_record_timestamp,
+                        TIME_FORMAT
+                      )}). It will then stop and close.`
                 }
-                onBrushEnd={onBrushEnd}
-              />
+              >
+                <EuiSwitch
+                  id="realTimeSwitch"
+                  label={i18n.translate(
+                    'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchLabel',
+                    {
+                      defaultMessage: 'Run job in real time',
+                    }
+                  )}
+                  checked={runInRealTime}
+                  onChange={(e) => setRunInRealTime(e.target.checked)}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                fullWidth
+                helpText="Create a new calendar and event to skip over a period of time when analyzing the data."
+                // helpText="Create a new calendar and event to skip over a period of time when analyzing the data. To use an existing calendar, do not use this setting and ensure the existing calendar is attached to the job before rerunning it."
+              >
+                <EuiSwitch
+                  id="createCalendarSwitch"
+                  label={i18n.translate(
+                    'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchLabel',
+                    {
+                      defaultMessage: 'Create calendar to skip a range of time',
+                    }
+                  )}
+                  checked={createCalendar}
+                  onChange={(e) => setCreateCalendar(e.target.checked)}
+                />
+              </EuiFormRow>
+
+              {createCalendar && (
+                <>
+                  <EuiSpacer size="l" />
+                  <div>Select time range for calendar event.</div>
+                  <EuiSpacer size="m" />
+                  <EventRateChart
+                    eventRateChartData={eventRateData}
+                    anomalyData={anomalies}
+                    loading={chartReady === false}
+                    height={'100px'}
+                    width={'100%'}
+                    fadeChart={true}
+                    overlayRange={
+                      startDate !== null && endDate !== null
+                        ? {
+                            start: startDate.valueOf(),
+                            end: endDate.valueOf(),
+                            color: '#0000ff',
+                            showMarker: false,
+                          }
+                        : undefined
+                    }
+                    onBrushEnd={onBrushEnd}
+                  />
+                  <EuiSpacer size="s" />
+
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem>
+                      <EuiFormRow label="From">
+                        <EuiDatePicker
+                          showTimeSelect
+                          selected={startDate}
+                          minDate={moment(currentSnapshot.latest_record_time_stamp)}
+                          maxDate={endDate || moment(job.data_counts.latest_record_timestamp)}
+                          onChange={(d) => setStartDate(d)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow label="To">
+                        <EuiDatePicker
+                          showTimeSelect
+                          selected={endDate}
+                          minDate={startDate || moment(currentSnapshot.latest_record_time_stamp)}
+                          onChange={(d) => setEndDate(d)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              )}
             </>
           )}
         </EuiFlyoutBody>

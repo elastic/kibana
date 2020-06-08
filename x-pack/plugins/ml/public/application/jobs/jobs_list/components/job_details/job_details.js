@@ -64,8 +64,7 @@ export class JobDetails extends Component {
         datafeedTimingStats,
       } = extractJobDetails(job);
 
-      const { showFullDetails } = this.props;
-
+      const { showFullDetails, refreshJobList } = this.props;
       const tabs = [
         {
           id: 'job-settings',
@@ -184,7 +183,7 @@ export class JobDetails extends Component {
           }),
           content: (
             <Fragment>
-              <ModelSnapshotTable job={job} />
+              <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
               {/* <AnnotationFlyout /> */}
             </Fragment>
           ),
@@ -205,4 +204,5 @@ JobDetails.propTypes = {
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
   showFullDetails: PropTypes.bool,
+  refreshJobList: PropTypes.func,
 };

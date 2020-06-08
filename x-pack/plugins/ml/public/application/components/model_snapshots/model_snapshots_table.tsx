@@ -37,6 +37,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
   job: CombinedJobWithStats;
+  refreshJobList: () => void;
 }
 
 enum COMBINED_JOB_STATE {
@@ -46,12 +47,12 @@ enum COMBINED_JOB_STATE {
   UNKNOWN,
 }
 
-export const ModelSnapshotTable: FC<Props> = ({ job }) => {
+export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   const [snapshots, setSnapshots] = useState<ModelSnapshot[]>([]);
   const [snapshotsLoaded, setSnapshotsLoaded] = useState<boolean>(false);
   const [editSnapshot, setEditSnapshot] = useState<ModelSnapshot | null>(null);
   const [revertSnapshot, setRevertSnapshot] = useState<ModelSnapshot | null>(null);
-  const [closeJobModalVisible, setCloseJobModalVisible] = useState(false);
+  const [closeJobModalVisible, setCloseJobModalVisible] = useState<ModelSnapshot | null>(null);
   const [combinedJobState, setCombinedJobState] = useState<COMBINED_JOB_STATE | null>(null);
 
   useEffect(() => {
@@ -70,26 +71,30 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
       // show toast
       return;
     }
+    setCombinedJobState(state);
 
     if (state === COMBINED_JOB_STATE.CLOSED) {
       // show flyout
       setRevertSnapshot(snapshot);
     } else {
-      setCombinedJobState(state);
-      showCloseJobModalVisible();
+      // show close job modal
+      setCloseJobModalVisible(snapshot);
     }
   }
 
-  function showCloseJobModalVisible() {
-    setCloseJobModalVisible(true);
-  }
   function hideCloseJobModalVisible() {
     setCombinedJobState(null);
-    setCloseJobModalVisible(false);
+    setCloseJobModalVisible(null);
   }
 
   async function forceCloseJob() {
-    ml.jobs.forceStopAndCloseJob(job.job_id);
+    await ml.jobs.forceStopAndCloseJob(job.job_id);
+    if (closeJobModalVisible !== null) {
+      const state = await getCombinedJobState(job.job_id);
+      if (state === COMBINED_JOB_STATE.CLOSED) {
+        setRevertSnapshot(closeJobModalVisible);
+      }
+    }
     hideCloseJobModalVisible();
   }
 
@@ -169,19 +174,6 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
           icon: 'pencil',
           onClick: setEditSnapshot,
         },
-        // {
-        //   name: i18n.translate('xpack.ml.modelSnapshotTable.actions.delete.name', {
-        //     defaultMessage: 'Delete',
-        //   }),
-        //   description: i18n.translate('xpack.ml.modelSnapshotTable.actions.delete.description', {
-        //     defaultMessage: 'Delete this snapshot',
-        //   }),
-        //   type: 'icon',
-        //   icon: 'trash',
-        //   onClick: (a) => {
-        //     console.log(a);
-        //   },
-        // },
       ],
     },
   ];
@@ -238,12 +230,13 @@ export const ModelSnapshotTable: FC<Props> = ({ job }) => {
             setRevertSnapshot(null);
             if (reload) {
               loadModelSnapshots();
+              setTimeout(refreshJobList, 500);
             }
           }}
         />
       )}
 
-      {closeJobModalVisible && combinedJobState !== null && (
+      {closeJobModalVisible !== null && combinedJobState !== null && (
         <EuiOverlayMask>
           <EuiConfirmModal
             title={i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.title', {

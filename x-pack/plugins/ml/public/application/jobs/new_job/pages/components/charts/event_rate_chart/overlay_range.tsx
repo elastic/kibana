@@ -46,7 +46,10 @@ export const OverlayRange: FC<Props> = ({
             },
           },
         ]}
-        style={{ fill: color, strokeWidth: 0 }}
+        style={{
+          fill: color,
+          strokeWidth: 0,
+        }}
       />
       <LineAnnotation
         id="annotation_1"

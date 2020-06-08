@@ -112,6 +112,7 @@ export class JobsListView extends Component {
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
+            refreshJobList={this.onRefreshClick}
           />
         );
       } else {
@@ -121,6 +122,7 @@ export class JobsListView extends Component {
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
+            refreshJobList={this.onRefreshClick}
           />
         );
       }
@@ -143,6 +145,7 @@ export class JobsListView extends Component {
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
                     showFullDetails={this.props.isManagementTable !== true}
+                    refreshJobList={this.onRefreshClick}
                   />
                 );
               }
