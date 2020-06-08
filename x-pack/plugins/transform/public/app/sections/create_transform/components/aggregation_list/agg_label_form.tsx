@@ -68,9 +68,9 @@ export const AggLabelForm: React.FC<Props> = ({
 
   const updateSubAggHandler = useCallback(
     (prevSubItemName: string, subItem: PivotAggsConfig) => {
-      actions.updateSubAggregation(item, prevSubItemName, subItem);
+      actions.updateSubAggregation(prevSubItemName, subItem);
     },
-    [actions, item]
+    [actions]
   );
 
   const deleteSubAggHandler = useCallback(
@@ -148,7 +148,7 @@ export const AggLabelForm: React.FC<Props> = ({
       {isSubAggSupported && (
         <>
           <EuiSpacer size="m" />
-          {isPivotAggsConfigWithUiSupport(item) && item.subAggs && (
+          {item.subAggs && (
             <AggListForm
               aggOptions={aggOptions}
               onChange={updateSubAggHandler}

@@ -88,6 +88,8 @@ export interface PivotAggsConfigBase {
   isSubAggsSupported?: boolean;
   /** Dictionary of the sub-aggregations */
   subAggs?: PivotAggsConfigDict;
+  /** Reference to the parent aggregation */
+  parentAgg?: PivotAggsConfig;
 }
 
 /**
@@ -208,6 +210,7 @@ export function getEsAggFromAggConfig(
   delete esAgg.agg;
   delete esAgg.aggName;
   delete esAgg.dropDownName;
+  delete esAgg.parentAgg;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
     esAgg = pivotAggsConfig.getEsAggConfig();

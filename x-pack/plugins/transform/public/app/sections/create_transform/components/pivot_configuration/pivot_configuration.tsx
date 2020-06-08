@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
 import React, { memo, FC, createContext } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
@@ -89,8 +88,5 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
         </EuiFormRow>
       </PivotConfigurationContext.Provider>
     );
-  },
-  (prevProps, nextProps) => {
-    return isEqual(prevProps.state, nextProps.state);
   }
 );
