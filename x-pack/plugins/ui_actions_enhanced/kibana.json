@@ -1,7 +1,7 @@
 {
-  "id": "advancedUiActions",
+  "id": "uiActionsEnhanced",
   "version": "kibana",
-  "configPath": ["xpack", "advanced_ui_actions"],
+  "configPath": ["xpack", "ui_actions_enhanced"],
   "requiredPlugins": [
     "embeddable",
     "uiActions"

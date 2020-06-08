@@ -61,7 +61,7 @@ export class CustomTimeRangeAction implements ActionByType<typeof CUSTOM_TIME_RA
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.advancedUiActions.customizeTimeRangeMenuItem.displayName', {
+    return i18n.translate('xpack.uiActionsEnhanced.customizeTimeRangeMenuItem.displayName', {
       defaultMessage: 'Customize time range',
     });
   }
