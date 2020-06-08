@@ -95,6 +95,26 @@ export const MapsCreateEditView = class extends React.Component {
     if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
       updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
     }
+    this.updateFromGlobalState();
+  }
+
+  updateFromGlobalState() {
+    const { filters, refreshInterval, time } = this.state;
+    const globalState = getGlobalState();
+    const newState = {};
+
+    if (!_.isEqual(globalState.filters, filters)) {
+      newState.filters = globalState.filters;
+    }
+    if (!_.isEqual(globalState.refreshInterval, refreshInterval)) {
+      newState.refreshInterval = globalState.refreshInterval;
+    }
+    if (!_.isEqual(globalState.time, time)) {
+      newState.time = globalState.time;
+    }
+    if (!_.isEmpty(newState)) {
+      this.setState(newState, this.syncAppAndGlobalState);
+    }
   }
 
   componentWillUnmount() {
@@ -206,14 +226,17 @@ export const MapsCreateEditView = class extends React.Component {
     });
 
     // globalState
+
+    const refreshInterval = {
+      pause: refreshConfig.isPaused,
+      value: refreshConfig.interval,
+    };
     updateGlobalState({
       time: time,
-      refreshInterval: {
-        pause: refreshConfig.isPaused,
-        value: refreshConfig.interval,
-      },
+      refreshInterval,
       filters: filterManager.getGlobalFilters(),
     });
+    this.setState({ refreshInterval });
   }
 
   onQueryChange = async ({ filters, query, time, refresh }) => {
