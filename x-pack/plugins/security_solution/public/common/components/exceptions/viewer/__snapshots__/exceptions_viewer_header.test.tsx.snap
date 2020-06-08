@@ -1,0 +1,688 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExceptionsViewerHeader it renders Detections toggle selected when clicked 1`] = `
+<ThemeProvider
+  theme={[Function]}
+>
+  <ExceptionsViewerHeader
+    detectionsListItems={0}
+    endpointListItems={0}
+    isInitLoading={false}
+    onAddDetectionsExceptionClick={[MockFunction]}
+    onAddEndpointExceptionClick={[MockFunction]}
+    onFilterChange={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "filter": "",
+              "showDetectionsList": false,
+              "showEndpointList": false,
+              "tags": Array [],
+            },
+          ],
+          Array [
+            Object {
+              "filter": "",
+              "showDetectionsList": true,
+              "showEndpointList": false,
+              "tags": Array [],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+    supportedListTypes={
+      Array [
+        "detection",
+        "endpoint",
+      ]
+    }
+  >
+    <EuiFlexGroup
+      alignItems="center"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <EuiFlexItem
+          grow={true}
+        >
+          <div
+            className="euiFlexItem"
+          >
+            <EuiFieldSearch
+              aria-label="Search field (default)"
+              compressed={false}
+              data-test-subj="exceptionsHeaderSearch"
+              disabled={false}
+              fullWidth={true}
+              incremental={false}
+              isClearable={true}
+              isLoading={false}
+              onChange={[Function]}
+              placeholder="Search field (default)"
+            >
+              <EuiFormControlLayout
+                compressed={false}
+                fullWidth={true}
+                icon="search"
+                isLoading={false}
+              >
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl>
+                      <input
+                        aria-label="Search field (default)"
+                        className="euiFieldSearch euiFieldSearch--fullWidth"
+                        data-test-subj="exceptionsHeaderSearch"
+                        disabled={false}
+                        onChange={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search field (default)"
+                        type="search"
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons
+                      icon="search"
+                      isLoading={false}
+                    >
+                      <div
+                        className="euiFormControlLayoutIcons"
+                      >
+                        <EuiFormControlLayoutCustomIcon
+                          type="search"
+                        >
+                          <span
+                            className="euiFormControlLayoutCustomIcon"
+                          >
+                            <EuiIcon
+                              aria-hidden="true"
+                              className="euiFormControlLayoutCustomIcon__icon"
+                              type="search"
+                            >
+                              <div
+                                aria-hidden="true"
+                                className="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="search"
+                              />
+                            </EuiIcon>
+                          </span>
+                        </EuiFormControlLayoutCustomIcon>
+                      </div>
+                    </EuiFormControlLayoutIcons>
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiFieldSearch>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiFilterGroup
+                      data-test-subj="exceptionsFilterGroupBtns"
+                    >
+                      <div
+                        className="euiFilterGroup"
+                        data-test-subj="exceptionsFilterGroupBtns"
+                      >
+                        <EuiFilterButton
+                          data-test-subj="exceptionsDetectionFilterBtn"
+                          hasActiveFilters={true}
+                          isDisabled={false}
+                          onClick={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            className="euiFilterButton euiFilterButton-hasActiveFilters"
+                            color="text"
+                            data-test-subj="exceptionsDetectionFilterBtn"
+                            iconSide="right"
+                            isDisabled={false}
+                            onClick={[Function]}
+                            textProps={
+                              Object {
+                                "className": "",
+                              }
+                            }
+                            type="button"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters"
+                              data-test-subj="exceptionsDetectionFilterBtn"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <span
+                                className="euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <span
+                                    className="euiFilterButton__textShift"
+                                    data-text="Detection list (0)"
+                                    title="Detection list (0)"
+                                  >
+                                    Detection list
+                                     (0)
+                                  </span>
+                                </span>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
+                        </EuiFilterButton>
+                        <EuiFilterButton
+                          data-test-subj="exceptionsEndpointFilterBtn"
+                          hasActiveFilters={false}
+                          isDisabled={false}
+                          onClick={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            className="euiFilterButton"
+                            color="text"
+                            data-test-subj="exceptionsEndpointFilterBtn"
+                            iconSide="right"
+                            isDisabled={false}
+                            onClick={[Function]}
+                            textProps={
+                              Object {
+                                "className": "",
+                              }
+                            }
+                            type="button"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton"
+                              data-test-subj="exceptionsEndpointFilterBtn"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <span
+                                className="euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <span
+                                    className="euiFilterButton__textShift"
+                                    data-text="Endpoint list (0)"
+                                    title="Endpoint list (0)"
+                                  >
+                                    Endpoint list
+                                     (0)
+                                  </span>
+                                </span>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
+                        </EuiFilterButton>
+                      </div>
+                    </EuiFilterGroup>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiPopover
+                      anchorPosition="downCenter"
+                      button={
+                        <EuiButton
+                          data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                          fill={true}
+                          iconSide="right"
+                          iconType="arrowDown"
+                          isDisabled={false}
+                          onClick={[Function]}
+                        >
+                          Add new exception
+                        </EuiButton>
+                      }
+                      closePopover={[Function]}
+                      display="inlineBlock"
+                      hasArrow={true}
+                      isOpen={false}
+                      ownFocus={false}
+                      panelPaddingSize="none"
+                      repositionOnScroll={true}
+                    >
+                      <EuiOutsideClickDetector
+                        isDisabled={true}
+                        onOutsideClick={[Function]}
+                      >
+                        <div
+                          className="euiPopover euiPopover--anchorDownCenter"
+                          onKeyDown={[Function]}
+                          onMouseDown={[Function]}
+                          onMouseUp={[Function]}
+                          onTouchEnd={[Function]}
+                          onTouchStart={[Function]}
+                        >
+                          <div
+                            className="euiPopover__anchor"
+                          >
+                            <EuiButton
+                              data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                              fill={true}
+                              iconSide="right"
+                              iconType="arrowDown"
+                              isDisabled={false}
+                              onClick={[Function]}
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--iconRight euiButton--fill"
+                                data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <EuiIcon
+                                    aria-hidden="true"
+                                    className="euiButton__icon"
+                                    size="m"
+                                    type="arrowDown"
+                                  >
+                                    <div
+                                      aria-hidden="true"
+                                      className="euiButton__icon"
+                                      data-euiicon-type="arrowDown"
+                                      size="m"
+                                    />
+                                  </EuiIcon>
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Add new exception
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </div>
+                      </EuiOutsideClickDetector>
+                    </EuiPopover>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+  </ExceptionsViewerHeader>
+</ThemeProvider>
+`;
+
+exports[`ExceptionsViewerHeader it renders all disabled if "isInitLoading" is true 1`] = `
+<ThemeProvider
+  theme={[Function]}
+>
+  <ExceptionsViewerHeader
+    detectionsListItems={0}
+    endpointListItems={0}
+    isInitLoading={true}
+    onAddDetectionsExceptionClick={[MockFunction]}
+    onAddEndpointExceptionClick={[MockFunction]}
+    onFilterChange={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "filter": "",
+              "showDetectionsList": false,
+              "showEndpointList": false,
+              "tags": Array [],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+    supportedListTypes={
+      Array [
+        "detection",
+        "endpoint",
+      ]
+    }
+  >
+    <EuiFlexGroup
+      alignItems="center"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <EuiFlexItem
+          grow={true}
+        >
+          <div
+            className="euiFlexItem"
+          >
+            <EuiFieldSearch
+              aria-label="Search field (default)"
+              compressed={false}
+              data-test-subj="exceptionsHeaderSearch"
+              disabled={true}
+              fullWidth={true}
+              incremental={false}
+              isClearable={true}
+              isLoading={false}
+              onChange={[Function]}
+              placeholder="Search field (default)"
+            >
+              <EuiFormControlLayout
+                compressed={false}
+                fullWidth={true}
+                icon="search"
+                isLoading={false}
+              >
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl>
+                      <input
+                        aria-label="Search field (default)"
+                        className="euiFieldSearch euiFieldSearch--fullWidth"
+                        data-test-subj="exceptionsHeaderSearch"
+                        disabled={true}
+                        onChange={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search field (default)"
+                        type="search"
+                      />
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons
+                      icon="search"
+                      isLoading={false}
+                    >
+                      <div
+                        className="euiFormControlLayoutIcons"
+                      >
+                        <EuiFormControlLayoutCustomIcon
+                          type="search"
+                        >
+                          <span
+                            className="euiFormControlLayoutCustomIcon"
+                          >
+                            <EuiIcon
+                              aria-hidden="true"
+                              className="euiFormControlLayoutCustomIcon__icon"
+                              type="search"
+                            >
+                              <div
+                                aria-hidden="true"
+                                className="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="search"
+                              />
+                            </EuiIcon>
+                          </span>
+                        </EuiFormControlLayoutCustomIcon>
+                      </div>
+                    </EuiFormControlLayoutIcons>
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </EuiFieldSearch>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiFilterGroup>
+                      <div
+                        className="euiFilterGroup"
+                      >
+                        <EuiFilterButton
+                          data-test-subj="exceptionsDetectionFilterBtn"
+                          hasActiveFilters={false}
+                          isDisabled={true}
+                          onClick={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            className="euiFilterButton"
+                            color="text"
+                            data-test-subj="exceptionsDetectionFilterBtn"
+                            iconSide="right"
+                            isDisabled={true}
+                            onClick={[Function]}
+                            textProps={
+                              Object {
+                                "className": "",
+                              }
+                            }
+                            type="button"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton"
+                              data-test-subj="exceptionsDetectionFilterBtn"
+                              disabled={true}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <span
+                                className="euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <span
+                                    className="euiFilterButton__textShift"
+                                    data-text="Detection list (0)"
+                                    title="Detection list (0)"
+                                  >
+                                    Detection list
+                                     (0)
+                                  </span>
+                                </span>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
+                        </EuiFilterButton>
+                        <EuiFilterButton
+                          data-test-subj="exceptionsEndpointFilterBtn"
+                          hasActiveFilters={false}
+                          isDisabled={true}
+                          onClick={[Function]}
+                        >
+                          <EuiButtonEmpty
+                            className="euiFilterButton"
+                            color="text"
+                            data-test-subj="exceptionsEndpointFilterBtn"
+                            iconSide="right"
+                            isDisabled={true}
+                            onClick={[Function]}
+                            textProps={
+                              Object {
+                                "className": "",
+                              }
+                            }
+                            type="button"
+                          >
+                            <button
+                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton"
+                              data-test-subj="exceptionsEndpointFilterBtn"
+                              disabled={true}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <span
+                                className="euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <span
+                                    className="euiFilterButton__textShift"
+                                    data-text="Endpoint list (0)"
+                                    title="Endpoint list (0)"
+                                  >
+                                    Endpoint list
+                                     (0)
+                                  </span>
+                                </span>
+                              </span>
+                            </button>
+                          </EuiButtonEmpty>
+                        </EuiFilterButton>
+                      </div>
+                    </EuiFilterGroup>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiPopover
+                      anchorPosition="downCenter"
+                      button={
+                        <EuiButton
+                          data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                          fill={true}
+                          iconSide="right"
+                          iconType="arrowDown"
+                          isDisabled={true}
+                          onClick={[Function]}
+                        >
+                          Add new exception
+                        </EuiButton>
+                      }
+                      closePopover={[Function]}
+                      display="inlineBlock"
+                      hasArrow={true}
+                      isOpen={false}
+                      ownFocus={false}
+                      panelPaddingSize="none"
+                      repositionOnScroll={true}
+                    >
+                      <EuiOutsideClickDetector
+                        isDisabled={true}
+                        onOutsideClick={[Function]}
+                      >
+                        <div
+                          className="euiPopover euiPopover--anchorDownCenter"
+                          onKeyDown={[Function]}
+                          onMouseDown={[Function]}
+                          onMouseUp={[Function]}
+                          onTouchEnd={[Function]}
+                          onTouchStart={[Function]}
+                        >
+                          <div
+                            className="euiPopover__anchor"
+                          >
+                            <EuiButton
+                              data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                              fill={true}
+                              iconSide="right"
+                              iconType="arrowDown"
+                              isDisabled={true}
+                              onClick={[Function]}
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--iconRight euiButton--fill"
+                                data-test-subj="exceptionsHeaderAddExceptionPopoverBtn"
+                                disabled={true}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <EuiIcon
+                                    aria-hidden="true"
+                                    className="euiButton__icon"
+                                    size="m"
+                                    type="arrowDown"
+                                  >
+                                    <div
+                                      aria-hidden="true"
+                                      className="euiButton__icon"
+                                      data-euiicon-type="arrowDown"
+                                      size="m"
+                                    />
+                                  </EuiIcon>
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Add new exception
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </div>
+                      </EuiOutsideClickDetector>
+                    </EuiPopover>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+  </ExceptionsViewerHeader>
+</ThemeProvider>
+`;

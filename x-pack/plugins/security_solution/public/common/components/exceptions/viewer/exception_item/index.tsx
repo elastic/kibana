@@ -18,8 +18,7 @@ import styled from 'styled-components';
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntries, getFormattedComments } from '../../helpers';
-import { FormattedEntry, ExceptionListItemSchema } from '../../types';
-import { NamespaceType } from '../../../../../../public/lists_plugin_deps';
+import { FormattedEntry, ExceptionListItemSchema, ApiProps } from '../../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
     &.comments--show {
@@ -29,13 +28,15 @@ const MyFlexItem = styled(EuiFlexItem)`
 `;
 
 interface ExceptionItemProps {
+  loadingItemIds: ApiProps[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
-  handleDelete: ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) => void;
+  handleDelete: (arg: ApiProps) => void;
   handleEdit: (item: ExceptionListItemSchema) => void;
 }
 
 const ExceptionItemComponent = ({
+  loadingItemIds,
   exceptionItem,
   commentsAccordionId,
   handleDelete,
@@ -50,7 +51,7 @@ const ExceptionItemComponent = ({
   }, [exceptionItem.entries]);
 
   const onDelete = useCallback((): void => {
-    handleDelete({ id: exceptionItem.id, namespaceType: exceptionItem.namespaceType });
+    handleDelete({ id: exceptionItem.id, namespaceType: exceptionItem.namespace_type });
   }, [handleDelete, exceptionItem]);
 
   const onEdit = useCallback((): void => {
@@ -66,6 +67,11 @@ const ExceptionItemComponent = ({
     return getFormattedComments(exceptionItem.comment);
   }, [exceptionItem]);
 
+  const disableDelete = useMemo((): boolean => {
+    const foundItems = loadingItemIds.filter((t) => t.id === exceptionItem.id);
+    return foundItems.length > 0;
+  }, [loadingItemIds, exceptionItem.id]);
+
   return (
     <EuiPanel paddingSize="none">
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -76,7 +82,12 @@ const ExceptionItemComponent = ({
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
             />
-            <ExceptionEntries entries={entryItems} handleDelete={onDelete} handleEdit={onEdit} />
+            <ExceptionEntries
+              disableDelete={disableDelete}
+              entries={entryItems}
+              handleDelete={onDelete}
+              handleEdit={onEdit}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
         <MyFlexItem className={showComments ? 'comments--show' : ''}>

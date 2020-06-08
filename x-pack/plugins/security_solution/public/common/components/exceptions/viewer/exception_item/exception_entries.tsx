@@ -47,12 +47,14 @@ const AndOrBadgeContainer = styled(EuiFlexItem)`
 
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
+  disableDelete: boolean;
   handleDelete: () => void;
   handleEdit: () => void;
 }
 
 const ExceptionEntriesComponent = ({
   entries,
+  disableDelete,
   handleDelete,
   handleEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
@@ -140,6 +142,7 @@ const ExceptionEntriesComponent = ({
                 size="s"
                 color="primary"
                 onClick={handleEdit}
+                isDisabled={disableDelete}
                 data-test-subj="exceptionsViewerEditBtn"
               >
                 {i18n.EDIT}
@@ -150,6 +153,7 @@ const ExceptionEntriesComponent = ({
                 size="s"
                 color="danger"
                 onClick={handleDelete}
+                isLoading={disableDelete}
                 data-test-subj="exceptionsViewerDeleteBtn"
               >
                 {i18n.REMOVE}

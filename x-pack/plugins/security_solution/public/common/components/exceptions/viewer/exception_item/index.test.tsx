@@ -19,6 +19,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           handleDelete={jest.fn()}
           handleEdit={jest.fn()}
@@ -38,6 +39,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           handleDelete={jest.fn()}
           handleEdit={mockHandleEdit}
@@ -59,6 +61,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
@@ -80,6 +83,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
@@ -98,6 +102,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
