@@ -68,7 +68,7 @@ export const createExternalService = ({
         url: `${incidentUrl}${query}`,
       });
 
-      return { ...res.data.result };
+      return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
       throw new Error(
         getErrorMessage(
