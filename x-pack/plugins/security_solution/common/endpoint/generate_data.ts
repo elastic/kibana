@@ -929,7 +929,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
               {
-                name: 'load_malware_mode',
+                name: 'load_malware_model',
                 message: 'Error deserializing EXE model; no valid malware model installed',
                 status: HostPolicyResponseActionStatus.success,
               },
