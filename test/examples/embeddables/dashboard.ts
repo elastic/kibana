@@ -77,6 +77,7 @@ export const testDashboardInput = {
       },
     },
   },
+  isEmbeddedExternally: false,
   isFullScreenMode: false,
   filters: [],
   useMargins: true,

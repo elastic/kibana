@@ -171,15 +171,26 @@ export class DashboardPlugin
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
-      const useHideChrome = () => {
+      const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
         React.useEffect(() => {
-          coreStart.chrome.setIsVisible(false);
-          return () => coreStart.chrome.setIsVisible(true);
-        }, []);
+          if (toggleChrome) {
+            coreStart.chrome.setIsVisible(false);
+          }
+
+          return () => {
+            if (toggleChrome) {
+              coreStart.chrome.setIsVisible(true);
+            }
+          };
+        }, [toggleChrome]);
       };
 
-      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = (props) => {
-        useHideChrome();
+      const ExitFullScreenButton: React.FC<
+        ExitFullScreenButtonProps & {
+          toggleChrome: boolean;
+        }
+      > = ({ toggleChrome, ...props }) => {
+        useHideChrome({ toggleChrome });
         return <ExitFullScreenButtonUi {...props} />;
       };
       return {
