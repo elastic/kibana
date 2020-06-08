@@ -547,6 +547,7 @@ export const ActionForm = ({
     actionTypeNodes = actionTypeRegistry
       .list()
       .filter((item) => actionTypesIndex[item.id])
+      .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
       )

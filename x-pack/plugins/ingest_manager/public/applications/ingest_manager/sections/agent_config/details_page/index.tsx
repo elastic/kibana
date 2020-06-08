@@ -169,6 +169,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         ))}
       </EuiFlexGroup>
     ),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentConfig, configId, agentStatus]
   );
 

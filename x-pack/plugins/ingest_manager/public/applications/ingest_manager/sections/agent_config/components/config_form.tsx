@@ -50,6 +50,15 @@ export const agentConfigFormValidation = (
     ];
   }
 
+  if (!agentConfig.namespace?.trim()) {
+    errors.namespace = [
+      <FormattedMessage
+        id="xpack.ingestManager.agentConfigForm.namespaceRequiredErrorMessage"
+        defaultMessage="A namespace is required"
+      />,
+    ];
+  }
+
   return errors;
 };
 
@@ -73,7 +82,6 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
   onDelete = () => {},
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
-  const [showNamespace, setShowNamespace] = useState<boolean>(!!agentConfig.namespace);
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
     label: JSX.Element;
@@ -170,49 +178,28 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
           />
         }
       >
-        <EuiSwitch
-          showLabel={true}
-          label={
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigForm.namespaceUseDefaultsFieldLabel"
-              defaultMessage="Use default namespace"
-            />
-          }
-          checked={showNamespace}
-          onChange={() => {
-            setShowNamespace(!showNamespace);
-            if (showNamespace) {
-              updateAgentConfig({ namespace: '' });
-            }
-          }}
-        />
-        {showNamespace && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
-              isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-            >
-              <EuiComboBox
-                fullWidth
-                singleSelection
-                noSuggestions
-                selectedOptions={agentConfig.namespace ? [{ label: agentConfig.namespace }] : []}
-                onCreateOption={(value: string) => {
-                  updateAgentConfig({ namespace: value });
-                }}
-                onChange={(selectedOptions) => {
-                  updateAgentConfig({
-                    namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
-                  });
-                }}
-                isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-                onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
-              />
-            </EuiFormRow>
-          </>
-        )}
+        <EuiFormRow
+          fullWidth
+          error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
+          isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+        >
+          <EuiComboBox
+            fullWidth
+            singleSelection
+            noSuggestions
+            selectedOptions={agentConfig.namespace ? [{ label: agentConfig.namespace }] : []}
+            onCreateOption={(value: string) => {
+              updateAgentConfig({ namespace: value });
+            }}
+            onChange={(selectedOptions) => {
+              updateAgentConfig({
+                namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+            onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={

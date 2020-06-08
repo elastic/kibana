@@ -26,12 +26,10 @@ export default function ({
   loadTestFile,
 }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common']);
 
   describe('state sync examples', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('settings');
     });
 
     loadTestFile(require.resolve('./todo_app'));

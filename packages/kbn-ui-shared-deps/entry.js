@@ -30,8 +30,8 @@ export const KbnI18nReact = require('@kbn/i18n/react');
 export const Angular = require('angular');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
-export const Monaco = require('./monaco.ts');
-export const MonacoBare = require('monaco-editor/esm/vs/editor/editor.api');
+export const KbnMonaco = require('@kbn/monaco');
+export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');
@@ -44,6 +44,7 @@ Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 // big deps which are locked to a single version
 export const Rxjs = require('rxjs');
 export const RxjsOperators = require('rxjs/operators');
+export const ElasticNumeral = require('@elastic/numeral');
 export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
