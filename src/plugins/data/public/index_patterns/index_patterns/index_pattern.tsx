@@ -49,6 +49,7 @@ import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { getNotifications, getFieldFormats, getHttp } from '../../services';
 import { TypeMeta } from './types';
+import { PatternCache } from './_pattern_cache';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -71,12 +72,13 @@ export class IndexPattern implements IIndexPattern {
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
-  private patternCache: any;
+  private patternCache: PatternCache;
   private getConfig: any;
   private sourceFilters?: [];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
+  private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -105,7 +107,7 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: PatternCache
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -123,6 +125,7 @@ export class IndexPattern implements IIndexPattern {
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
+    this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(
       this,
       apiClient,
@@ -484,8 +487,8 @@ export class IndexPattern implements IIndexPattern {
           duplicateId,
           this.getConfig,
           this.savedObjectsClient,
-          this.patternCache,
-          this.fieldsFetcher
+          this.apiClient,
+          this.patternCache
         );
         await duplicatePattern.destroy();
       }
@@ -533,8 +536,8 @@ export class IndexPattern implements IIndexPattern {
             this.id,
             this.getConfig,
             this.savedObjectsClient,
-            this.patternCache,
-            this.fieldsFetcher
+            this.apiClient,
+            this.patternCache
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -577,7 +580,7 @@ export class IndexPattern implements IIndexPattern {
             this.version = samePattern.version;
 
             // Clear cache
-            this.patternCache.clear(this.id);
+            this.patternCache.clear(this.id!);
 
             // Try the save again
             return this.save(saveAttempts);
@@ -633,8 +636,8 @@ export class IndexPattern implements IIndexPattern {
   }
 
   destroy() {
-    this.patternCache.clear(this.id);
     if (this.id) {
+      this.patternCache.clear(this.id);
       return this.savedObjectsClient.delete(type, this.id);
     }
   }
