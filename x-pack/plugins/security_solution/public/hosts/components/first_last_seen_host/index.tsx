@@ -22,6 +22,7 @@ export const FirstLastSeenHost = React.memo<{ hostname: string; type: FirstLastS
     return (
       <ApolloConsumer>
         {(client) => {
+          /* eslint-disable-next-line react-hooks/rules-of-hooks */
           const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
             hostname,
             'default',
