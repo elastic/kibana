@@ -2,8 +2,7 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "plugins/actions",
-    "xpack.advancedUiActions": "plugins/advanced_ui_actions",
-    "xpack.uiActionsEnhanced": "examples/ui_actions_enhanced_examples",
+    "xpack.uiActionsEnhanced": ["plugins/ui_actions_enhanced", "examples/ui_actions_enhanced_examples"],
     "xpack.alerts": "plugins/alerts",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
     "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
