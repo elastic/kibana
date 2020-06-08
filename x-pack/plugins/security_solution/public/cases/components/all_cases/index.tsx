@@ -134,6 +134,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     (refetchFilter: () => void) => {
       filterRefetch.current = refetchFilter;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [filterRefetch.current]
   );
   const refreshCases = useCallback(
@@ -146,6 +147,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         filterRefetch.current();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [filterOptions, queryParams, filterRefetch.current]
   );
 
@@ -158,6 +160,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       refreshCases();
       dispatchResetIsUpdated();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDeleted, isUpdated]);
   const confirmDeleteModal = useMemo(
     () => (
@@ -172,12 +175,14 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         )}
       />
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
   );
 
   const toggleDeleteModal = useCallback((deleteCase: Case) => {
     handleToggleModal();
     setDeleteThisCase(deleteCase);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleBulkDeleteModal = useCallback(
@@ -192,6 +197,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
       setDeleteBulk(convertToDeleteCases);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedCases]
   );
 
@@ -199,6 +205,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     (status: string) => {
       updateBulkStatus(selectedCases, status);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedCases]
   );
 
@@ -220,6 +227,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         })}
       />
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
   );
   const handleDispatchUpdate = useCallback(
@@ -261,6 +269,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       setQueryParams(newQueryParams);
       refreshCases(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [queryParams]
   );
 
@@ -274,6 +283,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       setFilters(newFilterOptions);
       refreshCases(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [filterOptions, queryParams]
   );
 
@@ -296,6 +306,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
     () => ({ onSelectionChange: setSelectedCases }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedCases]
   );
   const isCasesLoading = useMemo(
