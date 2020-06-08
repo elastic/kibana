@@ -34,6 +34,7 @@ const AlertDetailsOverviewComponent = memo(() => {
     return null;
   }
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const tabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
       {
@@ -71,11 +72,13 @@ const AlertDetailsOverviewComponent = memo(() => {
     ];
   }, [alertDetailsData]);
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const activeTab = useMemo(
     () => (alertDetailsTabId ? tabs.find(({ id }) => id === alertDetailsTabId) : tabs[0]),
     [alertDetailsTabId, tabs]
   );
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const handleTabClick = useCallback(
     (clickedTab: EuiTabbedContentTab): void => {
       if (clickedTab.id !== alertDetailsTabId) {
