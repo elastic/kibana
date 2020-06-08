@@ -5,13 +5,12 @@
  */
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import {
-  UiActionsActionDefinition as ActionDefinition,
-  UiActionsPresentable as Presentable,
-} from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { SerializedAction } from './types';
+import { ILicense } from '../../../licensing/public';
+import { ActionEnhancedDefinition } from '../actions';
 
 export class ActionFactory<
   Config extends object = object,
@@ -19,10 +18,12 @@ export class ActionFactory<
   ActionContext extends object = object
 > implements Omit<Presentable<FactoryContext>, 'getHref'>, Configurable<Config, FactoryContext> {
   constructor(
-    protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
+    protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>,
+    protected readonly getLicence: () => ILicense
   ) {}
 
   public readonly id = this.def.id;
+  public readonly minimalLicense = this.def.minimalLicense;
   public readonly order = this.def.order || 0;
   public readonly MenuItem? = this.def.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
@@ -51,9 +52,21 @@ export class ActionFactory<
     return await this.def.isCompatible(context);
   }
 
+  /**
+   * Does this action factory licence requirements
+   * compatible with current license?
+   */
+  public isCompatibleLicence() {
+    if (!this.minimalLicense) return true;
+    return this.getLicence().hasAtLeast(this.minimalLicense);
+  }
+
   public create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
-  ): ActionDefinition<ActionContext> {
-    return this.def.create(serializedAction);
+  ): ActionEnhancedDefinition<ActionContext> {
+    return {
+      minimalLicense: this.minimalLicense, // actions created with action factory inherit it's license requirements
+      ...this.def.create(serializedAction),
+    };
   }
 }

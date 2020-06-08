@@ -12,3 +12,12 @@ export const txtChangeButton = i18n.translate(
     defaultMessage: 'Change',
   }
 );
+
+export const doesNotMeetLicenseRequirements = {
+  header: i18n.translate('xpack.uiActionsEnhanced.components.actionWizard.noLicenseTooltipHeader', {
+    defaultMessage: 'Not available',
+  }),
+  content: i18n.translate('xpack.uiActionsEnhanced.components.actionWizard.noLicenseTooltipBody', {
+    defaultMessage: 'Upgrade your license to get access to this action.',
+  }),
+};

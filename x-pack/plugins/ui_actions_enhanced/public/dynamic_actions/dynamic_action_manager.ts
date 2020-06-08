@@ -69,6 +69,7 @@ export class DynamicActionManager {
     const { uiActions, isCompatible } = this.params;
 
     const actionId = this.generateActionId(eventId);
+
     const factory = uiActions.getActionFactory(event.action.factoryId);
     const actionDefinition: ActionDefinition = {
       ...factory.create(action as SerializedAction<object>),

@@ -103,9 +103,9 @@ describe('UiActionsService', () => {
       });
     });
 
-    test('return action instance', () => {
+    test('returns an action instance getter', () => {
       const service = new UiActionsService();
-      const action = service.registerAction({
+      const getAction = service.registerAction({
         id: 'test',
         execute: async () => {},
         getDisplayName: () => 'test',
@@ -113,6 +113,8 @@ describe('UiActionsService', () => {
         isCompatible: async () => true,
         type: 'test' as ActionType,
       });
+
+      const action = getAction();
 
       expect(action).toBeInstanceOf(ActionInternal);
       expect(action.id).toBe('test');
@@ -178,6 +180,7 @@ describe('UiActionsService', () => {
       const length = actions.size;
 
       service.registerAction(helloWorldAction);
+      service.ensureActionsExist();
 
       expect(actions.size - length).toBe(1);
       expect(actions.get(helloWorldAction.id)!.id).toBe(helloWorldAction.id);
@@ -390,6 +393,8 @@ describe('UiActionsService', () => {
         order: 13,
       } as any);
 
+      service.ensureActionsExist();
+
       expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
         id: ACTION_HELLO_WORLD,
         order: 13,
@@ -489,6 +494,28 @@ describe('UiActionsService', () => {
       expect(() => service.registerTrigger(trigger)).toThrowError(
         'Trigger [trigger.id = MY-TRIGGER] already registered.'
       );
+    });
+  });
+
+  describe('custom action creator', () => {
+    test('can provide custom action creator', () => {
+      const service = new UiActionsService();
+      class CustomActionInternal extends ActionInternal {
+        readonly custom = true;
+      }
+      service.setCustomActionCreator((def) => new CustomActionInternal(def));
+      const actionDef: Action = {
+        id: 'action1',
+        order: 1,
+        type: 'type1' as ActionType,
+        execute: async () => {},
+        getDisplayName: () => 'test',
+        getIconType: () => '',
+        isCompatible: async () => true,
+      };
+      service.registerAction(actionDef);
+      const action = service.getAction(actionDef.id);
+      expect('custom' in action).toBe(true);
     });
   });
 });

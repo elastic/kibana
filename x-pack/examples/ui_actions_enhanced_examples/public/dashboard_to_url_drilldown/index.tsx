@@ -39,6 +39,8 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
 
   public readonly order = 8;
 
+  readonly minimalLicense = 'gold'; // example of minimal license support
+
   public readonly getDisplayName = () => 'Go to URL (example)';
 
   public readonly euiIcon = 'link';

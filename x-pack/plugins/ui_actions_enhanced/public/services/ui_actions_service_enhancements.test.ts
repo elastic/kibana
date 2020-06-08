@@ -6,6 +6,9 @@
 
 import { UiActionsServiceEnhancements } from './ui_actions_service_enhancements';
 import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
+import { licenseMock } from '../../../licensing/common/licensing.mock';
+
+const getLicenseInfo = () => licenseMock.createLicense();
 
 describe('UiActionsService', () => {
   describe('action factories', () => {
@@ -25,7 +28,7 @@ describe('UiActionsService', () => {
     };
 
     test('.getActionFactories() returns empty array if no action factories registered', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       const factories = service.getActionFactories();
 
@@ -33,7 +36,7 @@ describe('UiActionsService', () => {
     });
 
     test('can register and retrieve an action factory', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       service.registerActionFactory(factoryDefinition1);
 
@@ -44,7 +47,7 @@ describe('UiActionsService', () => {
     });
 
     test('can retrieve all action factories', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       service.registerActionFactory(factoryDefinition1);
       service.registerActionFactory(factoryDefinition2);
@@ -58,7 +61,7 @@ describe('UiActionsService', () => {
     });
 
     test('throws when retrieving action factory that does not exist', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       service.registerActionFactory(factoryDefinition1);
 

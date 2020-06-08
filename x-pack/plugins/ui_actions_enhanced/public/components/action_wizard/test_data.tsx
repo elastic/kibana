@@ -10,6 +10,7 @@ import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/p
 import { ActionWizard } from './action_wizard';
 import { ActionFactoryDefinition, ActionFactory } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
+import { licenseMock } from '../../../../licensing/common/licensing.mock';
 
 type ActionBaseConfig = object;
 
@@ -104,7 +105,9 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   }),
 };
 
-export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory);
+export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, () =>
+  licenseMock.createLicense()
+);
 
 interface UrlDrilldownConfig {
   url: string;
@@ -159,7 +162,9 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   create: () => null as any,
 };
 
-export const urlFactory = new ActionFactory(urlDrilldownActionFactory);
+export const urlFactory = new ActionFactory(urlDrilldownActionFactory, () =>
+  licenseMock.createLicense()
+);
 
 export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{

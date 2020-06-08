@@ -23,9 +23,11 @@ import { Filter } from '../../data/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
 import { IEmbeddable } from '../../embeddable/public';
 import { RangeSelectTriggerContext, ValueClickTriggerContext } from '../../embeddable/public';
+import { ActionDefinition } from './actions';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
+export type ActionDefinitionRegistry = Map<string, ActionDefinition>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';

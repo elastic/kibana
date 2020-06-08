@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiKeyPadMenuItem,
 } from '@elastic/eui';
-import { txtChangeButton } from './i18n';
+import { doesNotMeetLicenseRequirements, txtChangeButton } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory } from '../../dynamic_actions';
 
@@ -61,7 +61,11 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   context,
 }) => {
   // auto pick action factory if there is only 1 available
-  if (!currentActionFactory && actionFactories.length === 1) {
+  if (
+    !currentActionFactory &&
+    actionFactories.length === 1 &&
+    actionFactories[0].isCompatibleLicence()
+  ) {
     onActionFactoryChange(actionFactories[0]);
   }
 
@@ -186,6 +190,18 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               label={actionFactory.getDisplayName(context)}
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
+              disabled={!actionFactory.isCompatibleLicence()}
+              betaBadgeIconType={!actionFactory.isCompatibleLicence() ? 'lock' : undefined}
+              betaBadgeLabel={
+                !actionFactory.isCompatibleLicence()
+                  ? doesNotMeetLicenseRequirements.header
+                  : undefined
+              }
+              betaBadgeTooltipContent={
+                !actionFactory.isCompatibleLicence()
+                  ? doesNotMeetLicenseRequirements.content
+                  : undefined
+              }
             >
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />

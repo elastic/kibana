@@ -29,9 +29,13 @@ export type UiActionsSetup = Pick<
   | 'registerAction'
   | 'registerTrigger'
   | 'unregisterAction'
+  | 'setCustomActionCreator'
 >;
 
-export type UiActionsStart = PublicMethodsOf<UiActionsService>;
+export type UiActionsStart = Omit<
+  PublicMethodsOf<UiActionsService>,
+  'ensureActionsExist' | 'setCustomActionCreator'
+>;
 
 export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   private readonly service = new UiActionsService();
@@ -46,6 +50,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   }
 
   public start(core: CoreStart): UiActionsStart {
+    this.service.ensureActionsExist();
     return this.service;
   }
 

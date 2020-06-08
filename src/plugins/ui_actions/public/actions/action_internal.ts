@@ -24,6 +24,13 @@ import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
 
+/**
+ * @remarks
+ * This is exported from a plugin only to be used in `x-pack/actions_enhanced`
+ * This is not part of public api and could be changed without notice
+ *
+ * @internal
+ */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}

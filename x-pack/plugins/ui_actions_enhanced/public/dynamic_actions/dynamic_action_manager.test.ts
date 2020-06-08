@@ -12,6 +12,7 @@ import { of } from '../../../../../src/plugins/kibana_utils';
 import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
+import { licenseMock } from '../../../licensing/common/licensing.mock';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -74,7 +75,9 @@ const setup = (events: readonly SerializedEvent[] = []) => {
   const uiActions = new UiActionsService({
     actions,
   });
-  const uiActionsEnhancements = new UiActionsServiceEnhancements();
+  const uiActionsEnhancements = new UiActionsServiceEnhancements({
+    getLicenseInfo: () => licenseMock.createLicense(),
+  });
   const manager = new DynamicActionManager({
     isCompatible,
     storage,
