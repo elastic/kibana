@@ -173,3 +173,18 @@ export const hasSelectedAlert: (state: Immutable<AlertListState>) => boolean = c
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
+
+let lastSelectedAlert: string | null = null;
+export const selectedAlertHasChanged: (state: Immutable<AlertListState>) => boolean = createSelector(
+  uiQueryParams,
+  function hasChanged({ selected_alert: selectedAlert }) {
+    if(typeof selectedAlert !== 'string'){
+      return false;
+    }
+    if(selectedAlert === lastSelectedAlert){
+      return false;
+    }
+    lastSelectedAlert = selectedAlert;
+    return true;
+  }
+);
