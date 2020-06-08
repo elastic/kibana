@@ -7,11 +7,19 @@
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function EndpointPageProvider({ getService }: FtrProviderContext) {
+export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
 
   return {
+    /**
+     * Navigates to the Endpoints list
+     */
+    async navigateToEndpointList() {
+      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
+    },
+
     /**
      * Finds the Table with the given `selector` (test subject) and returns
      * back an array containing the table's header column text
