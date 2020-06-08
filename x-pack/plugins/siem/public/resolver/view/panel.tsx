@@ -359,18 +359,18 @@ const PanelContent = memo(function PanelContent() {
    * This updates the breadcrumb nav, the table view and URL history
    */
   const pushToQueryParams = useCallback(
-    (newCrumbs: typeof queryParams) => {
+    (newCrumbs: crumbInfo) => {
       console.log('push to query params');
       console.log(newCrumbs);
       //Construct a new set of params from the current set (minus the params)
       //by assigning the new set of params provided in `newCrumbs`
-      const currentParams = querystring.parse(urlSearch.slice(1));
-      delete currentParams.crumbId;
-      delete currentParams.crumbEvent;
-      const crumbsToPass = newCrumbs.crumbEvent===''?{crumbId: newCrumbs.crumbId}:newCrumbs;
-      //const newSearch = {...currentParams, ...crumbsToPass};
-      const newSearch = {...currentParams};
-      const relativeURL = {search: querystring.stringify(newSearch)};
+      const crumbsToPass = {
+        ...querystring.parse(urlSearch.slice(1)),
+        ...newCrumbs
+      };
+      crumbsToPass.crumbId === '' && delete crumbsToPass.crumbId;
+      crumbsToPass.crumbEvent === '' && delete crumbsToPass.crumbEvent;
+      const relativeURL = {search: querystring.stringify(crumbsToPass)};
       
       return history.push(relativeURL);
     },
