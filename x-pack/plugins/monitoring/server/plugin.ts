@@ -48,7 +48,7 @@ import {
   LegacyRequest,
 } from './types';
 import {
- PluginStartContract as AlertingPluginStartContract,
+  PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerts/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
@@ -385,7 +385,8 @@ export class Plugin {
             const result = await options.handler(legacyRequest);
             return res.ok({ body: result });
           } catch (err) {
-            const statusCode: number = err.output?.statusCode || err.statusCode || err.status || 500;
+            const statusCode: number =
+              err.output?.statusCode || err.statusCode || err.status || 500;
             if (Boom.isBoom(err) || statusCode !== 500) {
               return res.customError({ statusCode, body: err });
             }
