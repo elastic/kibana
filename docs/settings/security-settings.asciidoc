@@ -55,6 +55,9 @@ You can configure the following settings in the `kibana.yml` file.
   this to `true` if SSL is configured outside of {kib} (for example, you are
   routing requests through a load balancer or proxy).
 
+| `xpack.security.sameSiteCookies`
+  | Sets the `SameSite` attribute of `Set-Cookie` HTTP header. It allows you to declare whether your cookie should be restricted to a first-party or same-site context. *Not set* by default. Which makes modern browsers treat it as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Note, that `None` usage requires Secure context `xpack.security.secureCookies: true`. Some old versions of IE11 do not support `SameSite: None`, so you shouldn't specify `xpack.security.sameSiteCookies` at all.
+
 | `xpack.security.session.idleTimeout`
   | Sets the session duration. By default, sessions stay active until the
   browser is closed. When this is set to an explicit idle timeout, closing the
