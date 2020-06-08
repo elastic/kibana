@@ -22,7 +22,7 @@ export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
 export const CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE =
   'Create template timeline without a template timeline ID is not allowed';
 export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
-export const UPDATE_STATUS_ERROR_MESSAGE = 'Update timeline status is is not allowed';
+export const UPDATE_STATUS_ERROR_MESSAGE = 'Update an immutiable timeline is is not allowed';
 
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,

@@ -68,6 +68,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     pinEvent,
     pinnedEventIds,
     removeColumn,
+    status,
     selectedEventIds,
     setSelected,
     clearSelected,
@@ -189,6 +190,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
+        status={status}
         sort={sort}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
@@ -233,6 +235,7 @@ const makeMapStateToProps = () => {
       loadingEventIds,
       pinnedEventIds,
       selectedEventIds,
+      status,
       showCheckboxes,
       showRowRenderers,
     } = timeline;
@@ -247,6 +250,7 @@ const makeMapStateToProps = () => {
       id,
       pinnedEventIds,
       selectedEventIds,
+      status,
       showCheckboxes,
       showRowRenderers,
     };

@@ -11,6 +11,9 @@ import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../../graphql/types';
+
+import { TimelineStatus } from '../../../../common/types/timeline';
+
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -22,9 +25,9 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+
 import {
   defaultColumnHeaderType,
   defaultHeaders,
@@ -165,10 +168,11 @@ export const defaultTimelineToTimelineModel = (
         )
       : {},
     id: duplicate ? '' : timeline.savedObjectId,
+    status: TimelineStatus.active,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
-    templateTimelineId: duplicate ? null : timeline.templateTimelineId,
+    templateTimelineId: duplicate ? uuid.v4() : timeline.templateTimelineId,
     templateTimelineVersion: duplicate ? null : timeline.templateTimelineVersion,
   }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
     ...timelineDefaults,

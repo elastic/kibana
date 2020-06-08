@@ -10,6 +10,7 @@ import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
 import {
   TimelineTypeLiteral,
+  TimelineTypeLiteralWithNull,
   TimelineStatus,
   TemplateTimelineTypeLiteral,
 } from '../../../../common/types/timeline';
@@ -167,6 +168,8 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
+  /** this affects timeline's behaviour like editable / duplicatible */
+  timelineType: TimelineTypeLiteralWithNull;
   /** when timelineType === template, templatetimelineFilter is a JSX.Element */
   templateTimelineFilter: JSX.Element[] | null;
   /** timeline / template timeline */

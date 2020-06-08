@@ -7,6 +7,9 @@
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
+
+import { TimelineStatus } from '../../../../common/types/timeline';
+
 import * as i18n from './translations';
 import { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
@@ -62,7 +65,9 @@ export const useEditTimelineBatchActions = ({
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
-      const isDisabled = isEmpty(selectedItems);
+      const isDisabled =
+        isEmpty(selectedItems) ||
+        selectedItems?.some((item) => item.status === TimelineStatus.immutiable);
       return (
         <>
           <EditTimelineActions

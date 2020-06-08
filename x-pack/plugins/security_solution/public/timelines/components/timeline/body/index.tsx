@@ -88,6 +88,7 @@ export const Body = React.memo<BodyProps>(
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
+    status,
     selectedEventIds,
     showCheckboxes,
     sort,

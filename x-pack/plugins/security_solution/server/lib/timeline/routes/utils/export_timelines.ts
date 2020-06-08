@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
+
 import {
   SavedObjectsClient,
   SavedObjectsFindOptions,
@@ -180,12 +182,11 @@ const getTimelinesFromObjects = async (
     if (myTimeline != null) {
       const timelineNotes = myNotes.filter((n) => n.timelineId === timelineId);
       const timelinePinnedEventIds = myPinnedEventIds.filter((p) => p.timelineId === timelineId);
+      const exportedTimeline = omit('status', myTimeline);
       return [
         ...acc,
         {
-          ...myTimeline,
-          status:
-            myTimeline.status === TimelineStatus.draft ? TimelineStatus.active : myTimeline.status,
+          ...exportedTimeline,
           ...getGlobalEventNotesByTimelineId(timelineNotes),
           pinnedEventIds: getPinnedEventsIdsByTimelineId(timelinePinnedEventIds),
         },
