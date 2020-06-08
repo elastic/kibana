@@ -1,6 +1,6 @@
 [role="xpack"]
 [[ml-settings-kb]]
-=== Machine learning settings in Kibana
+=== Machine learning settings in {kib}
 ++++
 <titleabbrev>Machine learning settings</titleabbrev>
 ++++
