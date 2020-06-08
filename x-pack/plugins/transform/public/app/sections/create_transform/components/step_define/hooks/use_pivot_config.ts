@@ -211,9 +211,11 @@ export const usePivotConfig = (
         throw new Error('No parent aggregation reference found');
       }
 
+      const { [prevSubItemName]: deleted, ...newSubAgg } = parent.subAggs;
+
       const aggNameConflictMessages = getAggNameConflictToastMessages(
         subItem.aggName,
-        parent.subAggs,
+        newSubAgg,
         {}
       );
       if (aggNameConflictMessages.length > 0) {
@@ -221,7 +223,6 @@ export const usePivotConfig = (
         return;
       }
 
-      const { [prevSubItemName]: deleted, ...newSubAgg } = parent.subAggs;
       parent.subAggs = {
         ...newSubAgg,
         [subItem.aggName]: subItem,
