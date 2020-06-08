@@ -113,7 +113,7 @@ export const Home = () => {
               <EuiFlexItem>
                 <EuiFlexGrid columns={2}>
                   {appsSection.map((app) => (
-                    <EuiFlexItem>
+                    <EuiFlexItem key={app.id}>
                       <EuiCardWithoutPadding
                         display="plain"
                         layout="horizontal"
