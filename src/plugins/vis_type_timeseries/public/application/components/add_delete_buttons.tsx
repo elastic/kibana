@@ -17,13 +17,29 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import { EuiToolTip, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { MouseEvent } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
 
-export function AddDeleteButtons(props) {
+interface AddDeleteButtonsProps {
+  addTooltip: string;
+  deleteTooltip: string;
+  cloneTooltip: string;
+  activatePanelTooltip: string;
+  deactivatePanelTooltip: string;
+  isPanelActive?: boolean;
+  disableAdd?: boolean;
+  disableDelete: boolean;
+  responsive?: boolean;
+  testSubj: string;
+  togglePanelActivation?: () => void;
+  onClone?: () => void;
+  onAdd: () => void;
+  onDelete: (event: MouseEvent) => void;
+}
+
+export function AddDeleteButtons(props: AddDeleteButtonsProps) {
   const { testSubj } = props;
   const createDelete = () => {
     if (props.disableDelete) {
@@ -146,20 +162,4 @@ AddDeleteButtons.defaultProps = {
       defaultMessage: 'Temporarily Disable',
     }
   ),
-};
-
-AddDeleteButtons.propTypes = {
-  addTooltip: PropTypes.string,
-  deleteTooltip: PropTypes.string,
-  cloneTooltip: PropTypes.string,
-  activatePanelTooltip: PropTypes.string,
-  deactivatePanelTooltip: PropTypes.string,
-  togglePanelActivation: PropTypes.func,
-  isPanelActive: PropTypes.bool,
-  disableAdd: PropTypes.bool,
-  disableDelete: PropTypes.bool,
-  onClone: PropTypes.func,
-  onAdd: PropTypes.func,
-  onDelete: PropTypes.func,
-  responsive: PropTypes.bool,
 };

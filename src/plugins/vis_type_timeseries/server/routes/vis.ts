@@ -20,7 +20,7 @@
 import { IRouter, KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
-import { visPayloadSchema } from './post_vis_schema';
+import { visPayloadSchema } from '../../common/post_vis_schema';
 import { Framework, ValidationTelemetryServiceSetup } from '../index';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });

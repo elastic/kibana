@@ -17,15 +17,26 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
 import { last } from 'lodash';
-import { AddDeleteButtons } from '../add_delete_buttons';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SeriesDragHandler } from '../series_drag_handler';
 import { i18n } from '@kbn/i18n';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { SeriesDragHandler } from '../series_drag_handler';
+import { MetricsItemsSchema } from '../../../../common/types';
+import { DragHandleProps } from '../../../types';
 
-export function AggRow(props) {
+interface AggRowProps {
+  disableDelete: boolean;
+  model: MetricsItemsSchema;
+  siblings: MetricsItemsSchema[];
+  dragHandleProps: DragHandleProps;
+  children: React.ReactNode;
+  onAdd: () => void;
+  onDelete: () => void;
+}
+
+export function AggRow(props: AggRowProps) {
   let iconType = 'eyeClosed';
   let iconColor = 'subdued';
   const lastSibling = last(props.siblings);
@@ -71,12 +82,3 @@ export function AggRow(props) {
     </div>
   );
 }
-
-AggRow.propTypes = {
-  disableDelete: PropTypes.bool,
-  model: PropTypes.object,
-  onAdd: PropTypes.func,
-  onDelete: PropTypes.func,
-  siblings: PropTypes.array,
-  dragHandleProps: PropTypes.object,
-};

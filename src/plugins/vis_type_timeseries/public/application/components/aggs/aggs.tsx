@@ -18,18 +18,27 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 
 import { EuiDraggable, EuiDroppable } from '@elastic/eui';
 
 import { Agg } from './agg';
-import { newMetricAggFn } from '../lib/new_metric_agg_fn';
+// @ts-ignore
 import { seriesChangeHandler } from '../lib/series_change_handler';
+// @ts-ignore
 import { handleAdd, handleDelete } from '../lib/collection_actions';
+import { newMetricAggFn } from '../lib/new_metric_agg_fn';
+import { PanelSchema, SeriesItemsSchema, FieldDescriptor } from '../../../../common/types';
 
 const DROPPABLE_ID = 'aggs_dnd';
 
-export class Aggs extends PureComponent {
+export interface AggsProps {
+  panel: PanelSchema;
+  model: SeriesItemsSchema;
+  fields: FieldDescriptor[];
+  uiRestrictions: { '*': boolean };
+}
+
+export class Aggs extends PureComponent<AggsProps> {
   render() {
     const { panel, model, fields, uiRestrictions } = this.props;
     const list = model.metrics;
@@ -68,12 +77,3 @@ export class Aggs extends PureComponent {
     );
   }
 }
-
-Aggs.propTypes = {
-  name: PropTypes.string.isRequired,
-  fields: PropTypes.object.isRequired,
-  model: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
-  panel: PropTypes.object.isRequired,
-  dragHandleProps: PropTypes.object,
-};

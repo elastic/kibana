@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
+// @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+import { MetricsItemsSchema } from '../../../../common/types';
 
-const metricAggs = [
+type AggSelectOption = EuiComboBoxOptionOption;
+
+const metricAggs: AggSelectOption[] = [
   {
     label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.averageLabel', {
       defaultMessage: 'Average',
@@ -123,7 +125,7 @@ const metricAggs = [
   },
 ];
 
-const pipelineAggs = [
+const pipelineAggs: AggSelectOption[] = [
   {
     label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.bucketScriptLabel', {
       defaultMessage: 'Bucket Script',
@@ -162,7 +164,7 @@ const pipelineAggs = [
   },
 ];
 
-const siblingAggs = [
+const siblingAggs: AggSelectOption[] = [
   {
     label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallAverageLabel', {
       defaultMessage: 'Overall Average',
@@ -207,7 +209,7 @@ const siblingAggs = [
   },
 ];
 
-const specialAggs = [
+const specialAggs: AggSelectOption[] = [
   {
     label: i18n.translate('visTypeTimeseries.aggSelect.specialAggs.seriesAggLabel', {
       defaultMessage: 'Series Agg',
@@ -224,29 +226,40 @@ const specialAggs = [
 
 const allAggOptions = [...metricAggs, ...pipelineAggs, ...siblingAggs, ...specialAggs];
 
-function filterByPanelType(panelType) {
-  return (agg) => {
+function filterByPanelType(panelType: string) {
+  return (agg: AggSelectOption) => {
     if (panelType === 'table') return agg.value !== 'series_agg';
     return true;
   };
 }
 
-function AggSelectUi(props) {
+interface AggSelectUiProps {
+  id: string;
+  panelType: string;
+  siblings: MetricsItemsSchema[];
+  value: string;
+  uiRestrictions?: { '*': boolean };
+  onChange: (currentlySelectedOptions: AggSelectOption[]) => void;
+}
+
+export function AggSelect(props: AggSelectUiProps) {
   const { siblings, panelType, value, onChange, uiRestrictions, ...rest } = props;
 
   const selectedOptions = allAggOptions.filter((option) => {
     return value === option.value && isMetricEnabled(option.value, uiRestrictions);
   });
 
-  let enablePipelines = siblings.some((s) => !!metricAggs.find((m) => m.value === s.type));
+  let enablePipelines = siblings.some(
+    (s: { id: string; type: string }) => !!metricAggs.find((m) => m.value === s.type)
+  );
 
   if (siblings.length <= 1) enablePipelines = false;
 
-  let options;
+  let options: EuiComboBoxOptionOption[];
   if (panelType === 'metrics') {
     options = metricAggs;
   } else {
-    const disableSiblingAggs = (agg) => ({
+    const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,
       disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions),
     });
@@ -282,9 +295,9 @@ function AggSelectUi(props) {
     ];
   }
 
-  const handleChange = (selectedOptions) => {
-    if (!selectedOptions || selectedOptions.length <= 0) return;
-    onChange(selectedOptions);
+  const handleChange = (currentlySelectedOptions: AggSelectOption[]) => {
+    if (!currentlySelectedOptions || currentlySelectedOptions.length <= 0) return;
+    onChange(currentlySelectedOptions);
   };
 
   return (
@@ -303,13 +316,3 @@ function AggSelectUi(props) {
     </div>
   );
 }
-
-AggSelectUi.propTypes = {
-  onChange: PropTypes.func,
-  panelType: PropTypes.string,
-  siblings: PropTypes.array,
-  value: PropTypes.string,
-  uiRestrictions: PropTypes.object,
-};
-
-export const AggSelect = injectI18n(AggSelectUi);

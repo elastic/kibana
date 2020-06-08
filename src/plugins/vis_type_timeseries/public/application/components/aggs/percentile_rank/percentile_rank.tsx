@@ -17,16 +17,8 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
 import { assign } from 'lodash';
-import { AggSelect } from '../agg_select';
-import { FieldSelect } from '../field_select';
-import { AggRow } from '../agg_row';
-import { createChangeHandler } from '../../lib/create_change_handler';
-import { createSelectHandler } from '../../lib/create_select_handler';
-import { PercentileRankValues } from './percentile_rank_values';
-
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -36,11 +28,41 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AggSelect } from '../agg_select';
+// @ts-ignore
+import { FieldSelect } from '../field_select';
+// @ts-ignore
+import { createChangeHandler } from '../../lib/create_change_handler';
+// @ts-ignore
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { AggRow } from '../agg_row';
+import { PercentileRankValues } from './percentile_rank_values';
+
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import {
+  MetricsItemsSchema,
+  PanelSchema,
+  SeriesItemsSchema,
+  FieldDescriptor,
+} from '../../../../../common/types';
+import { DragHandleProps } from '../../../../types';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
-export const PercentileRankAgg = (props) => {
+interface PercentileRankAggProps {
+  disableDelete: boolean;
+  fields: FieldDescriptor[];
+  model: MetricsItemsSchema;
+  panel: PanelSchema;
+  series: SeriesItemsSchema;
+  siblings: MetricsItemsSchema[];
+  dragHandleProps: DragHandleProps;
+  onAdd(): void;
+  onChange(): void;
+  onDelete(): void;
+}
+
+export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const { series, panel, fields } = props;
   const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
@@ -52,7 +74,7 @@ export const PercentileRankAgg = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
-  const handlePercentileRankValuesChange = (values) => {
+  const handlePercentileRankValuesChange = (values: Array<string | null> | null | undefined) => {
     handleChange(
       assign({}, model, {
         values,
@@ -108,25 +130,15 @@ export const PercentileRankAgg = (props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <PercentileRankValues
-        disableAdd={isTablePanel}
-        disableDelete={isTablePanel}
-        showOnlyLastRow={isTablePanel}
-        model={model.values}
-        onChange={handlePercentileRankValuesChange}
-      />
+      {model.values && (
+        <PercentileRankValues
+          disableAdd={isTablePanel}
+          disableDelete={isTablePanel}
+          showOnlyLastRow={isTablePanel}
+          model={model.values}
+          onChange={handlePercentileRankValuesChange}
+        />
+      )}
     </AggRow>
   );
-};
-
-PercentileRankAgg.propTypes = {
-  disableDelete: PropTypes.bool,
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onAdd: PropTypes.func,
-  onChange: PropTypes.func,
-  onDelete: PropTypes.func,
-  panel: PropTypes.object,
-  series: PropTypes.object,
-  siblings: PropTypes.array,
 };

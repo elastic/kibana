@@ -76,7 +76,7 @@ const gaugeColorRulesItems = schema.object({
   operator: stringOptionalNullable,
   value: schema.maybe(schema.nullable(schema.number())),
 });
-const metricsItems = schema.object({
+export const metricsItems = schema.object({
   field: stringOptionalNullable,
   id: stringRequired,
   metric_agg: stringOptionalNullable,
@@ -133,7 +133,7 @@ const splitFiltersItems = schema.object({
   label: stringOptionalNullable,
 });
 
-const seriesItems = schema.object({
+export const seriesItems = schema.object({
   aggregate_by: stringOptionalNullable,
   aggregate_function: stringOptionalNullable,
   axis_position: stringRequired,
@@ -195,63 +195,63 @@ const seriesItems = schema.object({
   var_name: stringOptionalNullable,
 });
 
+export const panel = schema.object({
+  annotations: schema.maybe(schema.arrayOf(annotationsItems)),
+  axis_formatter: stringRequired,
+  axis_position: stringRequired,
+  axis_scale: stringRequired,
+  axis_min: stringOrNumberOptionalNullable,
+  axis_max: stringOrNumberOptionalNullable,
+  bar_color_rules: schema.maybe(arrayNullable),
+  background_color: stringOptionalNullable,
+  background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
+  default_index_pattern: stringOptionalNullable,
+  default_timefield: stringOptionalNullable,
+  drilldown_url: stringOptionalNullable,
+  drop_last_bucket: numberIntegerOptional,
+  filter: schema.nullable(
+    schema.oneOf([
+      stringOptionalNullable,
+      schema.object({
+        language: stringOptionalNullable,
+        query: stringOptionalNullable,
+      }),
+    ])
+  ),
+  gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
+  gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),
+  gauge_inner_color: stringOptionalNullable,
+  gauge_inner_width: stringOrNumberOptionalNullable,
+  gauge_style: stringOptionalNullable,
+  gauge_max: stringOrNumberOptionalNullable,
+  id: stringRequired,
+  ignore_global_filters: numberOptional,
+  ignore_global_filter: numberOptional,
+  index_pattern: stringRequired,
+  interval: stringRequired,
+  isModelInvalid: schema.maybe(schema.boolean()),
+  legend_position: stringOptionalNullable,
+  markdown: stringOptionalNullable,
+  markdown_scrollbars: numberIntegerOptional,
+  markdown_openLinksInNewTab: numberIntegerOptional,
+  markdown_vertical_align: stringOptionalNullable,
+  markdown_less: stringOptionalNullable,
+  markdown_css: stringOptionalNullable,
+  pivot_id: stringOptionalNullable,
+  pivot_label: stringOptionalNullable,
+  pivot_type: stringOptionalNullable,
+  pivot_rows: stringOptionalNullable,
+  series: schema.arrayOf(seriesItems),
+  show_grid: numberIntegerRequired,
+  show_legend: numberIntegerRequired,
+  time_field: stringOptionalNullable,
+  time_range_mode: stringOptionalNullable,
+  type: stringRequired,
+});
+
 export const visPayloadSchema = schema.object({
   filters: arrayNullable,
-  panels: schema.arrayOf(
-    schema.object({
-      annotations: schema.maybe(schema.arrayOf(annotationsItems)),
-      axis_formatter: stringRequired,
-      axis_position: stringRequired,
-      axis_scale: stringRequired,
-      axis_min: stringOrNumberOptionalNullable,
-      axis_max: stringOrNumberOptionalNullable,
-      bar_color_rules: schema.maybe(arrayNullable),
-      background_color: stringOptionalNullable,
-      background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
-      default_index_pattern: stringOptionalNullable,
-      default_timefield: stringOptionalNullable,
-      drilldown_url: stringOptionalNullable,
-      drop_last_bucket: numberIntegerOptional,
-      filter: schema.nullable(
-        schema.oneOf([
-          stringOptionalNullable,
-          schema.object({
-            language: stringOptionalNullable,
-            query: stringOptionalNullable,
-          }),
-        ])
-      ),
-      gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
-      gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),
-      gauge_inner_color: stringOptionalNullable,
-      gauge_inner_width: stringOrNumberOptionalNullable,
-      gauge_style: stringOptionalNullable,
-      gauge_max: stringOrNumberOptionalNullable,
-      id: stringRequired,
-      ignore_global_filters: numberOptional,
-      ignore_global_filter: numberOptional,
-      index_pattern: stringRequired,
-      interval: stringRequired,
-      isModelInvalid: schema.maybe(schema.boolean()),
-      legend_position: stringOptionalNullable,
-      markdown: stringOptionalNullable,
-      markdown_scrollbars: numberIntegerOptional,
-      markdown_openLinksInNewTab: numberIntegerOptional,
-      markdown_vertical_align: stringOptionalNullable,
-      markdown_less: stringOptionalNullable,
-      markdown_css: stringOptionalNullable,
-      pivot_id: stringOptionalNullable,
-      pivot_label: stringOptionalNullable,
-      pivot_type: stringOptionalNullable,
-      pivot_rows: stringOptionalNullable,
-      series: schema.arrayOf(seriesItems),
-      show_grid: numberIntegerRequired,
-      show_legend: numberIntegerRequired,
-      time_field: stringOptionalNullable,
-      time_range_mode: stringOptionalNullable,
-      type: stringRequired,
-    })
-  ),
+  panels: schema.arrayOf(panel),
   // general
   query: schema.nullable(schema.arrayOf(queryObject)),
   state: schema.object({

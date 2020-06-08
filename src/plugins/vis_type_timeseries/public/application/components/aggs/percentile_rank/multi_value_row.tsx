@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import PropTypes from 'prop-types';
 import React from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,10 +30,29 @@ import {
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
 
-export const MultiValueRow = ({ model, onChange, onDelete, onAdd, disableAdd, disableDelete }) => {
+interface MultiValueRowProps {
+  model: {
+    id: number;
+    value: string;
+  };
+  disableAdd: boolean;
+  disableDelete: boolean;
+  onChange: ({ value, id }: { id: number; value: string }) => void;
+  onDelete: (model: { id: number; value: string }) => void;
+  onAdd: () => void;
+}
+
+export const MultiValueRow = ({
+  model,
+  onChange,
+  onDelete,
+  onAdd,
+  disableAdd,
+  disableDelete,
+}: MultiValueRowProps) => {
   const htmlId = htmlIdGenerator();
 
-  const onFieldNumberChange = (event) =>
+  const onFieldNumberChange = (event: any) =>
     onChange({
       ...model,
       value: get(event, 'target.value'),
@@ -54,7 +72,7 @@ export const MultiValueRow = ({ model, onChange, onDelete, onAdd, disableAdd, di
         <EuiFlexItem grow={false}>
           <EuiFieldNumber
             value={model.value === '' ? '' : Number(model.value)}
-            placeholder={0}
+            placeholder={'0'}
             onChange={onFieldNumberChange}
           />
         </EuiFlexItem>
@@ -77,13 +95,4 @@ MultiValueRow.defaultProps = {
     id: null,
     value: '',
   },
-};
-
-MultiValueRow.propTypes = {
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-  onDelete: PropTypes.func,
-  onAdd: PropTypes.func,
-  defaultAddValue: PropTypes.string,
-  disableDelete: PropTypes.bool,
 };

@@ -17,30 +17,13 @@
  * under the License.
  */
 
-import { AggRow } from './agg_row';
 import React from 'react';
-import { EuiCode, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiDraggable } from '@elastic/eui';
 
-export function UnsupportedAgg(props) {
-  return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-      dragHandleProps={props.dragHandleProps}
-    >
-      <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
-        <span>
-          <FormattedMessage
-            id="visTypeTimeseries.unsupportedAgg.aggIsNotSupportedDescription"
-            defaultMessage="The {modelType} aggregation is no longer supported."
-            values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
-          />
-        </span>
-      </EuiTitle>
-    </AggRow>
-  );
-}
+type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
+type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
+  ? FirstArgument
+  : never;
+export type DragHandleProps = FirstArgumentOf<
+  Exclude<PropsOf<typeof EuiDraggable>['children'], React.ReactElement>
+>['dragHandleProps'];

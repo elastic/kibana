@@ -17,11 +17,24 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { TypeOf } from '@kbn/config-schema';
+import { metricsItems, panel, seriesItems } from './post_vis_schema';
 
-export const newMetricAggFn = () => {
-  return {
-    id: uuid.v1(),
-    type: 'count',
-  };
-};
+interface FieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+
+export interface FieldDescriptor {
+  aggregatable: boolean;
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
+  esTypes: string[];
+  subType?: FieldSubType;
+}
+
+export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
+export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
+export type PanelSchema = TypeOf<typeof panel>;
