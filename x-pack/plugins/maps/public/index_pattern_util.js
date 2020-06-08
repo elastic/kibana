@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getIndexPatternService } from './kibana_services';
+import { getIndexPatternService, getIsGoldPlus } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
@@ -30,19 +30,24 @@ export function getTermsFields(fields) {
   });
 }
 
-export const AGGREGATABLE_GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
+export function getAggregatableGeoFieldTypes() {
+  const aggregatableFieldTypes = [ES_GEO_FIELD_TYPE.GEO_POINT];
+  if (getIsGoldPlus()) {
+    aggregatableFieldTypes.push(ES_GEO_FIELD_TYPE.GEO_SHAPE);
+  }
+  return aggregatableFieldTypes;
+}
 
 export function getFieldsWithGeoTileAgg(fields) {
   return fields.filter(supportsGeoTileAgg);
 }
 
 export function supportsGeoTileAgg(field) {
-  // TODO add geo_shape support with license check
   return (
     field &&
     field.aggregatable &&
     !indexPatterns.isNestedField(field) &&
-    field.type === ES_GEO_FIELD_TYPE.GEO_POINT
+    getAggregatableGeoFieldTypes().includes(field.type)
   );
 }
 
