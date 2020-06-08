@@ -70,8 +70,9 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
         .digest('hex');
 
       for (const schemaVersion of ArtifactConstants.SUPPORTED_SCHEMA_VERSIONS) {
+        const artifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}`;
         const exceptionSO = {
-          name: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}`,
+          name: artifactName,
           schemaVersion,
           sha256: sha256Hash,
           encoding: 'xz',
@@ -80,24 +81,33 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           size: Buffer.from(JSON.stringify(exceptions)).byteLength,
         };
 
-        /*
-        const resp = await soClient.find({
-          type: ArtifactConstants.SAVED_OBJECT_TYPE,
-          search: sha256Hash,
-          searchFields: ['sha256'],
-          fields: [],
-        });
-        */
-
-        // TODO clean this up and handle errors better
-        // if (resp.total === 0) {
         try {
+          // Create the new artifact
           const soResponse = await soClient.create(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,
             { id: sha256Hash }
           );
           context.logger.debug(JSON.stringify(soResponse));
+
+          // Clean up old artifacts
+          const otherArtifacts = await soClient.find({
+            type: ArtifactConstants.SAVED_OBJECT_TYPE,
+            search: artifactName,
+            searchFields: ['name'],
+            sortField: 'created',
+            sortOrder: 'desc',
+          });
+
+          // Remove all but the latest artifact
+          const toDelete = otherArtifacts.saved_objects.slice(
+            1,
+            otherArtifacts.saved_objects.length
+          );
+          for (const delObj of toDelete) {
+            context.logger.debug(`REMOVING ${delObj.id}`);
+            await soClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, delObj.id);
+          }
         } catch (error) {
           if (error.statusCode === 409) {
             context.logger.debug('No update to Endpoint Exceptions, skipping.');
@@ -105,12 +115,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             context.logger.error(error);
           }
         }
-
-        /*
-        } else {
-          context.logger.debug('No update to Endpoint Exceptions, skipping.');
-        }
-        */
       }
     }
   };
