@@ -19,6 +19,7 @@ import { Position } from '@elastic/charts/dist/utils/commons';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { ChartWrapper } from '../ChartWrapper';
 
 function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
   return Object.entries(values).map((value, index) => ({
@@ -30,23 +31,23 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
 export const PageLoadDistribution = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
 
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi({
-      pathname: '/api/apm/rum-client/page-load-distribution',
-      params: {
-        // path: {
-        //   serviceName,
-        // },
-        query: {
-          // start,
-          // end,
-          // uiFilters: JSON.stringify(uiFilters),
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        pathname: '/api/apm/rum-client/page-load-distribution',
+        params: {
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+          },
         },
-      },
-    });
-  }, []);
+      });
+    },
+    [end, start, uiFilters]
+  );
   const dataValues = generateAnnotationData(data?.percentiles ?? []);
   const style = {
     line: {
@@ -65,30 +66,30 @@ export const PageLoadDistribution = () => {
   return (
     <div style={{ height: '400px' }}>
       <EuiSpacer size="l" />
-      <Chart className="story-chart">
-        <LineAnnotation
-          id="annotation_1"
-          domainType={AnnotationDomainTypes.XDomain}
-          dataValues={dataValues}
-          style={style}
-          marker={<span>%</span>}
-        />
-        <Axis id="bottom" title="index" position={Position.Bottom} />
-        <Axis
-          id="left"
-          title={'test'}
-          position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2) + '%'}
-        />
-        <AreaSeries
-          id="areas"
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={'y'}
-          data={data?.pageLoadDistribution ?? []}
-        />
-      </Chart>
+      <ChartWrapper loading={status !== 'success'}>
+        <Chart className="story-chart">
+          <LineAnnotation
+            id="annotation_1"
+            domainType={AnnotationDomainTypes.XDomain}
+            dataValues={dataValues}
+            style={style}
+            marker={<span>%</span>}
+          />
+          <Axis id="bottom" title="Page load time" position={Position.Bottom} />
+          <Axis
+            id="left"
+            title={'test'}
+            position={Position.Left}
+            tickFormat={(d) => Number(d).toFixed(2) + '%'}
+          />
+          <AreaSeries
+            id="areas"
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            data={data?.pageLoadDistribution ?? []}
+          />
+        </Chart>
+      </ChartWrapper>
     </div>
   );
 };

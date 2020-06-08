@@ -12,29 +12,26 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 export const ClientMetrics = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
 
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi({
-      pathname: '/api/apm/rum-client/metrics',
-      params: {
-        // path: {
-        //   serviceName,
-        // },
-        query: {
-          // start,
-          // end,
-          // uiFilters: JSON.stringify(uiFilters),
+  const { data } = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        pathname: '/api/apm/rum/client-metrics',
+        params: {
+          query: { start, end, uiFilters: JSON.stringify(uiFilters) },
         },
-      },
-    });
-  }, []);
+      });
+    },
+    [start, end, uiFilters]
+  );
+
   return (
     <>
       <EuiSpacer size="l" />
       <EuiStat
         titleSize="m"
-        title={(data?.backEnd?.avg.toFixed(2) ?? '--') + ' seconds'}
+        title={(data?.backEnd?.value.toFixed(2) ?? '--') + ' seconds'}
         description="Backend"
       />
       <EuiSpacer size="l" />
@@ -46,7 +43,7 @@ export const ClientMetrics = () => {
       <EuiSpacer size="l" />
       <EuiStat
         titleSize="m"
-        title={(data?.frontEnd?.avg.toFixed(2) ?? '--') + ' seconds'}
+        title={(data?.frontEnd?.value.toFixed(2) ?? '--') + ' seconds'}
         description="Frontend"
       />
     </>

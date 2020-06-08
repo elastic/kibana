@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getServicesProjection } from '../../../common/projections/services';
+import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { IEnvOptions } from '../service_map/get_service_map';
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters,
+} from '../helpers/setup_request';
 
-export async function getClientMetrics(options: IEnvOptions) {
-  const { setup } = options;
-
-  const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+export async function getClientMetrics({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const projection = getRumOverviewProjection({
+    setup,
   });
 
   const { filter } = projection.body.query.bool;
@@ -38,13 +39,13 @@ export async function getClientMetrics(options: IEnvOptions) {
       aggs: {
         pageViews: { value_count: { field: 'transaction.type' } },
         backEnd: {
-          stats: {
+          avg: {
             field: 'transaction.marks.agent.timeToFirstByte',
             missing: 0,
           },
         },
         frontEnd: {
-          stats: {
+          avg: {
             script: {
               lang: 'painless',
               source: `

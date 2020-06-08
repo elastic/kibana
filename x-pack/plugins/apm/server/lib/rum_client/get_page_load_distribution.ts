@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { IEnvOptions } from '../service_map/get_service_map';
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters,
+} from '../helpers/setup_request';
 
-export async function getPageLoadDistribution(options: IEnvOptions) {
-  const { setup } = options;
-
-  const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+export async function getPageLoadDistribution({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const projection = getRumOverviewProjection({
+    setup,
   });
 
   const { filter } = projection.body.query.bool;
@@ -37,8 +39,9 @@ export async function getPageLoadDistribution(options: IEnvOptions) {
       },
       aggs: {
         durationMinMax: {
-          stats: {
+          min: {
             field: 'transaction.duration.us',
+            missing: 0,
           },
         },
         durationPercentiles: {
@@ -62,7 +65,7 @@ export async function getPageLoadDistribution(options: IEnvOptions) {
 
   const response = await client.search(params);
 
-  const minDuration = response.aggregations.durationMinMax.min / 1000;
+  const minDuration = response.aggregations.durationMinMax.value! / 1000;
   const durationPercentiles = response.aggregations.durationPercentiles.values;
   const maxPercentile = durationPercentiles['96.0'];
   const pageDist = await getPercentilesDistribution(
@@ -70,11 +73,14 @@ export async function getPageLoadDistribution(options: IEnvOptions) {
     minDuration,
     maxPercentile
   );
-  return { pageLoadDistribution: pageDist, percentiles: durationPercentiles };
+  return {
+    pageLoadDistribution: pageDist,
+    percentiles: durationPercentiles,
+  };
 }
 
 const getPercentilesDistribution = async (
-  options: IEnvOptions,
+  setup: Setup & SetupTimeRange & SetupUIFilters,
   minPercentiles: number,
   maxPercentile: number
 ) => {
@@ -84,10 +90,8 @@ const getPercentilesDistribution = async (
     stepValues.push((stepValue * i + minPercentiles).toFixed(2));
   }
 
-  const { setup } = options;
-
-  const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+  const projection = getRumOverviewProjection({
+    setup,
   });
 
   const { filter } = projection.body.query.bool;
