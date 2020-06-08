@@ -25,6 +25,7 @@ describe('alert monitor status component', () => {
       hasFilters: false,
       isOldAlert: true,
       locations: [],
+      shouldUpdateUrl: false,
       snapshotCount: 0,
       snapshotLoading: false,
       numTimes: 14,
@@ -52,6 +53,7 @@ describe('alert monitor status component', () => {
             }
             data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
             defaultKuery="monitor.id: foo"
+            shouldUpdateUrl={false}
             updateDefaultKuery={[Function]}
           />
           <EuiSpacer
@@ -85,6 +87,7 @@ describe('alert monitor status component', () => {
             newFilters={Array []}
             onRemoveFilter={[Function]}
             setAlertParams={[MockFunction]}
+            shouldUpdateUrl={false}
           />
           <EuiSpacer
             size="xs"
