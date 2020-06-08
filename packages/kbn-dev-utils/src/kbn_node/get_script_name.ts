@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,25 +17,8 @@
  * under the License.
  */
 
-const { execFileSync } = require('child_process');
-const os = require('os');
+import { platform } from 'os';
 
-const args = process.argv.slice(2);
-const stdio = [0, 1, 2];
-const maxBuffer = 100 * 1024 * 1024;
-
-if (os.platform() === 'win32') {
-  execFileSync(
-    `${__dirname}/../src/dev/node_with_options_bin_scripts/node_with_options.bat`,
-    args,
-    {
-      maxBuffer,
-      stdio,
-    }
-  );
-} else {
-  execFileSync(`${__dirname}/../src/dev/node_with_options_bin_scripts/node_with_options.sh`, args, {
-    maxBuffer,
-    stdio,
-  });
+export function getScriptName() {
+  return platform() === 'win32' ? 'kbn-node.cmd' : 'kbn-node';
 }

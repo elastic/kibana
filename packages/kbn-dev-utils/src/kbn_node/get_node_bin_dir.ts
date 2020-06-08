@@ -17,5 +17,19 @@
  * under the License.
  */
 
-require('../src/setup_node_env/node_version_validator');
-require('../node_modules/.bin/backport');
+import execa from 'execa';
+import { platform } from 'os';
+import { resolve } from 'path';
+import { REPO_ROOT } from '../repo_root';
+
+// Retrieves the correct location for the current node installation dir
+export function getNodeBinDir() {
+  const nixPrefix = 'bin';
+  const nodeDir = execa
+    .sync('npm', ['config', 'get', 'prefix'], {
+      cwd: REPO_ROOT,
+    })
+    .stdout.trim();
+
+  return platform() === 'win32' ? nodeDir : resolve(nodeDir, nixPrefix);
+}
