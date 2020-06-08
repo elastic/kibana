@@ -73,6 +73,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     );
   }
 
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,
