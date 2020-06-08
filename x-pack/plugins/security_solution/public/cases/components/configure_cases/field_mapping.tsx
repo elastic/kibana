@@ -95,6 +95,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setActionTypeToMapping(caseField, newActionType, myMapping));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapping]
   );
 
@@ -103,6 +104,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setThirdPartyToMapping(caseField, newThirdPartyField, myMapping));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapping]
   );
 
@@ -132,7 +134,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
             key={`${item.source}`}
             id={`${item.source}`}
             disabled={disabled}
-            siemField={item.source}
+            securitySolutionField={item.source}
             thirdPartyOptions={getThirdPartyOptions(item.source, selectedConnector.fields)}
             actionTypeOptions={actionTypeOptions}
             onChangeActionType={onChangeActionType}

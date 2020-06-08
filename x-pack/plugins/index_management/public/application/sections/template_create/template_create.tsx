@@ -33,7 +33,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
       return;
     }
 
-    history.push(getTemplateDetailsLink(name, template._kbnMeta.formatVersion));
+    history.push(getTemplateDetailsLink(name, template._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {

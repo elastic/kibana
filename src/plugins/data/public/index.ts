@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -267,6 +265,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../common';
 
 /*
