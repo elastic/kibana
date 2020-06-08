@@ -18,15 +18,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const appsMenu = getService('appsMenu');
 
   describe('batchedFunction', () => {
     beforeEach(async () => {
-      await appsMenu.clickLink('bfetch explorer');
       await testSubjects.click('count-until');
       await testSubjects.click('double-integers');
     });

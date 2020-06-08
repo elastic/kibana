@@ -48,7 +48,7 @@ export interface AllTimelinesVariables {
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
 
 export const getAllTimeline = memoizeOne(
-  (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
+  (_variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
     timelines.map((timeline) => ({
       created: timeline.created,
       description: timeline.description,
@@ -168,6 +168,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apolloClient, allTimelines]
   );
 
