@@ -37,6 +37,10 @@ export interface PolicyTestResourceInfo {
    * This is where Endpoint Policy is stored.
    */
   datasource: Immutable<CreateDatasourceResponse['item']>;
+  /**
+   * Information about the endpoint package
+   */
+  packageInfo: Immutable<GetPackagesResponse['response'][0]>;
   /** will clean up (delete) the objects created (agent config + datasource) */
   cleanup: () => Promise<void>;
 }
@@ -160,10 +164,9 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       }
 
       return {
-        // @ts-ignore
-        agentConfig,
-        // @ts-ignore
-        datasource,
+        agentConfig: agentConfig!,
+        datasource: datasource!,
+        packageInfo: endpointPackageInfo!,
         async cleanup() {
           // Delete Datasource
           try {

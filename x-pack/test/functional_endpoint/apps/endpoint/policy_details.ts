@@ -83,11 +83,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
       it('should have updated policy data in overall agent configuration', async () => {
-        // Turn off file events.
+        // This test ensures that updates made to the Endpoint Policy are carried all the way through
+        // to the generated Agent Configuration that is dispatch down to the Elastic Agent.
+
         await Promise.all([
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_file'),
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
-          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMaxEvent_file'),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
         ]);
         await pageObjects.policy.confirmAndSave();
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -100,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           datasources: [
             {
               enabled: true,
-              id: 'e5cfd120-a9b8-11ea-8cdc-f3228a168e40',
+              id: policyInfo.datasource.id,
               inputs: [
                 {
                   enabled: true,
@@ -120,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                         },
                       },
                       events: {
-                        file: true,
+                        file: false,
                         network: true,
                         process: true,
                       },
@@ -144,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                         },
                       },
                       events: {
-                        file: true,
+                        file: false,
                         network: true,
                         process: true,
                       },
@@ -172,8 +174,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                       },
                       events: {
                         dll_and_driver_load: true,
-                        dns: false,
-                        file: true,
+                        dns: true,
+                        file: false,
                         network: true,
                         process: true,
                         registry: true,
@@ -196,19 +198,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               namespace: 'default',
               package: {
                 name: 'endpoint',
-                version: '0.2.0',
+                version: policyInfo.packageInfo.version,
               },
               use_output: 'default',
             },
           ],
-          id: 'e59252f0-a9b8-11ea-8cdc-f3228a168e40',
+          id: policyInfo.agentConfig.id,
           outputs: {
             default: {
               hosts: ['http://localhost:9200'],
               type: 'elasticsearch',
             },
           },
-          revision: 5,
+          revision: 3,
           settings: {
             monitoring: {
               enabled: false,
