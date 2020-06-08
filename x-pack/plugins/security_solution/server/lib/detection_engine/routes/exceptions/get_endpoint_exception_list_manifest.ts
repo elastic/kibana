@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createHash } from 'crypto';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { ArtifactConstants } from '../../../exceptions';
 import { buildRouteValidation } from '../utils';
@@ -53,7 +54,7 @@ async function handleAllowlistManifest(context, req, res) {
       return res.badRequest('invalid manifest version');
     }
 
-    const resp = await getAllowlistManifest(context, req.params.schemaVersion);
+    const resp = await getAllowlistManifest(context, '1.0.0', req.params.schemaVersion);
     if (resp.saved_objects.length === 0) {
       return res.notFound({ body: `No manifest found for version ${req.params.schemaVersion}` });
     }
@@ -62,6 +63,15 @@ async function handleAllowlistManifest(context, req, res) {
       manifestVersion: '1.0.0', // TODO hardcode?
       artifacts: {},
     };
+
+    // Handle a HEAD request
+    if (req.route.method === 'head') {
+      const manifestHash = createHash('sha256')
+        .update(JSON.stringify(manifestResp), 'utf8')
+        .digest('hex');
+
+      return res.ok({ headers: { 'e-tag': manifestHash } });
+    }
 
     // transform and validate response
     for (const manifest of resp.saved_objects) {
