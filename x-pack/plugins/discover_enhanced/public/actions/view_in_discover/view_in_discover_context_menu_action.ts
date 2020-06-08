@@ -19,7 +19,7 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../../../../../../src/plugins/visualizations/public';
 
-export const ACTION_VIEW_IN_DISCOVER = 'ACTION_VIEW_IN_DISCOVER';
+export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 const isOutputWithIndexPatterns = (
   output: unknown
@@ -40,10 +40,10 @@ interface Params {
   >;
 }
 
-export class ViewInDiscoverContextMenuAction implements Action<EmbeddableContext> {
-  public readonly id = ACTION_VIEW_IN_DISCOVER;
+export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
+  public readonly id = ACTION_EXPLORE_DATA;
 
-  public readonly type = ACTION_VIEW_IN_DISCOVER;
+  public readonly type = ACTION_EXPLORE_DATA;
 
   public readonly order = 200;
 

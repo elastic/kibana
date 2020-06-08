@@ -15,11 +15,11 @@ import {
   EmbeddableContext,
   CONTEXT_MENU_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
-import { ViewInDiscoverContextMenuAction, ACTION_VIEW_IN_DISCOVER } from './actions';
+import { ExploreDataContextMenuAction, ACTION_EXPLORE_DATA } from './actions';
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
-    [ACTION_VIEW_IN_DISCOVER]: EmbeddableContext;
+    [ACTION_EXPLORE_DATA]: EmbeddableContext;
   }
 }
 
@@ -47,8 +47,8 @@ export class DiscoverEnhancedPlugin
     const start = createStartServicesGetter(core.getStartServices);
 
     if (!!share) {
-      const viewInDiscoverAction = new ViewInDiscoverContextMenuAction({ start });
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, viewInDiscoverAction);
+      const exploreDataAction = new ExploreDataContextMenuAction({ start });
+      uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
     }
   }
 
