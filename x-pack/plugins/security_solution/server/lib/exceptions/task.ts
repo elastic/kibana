@@ -11,10 +11,10 @@ import {
   TaskManagerStartContract,
 } from '../../../../../plugins/task_manager/server';
 import { ListPluginSetup } from '../../../../lists/server';
+import { ConfigType } from '../../config';
 import { GetFullEndpointExceptionList, CompressExceptionList } from './fetch_endpoint_exceptions';
 
 const PackagerTaskConstants = {
-  INTERVAL: '30s',
   TIMEOUT: '1m',
   TYPE: 'securitySolution:endpoint:exceptions-packager',
 };
@@ -36,6 +36,7 @@ interface PackagerTaskRunner {
 
 interface PackagerTaskContext {
   core: CoreSetup;
+  config: ConfigType;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   lists: ListPluginSetup;
@@ -58,7 +59,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os);
       // Don't create an artifact if there are no exceptions
       if (exceptions.exceptions_list.length === 0) {
-        context.logger.debug('No endpoint exceptions found.');
+        context.logger.debug(`No endpoint exceptions found for ${os}.`);
         return;
       }
 
@@ -79,23 +80,37 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           size: Buffer.from(JSON.stringify(exceptions)).byteLength,
         };
 
+        /*
         const resp = await soClient.find({
           type: ArtifactConstants.SAVED_OBJECT_TYPE,
           search: sha256Hash,
           searchFields: ['sha256'],
           fields: [],
         });
+        */
 
         // TODO clean this up and handle errors better
-        if (resp.total === 0) {
+        // if (resp.total === 0) {
+        try {
           const soResponse = await soClient.create(
             ArtifactConstants.SAVED_OBJECT_TYPE,
-            exceptionSO
+            exceptionSO,
+            { id: sha256Hash }
           );
           context.logger.debug(JSON.stringify(soResponse));
+        } catch (error) {
+          if (error.statusCode === 409) {
+            context.logger.debug('No update to Endpoint Exceptions, skipping.');
+          } else {
+            context.logger.error(error);
+          }
+        }
+
+        /*
         } else {
           context.logger.debug('No update to Endpoint Exceptions, skipping.');
         }
+        */
       }
     }
   };
@@ -109,7 +124,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             taskType: PackagerTaskConstants.TYPE,
             scope: ['securitySolution'],
             schedule: {
-              interval: PackagerTaskConstants.INTERVAL,
+              interval: context.config.packagerTaskInterval,
             },
             state: {},
             params: {},

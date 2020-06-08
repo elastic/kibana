@@ -6,6 +6,9 @@
 
 import Joi from 'joi';
 
+// TODO: convert to io-tsk
+// import * as t from 'io-ts';
+
 export const downloadExceptionListSchema = Joi.object({
   sha256: Joi.string(),
 });

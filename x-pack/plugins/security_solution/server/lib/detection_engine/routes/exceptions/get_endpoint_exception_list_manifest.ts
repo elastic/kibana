@@ -32,7 +32,7 @@ export interface Artifact {
 export function getEndpointExceptionListManifest(router: IRouter) {
   router.get(
     {
-      path: `${allowlistBaseRoute}/manifest/{schemaVersion}`,
+      path: `${allowlistBaseRoute}/manifest/{manifestVersion}/{schemaVersion}`,
       validate: {
         params: buildRouteValidation<GetExceptionListManifestRequestParams>(
           getExceptionListManifestSchema
@@ -49,6 +49,10 @@ export function getEndpointExceptionListManifest(router: IRouter) {
  */
 async function handleAllowlistManifest(context, req, res) {
   try {
+    if (req.params.manifestVersion !== '1.0.0') {
+      return res.badRequest('invalid manifest version');
+    }
+
     const resp = await getAllowlistManifest(context, req.params.schemaVersion);
     if (resp.saved_objects.length === 0) {
       return res.notFound({ body: `No manifest found for version ${req.params.schemaVersion}` });
@@ -77,7 +81,7 @@ async function handleAllowlistManifest(context, req, res) {
 /**
  * Creates the manifest for the whitelist
  */
-async function getAllowlistManifest(ctx, schemaVersion: string) {
+async function getAllowlistManifest(ctx, manifestVersion: string, schemaVersion: string) {
   const soClient = ctx.core.savedObjects.client;
 
   // TODO page

@@ -18,7 +18,6 @@ import {
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
-import { ListPluginSetup as ListsSetup } from '../../lists/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
@@ -66,9 +65,9 @@ export interface StartPlugins {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup { }
+export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart { }
+export interface PluginStart {}
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
@@ -220,6 +219,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.taskManager && plugins.lists) {
       this.exceptionsPackagerTask = setupPackagerTask({
         core,
+        config,
         logger: this.logger,
         taskManager: plugins.taskManager,
         lists: plugins.lists,

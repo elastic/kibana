@@ -6,6 +6,10 @@
 
 import Joi from 'joi';
 
+// TODO: convert to io-tsk
+// import * as t from 'io-ts';
+
 export const getExceptionListManifestSchema = Joi.object({
+  manifestVersion: Joi.string(),
   schemaVersion: Joi.string(),
 });
