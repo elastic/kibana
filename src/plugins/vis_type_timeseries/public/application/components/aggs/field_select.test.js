@@ -21,22 +21,12 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { FieldSelect } from './field_select';
 import { EuiComboBox } from '@elastic/eui';
-import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
-
-const UI_RESTRICTIONS = { '*': true };
-const INDEX_PATTERN = 'some-pattern';
-const FIELDS = {
-  [INDEX_PATTERN]: [
-    {
-      type: 'date',
-      name: '@timestamp',
-    },
-    {
-      type: 'number',
-      name: 'system.cpu.user.pct',
-    },
-  ],
-};
+import {
+  SCRIPTED_FIELD_VALUE,
+  FIELDS,
+  INDEX_PATTERN,
+  UI_RESTRICTIONS,
+} from '../../../../common/constants';
 
 describe('FieldSelect', () => {
   it('should have scripted field', () => {
