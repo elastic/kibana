@@ -67,7 +67,7 @@ export class UptimePlugin
       appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
       euiIconType: 'uptimeApp',
-      order: 8900,
+      order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
