@@ -8,6 +8,7 @@ import { ResponseToolkit } from 'hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
+import { KibanaRequest, LegacyRequest } from '../../../../../../../../src/core/server';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {
@@ -128,13 +129,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   private async getUser(request: KibanaServerRequest): Promise<KibanaUser | null> {
-    let user;
-    try {
-      user = await this.server.plugins.security.getUser(request);
-    } catch (e) {
-      return null;
-    }
-    if (user === null) {
+    const user = this.server.newPlatform.setup.plugins.security?.authc.getCurrentUser(
+      KibanaRequest.from((request as unknown) as LegacyRequest)
+    );
+    if (!user) {
       return null;
     }
     const assertKibanaUser = RuntimeKibanaUser.decode(user);
