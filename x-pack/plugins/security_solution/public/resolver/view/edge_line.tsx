@@ -8,24 +8,26 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3, distance, angle } from '../lib/vector2';
 import { Vector2, Matrix3, EdgeLineMetadata } from '../types';
-import { useResolverTheme } from './assets';
+import { useResolverTheme, calculateResolverFontSize } from './assets';
 
 interface ElapsedTimeProps {
-  readonly scaledTypeSize: number;
   readonly backgroundColor: string;
+  readonly leftPct: number;
+  readonly scaledTypeSize: number;
+  readonly textColor: string;
 }
 
 const StyledElapsedTime = styled.div<ElapsedTimeProps>`
   background-color: ${(props) => props.backgroundColor};
-  color: ${() => useResolverTheme().colorMap.resolverEdgeText};
+  color: ${(props) => props.textColor};
   font-size: ${(props) => `${props.scaledTypeSize}px`};
   font-weight: bold;
   position: absolute;
   top: 50%;
   white-space: nowrap;
-  left: 50%;
+  left: ${(props) => `${props.leftPct}%`};
   padding: 6px 8px;
-  border-radius: 999px;
+  border-radius: 999px; // generate pill shape
   transform: translate(-50%, -50%) rotateX(35deg);
   user-select: none;
 `;
@@ -77,11 +79,7 @@ const EdgeLineComponent = React.memo(
      * should be the same as the distance between the start and end points.
      */
     const length = distance(screenStart, screenEnd);
-
-    const minimumFontSize = 10;
-    const slopeOfFontScale = 7.5;
-    const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
-    const scaledTypeSize = minimumFontSize + fontSizeAdjustmentForScale;
+    const scaledTypeSize = calculateResolverFontSize(magFactorX, 10, 7.5);
 
     const style = {
       left: `${screenStart[0]}px`,
@@ -99,14 +97,22 @@ const EdgeLineComponent = React.memo(
        */
       transform: `translateY(-50%) rotateZ(${angle(screenStart, screenEnd)}rad)`,
     };
-    const showElapsedTime = elapsedTime && magFactorX >= 0.75 && magFactorX <= 2.25;
+
+    let elapsedTimeLeftPosPct = 50;
+
+    if (magFactorX < 1) {
+      const fractionalOffset = (1 / magFactorX) * ((1 - magFactorX) * 10);
+      elapsedTimeLeftPosPct += fractionalOffset;
+    }
 
     return (
       <div role="presentation" className={className} style={style}>
-        {showElapsedTime && (
+        {elapsedTime && (
           <StyledElapsedTime
             backgroundColor={colorMap.resolverEdge}
+            leftPct={elapsedTimeLeftPosPct}
             scaledTypeSize={scaledTypeSize}
+            textColor={colorMap.resolverEdgeText}
           >
             {elapsedTime}
           </StyledElapsedTime>
@@ -120,14 +126,8 @@ EdgeLineComponent.displayName = 'EdgeLine';
 
 export const EdgeLine = styled(EdgeLineComponent)`
   position: absolute;
-  height: ${({ projectionMatrix }) => {
-    const [magFactorX] = projectionMatrix;
-    const minimumFontSize = 12;
-    const slopeOfFontScale = 8.5;
-    const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
-    const scaledTypeSize = minimumFontSize + fontSizeAdjustmentForScale;
-    return `${scaledTypeSize}px`;
+  height: ${({ projectionMatrix: [magFactorX] }) => {
+    return `${calculateResolverFontSize(magFactorX, 12, 8.5)}px`;
   }};
   background-color: ${() => useResolverTheme().colorMap.resolverEdge};
-  /* contain: strict; */
 `;

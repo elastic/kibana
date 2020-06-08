@@ -110,7 +110,7 @@ const NodeSubMenuComponents = React.memo(
   }: {
     menuTitle: string;
     className?: string;
-    menuAction: () => unknown;
+    menuAction?: () => unknown;
     buttonBorderColor: ButtonColor;
     buttonFill: string;
   } & {

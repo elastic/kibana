@@ -19,7 +19,7 @@ import {
   RelatedEventDataEntryWithStats,
   EdgeLineMetadata,
 } from '../../types';
-import { ResolverEvent, EndpointEvent } from '../../../../common/endpoint/types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 import { eventTimestamp } from '../../../../common/endpoint/models/event';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
 import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
@@ -32,7 +32,7 @@ import {
 } from '../../models/indexed_process_tree';
 import { getRelativeTimeDifference } from '../../lib/date';
 
-const unit = 100;
+const unit = 135;
 const distanceBetweenNodesInUnits = 2;
 
 export function isLoading(state: DataState) {

@@ -16,7 +16,7 @@ export const getRelativeTimeDifference = (startDate: DateFormat, endDate: DateFo
   moment.relativeTimeThreshold('mm', 1);
   moment.relativeTimeThreshold('h', 24); // Least number of hours to be considered a day
   moment.relativeTimeThreshold('hh', 1);
-  moment.relativeTimeThreshold('d', 30); // Least number of days to be considered a month
+  moment.relativeTimeThreshold('d', 28); // Least number of days to be considered a month
   moment.relativeTimeThreshold('dd', 1);
   moment.relativeTimeThreshold('M', 12); // Least number of months to be considered a year
   moment.relativeTimeThreshold('MM', 1);

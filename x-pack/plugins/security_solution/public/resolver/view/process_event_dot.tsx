@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,8 +18,8 @@ import {
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, useResolverTheme, NodeStyleMap } from './assets';
+import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { SymbolIds, useResolverTheme, NodeStyleMap, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -198,6 +198,45 @@ const getDisplayName: (schemaName: string) => string = function nameInSchemaToDi
   );
 };
 
+interface StyledActionsContainer {
+  readonly color: string;
+  readonly fontSize: number;
+  readonly topPct: number;
+}
+
+const StyledActionsContainer = styled.div<StyledActionsContainer>`
+  background-color: transparent;
+  color: ${(props) => props.color};
+  display: flex;
+  flex-flow: column;
+  font-size: ${(props) => `${props.fontSize}px`};
+  left: 25%;
+  line-height: 140%;
+  padding: 0.25rem 0 0 0.1rem;
+  position: absolute;
+  top: ${(props) => `${props.topPct}%`};
+  width: auto;
+`;
+
+interface StyledDescriptionText {
+  readonly backgroundColor: string;
+  readonly color: string;
+}
+
+const StyledDescriptionText = styled.div<StyledDescriptionText>`
+  text-transform: uppercase;
+  letter-spacing: -0.01px;
+  background-color: ${(props) => props.backgroundColor};
+  line-height: 1;
+  font-weight: bold;
+  font-size: 0.8rem;
+  width: fit-content;
+  margin: 0;
+  text-align: left;
+  padding: 1px 0 1px 0;
+  color: ${(props) => props.color};
+`;
+
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
  */
@@ -255,8 +294,32 @@ const ProcessEventDotComponents = React.memo(
      * position to accomodate for that. This aligns the logical center of the process node
      * with the correct position on the map.
      */
-    const processNodeViewXOffset = -0.172413 * logicalProcessNodeViewWidth * magFactorX;
-    const processNodeViewYOffset = -0.73684 * logicalProcessNodeViewHeight * magFactorX;
+    const isZoomedOut = magFactorX < 0.95;
+    const isShowingDescriptionText = magFactorX > 0.6;
+
+    const nodeXOffsetValue = isZoomedOut
+      ? -0.177413 + (-magFactorX * (1 - magFactorX)) / 5
+      : -0.172413;
+    const nodeYOffsetValue = isZoomedOut
+      ? -0.73684 + (-magFactorX * 0.5 * (1 - magFactorX)) / magFactorX
+      : -0.73684;
+
+    const actionsBaseYOffsetPct = 30;
+    let actionsYOffsetPct;
+    switch (true) {
+      case !isZoomedOut:
+        actionsYOffsetPct = actionsBaseYOffsetPct + 3.5 * magFactorX;
+        break;
+      case isShowingDescriptionText:
+        actionsYOffsetPct = actionsBaseYOffsetPct + magFactorX;
+        break;
+      default:
+        actionsYOffsetPct = actionsBaseYOffsetPct + 21 * magFactorX;
+        break;
+    }
+
+    const processNodeViewXOffset = nodeXOffsetValue * logicalProcessNodeViewWidth * magFactorX;
+    const processNodeViewYOffset = nodeYOffsetValue * logicalProcessNodeViewHeight * magFactorX;
 
     const nodeViewportStyle = useMemo(
       () => ({
@@ -276,18 +339,13 @@ const ProcessEventDotComponents = React.memo(
      *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
      *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
      */
-    const minimumFontSize = 18.75;
-    const slopeOfFontScale = 12.5;
-    const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
-    const scaledTypeSize = minimumFontSize + fontSizeAdjustmentForScale;
+    const scaledTypeSize = calculateResolverFontSize(magFactorX, 18.75, 12.5);
 
     const markerBaseSize = 15;
     const markerSize = markerBaseSize;
     const markerPositionYOffset = -markerBaseSize / 2 + 3; // + 3 to align nodes centrally on edge
     const markerPositionXOffset = -markerBaseSize / 2;
 
-    const markerActionsBaseYOffsetPct = 30;
-    const markerActionsYOffsetPct = markerActionsBaseYOffsetPct + 7 * magFactorX;
     /**
      * An element that should be animated when the node is clicked.
      */
@@ -303,9 +361,14 @@ const ProcessEventDotComponents = React.memo(
         | null;
     } = React.createRef();
     const { colorMap, nodeAssets } = useResolverTheme();
-    const { backingFill, cubeSymbol, descriptionText, isLabelFilled, labelButtonFill } = nodeAssets[
-      nodeType(event)
-    ];
+    const {
+      backingFill,
+      cubeSymbol,
+      descriptionText,
+      isLabelFilled,
+      labelButtonFill,
+      strokeColor,
+    } = nodeAssets[nodeType(event)];
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -341,7 +404,7 @@ const ProcessEventDotComponents = React.memo(
       });
     }, [animationTarget, dispatch, nodeId]);
 
-    const handleRelatedEventRequest = useCallback(() => {
+    useEffect(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
         payload: event,
@@ -359,6 +422,7 @@ const ProcessEventDotComponents = React.memo(
      * generally in the form `number of related events in category` `category title`
      * e.g. "10 DNS", "230 File"
      */
+    const [isShowingRelatedEvents, updateIsShowingRelatedEvents] = useState(false);
     const relatedEventOptions = useMemo(() => {
       if (!relatedEventsStats) {
         // Return an empty set of options if there are no stats to report
@@ -434,6 +498,7 @@ const ProcessEventDotComponents = React.memo(
                 fill={backingFill} // Only visible on hover
                 x={-11.35}
                 y={-8.35}
+                stroke={strokeColor}
                 width={markerSize * 1.5}
                 height={markerSize * 1.5}
                 className="backing"
@@ -462,64 +527,65 @@ const ProcessEventDotComponents = React.memo(
               </use>
             </g>
           </svg>
-          <div
-            style={{
-              display: 'flex',
-              flexFlow: 'column',
-              left: '25%',
-              top: `${markerActionsYOffsetPct}%`,
-              position: 'absolute',
-              width: 'auto',
-              color: colorMap.full,
-              fontSize: `${scaledTypeSize}px`,
-              lineHeight: '140%',
-              backgroundColor: 'transparent',
-              padding: '.25rem',
-            }}
+          <StyledActionsContainer
+            color={colorMap.full}
+            fontSize={scaledTypeSize}
+            topPct={actionsYOffsetPct}
           >
+            {isShowingDescriptionText && (
+              <StyledDescriptionText
+                backgroundColor={colorMap.resolverBackground}
+                color={colorMap.descriptionText}
+              >
+                {descriptionText}
+              </StyledDescriptionText>
+            )}
             <div
-              id={descriptionId}
               style={{
-                textTransform: 'uppercase',
-                letterSpacing: '-0.01px',
                 backgroundColor: colorMap.resolverBackground,
-                lineHeight: '1',
-                fontWeight: 'bold',
-                fontSize: '0.8rem',
-                width: 'fit-content',
-                margin: '0',
-                textAlign: 'left',
-                padding: '0',
-                color: colorMap.descriptionText,
+                alignSelf: 'flex-start',
+                padding: 0,
               }}
             >
-              {descriptionText}
-            </div>
-            <EuiButton
-              color={labelButtonFill}
-              data-test-subject="nodeLabel"
-              fill={isLabelFilled}
-              id={labelId}
-              size="s"
-              tabIndex={-1}
-            >
-              <span className="euiButton__content">
-                <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {eventModel.eventName(event)}
+              <EuiButton
+                color={labelButtonFill}
+                data-test-subject="nodeLabel"
+                fill={isLabelFilled}
+                id={labelId}
+                size="s"
+                style={{
+                  maxWidth: `${Math.min(150 * magFactorX, 400)}px`,
+                }}
+                tabIndex={-1}
+              >
+                <span className="euiButton__content">
+                  <span className="euiButton__text" data-test-subj={'euiButton__text'}>
+                    {eventModel.eventName(event)}
+                  </span>
                 </span>
-              </span>
-            </EuiButton>
-            {magFactorX >= 1.3 && (
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
-                <EuiFlexItem grow={false} className="related-dropdown">
-                  <NodeSubMenu
-                    buttonBorderColor={labelButtonFill}
-                    buttonFill={colorMap.resolverBackground}
-                    menuTitle={subMenuAssets.relatedEvents.title}
-                    optionsWithActions={relatedEventStatusOrOptions}
-                    menuAction={handleRelatedEventRequest}
-                  />
-                </EuiFlexItem>
+              </EuiButton>
+            </div>
+            {!isZoomedOut && (
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                gutterSize="xs"
+                style={{
+                  background: colorMap.resolverBackground,
+                  alignSelf: 'flex-start',
+                  padding: 0,
+                  margin: 0,
+                }}
+              >
+                {isShowingRelatedEvents && (
+                  <EuiFlexItem grow={false} className="related-dropdown">
+                    <NodeSubMenu
+                      buttonBorderColor={labelButtonFill}
+                      buttonFill={colorMap.resolverBackground}
+                      menuTitle={subMenuAssets.relatedEvents.title}
+                      optionsWithActions={relatedEventStatusOrOptions}
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <NodeSubMenu
                     buttonBorderColor={labelButtonFill}
@@ -530,7 +596,7 @@ const ProcessEventDotComponents = React.memo(
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
-          </div>
+          </StyledActionsContainer>
         </div>
       </EuiKeyboardAccessible>
     );
@@ -566,7 +632,7 @@ export const ProcessEventDot = styled(ProcessEventDotComponents)`
   &:hover:not([aria-current]) .backing {
     transition-property: fill-opacity;
     transition-duration: 0.25s;
-    fill-opacity: 0.06;
+    fill-opacity: 1; // actual color opacity handled in the fill hex
   }
 
   &[aria-current] .backing {

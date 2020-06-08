@@ -30,6 +30,7 @@ interface NodeStyleConfig {
   descriptionText: string;
   isLabelFilled: boolean;
   labelButtonFill: ButtonColor;
+  strokeColor: string;
 }
 
 export interface NodeStyleMap {
@@ -368,7 +369,6 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
       <path
         d="m87.521 25.064a3.795 3.795 0 0 0-1.4313-1.4717l-40.164-23.083a3.8338 3.8338 0 0 0-3.8191 0l-40.165 23.083a3.8634 3.8634 0 0 0-1.9097 3.2926v46.165a3.7986 3.7986 0 0 0 1.9097 3.2925l40.164 23.083a3.8342 3.8342 0 0 0 3.8191 0l40.164-23.083a3.7988 3.7988 0 0 0 1.9099-3.2925v-46.165a3.7775 3.7775 0 0 0-0.47857-1.8209z"
         strokeWidth="2"
-        stroke="#7E839C"
       />
     </symbol>
   </>
@@ -418,11 +418,11 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     full: theme.euiColorFullShade,
     graphControls: theme.euiColorDarkestShade,
     graphControlsBackground: theme.euiColorEmptyShade,
-    processBackingFill: theme.euiColorPrimary,
+    processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
     resolverBackground: theme.euiColorEmptyShade,
     resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
-    triggerBackingFill: theme.euiColorDanger,
+    triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
   };
 
   const nodeAssets: NodeStyleMap = {
@@ -435,6 +435,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       }),
       isLabelFilled: true,
       labelButtonFill: 'primary',
+      strokeColor: theme.euiColorPrimary,
     },
     runningTriggerCube: {
       backingFill: colorMap.triggerBackingFill,
@@ -445,6 +446,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       }),
       isLabelFilled: true,
       labelButtonFill: 'danger',
+      strokeColor: theme.euiColorDanger,
     },
     terminatedProcessCube: {
       backingFill: colorMap.processBackingFill,
@@ -455,6 +457,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       }),
       isLabelFilled: false,
       labelButtonFill: 'primary',
+      strokeColor: `${theme.euiColorPrimary}33`, // 33 = 20% opacity
     },
     terminatedTriggerCube: {
       backingFill: colorMap.triggerBackingFill,
@@ -465,8 +468,18 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       }),
       isLabelFilled: false,
       labelButtonFill: 'danger',
+      strokeColor: `${theme.euiColorDanger}33`,
     },
   };
 
   return { colorMap, nodeAssets };
+};
+
+export const calculateResolverFontSize = (
+  magFactorX: number,
+  minFontSize: number,
+  slopeOfFontScale: number
+): number => {
+  const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
+  return minFontSize + fontSizeAdjustmentForScale;
 };
