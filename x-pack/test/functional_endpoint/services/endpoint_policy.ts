@@ -12,6 +12,7 @@ import {
   CreateDatasourceResponse,
   DeleteAgentConfigRequest,
   DeleteDatasourcesRequest,
+  GetFullAgentConfigResponse,
   GetPackagesResponse,
 } from '../../../plugins/ingest_manager/common';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
@@ -53,6 +54,26 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
   };
 
   return {
+    /**
+     * Retrieves the full Agent configuration, which mirrors what the Elastic Agent would get
+     * once they checkin.
+     */
+    async getFullAgentConfig(agentConfigId: string): Promise<GetFullAgentConfigResponse['item']> {
+      let fullAgentConfig: GetFullAgentConfigResponse['item'];
+      try {
+        const apiResponse: { body: GetFullAgentConfigResponse } = await supertest
+          .get(`${INGEST_API_AGENT_CONFIGS}/${agentConfigId}/full`)
+          .expect(200);
+
+        fullAgentConfig = apiResponse.body.item;
+      } catch (error) {
+        logSupertestApiErrorAndThrow('Unable to get full Agent Configuration', error);
+      }
+
+      // @ts-ignore
+      return fullAgentConfig;
+    },
+
     /**
      * Creates an Ingest Agent Configuration and adds to it the Endpoint Datasource that
      * stores the Policy configuration data
