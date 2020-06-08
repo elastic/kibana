@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'header']);
 
   return {
     /**
@@ -15,6 +15,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async navigateToPolicyList() {
       await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
+      await pageObjects.header.waitUntilLoadingHasFinished();
     },
   };
 }

@@ -9,15 +9,18 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
 
   return {
     /**
      * Navigate to the Endpoints list page
      */
-    async navigateToEndpointList() {
-      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/endpoints' });
+    async navigateToEndpointList(searchParams?: string) {
+      await pageObjects.common.navigateToApp('securitySolution', {
+        hash: `/management/endpoints${searchParams ? `?${searchParams}` : ''}`,
+      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
