@@ -210,7 +210,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   display: flex;
   flex-flow: column;
   font-size: ${(props) => `${props.fontSize}px`};
-  left: 25%;
+  left: 26%;
   line-height: 140%;
   padding: 0.25rem 0 0 0.1rem;
   position: absolute;
@@ -233,7 +233,7 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   width: fit-content;
   margin: 0;
   text-align: left;
-  padding: 1px 0 1px 0;
+  padding: 4px 0 0 2px;
   color: ${(props) => props.color};
 `;
 
@@ -295,7 +295,7 @@ const ProcessEventDotComponents = React.memo(
      * with the correct position on the map.
      */
     const isZoomedOut = magFactorX < 0.95;
-    const isShowingDescriptionText = magFactorX > 0.6;
+    const isShowingDescriptionText = magFactorX >= 0.55;
 
     const nodeXOffsetValue = isZoomedOut
       ? -0.177413 + (-magFactorX * (1 - magFactorX)) / 5
@@ -554,6 +554,7 @@ const ProcessEventDotComponents = React.memo(
                 id={labelId}
                 size="s"
                 style={{
+                  maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
                   maxWidth: `${Math.min(150 * magFactorX, 400)}px`,
                 }}
                 tabIndex={-1}
