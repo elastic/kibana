@@ -7,6 +7,8 @@
 import { Observable } from 'rxjs';
 import _, { countBy, groupBy, mapValues } from 'lodash';
 import { APICaller, CoreSetup } from 'kibana/server';
+import { first } from 'rxjs/operators';
+
 import { getNextMidnight } from '../../get_next_midnight';
 import { TaskInstance } from '../../../../../task_manager/server';
 import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
@@ -82,7 +84,7 @@ export function visualizationsTaskRunner(
     let error;
 
     try {
-      const index = (await config.toPromise()).kibana.index;
+      const index = (await config.pipe(first()).toPromise()).kibana.index;
       stats = await getStats(callCluster, index);
     } catch (err) {
       if (err.constructor === Error) {

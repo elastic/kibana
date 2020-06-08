@@ -366,6 +366,9 @@ class JobService {
     delete tempJob.open_time;
     delete tempJob.established_model_memory;
     delete tempJob.calendars;
+    delete tempJob.timing_stats;
+    delete tempJob.forecasts_stats;
+    delete tempJob.assignment_explanation;
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 

@@ -23,7 +23,6 @@
 |  Function | Description |
 |  --- | --- |
 |  [getDefaultSearchParams(config)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
-|  [getTotalLoaded({ total, failed, successful })](./kibana-plugin-plugins-data-server.gettotalloaded.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
@@ -56,6 +55,7 @@
 |  Variable | Description |
 |  --- | --- |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
+|  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |

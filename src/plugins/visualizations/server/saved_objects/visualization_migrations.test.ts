@@ -597,12 +597,12 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
       ];
       const tableDoc = generateDoc('table', aggs);
@@ -630,7 +630,7 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
@@ -655,7 +655,7 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
       ];
       const tableDoc = generateDoc('table', aggs);
@@ -675,12 +675,12 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
         {
           id: '4',
@@ -705,15 +705,15 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
       ];
-      const expected = [{}, { foo: 'bar', row: true }, { hey: 'ya' }];
+      const expected = [{}, { foo: 'bar' }, { hey: 'ya' }];
       const migrated = migrate(generateDoc('table', aggs));
       const actual = JSON.parse(migrated.attributes.visState);
 
@@ -1360,11 +1360,11 @@ describe('migration visualization', () => {
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
-    const generateDoc = (params: any) => ({
+    const generateDoc = (visState: any) => ({
       attributes: {
         title: 'My Vis',
         description: 'This is my super cool vis.',
-        visState: JSON.stringify({ params }),
+        visState: JSON.stringify(visState),
         uiStateJSON: '{}',
         version: 1,
         kibanaSavedObjectMeta: {
@@ -1390,7 +1390,7 @@ describe('migration visualization', () => {
           },
         ],
       };
-      const timeSeriesDoc = generateDoc(params);
+      const timeSeriesDoc = generateDoc({ params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
 
@@ -1427,11 +1427,37 @@ describe('migration visualization', () => {
           },
         ],
       };
-      const timeSeriesDoc = generateDoc(params);
+      const timeSeriesDoc = generateDoc({ params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
 
       expect(migratedParams.gauge_color_rules[1]).toEqual(params.gauge_color_rules[1]);
+    });
+
+    it('should move "row" field on split chart by a row or column to vis.params', () => {
+      const visData = {
+        type: 'area',
+        aggs: [
+          {
+            id: '1',
+            schema: 'metric',
+            params: {},
+          },
+          {
+            id: '2',
+            type: 'terms',
+            schema: 'split',
+            params: { foo: 'bar', row: true },
+          },
+        ],
+        params: {},
+      };
+
+      const migrated = migrate(generateDoc(visData));
+      const actual = JSON.parse(migrated.attributes.visState);
+
+      expect(actual.aggs.filter((agg: any) => 'row' in agg.params)).toEqual([]);
+      expect(actual.params.row).toBeTruthy();
     });
   });
 });
