@@ -41,6 +41,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
       onTimelineChange(insertTimeline.timelineTitle, insertTimeline.timelineSavedObjectId);
       dispatch(setInsertTimeline(null));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [insertTimeline, dispatch]);
 
   const handleClosePopover = useCallback(() => {

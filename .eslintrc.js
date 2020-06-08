@@ -225,7 +225,7 @@ module.exports = {
                   '!src/core/server/index.ts', // relative import
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
-                  '!src/core/server/test_utils',
+                  '!src/core/server/test_utils{,.ts}',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -758,10 +758,6 @@ module.exports = {
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
-        // might be introduced after the other warns are fixed
-        // 'react/jsx-sort-props': 'error',
-        // might be introduced after the other warns are fixed
-        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',

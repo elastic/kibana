@@ -96,6 +96,7 @@ export const Properties = React.memo<Props>(
     const onOpenTimelineModal = useCallback(() => {
       onClosePopover();
       setShowTimelineModal(true);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const [showCaseModal, setShowCaseModal] = useState(false);
     const onCloseCaseModal = useCallback(() => setShowCaseModal(false), []);
@@ -119,7 +120,7 @@ export const Properties = React.memo<Props>(
           })
         );
       },
-      [currentTimeline, dispatch, history, timelineId, title]
+      [onCloseCaseModal, currentTimeline, dispatch, history, timelineId, title]
     );
 
     const datePickerWidth = useMemo(
