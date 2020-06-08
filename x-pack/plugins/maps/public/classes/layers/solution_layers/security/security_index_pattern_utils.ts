@@ -34,7 +34,7 @@ export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
 }
 
 async function loadSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
-  let securityIndexPatternTitles;
+  let securityIndexPatternTitles: string[];
   try {
     securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
   } catch (error) {
