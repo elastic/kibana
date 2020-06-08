@@ -7377,8 +7377,6 @@
     "xpack.infra.alerting.logs.manageAlerts": "アラートを管理",
     "xpack.infra.alerting.manageAlerts": "アラートを管理",
     "xpack.infra.analysisSetup.actionStepTitle": "MLジョブを作成",
-    "xpack.infra.analysisSetup.analysisSetupDescription": "機械学習を使用して自動的に異常ログレートカウントを検出します。",
-    "xpack.infra.analysisSetup.analysisSetupTitle": "機械学習分析を有効にする",
     "xpack.infra.analysisSetup.configurationStepTitle": "構成",
     "xpack.infra.analysisSetup.createMlJobButton": "ML ジョブを作成",
     "xpack.infra.analysisSetup.deleteAnalysisResultsWarning": "これにより以前検出された異常が削除されます。",

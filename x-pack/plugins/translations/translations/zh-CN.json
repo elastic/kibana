@@ -7381,8 +7381,6 @@
     "xpack.infra.alerting.logs.manageAlerts": "管理告警",
     "xpack.infra.alerting.manageAlerts": "管理告警",
     "xpack.infra.analysisSetup.actionStepTitle": "创建 ML 作业",
-    "xpack.infra.analysisSetup.analysisSetupDescription": "使用 Machine Learning 自动检测异常日志速率计数。",
-    "xpack.infra.analysisSetup.analysisSetupTitle": "启用 Machine Learning 分析",
     "xpack.infra.analysisSetup.configurationStepTitle": "配置",
     "xpack.infra.analysisSetup.createMlJobButton": "创建 ML 作业",
     "xpack.infra.analysisSetup.deleteAnalysisResultsWarning": "这将移除以前检测到的异常。",
