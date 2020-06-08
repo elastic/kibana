@@ -24,6 +24,7 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -75,6 +76,7 @@ describe('Timeline', () => {
       showCallOutUnauthorizedMsg: false,
       start: startDate,
       sort,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

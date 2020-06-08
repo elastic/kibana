@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
   apolloClientObservable,
@@ -48,6 +48,26 @@ describe('Properties', () => {
   const usersViewing = ['elastic'];
 
   const state: State = mockGlobalState;
+  const props = {
+    associateNote: jest.fn(),
+    createTimeline: jest.fn(),
+    isDataInTimeline: false,
+    isDatepickerLocked: false,
+    isFavorite: false,
+    title: '',
+    timelineType: TimelineType.default,
+    description: '',
+    getNotesByIds: jest.fn(),
+    noteIds: [],
+    status: TimelineStatus.active,
+    timelineId: 'abc',
+    toggleLock: jest.fn(),
+    updateDescription: jest.fn(),
+    updateIsFavorite: jest.fn(),
+    updateTitle: jest.fn(),
+    updateNote: jest.fn(),
+    usersViewing,
+  };
   let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
@@ -59,25 +79,7 @@ describe('Properties', () => {
   test('renders correctly', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
@@ -90,27 +92,10 @@ describe('Properties', () => {
   });
 
   test('renders correctly draft timeline', () => {
+    const testProps = { ...props, status: TimelineStatus.draft };
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.draft}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
 
@@ -124,25 +109,7 @@ describe('Properties', () => {
   test('it renders an empty star icon when it is NOT a favorite', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
@@ -150,27 +117,11 @@ describe('Properties', () => {
   });
 
   test('it renders a filled star icon when it is a favorite', () => {
+    const testProps = { ...props, isFavorite: true };
+
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={true}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
 
@@ -179,28 +130,10 @@ describe('Properties', () => {
 
   test('it renders the title of the timeline', () => {
     const title = 'foozle';
-
+    const testProps = { ...props, title };
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title={title}
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
 
@@ -210,25 +143,7 @@ describe('Properties', () => {
   test('it renders the date picker with the lock icon', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
@@ -241,27 +156,11 @@ describe('Properties', () => {
   });
 
   test('it renders the lock icon when isDatepickerLocked is true', () => {
+    const testProps = { ...props, isDatepickerLocked: true };
+
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={true}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
     expect(
@@ -275,25 +174,7 @@ describe('Properties', () => {
   test('it renders the unlock icon when isDatepickerLocked is false', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
     expect(
@@ -306,29 +187,13 @@ describe('Properties', () => {
 
   test('it renders a description on the left when the width is at least as wide as the threshold', () => {
     const description = 'strange';
+    const testProps = { ...props, description };
+
     mockedWidth = showDescriptionThreshold;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description={description}
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
 
@@ -343,29 +208,13 @@ describe('Properties', () => {
 
   test('it does NOT render a description on the left when the width is less than the threshold', () => {
     const description = 'strange';
+    const testProps = { ...props, description };
+
     mockedWidth = showDescriptionThreshold - 1;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description={description}
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
 
@@ -382,25 +231,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
@@ -417,25 +248,7 @@ describe('Properties', () => {
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
@@ -450,25 +263,7 @@ describe('Properties', () => {
   test('it renders a settings icon', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
@@ -477,28 +272,11 @@ describe('Properties', () => {
 
   test('it renders an avatar for the current user viewing the timeline when it has a title', () => {
     const title = 'port scan';
+    const testProps = { ...props, title };
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title={title}
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...testProps} />
       </ReduxStoreProvider>
     );
 
@@ -508,25 +286,7 @@ describe('Properties', () => {
   test('it does NOT render an avatar for the current user viewing the timeline when it does NOT have a title', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
-        <Properties
-          associateNote={jest.fn()}
-          createTimeline={jest.fn()}
-          isDataInTimeline={false}
-          isDatepickerLocked={false}
-          isFavorite={false}
-          title=""
-          description=""
-          getNotesByIds={jest.fn()}
-          noteIds={[]}
-          status={TimelineStatus.active}
-          timelineId="abc"
-          toggleLock={jest.fn()}
-          updateDescription={jest.fn()}
-          updateIsFavorite={jest.fn()}
-          updateTitle={jest.fn()}
-          updateNote={jest.fn()}
-          usersViewing={usersViewing}
-        />
+        <Properties {...props} />
       </ReduxStoreProvider>
     );
 
