@@ -149,6 +149,7 @@ export const EmbeddedMapComponent = ({
     return () => {
       isSubscribed = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
 
   // queryExpression updated useEffect
@@ -156,12 +157,14 @@ export const EmbeddedMapComponent = ({
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // DateRange updated useEffect
@@ -173,6 +176,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   return isError ? null : (

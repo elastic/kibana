@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
-// @ts-ignore
-import { i18n } from '@kbn/i18n';
 import {
   Plugin,
   CoreSetup,
@@ -29,19 +28,20 @@ import {
   setIndexPatternSelect,
   setIndexPatternService,
   setInspector,
+  setIsGoldPlus,
+  setKibanaCommonConfig,
+  setKibanaVersion,
   setLicenseId,
+  setMapAppConfig,
   setMapsCapabilities,
   setNavigation,
   setSavedObjectsClient,
+  setSearchService,
   setTimeFilter,
   setToasts,
   setUiActions,
   setUiSettings,
   setVisualizations,
-  setSearchService,
-  setMapAppConfig,
-  setKibanaCommonConfig,
-  setKibanaVersion,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -53,6 +53,7 @@ import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
+import { ILicense } from '../../licensing/common/types';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -85,7 +86,14 @@ export const bindSetupCoreAndPlugins = (
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { fileUpload, data, inspector } = plugins;
+  const { fileUpload, data, inspector, licensing } = plugins;
+  if (licensing) {
+    licensing.license$.subscribe((license: ILicense) => {
+      const gold = license.check(APP_ID, 'gold');
+      setIsGoldPlus(gold.state === 'valid');
+    });
+  }
+
   setInspector(inspector);
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);

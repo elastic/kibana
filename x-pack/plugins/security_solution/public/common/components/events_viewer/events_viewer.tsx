@@ -103,9 +103,11 @@ const EventsViewerComponent: React.FC<Props> = ({
   } = useManageTimeline();
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isQueryLoading]);
   useEffect(() => {
     setTimelineFilterManager({ id, filterManager });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterManager]);
 
   const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
