@@ -137,6 +137,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.agent.version,
       },
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     details.agent.version,
     details.endpoint.policy.id,
