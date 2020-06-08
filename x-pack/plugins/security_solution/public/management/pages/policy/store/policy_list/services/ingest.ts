@@ -9,6 +9,7 @@ import {
   GetDatasourcesRequest,
   GetAgentStatusResponse,
   DATASOURCE_SAVED_OBJECT_TYPE,
+  GetPackagesResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
@@ -17,6 +18,7 @@ const INGEST_API_ROOT = `/api/ingest_manager`;
 export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
+const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 
 /**
  * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
@@ -92,4 +94,12 @@ export const sendGetFleetAgentStatusForConfig = (
       configId,
     },
   });
+};
+
+/**
+ * Get all security EPM packages
+ */
+export const sendGetSecurityPackages = (http: HttpStart) => {
+  const options = { query: { category: 'security' } };
+  return http.get<GetPackagesResponse>(`${INGEST_API_EPM_PACKAGES}`, options);
 };

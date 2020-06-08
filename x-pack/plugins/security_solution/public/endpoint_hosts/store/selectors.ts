@@ -164,3 +164,9 @@ export const policyResponseStatus: (state: Immutable<HostState>) => string = cre
     return (policyResponse && policyResponse?.endpoint?.policy?.applied?.status) || '';
   }
 );
+
+/**
+ * Returns the latest endpoint version
+ */
+export const latestEndpointVersion = (state: Immutable<HostState>): string | undefined =>
+  state.endpointPackageVersion;

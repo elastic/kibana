@@ -35,10 +35,12 @@ export const useHostLogsUrl = (hostId: string): { url: string; appId: string; ap
 /**
  * Returns an object that contains Ingest app and URL information
  */
-export const useHostIngestUrl = (): { url: string; appId: string; appPath: string } => {
+export const useHostIngestUrl = (
+  latestEndpointVersion: string
+): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
-    const appPath = `#/integrations/endpoint-0.2.0/add-datasource`;
+    const appPath = `#/integrations/endpoint-${latestEndpointVersion}/add-datasource`;
     return {
       url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
       appId: 'ingestManager',

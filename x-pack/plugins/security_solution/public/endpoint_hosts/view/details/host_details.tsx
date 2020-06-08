@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { useHostSelector, useHostLogsUrl, useHostIngestUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
-import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
+import { policyResponseStatus, uiQueryParams, latestEndpointVersion } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -34,7 +34,10 @@ const HostIds = styled(EuiListGroupItem)`
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId: logsAppId, appPath: logsAppPath, url: logsUrl } = useHostLogsUrl(details.host.id);
-  const { appId: ingestAppId, appPath: ingestAppPath, url: ingestUrl } = useHostIngestUrl();
+  const endpointVersion = useHostSelector(latestEndpointVersion);
+  const { appId: ingestAppId, appPath: ingestAppPath, url: ingestUrl } = useHostIngestUrl(
+    endpointVersion
+  );
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -104,7 +107,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
     ];
-  });
+  }, [details]);
   const detailsResultsLower = useMemo(() => {
     return [
       {
@@ -155,6 +158,17 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsPolicy}
         data-test-subj="hostDetailsPolicyList"
       />
+      <LinkToApp
+        appId={ingestAppId}
+        appPath={ingestAppPath}
+        href={ingestUrl}
+        data-test-subj="hostDetailsLinkToIngest"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+          defaultMessage="Reassign Policy"
+        />
+      </LinkToApp>
       <EuiHorizontalRule margin="s" />
       <EuiDescriptionList
         type="column"
@@ -172,17 +186,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToLogsTitle"
             defaultMessage="Endpoint Logs"
-          />
-        </LinkToApp>
-        <LinkToApp
-          appId={ingestAppId}
-          appPath={ingestAppPath}
-          href={ingestUrl}
-          data-test-subj="hostDetailsLinkToIngest"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-            defaultMessage="Reassign Policy"
           />
         </LinkToApp>
       </p>

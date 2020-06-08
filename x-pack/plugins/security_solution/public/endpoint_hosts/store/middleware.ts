@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GetPackagesResponse } from '../../../../ingest_manager/common';
 import { HostResultList } from '../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../common/store';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../types';
+import { sendGetSecurityPackages } from '../../management/pages/policy/store/policy_list/services/ingest';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
+  const http = coreStart.http;
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
@@ -88,6 +91,27 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostPolicyResponse',
+          payload: error,
+        });
+      }
+
+      // call the policy package api
+      let endpointPackageInfo: GetPackagesResponse['response'][0] | undefined;
+      try {
+        const securityPackages: GetPackagesResponse = await sendGetSecurityPackages(http);
+        endpointPackageInfo = securityPackages.response.find(
+          (epmPackage) => epmPackage.name === 'endpoint'
+        );
+        if (!endpointPackageInfo) {
+          throw new Error('Endpoint package was not found.');
+        }
+        dispatch({
+          type: 'serverReturnedEndpointPackageVersion',
+          payload: endpointPackageInfo.version,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnEndpointPackageVersion',
           payload: error,
         });
       }

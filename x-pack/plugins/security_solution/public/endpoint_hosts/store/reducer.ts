@@ -23,6 +23,8 @@ export const initialHostListState: Immutable<HostState> = {
   policyResponse: undefined,
   policyResponseLoading: false,
   policyResponseError: undefined,
+  endpointPackageVersion: undefined,
+  endpointPackageVersionError: undefined,
   location: undefined,
 };
 
@@ -77,6 +79,18 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       policyResponseError: action.payload,
       policyResponseLoading: false,
+    };
+  } else if (action.type === 'serverReturnedEndpointPackageVersion') {
+    return {
+      ...state,
+      endpointPackageVersion: action.payload,
+      endpointPackageVersionError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnEndpointPackageVersion') {
+    return {
+      ...state,
+      endpointPackageError: action.payload,
+      endpointPackageVersion: undefined,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {

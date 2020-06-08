@@ -38,6 +38,10 @@ export interface HostState {
   policyResponseLoading: boolean;
   /** api error from retrieving the policy response */
   policyResponseError?: ServerApiError;
+  /** latest endpoint package version */
+  endpointPackageVersion?: string;
+  /** api error from retrieving endpoint package version */
+  endpointPackageVersionError?: ServerApiError;
   /** current location info */
   location?: Immutable<AppLocation>;
 }
