@@ -6,6 +6,7 @@
 
 import { APICaller } from 'src/core/server';
 import { of } from 'rxjs';
+import moment from 'moment';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   ConcreteTaskInstance,
@@ -37,6 +38,7 @@ const defaultMockSavedObjects = [
     _source: {
       type: 'visualization',
       visualization: { visState: '{"type": "shell_beads"}' },
+      updated_at: moment().subtract(7, 'days').startOf('day').toString(),
     },
   },
 ];
