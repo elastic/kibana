@@ -102,6 +102,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     [chartElem]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const highlightSeries = useCallback(
     debounce(({ currentTarget }: JQuery.TriggeredEvent) => {
       const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
@@ -297,6 +298,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     [plot, legendValueNumbers, unhighlightSeries, legendCaption]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedSetLegendNumbers = useCallback(
     debounce(setLegendNumbers, DEBOUNCE_DELAY, {
       maxWait: DEBOUNCE_DELAY,

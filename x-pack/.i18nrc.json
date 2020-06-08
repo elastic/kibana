@@ -2,8 +2,7 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "plugins/actions",
-    "xpack.advancedUiActions": "plugins/advanced_ui_actions",
-    "xpack.uiActionsEnhanced": "examples/ui_actions_enhanced_examples",
+    "xpack.uiActionsEnhanced": ["plugins/ui_actions_enhanced", "examples/ui_actions_enhanced_examples"],
     "xpack.alerts": "plugins/alerts",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
     "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
@@ -49,7 +48,8 @@
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": ["plugins/uptime"],
-    "xpack.watcher": "plugins/watcher"
+    "xpack.watcher": "plugins/watcher",
+    "xpack.observability": "plugins/observability"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",
