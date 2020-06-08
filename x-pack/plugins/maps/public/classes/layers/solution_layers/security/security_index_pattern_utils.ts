@@ -34,7 +34,15 @@ export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
 }
 
 async function loadSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
-  const securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
+  let securityIndexPatternTitles;
+  try {
+    securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
+  } catch (error) {
+    // UiSettings throws with unreconized configuration setting
+    // siem:defaultIndex configuration setting is not registered if security app is not running
+    return [];
+  }
+
   const indexPatternCache = await getIndexPatternService().getCache();
   return indexPatternCache!
     .filter((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
