@@ -10,7 +10,7 @@
     "navigation",
     "kibanaLegacy",
     "triggers_actions_ui",
-    "alerting",
+    "alerts",
     "actions"
   ],
   "optionalPlugins": ["infra", "telemetryCollectionManager", "usageCollection", "home"],

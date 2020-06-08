@@ -47,52 +47,8 @@ import {
   LegacyAPI,
   LegacyRequest,
 } from './types';
-import {
-  PluginStartContract as AlertingPluginStartContract,
-  PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerts/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
 import { getClusterState } from './alerts/cluster_state';
-import { InfraPluginSetup } from '../../infra/server';
-
-export interface LegacyAPI {
-  getServerStatus: () => string;
-}
-
-interface PluginsSetup {
-  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  licensing: LicensingPluginSetup;
-  features: FeaturesPluginSetupContract;
-  alerts: AlertingPluginSetupContract;
-  infra: InfraPluginSetup;
-}
-
-interface PluginsStart {
-  alerts: AlertingPluginStartContract;
-}
-
-interface MonitoringCoreConfig {
-  get: (key: string) => string | undefined;
-}
-
-interface MonitoringCore {
-  config: () => MonitoringCoreConfig;
-  log: Logger;
-  route: (options: any) => void;
-}
-
-interface LegacyShimDependencies {
-  router: IRouter;
-  instanceUuid: string;
-  esDataClient: IClusterClient;
-  kibanaStatsCollector: any;
-}
-
-interface IBulkUploader {
-  setKibanaStatusGetter: (getter: () => string | undefined) => void;
-  getKibanaStats: () => any;
-}
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -173,7 +129,7 @@ export class Plugin {
     for (const alert of alerts) {
       if (alert.isEnabled()) {
         alert.initializeAlertType(getUiSettingsService, cluster, this.getLogger, config, kibanaUrl);
-        plugins.alerting.registerType(alert.getAlertType());
+        plugins.alerts.registerType(alert.getAlertType());
       }
     }
 
@@ -356,7 +312,7 @@ export class Plugin {
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getActionTypeRegistry: () => context.actions?.listTypes(),
-            getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
+            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
             getActionsClient: () => plugins.actions.getActionsClientWithRequest(req),
             server: {
               config: legacyConfigWrapper,

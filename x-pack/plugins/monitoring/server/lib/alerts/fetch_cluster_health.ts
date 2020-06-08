@@ -13,7 +13,11 @@ export async function fetchClusterHealth(
 ): Promise<AlertClusterHealth[]> {
   const params = {
     index,
-    filterPath: ['hits.hits._source.cluster_state.status', 'hits.hits._source.cluster_uuid'],
+    filterPath: [
+      'hits.hits._source.cluster_state.status',
+      'hits.hits._source.cluster_uuid',
+      'hits.hits._index',
+    ],
     body: {
       size: 1,
       sort: [{ timestamp: { order: 'desc' } }],
@@ -48,6 +52,7 @@ export async function fetchClusterHealth(
     return {
       health: get(hit, '_source.cluster_state.status'),
       clusterUuid: get(hit, '_source.cluster_uuid'),
+      ccs: get(hit, '_index'),
     } as AlertClusterHealth;
   });
 }

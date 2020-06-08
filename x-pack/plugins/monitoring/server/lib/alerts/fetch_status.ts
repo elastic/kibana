@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { AlertState, AlertGroupedState, AlertStates } from '../../alerts/types';
-import { AlertsClient } from '../../../../alerting/server';
+import { AlertStates } from '../../alerts/types';
+import { AlertsClient } from '../../../../alerts/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
 

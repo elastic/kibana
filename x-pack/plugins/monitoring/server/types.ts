@@ -8,11 +8,11 @@ import { IRouter, IClusterClient, Logger } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
-import { PluginSetupContract as ActionsPluginsStartContact } from '../../actions/server';
+import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
+} from '../../alerts/server';
 import { InfraPluginSetup } from '../../infra/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
@@ -40,12 +40,12 @@ export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
-  alerting: AlertingPluginSetupContract;
+  alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
 }
 
 export interface PluginsStart {
-  alerting: AlertingPluginStartContract;
+  alerts: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
 }
 

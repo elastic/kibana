@@ -10,7 +10,6 @@ import {
   Logger,
   IUiSettingsClient,
 } from 'kibana/server';
-import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   AlertType,
@@ -18,8 +17,8 @@ import {
   AlertInstance,
   AlertsClient,
   AlertServices,
-} from '../../../alerting/server';
-import { Alert, AlertAction, RawAlertInstance } from '../../../alerting/common';
+} from '../../../alerts/server';
+import { Alert, RawAlertInstance } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
 import { AlertState, AlertCluster, AlertMessage, AlertData, AlertStates } from './types';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
@@ -36,7 +35,6 @@ import { ActionResult } from '../../../actions/common';
 import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
-const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle', 'actions'];
 
 export class BaseAlert {
   public type!: string;
@@ -281,7 +279,7 @@ export class BaseAlert {
         shouldExecuteActions = true;
       }
 
-      instance.replaceState(alertState);
+      instance.replaceState(alertStates);
       if (shouldExecuteActions) {
         this.executeActions(instance, alertStates, item, cluster);
       }

@@ -10,7 +10,7 @@ import {
   ALERT_LICENSE_EXPIRATION,
   ALERT_CPU_USAGE,
 } from '../../common/constants';
-import { AlertsClient } from '../../../alerting/server';
+import { AlertsClient } from '../../../alerts/server';
 
 const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,

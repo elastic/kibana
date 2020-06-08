@@ -17,7 +17,7 @@ import {
   AlertMessageLinkToken,
   AlertStates,
 } from './types';
-import { AlertInstance, AlertServices } from '../../../alerting/server';
+import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CPU_USAGE,
@@ -27,15 +27,15 @@ import {
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
-import { RawAlertInstance } from '../../../alerting/common';
-import { parseDuration } from '../../../alerting/common/parse_duration';
+import { RawAlertInstance } from '../../../alerts/common';
+import { parseDuration } from '../../../alerts/common/parse_duration';
 import {
   CommonAlertFilter,
   CommonAlertCpuUsageFilter,
   CommonAlertParams,
   CommonAlertParamDetail,
 } from '../../common/types';
-import { AlertsClient } from '../../../alerting/server';
+import { AlertsClient } from '../../../alerts/server';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.cpuUsage.resolved', {
   defaultMessage: 'resolved',
@@ -225,7 +225,7 @@ export class CpuUsageAlert extends BaseAlert {
   protected executeActions(
     instance: AlertInstance,
     alertStates: AlertStates,
-    item: AlertData,
+    item: AlertData | null,
     cluster: AlertCluster
   ) {
     const { states, isFiring } = alertStates;

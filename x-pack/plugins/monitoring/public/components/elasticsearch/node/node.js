@@ -23,7 +23,7 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertSeverity } from '../../../../common/enums';
-import { replaceTokens } from '../../alert/lib';
+import { replaceTokens } from '../../../alerts/replace_tokens';
 
 export const Node = ({
   nodeSummary,

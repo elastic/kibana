@@ -14,8 +14,9 @@ import {
   AlertMessageLinkToken,
   AlertClusterHealth,
   AlertClusterHealthState,
+  AlertStates,
 } from './types';
-import { AlertInstance, AlertExecutorOptions } from '../../../alerting/server';
+import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_ALERTS,
@@ -108,6 +109,7 @@ export class ClusterHealthAlert extends BaseAlert {
         shouldFire,
         severity,
         meta: clusterHealth,
+        ccs: clusterHealth.ccs,
       });
       return accum;
     }, []);
@@ -118,6 +120,7 @@ export class ClusterHealthAlert extends BaseAlert {
     return {
       cluster,
       health: clusterHealth.health,
+      ccs: clusterHealth.ccs,
       ui: {
         isFiring: false,
         message: null,
@@ -172,10 +175,12 @@ export class ClusterHealthAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    alertState: AlertState,
+    alertStates: AlertStates,
     item: AlertData,
     cluster: AlertCluster
   ) {
+    const { states } = alertStates;
+    const alertState = states[0];
     const clusterHealth = item.meta as AlertClusterHealth;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {

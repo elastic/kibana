@@ -18,6 +18,7 @@ export interface AlertLicense {
 export interface AlertClusterHealth {
   health: AlertClusterHealthType;
   clusterUuid: string;
+  ccs: string | null;
 }
 
 export interface AlertState {

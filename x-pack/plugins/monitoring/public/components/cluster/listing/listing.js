@@ -20,7 +20,6 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { EuiMonitoringTable } from '../../table';
-import { AlertsIndicator } from '../../cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
@@ -108,21 +107,22 @@ const getColumns = (
         );
       },
     },
-    {
-      name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
-        defaultMessage: 'Status',
-      }),
-      field: 'status',
-      'data-test-subj': 'alertsStatus',
-      sortable: true,
-      render: (_status, cluster) => (
-        <IsClusterSupported {...cluster}>
-          <IsAlertsSupported cluster={cluster}>
-            <AlertsIndicator alerts={cluster.alerts} />
-          </IsAlertsSupported>
-        </IsClusterSupported>
-      ),
-    },
+    // TODO: use new alerts here
+    // {
+    //   name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
+    //     defaultMessage: 'Status',
+    //   }),
+    //   field: 'status',
+    //   'data-test-subj': 'alertsStatus',
+    //   sortable: true,
+    //   render: (_status, cluster) => (
+    //     <IsClusterSupported {...cluster}>
+    //       <IsAlertsSupported cluster={cluster}>
+    //         <AlertsIndicator alerts={cluster.alerts} />
+    //       </IsAlertsSupported>
+    //     </IsClusterSupported>
+    //   ),
+    // },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.nodesColumnTitle', {
         defaultMessage: 'Nodes',

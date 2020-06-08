@@ -18,7 +18,7 @@ import {
   AlertLicenseState,
   AlertStates,
 } from './types';
-import { AlertInstance, AlertExecutorOptions } from '../../../alerting/server';
+import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
 import {
   INDEX_ALERTS,
   INDEX_PATTERN_ELASTICSEARCH,
