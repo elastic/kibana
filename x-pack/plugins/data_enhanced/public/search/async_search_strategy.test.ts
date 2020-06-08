@@ -12,9 +12,10 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { asyncSearchStrategyProvider } from './async_search_strategy';
 import { IAsyncSearchOptions } from '.';
+import { DataEnhancedStartDependencies } from '../plugin';
 
 describe('Async search strategy', () => {
-  let mockCoreSetup: jest.Mocked<CoreSetup>;
+  let mockCoreSetup: jest.Mocked<CoreSetup<DataEnhancedStartDependencies>>;
   let mockDataStart: jest.Mocked<DataPublicPluginStart>;
   const mockSearch = jest.fn();
   const mockRequest = { params: {}, serverStrategy: 'foo' };
