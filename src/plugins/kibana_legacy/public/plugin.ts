@@ -220,13 +220,7 @@ export class KibanaLegacyPlugin {
         );
       },
       navigateToLegacyKibanaUrl: (hash: string) => {
-        return navigateToLegacyKibanaUrl(
-          hash,
-          this.forwardDefinitions,
-          basePath,
-          application,
-          this.currentAppId
-        );
+        return navigateToLegacyKibanaUrl(hash, this.forwardDefinitions, basePath, application);
       },
     };
   }

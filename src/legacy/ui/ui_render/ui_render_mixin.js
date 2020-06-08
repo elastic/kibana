@@ -132,7 +132,6 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
-          `${regularBundlePath}/commons.style.css`,
           ...(isCore
             ? []
             : [
@@ -165,13 +164,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-          ...(isCore
-            ? []
-            : [
-                `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
-                ...dllJsChunks,
-                `${regularBundlePath}/commons.bundle.js`,
-              ]),
+          ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
           `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(

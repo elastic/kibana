@@ -48,6 +48,7 @@ const createStartContract = (): Start => ({
     getHideWriteControls: jest.fn(),
   },
   navigateToDefaultApp: jest.fn(),
+  navigateToLegacyKibanaUrl: jest.fn(),
 });
 
 export const kibanaLegacyPluginMock = {
