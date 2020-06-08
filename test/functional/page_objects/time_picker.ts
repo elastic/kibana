@@ -45,8 +45,8 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   class TimePicker {
     defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
     defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-    defaultStartTimeUTC = '2015-09-18T19:37:13.000Z';
-    defaultEndTimeUTC = 'Sep 23, 2015 @ 18:31:44.000';
+    defaultStartTimeUTC = '2015-09-18T06:31:44.000Z';
+    defaultEndTimeUTC = '2015-09-23T18:31:44.000Z';
 
     async setDefaultAbsoluteRange() {
       await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
