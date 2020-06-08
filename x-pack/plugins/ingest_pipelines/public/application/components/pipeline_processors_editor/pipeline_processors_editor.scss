@@ -1,4 +1,7 @@
-.processorsEditorContainer {
-  background-color: $euiColorLightestShade;
-  padding: $euiSizeS;
+.pipelineProcessorsEditor {
+  margin-bottom: $euiSize;
+  &__editorContainer {
+    background-color: $euiColorLightestShade;
+    padding: $euiSizeS;
+  }
 }

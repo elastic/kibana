@@ -5,8 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, useCallback, memo, useState, useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import './pipeline_processors_editor.scss';
 
@@ -90,15 +91,30 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       [setFormState]
     );
 
+    const [showGlobalOnFailure, setShowGlobalOnFailure] = useState<boolean>(
+      Boolean(onFailureProcessors.length)
+    );
+
     useEffect(() => {
       onUpdate({
         validate: async () => {
           const formValid = await formState.validate();
           return formValid && settingsFormMode.id === 'closed';
         },
-        getData: () => serialize({ onFailure: onFailureProcessors, processors }),
+        getData: () =>
+          serialize({
+            onFailure: showGlobalOnFailure ? onFailureProcessors : undefined,
+            processors,
+          }),
       });
-    }, [processors, onFailureProcessors, onUpdate, formState, settingsFormMode]);
+    }, [
+      processors,
+      onFailureProcessors,
+      onUpdate,
+      formState,
+      settingsFormMode,
+      showGlobalOnFailure,
+    ]);
 
     const onSubmit = useCallback(
       (processorTypeAndOptions) => {
@@ -186,8 +202,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     );
 
     return (
-      <>
-        <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+      <div className="pipelineProcessorsEditor">
+        <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
           <EuiFlexItem grow={false}>
             <ProcessorsTitleAndTestButton
               learnMoreAboutProcessorsUrl={learnMoreAboutProcessorsUrl}
@@ -200,7 +216,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               direction="column"
               gutterSize="none"
               responsive={false}
-              className="processorsEditorContainer"
+              className="pipelineProcessorsEditor__editorContainer"
             >
               <EuiFlexItem grow={false}>
                 <Tree
@@ -248,49 +264,64 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              responsive={false}
-              className="processorsEditorContainer"
-            >
-              <EuiFlexItem grow={false}>
-                <Tree
-                  baseSelector={ON_FAILURE_STATE_SCOPE}
-                  processors={onFailureProcessors}
-                  onAction={onTreeAction}
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.pipelineEditor.onFailureToggleDescription"
+                  defaultMessage="Add failure processors"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  justifyContent="flexStart"
-                  alignItems="center"
-                  gutterSize="l"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconSide="left"
-                      iconType="plusInCircle"
-                      onClick={() =>
-                        setSettingsFormMode({
-                          id: 'creatingTopLevelProcessor',
-                          arg: ON_FAILURE_STATE_SCOPE,
-                        })
-                      }
-                    >
-                      {i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
-                        {
-                          defaultMessage: 'Add a processor',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              }
+              checked={showGlobalOnFailure}
+              onChange={(e) => setShowGlobalOnFailure(e.target.checked)}
+              data-test-subj="onFailureToggle"
+            />
           </EuiFlexItem>
+          {showGlobalOnFailure ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+                className="pipelineProcessorsEditor__editorContainer"
+              >
+                <EuiFlexItem grow={false}>
+                  <Tree
+                    baseSelector={ON_FAILURE_STATE_SCOPE}
+                    processors={onFailureProcessors}
+                    onAction={onTreeAction}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup
+                    justifyContent="flexStart"
+                    alignItems="center"
+                    gutterSize="l"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        iconSide="left"
+                        iconType="plusInCircle"
+                        onClick={() =>
+                          setSettingsFormMode({
+                            id: 'creatingTopLevelProcessor',
+                            arg: ON_FAILURE_STATE_SCOPE,
+                          })
+                        }
+                      >
+                        {i18n.translate(
+                          'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
+                          {
+                            defaultMessage: 'Add a processor',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : undefined}
         </EuiFlexGroup>
         {settingsFormMode.id !== 'closed' ? (
           <SettingsFormFlyout
@@ -321,7 +352,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             }}
           />
         )}
-      </>
+      </div>
     );
   }
 );
