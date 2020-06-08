@@ -104,6 +104,7 @@ const EditRulePageComponent: FC = () => {
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
   const setStepsForm = useCallback(
     (step: RuleStep, form: FormHook<FormData>) => {
@@ -113,6 +114,7 @@ const EditRulePageComponent: FC = () => {
         form.submit();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [initForm, selectedTab]
   );
   const tabs = useMemo(
@@ -206,6 +208,7 @@ const EditRulePageComponent: FC = () => {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       rule,
       loading,
@@ -265,6 +268,7 @@ const EditRulePageComponent: FC = () => {
     } else {
       setTabHasError(invalidForms);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     stepsForm,
     myAboutRuleForm,
@@ -320,6 +324,7 @@ const EditRulePageComponent: FC = () => {
       setInitForm(true);
       setSelectedTab(tab);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedTab, stepsForm.current]
   );
 
@@ -338,6 +343,7 @@ const EditRulePageComponent: FC = () => {
   useEffect(() => {
     const tabIndex = rule?.immutable ? 3 : 0;
     setSelectedTab(tabs[tabIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rule]);
 
   if (isSaved) {

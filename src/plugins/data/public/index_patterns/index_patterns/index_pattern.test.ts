@@ -85,6 +85,9 @@ const savedObjectsClient = {
 
 const patternCache = {
   clear: jest.fn(),
+  get: jest.fn(),
+  set: jest.fn(),
+  clearAll: jest.fn(),
 };
 
 const config = {
