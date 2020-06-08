@@ -7,6 +7,7 @@
 import { createHash } from 'crypto';
 import { CoreSetup, Logger, SavedObjectsClient } from '../../../../../../src/core/server';
 import {
+  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../../plugins/task_manager/server';
@@ -17,6 +18,7 @@ import { GetFullEndpointExceptionList, CompressExceptionList } from './fetch_end
 const PackagerTaskConstants = {
   TIMEOUT: '1m',
   TYPE: 'securitySolution:endpoint:exceptions-packager',
+  VERSION: '1.0.0',
 };
 
 export const ArtifactConstants = {
@@ -47,7 +49,17 @@ interface PackagerTaskRunnerContext {
 }
 
 export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
-  const run = async () => {
+  const getTaskId = (): string => {
+    return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
+  };
+
+  const run = async (taskId: string) => {
+    if (taskId !== getTaskId()) {
+      // old task, return
+      context.logger.debug(`Outdated task running: ${taskId}`);
+      return;
+    }
+
     context.logger.debug('Running exception list packager task');
 
     const [{ savedObjects }] = await context.core.getStartServices();
@@ -57,12 +69,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       const exceptions = await GetFullEndpointExceptionList(exceptionListClient, os);
-      // Don't create an artifact if there are no exceptions
-      if (exceptions.exceptions_list.length === 0) {
-        context.logger.debug(`No endpoint exceptions found for ${os}.`);
-        return;
-      }
-
       const compressedExceptions: Buffer = await CompressExceptionList(exceptions);
 
       const sha256Hash = createHash('sha256')
@@ -117,22 +123,22 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
         }
       }
     }
+    return true;
   };
 
-  const getTaskRunner = (runnerContext: PackagerTaskRunnerContext) => {
+  const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
     return {
       run: async () => {
         try {
-          await runnerContext.taskManager.ensureScheduled({
-            id: PackagerTaskConstants.TYPE,
+          const taskId = getTaskId();
+          const taskInstance = await runnerContext.taskManager.ensureScheduled({
+            id: taskId,
             taskType: PackagerTaskConstants.TYPE,
             scope: ['securitySolution'],
-            schedule: {
-              interval: context.config.packagerTaskInterval,
-            },
             state: {},
-            params: {},
+            params: { version: PackagerTaskConstants.VERSION },
           });
+          await runnerContext.taskManager.runNow(taskInstance.id);
         } catch (e) {
           context.logger.debug(`Error scheduling task, received ${e.message}`);
         }
@@ -141,14 +147,22 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   };
 
   context.taskManager.registerTaskDefinitions({
-    'securitySolution:endpoint:exceptions-packager': {
+    [PackagerTaskConstants.TYPE]: {
       title: 'Security Solution Endpoint Exceptions Handler',
       type: PackagerTaskConstants.TYPE,
       timeout: PackagerTaskConstants.TIMEOUT,
-      createTaskRunner: () => {
+      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-            await run();
+            await run(taskInstance.id);
+
+            const nextRun = new Date();
+            nextRun.setSeconds(nextRun.getSeconds() + context.config.packagerTaskInterval);
+
+            return {
+              state: {},
+              runAt: nextRun,
+            };
           },
           cancel: async () => {},
         };
