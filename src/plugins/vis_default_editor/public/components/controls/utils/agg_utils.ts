@@ -33,6 +33,7 @@ const CUSTOM_METRIC = {
 };
 
 function useCompatibleAggCallback(aggFilter: AggFilter) {
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   return useCallback(isCompatibleAggregation(aggFilter), [aggFilter]);
 }
 
