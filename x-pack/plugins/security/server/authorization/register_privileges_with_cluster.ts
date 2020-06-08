@@ -61,14 +61,14 @@ export async function registerPrivilegesWithCluster(
       privilege: application,
     });
     if (arePrivilegesEqual(existingPrivileges, expectedPrivileges)) {
-      logger.debug(`Kibana Privileges already registered with Elasticearch for ${application}`);
+      logger.debug(`Kibana Privileges already registered with Elasticsearch for ${application}`);
       return;
     }
 
     const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
     for (const privilegeToDelete of privilegesToDelete) {
       logger.debug(
-        `Deleting Kibana Privilege ${privilegeToDelete} from Elasticearch for ${application}`
+        `Deleting Kibana Privilege ${privilegeToDelete} from Elasticsearch for ${application}`
       );
       try {
         await clusterClient.callAsInternalUser('shield.deletePrivilege', {
