@@ -34655,7 +34655,7 @@ const npmRunPath = options => {
 
 	// Ensure the running `node` binary is used
 	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
-	result.unshift(execPathDir);
+	result.push(execPathDir);
 
 	return result.concat(options.path).join(path.delimiter);
 };

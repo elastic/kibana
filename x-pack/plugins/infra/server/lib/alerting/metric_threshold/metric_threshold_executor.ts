@@ -5,6 +5,7 @@
  */
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import { AlertStates } from './types';
@@ -77,6 +78,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
+          timestamp: moment().toISOString(),
           value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
