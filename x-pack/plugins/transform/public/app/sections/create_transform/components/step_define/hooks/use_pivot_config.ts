@@ -180,13 +180,25 @@ export const usePivotConfig = (
       }
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
+
       item.subAggs = item.subAggs ?? {};
+
+      const aggNameConflictMessages = getAggNameConflictToastMessages(
+        config.aggName,
+        item.subAggs,
+        {}
+      );
+      if (aggNameConflictMessages.length > 0) {
+        aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
+        return;
+      }
+
       item.subAggs[config.aggName] = config;
 
       const newRootItem = cloneAggItem(getRootAggregation(item));
       updateAggregation(newRootItem.aggName, newRootItem);
     },
-    [aggOptionsData, updateAggregation]
+    [aggOptionsData, toastNotifications, updateAggregation]
   );
 
   /**
@@ -198,6 +210,17 @@ export const usePivotConfig = (
       if (!parent || !parent.subAggs) {
         throw new Error('No parent aggregation reference found');
       }
+
+      const aggNameConflictMessages = getAggNameConflictToastMessages(
+        subItem.aggName,
+        parent.subAggs,
+        {}
+      );
+      if (aggNameConflictMessages.length > 0) {
+        aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
+        return;
+      }
+
       const { [prevSubItemName]: deleted, ...newSubAgg } = parent.subAggs;
       parent.subAggs = {
         ...newSubAgg,
@@ -206,7 +229,7 @@ export const usePivotConfig = (
       const newRootItem = cloneAggItem(getRootAggregation(subItem));
       updateAggregation(newRootItem.aggName, newRootItem);
     },
-    [updateAggregation]
+    [toastNotifications, updateAggregation]
   );
 
   /**
