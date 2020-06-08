@@ -17,9 +17,17 @@ interface Props {
   eventRateChartData: LineChartPoint[];
   start: number;
   end: number;
+  color: string;
+  showMarker?: boolean;
 }
 
-export const OverlayRange: FC<Props> = ({ eventRateChartData, start, end }) => {
+export const OverlayRange: FC<Props> = ({
+  eventRateChartData,
+  start,
+  end,
+  color,
+  showMarker = true,
+}) => {
   const maxHeight = Math.max(...eventRateChartData.map((e) => e.value));
 
   return (
@@ -38,7 +46,7 @@ export const OverlayRange: FC<Props> = ({ eventRateChartData, start, end }) => {
             },
           },
         ]}
-        style={{ fill: 'red' }}
+        style={{ fill: color, strokeWidth: 0 }}
       />
       <LineAnnotation
         id="annotation_1"
@@ -52,16 +60,18 @@ export const OverlayRange: FC<Props> = ({ eventRateChartData, start, end }) => {
           },
         }}
         marker={
-          <>
-            <div style={{ marginLeft: '14px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <EuiIcon type="arrowUp" />
+          showMarker ? (
+            <>
+              <div style={{ marginLeft: '14px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <EuiIcon type="arrowUp" />
+                </div>
+                <div style={{ fontWeight: 'normal', color: '#343741' }}>
+                  {formatDate(start, TIME_FORMAT)}
+                </div>
               </div>
-              <div style={{ fontWeight: 'normal', color: '#343741' }}>
-                {formatDate(start, TIME_FORMAT)}
-              </div>
-            </div>
-          </>
+            </>
+          ) : undefined
         }
       />
     </>

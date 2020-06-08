@@ -26,7 +26,7 @@ export class JobDetails extends Component {
 
     this.state = {};
     if (this.props.addYourself) {
-      this.props.addYourself(props.jobId, this);
+      this.props.addYourself(props.jobId, (j) => this.updateJob(j));
     }
   }
 
@@ -34,9 +34,8 @@ export class JobDetails extends Component {
     this.props.removeYourself(this.props.jobId);
   }
 
-  static getDerivedStateFromProps(props) {
-    const { job, loading } = props;
-    return { job, loading };
+  updateJob(job) {
+    this.setState({ job });
   }
 
   render() {

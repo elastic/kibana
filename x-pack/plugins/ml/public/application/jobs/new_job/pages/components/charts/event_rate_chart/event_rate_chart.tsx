@@ -5,7 +5,14 @@
  */
 
 import React, { FC } from 'react';
-import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
+import {
+  BarSeries,
+  Chart,
+  ScaleType,
+  Settings,
+  TooltipType,
+  BrushEndListener,
+} from '@elastic/charts';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
@@ -25,7 +32,10 @@ interface Props {
   overlayRange?: {
     start: number;
     end: number;
+    color: string;
+    showMarker?: boolean;
   };
+  onBrushEnd?: BrushEndListener;
 }
 
 export const EventRateChart: FC<Props> = ({
@@ -37,6 +47,7 @@ export const EventRateChart: FC<Props> = ({
   loading = false,
   fadeChart,
   overlayRange,
+  onBrushEnd,
 }) => {
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
@@ -49,13 +60,20 @@ export const EventRateChart: FC<Props> = ({
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart>
           {showAxis === true && <Axes />}
-          <Settings tooltip={TooltipType.None} />
+
+          {onBrushEnd === undefined ? (
+            <Settings tooltip={TooltipType.None} />
+          ) : (
+            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} />
+          )}
 
           {overlayRange && (
             <OverlayRange
               eventRateChartData={eventRateChartData}
               start={overlayRange.start}
               end={overlayRange.end}
+              color={overlayRange.color}
+              showMarker={overlayRange.showMarker}
             />
           )}
 

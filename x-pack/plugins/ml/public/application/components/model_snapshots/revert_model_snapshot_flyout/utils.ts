@@ -13,9 +13,16 @@ import {
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 
-export async function loadEventRateForJob(job: CombinedJobWithStats, bars: number) {
-  const interval = Math.floor(
-    (job.data_counts.latest_record_timestamp - job.data_counts.earliest_record_timestamp) / bars
+export async function loadEventRateForJob(
+  job: CombinedJobWithStats,
+  bucketSpanMs: number,
+  bars: number
+) {
+  const intervalMs = Math.max(
+    Math.floor(
+      (job.data_counts.latest_record_timestamp - job.data_counts.earliest_record_timestamp) / bars
+    ),
+    bucketSpanMs
   );
   const resp = await mlResultsService.getEventRateData(
     job.datafeed_config.indices.join(),
@@ -23,7 +30,7 @@ export async function loadEventRateForJob(job: CombinedJobWithStats, bars: numbe
     job.data_description.time_field,
     job.data_counts.earliest_record_timestamp,
     job.data_counts.latest_record_timestamp,
-    interval
+    intervalMs
   );
   if (resp.error !== undefined) {
     throw resp.error;
@@ -35,16 +42,23 @@ export async function loadEventRateForJob(job: CombinedJobWithStats, bars: numbe
   }));
 }
 
-export async function loadAnomalyDataForJob(job: CombinedJobWithStats, bars: number) {
-  const interval = Math.floor(
-    (job.data_counts.latest_record_timestamp - job.data_counts.earliest_record_timestamp) / bars
+export async function loadAnomalyDataForJob(
+  job: CombinedJobWithStats,
+  bucketSpanMs: number,
+  bars: number
+) {
+  const intervalMs = Math.max(
+    Math.floor(
+      (job.data_counts.latest_record_timestamp - job.data_counts.earliest_record_timestamp) / bars
+    ),
+    bucketSpanMs
   );
 
   const resp = await mlResultsService.getScoresByBucket(
     [job.job_id],
     job.data_counts.earliest_record_timestamp,
     job.data_counts.latest_record_timestamp,
-    interval,
+    intervalMs,
     1
   );
 

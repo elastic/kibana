@@ -13,6 +13,9 @@
 import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+// @ts-ignore
+import { formatDate } from '@elastic/eui/lib/services/format';
+import { XYBrushArea } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -43,6 +46,9 @@ import { useNotifications } from '../../../contexts/kibana';
 import { loadEventRateForJob, loadAnomalyDataForJob } from './utils';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import { parseInterval } from '../../../../../common/util/parse_interval';
+
+const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -56,13 +62,15 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [currentSnapshot, setCurrentSnapshot] = useState(snapshot);
   const [revertModalVisible, setRevertModalVisible] = useState(false);
   const [replay, setReplay] = useState(true);
-  const [runInRealTime, setRunInRealTime] = useState(true);
+  const [runInRealTime, setRunInRealTime] = useState(false);
   const [createCalendar, setCreateCalendar] = useState(false);
   const [startDate, setStartDate] = useState<moment.Moment | null>(
-    moment(snapshot.latest_record_time_stamp)
+    // moment(snapshot.latest_record_time_stamp)
+    null
   );
   const [endDate, setEndDate] = useState<moment.Moment | null>(
-    moment(job.data_counts.latest_record_timestamp)
+    // moment(job.data_counts.latest_record_timestamp)
+    null
   );
 
   const [eventRateData, setEventRateData] = useState<any[]>([]);
@@ -74,11 +82,14 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   }, []);
 
   async function createChartData() {
-    const d = await loadEventRateForJob(job, 100);
-    const a = await loadAnomalyDataForJob(job, 100);
+    // setTimeout(async () => {
+    const bucketSpanMs = parseInterval(job.analysis_config.bucket_span)!.asMilliseconds();
+    const d = await loadEventRateForJob(job, bucketSpanMs, 100);
+    const a = await loadAnomalyDataForJob(job, bucketSpanMs, 100);
     setEventRateData(d);
     setAnomalies(a[0]);
     setChartReady(true);
+    // }, 250);
   }
 
   function closeWithReload() {
@@ -93,6 +104,13 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   }
   function hideRevertModal() {
     setRevertModalVisible(false);
+  }
+
+  function onBrushEnd({ x }: XYBrushArea) {
+    if (x && x.length === 2) {
+      setStartDate(moment(x[0]));
+      setEndDate(moment(x[1]));
+    }
   }
 
   async function revert() {
@@ -145,11 +163,31 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             overlayRange={{
               start: snapshot.latest_record_time_stamp,
               end: job.data_counts.latest_record_timestamp,
+              color: '#ff0000',
             }}
           />
 
           <EuiSpacer size="l" />
-          <EuiHorizontalRule />
+          <EuiSpacer size="l" />
+
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.title',
+              {
+                defaultMessage: 'Anomalies will be deleted',
+              }
+            )}
+            color="warning"
+            iconType="alert"
+          >
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
+              defaultMessage="All anomaly detection results after {date} will be deleted."
+              values={{ date: formatDate(snapshot.latest_record_time_stamp, TIME_FORMAT) }}
+            />
+          </EuiCallOut>
+
+          <EuiHorizontalRule margin="xl" />
 
           <EuiFormRow fullWidth>
             <EuiCheckbox
@@ -194,40 +232,62 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             />
           </EuiFormRow>
 
-          <EuiSpacer size="l" />
+          {createCalendar && replay && (
+            <>
+              <EuiSpacer size="l" />
 
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFormRow label="From">
-                <EuiDatePicker
-                  disabled={createCalendar === false || replay === false}
-                  showTimeSelect
-                  selected={startDate}
-                  minDate={moment(snapshot.latest_record_time_stamp)}
-                  maxDate={endDate || moment(job.data_counts.latest_record_timestamp)}
-                  onChange={(d) => setStartDate(d)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="To">
-                <EuiDatePicker
-                  disabled={createCalendar === false || replay === false}
-                  showTimeSelect
-                  selected={endDate}
-                  minDate={startDate || moment(snapshot.latest_record_time_stamp)}
-                  onChange={(d) => setEndDate(d)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow label="From">
+                    <EuiDatePicker
+                      showTimeSelect
+                      selected={startDate}
+                      minDate={moment(snapshot.latest_record_time_stamp)}
+                      maxDate={endDate || moment(job.data_counts.latest_record_timestamp)}
+                      onChange={(d) => setStartDate(d)}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow label="To">
+                    <EuiDatePicker
+                      showTimeSelect
+                      selected={endDate}
+                      minDate={startDate || moment(snapshot.latest_record_time_stamp)}
+                      onChange={(d) => setEndDate(d)}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EventRateChart
+                eventRateChartData={eventRateData}
+                anomalyData={anomalies}
+                loading={chartReady === false}
+                height={'100px'}
+                width={'100%'}
+                fadeChart={true}
+                overlayRange={
+                  startDate !== null && endDate !== null
+                    ? {
+                        start: startDate.valueOf(),
+                        end: endDate.valueOf(),
+                        color: '#0000ff',
+                        showMarker: false,
+                      }
+                    : undefined
+                }
+                onBrushEnd={onBrushEnd}
+              />
+            </>
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={closeWithoutReload} flush="left">
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.closeButton"
+                  id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.closeButton"
                   defaultMessage="Close"
                 />
               </EuiButtonEmpty>
@@ -235,9 +295,13 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <EuiFlexItem grow={true} />
 
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={showRevertModal} fill>
+              <EuiButton
+                onClick={showRevertModal}
+                disabled={createCalendar === true && (startDate === null || endDate === null)}
+                fill
+              >
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.saveButton"
+                  id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.saveButton"
                   defaultMessage="Apply"
                 />
               </EuiButton>
