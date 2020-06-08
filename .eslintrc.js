@@ -203,6 +203,11 @@ module.exports = {
                 errorMessage: `Public code can not import from server, use a common directory.`,
               },
               {
+                target: ['(src|x-pack)/plugins/*/common/**/*'],
+                from: ['(src|x-pack)/plugins/*/(server|public)/**/*'],
+                errorMessage: `Common code can not import from server or public, use a common directory.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -220,7 +225,7 @@ module.exports = {
                   '!src/core/server/index.ts', // relative import
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
-                  '!src/core/server/test_utils',
+                  '!src/core/server/test_utils{,.ts}',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -582,11 +587,11 @@ module.exports = {
     },
 
     /**
-     * SIEM overrides
+     * Security Solution overrides
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -600,7 +605,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/{,legacy/}plugins/siem/**/*.{ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -635,7 +640,7 @@ module.exports = {
     // {
     //   // will introduced after the other warns are fixed
     //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
+    //   files: ['x-pack/plugins/security_solution/public/**/!(*.test).{js,ts,tsx}'],
     //   plugins: ['react-perf'],
     //   rules: {
     //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -646,7 +651,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/{,legacy/}plugins/siem/**/*.{js,ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,
@@ -753,10 +758,6 @@ module.exports = {
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
-        // might be introduced after the other warns are fixed
-        // 'react/jsx-sort-props': 'error',
-        // might be introduced after the other warns are fixed
-        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
