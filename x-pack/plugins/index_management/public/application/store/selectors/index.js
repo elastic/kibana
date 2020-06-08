@@ -6,6 +6,7 @@
 import { Pager, EuiSearchBar } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
+import * as qs from 'query-string';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
 
@@ -35,6 +36,7 @@ export const getIndexByIndexName = (state, name) => getIndices(state)[name];
 export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
 export const getTableState = (state) => state.tableState;
+export const getTableLocationProp = (_, props) => props.location;
 export const getAllIds = (state) => state.indices.allIds;
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
@@ -79,18 +81,24 @@ const filterByToggles = (indices, toggleNameToVisibleMap) => {
     });
   });
 };
-const getFilteredIndices = createSelector(
+
+export const getFilteredIndices = createSelector(
   getIndices,
   getAllIds,
   getTableState,
-  (indices, allIds, tableState) => {
+  getTableLocationProp,
+  (indices, allIds, tableState, tableLocation) => {
     let indexArray = allIds.map((indexName) => indices[indexName]);
     indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
-    const systemFilteredIndexes = tableState.showHiddenIndices
+    const { includeHiddenIndices: includeHiddenParam } = qs.parse(tableLocation.search);
+    const includeHidden = includeHiddenParam === 'true';
+    const filteredIndices = includeHidden
       ? indexArray
-      : indexArray.filter((index) => !(index.name + '').startsWith('.') && !index.hidden);
+      : indexArray.filter((index) => {
+          return !(index.name + '').startsWith('.') && !index.hidden;
+        });
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
-    return EuiSearchBar.Query.execute(filter, systemFilteredIndexes, {
+    return EuiSearchBar.Query.execute(filter, filteredIndices, {
       defaultFields: defaultFilterFields,
     });
   }
@@ -133,28 +141,7 @@ export const getPageOfIndices = createSelector(
   }
 );
 
-export const getIndexNamesForCurrentPage = createSelector(getPageOfIndices, (pageOfIndices) => {
-  return pageOfIndices.map((index) => index.name);
-});
-
-export const getHasNextPage = createSelector(getPager, (pager) => {
-  return pager.hasNextPage;
-});
-
-export const getHasPreviousPage = createSelector(getPager, (pager) => {
-  return pager.hasPreviousPage;
-});
-
-export const getCurrentPage = createSelector(getPager, (pager) => {
-  return pager.currentPage;
-});
-
 export const getFilter = createSelector(getTableState, ({ filter }) => filter);
-
-export const showHiddenIndices = createSelector(
-  getTableState,
-  ({ showHiddenIndices }) => showHiddenIndices
-);
 
 export const isSortAscending = createSelector(
   getTableState,
