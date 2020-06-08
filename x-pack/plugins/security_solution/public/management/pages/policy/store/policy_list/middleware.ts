@@ -5,10 +5,11 @@
  */
 
 import { GetPolicyListResponse, PolicyListState } from '../../types';
-import { sendGetEndpointSpecificDatasources } from './services/ingest';
+import { sendGetEndpointSpecificDatasources, sendDeleteDatasource } from './services/ingest';
 import { isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
+import { DeleteDatasourcesResponse } from '../../../../../../../ingest_manager/common';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = (
   coreStart
@@ -19,7 +20,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
     next(action);
 
     const state = getState();
-    if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
+    if (
+      (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) ||
+      action.type === 'serverDeletedPolicy'
+    ) {
       const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
       let response: GetPolicyListResponse;
 
@@ -45,6 +49,30 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
           pageIndex,
           pageSize,
           total: response ? response.total : initialPolicyListState().total,
+        },
+      });
+    } else if (action.type === 'userClickedPolicyListDeleteButton') {
+      const { policyId } = action.payload;
+      const datasourceIds: string[] = [policyId];
+      let apiResponse: DeleteDatasourcesResponse;
+      try {
+        apiResponse = await sendDeleteDatasource(http, { body: { datasourceIds } });
+      } catch (error) {
+        dispatch({
+          type: 'serverDeletedPolicyFailure',
+          payload: {
+            success: false,
+            error: error.body || error,
+          },
+        });
+        return;
+      }
+
+      dispatch({
+        type: 'serverDeletedPolicy',
+        payload: {
+          id: apiResponse[0].id,
+          success: true,
         },
       });
     }

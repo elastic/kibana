@@ -17,6 +17,10 @@ import {
   EuiContextMenuItem,
   EuiButtonIcon,
   EuiContextMenuPanel,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -106,6 +110,9 @@ export const PolicyList = React.memo(() => {
   const history = useHistory();
   const location = useLocation();
 
+  const [showDelete, setShowDelete] = useState<boolean>(false);
+  const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
+
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const {
     selectPolicyItems: policyItems,
@@ -114,6 +121,8 @@ export const PolicyList = React.memo(() => {
     selectTotal: totalItemCount,
     selectIsLoading: loading,
     selectApiError: apiError,
+    selectIsDeleting: isDeleting,
+    selectDeleteStatus: deleteStatus,
   } = usePolicyListSelector(selector);
 
   useEffect(() => {
@@ -125,6 +134,38 @@ export const PolicyList = React.memo(() => {
       });
     }
   }, [apiError, dispatch, notifications.toasts]);
+
+  // Handle showing update statuses
+  useEffect(() => {
+    if (deleteStatus !== undefined) {
+      if (deleteStatus === true) {
+        setPolicyIdToDelete('');
+        setShowDelete(false);
+        notifications.toasts.success({
+          toastLifeTimeMs: 10000,
+          title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteSuccessToast', {
+            defaultMessage: 'Success!',
+          }),
+          body: (
+            <FormattedMessage
+              id="'xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
+              defaultMessage="Policy has been deleted."
+            />
+          ),
+        });
+      } else {
+        notifications.toasts.danger({
+          toastLifeTimeMs: 10000,
+          title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToast', {
+            defaultMessage: 'Failed!',
+          }),
+          body: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
+            defaultMessage: 'Failed to delete policy',
+          }),
+        });
+      }
+    }
+  }, [notifications.toasts, deleteStatus]);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -142,6 +183,27 @@ export const PolicyList = React.memo(() => {
     },
     [history, location.pathname]
   );
+
+  const handleDeleteOnClick = useCallback(({ policyId }: { policyId: string }) => {
+    setPolicyIdToDelete(policyId);
+    setShowDelete(true);
+  }, []);
+
+  const handleDeleteConfirmation = useCallback(
+    ({ policyId }: { policyId: string }) => {
+      dispatch({
+        type: 'userClickedPolicyListDeleteButton',
+        payload: {
+          policyId,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const handleDeleteCancel = useCallback(() => {
+    setShowDelete(false);
+  }, []);
 
   const columns: Array<EuiTableFieldDataColumnType<Immutable<PolicyData>>> = useMemo(
     () => [
@@ -248,6 +310,18 @@ export const PolicyList = React.memo(() => {
                         />
                       </LinkToApp>
                     </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      icon="link"
+                      key="policyDeletAction"
+                      onClick={() => {
+                        handleDeleteOnClick({ policyId: item.id });
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policyList.policyDeleteAction"
+                        defaultMessage="Delete Policy"
+                      />
+                    </EuiContextMenuItem>,
                   ]}
                 />
               );
@@ -260,34 +334,116 @@ export const PolicyList = React.memo(() => {
   );
 
   return (
-    <ManagementPageView
-      viewType="list"
-      data-test-subj="policyListPage"
-      headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
-        defaultMessage: 'Policies',
-      })}
-      bodyHeader={
-        <EuiText color="subdued" data-test-subj="policyTotalCount">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
-            defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
-            values={{ totalItemCount }}
-          />
-        </EuiText>
-      }
-    >
-      <EuiBasicTable
-        items={useMemo(() => [...policyItems], [policyItems])}
-        columns={columns}
-        loading={loading}
-        pagination={paginationSetup}
-        onChange={handleTableChange}
-        data-test-subj="policyTable"
-        hasActions={false}
-      />
-      <SpyRoute />
-    </ManagementPageView>
+    <>
+      {showDelete && (
+        <ConfirmDelete
+          hostCount={10}
+          onCancel={handleDeleteCancel}
+          isDeleting={isDeleting}
+          onConfirm={() => {
+            handleDeleteConfirmation({ policyId: policyIdToDelete });
+          }}
+        />
+      )}
+      <ManagementPageView
+        viewType="list"
+        data-test-subj="policyListPage"
+        headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
+          defaultMessage: 'Policies',
+        })}
+        bodyHeader={
+          <EuiText color="subdued" data-test-subj="policyTotalCount">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
+              defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
+              values={{ totalItemCount }}
+            />
+          </EuiText>
+        }
+      >
+        <EuiBasicTable
+          items={useMemo(() => [...policyItems], [policyItems])}
+          columns={columns}
+          loading={loading}
+          pagination={paginationSetup}
+          onChange={handleTableChange}
+          data-test-subj="policyTable"
+          hasActions={false}
+        />
+        <SpyRoute />
+      </ManagementPageView>
+    </>
   );
 });
 
 PolicyList.displayName = 'PolicyList';
+
+const ConfirmDelete = React.memo<{
+  hostCount: number;
+  isDeleting: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}>(({ hostCount, isDeleting, onCancel, onConfirm }) => {
+  return (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        data-test-subj="policyListDeleteModal"
+        title={i18n.translate('xpack.securitySolution.endpoint.policyList.deleteConfirm.title', {
+          defaultMessage: 'Delete policy and deploy changes',
+        })}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        confirmButtonText={
+          isDeleting ? (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.deleteConfirm.deletingButton"
+              defaultMessage="Deleting..."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.deleteConfirm.confirmDeleteButton"
+              defaultMessage="Delete Policy"
+            />
+          )
+        }
+        confirmButtonDisabled={isDeleting}
+        cancelButtonText={i18n.translate(
+          'xpack.securitySolution.endpoint.policyList.deleteConfirm.cancelButtonTitle',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+      >
+        {hostCount > 0 && (
+          <>
+            <EuiCallOut
+              data-test-subj="policyListWarningCallout"
+              title={i18n.translate(
+                'xpack.securitySolution.endpoint.policyList.deleteConfirm.warningTitle',
+                {
+                  defaultMessage:
+                    'This action will delete Endpoint Security from {hostCount, plural, one {# host} other {# hosts}}',
+                  values: { hostCount },
+                }
+              )}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyList.deleteConfirm.warningMessage"
+                defaultMessage="Deleting this Policy will remove Endpoint Security from these hosts"
+              />
+            </EuiCallOut>
+            <EuiSpacer size="xl" />
+          </>
+        )}
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyList.deleteConfirm.message"
+            defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+          />
+        </p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  );
+});
+
+ConfirmDelete.displayName = 'ConfirmDelete';

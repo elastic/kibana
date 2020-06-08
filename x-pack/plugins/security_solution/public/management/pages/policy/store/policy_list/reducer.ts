@@ -17,6 +17,8 @@ import { PolicyListState } from '../../types';
 export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
   policyItems: [],
   isLoading: false,
+  isDeleting: false,
+  deleteStatus: undefined,
   apiError: undefined,
   pageIndex: 0,
   pageSize: 10,
@@ -33,6 +35,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
       ...state,
       ...action.payload,
       isLoading: false,
+      isDeleting: false,
     };
   }
 
@@ -41,6 +44,33 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
       ...state,
       apiError: action.payload,
       isLoading: false,
+      isDeleting: false,
+    };
+  }
+
+  if (action.type === 'serverDeletedPolicyFailure') {
+    return {
+      ...state,
+      ...action.payload,
+      isLoading: false,
+      isDeleting: false,
+    };
+  }
+
+  if (action.type === 'serverDeletedPolicy') {
+    return {
+      ...state,
+      deleteStatus: action.payload.success,
+      isLoading: false,
+      isDeleting: false,
+    };
+  }
+
+  if (action.type === 'userClickedPolicyListDeleteButton') {
+    return {
+      ...state,
+      isLoading: false,
+      isDeleting: true,
     };
   }
 
@@ -60,6 +90,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
           ...newState,
           apiError: undefined,
           isLoading: true,
+          isDeleting: false,
         };
       }
       return newState;

@@ -22,4 +22,24 @@ interface ServerFailedToReturnPolicyListData {
   payload: ServerApiError;
 }
 
-export type PolicyListAction = ServerReturnedPolicyListData | ServerFailedToReturnPolicyListData;
+interface UserClickedPolicyListDeleteButton {
+  type: 'userClickedPolicyListDeleteButton';
+  payload: { policyId: string };
+}
+
+interface ServerDeletedPolicyFailure {
+  type: 'serverDeletedPolicyFailure';
+  payload: ServerApiError;
+}
+
+interface ServerDeletedPolicy {
+  type: 'serverDeletedPolicy';
+  payload: { id: string; success: boolean };
+}
+
+export type PolicyListAction =
+  | ServerReturnedPolicyListData
+  | ServerFailedToReturnPolicyListData
+  | UserClickedPolicyListDeleteButton
+  | ServerDeletedPolicyFailure
+  | ServerDeletedPolicy;

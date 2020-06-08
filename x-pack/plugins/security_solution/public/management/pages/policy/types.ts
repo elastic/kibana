@@ -37,6 +37,10 @@ export interface PolicyListState {
   isLoading: boolean;
   /** current location information */
   location?: Immutable<AppLocation>;
+  /** policy is being deleted */
+  isDeleting: boolean;
+  /** Deletion status */
+  deleteStatus?: boolean;
 }
 
 /**
