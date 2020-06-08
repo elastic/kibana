@@ -43,18 +43,11 @@ uiModules.get('kibana').config(function ($provide) {
   });
 });
 
-function activate() {
-  active = true;
+export function activateForSuite() {
+  before(() => {
+    active = true;
+  });
+  after(() => {
+    active = false;
+  });
 }
-function deactivate() {
-  active = false;
-}
-
-export default {
-  activate: activate,
-  deactivate: deactivate,
-  activateForSuite: function () {
-    before(activate);
-    after(deactivate);
-  },
-};
