@@ -22,11 +22,11 @@ const stringifyJson = (json: any) =>
 
 export const useJsonStep = ({
   prop,
-  defaultValue = {},
+  defaultValue,
   setDataGetter,
   onStepValidityChange,
 }: Parameters) => {
-  const [content, setContent] = useState<string>(stringifyJson(defaultValue));
+  const [content, setContent] = useState<string>(stringifyJson(defaultValue ?? {}));
   const [error, setError] = useState<string | null>(null);
 
   const validateContent = useCallback(() => {
@@ -58,6 +58,13 @@ export const useJsonStep = ({
     onStepValidityChange(isValid);
     setDataGetter(dataGetter);
   }, [content, dataGetter, onStepValidityChange, setDataGetter, validateContent]);
+
+  // useEffect(() => {
+  //   console.log('Mount', defaultValue);
+  //   return () => {
+  //     console.log('Unmount!');
+  //   };
+  // }, [defaultValue]);
 
   return {
     content,

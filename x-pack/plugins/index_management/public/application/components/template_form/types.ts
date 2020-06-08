@@ -7,7 +7,7 @@
 import { TemplateDeserialized } from '../../../../common';
 
 export interface StepProps {
-  template?: TemplateDeserialized;
+  indexTemplate?: TemplateDeserialized;
   setDataGetter: (dataGetter: DataGetterFunc) => void;
   updateCurrentStep?: (step: number) => void;
   onStepValidityChange: (isValid: boolean | undefined) => void;

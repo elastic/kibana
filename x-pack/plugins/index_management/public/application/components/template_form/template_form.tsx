@@ -133,7 +133,6 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
         template.current = { ...template.current, ...data };
       }
     }
-
     return { isValid, data };
   };
 
@@ -206,7 +205,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
       <EuiForm data-test-subj="templateForm">
         <CurrentStepComponent
           key={currentStep}
-          template={template.current}
+          indexTemplate={template.current}
           setDataGetter={setStepDataGetter}
           updateCurrentStep={updateCurrentStep}
           onStepValidityChange={onStepValidityChange}

@@ -58,12 +58,10 @@ export const ConfigureSection = ({ title, subTitle, defaultExpanded = true, chil
         </EuiText>
       </EuiTextColor>
 
-      {isExpanded ? (
-        <>
-          <EuiSpacer />
-          {children}
-        </>
-      ) : null}
+      <div style={{ display: isExpanded ? 'block' : 'none' }}>
+        <EuiSpacer />
+        {children}
+      </div>
     </div>
   );
 };

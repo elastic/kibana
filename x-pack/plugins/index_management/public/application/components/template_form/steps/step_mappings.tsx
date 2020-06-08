@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  // EuiTitle,
   EuiButtonEmpty,
   EuiSpacer,
   EuiText,
@@ -19,11 +19,11 @@ import { StepProps, DataGetterFunc } from '../types';
 import { MappingsEditor, OnUpdateHandler, LoadMappingsFromJsonButton } from '../../mappings_editor';
 
 export const StepMappings: React.FunctionComponent<StepProps> = ({
-  template,
+  indexTemplate,
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const [mappings, setMappings] = useState(template?.template.mappings);
+  const [mappings, setMappings] = useState(indexTemplate?.template.mappings);
 
   const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
     ({ isValid, getData, validate }) => {
@@ -52,17 +52,6 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
     <div data-test-subj="stepMappings">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2 data-test-subj="stepTitle">
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
-                defaultMessage="Mappings (optional)"
-              />
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
           <EuiText>
             <p>
               <FormattedMessage
@@ -103,7 +92,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       <MappingsEditor
         value={mappings}
         onChange={onMappingsEditorUpdate}
-        indexSettings={template?.template.settings}
+        indexSettings={indexTemplate?.template.settings}
       />
 
       <EuiSpacer size="m" />

@@ -60,14 +60,14 @@ const fieldsMeta = {
 };
 
 export const StepLogistics: React.FunctionComponent<StepProps> = ({
-  template,
+  indexTemplate,
   isEditing,
   setDataGetter,
   onStepValidityChange,
 }) => {
   const { form } = useForm({
     schema: schemas.logistics,
-    defaultValue: template,
+    defaultValue: indexTemplate,
     options: { stripEmptyFields: false },
   });
 

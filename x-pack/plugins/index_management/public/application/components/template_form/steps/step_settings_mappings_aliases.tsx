@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 // import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -20,64 +20,122 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { documentationService } from '../../../services/documentation';
+// import { documentationService } from '../../../services/documentation';
 import { ComponentTemplatesContainer, ComponentTemplates } from '../../../components';
+import { TemplateDeserialized } from '../../../../../common';
 import { ConfigureSection, SimulateTemplate } from '../components';
-import { StepSettings } from './step_settings';
 import { StepProps, DataGetterFunc } from '../types';
+import { StepSettings } from './step_settings';
+import { StepMappings } from './step_mappings';
 // import { useJsonStep } from './use_json_step';
 
+const hasEntries = (obj?: Record<string, any>) =>
+  obj === undefined ? false : Object.keys(obj).length > 0;
+
 export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = ({
-  template = {},
+  indexTemplate,
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const { name, _kbnMeta, ...rest } = template;
+  const defaultTemplate = useMemo<TemplateDeserialized>(() => {
+    return {
+      composedOf: [],
+      template: {
+        settings: {},
+        mappings: {},
+        aliases: {},
+      },
+      ...indexTemplate,
+    } as TemplateDeserialized;
+  }, [indexTemplate]);
+
   const [isCreateComponentFromTemplateVisible, setIsCreateComponentFromTemplateVisible] = useState(
     false
   );
-  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
-  const [isMappingsVisible, setIsMappingsVisible] = useState(false);
-  const [isAliasesVisible, setIsAliasesVisible] = useState(false);
+  const [isSettingsVisible, setIsSettingsVisible] = useState(
+    hasEntries((defaultTemplate.template as any).settings)
+  );
+  const [isMappingsVisible, setIsMappingsVisible] = useState(
+    hasEntries((defaultTemplate.template as any).mappings)
+  );
+  const [isAliasesVisible, setIsAliasesVisible] = useState(
+    hasEntries((defaultTemplate.template as any).aliases)
+  );
   const [isSimulateVisible, setIsSimulateVisible] = useState(false);
-  const [currentTemplate, setCurrentTemplate] = useState({
-    ...rest,
-    composedOf: [],
-    template: {},
-  });
-
-  const cacheTemplate = useRef(template);
 
   const validation = useRef<{
     settings: boolean | undefined;
     mappings: boolean | undefined;
     aliases: boolean | undefined;
   }>({
-    settings: true,
-    mappings: true,
-    aliases: true,
+    settings: undefined,
+    mappings: undefined,
+    aliases: undefined,
   });
 
-  const setSettingsDataGetter = useCallback(async (stepDataGetter: DataGetterFunc) => {
-    const allSectionsValid = Object.values(validation.current).every((isValid) => isValid);
+  const dataGetter = useRef<any>(async () => ({
+    isValid: true,
+    data: {
+      template: {
+        settings: defaultTemplate.template.settings,
+        mappings: defaultTemplate.template.mappings,
+        aliases: defaultTemplate.template.aliases,
+      },
+    },
+  }));
 
-    if (allSectionsValid) {
-      const { data } = await stepDataGetter();
-      let nextState;
-      setCurrentTemplate((prev) => {
-        nextState = {
-          ...prev,
+  const allGetters = useRef({
+    settings: async () => ({ isValid: true, data: defaultTemplate.template.settings }),
+    mappings: async () => ({ isValid: true, data: defaultTemplate.template.mappings }),
+    aliases: async () => ({ isValid: true, data: defaultTemplate.template.aliases }),
+  });
+
+  const updateDataGetter = useCallback(() => {
+    dataGetter.current = async () => {
+      const { isValid: isSettingsValid, data: settingsData } = await allGetters.current.settings();
+      const { isValid: isMappingsValid, data: mappingsData } = await allGetters.current.mappings();
+      const { isValid: isAliasesValid, data: aliasesData } = await allGetters.current.aliases();
+
+      return {
+        isValid: Boolean(isSettingsValid) && Boolean(isMappingsValid) && Boolean(isAliasesValid),
+        data: {
           template: {
-            ...prev.template,
-            ...data,
+            ...settingsData,
+            ...mappingsData,
+            ...aliasesData,
           },
-        };
-        return nextState;
-      });
+        },
+      };
+    };
 
-      cacheTemplate.current = nextState as any;
-    }
-  }, []);
+    setDataGetter(dataGetter.current);
+  }, [setDataGetter]);
+
+  const onCustomSettingsChange = useMemo(() => {
+    return {
+      settings: (stepDataGetter: DataGetterFunc) => {
+        allGetters.current.settings = stepDataGetter;
+        updateDataGetter();
+      },
+      mappings: (stepDataGetter: DataGetterFunc) => {
+        allGetters.current.mappings = stepDataGetter;
+        updateDataGetter();
+      },
+      aliases: (stepDataGetter: DataGetterFunc) => {
+        allGetters.current.aliases = stepDataGetter;
+        updateDataGetter();
+      },
+    };
+  }, [updateDataGetter]);
+
+  const getTemplateSimulate = useCallback(async () => {
+    const { data } = await dataGetter.current();
+    const { name, _kbnMeta, ...rest } = defaultTemplate;
+    return {
+      ...rest,
+      ...data,
+    };
+  }, [defaultTemplate]);
 
   const onSettingsValidityChange = useCallback((isValid: boolean | undefined) => {
     validation.current = {
@@ -86,12 +144,19 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
     };
   }, []);
 
+  const onMappingsValidityChange = useCallback((isValid: boolean | undefined) => {
+    validation.current = {
+      ...validation.current,
+      mappings: isValid,
+    };
+  }, []);
+
   useEffect(() => {
     setDataGetter(async () => ({
       isValid: true,
-      data: currentTemplate,
+      data: defaultTemplate,
     }));
-  }, [currentTemplate, setDataGetter]);
+  }, [defaultTemplate, setDataGetter]);
 
   return (
     <>
@@ -261,10 +326,11 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
               <div>
                 <EuiSpacer />
                 <StepSettings
-                  template={cacheTemplate.current as any}
-                  setDataGetter={setSettingsDataGetter}
+                  indexTemplate={defaultTemplate}
+                  setDataGetter={onCustomSettingsChange.settings}
                   onStepValidityChange={onSettingsValidityChange}
                 />
+                <EuiSpacer size="xl" />
               </div>
             )}
           </div>
@@ -284,7 +350,11 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
             {isMappingsVisible && (
               <div>
                 <EuiSpacer />
-                Mappings configuration
+                <StepMappings
+                  indexTemplate={defaultTemplate}
+                  setDataGetter={onCustomSettingsChange.mappings}
+                  onStepValidityChange={onMappingsValidityChange}
+                />
               </div>
             )}
           </div>
@@ -313,7 +383,10 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
 
       {/* Simulate index template */}
       {isSimulateVisible && (
-        <SimulateTemplate template={currentTemplate} onClose={() => setIsSimulateVisible(false)} />
+        <SimulateTemplate
+          getTemplate={getTemplateSimulate}
+          onClose={() => setIsSimulateVisible(false)}
+        />
       )}
     </>
   );

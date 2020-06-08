@@ -22,13 +22,13 @@ import { StepProps } from '../types';
 import { useJsonStep } from './use_json_step';
 
 export const StepSettings: React.FunctionComponent<StepProps> = ({
-  template,
+  indexTemplate,
   setDataGetter,
   onStepValidityChange,
 }) => {
   const { content, setContent, error } = useJsonStep({
     prop: 'settings',
-    defaultValue: template?.template.settings,
+    defaultValue: indexTemplate?.template.settings,
     setDataGetter,
     onStepValidityChange,
   });

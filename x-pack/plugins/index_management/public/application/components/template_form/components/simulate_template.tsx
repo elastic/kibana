@@ -29,10 +29,10 @@ const { stripEmptyFields } = serializers;
 
 interface Props {
   onClose(): void;
-  template: { [key: string]: any };
+  getTemplate: () => { [key: string]: any };
 }
 
-export const SimulateTemplate = ({ onClose, template }: Props) => {
+export const SimulateTemplate = ({ onClose, getTemplate }: Props) => {
   const [heightCodeBlock, setHeightCodeBlock] = useState(0);
   const [templatePreview, setTemplatePreview] = useState('{}');
   const [count, setCount] = useState(1);
@@ -47,12 +47,13 @@ export const SimulateTemplate = ({ onClose, template }: Props) => {
   const updatePreview = useCallback(async () => {
     if (count > refCount.current) {
       refCount.current = count;
+      const indexTemplate = await getTemplate();
       const { data, error } = await simulateIndexTemplate(
-        serializeV2Template(stripEmptyFields(template) as any)
+        serializeV2Template(stripEmptyFields(indexTemplate) as any)
       );
       setTemplatePreview(JSON.stringify(data ?? error, null, 2));
     }
-  }, [count, template]);
+  }, [count, getTemplate]);
 
   useEffect(() => {
     updatePreview();
@@ -64,7 +65,8 @@ export const SimulateTemplate = ({ onClose, template }: Props) => {
       data-test-subj="simulateTemplateFlyout"
       aria-labelledby="simulateTemplateFlyoutTitle"
       size="m"
-      maxWidth={500}
+      maxWidth={720}
+      style={{ minWidth: '680px' }}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
