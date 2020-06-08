@@ -22,6 +22,8 @@ import {
 } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../../common/projections/services';
 
+const MAX_NUMBER_OF_SERVICES = 1000;
+
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 
 const arrayUnionToCallable = <T extends any[]>(
@@ -65,7 +67,10 @@ const getTransactionDurationAvg = async ({
         },
         aggs: {
           services: {
-            ...projection.body.aggs.services,
+            terms: {
+              ...projection.body.aggs.services.terms,
+              size: MAX_NUMBER_OF_SERVICES,
+            },
             aggs: {
               average: {
                 avg: {
@@ -113,7 +118,10 @@ const getAgentName = async ({ setup, projection }: AggregationParams) => {
         },
         aggs: {
           services: {
-            ...projection.body.aggs.services,
+            terms: {
+              ...projection.body.aggs.services.terms,
+              size: MAX_NUMBER_OF_SERVICES,
+            },
             aggs: {
               agent_name: {
                 top_hits: {
@@ -167,7 +175,10 @@ const getTransactionRate = async ({ setup, projection }: AggregationParams) => {
         aggs: setup.hasTransactionDurationMetrics
           ? {
               services: {
-                ...projection.body.aggs.services,
+                terms: {
+                  ...projection.body.aggs.services.terms,
+                  size: MAX_NUMBER_OF_SERVICES,
+                },
                 aggs: {
                   count: {
                     value_count: {
@@ -260,7 +271,10 @@ const getEnvironments = async ({ setup, projection }: AggregationParams) => {
         },
         aggs: {
           services: {
-            ...projection.body.aggs.services,
+            terms: {
+              ...projection.body.aggs.services.terms,
+              size: MAX_NUMBER_OF_SERVICES,
+            },
             aggs: {
               environments: {
                 terms: {

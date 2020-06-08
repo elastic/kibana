@@ -11,6 +11,7 @@ import { APMAPI } from '../../../server/routes/create_apm_api';
 import { Client } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
+
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
   params?: {
     body?: any;
