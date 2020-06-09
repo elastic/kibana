@@ -176,7 +176,7 @@
     "elastic-apm-node": "^3.6.0",
     "elasticsearch": "^16.7.0",
     "elasticsearch-browser": "^16.7.0",
-    "execa": "^4.0.0",
+    "execa": "^4.0.2",
     "expiry-js": "0.1.7",
     "fast-deep-equal": "^3.1.1",
     "file-loader": "4.2.0",
