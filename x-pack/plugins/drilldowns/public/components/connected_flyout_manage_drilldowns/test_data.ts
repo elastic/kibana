@@ -9,7 +9,7 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
   UiActionsEnhancedSerializedAction,
-} from '../../../../advanced_ui_actions/public';
+} from '../../../../ui_actions_enhanced/public';
 import { TriggerContextMapping } from '../../../../../../src/plugins/ui_actions/public';
 import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
 

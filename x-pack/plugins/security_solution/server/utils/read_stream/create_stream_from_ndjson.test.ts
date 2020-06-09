@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { transformDataToNdjson } from './create_stream_from_ndjson';
-import { ImportRuleAlertRest } from '../../lib/detection_engine/types';
 import { sampleRule } from '../../lib/detection_engine/signals/__mocks__/es_results';
+import { ImportRulesSchemaDecoded } from '../../../common/detection_engine/schemas/request/import_rules_schema';
 
-export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
+export const getOutputSample = (): Partial<ImportRulesSchemaDecoded> => ({
   rule_id: 'rule-1',
   output_index: '.siem-signals',
   risk_score: 50,
@@ -21,7 +21,7 @@ export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
   type: 'query',
 });
 
-export const getSampleAsNdjson = (sample: Partial<ImportRuleAlertRest>): string => {
+export const getSampleAsNdjson = (sample: Partial<ImportRulesSchemaDecoded>): string => {
   return `${JSON.stringify(sample)}\n`;
 };
 
