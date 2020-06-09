@@ -8,7 +8,7 @@ import React, { Fragment, FC } from 'react';
 
 import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
-import { FormMessage } from '../../hooks/use_create_analytics_form/state'; // State
+import { FormMessage } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 interface Props {
   messages: FormMessage[];
