@@ -60,7 +60,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
         selectedStatus,
       });
     },
-    [selectedEventIds, updateAlertsStatus]
+    [currentFilter, selectedEventIds, updateAlertsStatus]
   );
 
   const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
