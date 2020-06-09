@@ -11,8 +11,6 @@ import { getIndexPatternService, getUiSettings } from '../../../../kibana_servic
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternSavedObjectAttrs } from '../../../../../../../../src/plugins/data/public/index_patterns/index_patterns/index_patterns';
 
-const SIEM_DEFAULT_INDEX = 'siem:defaultIndex';
-
 export type IndexPatternMeta = {
   id: string;
   title: string;
@@ -36,7 +34,7 @@ export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
 async function loadSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
   let securityIndexPatternTitles: string[];
   try {
-    securityIndexPatternTitles = getUiSettings().get(SIEM_DEFAULT_INDEX) as string[];
+    securityIndexPatternTitles = getUiSettings().get('securitySolution:defaultIndex') as string[];
   } catch (error) {
     // UiSettings throws with unreconized configuration setting
     // siem:defaultIndex configuration setting is not registered if security app is not running

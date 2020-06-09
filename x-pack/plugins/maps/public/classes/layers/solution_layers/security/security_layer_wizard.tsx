@@ -16,7 +16,7 @@ export const SecurityLayerWizardConfig: LayerWizard = {
     return indexPatterns.length > 0;
   },
   description: i18n.translate('xpack.maps.security.desc', {
-    defaultMessage: 'SIEM layers',
+    defaultMessage: 'Security layers',
   }),
   icon: 'logoSecurity',
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
