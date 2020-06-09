@@ -38,7 +38,8 @@ export class ReportingPlugin
     const basePath = http.basePath.get;
 
     // async background setup
-    buildConfig(initContext, core, this.logger).then((config) => {
+    (async () => {
+      const config = await buildConfig(initContext, core, this.logger);
       const reportingCore = new ReportingCore(config);
 
       reportingCore.pluginSetup({
@@ -55,6 +56,10 @@ export class ReportingPlugin
 
       this.logger.debug('Setup complete');
       this.setup$.next(true);
+    })().catch((e) => {
+      this.logger.error(
+        `Error in Reporting setup, reporting may not function properly\n` + e.stack
+      );
     });
 
     return {};
@@ -70,7 +75,8 @@ export class ReportingPlugin
     const { elasticsearch } = reportingCore.getPluginSetupDeps();
 
     // async background start
-    initializeBrowserDriverFactory(config, logger).then(async (browserDriverFactory) => {
+    (async () => {
+      const browserDriverFactory = await initializeBrowserDriverFactory(config, logger);
       reportingCore.setBrowserDriverFactory(browserDriverFactory);
 
       const esqueue = await createQueueFactory(reportingCore, logger);
@@ -88,6 +94,10 @@ export class ReportingPlugin
 
       this.logger.debug('Start complete');
       this.start$.next(true);
+    })().catch((e) => {
+      this.logger.error(
+        `Error in Reporting startup, reporting may not function properly\n` + e.stack
+      );
     });
 
     return {};
