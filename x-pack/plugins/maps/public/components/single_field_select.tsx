@@ -20,8 +20,8 @@ import { IFieldType } from 'src/plugins/data/public';
 import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(
-  fields: IFieldType[],
-  isFieldDisabled?: (field?: IFieldType) => boolean
+  fields?: IFieldType[],
+  isFieldDisabled?: (field: IFieldType) => boolean
 ): Array<EuiComboBoxOptionOption<IFieldType>> {
   if (!fields) {
     return [];
