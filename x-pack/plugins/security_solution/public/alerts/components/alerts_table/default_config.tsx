@@ -194,7 +194,7 @@ export const getAlertActions = ({
   const openAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Open alert',
     content: i18n.ACTION_OPEN_ALERT,
-    dataTestSubj: 'update-alert-status',
+    dataTestSubj: 'open-alert-status',
     displayType: 'contextMenu',
     iconType: 'securitySignalDetected',
     id: FILTER_OPEN,
@@ -215,7 +215,7 @@ export const getAlertActions = ({
   const closeAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Close alert',
     content: i18n.ACTION_CLOSE_ALERT,
-    dataTestSubj: 'update-alert-status',
+    dataTestSubj: 'close-alert-status',
     displayType: 'contextMenu',
     iconType: 'securitySignalResolved',
     id: FILTER_CLOSED,
@@ -234,9 +234,9 @@ export const getAlertActions = ({
   };
 
   const inProgressAlertActionComponent: TimelineRowAction = {
-    ariaLabel: 'Update alert status',
+    ariaLabel: 'Mark alert in progress',
     content: i18n.ACTION_IN_PROGRESS_ALERT,
-    dataTestSubj: 'update-alert-status',
+    dataTestSubj: 'in-progress-alert-status',
     displayType: 'contextMenu',
     iconType: 'alert',
     id: FILTER_IN_PROGRESS,

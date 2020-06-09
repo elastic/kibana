@@ -68,50 +68,48 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     defaultNumberFormat
   );
 
-  const UtilityBarPopoverContent = (closePopover: () => void) => {
-    return (
-      <EuiFlexGroup direction="column">
-        {currentFilter !== FILTER_OPEN && (
-          <EuiFlexItem style={{ minWidth: 175 }}>
-            <LinkIcon
-              iconType={'securitySignalDetected'}
-              iconSize="m"
-              ariaLabel="openSelectedAlerts"
-              onClick={() => handleUpdateStatus('open')}
-            >
-              {i18n.BATCH_ACTION_OPEN_SELECTED}
-            </LinkIcon>
-          </EuiFlexItem>
-        )}
+  const UtilityBarPopoverContent = (closePopover: () => void) => (
+    <EuiFlexGroup style={{ minWidth: 175 }} direction="column">
+      {currentFilter !== FILTER_OPEN && (
+        <EuiFlexItem>
+          <LinkIcon
+            iconType={'securitySignalDetected'}
+            iconSize="m"
+            ariaLabel="openSelectedAlerts"
+            onClick={() => handleUpdateStatus('open')}
+          >
+            {i18n.BATCH_ACTION_OPEN_SELECTED}
+          </LinkIcon>
+        </EuiFlexItem>
+      )}
 
-        {currentFilter !== FILTER_CLOSED && (
-          <EuiFlexItem style={{ minWidth: 175 }}>
-            <LinkIcon
-              iconType={'securitySignalResolved'}
-              iconSize="m"
-              ariaLabel="closeSelectedAlerts"
-              onClick={() => handleUpdateStatus('closed')}
-            >
-              {i18n.BATCH_ACTION_CLOSE_SELECTED}
-            </LinkIcon>
-          </EuiFlexItem>
-        )}
+      {currentFilter !== FILTER_CLOSED && (
+        <EuiFlexItem>
+          <LinkIcon
+            iconType={'securitySignalResolved'}
+            iconSize="m"
+            ariaLabel="closeSelectedAlerts"
+            onClick={() => handleUpdateStatus('closed')}
+          >
+            {i18n.BATCH_ACTION_CLOSE_SELECTED}
+          </LinkIcon>
+        </EuiFlexItem>
+      )}
 
-        {currentFilter !== FILTER_IN_PROGRESS && (
-          <EuiFlexItem style={{ minWidth: 175 }}>
-            <LinkIcon
-              iconType={'alert'}
-              iconSize="m"
-              ariaLabel="markSelectedAlertsInProgress"
-              onClick={() => handleUpdateStatus('in-progress')}
-            >
-              {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
-            </LinkIcon>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  };
+      {currentFilter !== FILTER_IN_PROGRESS && (
+        <EuiFlexItem>
+          <LinkIcon
+            iconType={'alert'}
+            iconSize="m"
+            ariaLabel="markSelectedAlertsInProgress"
+            onClick={() => handleUpdateStatus('in-progress')}
+          >
+            {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
+          </LinkIcon>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 
   return (
     <>
@@ -134,7 +132,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                 </UtilityBarText>
 
                 <UtilityBarAction
-                  dataTestSubj="openCloseAlert"
+                  dataTestSubj="alertActionPopover"
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
                   iconType="arrowDown"
                   iconSide="right"
