@@ -64,7 +64,7 @@ export const filterNetworkData: Filter[] = [
 ];
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
-  <AlertsView tableId={ALERTS_TABLE_ID} {...alertsProps} pageFilters={filterNetworkData} />
+  <AlertsView timelineId={ALERTS_TABLE_ID} {...alertsProps} pageFilters={filterNetworkData} />
 ));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

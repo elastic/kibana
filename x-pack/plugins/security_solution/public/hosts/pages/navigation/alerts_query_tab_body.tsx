@@ -50,7 +50,7 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQu
     [pageFilters]
   );
 
-  return <AlertsView tableId={ALERTS_TABLE_ID} {...rest} pageFilters={hostPageFilters} />;
+  return <AlertsView timelineId={ALERTS_TABLE_ID} {...rest} pageFilters={hostPageFilters} />;
 });
 
 HostAlertsQueryTabBody.displayName = 'HostAlertsQueryTabBody';

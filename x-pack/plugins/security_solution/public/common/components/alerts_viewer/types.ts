@@ -16,7 +16,7 @@ export interface AlertsComponentsProps
     CommonQueryProps,
     'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate' | 'type'
   > {
-  tableId: string;
+  timelineId: string;
   pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];

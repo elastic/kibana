@@ -17,7 +17,7 @@ import { MatrixHisrogramConfigs } from '../matrix_histogram/types';
 const ID = 'alertsOverTimeQuery';
 
 export const AlertsView = ({
-  tableId,
+  timelineId,
   deleteQuery,
   endDate,
   filterQuery,
@@ -62,7 +62,12 @@ export const AlertsView = ({
         type={type}
         {...alertsHistogramConfigs}
       />
-      <AlertsTable id={tableId} endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+      <AlertsTable
+        timelineId={timelineId}
+        endDate={endDate}
+        startDate={startDate}
+        pageFilters={pageFilters}
+      />
     </>
   );
 };
