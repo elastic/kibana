@@ -82,6 +82,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         onlyUserFavorite: filterBy === 'favorites',
         timelineType: TimelineType.default,
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterBy]);
 
     return (

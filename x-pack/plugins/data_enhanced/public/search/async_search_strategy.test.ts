@@ -6,35 +6,37 @@
 
 import { of } from 'rxjs';
 import { AbortController } from 'abort-controller';
+import { CoreSetup } from '../../../../../src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { asyncSearchStrategyProvider } from './async_search_strategy';
-import { IAsyncSearchOptions } from './types';
-import { CoreStart } from 'kibana/public';
+import { IAsyncSearchOptions } from '.';
+import { DataEnhancedStartDependencies } from '../plugin';
 
 describe('Async search strategy', () => {
-  let mockCoreStart: MockedKeys<CoreStart>;
+  let mockCoreSetup: jest.Mocked<CoreSetup<DataEnhancedStartDependencies>>;
+  let mockDataStart: jest.Mocked<DataPublicPluginStart>;
   const mockSearch = jest.fn();
   const mockRequest = { params: {}, serverStrategy: 'foo' };
   const mockOptions: IAsyncSearchOptions = { pollInterval: 0 };
 
   beforeEach(() => {
-    mockCoreStart = coreMock.createStart();
+    mockCoreSetup = coreMock.createSetup();
+    mockDataStart = dataPluginMock.createStartContract();
+    (mockDataStart.search.getSearchStrategy as jest.Mock).mockReturnValue({ search: mockSearch });
+    mockCoreSetup.getStartServices.mockResolvedValue([
+      undefined as any,
+      { data: mockDataStart },
+      undefined,
+    ]);
     mockSearch.mockReset();
   });
 
   it('only sends one request if the first response is complete', async () => {
     mockSearch.mockReturnValueOnce(of({ id: 1, total: 1, loaded: 1 }));
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup);
 
     await asyncSearch.search(mockRequest, mockOptions).toPromise();
 
@@ -51,17 +53,7 @@ describe('Async search strategy', () => {
         of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false })
       );
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
-
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup);
     expect(mockSearch).toBeCalledTimes(0);
 
     await asyncSearch.search(mockRequest, mockOptions).toPromise();
@@ -75,17 +67,7 @@ describe('Async search strategy', () => {
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: true }))
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: true }));
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
-
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup);
     expect(mockSearch).toBeCalledTimes(0);
 
     await asyncSearch
@@ -104,16 +86,7 @@ describe('Async search strategy', () => {
         of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false })
       );
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup);
 
     expect(mockSearch).toBeCalledTimes(0);
 
@@ -131,16 +104,7 @@ describe('Async search strategy', () => {
         of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false })
       );
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup);
 
     expect(mockSearch).toBeCalledTimes(0);
 
@@ -157,16 +121,7 @@ describe('Async search strategy', () => {
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }))
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup);
     const abortController = new AbortController();
     const options = { ...mockOptions, signal: abortController.signal };
 
@@ -178,7 +133,7 @@ describe('Async search strategy', () => {
     } catch (e) {
       expect(e.name).toBe('AbortError');
       expect(mockSearch).toBeCalledTimes(1);
-      expect(mockCoreStart.http.delete).toBeCalled();
+      expect(mockCoreSetup.http.delete).toBeCalled();
     }
   });
 });
