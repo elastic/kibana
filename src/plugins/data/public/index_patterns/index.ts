@@ -37,4 +37,5 @@ export {
   IndexPattern,
   TypeMeta,
   AggregationRestrictions,
+  IndexPatternsApiClient,
 } from './index_patterns';

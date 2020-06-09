@@ -40,7 +40,11 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService, onRedirectNoIndexPattern } from './index_patterns';
+import {
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  IndexPatternsApiClient,
+} from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -167,7 +171,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const indexPatterns = new IndexPatternsService(
       uiSettings,
       savedObjects.client,
-      http,
+      new IndexPatternsApiClient(http),
       fieldFormats,
       notifications.toasts.add,
       notifications.toasts.addError,

@@ -75,8 +75,10 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   }
 
   public start(core: CoreStart) {
+    const fieldFormats = this.fieldFormats.start();
     return {
-      fieldFormats: this.fieldFormats.start(),
+      fieldFormats,
+      indexPatterns: this.indexPatterns.start(core, fieldFormats),
     };
   }
 

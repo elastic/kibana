@@ -21,7 +21,6 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
   IUiSettingsClient,
-  HttpStart,
   CoreStart,
 } from 'src/core/public';
 
@@ -68,13 +67,14 @@ export class IndexPatternsService {
   constructor(
     uiSettings: CoreStart['uiSettings'],
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpStart,
+    apiClient: IndexPatternsApiClient,
     fieldFormats: FieldFormatsStartCommon,
     onNotification: OnNotification,
     onError: OnError,
     onRedirectNoIndexPattern: () => void
   ) {
-    this.apiClient = new IndexPatternsApiClient(http);
+    // this.apiClient = new IndexPatternsApiClient(http);
+    this.apiClient = apiClient;
     this.config = uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;

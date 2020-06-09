@@ -17,12 +17,22 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, KibanaRequest } from 'kibana/server';
+import { IUiSettingsClient, SavedObjectsClient } from 'kibana/public';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
+import {
+  IndexPatternsService as IndexPatternsCommonService,
+  IndexPatternsApiClient,
+} from '../../common/index_patterns';
+import { FieldFormatsStart } from '../field_formats';
 
-export class IndexPatternsService implements Plugin<void> {
+export interface IndexPatternsServiceStart {
+  IndexPatternsServiceFactory: any;
+}
+
+export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -30,5 +40,30 @@ export class IndexPatternsService implements Plugin<void> {
     registerRoutes(core.http);
   }
 
-  public start() {}
+  public start(core: CoreStart, fieldFormats: FieldFormatsStart) {
+    // unsure what to do about http
+    const { uiSettings, savedObjects } = core;
+    // todo - how to set up uiSettings.getScopedClient()
+    // todo - how to set up savedObjects.getScopedClient()
+
+    return {
+      IndexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
+        const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+        const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+        // todo - separate out client api, uiSettings compat
+
+        return new IndexPatternsCommonService(
+          (uiSettingsClient as unknown) as IUiSettingsClient,
+          // (savedObjectsClient as unknown) as SavedObjectsClient,
+          savedObjectsClient,
+          {} as IndexPatternsApiClient, // hoooow
+          formats,
+          () => {},
+          () => {},
+          () => {}
+        );
+      },
+    };
+  }
 }
