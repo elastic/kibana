@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, memo } from 'react';
 import {
   EuiButtonIcon,
@@ -14,8 +15,6 @@ import {
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ProcessorInternal } from '../types';
 
@@ -72,17 +71,14 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={
-                        <FormattedMessage
-                          id="xpack.ingestPipelines.pipelineEditor.item.uniqueIdToolTipDescription"
-                          defaultMessage={
-                            'A unique identifier for this "{type}" processor. This value will not be saved for this processor. To provide your own processor description that can be saved use the tag field. Click on the help icon below to learn more.'
-                          }
-                          values={{
-                            type: processor.type,
-                          }}
-                        />
-                      }
+                      content={i18n.translate(
+                        'xpack.ingestPipelines.pipelineEditor.item.uniqueIdToolTipDescription',
+                        {
+                          defaultMessage:
+                            'A unique identifier for this "{type}" processor. This value will not be saved for this processor. To provide your own processor description that can be saved use the tag field. Click on the help icon below to learn more.',
+                          values: { type: processor.type },
+                        }
+                      )}
                     >
                       <EuiLink target="_blank" href={links.learnMoreAboutProcessorsUrl}>
                         <EuiIcon color="primary" type="questionInCircle" />
