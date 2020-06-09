@@ -63,6 +63,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field, value, filterManager, onFilterAdded]);
 
   const filterOutValue = useCallback(() => {
@@ -77,6 +78,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field, value, filterManager, onFilterAdded]);
 
   return (
