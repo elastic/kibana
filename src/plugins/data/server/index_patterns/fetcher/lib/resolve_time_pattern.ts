@@ -47,7 +47,7 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
     )
     .sortBy((indexName: string) => indexName)
     .uniq(true)
-    .map(indexName => {
+    .map((indexName) => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {
         return {
@@ -69,8 +69,10 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
     .value();
 
   return {
-    all: allIndexDetails.map(details => details.indexName),
+    all: allIndexDetails.map((details) => details.indexName),
 
-    matches: allIndexDetails.filter(details => details.isMatch).map(details => details.indexName),
+    matches: allIndexDetails
+      .filter((details) => details.isMatch)
+      .map((details) => details.indexName),
   };
 }

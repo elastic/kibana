@@ -6,11 +6,13 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { Filter, TimeRange } from 'src/plugins/data/public';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
+  MapQuery,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -24,8 +26,20 @@ export type GeoJsonWithMeta = {
   meta?: GeoJsonFetchMeta;
 };
 
+export type BoundsFilters = {
+  applyGlobalQuery: boolean;
+  filters: Filter[];
+  query: MapQuery;
+  sourceQuery: MapQuery;
+  timeFilters: TimeRange;
+};
+
 export interface IVectorSource extends ISource {
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
+  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -40,11 +54,14 @@ export interface IVectorSource extends ISource {
   createField({ fieldName }: { fieldName: string }): IField;
   supportsFieldMeta(): boolean;
   canFormatFeatureProperties(): boolean;
-  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
+  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -60,7 +77,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
   supportsFieldMeta(): boolean;
-  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {

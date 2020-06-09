@@ -57,12 +57,12 @@ export class FluidTable extends Component {
       [
         {
           name: 'title',
-          getValue: item => item.title.toLowerCase(),
+          getValue: (item) => item.title.toLowerCase(),
           isAscending: true,
         },
         {
           name: 'description',
-          getValue: item => item.description.toLowerCase(),
+          getValue: (item) => item.description.toLowerCase(),
           isAscending: true,
         },
       ],
@@ -70,7 +70,7 @@ export class FluidTable extends Component {
     );
   }
 
-  onSort = prop => {
+  onSort = (prop) => {
     this.sortableProperties.sortOn(prop);
 
     this.setState({
@@ -79,7 +79,7 @@ export class FluidTable extends Component {
   };
 
   renderRows() {
-    return this.items.map(item => (
+    return this.items.map((item) => (
       <KuiTableRow key={item.title}>
         <KuiTableRowCell>{item.title}</KuiTableRowCell>
 

@@ -35,7 +35,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
 
     return {
       success: true,
-      results: response.removals.map(removal => ({
+      results: response.removals.map((removal) => ({
         success: removal.status && removal.status >= 200 && removal.status < 300,
         error:
           !removal.status || removal.status >= 300

@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
 
-  describe('Home page', function() {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexManagement');
     });
@@ -45,6 +45,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         const templateList = await testSubjects.exists('templateList');
         expect(templateList).to.be(true);
+      });
+    });
+
+    describe('Component templates', () => {
+      it('renders the component templates tab', async () => {
+        // Navigate to the component templates tab
+        await pageObjects.indexManagement.changeTabs('component_templatesTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/component_templates`);
+
+        // There should be no component templates by default, so we verify the empty prompt displays
+        const componentTemplateEmptyPrompt = await testSubjects.exists('emptyList');
+        expect(componentTemplateEmptyPrompt).to.be(true);
       });
     });
   });

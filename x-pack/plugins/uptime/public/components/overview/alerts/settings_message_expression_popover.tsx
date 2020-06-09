@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLink } from '@elastic/eui';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
-import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SETTINGS_ROUTE } from '../../../../common/constants';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface SettingsMessageExpressionPopoverProps {
   'aria-label': string;
@@ -25,9 +25,12 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
   value,
   id,
 }) => {
+  const kibana = useKibana();
+  const path = kibana.services?.application?.getUrlForApp('uptime', { path: 'settings' });
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
+      data-test-subj={`xpack.uptime.alerts.tls.expressionPopover.${id}`}
       id={id}
       anchorPosition="downLeft"
       button={
@@ -50,12 +53,12 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
           settingsPageLink: (
             // this link is wrapped around a span so we can also change the UI state
             // and hide the alert flyout before triggering the navigation to the settings page
-            <Link to={SETTINGS_ROUTE} data-test-subj="xpack.uptime.alerts.tlsFlyout.linkToSettings">
+            <EuiLink href={path} data-test-subj="xpack.uptime.alerts.tlsFlyout.linkToSettings">
               <span
                 onClick={() => {
                   setAlertFlyoutVisible(false);
                 }}
-                onKeyUp={e => {
+                onKeyUp={(e) => {
                   if (e.key === 'Enter') {
                     setAlertFlyoutVisible(false);
                   }
@@ -63,7 +66,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
               >
                 settings page
               </span>
-            </Link>
+            </EuiLink>
           ),
         }}
       />

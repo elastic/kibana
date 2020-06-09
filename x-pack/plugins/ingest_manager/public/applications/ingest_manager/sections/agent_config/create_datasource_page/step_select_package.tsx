@@ -131,8 +131,8 @@ export const StepSelectPackage: React.FunctionComponent<{
             ),
           }}
           height={240}
-          onChange={options => {
-            const selectedOption = options.find(option => option.checked === 'on');
+          onChange={(options) => {
+            const selectedOption = options.find((option) => option.checked === 'on');
             if (selectedOption) {
               setSelectedPkgKey(selectedOption.key);
             } else {

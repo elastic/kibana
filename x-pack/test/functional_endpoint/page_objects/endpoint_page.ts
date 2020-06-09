@@ -7,11 +7,22 @@
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function EndpointPageProvider({ getService }: FtrProviderContext) {
+export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const pageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
 
   return {
+    /**
+     * Navigate to the Endpoints list page
+     */
+    async navigateToEndpointList(searchParams?: string) {
+      await pageObjects.common.navigateToApp('securitySolution', {
+        hash: `/management/endpoints${searchParams ? `?${searchParams}` : ''}`,
+      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    },
+
     /**
      * Finds the Table with the given `selector` (test subject) and returns
      * back an array containing the table's header column text
@@ -23,16 +34,12 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await (await testSubjects.find('policyTable')).parseDomContent();
       return $('thead tr th')
         .toArray()
-        .map(th =>
+        .map((th) =>
           $(th)
             .text()
             .replace(/&nbsp;/g, '')
             .trim()
         );
-    },
-
-    async welcomeEndpointTitle() {
-      return await testSubjects.getVisibleText('welcomeTitle');
     },
 
     /**
@@ -47,11 +54,11 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await hostTable.parseDomContent();
       return $('tr')
         .toArray()
-        .map(row =>
+        .map((row) =>
           $(row)
             .find('.euiTableCellContent')
             .toArray()
-            .map(cell =>
+            .map((cell) =>
               $(cell)
                 .text()
                 .replace(/&nbsp;/g, '')
@@ -83,7 +90,7 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await detailsData.parseDomContent();
       return $('dt')
         .toArray()
-        .map(key =>
+        .map((key) =>
           $(key)
             .text()
             .replace(/&nbsp;/g, '')

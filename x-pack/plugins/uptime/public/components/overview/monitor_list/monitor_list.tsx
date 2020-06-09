@@ -14,9 +14,9 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
+import { HistogramPoint } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
@@ -28,14 +28,13 @@ import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
-import { useUrlParams } from '../../../hooks';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 
 interface Props extends MonitorListProps {
-  lastRefresh: number;
+  pageSize: number;
+  setPageSize: (val: number) => void;
   monitorList: MonitorList;
-  getMonitorList: (params: FetchMonitorStatesQueryArgs) => void;
 }
 
 const TruncatedEuiLink = styled(EuiLink)`
@@ -44,48 +43,19 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
-const DEFAULT_PAGE_SIZE = 10;
-const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
-const getPageSizeValue = () => {
-  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
-  if (isNaN(value)) {
-    return DEFAULT_PAGE_SIZE;
-  }
-  return value;
+export const noItemsMessage = (loading: boolean, filters?: string) => {
+  if (loading) return labels.LOADING;
+  return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
 export const MonitorListComponent: React.FC<Props> = ({
   filters,
-  getMonitorList,
-  lastRefresh,
   monitorList: { list, error, loading },
   linkParameters,
+  pageSize,
+  setPageSize,
 }) => {
-  const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-
-  const [getUrlValues] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
-
-  useEffect(() => {
-    getMonitorList({
-      dateRangeStart,
-      dateRangeEnd,
-      filters,
-      pageSize,
-      pagination,
-      statusFilter,
-    });
-  }, [
-    getMonitorList,
-    dateRangeStart,
-    dateRangeEnd,
-    filters,
-    lastRefresh,
-    pageSize,
-    pagination,
-    statusFilter,
-  ]);
 
   const items = list.summaries ?? [];
 
@@ -175,7 +145,7 @@ export const MonitorListComponent: React.FC<Props> = ({
             iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
             onClick={() => {
               if (drawerIds.includes(id)) {
-                updateDrawerIds(drawerIds.filter(p => p !== id));
+                updateDrawerIds(drawerIds.filter((p) => p !== id));
               } else {
                 updateDrawerIds([...drawerIds, id]);
               }
@@ -199,7 +169,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={!!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE}
+        noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
       />
       <EuiSpacer size="m" />

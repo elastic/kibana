@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('home page', function() {
+  describe('home page', function () {
     const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
 

@@ -27,7 +27,7 @@ const { generateStorybookEntry } = require('./lib/storybook_entry');
 const { REPO_ROOT, ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
-exports.runStorybookCli = config => {
+exports.runStorybookCli = (config) => {
   const { name, storyGlobs } = config;
   run(
     async ({ flags, log, procRunner }) => {

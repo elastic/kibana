@@ -6,7 +6,7 @@
 
 import { AbstractLayer } from '../layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { TileStyle } from '../../styles/tile/tile_style';
 
 export class TileLayer extends AbstractLayer {
@@ -25,21 +25,18 @@ export class TileLayer extends AbstractLayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
-      return;
-    }
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       //data is immmutable
       return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
+    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
     try {
       const url = await this.getSource().getUrlTemplate();
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, { url }, {});
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
   }
 
@@ -71,15 +68,16 @@ export class TileLayer extends AbstractLayer {
         //when turning the layer back into visible, it's possible the url has not been resovled yet.
         return;
       }
-      const url = sourceDataRequest.getData();
-      if (!url) {
+
+      const tmsSourceData = sourceDataRequest.getData();
+      if (!tmsSourceData || !tmsSourceData.url) {
         return;
       }
 
       const sourceId = this.getId();
       mbMap.addSource(sourceId, {
         type: 'raster',
-        tiles: [url],
+        tiles: [tmsSourceData.url],
         tileSize: 256,
         scheme: 'xyz',
       });

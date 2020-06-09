@@ -21,7 +21,7 @@ import { rename } from 'fs';
 import { delay } from 'lodash';
 
 export function renamePlugin(workingPath, finalPath) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const start = Date.now();
     const retryTime = 3000;
     const retryDelay = 100;

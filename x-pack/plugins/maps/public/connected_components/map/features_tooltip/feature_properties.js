@@ -151,7 +151,7 @@ export class FeatureProperties extends React.Component {
       );
     }
 
-    const rows = this.state.properties.map(tooltipProperty => {
+    const rows = this.state.properties.map((tooltipProperty) => {
       const label = tooltipProperty.getPropertyName();
       return (
         <tr key={label}>
@@ -174,7 +174,7 @@ export class FeatureProperties extends React.Component {
     return (
       <table
         className="eui-yScrollWithShadows mapFeatureTooltip_table"
-        ref={node => (this._node = node)}
+        ref={(node) => (this._node = node)}
       >
         <tbody>{rows}</tbody>
       </table>

@@ -27,7 +27,7 @@ function renderOption(option, searchValue, contentClassName) {
 
 function groupFieldsByOrigin(fields) {
   const fieldsByOriginMap = new Map();
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (fieldsByOriginMap.has(field.origin)) {
       const fieldsList = fieldsByOriginMap.get(field.origin);
       fieldsList.push(field);
@@ -39,7 +39,7 @@ function groupFieldsByOrigin(fields) {
 
   function fieldsListToOptions(fieldsList) {
     return fieldsList
-      .map(field => {
+      .map((field) => {
         return { value: field, label: field.label };
       })
       .sort((a, b) => {
@@ -73,7 +73,7 @@ function groupFieldsByOrigin(fields) {
 }
 
 export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ...rest }) {
-  const onFieldChange = selectedFields => {
+  const onFieldChange = (selectedFields) => {
     onChange({
       field: selectedFields.length > 0 ? selectedFields[0].value : null,
     });
@@ -81,7 +81,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
 
   let selectedOption;
   if (selectedFieldName) {
-    selectedOption = fields.find(field => {
+    selectedOption = fields.find((field) => {
       return field.name === selectedFieldName;
     });
   }

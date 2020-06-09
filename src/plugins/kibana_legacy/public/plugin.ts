@@ -161,7 +161,7 @@ export class KibanaLegacyPlugin {
         this.forwardDefinitions.push({
           legacyAppId,
           newAppId,
-          rewritePath: rewritePath || (path => `#${path.replace(`/${legacyAppId}`, '') || '/'}`),
+          rewritePath: rewritePath || ((path) => `#${path.replace(`/${legacyAppId}`, '') || '/'}`),
         });
       },
 
@@ -180,7 +180,7 @@ export class KibanaLegacyPlugin {
   }
 
   public start({ application, http: { basePath }, uiSettings }: CoreStart) {
-    this.currentAppIdSubscription = application.currentAppId$.subscribe(currentAppId => {
+    this.currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
       this.currentAppId = currentAppId;
     });
     injectHeaderStyle(uiSettings);

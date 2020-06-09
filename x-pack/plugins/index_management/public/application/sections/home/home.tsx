@@ -18,13 +18,19 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import { BASE_PATH } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
+import { ComponentTemplateList } from '../../components/component_templates';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
-type Section = 'indices' | 'templates';
+export enum Section {
+  Indices = 'indices',
+  IndexTemplates = 'templates',
+  ComponentTemplates = 'component_templates',
+}
+
+export const homeSections = [Section.Indices, Section.IndexTemplates, Section.ComponentTemplates];
 
 interface MatchParams {
   section: Section;
@@ -38,11 +44,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const tabs = [
     {
-      id: 'indices' as Section,
+      id: Section.Indices,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
     {
-      id: 'templates' as Section,
+      id: Section.IndexTemplates,
       name: (
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
@@ -50,10 +56,19 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
     },
+    {
+      id: Section.ComponentTemplates,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.componentTemplatesTabTitle"
+          defaultMessage="Component Templates"
+        />
+      ),
+    },
   ];
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`${BASE_PATH}${newSection}`);
+    history.push(`/${newSection}`);
   };
 
   useEffect(() => {
@@ -92,7 +107,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
@@ -107,9 +122,14 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
+          <Route exact path={`/${Section.Indices}`} component={IndexList} />
+          <Route exact path={`/${Section.Indices}/filter/:filter?`} component={IndexList} />
+          <Route
+            exact
+            path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
+            component={TemplateList}
+          />
+          <Route exact path={`/${Section.ComponentTemplates}`} component={ComponentTemplateList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

@@ -10,34 +10,34 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { AnomaliesResponse } from './get_service_map';
 import {
   transformServiceMapResponses,
-  ServiceMapResponse
+  ServiceMapResponse,
 } from './transform_service_map_responses';
 
 const nodejsService = {
   [SERVICE_NAME]: 'opbeans-node',
   [SERVICE_ENVIRONMENT]: 'production',
-  [AGENT_NAME]: 'nodejs'
+  [AGENT_NAME]: 'nodejs',
 };
 
 const nodejsExternal = {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: 'opbeans-node',
   [SPAN_TYPE]: 'external',
-  [SPAN_SUBTYPE]: 'aa'
+  [SPAN_SUBTYPE]: 'aa',
 };
 
 const javaService = {
   [SERVICE_NAME]: 'opbeans-java',
   [SERVICE_ENVIRONMENT]: 'production',
-  [AGENT_NAME]: 'java'
+  [AGENT_NAME]: 'java',
 };
 
 const anomalies = ({
-  aggregations: { jobs: { buckets: [] } }
+  aggregations: { jobs: { buckets: [] } },
 } as unknown) as AnomaliesResponse;
 
 describe('transformServiceMapResponses', () => {
@@ -48,28 +48,28 @@ describe('transformServiceMapResponses', () => {
       discoveredServices: [
         {
           from: nodejsExternal,
-          to: nodejsService
-        }
+          to: nodejsService,
+        },
       ],
       connections: [
         {
           source: javaService,
-          destination: nodejsExternal
-        }
-      ]
+          destination: nodejsExternal,
+        },
+      ],
     };
 
     const { elements } = transformServiceMapResponses(response);
 
     const connection = elements.find(
-      element => 'source' in element.data && 'target' in element.data
+      (element) => 'source' in element.data && 'target' in element.data
     );
 
     // @ts-ignore
     expect(connection?.data.target).toBe('opbeans-node');
 
     expect(
-      elements.find(element => element.data.id === '>opbeans-node')
+      elements.find((element) => element.data.id === '>opbeans-node')
     ).toBeUndefined();
   });
 
@@ -80,31 +80,31 @@ describe('transformServiceMapResponses', () => {
       discoveredServices: [
         {
           from: nodejsExternal,
-          to: nodejsService
-        }
+          to: nodejsService,
+        },
       ],
       connections: [
         {
           source: javaService,
-          destination: nodejsExternal
+          destination: nodejsExternal,
         },
         {
           source: javaService,
           destination: {
             ...nodejsExternal,
-            [SPAN_TYPE]: 'foo'
-          }
-        }
-      ]
+            [SPAN_TYPE]: 'foo',
+          },
+        },
+      ],
     };
 
     const { elements } = transformServiceMapResponses(response);
 
-    const connections = elements.filter(element => 'source' in element.data);
+    const connections = elements.filter((element) => 'source' in element.data);
 
     expect(connections.length).toBe(1);
 
-    const nodes = elements.filter(element => !('source' in element.data));
+    const nodes = elements.filter((element) => !('source' in element.data));
 
     expect(nodes.length).toBe(2);
   });
@@ -117,30 +117,30 @@ describe('transformServiceMapResponses', () => {
       connections: [
         {
           source: javaService,
-          destination: nodejsExternal
+          destination: nodejsExternal,
         },
         {
           source: javaService,
           destination: {
             ...nodejsExternal,
-            [SPAN_TYPE]: 'foo'
-          }
+            [SPAN_TYPE]: 'foo',
+          },
         },
         {
           source: javaService,
           destination: {
             ...nodejsExternal,
-            [SPAN_SUBTYPE]: 'bb'
-          }
-        }
-      ]
+            [SPAN_SUBTYPE]: 'bb',
+          },
+        },
+      ],
     };
 
     const { elements } = transformServiceMapResponses(response);
 
-    const nodes = elements.filter(element => !('source' in element.data));
+    const nodes = elements.filter((element) => !('source' in element.data));
 
-    const nodejsNode = nodes.find(node => node.data.id === '>opbeans-node');
+    const nodejsNode = nodes.find((node) => node.data.id === '>opbeans-node');
 
     // @ts-ignore
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
@@ -156,9 +156,9 @@ describe('transformServiceMapResponses', () => {
       connections: [
         {
           source: javaService,
-          destination: nodejsService
-        }
-      ]
+          destination: nodejsService,
+        },
+      ],
     };
 
     const { elements } = transformServiceMapResponses(response);

@@ -70,11 +70,11 @@ export function injectReferences(
   if (!Array.isArray(panels)) {
     return;
   }
-  panels.forEach(panel => {
+  panels.forEach((panel) => {
     if (!panel.panelRefName) {
       return;
     }
-    const reference = references.find(ref => ref.name === panel.panelRefName);
+    const reference = references.find((ref) => ref.name === panel.panelRefName);
     if (!reference) {
       // Throw an error since "panelRefName" means the reference exists within
       // "references" and in this scenario we have bad data.

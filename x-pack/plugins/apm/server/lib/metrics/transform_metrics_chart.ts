@@ -8,7 +8,7 @@ import { Unionize, Overwrite } from 'utility-types';
 import { ChartBase } from './types';
 import {
   ESSearchResponse,
-  ESSearchRequest
+  ESSearchRequest,
 } from '../../../typings/elasticsearch';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { getVizColorForIndex } from '../../../common/viz_colors';
@@ -61,15 +61,15 @@ export function transformDataToMetricsChart(
           chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
         overallValue,
         data:
-          timeseriesData?.buckets.map(bucket => {
+          timeseriesData?.buckets.map((bucket) => {
             const { value } = bucket[seriesKey] as { value: number | null };
             const y = value === null || isNaN(value) ? null : value;
             return {
               x: bucket.key,
-              y
+              y,
             };
-          }) || []
+          }) || [],
       };
-    })
+    }),
   };
 }

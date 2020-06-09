@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/case/common/constants';
 import { postCaseReq, defaultUser, postCommentReq } from '../../../common/lib/mock';
@@ -15,6 +16,7 @@ import {
   deleteComments,
   deleteConfiguration,
   getConfiguration,
+  getServiceNowConnector,
 } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,19 +25,31 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('push_case', () => {
+    const actionsRemover = new ActionsRemover(supertest);
+
     afterEach(async () => {
       await deleteCases(es);
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);
+      await actionsRemover.removeAll();
     });
 
     it('should push a case', async () => {
+      const { body: connector } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getServiceNowConnector())
+        .expect(200);
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration())
+        .send(getConfiguration(connector.id))
         .expect(200);
+
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -58,11 +72,20 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('pushes a comment appropriately', async () => {
+      const { body: connector } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getServiceNowConnector())
+        .expect(200);
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration())
+        .send(getConfiguration(connector.id))
         .expect(200);
+
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -99,6 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
       expect(body.comments[0].pushed_by).to.eql(defaultUser);
     });
+
     it('unhappy path - 404s when case does not exist', async () => {
       await supertest
         .post(`${CASES_URL}/fake-id/_push`)

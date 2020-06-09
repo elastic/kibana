@@ -50,7 +50,7 @@ export class LocalApplicationService {
    * @param angularRouteManager The current `ui/routes` instance
    */
   attachToAngular(angularRouteManager: UIRoutes) {
-    npStart.plugins.kibanaLegacy.getApps().forEach(app => {
+    npStart.plugins.kibanaLegacy.getApps().forEach((app) => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {
         outerAngularWrapperRoute: true,
@@ -87,7 +87,7 @@ export class LocalApplicationService {
       });
 
       if (app.updater$) {
-        app.updater$.subscribe(updater => {
+        app.updater$.subscribe((updater) => {
           const updatedFields = updater(app);
           if (updatedFields && updatedFields.activeUrl) {
             npStart.core.chrome.navLinks.update(app.navLinkId || app.id, {
@@ -98,7 +98,7 @@ export class LocalApplicationService {
       }
     });
 
-    npStart.plugins.kibanaLegacy.getForwards().forEach(forwardDefinition => {
+    npStart.plugins.kibanaLegacy.getForwards().forEach((forwardDefinition) => {
       angularRouteManager.when(matchAllWithPrefix(forwardDefinition.legacyAppId), {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,

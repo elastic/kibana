@@ -39,7 +39,10 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  // Internal types
-  InternalApplicationStart,
   LegacyApp,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
+  // Internal types
+  InternalApplicationSetup,
+  InternalApplicationStart,
 } from './types';

@@ -37,11 +37,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import {
-  TemplateDeserialized,
-  TemplateListItem,
-  IndexTemplateFormatVersion,
-} from '../../../common';
+import { TemplateDeserialized, TemplateListItem } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
@@ -168,26 +164,35 @@ export async function unfreezeIndices(indices: string[]) {
 }
 
 export async function loadIndexSettings(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/settings/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {
-  const response = await httpService.httpClient.put(`${API_BASE_PATH}/settings/${indexName}`, {
-    body: JSON.stringify(body),
-  });
+  const response = await httpService.httpClient.put(
+    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    {
+      body: JSON.stringify(body),
+    }
+  );
   // Only track successful requests.
   uiMetricService.trackMetric('count', UIM_UPDATE_SETTINGS);
   return response;
 }
 
 export async function loadIndexStats(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/stats/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
 export async function loadIndexMapping(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/mapping/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
@@ -205,17 +210,15 @@ export async function loadIndexData(type: string, indexName: string) {
 }
 
 export function useLoadIndexTemplates() {
-  return useRequest<TemplateListItem[]>({
-    path: `${API_BASE_PATH}/templates`,
+  return useRequest<{ templates: TemplateListItem[]; legacyTemplates: TemplateListItem[] }>({
+    path: `${API_BASE_PATH}/index_templates`,
     method: 'get',
   });
 }
 
-export async function deleteTemplates(
-  templates: Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
-) {
+export async function deleteTemplates(templates: Array<{ name: string; isLegacy?: boolean }>) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/delete-templates`,
+    path: `${API_BASE_PATH}/delete_index_templates`,
     method: 'post',
     body: { templates },
   });
@@ -227,23 +230,20 @@ export async function deleteTemplates(
   return result;
 }
 
-export function useLoadIndexTemplate(
-  name: TemplateDeserialized['name'],
-  formatVersion: IndexTemplateFormatVersion
-) {
+export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegacy?: boolean) {
   return useRequest<TemplateDeserialized>({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/index_templates/${encodeURIComponent(name)}`,
     method: 'get',
     query: {
-      v: formatVersion,
+      legacy: isLegacy,
     },
   });
 }
 
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates`,
-    method: 'put',
+    path: `${API_BASE_PATH}/index_templates`,
+    method: 'post',
     body: JSON.stringify(template),
   });
 
@@ -257,7 +257,7 @@ export async function saveTemplate(template: TemplateDeserialized, isClone?: boo
 export async function updateTemplate(template: TemplateDeserialized) {
   const { name } = template;
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/index_templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
   });

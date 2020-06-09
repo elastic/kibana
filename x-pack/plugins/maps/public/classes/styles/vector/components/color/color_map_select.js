@@ -65,7 +65,7 @@ export class ColorMapSelect extends Component {
     );
   }
 
-  _onColorMapSelect = selectedValue => {
+  _onColorMapSelect = (selectedValue) => {
     const useCustomColorMap = selectedValue === CUSTOM_COLOR_MAP;
     this.props.onChange({
       color: useCustomColorMap ? null : selectedValue,
@@ -135,7 +135,9 @@ export class ColorMapSelect extends Component {
     if (this.props.useCustomColorMap || !this.props.supportsAutoDomain) {
       valueOfSelected = CUSTOM_COLOR_MAP;
     } else {
-      valueOfSelected = this.props.colorMapOptions.find(option => option.value === this.props.color)
+      valueOfSelected = this.props.colorMapOptions.find(
+        (option) => option.value === this.props.color
+      )
         ? this.props.color
         : '';
     }

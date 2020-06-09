@@ -35,7 +35,7 @@ function memoizeLast<T extends (...args: any[]) => any>(func: T): T {
   let prevCall: MemoizedCall | NeverCalled = neverCalled;
 
   // We need to use a `function` here for proper this passing.
-  const memoizedFunction = function(this: any, ...args: any[]) {
+  const memoizedFunction = function (this: any, ...args: any[]) {
     if (
       prevCall !== neverCalled &&
       prevCall.this === this &&

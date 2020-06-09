@@ -179,7 +179,7 @@ export class EsQueryParser {
     return { dataObject, url };
   }
 
-  mapRequest = request => {
+  mapRequest = (request) => {
     const esRequest = request.url;
     if (this._esShardTimeout) {
       // remove possible timeout query param to prevent two conflicting timeout parameters

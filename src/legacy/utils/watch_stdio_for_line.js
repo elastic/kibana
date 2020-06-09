@@ -53,7 +53,7 @@ export async function watchStdioForLine(proc, logFn, exitAfter) {
   }
 
   await Promise.all([
-    proc.catch(error => {
+    proc.catch((error) => {
       // ignore the error thrown by execa if it's because we killed with SIGINT
       if (error.signal !== 'SIGINT') {
         throw error;

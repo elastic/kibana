@@ -8,8 +8,9 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry } from 'geojson';
+import { AbstractSource, ImmutableSourceProperty } from '../source';
+import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { FIELD_ORIGIN, MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
@@ -18,7 +19,6 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
@@ -64,7 +64,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   ) {
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
-    this._tooltipFields = this._descriptor.tooltipProperties.map(fieldName => {
+    this._tooltipFields = this._descriptor.tooltipProperties.map((fieldName) => {
       return this.createField({ fieldName });
     });
   }
@@ -192,13 +192,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent {
-    return {
-      maxLat: 90,
-      maxLon: 180,
-      minLat: -90,
-      minLon: -180,
-    };
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null {
+    return null;
   }
 
   getSyncMeta(): VectorSourceSyncMeta {

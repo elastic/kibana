@@ -136,7 +136,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           transformId,
         })
         .then(() => response.transformsCreated.push({ transform: transformId }))
-        .catch(e =>
+        .catch((e) =>
           response.errors.push({
             id: transformId,
             error: wrapEsError(e),

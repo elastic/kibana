@@ -18,50 +18,50 @@
  */
 
 import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
+import { SimpleSavedObject } from 'src/core/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
 
 export class IndexPatternListManager {
-  private configs: IndexPatternListConfig[];
+  private configs: IndexPatternListConfig[] = [];
 
-  constructor() {
-    this.configs = [];
+  setup() {
+    return {
+      addListConfig: (Config: typeof IndexPatternListConfig) => {
+        const config = new Config();
+
+        if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
+          throw new Error(`${config.key} exists in IndexPatternListManager.`);
+        }
+        this.configs.push(config);
+      },
+    };
   }
 
-  private addListConfig(Config: typeof IndexPatternListConfig) {
-    const config = new Config();
-    if (this.configs.findIndex(c => c.key === config.key) !== -1) {
-      throw new Error(`${config.key} exists in IndexPatternListManager.`);
-    }
-    this.configs.push(config);
+  start() {
+    return {
+      getIndexPatternTags: (
+        indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
+        isDefault: boolean
+      ) =>
+        this.configs.reduce(
+          (tags: IndexPatternTag[], config) =>
+            config.getIndexPatternTags
+              ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
+              : tags,
+          []
+        ),
+
+      getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType): string[] =>
+        this.configs.reduce(
+          (info: string[], config) =>
+            config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info,
+          []
+        ),
+
+      areScriptedFieldsEnabled: (indexPattern: IIndexPattern): boolean =>
+        this.configs.every((config) =>
+          config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true
+        ),
+    };
   }
-
-  private getIndexPatternTags(indexPattern: IIndexPattern, isDefault: boolean) {
-    return this.configs.reduce((tags: IndexPatternTag[], config) => {
-      return config.getIndexPatternTags
-        ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
-        : tags;
-    }, []);
-  }
-
-  private getFieldInfo(indexPattern: IIndexPattern, field: IFieldType): string[] {
-    return this.configs.reduce((info: string[], config) => {
-      return config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info;
-    }, []);
-  }
-
-  private areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
-    return this.configs.every(config => {
-      return config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true;
-    });
-  }
-
-  setup = () => ({
-    addListConfig: this.addListConfig.bind(this),
-  });
-
-  start = () => ({
-    getIndexPatternTags: this.getIndexPatternTags.bind(this),
-    getFieldInfo: this.getFieldInfo.bind(this),
-    areScriptedFieldsEnabled: this.areScriptedFieldsEnabled.bind(this),
-  });
 }

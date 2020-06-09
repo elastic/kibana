@@ -27,6 +27,7 @@ import {
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
   TYPE_DEFINITION,
+  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
 import { State } from '../reducer';
@@ -74,7 +75,10 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
 export const getTypeLabelFromType = (type: DataType) =>
   TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
 
-export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
+export const getFieldConfig = <T = unknown>(
+  param: ParameterName,
+  prop?: string
+): FieldConfig<any, T> => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||
@@ -107,7 +111,7 @@ const replaceAliasPathByAliasId = (
   Object.entries(byId).forEach(([id, field]) => {
     if (field.source.type === 'alias') {
       const aliasTargetField = Object.values(byId).find(
-        _field => _field.path.join('.') === field.source.path
+        (_field) => _field.path.join('.') === field.source.path
       );
 
       if (aliasTargetField) {
@@ -124,8 +128,31 @@ const replaceAliasPathByAliasId = (
   return { aliases, byId };
 };
 
-export const getMainTypeFromSubType = (subType: SubType): MainType =>
+const getMainTypeFromSubType = (subType: SubType): MainType =>
   (SUB_TYPE_MAP_TO_MAIN[subType] ?? 'other') as MainType;
+
+/**
+ * Read the field source type and decide if it is a SubType of a MainType
+ * A SubType is for example the "float" datatype. It is the SubType of the "numeric" MainType
+ *
+ * @param sourceType The type declared on the mappings field
+ */
+export const getTypeMetaFromSource = (
+  sourceType: string
+): { mainType: MainType; subType?: SubType } => {
+  if (!MAIN_DATA_TYPE_DEFINITION[sourceType as MainType]) {
+    // If the sourceType provided if **not** one of the MainType, it is probably a SubType type
+    const mainType = getMainTypeFromSubType(sourceType as SubType);
+    if (!mainType) {
+      throw new Error(
+        `Property type "${sourceType}" not recognized and no subType was found for it.`
+      );
+    }
+    return { mainType, subType: sourceType as SubType };
+  }
+
+  return { mainType: sourceType as MainType };
+};
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
@@ -265,7 +292,7 @@ const replaceAliasIdByAliasPath = (
   Object.entries(aliases).forEach(([targetId, aliasesIds]) => {
     const path = updatedById[targetId] ? updatedById[targetId].path.join('.') : '';
 
-    aliasesIds.forEach(id => {
+    aliasesIds.forEach((id) => {
       const aliasField = updatedById[id];
       if (!aliasField) {
         return;
@@ -286,7 +313,7 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
   const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
-    ids.forEach(id => {
+    ids.forEach((id) => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
@@ -329,8 +356,8 @@ export const updateFieldsPathAfterFieldNameChange = (
 
     if (_field.hasChildFields || _field.hasMultiFields) {
       _field
-        .childFields!.map(fieldId => byId[fieldId])
-        .forEach(childField => {
+        .childFields!.map((fieldId) => byId[fieldId])
+        .forEach((childField) => {
           updateFieldPath(childField, [..._paths, name]);
         });
     }
@@ -354,8 +381,8 @@ export const getAllChildFields = (
   const getChildFields = (_field: NormalizedField, to: NormalizedField[] = []) => {
     if (_field.hasChildFields || _field.hasMultiFields) {
       _field
-        .childFields!.map(fieldId => byId[fieldId])
-        .forEach(childField => {
+        .childFields!.map((fieldId) => byId[fieldId])
+        .forEach((childField) => {
           to.push(childField);
           getChildFields(childField, to);
         });
@@ -384,13 +411,13 @@ export const getAllDescendantAliases = (
   }
 
   if (hasAliases) {
-    fields.aliases[field.id].forEach(id => {
+    fields.aliases[field.id].forEach((id) => {
       aliasesIds.push(id);
     });
   }
 
   if (field.childFields) {
-    field.childFields.forEach(id => {
+    field.childFields.forEach((id) => {
       if (!fields.byId[id]) {
         return;
       }
@@ -428,14 +455,14 @@ export const filterTypesForMultiField = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>
   options.filter(
-    option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
+    (option) => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
   );
 
 export const filterTypesForNonRootFields = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>
   options.filter(
-    option => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
+    (option) => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
   );
 
 /**
@@ -457,7 +484,7 @@ export const buildFieldTreeFromIds = (
   byId: NormalizedFields['byId'],
   render: (field: NormalizedField) => JSX.Element | string
 ): TreeItem[] =>
-  fieldsIds.map(id => {
+  fieldsIds.map((id) => {
     const field = byId[id];
     const children = field.childFields
       ? buildFieldTreeFromIds(field.childFields, byId, render)

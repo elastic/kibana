@@ -7,14 +7,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'endpointAlerts']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const browser = getService('browser');
 
-  describe('Endpoint Alert Resolver', function() {
+  describe('Endpoint Alert Resolver', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
@@ -45,7 +45,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverEmbeddable',
         'tr'
       );
-      await retry.try(async function() {
+      await retry.try(async function () {
         await testSubjects.click('zoom-out');
         const Nodes = await testSubjects.findAll('resolverNode');
         expect(tableData.length - 1).to.eql(Nodes.length);

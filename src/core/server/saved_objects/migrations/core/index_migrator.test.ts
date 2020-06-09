@@ -341,7 +341,7 @@ function withIndex(callCluster: jest.Mock, opts: any = {}) {
 
   let scrollCallCounter = 1;
 
-  callCluster.mockImplementation(method => {
+  callCluster.mockImplementation((method) => {
     if (method === 'indices.get') {
       return Promise.resolve(index);
     } else if (method === 'indices.getAlias') {

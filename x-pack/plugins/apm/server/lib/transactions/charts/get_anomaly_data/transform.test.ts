@@ -27,24 +27,24 @@ describe('anomalySeriesTransform', () => {
       const esResponse = getESResponse([
         {
           key: 0,
-          anomaly_score: { value: 90 }
+          anomaly_score: { value: 90 },
         },
         {
           key: 5000,
-          anomaly_score: { value: 0 }
+          anomaly_score: { value: 0 },
         },
         {
           key: 10000,
-          anomaly_score: { value: 90 }
+          anomaly_score: { value: 90 },
         },
         {
           key: 15000,
-          anomaly_score: { value: 0 }
+          anomaly_score: { value: 0 },
         },
         {
           key: 20000,
-          anomaly_score: { value: 90 }
-        }
+          anomaly_score: { value: 90 },
+        },
       ]);
 
       const getMlBucketSize = 5;
@@ -65,12 +65,12 @@ describe('anomalySeriesTransform', () => {
       const esResponse = getESResponse([
         {
           key: 0,
-          anomaly_score: { value: 0 }
+          anomaly_score: { value: 0 },
         },
         {
           key: 5000,
-          anomaly_score: { value: 90 }
-        }
+          anomaly_score: { value: 90 },
+        },
       ]);
 
       const getMlBucketSize = 10;
@@ -94,23 +94,23 @@ describe('anomalySeriesTransform', () => {
         {
           key: 0,
           upper: { value: 15 },
-          lower: { value: 10 }
+          lower: { value: 10 },
         },
         {
           key: 5000,
           upper: { value: 25 },
-          lower: { value: 20 }
+          lower: { value: 20 },
         },
         {
           key: 10000,
           upper: { value: 35 },
-          lower: { value: 30 }
+          lower: { value: 30 },
         },
         {
           key: 15000,
           upper: { value: 45 },
-          lower: { value: 40 }
-        }
+          lower: { value: 40 },
+        },
       ]);
 
       const mlBucketSize = 10;
@@ -126,7 +126,7 @@ describe('anomalySeriesTransform', () => {
       const buckets = anomalySeries!.anomalyBoundaries;
       expect(buckets).toEqual([
         { x: 5000, y: 25, y0: 20 },
-        { x: 10000, y: 35, y0: 30 }
+        { x: 10000, y: 35, y0: 30 },
       ]);
     });
 
@@ -136,20 +136,20 @@ describe('anomalySeriesTransform', () => {
           key: 0,
           anomaly_score: { value: 0 },
           upper: { value: 15 },
-          lower: { value: 10 }
+          lower: { value: 10 },
         },
         {
           key: 5000,
           anomaly_score: { value: 0 },
           upper: { value: null },
-          lower: { value: null }
+          lower: { value: null },
         },
         {
           key: 10000,
           anomaly_score: { value: 0 },
           upper: { value: 25 },
-          lower: { value: 20 }
-        }
+          lower: { value: 20 },
+        },
       ]);
 
       const getMlBucketSize = 10;
@@ -165,7 +165,7 @@ describe('anomalySeriesTransform', () => {
       const buckets = anomalySeries!.anomalyBoundaries;
       expect(buckets).toEqual([
         { x: 5000, y: 15, y0: 10 },
-        { x: 10000, y: 25, y0: 20 }
+        { x: 10000, y: 25, y0: 20 },
       ]);
     });
 
@@ -175,20 +175,20 @@ describe('anomalySeriesTransform', () => {
           key: 0,
           anomaly_score: { value: 0 },
           upper: { value: 15 },
-          lower: { value: 10 }
+          lower: { value: 10 },
         },
         {
           key: 5000,
           anomaly_score: { value: 0 },
           upper: { value: null },
-          lower: { value: null }
+          lower: { value: null },
         },
         {
           key: 10000,
           anomaly_score: { value: 0 },
           upper: { value: null },
-          lower: { value: null }
-        }
+          lower: { value: null },
+        },
       ]);
 
       const getMlBucketSize = 10;
@@ -204,7 +204,7 @@ describe('anomalySeriesTransform', () => {
       const buckets = anomalySeries!.anomalyBoundaries;
       expect(buckets).toEqual([
         { x: 5000, y: 15, y0: 10 },
-        { x: 10000, y: 15, y0: 10 }
+        { x: 10000, y: 15, y0: 10 },
       ]);
     });
   });
@@ -216,29 +216,29 @@ describe('replaceFirstAndLastBucket', () => {
       {
         x: 0,
         lower: 10,
-        upper: 20
+        upper: 20,
       },
       {
         x: 5,
         lower: null,
-        upper: null
+        upper: null,
       },
       {
         x: 10,
         lower: null,
-        upper: null
+        upper: null,
       },
       {
         x: 15,
         lower: 30,
-        upper: 40
-      }
+        upper: 40,
+      },
     ];
 
     const timeSeriesDates = [10, 15];
     expect(replaceFirstAndLastBucket(buckets as any, timeSeriesDates)).toEqual([
       { x: 10, lower: 10, upper: 20 },
-      { x: 15, lower: 30, upper: 40 }
+      { x: 15, lower: 30, upper: 40 },
     ]);
   });
 
@@ -247,25 +247,25 @@ describe('replaceFirstAndLastBucket', () => {
       {
         x: 10,
         lower: 30,
-        upper: 40
+        upper: 40,
       },
       {
         x: 15,
         lower: null,
-        upper: null
+        upper: null,
       },
       {
         x: 20,
         lower: null,
-        upper: null
-      }
+        upper: null,
+      },
     ] as any;
 
     const timeSeriesDates = [10, 15, 20];
     expect(replaceFirstAndLastBucket(buckets, timeSeriesDates)).toEqual([
       { x: 10, lower: 30, upper: 40 },
       { x: 15, lower: null, upper: null },
-      { x: 20, lower: 30, upper: 40 }
+      { x: 20, lower: 30, upper: 40 },
     ]);
   });
 });
@@ -278,12 +278,12 @@ function getESResponse(buckets: any): ESResponse {
       total: 5,
       successful: 5,
       skipped: 0,
-      failed: 0
+      failed: 0,
     },
     hits: {
       total: 10,
       max_score: 0,
-      hits: []
+      hits: [],
     },
     aggregations: {
       ml_avg_response_times: {
@@ -293,11 +293,11 @@ function getESResponse(buckets: any): ESResponse {
             lower: { value: bucket?.lower?.value || null },
             upper: { value: bucket?.upper?.value || null },
             anomaly_score: {
-              value: bucket?.anomaly_score?.value || null
-            }
+              value: bucket?.anomaly_score?.value || null,
+            },
           };
-        })
-      }
-    }
+        }),
+      },
+    },
   } as unknown) as ESResponse;
 }

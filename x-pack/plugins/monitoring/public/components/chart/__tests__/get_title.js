@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getTitle } from '../get_title';
 
-describe('getTitle', function() {
+describe('getTitle', function () {
   it('with metric.title', () => {
     const series = [
       { metric: { title: 'Foo', label: 'Bar X' } },

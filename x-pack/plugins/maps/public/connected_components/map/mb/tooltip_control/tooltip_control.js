@@ -47,7 +47,7 @@ export class TooltipControl extends React.Component {
   };
 
   _getLayerByMbLayerId(mbLayerId) {
-    return this.props.layerList.find(layer => {
+    return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
       return mbLayerIds.indexOf(mbLayerId) > -1;
     });
@@ -85,7 +85,7 @@ export class TooltipControl extends React.Component {
     return uniqueFeatures;
   }
 
-  _lockTooltip = e => {
+  _lockTooltip = (e) => {
     if (this.props.isDrawingFilter) {
       // ignore click events when in draw mode
       return;
@@ -109,7 +109,7 @@ export class TooltipControl extends React.Component {
     });
   };
 
-  _updateHoverTooltipState = _.debounce(e => {
+  _updateHoverTooltipState = _.debounce((e) => {
     if (this.props.isDrawingFilter || this.props.hasLockedTooltips) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;
@@ -149,7 +149,7 @@ export class TooltipControl extends React.Component {
     //For example:
     //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
     //during that data-fetch window, the app should not query for layers that do not exist.
-    return mbLayerIds.filter(mbLayerId => {
+    return mbLayerIds.filter((mbLayerId) => {
       return !!this.props.mbMap.getLayer(mbLayerId);
     });
   }

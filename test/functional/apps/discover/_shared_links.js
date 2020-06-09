@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -71,16 +71,16 @@ export default function({ getService, getPageObjects }) {
 
     describe('shared links with state in query', async () => {
       let teardown;
-      before(async function() {
+      before(async function () {
         teardown = await setup({ storeStateInSessionStorage: false });
       });
 
-      after(async function() {
+      after(async function () {
         await teardown();
       });
 
-      describe('permalink', function() {
-        it('should allow for copying the snapshot URL', async function() {
+      describe('permalink', function () {
+        it('should allow for copying the snapshot URL', async function () {
           const expectedUrl =
             baseUrl +
             '/app/discover?_t=1453775307251#' +
@@ -96,7 +96,7 @@ export default function({ getService, getPageObjects }) {
           );
         });
 
-        it('should allow for copying the snapshot URL as a short URL', async function() {
+        it('should allow for copying the snapshot URL as a short URL', async function () {
           const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
           await PageObjects.share.checkShortenUrl();
           await retry.try(async () => {
@@ -105,7 +105,7 @@ export default function({ getService, getPageObjects }) {
           });
         });
 
-        it('should allow for copying the saved object URL', async function() {
+        it('should allow for copying the saved object URL', async function () {
           const expectedUrl =
             baseUrl +
             '/app/discover#' +
@@ -124,16 +124,16 @@ export default function({ getService, getPageObjects }) {
 
     describe('shared links with state in sessionStorage', async () => {
       let teardown;
-      before(async function() {
+      before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
       });
 
-      after(async function() {
+      after(async function () {
         await teardown();
       });
 
-      describe('permalink', function() {
-        it('should allow for copying the snapshot URL as a short URL and should open it', async function() {
+      describe('permalink', function () {
+        it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
           const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
           await PageObjects.share.checkShortenUrl();
           let actualUrl;

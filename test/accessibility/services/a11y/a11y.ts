@@ -69,7 +69,7 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         include: global ? undefined : [testSubjectToCss('appA11yRoot')],
         exclude: ([] as string[])
           .concat(excludeTestSubj || [])
-          .map(ts => [testSubjectToCss(ts)])
+          .map((ts) => [testSubjectToCss(ts)])
           .concat([['.ace_scrollbar']]),
       };
     }

@@ -12,13 +12,13 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
   'xpack.apm.setupInstructionsButtonLabel',
   {
-    defaultMessage: 'Setup Instructions'
+    defaultMessage: 'Setup Instructions',
   }
 );
 
 // renders a filled button or a link as a kibana link to setup instructions
 export function SetupInstructionsLink({
-  buttonFill = false
+  buttonFill = false,
 }: {
   buttonFill?: boolean;
 }) {

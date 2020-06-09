@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
-import { NotificationsStart } from 'src/core/public';
+import { ApplicationStart, NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
@@ -40,6 +40,7 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -137,7 +138,11 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt isAdmin={isAdmin} docLinks={this.props.docLinks} />
+          <EmptyPrompt
+            isAdmin={isAdmin}
+            docLinks={this.props.docLinks}
+            navigateToApp={this.props.navigateToApp}
+          />
         </EuiPageContent>
       );
     }
@@ -189,9 +194,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         id="xpack.security.management.apiKeys.table.apiKeysTableLoadingMessage"
         defaultMessage="Loading API keys…"
       />
-    ) : (
-      undefined
-    );
+    ) : undefined;
 
     const sorting = {
       sort: {
@@ -220,7 +223,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           notifications={this.props.notifications}
           apiKeysAPIClient={this.props.apiKeysAPIClient}
         >
-          {invalidateApiKeyPrompt => {
+          {(invalidateApiKeyPrompt) => {
             return (
               <EuiButton
                 onClick={() =>
@@ -243,9 +246,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             );
           }}
         </InvalidateProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       toolsRight: (
         <EuiButton
           color="secondary"
@@ -276,7 +277,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                   apiKeysMap[apiKey.username] = true;
                   return apiKeysMap;
                 }, {})
-              ).map(username => {
+              ).map((username) => {
                 return {
                   value: username,
                   view: username,
@@ -295,7 +296,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                   apiKeysMap[apiKey.realm] = true;
                   return apiKeysMap;
                 }, {})
-              ).map(realm => {
+              ).map((realm) => {
                 return {
                   value: realm,
                   view: realm,
@@ -325,9 +326,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
             <EuiSpacer size="m" />
           </>
-        ) : (
-          undefined
-        )}
+        ) : undefined}
 
         {
           <EuiInMemoryTable
@@ -447,7 +446,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                       notifications={this.props.notifications}
                       apiKeysAPIClient={this.props.apiKeysAPIClient}
                     >
-                      {invalidateApiKeyPrompt => {
+                      {(invalidateApiKeyPrompt) => {
                         return (
                           <EuiToolTip
                             content={i18n.translate(

@@ -26,6 +26,7 @@ export {
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,

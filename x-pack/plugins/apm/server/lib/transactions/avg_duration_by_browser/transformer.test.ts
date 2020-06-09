@@ -13,17 +13,17 @@ describe('transformer', () => {
       {
         data: [
           { x: 1571650700000, y: undefined },
-          { x: 1571650800000, y: 86425.1 }
+          { x: 1571650800000, y: 86425.1 },
         ],
-        title: 'Firefox'
+        title: 'Firefox',
       },
       {
         data: [
           { x: 1571650700000, y: undefined },
-          { x: 1571650800000, y: 860425.0 }
+          { x: 1571650800000, y: 860425.0 },
         ],
-        title: 'Other'
-      }
+        title: 'Other',
+      },
     ]);
   });
 });

@@ -62,7 +62,7 @@ export async function createOrUpdateIndex({
         }
       },
       {
-        onFailedAttempt: e => {
+        onFailedAttempt: (e) => {
           logger.warn(`Could not create index: '${index}'. Retrying...`);
           logger.warn(e);
         },

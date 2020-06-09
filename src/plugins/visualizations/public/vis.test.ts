@@ -24,7 +24,7 @@ jest.mock('./services', () => {
     constructor() {}
 
     render(): Promise<void> {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve();
       });
     }
@@ -62,7 +62,7 @@ jest.mock('./services', () => {
   };
 });
 
-describe('Vis Class', function() {
+describe('Vis Class', function () {
   let vis: Vis;
   const stateFixture = {
     type: 'pie',
@@ -80,12 +80,12 @@ describe('Vis Class', function() {
     params: { isDonut: true },
   };
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     vis = new Vis('test', stateFixture as any);
     await vis.setState(stateFixture as any);
   });
 
-  const verifyVis = function(visToVerify: Vis) {
+  const verifyVis = function (visToVerify: Vis) {
     expect(visToVerify).toHaveProperty('data');
     expect(visToVerify.data).toHaveProperty('aggs');
     expect(visToVerify.data.aggs!.aggs).toHaveLength(3);
@@ -96,14 +96,14 @@ describe('Vis Class', function() {
     expect(visToVerify.params).toHaveProperty('isDonut', true);
   };
 
-  describe('initialization', function() {
-    it('should set the state', function() {
+  describe('initialization', function () {
+    it('should set the state', function () {
       verifyVis(vis);
     });
   });
 
-  describe('getState()', function() {
-    it('should get a state that represents the... er... state', function() {
+  describe('getState()', function () {
+    it('should get a state that represents the... er... state', function () {
       const state = vis.serialize();
       expect(state).toHaveProperty('type', 'pie');
 
@@ -115,12 +115,12 @@ describe('Vis Class', function() {
     });
   });
 
-  describe('isHierarchical()', function() {
-    it('should return false for non-hierarchical vis (like histogram)', function() {
+  describe('isHierarchical()', function () {
+    it('should return false for non-hierarchical vis (like histogram)', function () {
       expect(vis.isHierarchical()).toBe(false);
     });
 
-    it('should return true for hierarchical vis (like pie)', function() {
+    it('should return true for hierarchical vis (like pie)', function () {
       vis.type.hierarchicalData = true;
       expect(vis.isHierarchical()).toBe(true);
     });

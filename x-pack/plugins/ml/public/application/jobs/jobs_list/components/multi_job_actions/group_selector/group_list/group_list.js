@@ -42,7 +42,7 @@ export class GroupList extends Component {
     this.selectItems = [];
   }
 
-  selectGroup = group => {
+  selectGroup = (group) => {
     this.props.selectGroup(group);
   };
 
@@ -91,11 +91,11 @@ export class GroupList extends Component {
         {groups.map((g, index) => (
           <div
             tabIndex={'0'}
-            onKeyDown={event => this.handleKeyDown(event, g, index)}
+            onKeyDown={(event) => this.handleKeyDown(event, g, index)}
             key={g.id}
             className="group-item"
             onClick={() => this.selectGroup(g)}
-            ref={ref => this.setRef(ref, index)}
+            ref={(ref) => this.setRef(ref, index)}
           >
             <Check group={g} selectedGroups={selectedGroups} />
             <JobGroup name={g.id} />

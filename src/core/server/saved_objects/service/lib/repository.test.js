@@ -113,10 +113,10 @@ describe('SavedObjectsRepository', () => {
     },
   };
 
-  const createType = type => ({
+  const createType = (type) => ({
     name: type,
     mappings: { properties: mappings.properties[type].properties },
-    migrations: { '1.1.1': doc => doc },
+    migrations: { '1.1.1': (doc) => doc },
   });
 
   const registry = new SavedObjectTypeRegistry();
@@ -171,7 +171,7 @@ describe('SavedObjectsRepository', () => {
 
   const getMockMgetResponse = (objects, namespace) => ({
     status: 200,
-    docs: objects.map(obj =>
+    docs: objects.map((obj) =>
       obj.found === false ? obj : getMockGetResponse({ ...obj, namespace })
     ),
   });
@@ -202,10 +202,11 @@ describe('SavedObjectsRepository', () => {
   const expectSuccess = ({ type, id }) => expect.toBeDocumentWithoutError(type, id);
   const expectError = ({ type, id }) => ({ type, id, error: expect.any(Object) });
   const expectErrorResult = ({ type, id }, error) => ({ type, id, error });
-  const expectErrorNotFound = obj =>
+  const expectErrorNotFound = (obj) =>
     expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id));
-  const expectErrorConflict = obj => expectErrorResult(obj, createConflictError(obj.type, obj.id));
-  const expectErrorInvalidType = obj =>
+  const expectErrorConflict = (obj) =>
+    expectErrorResult(obj, createConflictError(obj.type, obj.id));
+  const expectErrorInvalidType = (obj) =>
     expectErrorResult(obj, createUnsupportedTypeError(obj.type, obj.id));
 
   const expectMigrationArgs = (args, contains = true, n = 1) => {
@@ -229,12 +230,12 @@ describe('SavedObjectsRepository', () => {
       trimIdPrefix: jest.fn(),
     };
     const _serializer = new SavedObjectsSerializer(registry);
-    Object.keys(serializer).forEach(key => {
+    Object.keys(serializer).forEach((key) => {
       serializer[key].mockImplementation((...args) => _serializer[key](...args));
     });
 
-    const allTypes = registry.getAllTypes().map(type => type.name);
-    const allowedTypes = [...new Set(allTypes.filter(type => !registry.isHidden(type)))];
+    const allTypes = registry.getAllTypes().map((type) => type.name);
+    const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
@@ -251,7 +252,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const mockMigrationVersion = { foo: '2.3.4' };
-  const mockMigrateDocument = doc => ({
+  const mockMigrateDocument = (doc) => ({
     ...doc,
     attributes: {
       ...doc.attributes,
@@ -345,7 +346,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when type is not multi-namespace`, async () => {
-        const test = async type => {
+        const test = async (type) => {
           const message = `${type} doesn't support multiple namespaces`;
           await expectBadRequestError(type, id, [newNs1, newNs2], message);
           expect(callAdminCluster).not.toHaveBeenCalled();
@@ -355,7 +356,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when namespaces is an empty array`, async () => {
-        const test = async namespaces => {
+        const test = async (namespaces) => {
           const message = 'namespaces must be a non-empty array of strings';
           await expectBadRequestError(type, id, namespaces, message);
           expect(callAdminCluster).not.toHaveBeenCalled();
@@ -489,7 +490,7 @@ describe('SavedObjectsRepository', () => {
       }),
     ];
 
-    const expectSuccessResult = obj => ({
+    const expectSuccessResult = (obj) => ({
       ...obj,
       migrationVersion: { [obj.type]: '1.1.1' },
       version: mockVersion,
@@ -511,13 +512,13 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should use the ES create method if ID is undefined and overwrite=true`, async () => {
-        const objects = [obj1, obj2].map(obj => ({ ...obj, id: undefined }));
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, id: undefined }));
         await bulkCreateSuccess(objects, { overwrite: true });
         expectClusterCallArgsAction(objects, { method: 'create' });
       });
 
       it(`should use the ES create method if ID is undefined and overwrite=false`, async () => {
-        const objects = [obj1, obj2].map(obj => ({ ...obj, id: undefined }));
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, id: undefined }));
         await bulkCreateSuccess(objects);
         expectClusterCallArgsAction(objects, { method: 'create' });
       });
@@ -557,8 +558,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`adds namespaces to request body for any types that are multi-namespace`, async () => {
-        const test = async namespace => {
-          const objects = [obj1, obj2].map(x => ({ ...x, type: MULTI_NAMESPACE_TYPE }));
+        const test = async (namespace) => {
+          const objects = [obj1, obj2].map((x) => ({ ...x, type: MULTI_NAMESPACE_TYPE }));
           const namespaces = [namespace ?? 'default'];
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const expected = expect.objectContaining({ namespaces });
@@ -571,7 +572,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't add namespaces to request body for any types that are not multi-namespace`, async () => {
-        const test = async namespace => {
+        const test = async (namespace) => {
           const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const expected = expect.not.objectContaining({ namespaces: expect.anything() });
@@ -600,7 +601,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should use custom index`, async () => {
-        await bulkCreateSuccess([obj1, obj2].map(x => ({ ...x, type: CUSTOM_INDEX_TYPE })));
+        await bulkCreateSuccess([obj1, obj2].map((x) => ({ ...x, type: CUSTOM_INDEX_TYPE })));
         expectClusterCallArgsAction([obj1, obj2], { method: 'create', _index: 'custom' });
       });
 
@@ -730,11 +731,11 @@ describe('SavedObjectsRepository', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
         await bulkCreateSuccess([obj1, obj2]);
-        const docs = [obj1, obj2].map(x => ({ ...x, ...mockTimestampFields }));
+        const docs = [obj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
-        const migratedDocs = docs.map(x => migrator.migrateDocument(x));
+        const migratedDocs = docs.map((x) => migrator.migrateDocument(x));
         expect(serializer.savedObjectToRaw).toHaveBeenNthCalledWith(1, migratedDocs[0]);
         expect(serializer.savedObjectToRaw).toHaveBeenNthCalledWith(2, migratedDocs[1]);
       });
@@ -762,14 +763,14 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`adds namespaces to body when providing namespace for multi-namespace type`, async () => {
-        const objects = [obj1, obj2].map(obj => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
         await bulkCreateSuccess(objects, { namespace });
         expectMigrationArgs({ namespaces: [namespace] }, true, 1);
         expectMigrationArgs({ namespaces: [namespace] }, true, 2);
       });
 
       it(`adds default namespaces to body when providing no namespace for multi-namespace type`, async () => {
-        const objects = [obj1, obj2].map(obj => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
         await bulkCreateSuccess(objects);
         expectMigrationArgs({ namespaces: ['default'] }, true, 1);
         expectMigrationArgs({ namespaces: ['default'] }, true, 2);
@@ -787,7 +788,7 @@ describe('SavedObjectsRepository', () => {
       it(`formats the ES response`, async () => {
         const result = await bulkCreateSuccess([obj1, obj2]);
         expect(result).toEqual({
-          saved_objects: [obj1, obj2].map(x => expectSuccessResult(x)),
+          saved_objects: [obj1, obj2].map((x) => expectSuccessResult(x)),
         });
       });
 
@@ -909,12 +910,12 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`;
-        let objects = [obj1, obj2].map(obj => ({ ...obj, type: NAMESPACE_AGNOSTIC_TYPE }));
+        let objects = [obj1, obj2].map((obj) => ({ ...obj, type: NAMESPACE_AGNOSTIC_TYPE }));
         await bulkGetSuccess(objects, { namespace });
         _expectClusterCallArgs(objects, { getId });
 
         callAdminCluster.mockReset();
-        objects = [obj1, obj2].map(obj => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
+        objects = [obj1, obj2].map((obj) => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
         await bulkGetSuccess(objects, { namespace });
         _expectClusterCallArgs(objects, { getId });
       });
@@ -1136,7 +1137,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesnt call Elasticsearch if there are no valid objects to update`, async () => {
-        const objects = [obj1, obj2].map(x => ({ ...x, type: 'unknownType' }));
+        const objects = [obj1, obj2].map((x) => ({ ...x, type: 'unknownType' }));
         await savedObjectsRepository.bulkUpdate(objects);
         expect(callAdminCluster).toHaveBeenCalledTimes(0);
       });
@@ -1149,8 +1150,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts custom references array`, async () => {
-        const test = async references => {
-          const objects = [obj1, obj2].map(obj => ({ ...obj, references }));
+        const test = async (references) => {
+          const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.objectContaining({ references }) };
           const body = [expect.any(Object), expected, expect.any(Object), expected];
@@ -1163,8 +1164,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const test = async references => {
-          const objects = [obj1, obj2].map(obj => ({ ...obj, references }));
+        const test = async (references) => {
+          const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
           const body = [expect.any(Object), expected, expect.any(Object), expected];
@@ -1366,7 +1367,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`includes references`, async () => {
-        const objects = [obj1, obj2].map(obj => ({ ...obj, references }));
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
         const response = await bulkUpdateSuccess(objects);
         expect(response).toEqual({
           saved_objects: objects.map(expectSuccessResult),
@@ -1463,7 +1464,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts custom references array`, async () => {
-        const test = async references => {
+        const test = async (references) => {
           await createSuccess(type, attributes, { id, references });
           expectClusterCallArgs({
             body: expect.objectContaining({ references }),
@@ -1476,7 +1477,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const test = async references => {
+        const test = async (references) => {
           await createSuccess(type, attributes, { id, references });
           expectClusterCallArgs({
             body: expect.not.objectContaining({ references: expect.anything() }),
@@ -1871,7 +1872,7 @@ describe('SavedObjectsRepository', () => {
 
     describe('errors', () => {
       it(`throws when namespace is not a string`, async () => {
-        const test = async namespace => {
+        const test = async (namespace) => {
           await expect(savedObjectsRepository.deleteByNamespace(namespace)).rejects.toThrowError(
             `namespace is required, and must be a string`
           );
@@ -1904,17 +1905,17 @@ describe('SavedObjectsRepository', () => {
     describe('search dsl', () => {
       it(`constructs a query using all multi-namespace types, and another using all single-namespace types`, async () => {
         await deleteByNamespaceSuccess(namespace);
-        const allTypes = registry.getAllTypes().map(type => type.name);
+        const allTypes = registry.getAllTypes().map((type) => type.name);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           namespace,
-          type: allTypes.filter(type => !registry.isNamespaceAgnostic(type)),
+          type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
         });
       });
     });
   });
 
   describe('#find', () => {
-    const generateSearchResults = namespace => {
+    const generateSearchResults = (namespace) => {
       return {
         hits: {
           total: 4,
@@ -2038,7 +2039,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should not make a cluster call when attempting to find only invalid or hidden types`, async () => {
-        const test = async types => {
+        const test = async (types) => {
           await savedObjectsRepository.find({ type: types });
           expect(callAdminCluster).not.toHaveBeenCalled();
         };
@@ -2154,7 +2155,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should return empty results when attempting to find only invalid or hidden types`, async () => {
-        const test = async types => {
+        const test = async (types) => {
           const result = await savedObjectsRepository.find({ type: types });
           expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
         };
@@ -2468,7 +2469,7 @@ describe('SavedObjectsRepository', () => {
       };
 
       it(`throws when type is not a string`, async () => {
-        const test = async type => {
+        const test = async (type) => {
           await expect(
             savedObjectsRepository.incrementCounter(type, id, field)
           ).rejects.toThrowError(`"type" argument must be a string`);
@@ -2482,7 +2483,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when counterFieldName is not a string`, async () => {
-        const test = async field => {
+        const test = async (field) => {
           await expect(
             savedObjectsRepository.incrementCounter(type, id, field)
           ).rejects.toThrowError(`"counterFieldName" argument must be a string`);
@@ -2610,7 +2611,7 @@ describe('SavedObjectsRepository', () => {
       options
     ) => {
       mockGetResponse(type, id, currentNamespaces); // this._callCluster('get', ...)
-      const isDelete = currentNamespaces.every(namespace => namespaces.includes(namespace));
+      const isDelete = currentNamespaces.every((namespace) => namespaces.includes(namespace));
       callAdminCluster.mockResolvedValue({
         _id: `${type}:${id}`,
         ...mockVersionProps,
@@ -2629,7 +2630,7 @@ describe('SavedObjectsRepository', () => {
     describe('cluster calls', () => {
       describe('delete action', () => {
         const deleteFromNamespacesSuccessDelete = async (expectFn, options, _type = type) => {
-          const test = async namespaces => {
+          const test = async (namespaces) => {
             await deleteFromNamespacesSuccess(_type, id, namespaces, namespaces, options);
             expectFn();
             callAdminCluster.mockReset();
@@ -2680,7 +2681,7 @@ describe('SavedObjectsRepository', () => {
 
       describe('update action', () => {
         const deleteFromNamespacesSuccessUpdate = async (expectFn, options, _type = type) => {
-          const test = async remaining => {
+          const test = async (remaining) => {
             const currentNamespaces = [namespace1].concat(remaining);
             await deleteFromNamespacesSuccess(_type, id, [namespace1], currentNamespaces, options);
             expectFn();
@@ -2761,7 +2762,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when type is not namespace-agnostic`, async () => {
-        const test = async type => {
+        const test = async (type) => {
           const message = `${type} doesn't support multiple namespaces`;
           await expectBadRequestError(type, id, [namespace1, namespace2], message);
           expect(callAdminCluster).not.toHaveBeenCalled();
@@ -2771,7 +2772,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when namespaces is an empty array`, async () => {
-        const test = async namespaces => {
+        const test = async (namespaces) => {
           const message = 'namespaces must be a non-empty array of strings';
           await expectBadRequestError(type, id, namespaces, message);
           expect(callAdminCluster).not.toHaveBeenCalled();
@@ -2844,7 +2845,7 @@ describe('SavedObjectsRepository', () => {
 
     describe('returns', () => {
       it(`returns an empty object on success (delete)`, async () => {
-        const test = async namespaces => {
+        const test = async (namespaces) => {
           const result = await deleteFromNamespacesSuccess(type, id, namespaces, namespaces);
           expect(result).toEqual({});
           callAdminCluster.mockReset();
@@ -2854,7 +2855,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns an empty object on success (update)`, async () => {
-        const test = async remaining => {
+        const test = async (remaining) => {
           const currentNamespaces = [namespace1].concat(remaining);
           const result = await deleteFromNamespacesSuccess(
             type,
@@ -2929,7 +2930,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts custom references array`, async () => {
-        const test = async references => {
+        const test = async (references) => {
           await updateSuccess(type, id, attributes, { references });
           expectClusterCallArgs({
             body: { doc: expect.objectContaining({ references }) },
@@ -2942,7 +2943,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const test = async references => {
+        const test = async (references) => {
           await updateSuccess(type, id, attributes, { references });
           expectClusterCallArgs({
             body: { doc: expect.not.objectContaining({ references: expect.anything() }) },

@@ -42,7 +42,7 @@ export function SourcePicker({
           name: i18n.translate('xpack.graph.sourceModal.savedObjectType.indexPattern', {
             defaultMessage: 'Index pattern',
           }),
-          showSavedObject: indexPattern => !indexPattern.attributes.type,
+          showSavedObject: (indexPattern) => !indexPattern.attributes.type,
           includeFields: ['type'],
         },
       ]}

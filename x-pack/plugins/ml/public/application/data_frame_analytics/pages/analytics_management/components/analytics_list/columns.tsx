@@ -16,8 +16,10 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { getJobIdUrl } from '../../../../../util/get_job_id_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -135,6 +137,10 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
+export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
+  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
+);
+
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
@@ -193,12 +199,13 @@ export const getColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      field: DataFrameAnalyticsListColumn.id,
       name: 'ID',
-      sortable: true,
+      sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
+      render: (item: DataFrameAnalyticsListRow) =>
+        isManagementTable ? getDFAnalyticsJobIdLink(item) : item.id,
     },
     {
       field: DataFrameAnalyticsListColumn.description,
