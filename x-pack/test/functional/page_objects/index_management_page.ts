@@ -44,7 +44,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
-    async changeTabs(tab: 'indicesTab' | 'templatesTab') {
+    async changeTabs(tab: 'indicesTab' | 'templatesTab' | 'component_templatesTab') {
       await testSubjects.click(tab);
     },
   };

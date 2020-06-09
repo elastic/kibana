@@ -17,7 +17,7 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
   });
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null) => {
-      const builtLink = `${basePath}/app/siem#/timelines?timeline=(id:'${id}',isOpen:!t)`;
+      const builtLink = `${basePath}/app/security#/timelines?timeline=(id:'${id}',isOpen:!t)`;
       const currentValue = form.getFormData()[fieldName];
       const newValue: string = [
         currentValue.slice(0, cursorPosition.start),
@@ -28,12 +28,14 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
       ].join('');
       form.setFieldValue(fieldName, newValue);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [form]
   );
   const handleCursorChange = useCallback(
     (cp: CursorPosition) => {
       setCursorPosition(cp);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [cursorPosition]
   );
   return {
