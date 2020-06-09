@@ -6,11 +6,16 @@
 
 import { ProcessorInternal } from '../../types';
 
+// These values are tied to the style and heights following components:
+// - ./tree_node.tsx
+// - ./drop_zone_button.tsx
+// - ../pipeline_processors_editor_item.tsx
 const ITEM_HEIGHTS_PX = {
   withoutNestedItems: 59,
   withNestedItems: 95,
   padding: 16,
 };
+
 export const calculateItemHeight = ({
   processor,
   isFirstInArray,

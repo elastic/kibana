@@ -12,7 +12,8 @@ import { ProcessorInternal } from '../../types';
 
 import { PipelineProcessorsEditorItem, Handlers } from '../pipeline_processors_editor_item';
 
-import { PrivateTree, TreeMode, ProcessorInfo, PrivateOnActionHandler } from './tree';
+import { TreeMode, ProcessorInfo } from './tree';
+import { PrivateTree, PrivateOnActionHandler } from './private_tree';
 
 export interface Props {
   processor: ProcessorInternal;
