@@ -30,7 +30,7 @@ describe('addAnomaliesDataToNodes', () => {
         anomalyScore: 50,
         timestamp: 1591351200000,
         actual: 2000,
-        model_median: 1000,
+        typical: 1000,
       },
       {
         jobId: 'opbeans-java-request-high_mean_response_time',
@@ -39,7 +39,7 @@ describe('addAnomaliesDataToNodes', () => {
         anomalyScore: 100,
         timestamp: 1591351200000,
         actual: 9000,
-        model_median: 3000,
+        typical: 3000,
       },
     ];
 

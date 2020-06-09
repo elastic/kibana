@@ -62,7 +62,7 @@ export async function getServiceAnomalies(
       query: {
         bool: {
           filter: [
-            { term: { result_type: 'bucket' } },
+            { term: { result_type: 'record' } },
             {
               terms: {
                 job_id: apmJobIds,
@@ -82,8 +82,8 @@ export async function getServiceAnomalies(
           aggs: {
             top_score_hits: {
               top_hits: {
-                sort: [{ anomaly_score: { order: 'desc' as const } }],
-                _source: ['anomaly_score', 'timestamp'],
+                sort: [{ record_score: { order: 'desc' as const } }],
+                _source: ['record_score', 'timestamp', 'typical', 'actual'],
                 size: 1,
               },
             },
@@ -101,7 +101,12 @@ export async function getServiceAnomalies(
           top_score_hits: {
             hits: {
               hits: Array<{
-                _source: { anomaly_score: number; timestamp: number };
+                _source: {
+                  record_score: number;
+                  timestamp: number;
+                  typical: number[];
+                  actual: number[];
+                };
               }>;
             };
           };
@@ -114,52 +119,11 @@ export async function getServiceAnomalies(
     const bucketSource = jobBucket.top_score_hits.hits.hits?.[0]?._source;
     return {
       jobId,
-      anomalyScore: bucketSource.anomaly_score,
+      anomalyScore: bucketSource.record_score,
       timestamp: bucketSource.timestamp,
+      typical: bucketSource.typical[0],
+      actual: bucketSource.actual[0],
     };
   });
-  const anomalyModelValuePromises = anomalyScores.map(
-    ({ jobId, timestamp }) => {
-      return (async () => {
-        try {
-          const modelPlotResponse = await ml.mlSystem.mlAnomalySearch({
-            body: {
-              size: 1,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { result_type: 'model_plot' } },
-                    { term: { job_id: jobId } },
-                    { term: { timestamp } },
-                  ],
-                },
-              },
-              _source: ['actual', 'model_median'],
-            },
-          });
-          if (modelPlotResponse.hits.hits.length === 0) {
-            return;
-          }
-          const { actual, model_median } = modelPlotResponse.hits.hits[0]
-            ._source as {
-            actual: number;
-            model_median: number;
-          };
-          return { jobId, actual, model_median };
-        } catch (error) {
-          return;
-        }
-      })();
-    }
-  );
-
-  const anomalyModelValues = (
-    await Promise.all(anomalyModelValuePromises)
-  ).filter(<T>(value: T | undefined): value is T => value !== undefined);
-
-  return leftJoin(
-    apmMlJobCategories,
-    'jobId',
-    leftJoin(anomalyScores, 'jobId', anomalyModelValues)
-  );
+  return leftJoin(apmMlJobCategories, 'jobId', anomalyScores);
 }

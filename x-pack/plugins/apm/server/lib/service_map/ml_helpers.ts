@@ -30,7 +30,7 @@ export function addAnomaliesDataToNodes(
         acc[anomalyJob.serviceName] = {
           anomaly_score: anomalyJob.anomalyScore,
           actual_value: anomalyJob.actual,
-          typical_value: anomalyJob.model_median,
+          typical_value: anomalyJob.typical,
           ml_job_id: anomalyJob.jobId,
         };
       }

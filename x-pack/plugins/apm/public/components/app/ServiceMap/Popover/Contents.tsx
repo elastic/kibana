@@ -123,6 +123,13 @@ const ANOMALY_DETECTION_NO_DATA_TEXT = i18n.translate(
   }
 );
 
+function getDisplayedAnomalyScore(score: number) {
+  if (score > 0 && score < 1) {
+    return '<1';
+  }
+  return asInteger(score);
+}
+
 export function Contents({
   selectedNodeData,
   isService,
@@ -180,7 +187,7 @@ export function Contents({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <div>
-                    {asInteger(anomalyScore)}
+                    {getDisplayedAnomalyScore(anomalyScore)}
                     {anomalyDescription && (
                       <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
                     )}
