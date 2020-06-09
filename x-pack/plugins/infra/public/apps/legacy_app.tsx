@@ -69,7 +69,7 @@ const LegacyApp: React.FunctionComponent<{ history: History<unknown> }> = ({ his
                 nextSearch = undefined;
               }
 
-              // app/inra#infrastructure/metrics/:type/:node was changed to app/metrics/detail/:type/:node, this
+              // app/infra#infrastructure/metrics/:type/:node was changed to app/metrics/detail/:type/:node, this
               // accounts for that edge case
               nextPath = nextPath.replace('metrics/', 'detail/');
 
