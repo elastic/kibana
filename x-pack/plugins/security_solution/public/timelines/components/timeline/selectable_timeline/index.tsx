@@ -258,6 +258,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       onlyUserFavorite: onlyFavorites,
       timelineType,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
   return (

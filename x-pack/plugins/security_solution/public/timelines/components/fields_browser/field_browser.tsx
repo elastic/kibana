@@ -180,6 +180,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
 
   useEffect(() => {
     scrollViews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategoryId, timelineId]);
 
   return (
