@@ -7,7 +7,7 @@
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-import { AnalyticsJobType } from '../../hooks/use_create_analytics_form/state';
+import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
 
 export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
