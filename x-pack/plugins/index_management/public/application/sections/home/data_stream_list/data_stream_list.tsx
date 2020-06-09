@@ -7,9 +7,11 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
+import { reactRouterNavigate } from '../../../../shared_imports';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { DataStreamTable } from './data_stream_table';
@@ -32,7 +34,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     content = (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.idxMgmt.dataStreamList.loadingIndexTemplatesDescription"
+          id="xpack.idxMgmt.dataStreamList.loadingDataStreamsDescription"
           defaultMessage="Loading data streams…"
         />
       </SectionLoading>
@@ -42,7 +44,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.idxMgmt.dataStreamList.loadingIndexTemplatesErrorMessage"
+            id="xpack.idxMgmt.dataStreamList.loadingDataStreamsErrorMessage"
             defaultMessage="Error loading data streams"
           />
         }
@@ -56,10 +58,32 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         title={
           <h1 data-test-subj="title">
             <FormattedMessage
-              id="xpack.idxMgmt.dataStreamList.emptyPrompt.noIndexTemplatesTitle"
+              id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsTitle"
               defaultMessage="You don't have any data streams yet"
             />
           </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsDescription"
+              defaultMessage="Data streams represent the latest data in a rollover series. Get started with data streams by creating a {link}."
+              values={{
+                link: (
+                  <EuiLink
+                    data-test-subj="dataStreamsEmptyPromptTemplateLink"
+                    {...reactRouterNavigate(history, {
+                      pathname: '/templates',
+                    })}
+                  >
+                    {i18n.translate('xpack.idxMgmt.dataStreamList.emptyPrompt.getStartedLink', {
+                      defaultMessage: 'composable index template',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
         }
         data-test-subj="emptyPrompt"
       />

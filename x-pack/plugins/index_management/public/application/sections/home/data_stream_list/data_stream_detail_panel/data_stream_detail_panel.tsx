@@ -25,6 +25,11 @@ interface Props {
   onClose: () => void;
 }
 
+/**
+ * NOTE: This currently isn't in use by data_stream_list.tsx because it doesn't contain any
+ * information that doesn't already exist in the table. We'll use it once we add additional
+ * info, e.g. storage size, docs count.
+ */
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,

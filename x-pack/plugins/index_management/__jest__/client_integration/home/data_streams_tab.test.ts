@@ -56,6 +56,7 @@ describe('Data Streams tab', () => {
       const { actions, component } = testBed;
 
       httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
+      httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
       await act(async () => {
         actions.goToDataStreamsList();
@@ -69,6 +70,16 @@ describe('Data Streams tab', () => {
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
+    });
+
+    test('goes to index templates tab when "Get started" link is clicked', async () => {
+      const { actions, exists, component } = testBed;
+
+      await act(async () => {
+        actions.clickEmptyPromptIndexTemplateLink();
+      });
+
+      expect(exists('templateList')).toBe(true);
     });
   });
 

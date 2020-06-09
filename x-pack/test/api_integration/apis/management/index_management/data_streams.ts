@@ -21,14 +21,17 @@ export default function ({ getService }: FtrProviderContext) {
 
   const createDataStream = (name: string) => {
     // A data stream requires an index template before it can be created.
-    return supertest
-      .post(`${API_BASE_PATH}/index-templates`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
+    return es.dataManagement
+      .saveComposableIndexTemplate({
         name,
-        indexPatterns: ['*'],
-        _kbnMeta: {
-          isLegacy: false,
+        body: {
+          index_patterns: ['*'],
+          template: {
+            settings: {},
+          },
+          data_stream: {
+            timestamp_field: '@timestamp',
+          },
         },
       })
       .then(() =>
@@ -39,11 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const deleteDataStream = (name: string) => {
-    return supertest
-      .post(`${API_BASE_PATH}/delete-index-templates`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        templates: [{ name, isLegacy: false }],
+    return es.dataManagement
+      .deleteComposableIndexTemplate({
+        name,
       })
       .then(() =>
         es.dataManagement.deleteDataStream({
@@ -53,10 +54,11 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data streams', function () {
-    // TODO: Implement this test once the API supports creating composable index templates.
-    describe.skip('Get', () => {
-      before(() => createDataStream('test-data-stream'));
-      after(() => deleteDataStream('test-data-stream'));
+    const testDataStreamName = 'test-data-stream';
+
+    describe('Get', () => {
+      before(() => createDataStream(testDataStreamName));
+      after(() => deleteDataStream(testDataStreamName));
 
       describe('all data streams', () => {
         it('returns an array of data streams', async () => {
@@ -65,9 +67,19 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .expect(200);
 
+          // ES determines this value so we'll just echo it back.
+          const { uuid } = dataStreams[0].indices[0];
           expect(dataStreams).to.eql([
             {
-              name: 'test-data-stream',
+              name: testDataStreamName,
+              timeStampField: '@timestamp',
+              indices: [
+                {
+                  name: `${testDataStreamName}-000001`,
+                  uuid,
+                },
+              ],
+              generation: 1,
             },
           ]);
         });

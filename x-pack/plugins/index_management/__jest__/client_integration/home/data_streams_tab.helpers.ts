@@ -21,7 +21,7 @@ const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`/indices`],
-    componentRoutePath: `/:section(indices|data_streams)`,
+    componentRoutePath: `/:section(indices|data_streams|templates)`,
   },
   doMountAsync: true,
 };
@@ -31,6 +31,7 @@ const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), te
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
     goToDataStreamsList: () => void;
+    clickEmptyPromptIndexTemplateLink: () => void;
     clickReloadButton: () => void;
     clickIndicesAt: (index: number) => void;
   };
@@ -45,6 +46,18 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
 
   const goToDataStreamsList = () => {
     testBed.find('data_streamsTab').simulate('click');
+  };
+
+  const clickEmptyPromptIndexTemplateLink = async () => {
+    const { find, component, router } = testBed;
+
+    const templateLink = find('dataStreamsEmptyPromptTemplateLink');
+
+    await act(async () => {
+      router.navigateTo(templateLink.props().href!);
+    });
+
+    component.update();
   };
 
   const clickReloadButton = () => {
@@ -68,6 +81,7 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     ...testBed,
     actions: {
       goToDataStreamsList,
+      clickEmptyPromptIndexTemplateLink,
       clickReloadButton,
       clickIndicesAt,
     },

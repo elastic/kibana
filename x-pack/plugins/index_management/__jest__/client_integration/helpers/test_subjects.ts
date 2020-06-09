@@ -11,6 +11,7 @@ export type TestSubjects =
   | 'closeDetailsButton'
   | 'createLegacyTemplateButton'
   | 'createTemplateButton'
+  | 'dataStreamsEmptyPromptTemplateLink'
   | 'dataStreamTable'
   | 'dataStreamTable'
   | 'deleteSystemTemplateCallOut'

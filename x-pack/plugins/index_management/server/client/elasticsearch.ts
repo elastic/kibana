@@ -99,4 +99,34 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     ],
     method: 'DELETE',
   });
+
+  // Index templates v2
+  dataManagement.saveComposableIndexTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    needBody: true,
+    method: 'PUT',
+  });
+
+  dataManagement.deleteComposableIndexTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'DELETE',
+  });
 };
