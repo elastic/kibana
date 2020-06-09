@@ -614,6 +614,15 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
 
 function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
+  //dd
+  const nm = eventModel.eventName(processEvent);
+  if (nm.match(/iex/)){
+    return 'runningTriggerCube'
+  }
+  if (nm.match(/notepad/)){
+    return 'terminatedProcessCube'
+  }
+  //dd
   if (processType in processTypeToCube) {
     return processTypeToCube[processType];
   }
