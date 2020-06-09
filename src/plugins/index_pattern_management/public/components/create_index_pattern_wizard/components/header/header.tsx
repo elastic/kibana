@@ -32,6 +32,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../../../types';
 
 export const Header = ({
   prompt,
@@ -40,7 +42,6 @@ export const Header = ({
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
   isBeta = false,
-  changeTitle,
 }: {
   prompt?: React.ReactNode;
   indexPatternName: string;
@@ -48,8 +49,8 @@ export const Header = ({
   isIncludingSystemIndices: boolean;
   onChangeIncludingSystemIndices: () => void;
   isBeta?: boolean;
-  changeTitle: (title: string) => void;
 }) => {
+  const changeTitle = useKibana<IndexPatternManagmentContext>().services.chrome.docTitle.change;
   const createIndexPatternHeader = i18n.translate(
     'indexPatternManagement.createIndexPatternHeader',
     {

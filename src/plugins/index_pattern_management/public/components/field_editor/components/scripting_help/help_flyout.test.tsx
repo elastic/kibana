@@ -19,9 +19,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { HttpStart } from 'src/core/public';
-// eslint-disable-next-line
-import { docLinksServiceMock } from '../../../../../../../core/public/doc_links/doc_links_service.mock';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
@@ -29,22 +26,15 @@ import { IndexPattern } from '../../../../../../data/public';
 
 import { ExecuteScript } from '../../types';
 
-import { coreMock } from '../../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
-
 jest.mock('./test_script', () => ({
   TestScript: () => {
     return `<div>mockTestScript</div>`;
   },
 }));
 
-const { uiSettings } = coreMock.createStart();
-const { ui } = dataPluginMock.createStartContract();
-
 const indexPatternMock = {} as IndexPattern;
 
 describe('ScriptingHelpFlyout', () => {
-  const docLinksScriptedFields = docLinksServiceMock.createStartContract().links.scriptedFields;
   it('should render normally', async () => {
     const component = shallow(
       <ScriptingHelpFlyout
@@ -53,10 +43,6 @@ describe('ScriptingHelpFlyout', () => {
         lang="painless"
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
-        http={({} as unknown) as HttpStart}
-        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
-        uiSettings={uiSettings}
-        SearchBar={ui.SearchBar}
       />
     );
 
@@ -71,10 +57,6 @@ describe('ScriptingHelpFlyout', () => {
         lang="painless"
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
-        http={({} as unknown) as HttpStart}
-        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
-        uiSettings={uiSettings}
-        SearchBar={ui.SearchBar}
       />
     );
 

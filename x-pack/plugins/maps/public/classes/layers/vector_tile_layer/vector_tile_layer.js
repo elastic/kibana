@@ -6,7 +6,7 @@
 
 import { TileLayer } from '../tile_layer/tile_layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { isRetina } from '../../../meta';
 import {
   addSpriteSheetToMapFromImageData,
@@ -56,16 +56,16 @@ export class VectorTileLayer extends TileLayer {
 
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
-      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
+      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
       const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
         spriteSheetImageData,
       };
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, nextMeta);
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, nextMeta);
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
   }
 

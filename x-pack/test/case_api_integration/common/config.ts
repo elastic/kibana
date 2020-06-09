@@ -39,7 +39,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.js')
+      require.resolve('../../api_integration/config.ts')
     );
 
     const servers = {
@@ -78,7 +78,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'some.non.existent.com',
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.alerting.enabled=true',
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,

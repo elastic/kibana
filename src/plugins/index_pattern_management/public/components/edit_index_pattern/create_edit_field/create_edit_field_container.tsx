@@ -20,53 +20,30 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import {
-  HttpStart,
-  DocLinksStart,
-  ChromeDocTitle,
-  NotificationsStart,
-  IUiSettingsClient,
-} from 'src/core/public';
-
-import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
-import { ManagementAppMountParams } from '../../../../../management/public';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
-export interface CreateEditFieldContainerProps
-  extends RouteComponentProps<{ id: string; fieldName: string }> {
-  getIndexPattern: (id: string) => Promise<IndexPattern>;
-  fieldFormatEditors: any;
-  getConfig: IUiSettingsClient;
-  services: {
-    uiSettings: IUiSettingsClient;
-    notifications: NotificationsStart;
-    docTitle: ChromeDocTitle;
-    http: HttpStart;
-    docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
-    SearchBar: DataPublicPluginStart['ui']['SearchBar'];
-    toasts: NotificationsStart['toasts'];
-    fieldFormats: DataPublicPluginStart['fieldFormats'];
-    indexPatterns: DataPublicPluginStart['indexPatterns'];
-    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  };
-}
+export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName: string }>;
 
 const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
+  const { setBreadcrumbs, data } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
 
   useEffect(() => {
-    props.getIndexPattern(props.match.params.id).then((ip: IndexPattern) => {
+    data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
       setIndexPattern(ip);
       if (ip) {
-        props.services.setBreadcrumbs(
+        setBreadcrumbs(
           props.match.params.fieldName
             ? getEditFieldBreadcrumbs(ip, props.match.params.fieldName)
             : getCreateFieldBreadcrumbs(ip)
         );
       }
     });
-  }, [props.match.params.id, props.getIndexPattern, props]);
+  }, [props.match.params.id, props.match.params.fieldName, setBreadcrumbs, data.indexPatterns]);
 
   if (indexPattern) {
     return (
@@ -74,17 +51,6 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
         indexPattern={indexPattern}
         mode={props.match.params.fieldName ? 'edit' : 'create'}
         fieldName={props.match.params.fieldName}
-        fieldFormatEditors={props.fieldFormatEditors}
-        services={{
-          uiSettings: props.services.uiSettings,
-          http: props.services.http,
-          docLinksScriptedFields: props.services.docLinksScriptedFields,
-          SearchBar: props.services.SearchBar,
-          toasts: props.services.toasts,
-          fieldFormats: props.services.fieldFormats,
-          docTitle: props.services.docTitle,
-          indexPatterns: props.services.indexPatterns,
-        }}
       />
     );
   } else {

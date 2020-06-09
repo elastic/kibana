@@ -8,11 +8,12 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
 import { AggName, PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
 
 import { PopoverForm } from './popover_form';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 
 interface Props {
   item: PivotAggsConfig;
@@ -29,12 +30,16 @@ export const AggLabelForm: React.FC<Props> = ({
   onChange,
   options,
 }) => {
-  const [isPopoverVisible, setPopoverVisibility] = useState(false);
+  const [isPopoverVisible, setPopoverVisibility] = useState(
+    isPivotAggsWithExtendedForm(item) && !item.isValid()
+  );
 
   function update(updateItem: PivotAggsConfig) {
     onChange({ ...updateItem });
     setPopoverVisibility(false);
   }
+
+  const helperText = isPivotAggsWithExtendedForm(item) && item.helperText && item.helperText();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -43,6 +48,17 @@ export const AggLabelForm: React.FC<Props> = ({
           {item.aggName}
         </span>
       </EuiFlexItem>
+      {helperText && (
+        <EuiFlexItem grow={false}>
+          <EuiTextColor
+            color="subdued"
+            className="eui-textTruncate"
+            data-test-subj="transformAggHelperText"
+          >
+            {helperText}
+          </EuiTextColor>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
         <EuiPopover
           id="transformFormPopover"

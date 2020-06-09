@@ -31,7 +31,7 @@ export interface WorkerConfig {
   readonly optimizerCacheKey: unknown;
 }
 
-export type CacheableWorkerConfig = Omit<WorkerConfig, 'watch' | 'profileWebpack'>;
+export type CacheableWorkerConfig = Omit<WorkerConfig, 'watch' | 'profileWebpack' | 'cache'>;
 
 export function parseWorkerConfig(json: string): WorkerConfig {
   try {

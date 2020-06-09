@@ -9,5 +9,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('jobs', function () {
     loadTestFile(require.resolve('./categorization_field_examples'));
     loadTestFile(require.resolve('./jobs_summary'));
+    loadTestFile(require.resolve('./delete_jobs'));
+    loadTestFile(require.resolve('./close_jobs'));
   });
 }

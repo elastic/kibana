@@ -135,7 +135,7 @@ describe('Step1', () => {
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'POST',
-        pathname: `/api/action`,
+        pathname: `/api/actions/action`,
         body: JSON.stringify({
           name: 'Email action for Stack Monitoring alerts',
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
@@ -193,7 +193,7 @@ describe('Step1', () => {
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'PUT',
-        pathname: `/api/action/${emailActions[0].id}`,
+        pathname: `/api/actions/action/${emailActions[0].id}`,
         body: JSON.stringify({
           name: emailActions[0].name,
           config: omit(data, ['user', 'password']),
@@ -210,7 +210,7 @@ describe('Step1', () => {
           Legacy: {
             shims: {
               kfetch: jest.fn().mockImplementation((arg) => {
-                if (arg.pathname === '/api/action/1/_execute') {
+                if (arg.pathname === '/api/actions/action/1/_execute') {
                   return { status: 'ok' };
                 }
                 return {};
@@ -236,7 +236,7 @@ describe('Step1', () => {
           Legacy: {
             shims: {
               kfetch: (arg: any) => {
-                if (arg.pathname === '/api/action/1/_execute') {
+                if (arg.pathname === '/api/actions/action/1/_execute') {
                   return { status: 'ok' };
                 }
                 return {};
@@ -260,7 +260,7 @@ describe('Step1', () => {
           Legacy: {
             shims: {
               kfetch: (arg: any) => {
-                if (arg.pathname === '/api/action/1/_execute') {
+                if (arg.pathname === '/api/actions/action/1/_execute') {
                   return { message: 'Very detailed error message' };
                 }
                 return {};
@@ -320,7 +320,7 @@ describe('Step1', () => {
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'DELETE',
-        pathname: `/api/action/${emailActions[0].id}`,
+        pathname: `/api/actions/action/${emailActions[0].id}`,
       });
 
       expect(customProps.setSelectedEmailActionId).toHaveBeenCalledWith('');
