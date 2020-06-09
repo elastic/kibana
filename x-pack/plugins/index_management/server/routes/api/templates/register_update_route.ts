@@ -6,7 +6,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializeV1Template } from '../../../../common/lib';
+import { serializeLegacyTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
@@ -22,7 +22,7 @@ const querySchema = schema.object({
 export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
   router.put(
     {
-      path: addBasePath('/templates/{name}'),
+      path: addBasePath('/index-templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema, query: querySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -31,14 +31,14 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
       const template = req.body as TemplateDeserialized;
       const {
-        _kbnMeta: { formatVersion },
+        _kbnMeta: { isLegacy },
       } = template;
 
-      if (formatVersion !== 1) {
-        return res.badRequest({ body: 'Only index template version 1 can be edited.' });
+      if (!isLegacy) {
+        return res.badRequest({ body: 'Only legacy index template can be edited.' });
       }
 
-      const serializedTemplate = serializeV1Template(template);
+      const serializedTemplate = serializeLegacyTemplate(template);
 
       const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
 

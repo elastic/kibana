@@ -135,7 +135,7 @@ export class SavedObjectsRepository {
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
-    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
     const serializer = new SavedObjectsSerializer(typeRegistry);
     const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
 
