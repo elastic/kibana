@@ -79,7 +79,7 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
-        exceptions_list: exceptionsList,
+        exceptionsList,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
