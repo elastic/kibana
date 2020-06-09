@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useRef, FC } from 'react';
+import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
-import { assignHandlers, createHandlers } from '../../lib/create_handlers';
 
 const { RenderWithFn: strings } = ErrorStrings;
 
@@ -18,10 +17,10 @@ interface Props {
   renderFn: (
     domNode: HTMLElement,
     config: Record<string, any>,
-    handlers: Partial<RendererHandlers>
+    handlers: RendererHandlers
   ) => void | Promise<void>;
   reuseNode: boolean;
-  handlers: Partial<RendererHandlers>;
+  handlers: RendererHandlers;
   config: Record<string, any>;
   size: {
     height: number;
@@ -42,22 +41,23 @@ export const RenderWithFn: FC<Props> = ({
   const { services } = useKibana();
   const onError = services.canvas.notify.error;
 
-  const [handlers, setHandlers] = useState(createHandlers());
   const [domNode, setDomNode] = useState<HTMLElement | null>(null);
 
   // Tells us if the component is attempting to re-render into a previously-populated render target.
   const firstRender = useRef(true);
   // A reference to the node appended to the provided DOM node which is created and optionally replaced.
   const renderTarget = useRef<HTMLDivElement | null>(null);
+  // A reference to the handlers, as the renderFn may mutate them, (via onXYZ functions)
+  const handlers = useRef<RendererHandlers>(incomingHandlers);
 
   // Reset the render target, the node appended to the DOM node provided by RenderToDOM.
-  const resetRenderTarget = () => {
+  const resetRenderTarget = useCallback(() => {
     if (!domNode) {
       return;
     }
 
     if (!firstRender) {
-      handlers.destroy();
+      handlers.current.destroy();
     }
 
     while (domNode.firstChild) {
@@ -71,25 +71,16 @@ export const RenderWithFn: FC<Props> = ({
 
     renderTarget.current = div;
     firstRender.current = true;
-  };
-
-  // Destroy the Element on unmount.
-  useEffect(
-    () => () => {
-      handlers.destroy();
-    },
-    []
-  );
-
-  // Ensure all handlers are provided.
-  useEffect(() => {
-    setHandlers(assignHandlers(incomingHandlers));
-  }, Object.values(incomingHandlers));
+  }, [domNode]);
 
   // Invoke the resize handler when the size prop changes.
   useEffect(() => {
-    handlers.resize(size);
-  }, Object.values(size));
+    handlers.current.resize(size);
+  }, [size]);
+
+  useEffect(() => () => {
+    handlers.current.destroy();
+  });
 
   // Re-render the Element if these properties change.
   useEffect(() => {
@@ -102,12 +93,12 @@ export const RenderWithFn: FC<Props> = ({
     }
 
     try {
-      renderFn(renderTarget.current!, config, handlers);
+      renderFn(renderTarget.current!, config, handlers.current);
       firstRender.current = false;
     } catch (err) {
       onError(err, { title: strings.getRenderErrorMessage(functionName) });
     }
-  }, [domNode, renderFn, config, handlers]);
+  }, [config, domNode, functionName, onError, renderFn, resetRenderTarget, reuseNode]);
 
   return (
     <div className="canvasWorkpad--element_render canvasRenderEl" style={style}>

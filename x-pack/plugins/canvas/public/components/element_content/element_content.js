@@ -12,6 +12,7 @@ import { getType } from '@kbn/interpreter/common';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
+import { assignHandlers } from '../../lib/create_handlers';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 
@@ -77,14 +78,14 @@ export const ElementContent = compose(
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-          handlers={{
+          handlers={assignHandlers({
             getFilter,
             setFilter,
             done,
             onEmbeddableInputChange,
             onEmbeddableDestroyed,
             getElementId,
-          }}
+          })}
         />
       </ElementShareContainer>
     </div>

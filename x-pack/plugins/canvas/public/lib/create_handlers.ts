@@ -12,41 +12,37 @@ import { RendererHandlers, CanvasElement } from '../../types';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
-class Handlers {
-  destroy() {}
-  done() {}
-  event() {}
+
+export const createHandlers = (): RendererHandlers => ({
+  destroy() {},
+  done() {},
+  event() {},
   getElementId() {
     return '';
-  }
+  },
   getFilter() {
     return '';
-  }
+  },
   onComplete(fn: () => void) {
     this.done = fn;
-  }
+  },
   onDestroy(fn: () => void) {
     this.destroy = fn;
-  }
+  },
   // TODO: these functions do not match the `onXYZ` and `xyz` pattern elsewhere.
-  onEmbeddableDestroyed() {}
-  onEmbeddableInputChange() {}
+  onEmbeddableDestroyed() {},
+  onEmbeddableInputChange() {},
   onResize(fn: (size: { height: number; width: number }) => void) {
     this.resize = fn;
-  }
-  reload() {}
-  resize(_size: { height: number; width: number }) {}
-  setFilter() {}
-  update() {}
-}
+  },
+  reload() {},
+  resize(_size: { height: number; width: number }) {},
+  setFilter() {},
+  update() {},
+});
 
-export const createHandlers = (): RendererHandlers => {
-  return new Handlers();
-};
-
-export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers => {
-  return Object.assign(createHandlers(), handlers);
-};
+export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>
+  Object.assign(createHandlers(), handlers);
 
 // TODO: this is a legacy approach we should unravel in the near future.
 export const createDispatchedHandlerFactory = (

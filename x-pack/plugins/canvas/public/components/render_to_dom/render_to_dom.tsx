@@ -14,11 +14,14 @@ interface Props {
 
 export const RenderToDom: FC<Props> = ({ render, style }) => {
   // https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
-  const ref = useCallback((node: HTMLDivElement) => {
-    if (node !== null) {
-      render(node);
-    }
-  }, []);
+  const ref = useCallback(
+    (node: HTMLDivElement) => {
+      if (node !== null) {
+        render(node);
+      }
+    },
+    [render]
+  );
 
   return <div className="render_to_dom" {...{ ref, style }} />;
 };
