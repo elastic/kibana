@@ -120,7 +120,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
   const originatingApp = $route.current.params[EMBEDDABLE_ORIGINATING_APP_PARAM];
   removeQueryParam(history, EMBEDDABLE_ORIGINATING_APP_PARAM);
-
   $scope.getOriginatingApp = () => originatingApp;
 
   const visStateToEditorState = () => {
