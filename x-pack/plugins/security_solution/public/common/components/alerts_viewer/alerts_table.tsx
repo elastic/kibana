@@ -69,6 +69,7 @@ const AlertsTableComponent: React.FC<Props> = ({ id, endDate, startDate, pageFil
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <StatefulEventsViewer

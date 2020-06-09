@@ -52,6 +52,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
       );
       setRouterState(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routerState]);
 
   const handleClosePopover = useCallback(() => {
