@@ -25,7 +25,7 @@ export {
   validateIndexPattern,
   getFromSavedObject,
   isDefault,
-} from './lib';
+} from '../../common/index_patterns/lib';
 export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
 
 export {
