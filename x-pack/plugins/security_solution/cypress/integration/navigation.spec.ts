@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DETECTIONS, HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../screens/siem_header';
+import { DETECTIONS, HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../screens/security_header';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { navigateFromHeaderTo } from '../tasks/siem_header';

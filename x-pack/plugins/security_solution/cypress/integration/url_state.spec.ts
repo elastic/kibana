@@ -13,7 +13,7 @@ import {
 } from '../screens/date_picker';
 import { HOSTS_NAMES } from '../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../screens/hosts/main';
-import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/siem_header';
+import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/security_header';
 import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../tasks/login';

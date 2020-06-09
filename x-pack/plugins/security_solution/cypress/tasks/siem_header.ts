@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KQL_INPUT, REFRESH_BUTTON } from '../screens/siem_header';
+import { KQL_INPUT, REFRESH_BUTTON } from '../screens/security_header';
 
 export const clearSearchBar = () => {
   cy.get(KQL_INPUT).clear().type('{enter}');
