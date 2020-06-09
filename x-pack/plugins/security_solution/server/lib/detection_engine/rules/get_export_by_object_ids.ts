@@ -51,7 +51,7 @@ export const getRulesFromObjects = async (
     objects.reduce<Array<Promise<ExportRules>>>((accumPromise, object) => {
       const exportWorkerPromise = new Promise<ExportRules>(async (resolve) => {
         try {
-          const rule = await readRules({ alertsClient, ruleId: object.rule_id });
+          const rule = await readRules({ alertsClient, ruleId: object.rule_id, id: undefined });
           if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
             const transformedRule = transformAlertToRule(rule);
             resolve({

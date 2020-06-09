@@ -69,7 +69,6 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
 
 function getPropertyValue({
   val,
-  fieldName,
   truncated = false,
 }: Partial<IStickyProperty>) {
   if (truncated) {
