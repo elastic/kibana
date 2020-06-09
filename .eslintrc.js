@@ -164,7 +164,7 @@ module.exports = {
      * Files that require Elastic license headers instead of Apache 2.0 header
      */
     {
-      files: ['x-pack/**/*.{js,ts,tsx}', 'x-pack/bin/node'],
+      files: ['x-pack/**/*.{js,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
