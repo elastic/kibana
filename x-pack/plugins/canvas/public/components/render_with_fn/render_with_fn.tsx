@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
+import { isEqual } from 'lodash';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
@@ -29,6 +30,22 @@ interface Props {
 }
 
 const style = { height: '100%', width: '100%' };
+
+const useDeepEffect = (fn: () => void, deps: any[]) => {
+  const isFirst = useRef(true);
+  const prevDeps = useRef(deps);
+
+  useEffect(() => {
+    const isSame = prevDeps.current.every((obj, i) => isEqual(obj, deps[i]));
+
+    if (isFirst.current || !isSame) {
+      fn();
+    }
+
+    isFirst.current = false;
+    prevDeps.current = deps;
+  });
+};
 
 export const RenderWithFn: FC<Props> = ({
   name: functionName,
@@ -78,12 +95,15 @@ export const RenderWithFn: FC<Props> = ({
     handlers.current.resize(size);
   }, [size]);
 
-  useEffect(() => () => {
-    handlers.current.destroy();
-  });
+  useEffect(
+    () => () => {
+      handlers.current.destroy();
+    },
+    []
+  );
 
   // Re-render the Element if these properties change.
-  useEffect(() => {
+  useDeepEffect(() => {
     if (!domNode) {
       return;
     }

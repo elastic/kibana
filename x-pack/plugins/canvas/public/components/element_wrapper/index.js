@@ -62,7 +62,6 @@ export const ElementWrapper = compose(
     (props) => {
       const { element, createHandlers } = props;
       const handlers = createHandlers(element);
-      console.log('what?', handlers);
       // this removes element and createHandlers from passed props
       return { handlers };
     }
