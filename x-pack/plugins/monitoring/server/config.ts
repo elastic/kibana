@@ -86,7 +86,7 @@ export type MonitoringConfig = ReturnType<typeof createConfig>;
 export function createConfig(config: TypeOf<typeof configSchema>) {
   return {
     ...config,
-    elasticsearch: new MonitoringElasticsearchConfig(config.elasticsearch),
+    elasticsearch: new ElasticsearchConfig(config.elasticsearch as ElasticsearchConfigType),
     ui: {
       ...config.ui,
       elasticsearch: new MonitoringElasticsearchConfig(config.ui.elasticsearch),
