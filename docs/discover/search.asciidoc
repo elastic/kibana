@@ -1,5 +1,5 @@
 [[search]]
-== Search your data
+== Search data
 Many Kibana apps embed a query bar for real-time search, including
 *Discover*, *Visualize*, and *Dashboard*.
 
