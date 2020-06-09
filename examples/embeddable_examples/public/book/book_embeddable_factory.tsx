@@ -35,6 +35,7 @@ import {
   BookEmbeddableOutput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
+import { AttributeUnwrapService } from './attribute_unwrap';
 
 interface StartServices {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
@@ -58,6 +59,8 @@ export class BookEmbeddableFactory
     getIconForSavedObject: () => 'pencil',
   };
 
+  private unwrapService?: AttributeUnwrapService;
+
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
@@ -73,10 +76,13 @@ export class BookEmbeddableFactory
   };
 
   public async create(input: BookEmbeddableInput, parent?: IContainer) {
-    const { savedObjectsClient } = await this.getStartServices();
+    if (!this.unwrapService) {
+      const { savedObjectsClient } = await this.getStartServices();
+      this.unwrapService = new AttributeUnwrapService(this.type, savedObjectsClient);
+    }
     return new BookEmbeddable(input, {
       parent,
-      savedObjectsClient,
+      unwrapService: this.unwrapService,
     });
   }
 
@@ -98,7 +104,7 @@ export class BookEmbeddableFactory
           const savedItem = await savedObjectsClient.create(BOOK_SAVED_OBJECT, attributes);
           resolve({ savedObjectId: savedItem.id });
         } else {
-          resolve({ ...attributes });
+          resolve({ attributes });
         }
       };
       const overlay = openModal(

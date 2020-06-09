@@ -37,6 +37,7 @@ import {
   EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
 import { SearchableListContainer, SearchableContainerInput } from './searchable_list_container';
+import { BOOK_EMBEDDABLE } from '../book/book_embeddable';
 
 interface Props {
   embeddable: SearchableListContainer;
@@ -158,6 +159,13 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
               value={this.props.input.search || ''}
               onChange={(ev) => this.updateSearch(ev.target.value)}
             />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Filter">
+            <EuiButton data-test-subj="reloadBooks" onClick={() => this.reloadBooks()}>
+              Reload All Books
+            </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem />

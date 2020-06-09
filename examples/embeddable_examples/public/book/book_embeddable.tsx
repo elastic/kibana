@@ -19,7 +19,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { SavedObjectsClientContract } from 'kibana/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -29,26 +28,21 @@ import {
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
-// import { TodoComboEmbeddableComponent } from './todo_combo_component';
+import { AttributeUnwrapService } from './attribute_unwrap';
 
 export const BOOK_EMBEDDABLE = 'book';
 export type BookEmbeddableInput = BookByValueInput | BookByReferenceInput;
+export interface BookEmbeddableOutput extends EmbeddableOutput {
+  hasMatch: boolean;
+  attributes: BookSavedObjectAttributes;
+}
 
 interface BookInheritedInput extends EmbeddableInput {
   search?: string;
 }
 
-export type BookByValueInput = BookSavedObjectAttributes & BookInheritedInput;
+export type BookByValueInput = { attributes: BookSavedObjectAttributes } & BookInheritedInput;
 export type BookByReferenceInput = SavedObjectEmbeddableInput & BookInheritedInput;
-
-export function isReferenceInput(input: BookEmbeddableInput): input is BookByReferenceInput {
-  return (input as BookByReferenceInput).savedObjectId !== undefined;
-}
-
-export interface BookEmbeddableOutput extends EmbeddableOutput {
-  hasMatch: boolean;
-  savedAttributes?: BookSavedObjectAttributes;
-}
 
 /**
  * Returns whether any attributes contain the search string.  If search is empty, true is returned. If
@@ -69,47 +63,36 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
-  private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectId?: string;
+  private attributes?: BookSavedObjectAttributes;
+
+  private unwrapService: AttributeUnwrapService;
 
   constructor(
     initialInput: BookEmbeddableInput,
     {
       parent,
-      savedObjectsClient,
+      unwrapService,
     }: {
       parent?: IContainer;
-      savedObjectsClient: SavedObjectsClientContract;
+      unwrapService: AttributeUnwrapService;
     }
   ) {
-    super(initialInput, { hasMatch: false }, parent);
-    this.savedObjectsClient = savedObjectsClient;
+    super(initialInput, {} as BookEmbeddableOutput, parent);
+    this.unwrapService = unwrapService;
 
     this.subscription = this.getInput$().subscribe(async () => {
-      // console.log('book input changed to', this.getInput());
-      let savedAttributes: BookSavedObjectAttributes | undefined;
-      if (isReferenceInput(this.input)) {
-        if (this.savedObjectId !== this.input.savedObjectId) {
-          this.savedObjectId = this.input.savedObjectId;
-          const todoSavedObject = await this.savedObjectsClient.get<BookSavedObjectAttributes>(
-            this.type,
-            this.input.savedObjectId
-          );
-          savedAttributes = todoSavedObject?.attributes;
-        }
+      const savedObjectId = (this.getInput() as BookByReferenceInput).savedObjectId;
+      const attributes = (this.getInput() as BookByValueInput).attributes;
+      if (this.attributes !== attributes || this.savedObjectId !== savedObjectId) {
+        this.savedObjectId = savedObjectId;
+        this.reload();
       } else {
-        this.savedObjectId = undefined;
-        savedAttributes = this.input;
+        this.updateOutput({
+          attributes: this.attributes,
+          hasMatch: getHasMatch(this.input.search, this.attributes),
+        });
       }
-
-      this.updateOutput({
-        hasMatch: getHasMatch(this.input.search, savedAttributes),
-        savedAttributes,
-      });
-      // console.log('set output to:', {
-      //   hasMatch: getHasMatch(this.input.search, savedAttributes),
-      //   savedAttributes,
-      // });
     });
   }
 
@@ -122,19 +105,16 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   }
 
   public async reload() {
-    // console.log('reload called');
-    if (isReferenceInput(this.input)) {
-      this.savedObjectId = this.input.savedObjectId;
-      const todoSavedObject = await this.savedObjectsClient.get<BookSavedObjectAttributes>(
-        'todo',
-        this.input.savedObjectId
-      );
-      const savedAttributes = todoSavedObject?.attributes;
-      this.updateOutput({
-        hasMatch: getHasMatch(this.input.search, savedAttributes),
-        savedAttributes,
-      });
-    }
+    this.attributes = await this.unwrapService.unwrapAttributes<
+      BookSavedObjectAttributes,
+      BookByValueInput,
+      BookByReferenceInput
+    >(this.input);
+
+    this.updateOutput({
+      attributes: this.attributes,
+      hasMatch: getHasMatch(this.input.search, this.attributes),
+    });
   }
 
   public destroy() {

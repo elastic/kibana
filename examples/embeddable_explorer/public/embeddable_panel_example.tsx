@@ -83,8 +83,10 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
         type: BOOK_EMBEDDABLE,
         explicitInput: {
           id: '5',
-          title: 'Creating an embeddable by value: A Guide',
-          author: 'John A. ByValue',
+          attributes: {
+            title: 'Creating an embeddable by value: A Guide',
+            author: 'John A. ByValue',
+          },
         },
       },
     },

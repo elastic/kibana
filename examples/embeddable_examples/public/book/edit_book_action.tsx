@@ -40,8 +40,10 @@ export const ACTION_EDIT_BOOK = 'ACTION_EDIT_BOOK';
 export const createEditBookAction = (getStartServices: () => Promise<StartServices>) =>
   createAction({
     getDisplayName: () =>
-      i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit' }),
+      i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
     type: ACTION_EDIT_BOOK,
+    order: 100,
+    getIconType: () => 'documents',
     isCompatible: async ({ embeddable }: ActionContext) => {
       return (
         embeddable.type === BOOK_EMBEDDABLE && embeddable.getInput().viewMode === ViewMode.EDIT
@@ -51,29 +53,34 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
       const { openModal, savedObjectsClient } = await getStartServices();
       const onSave = async (attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
         if (includeInLibrary) {
-          // const input = embeddable.getInput() as BookByReferenceInput;
-
           if ((embeddable.getInput() as BookByReferenceInput).savedObjectId) {
+            embeddable.updateInput({ attributes: null });
             await savedObjectsClient.update(
               BOOK_SAVED_OBJECT,
               (embeddable.getInput() as BookByReferenceInput).savedObjectId!,
               attributes
             );
-            embeddable.updateInput({ attributes: undefined });
             embeddable.reload();
           } else {
             const savedItem = await savedObjectsClient.create(BOOK_SAVED_OBJECT, attributes);
             embeddable.updateInput({ savedObjectId: savedItem.id });
           }
+
+          // Ensures that any duplicate embeddables also register the changes.
+          embeddable.getRoot().reload();
         } else {
-          embeddable.updateInput({ attributes });
+          if ((embeddable.getInput() as BookByReferenceInput).savedObjectId) {
+            embeddable.updateInput({ savedObjectId: null, attributes });
+          } else {
+            embeddable.updateInput({ attributes });
+          }
         }
       };
       const overlay = openModal(
         toMountPoint(
           <CreateEditBookComponent
             savedObjectId={(embeddable.getInput() as BookByReferenceInput).savedObjectId}
-            attributes={embeddable.getOutput().savedAttributes}
+            attributes={embeddable.getOutput().attributes}
             onSave={(attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
               overlay.close();
               onSave(attributes, includeInLibrary);

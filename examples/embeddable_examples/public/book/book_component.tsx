@@ -22,12 +22,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
 import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
-import {
-  BookByValueInput,
-  BookEmbeddableInput,
-  BookEmbeddableOutput,
-  BookEmbeddable,
-} from './book_embeddable';
+import { BookEmbeddableInput, BookEmbeddableOutput, BookEmbeddable } from './book_embeddable';
 
 interface Props {
   input: BookEmbeddableInput;
@@ -49,13 +44,11 @@ function wrapSearchTerms(task?: string, search?: string) {
   );
 }
 
-export function BookEmbeddableComponentInner({
-  input: { search },
-  output: { savedAttributes },
-}: Props) {
-  const title = savedAttributes?.title;
-  const author = savedAttributes?.author;
-  const readIt = savedAttributes?.readIt;
+export function BookEmbeddableComponentInner({ input: { search }, output: { attributes } }: Props) {
+  const title = attributes?.title;
+  const author = attributes?.author;
+  const readIt = attributes?.readIt;
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
@@ -63,14 +56,14 @@ export function BookEmbeddableComponentInner({
           {title ? (
             <EuiFlexItem>
               <EuiText data-test-subj="bookEmbeddableTitle">
-                <h3>{`${wrapSearchTerms(title, search)},`}</h3>
+                <h3>{wrapSearchTerms(title, search)},</h3>
               </EuiText>
             </EuiFlexItem>
           ) : null}
           {author ? (
             <EuiFlexItem>
               <EuiText data-test-subj="bookEmbeddableAuthor">
-                <h5>{`- ${wrapSearchTerms(author, search)}`}</h5>
+                <h5>-{wrapSearchTerms(author, search)}</h5>
               </EuiText>
             </EuiFlexItem>
           ) : null}

@@ -68,19 +68,17 @@ export function CreateEditBookComponent({
         </EuiFormRow>
       </EuiModalBody>
       <EuiModalFooter>
-        {savedObjectId === undefined ? (
-          <EuiButton
-            data-test-subj="saveNoteEmbeddableByValue"
-            disabled={title === ''}
-            onClick={() => onSave({ title, author, readIt }, false)}
-          >
-            Save
-          </EuiButton>
-        ) : null}
+        <EuiButton
+          data-test-subj="saveNoteEmbeddableByValue"
+          disabled={title === ''}
+          onClick={() => onSave({ title, author, readIt }, false)}
+        >
+          {savedObjectId ? 'Unlink from library item' : 'Save and Return'}
+        </EuiButton>
         <EuiButton
           data-test-subj="saveNoteEmbeddableByRef"
           disabled={title === ''}
-          onClick={() => onSave({ title, author, readIt }, false)}
+          onClick={() => onSave({ title, author, readIt }, true)}
         >
           {savedObjectId ? 'Update library item' : 'Save to library'}
         </EuiButton>

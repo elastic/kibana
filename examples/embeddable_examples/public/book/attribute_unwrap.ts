@@ -18,33 +18,27 @@
  */
 
 import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
-import { SavedObjectsClientContract } from '../../../../src/core/public';
-
-type Common<A, B> = {
-  [P in keyof A & keyof B]: A[P] | B[P];
-};
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../src/core/public';
 
 function isRefType<RefType extends SavedObjectEmbeddableInput>(input: unknown): input is RefType {
   return !!(input as SavedObjectEmbeddableInput).savedObjectId;
 }
 
-export async function testUnWrap<
-  SavedObjectAttributes,
-  ValType extends SavedObjectAttributes = SavedObjectAttributes,
-  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
->(
-  input: RefType | ValType,
-  savedObjectsClient: SavedObjectsClientContract,
-  type: string
-): Promise<ValType> {
-  if (isRefType<RefType>(input)) {
-    const savedObject = await savedObjectsClient.get<SavedObjectAttributes>(
-      type,
-      input.savedObjectId
-    );
-    const commonInput = input as Common<RefType, ValType>;
-    return { ...commonInput, ...savedObject } as ValType;
-  } else {
-    return input as ValType;
+export class AttributeUnwrapService {
+  constructor(private type: string, private savedObjectsClient: SavedObjectsClientContract) {}
+
+  public async unwrapAttributes<
+    SavedObjectAttributes,
+    ValType extends { attributes: SavedObjectAttributes },
+    RefType extends SavedObjectEmbeddableInput
+  >(input: RefType | ValType): Promise<SavedObjectAttributes> {
+    if (isRefType<RefType>(input)) {
+      const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
+        SavedObjectAttributes
+      >(this.type, input.savedObjectId);
+      return savedObject.attributes;
+    } else {
+      return input.attributes;
+    }
   }
 }
