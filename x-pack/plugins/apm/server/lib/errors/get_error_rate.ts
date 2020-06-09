@@ -63,7 +63,10 @@ export async function getErrorRate({
         aggs,
       },
     });
-    return resp.aggregations?.response_times.buckets;
+    return {
+      totalHits: resp.hits.total.value,
+      aggs: resp.aggregations?.response_times.buckets,
+    };
   };
   const getErrorBucketAggregation = async () => {
     const resp = await client.search({
@@ -86,20 +89,27 @@ export async function getErrorRate({
   };
 
   // Needed to the wrap the call to client.search in a function to avoid "Type instantiation is excessively deep and possibly infinite"
-  const [transactionsCount, errorsCount] = await Promise.all([
+  const [transactions, errors] = await Promise.all([
     getTransactionBucketAggregation(),
     getErrorBucketAggregation(),
   ]);
 
   const transactionByTimestamp: Record<number, number> = {};
-  if (transactionsCount) {
-    transactionsCount.forEach((bucket) => {
+  if (transactions?.aggs) {
+    transactions.aggs.forEach((bucket) => {
       transactionByTimestamp[bucket.key] = bucket.doc_count;
     });
   }
 
-  return errorsCount?.map((bucket) => {
+  return errors?.map((bucket) => {
     const { key, doc_count: errorCount } = bucket;
-    return { x: key, y: errorCount / (transactionByTimestamp[key] || 1) };
+    return {
+      x: key,
+      y:
+        // If the transaction count doesn't have any hits, it means that the there's no result
+        transactions?.totalHits === 0
+          ? undefined
+          : errorCount / (transactionByTimestamp[key] || 1),
+    };
   });
 }
