@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import React from 'react';
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import ReactDOM from 'react-dom';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -36,12 +38,17 @@ import {
   IContainer,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
-import { IExpressionLoaderParams, ExpressionsStart } from '../../../../plugins/expressions/public';
+import {
+  IExpressionLoaderParams,
+  ExpressionsStart,
+  RenderError,
+} from '../../../../plugins/expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { EmbeddableErrorLabel } from './embeddable_error_label';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -88,6 +95,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
+  private labelNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
@@ -224,6 +232,31 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   // @ts-ignore
   hasInspector = () => Boolean(this.getInspectorAdapters());
 
+  onContainerLoading = () => {
+    this.domNode.setAttribute('data-render-complete', 'false');
+    this.domNode.setAttribute('data-loading', '');
+    this.domNode.removeAttribute('data-error');
+    ReactDOM.render(<EmbeddableErrorLabel />, this.labelNode);
+  };
+
+  onContainerRender = (count: number) => {
+    this.domNode.removeAttribute('data-loading');
+    this.domNode.setAttribute('data-render-complete', 'true');
+    this.domNode.setAttribute('data-rendering-count', count.toString());
+    dispatchRenderComplete(this.domNode);
+  };
+
+  onContainerError = (error: RenderError) => {
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.domNode.removeAttribute('data-loading');
+    this.domNode.setAttribute('data-error', '');
+    this.domNode.setAttribute('data-render-complete', 'false');
+
+    ReactDOM.render(<EmbeddableErrorLabel error={error} />, this.labelNode);
+  };
+
   /**
    *
    * @param {Element} domNode
@@ -233,13 +266,22 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.transferCustomizationsToUiState();
 
+    this.labelNode = document.createElement('div');
+    this.labelNode.className = `panel-label`;
+    domNode.appendChild(this.labelNode);
+
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
+
     this.domNode = div;
 
     const expressions = getExpressions();
-    this.handler = new expressions.ExpressionLoader(this.domNode);
+    this.handler = new expressions.ExpressionLoader(this.domNode, '', {
+      onRenderError: (element: HTMLElement, error: RenderError) => {
+        this.onContainerError(error);
+      },
+    });
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async (event) => {
@@ -283,21 +325,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     div.setAttribute('data-rendering-count', '0');
     div.setAttribute('data-render-complete', 'false');
 
-    this.subscriptions.push(
-      this.handler.loading$.subscribe(() => {
-        div.setAttribute('data-render-complete', 'false');
-        div.setAttribute('data-loading', '');
-      })
-    );
+    this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
 
-    this.subscriptions.push(
-      this.handler.render$.subscribe((count) => {
-        div.removeAttribute('data-loading');
-        div.setAttribute('data-render-complete', 'true');
-        div.setAttribute('data-rendering-count', count.toString());
-        dispatchRenderComplete(div);
-      })
-    );
+    this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.updateHandler();
   }
