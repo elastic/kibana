@@ -27,15 +27,25 @@ import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
 import { TimelineType } from '../../../../common/types/timeline';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
 jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: jest.fn(),
+}));
 jest.mock('../flyout/header_with_close_button');
-
 describe('StatefulTimeline', () => {
   let props = {} as StatefulTimelineProps;
   const sort: Sort = {

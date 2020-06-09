@@ -153,7 +153,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelineType,
       onlyFavorites,
       timelineStatus,
-      fetchAllTimeline,
     ]);
 
     /** Invoked when the user presses enters to submit the text in the search input */

@@ -85,7 +85,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         status: timelineStatus,
         timelineType,
       });
-    }, [filterBy, timelineStatus, timelineType, fetchAllTimeline]);
+    }, [filterBy, timelineStatus, timelineType]);
 
     return (
       <>

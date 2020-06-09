@@ -607,19 +607,40 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
             },
             "filters": Array [],
             "uiSettings": Object {
-              "get": [Function],
-              "get$": [MockFunction],
-              "getAll": [MockFunction],
-              "getSaved$": [MockFunction],
-              "getUpdate$": [MockFunction],
-              "getUpdateErrors$": [MockFunction],
-              "isCustom": [MockFunction],
-              "isDeclared": [MockFunction],
-              "isDefault": [MockFunction],
-              "isOverridden": [MockFunction],
-              "overrideLocalDefault": [MockFunction],
-              "remove": [MockFunction],
-              "set": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "query:allowLeadingWildcards",
+                  ],
+                  Array [
+                    "query:queryString:options",
+                  ],
+                  Array [
+                    "courier:ignoreFilterIfFieldNotInIndex",
+                  ],
+                  Array [
+                    "dateFormat:tz",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
             },
             "updated$": Subject {
               "_isScalar": false,
@@ -827,7 +848,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
     }
     inputId="timeline"
   />
-  <Connect(Component)
+  <Connect(EnhancedType)
     eventType="raw"
     fields={
       Array [
@@ -857,6 +878,6 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
     sourceId="default"
   >
     <Component />
-  </Connect(Component)>
+  </Connect(EnhancedType)>
 </styled.div>
 `;
