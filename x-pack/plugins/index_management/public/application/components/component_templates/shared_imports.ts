@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN, API_BASE_PATH, CREATE_LEGACY_TEMPLATE_BY_DEFAULT, BASE_PATH } from './constants';
-
-export { getTemplateParameter } from './lib';
-
-export * from './types';
+export {
+  UseRequestConfig,
+  UseRequestResponse,
+  SendRequestConfig,
+  SendRequestResponse,
+  sendRequest,
+  useRequest,
+  SectionLoading,
+} from '../../../../../../../src/plugins/es_ui_shared/public';
