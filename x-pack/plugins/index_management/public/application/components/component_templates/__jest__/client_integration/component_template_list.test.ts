@@ -62,7 +62,7 @@ describe('<ComponentTemplateList />', () => {
       const { tableCellsValues } = table.getMetaData('componentTemplatesTable');
       tableCellsValues.forEach((row, i) => {
         const { name, usedBy } = componentTemplates[i];
-        const usedByText = usedBy.length === 0 ? 'Not in use' : `${usedBy.length} index template`;
+        const usedByText = usedBy.length === 0 ? 'Not in use' : usedBy.length.toString();
 
         expect(row).toEqual(['', name, usedByText, '', '', '', '']);
       });
