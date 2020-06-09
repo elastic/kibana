@@ -10,9 +10,8 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { GlobalSearchProviderContext } from '../types';
 
-const createContextMock = (): jest.Mocked<GlobalSearchProviderContext> => {
+const createContextMock = () => {
   return {
     core: {
       savedObjects: {

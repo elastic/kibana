@@ -19,13 +19,9 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         .getAllTypes()
         .filter((type) => !typeRegistry.isHidden(type.name))
         .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
-      const typeToField = searchableTypes.reduce((memo, type) => {
-        return {
-          ...memo,
-          [type.name]: type.management!.defaultSearchField!,
-        };
-      }, {} as Record<string, string>);
-      const searchFields = [...new Set(Object.values(typeToField))];
+      const searchFields = [
+        ...new Set(searchableTypes.map((type) => type.management!.defaultSearchField!)),
+      ];
 
       // TODO: add preference once https://github.com/elastic/kibana/pull/68620 lands
       const responsePromise = client.find({
@@ -33,7 +29,7 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         perPage: maxResults,
         search: term,
         searchFields,
-        type: Object.keys(typeToField),
+        type: searchableTypes.map((type) => type.name),
       });
 
       return from(responsePromise).pipe(
