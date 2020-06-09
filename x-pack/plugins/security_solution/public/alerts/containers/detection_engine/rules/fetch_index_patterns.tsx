@@ -75,9 +75,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
                 setIndexPatterns(
                   getIndexFields(indices.join(), get('data.source.status.indexFields', result))
                 );
-                setBrowserFields(
-                  getBrowserFields(indices.join(), get('data.source.status.indexFields', result))
-                );
+                setBrowserFields(getBrowserFields(get('data.source.status.indexFields', result)));
               }
             },
             (error) => {
