@@ -49,6 +49,7 @@ const createStartContract = (): Start => ({
   },
   navigateToDefaultApp: jest.fn(),
   navigateToLegacyKibanaUrl: jest.fn(),
+  loadFontAwesome: jest.fn(),
 });
 
 export const kibanaLegacyPluginMock = {

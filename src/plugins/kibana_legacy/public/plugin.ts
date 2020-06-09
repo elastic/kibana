@@ -219,8 +219,20 @@ export class KibanaLegacyPlugin {
           overwriteHash
         );
       },
+      /**
+       * Resolves the provided hash using the registered forwards and navigates to the target app.
+       * If a navigation happened, `{ navigated: true }` will be returned.
+       * If no matching forward is found, `{ navigated: false }` will be returned.
+       * @param hash
+       */
       navigateToLegacyKibanaUrl: (hash: string) => {
         return navigateToLegacyKibanaUrl(hash, this.forwardDefinitions, basePath, application);
+      },
+      /**
+       * Loads the font-awesome icon font.
+       */
+      loadFontAwesome: async () => {
+        await import('./font_awesome');
       },
     };
   }
