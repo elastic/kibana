@@ -11,7 +11,7 @@ import { LinkIcon, LinkIconProps } from '../link_icon';
 import { BarAction } from './styles';
 
 const Popover = React.memo<UtilityBarActionProps>(
-  ({ children, color, iconSide, iconSize, iconType, popoverContent }) => {
+  ({ children, color, iconSide, iconSize, iconType, popoverContent, disabled }) => {
     const [popoverState, setPopoverState] = useState(false);
 
     const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
@@ -26,6 +26,7 @@ const Popover = React.memo<UtilityBarActionProps>(
             iconSize={iconSize}
             iconType={iconType}
             onClick={() => setPopoverState(!popoverState)}
+            disabled={disabled}
           >
             {children}
           </LinkIcon>
@@ -62,6 +63,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     <BarAction data-test-subj={dataTestSubj}>
       {popoverContent ? (
         <Popover
+          disabled={disabled}
           color={color}
           iconSide={iconSide}
           iconSize={iconSize}

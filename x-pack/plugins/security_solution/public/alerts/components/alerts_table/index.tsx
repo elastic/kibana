@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { AlertStateStatus } from '../../../../common/detection_engine/types';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -27,16 +28,10 @@ import { updateAlertStatusAction } from './actions';
 import {
   getAlertActions,
   requiredFieldsForActions,
-  alertsClosedFilters,
   alertsDefaultModel,
-  alertsOpenFilters,
+  buildAlertStatusFilter,
 } from './default_config';
-import {
-  FILTER_CLOSED,
-  FILTER_OPEN,
-  AlertFilterOption,
-  AlertsTableFilterGroup,
-} from './alerts_filter_group';
+import { FILTER_OPEN, AlertFilterOption, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18n from './translations';
 import {
@@ -157,21 +152,30 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, status: string) => {
-      const title =
-        status === 'closed'
-          ? i18n.CLOSED_ALERT_SUCCESS_TOAST(count)
-          : i18n.OPENED_ALERT_SUCCESS_TOAST(count);
-
+    (count: number, status: AlertStateStatus) => {
+      let title;
+      if (status === 'closed') {
+        title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
+      } else if (status === 'open') {
+        title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+      } else {
+        title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+      }
       displaySuccessToast(title, dispatchToaster);
     },
     [dispatchToaster]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
-    (status: string, error: Error) => {
-      const title =
-        status === 'closed' ? i18n.CLOSED_ALERT_FAILED_TOAST : i18n.OPENED_ALERT_FAILED_TOAST;
+    (status: AlertStateStatus, error: Error) => {
+      let title;
+      if (status === 'closed') {
+        title = i18n.CLOSED_ALERT_FAILED_TOAST;
+      } else if (status === 'open') {
+        title = i18n.OPENED_ALERT_FAILED_TOAST;
+      } else {
+        title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+      }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
     [dispatchToaster]
@@ -302,12 +306,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
-      return filterGroup === FILTER_OPEN ? alertsOpenFilters : alertsClosedFilters;
+      return buildAlertStatusFilter(filterGroup);
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [
-        ...defaultFilters,
-        ...(filterGroup === FILTER_OPEN ? alertsOpenFilters : alertsClosedFilters),
-      ];
+      return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
     }
   }, [defaultFilters, filterGroup]);
   const { initializeTimeline, setTimelineRowActions } = useManageTimeline();

@@ -32,7 +32,7 @@ import {
   UpdateTimelineLoading,
 } from './types';
 
-export const alertsOpenFilters: Filter[] = [
+export const buildAlertStatusFilter = (status: AlertStateStatus): Filter[] => [
   {
     meta: {
       alias: null,
@@ -41,32 +41,12 @@ export const alertsOpenFilters: Filter[] = [
       type: 'phrase',
       key: 'signal.status',
       params: {
-        query: 'open',
+        query: status,
       },
     },
     query: {
       match_phrase: {
-        'signal.status': 'open',
-      },
-    },
-  },
-];
-
-export const alertsClosedFilters: Filter[] = [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.status',
-      params: {
-        query: 'closed',
-      },
-    },
-    query: {
-      match_phrase: {
-        'signal.status': 'closed',
+        'signal.status': status,
       },
     },
   },
@@ -204,75 +184,75 @@ export const getAlertActions = ({
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
   hasIndexWrite: boolean;
-  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+  onAlertStatusUpdateFailure: (status: AlertStateStatus, error: Error) => void;
+  onAlertStatusUpdateSuccess: (count: number, status: AlertStateStatus) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   status: AlertStateStatus;
   updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineRowAction[] => {
-  const rowContextMenuItems: TimelineRowAction[] = [
-    {
-      ariaLabel: 'Open alert',
-      content: i18n.ACTION_OPEN_ALERT,
-      dataTestSubj: 'update-alert-status',
-      displayType: 'contextMenu',
-      iconType: 'securitySignalDetected',
-      id: FILTER_OPEN,
-      isActionDisabled: !canUserCRUD || !hasIndexWrite,
-      onClick: ({ eventId }: TimelineRowActionOnClick) =>
-        updateAlertStatusAction({
-          alertIds: [eventId],
-          onAlertStatusUpdateFailure,
-          onAlertStatusUpdateSuccess,
-          setEventsDeleted,
-          setEventsLoading,
-          status,
-          selectedStatus: FILTER_OPEN,
-        }),
-      width: 26,
-    },
-    {
-      ariaLabel: 'Close alert',
-      content: i18n.ACTION_CLOSE_ALERT,
-      dataTestSubj: 'update-alert-status',
-      displayType: 'contextMenu',
-      iconType: 'securitySignalResolved',
-      id: FILTER_CLOSED,
-      isActionDisabled: !canUserCRUD || !hasIndexWrite,
-      onClick: ({ eventId }: TimelineRowActionOnClick) =>
-        updateAlertStatusAction({
-          alertIds: [eventId],
-          onAlertStatusUpdateFailure,
-          onAlertStatusUpdateSuccess,
-          setEventsDeleted,
-          setEventsLoading,
-          status,
-          selectedStatus: FILTER_CLOSED,
-        }),
-      width: 26,
-    },
-    {
-      ariaLabel: 'Update alert status',
-      content: i18n.ACTION_IN_PROGRESS_ALERT,
-      dataTestSubj: 'update-alert-status',
-      displayType: 'contextMenu',
-      iconType: 'alert',
-      id: FILTER_IN_PROGRESS,
-      isActionDisabled: !canUserCRUD || !hasIndexWrite,
-      onClick: ({ eventId }: TimelineRowActionOnClick) =>
-        updateAlertStatusAction({
-          alertIds: [eventId],
-          onAlertStatusUpdateFailure,
-          onAlertStatusUpdateSuccess,
-          setEventsDeleted,
-          setEventsLoading,
-          status,
-          selectedStatus: FILTER_IN_PROGRESS,
-        }),
-      width: 26,
-    },
-  ];
+  const openAlertActionComponent: TimelineRowAction = {
+    ariaLabel: 'Open alert',
+    content: i18n.ACTION_OPEN_ALERT,
+    dataTestSubj: 'update-alert-status',
+    displayType: 'contextMenu',
+    iconType: 'securitySignalDetected',
+    id: FILTER_OPEN,
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
+      updateAlertStatusAction({
+        alertIds: [eventId],
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted,
+        setEventsLoading,
+        status,
+        selectedStatus: FILTER_OPEN,
+      }),
+    width: 26,
+  };
+
+  const closeAlertActionComponent: TimelineRowAction = {
+    ariaLabel: 'Close alert',
+    content: i18n.ACTION_CLOSE_ALERT,
+    dataTestSubj: 'update-alert-status',
+    displayType: 'contextMenu',
+    iconType: 'securitySignalResolved',
+    id: FILTER_CLOSED,
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
+      updateAlertStatusAction({
+        alertIds: [eventId],
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted,
+        setEventsLoading,
+        status,
+        selectedStatus: FILTER_CLOSED,
+      }),
+    width: 26,
+  };
+
+  const inProgressAlertActionComponent: TimelineRowAction = {
+    ariaLabel: 'Update alert status',
+    content: i18n.ACTION_IN_PROGRESS_ALERT,
+    dataTestSubj: 'update-alert-status',
+    displayType: 'contextMenu',
+    iconType: 'alert',
+    id: FILTER_IN_PROGRESS,
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
+      updateAlertStatusAction({
+        alertIds: [eventId],
+        onAlertStatusUpdateFailure,
+        onAlertStatusUpdateSuccess,
+        setEventsDeleted,
+        setEventsLoading,
+        status,
+        selectedStatus: FILTER_IN_PROGRESS,
+      }),
+    width: 26,
+  };
 
   return [
     {
@@ -291,6 +271,9 @@ export const getAlertActions = ({
         }),
       width: 26,
     },
-    ...rowContextMenuItems.filter((item) => item.id !== status), // Only gets the options available for the current status
+    // Context menu items
+    ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
+    ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
+    ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
   ];
 };

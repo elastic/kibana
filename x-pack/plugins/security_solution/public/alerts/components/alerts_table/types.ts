@@ -45,8 +45,8 @@ export interface UpdateAlertStatusActionProps {
   selectedStatus: AlertStateStatus;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
-  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
+  onAlertStatusUpdateSuccess: (count: number, status: AlertStateStatus) => void;
+  onAlertStatusUpdateFailure: (status: AlertStateStatus, error: Error) => void;
 }
 
 export interface SendAlertToTimelineActionProps {

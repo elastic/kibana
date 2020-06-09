@@ -23,6 +23,7 @@ import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { UpdateAlertsStatus } from '../types';
+import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 
 interface AlertsUtilityBarProps {
   canUserCRUD: boolean;
@@ -70,20 +71,41 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   const UtilityToolbar = (closePopover: () => void) => {
     return (
       <EuiFlexGroup direction="column">
-        <EuiFlexItem style={{ minWidth: 175 }}>
-          <LinkIcon
-            iconType={'securitySignalResolved'}
-            onClick={() => handleUpdateStatus('closed')}
-          >
-            {'Close Selected'}
-          </LinkIcon>
-        </EuiFlexItem>
+        {currentFilter !== FILTER_OPEN && (
+          <EuiFlexItem style={{ minWidth: 175 }}>
+            <LinkIcon
+              iconType={'securitySignalDetected'}
+              iconSize="m"
+              onClick={() => handleUpdateStatus('open')}
+            >
+              {'Open Selected'}
+            </LinkIcon>
+          </EuiFlexItem>
+        )}
 
-        <EuiFlexItem style={{ minWidth: 175 }}>
-          <LinkIcon iconType={'alert'} onClick={() => handleUpdateStatus('in-progress')}>
-            {'Mark in progress'}
-          </LinkIcon>
-        </EuiFlexItem>
+        {currentFilter !== FILTER_CLOSED && (
+          <EuiFlexItem style={{ minWidth: 175 }}>
+            <LinkIcon
+              iconType={'securitySignalResolved'}
+              iconSize="m"
+              onClick={() => handleUpdateStatus('closed')}
+            >
+              {'Close Selected'}
+            </LinkIcon>
+          </EuiFlexItem>
+        )}
+
+        {currentFilter !== FILTER_IN_PROGRESS && (
+          <EuiFlexItem style={{ minWidth: 175 }}>
+            <LinkIcon
+              iconType={'alert'}
+              iconSize="m"
+              onClick={() => handleUpdateStatus('in-progress')}
+            >
+              {'Mark in progress'}
+            </LinkIcon>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };
