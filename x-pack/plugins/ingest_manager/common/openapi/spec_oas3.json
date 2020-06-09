@@ -2686,10 +2686,10 @@
       "get": {
         "summary": "Fleet - Agent - List",
         "tags": [],
-        "responses": {},
-        "operationId": "get-fleet-agents",
-        "requestBody": {
-          "content": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
             "application/json": {
               "schema": {
                 "type": "object",
@@ -2765,7 +2765,9 @@
               }
             }
           }
+          }
         },
+        "operationId": "get-fleet-agents",
         "security": [
           {
             "basicAuth": []
