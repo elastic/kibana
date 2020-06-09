@@ -7,6 +7,9 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
+
+import { disableTemplate } from '../../../../common/constants';
+
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
@@ -15,11 +18,12 @@ import {
   QueryMatch,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
 import { TimelineById } from './types';
-import { TimelineNonEcsData } from '../../../graphql/types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -136,6 +140,7 @@ interface AddNewTimelineParams {
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
   timelineById: TimelineById;
+  timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
@@ -152,6 +157,7 @@ export const addNewTimeline = ({
   showCheckboxes = false,
   showRowRenderers = true,
   timelineById,
+  timelineType,
 }: AddNewTimelineParams): TimelineById => ({
   ...timelineById,
   [id]: {
@@ -171,6 +177,7 @@ export const addNewTimeline = ({
     isLoading: false,
     showCheckboxes,
     showRowRenderers,
+    timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
   },
 });
 
