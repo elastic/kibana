@@ -35,8 +35,8 @@ export const initElasticsearchHelpers = (es) => {
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
 
-  const createComponentTemplate = (componentTemplate, storeInMemory) => {
-    if (storeInMemory) {
+  const createComponentTemplate = (componentTemplate, shouldCacheTemplate) => {
+    if (shouldCacheTemplate) {
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
@@ -47,16 +47,15 @@ export const initElasticsearchHelpers = (es) => {
     return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
   };
 
-  const cleanUpComponentTemplates = () => {
+  const cleanUpComponentTemplates = () =>
     Promise.all(componentTemplatesCreated.map(deleteComponentTemplate))
       .then(() => {
         componentTemplatesCreated = [];
       })
       .catch((err) => {
         // eslint-disable-next-line no-console
-        console.log(`Error deleting ES resources: ${err.message}`);
+        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
-  };
 
   return {
     createIndex,

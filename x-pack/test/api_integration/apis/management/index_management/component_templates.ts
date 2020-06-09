@@ -23,8 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
   } = initElasticsearchHelpers(es);
 
   describe('Component templates', function () {
-    after(() => {
-      cleanUpComponentTemplates();
+    after(async () => {
+      await cleanUpComponentTemplates();
     });
 
     describe('Get', () => {
@@ -57,9 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         try {
           await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
-        } catch (e) {
+        } catch (err) {
           // eslint-disable-next-line no-console
           console.log('[Setup error] Error creating component template');
+          throw err;
         }
       });
 
@@ -101,13 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
       const COMPONENT_NAME = 'test_create_component_template';
       const REQUIRED_FIELDS_COMPONENT_NAME = 'test_create_required_fields_component_template';
 
-      after(() => {
+      after(async () => {
         // Clean up any component templates created in test cases
-        Promise.all(
+        await Promise.all(
           [COMPONENT_NAME, REQUIRED_FIELDS_COMPONENT_NAME].map(deleteComponentTemplate)
         ).catch((err) => {
           // eslint-disable-next-line no-console
           console.log(`[Cleanup error] Error deleting component templates: ${err.message}`);
+          throw err;
         });
       });
 
@@ -212,9 +214,10 @@ export default function ({ getService }: FtrProviderContext) {
         // Create component template that can be used to test PUT request
         try {
           await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
-        } catch (e) {
+        } catch (err) {
           // eslint-disable-next-line no-console
           console.log('[Setup error] Error creating component template');
+          throw err;
         }
       });
 
@@ -272,15 +275,19 @@ export default function ({ getService }: FtrProviderContext) {
       const componentTemplateC = { body: COMPONENT, name: 'test_delete_component_template_c' };
       const componentTemplateD = { body: COMPONENT, name: 'test_delete_component_template_d' };
 
-      before(() => {
+      before(async () => {
         // Create several component templates that can be used to test deletion
-        Promise.all(
-          [componentTemplateA, componentTemplateB, componentTemplateC, componentTemplateD].map(
-            createComponentTemplate
-          )
+        await Promise.all(
+          [
+            componentTemplateA,
+            componentTemplateB,
+            componentTemplateC,
+            componentTemplateD,
+          ].map((template) => createComponentTemplate(template, false))
         ).catch((err) => {
           // eslint-disable-next-line no-console
           console.log(`[Setup error] Error creating component templates: ${err.message}`);
+          throw err;
         });
       });
 
