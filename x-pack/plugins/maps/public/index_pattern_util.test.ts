@@ -31,7 +31,7 @@ describe('getSourceFields', () => {
       },
     ];
     const sourceFields = getSourceFields(fields);
-    expect(sourceFields).toEqual([{ name: 'agent' }]);
+    expect(sourceFields).toEqual([{ name: 'agent', type: 'string' }]);
   });
 });
 
