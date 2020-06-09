@@ -29,14 +29,14 @@ async function fetchIndexSettings(indexPatternTitle) {
   const http = getHttp();
   const toasts = getToasts();
   try {
-    const indexSettings = await http.fetch(`../../${INDEX_SETTINGS_API_PATH}`, {
+    const indexSettingsPath = `/${INDEX_SETTINGS_API_PATH}`;
+    return await http.fetch(indexSettingsPath, {
       method: 'GET',
       credentials: 'same-origin',
       query: {
         indexPatternTitle,
       },
     });
-    return indexSettings;
   } catch (err) {
     const warningMsg = i18n.translate('xpack.maps.indexSettings.fetchErrorMsg', {
       defaultMessage: `Unable to fetch index settings for index pattern '{indexPatternTitle}'.
