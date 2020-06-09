@@ -5,8 +5,22 @@
  */
 
 import React, { createContext, FunctionComponent, useContext } from 'react';
+import { IdGenerator } from './services';
 
-const PipelineProcessorsContext = createContext({
+interface Links {
+  learnMoreAboutProcessorsUrl: string;
+  learnMoreAboutOnFailureProcessorsUrl: string;
+}
+
+interface Services {
+  idGenerator: IdGenerator;
+}
+
+const PipelineProcessorsContext = createContext<{
+  services: Services;
+  links: Links;
+}>({
+  services: {} as any,
   links: {
     learnMoreAboutProcessorsUrl: '',
     learnMoreAboutOnFailureProcessorsUrl: '',
@@ -14,18 +28,17 @@ const PipelineProcessorsContext = createContext({
 });
 
 interface Props {
-  links: {
-    learnMoreAboutProcessorsUrl: string;
-    learnMoreAboutOnFailureProcessorsUrl: string;
-  };
+  services: Services;
+  links: Links;
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
+  services,
   links,
   children,
 }) => {
   return (
-    <PipelineProcessorsContext.Provider value={{ links }}>
+    <PipelineProcessorsContext.Provider value={{ services, links }}>
       {children}
     </PipelineProcessorsContext.Provider>
   );

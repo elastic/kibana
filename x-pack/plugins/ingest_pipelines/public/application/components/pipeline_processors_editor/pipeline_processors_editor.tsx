@@ -18,7 +18,10 @@ import {
   SettingsFormFlyout,
   ProcessorRemoveModal,
   OnActionHandler,
+  OnSubmitHandler,
 } from './components';
+
+import { usePipelineProcessorsContext } from './context';
 
 import {
   ProcessorInternal,
@@ -63,6 +66,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     isTestButtonDisabled,
     onUpdate,
   }) {
+    const { services } = usePipelineProcessorsContext();
     const [processorToDeleteSelector, setProcessorToDeleteSelector] = useState<
       ProcessorSelector | undefined
     >();
@@ -112,20 +116,26 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       showGlobalOnFailure,
     ]);
 
-    const onSubmit = useCallback(
+    const onSubmit = useCallback<OnSubmitHandler>(
       (processorTypeAndOptions) => {
         switch (settingsFormMode.id) {
           case 'creatingTopLevelProcessor':
             processorsDispatch({
               type: 'addTopLevelProcessor',
-              payload: { processor: processorTypeAndOptions, selector: settingsFormMode.arg },
+              payload: {
+                processor: { id: services.idGenerator.getId(), ...processorTypeAndOptions },
+                selector: settingsFormMode.arg,
+              },
             });
             break;
           case 'creatingOnFailureProcessor':
             processorsDispatch({
               type: 'addOnFailureProcessor',
               payload: {
-                onFailureProcessor: processorTypeAndOptions,
+                onFailureProcessor: {
+                  id: services.idGenerator.getId(),
+                  ...processorTypeAndOptions,
+                },
                 targetSelector: settingsFormMode.arg,
               },
             });
@@ -146,7 +156,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
         }
         dismissFlyout();
       },
-      [processorsDispatch, settingsFormMode]
+      [processorsDispatch, settingsFormMode, services.idGenerator]
     );
 
     const onCloseSettingsForm = useCallback(() => {

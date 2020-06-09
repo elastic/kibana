@@ -16,10 +16,12 @@ import { ProcessorInternal } from '../types';
 
 import { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from '.';
 
+export type OnSubmitHandler = (processor: ProcessorSettingsFromOnSubmitArg) => void;
+
 export interface Props {
   processor: ProcessorInternal | undefined;
   onFormUpdate: (form: OnFormUpdateArg<any>) => void;
-  onSubmit: (processor: ProcessorSettingsFromOnSubmitArg) => void;
+  onSubmit: OnSubmitHandler;
   onClose: () => void;
 }
 

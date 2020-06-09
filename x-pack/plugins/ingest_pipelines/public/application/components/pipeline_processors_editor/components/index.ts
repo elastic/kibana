@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SettingsFormFlyout } from './settings_form_flyout';
+export { SettingsFormFlyout, OnSubmitHandler } from './settings_form_flyout';
 
 export { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
 

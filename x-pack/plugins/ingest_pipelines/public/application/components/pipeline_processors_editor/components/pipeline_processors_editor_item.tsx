@@ -68,7 +68,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   <EuiFlexItem grow={false}>
                     <EuiCode>
                       <EuiText size="s" color="subdued">
-                        {`${processor.id.slice(processor.id.length - 7, -1)}`}
+                        {`#${processor.id}`}
                       </EuiText>
                     </EuiCode>
                   </EuiFlexItem>

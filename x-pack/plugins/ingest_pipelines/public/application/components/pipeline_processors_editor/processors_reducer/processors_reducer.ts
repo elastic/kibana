@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Reducer, useReducer, Dispatch } from 'react';
-import uuid from 'uuid';
 
 import { DeserializeResult } from '../deserialize';
 import { getValue, setValue } from '../utils';
@@ -20,12 +19,12 @@ export type State = Omit<DeserializeResult, 'onFailure'> & {
 export type Action =
   | {
       type: 'addTopLevelProcessor';
-      payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };
+      payload: { processor: ProcessorInternal; selector: ProcessorSelector };
     }
   | {
       type: 'addOnFailureProcessor';
       payload: {
-        onFailureProcessor: Omit<ProcessorInternal, 'id'>;
+        onFailureProcessor: ProcessorInternal;
         targetSelector: ProcessorSelector;
       };
     }
@@ -73,13 +72,12 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   }
 
   if (action.type === 'addTopLevelProcessor') {
-    const { processor: processorArgs, selector } = action.payload;
-    const newProcessor = { ...processorArgs, id: uuid.v4() };
-    return setValue(selector, state, getValue(selector, state).concat(newProcessor));
+    const { processor, selector } = action.payload;
+    return setValue(selector, state, getValue(selector, state).concat(processor));
   }
 
   if (action.type === 'addOnFailureProcessor') {
-    const { onFailureProcessor: processorArgs, targetSelector } = action.payload;
+    const { onFailureProcessor, targetSelector } = action.payload;
     if (!targetSelector.length) {
       throw new Error('Expected target selector to contain a path, but received an empty array.');
     }
@@ -87,10 +85,9 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     if (!targetProcessor) {
       throw new Error(`Could not find processor at ${targetSelector.join('.')}`);
     }
-    const newProcessor = { ...processorArgs, id: uuid.v4() };
     targetProcessor.onFailure = targetProcessor.onFailure
-      ? targetProcessor.onFailure.concat(newProcessor)
-      : [newProcessor];
+      ? targetProcessor.onFailure.concat(onFailureProcessor)
+      : [onFailureProcessor];
     return setValue(targetSelector, state, targetProcessor);
   }
 
