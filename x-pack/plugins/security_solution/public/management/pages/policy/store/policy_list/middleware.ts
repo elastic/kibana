@@ -5,11 +5,18 @@
  */
 
 import { GetPolicyListResponse, PolicyListState } from '../../types';
-import { sendGetEndpointSpecificDatasources, sendDeleteDatasource } from './services/ingest';
+import {
+  sendGetEndpointSpecificDatasources,
+  sendDeleteDatasource,
+  sendGetFleetAgentStatusForConfig,
+} from './services/ingest';
 import { isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
-import { DeleteDatasourcesResponse } from '../../../../../../../ingest_manager/common';
+import {
+  DeleteDatasourcesResponse,
+  GetAgentStatusResponse,
+} from '../../../../../../../ingest_manager/common';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = (
   coreStart
@@ -73,6 +80,27 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
         payload: {
           id: apiResponse[0].id,
           success: true,
+        },
+      });
+    } else if (action.type === 'userOpenedPolicyListDeleteModal') {
+      const { agentConfigId } = action.payload;
+      let apiResponse: GetAgentStatusResponse;
+      try {
+        apiResponse = await sendGetFleetAgentStatusForConfig(http, agentConfigId);
+      } catch (error) {
+        dispatch({
+          type: 'serverReturnedPolicyAgentsSummaryForDeleteFailure',
+          payload: {
+            success: false,
+            error: error.body || error,
+          },
+        });
+        return;
+      }
+      dispatch({
+        type: 'serverReturnedPolicyAgentsSummaryForDelete',
+        payload: {
+          agentStatusSummary: apiResponse.results,
         },
       });
     }

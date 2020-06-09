@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
+import styled from 'styled-components';
 import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
@@ -55,6 +56,10 @@ const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 });
+
+const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
+  color: ${(props) => props.theme.eui.textColors.danger};
+`;
 
 // eslint-disable-next-line react/display-name
 export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['items'] }>(
@@ -123,6 +128,7 @@ export const PolicyList = React.memo(() => {
     selectApiError: apiError,
     selectIsDeleting: isDeleting,
     selectDeleteStatus: deleteStatus,
+    selectAgentStatusSummary: agentStatusSummary,
   } = usePolicyListSelector(selector);
 
   useEffect(() => {
@@ -184,10 +190,19 @@ export const PolicyList = React.memo(() => {
     [history, location.pathname]
   );
 
-  const handleDeleteOnClick = useCallback(({ policyId }: { policyId: string }) => {
-    setPolicyIdToDelete(policyId);
-    setShowDelete(true);
-  }, []);
+  const handleDeleteOnClick = useCallback(
+    ({ policyId, agentConfigId }: { policyId: string; agentConfigId: string }) => {
+      dispatch({
+        type: 'userOpenedPolicyListDeleteModal',
+        payload: {
+          agentConfigId,
+        },
+      });
+      setPolicyIdToDelete(policyId);
+      setShowDelete(true);
+    },
+    []
+  );
 
   const handleDeleteConfirmation = useCallback(
     ({ policyId }: { policyId: string }) => {
@@ -310,18 +325,18 @@ export const PolicyList = React.memo(() => {
                         />
                       </LinkToApp>
                     </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      icon="link"
+                    <DangerEuiContextMenuItem
+                      icon="trash"
                       key="policyDeletAction"
                       onClick={() => {
-                        handleDeleteOnClick({ policyId: item.id });
+                        handleDeleteOnClick({ agentConfigId: item.config_id, policyId: item.id });
                       }}
                     >
                       <FormattedMessage
                         id="xpack.securitySolution.endpoint.policyList.policyDeleteAction"
                         defaultMessage="Delete Policy"
                       />
-                    </EuiContextMenuItem>,
+                    </DangerEuiContextMenuItem>,
                   ]}
                 />
               );
@@ -336,14 +351,17 @@ export const PolicyList = React.memo(() => {
   return (
     <>
       {showDelete && (
-        <ConfirmDelete
-          hostCount={10}
-          onCancel={handleDeleteCancel}
-          isDeleting={isDeleting}
-          onConfirm={() => {
-            handleDeleteConfirmation({ policyId: policyIdToDelete });
-          }}
-        />
+        <>
+          <ConfirmDelete
+            hostCount={agentStatusSummary ? agentStatusSummary.total : 0}
+            onCancel={handleDeleteCancel}
+            isDeleting={isDeleting}
+            onConfirm={() => {
+              handleDeleteConfirmation({ policyId: policyIdToDelete });
+            }}
+          />
+          <SpyRoute />
+        </>
       )}
       <ManagementPageView
         viewType="list"
@@ -393,6 +411,7 @@ const ConfirmDelete = React.memo<{
         })}
         onCancel={onCancel}
         onConfirm={onConfirm}
+        buttonColor="danger"
         confirmButtonText={
           isDeleting ? (
             <FormattedMessage
@@ -418,6 +437,7 @@ const ConfirmDelete = React.memo<{
           <>
             <EuiCallOut
               data-test-subj="policyListWarningCallout"
+              color="danger"
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.policyList.deleteConfirm.warningTitle',
                 {

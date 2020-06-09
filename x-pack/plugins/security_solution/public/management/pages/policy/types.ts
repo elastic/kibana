@@ -41,6 +41,8 @@ export interface PolicyListState {
   isDeleting: boolean;
   /** Deletion status */
   deleteStatus?: boolean;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary?: GetAgentStatusResponse['results'];
 }
 
 /**

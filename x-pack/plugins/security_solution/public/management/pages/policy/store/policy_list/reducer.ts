@@ -74,6 +74,20 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
     };
   }
 
+  if (action.type === 'serverReturnedPolicyAgentsSummaryForDelete') {
+    return {
+      ...state,
+      ...action.payload,
+    };
+  }
+
+  if (action.type === 'serverReturnedPolicyAgentsSummaryForDeleteFailure') {
+    return {
+      ...state,
+      ...action.payload,
+    };
+  }
+
   if (action.type === 'userChangedUrl') {
     const newState: Immutable<PolicyListState> = {
       ...state,
