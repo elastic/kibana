@@ -74,6 +74,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(

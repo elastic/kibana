@@ -101,6 +101,7 @@ const RuleActionsOverflowComponent = ({
             </EuiContextMenuItem>,
           ]
         : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [rule, userHasNoPermissions]
   );
 

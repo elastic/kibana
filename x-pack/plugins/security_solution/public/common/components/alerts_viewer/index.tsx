@@ -31,6 +31,7 @@ export const AlertsView = ({
       `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${i18n.UNIT(
         totalCount
       )}`,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const alertsHistogramConfigs: MatrixHisrogramConfigs = useMemo(

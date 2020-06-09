@@ -79,6 +79,7 @@ export const useTimelineTypes = (): {
         <EuiSpacer size="m" />
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabName]);
 
   const timelineFilters = useMemo(() => {
@@ -95,6 +96,7 @@ export const useTimelineTypes = (): {
         ))}
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineType]);
 
   return {
