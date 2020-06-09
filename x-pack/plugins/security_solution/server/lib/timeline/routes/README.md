@@ -434,9 +434,9 @@ kbn-version: 8.0.0
 ```
 
 ##### Request param
-
-timelineType `default` or `template`
-
+```
+timelineType: `default` or `template`
+```
 
 ##### Response
 ```json
