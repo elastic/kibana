@@ -12,8 +12,10 @@ import {
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
   MetricThresholdAlertPreviewRequestParams,
+  InventoryAlertPreviewRequestParams,
 } from '../../../common/alerting/metrics';
 import { createValidationFunction } from '../../../common/runtime_types';
+import { previewInventoryMetricThresholdAlert } from '../../lib/alerting/inventory_metric_threshold/preview_inventory_metric_threshold_alert';
 import { previewMetricThresholdAlert } from '../../lib/alerting/metric_threshold/preview_metric_threshold_alert';
 import { InfraBackendLibs } from '../../lib/infra_types';
 
@@ -76,7 +78,15 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             });
           }
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
-            // TODO: Add inventory preview functionality
+            const { nodeType } = request.body as InventoryAlertPreviewRequestParams;
+            const previewResult = await previewInventoryMetricThresholdAlert({
+              callCluster,
+              params: { criteria, filterQuery, nodeType },
+              lookback,
+              config: source.configuration,
+              alertInterval,
+            });
+
             return response.ok({});
           }
           default:

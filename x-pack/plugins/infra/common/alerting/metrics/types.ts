@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { ItemTypeRT } from '../../inventory_models/types';
 
 // TODO: Have threshold and inventory alerts import these types from this file instead of from their
 // local directories
@@ -61,10 +62,13 @@ export type MetricThresholdAlertPreviewRequestParams = rt.TypeOf<
 const inventoryAlertPreviewRequestParamsRT = rt.intersection([
   baseAlertRequestParamsRT,
   rt.type({
-    nodeType: rt.string,
+    nodeType: ItemTypeRT,
     alertType: rt.literal(METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID),
   }),
 ]);
+export type InventoryAlertPreviewRequestParams = rt.TypeOf<
+  typeof inventoryAlertPreviewRequestParamsRT
+>;
 
 export const alertPreviewRequestParamsRT = rt.union([
   metricThresholdAlertPreviewRequestParamsRT,
