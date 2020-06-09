@@ -8,4 +8,6 @@ export { ComponentTemplatesProvider } from './component_templates_context';
 
 export { ComponentTemplateList } from './component_template_list';
 
+export { ComponentTemplatesAuthProvider } from './component_templates_auth_provider';
+
 export * from './types';

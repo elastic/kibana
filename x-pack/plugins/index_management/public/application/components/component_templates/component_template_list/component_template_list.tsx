@@ -10,11 +10,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SectionLoading } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+import { ComponentTemplatesAuthProvider } from '../component_templates_auth_provider';
 
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
+import { ComponentTemplatesPrivilegesContainer } from './privileges_container';
 
 export const ComponentTemplateList: React.FunctionComponent = () => {
   const { api, trackMetric } = useComponentTemplatesContext();
@@ -56,20 +58,24 @@ export const ComponentTemplateList: React.FunctionComponent = () => {
   }
 
   return (
-    <div data-test-subj="componentTemplateList">
-      {content}
-      {componentTemplatesToDelete?.length > 0 ? (
-        <ComponentTemplatesDeleteModal
-          callback={(deleteResponse) => {
-            if (deleteResponse?.hasDeletedComponentTemplates) {
-              // refetch the component templates
-              sendRequest();
-            }
-            setComponentTemplatesToDelete([]);
-          }}
-          componentTemplatesToDelete={componentTemplatesToDelete}
-        />
-      ) : null}
-    </div>
+    <ComponentTemplatesAuthProvider>
+      <ComponentTemplatesPrivilegesContainer>
+        <div data-test-subj="componentTemplateList">
+          {content}
+          {componentTemplatesToDelete?.length > 0 ? (
+            <ComponentTemplatesDeleteModal
+              callback={(deleteResponse) => {
+                if (deleteResponse?.hasDeletedComponentTemplates) {
+                  // refetch the component templates
+                  sendRequest();
+                }
+                setComponentTemplatesToDelete([]);
+              }}
+              componentTemplatesToDelete={componentTemplatesToDelete}
+            />
+          ) : null}
+        </div>
+      </ComponentTemplatesPrivilegesContainer>
+    </ComponentTemplatesAuthProvider>
   );
 };
