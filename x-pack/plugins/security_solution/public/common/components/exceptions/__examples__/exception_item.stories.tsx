@@ -16,7 +16,7 @@ storiesOf('ExceptionItem', module)
   .add('with os', () => {
     const payload = getExceptionItemMock();
     payload.description = '';
-    payload.comments = [];
+    payload.comment = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -29,6 +29,7 @@ storiesOf('ExceptionItem', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -40,7 +41,7 @@ storiesOf('ExceptionItem', module)
   .add('with description', () => {
     const payload = getExceptionItemMock();
     payload._tags = [];
-    payload.comments = [];
+    payload.comment = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -53,6 +54,7 @@ storiesOf('ExceptionItem', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -77,6 +79,7 @@ storiesOf('ExceptionItem', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -89,11 +92,12 @@ storiesOf('ExceptionItem', module)
     const payload = getExceptionItemMock();
     payload._tags = [];
     payload.description = '';
-    payload.comments = [];
+    payload.comment = [];
 
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -108,6 +112,7 @@ storiesOf('ExceptionItem', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}

@@ -259,7 +259,7 @@ const ExceptionsViewerComponent = ({
 
   // Logic for initial render
   useEffect((): void => {
-    if (initLoading && (exceptions.length === 0 || exceptions != null)) {
+    if (initLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
       setInitLoading(false);
     }
   }, [initLoading, exceptions, loadingList]);
@@ -373,6 +373,7 @@ const ExceptionsViewerComponent = ({
               iconType="advancedSettingsApp"
               title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
               body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
+              data-test-subj="exceptionsEmptyPrompt"
             />
           )}
 

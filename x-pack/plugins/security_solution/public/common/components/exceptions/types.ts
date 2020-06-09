@@ -72,7 +72,7 @@ export interface FilterOptions {
 
 export interface Filter {
   filter: Partial<FilterOptions>;
-  pagination: Partial<Pagination>;
+  pagination: Partial<ExceptionsPagination>;
 }
 
 export interface SetExceptionsProps {

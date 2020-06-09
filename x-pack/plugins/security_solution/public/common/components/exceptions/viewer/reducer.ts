@@ -34,7 +34,7 @@ export type Action =
   | {
       type: 'updateFilterOptions';
       filterOptions: Partial<FilterOptions>;
-      pagination: Partial<Pagination>;
+      pagination: Partial<ExceptionsPagination>;
     }
   | { type: 'updateModalOpen'; isOpen: boolean }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }

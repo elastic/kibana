@@ -9,6 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewerHeader } from '../viewer/exceptions_viewer_header';
+import { ExceptionListType } from '../types';
 
 storiesOf('ExceptionsViewerHeader', module)
   .add('loading', () => {
@@ -18,10 +19,9 @@ storiesOf('ExceptionsViewerHeader', module)
           isInitLoading={true}
           detectionsListItems={5}
           endpointListItems={2000}
-          supportedListTypes={['a', 'b']}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           onFilterChange={() => {}}
-          onAddEndpointExceptionClick={() => {}}
-          onAddDetectionsExceptionClick={() => {}}
+          onAddExceptionClick={() => {}}
         />
       </ThemeProvider>
     );
@@ -33,10 +33,9 @@ storiesOf('ExceptionsViewerHeader', module)
           isInitLoading={false}
           detectionsListItems={5}
           endpointListItems={2000}
-          supportedListTypes={['a', 'b']}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
           onFilterChange={() => {}}
-          onAddEndpointExceptionClick={() => {}}
-          onAddDetectionsExceptionClick={() => {}}
+          onAddExceptionClick={() => {}}
         />
       </ThemeProvider>
     );
@@ -48,10 +47,9 @@ storiesOf('ExceptionsViewerHeader', module)
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={2000}
-          supportedListTypes={['a']}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
           onFilterChange={() => {}}
-          onAddEndpointExceptionClick={() => {}}
-          onAddDetectionsExceptionClick={() => {}}
+          onAddExceptionClick={() => {}}
         />
       </ThemeProvider>
     );
@@ -63,10 +61,9 @@ storiesOf('ExceptionsViewerHeader', module)
           isInitLoading={false}
           detectionsListItems={5}
           endpointListItems={0}
-          supportedListTypes={['a']}
+          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
           onFilterChange={() => {}}
-          onAddEndpointExceptionClick={() => {}}
-          onAddDetectionsExceptionClick={() => {}}
+          onAddExceptionClick={() => {}}
         />
       </ThemeProvider>
     );

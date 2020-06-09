@@ -40,9 +40,9 @@ const ExceptionsViewerPaginationComponent = ({
       onPaginationChange({
         filter: {},
         pagination: {
-          page: pageIndex + 1,
-          perPage: pagination.pageSize,
-          total: pagination.totalItemCount,
+          pageIndex: pageIndex + 1,
+          pageSize: pagination.pageSize,
+          totalItemCount: pagination.totalItemCount,
         },
       });
     },
@@ -58,17 +58,19 @@ const ExceptionsViewerPaginationComponent = ({
           onPaginationChange({
             filter: {},
             pagination: {
-              page: pagination.pageIndex,
-              perPage: rows,
-              total: pagination.totalItemCount,
+              pageIndex: pagination.pageIndex,
+              pageSize: rows,
+              totalItemCount: pagination.totalItemCount,
             },
           });
+          closePerPageMenu();
         }}
+        data-test-subj="exceptionsPerPageItem"
       >
         {i18n.NUMBER_OF_ITEMS(rows)}
       </EuiContextMenuItem>
     ));
-  }, [pagination, onPaginationChange]);
+  }, [pagination, onPaginationChange, closePerPageMenu]);
 
   const totalPages = useMemo((): number => {
     if (pagination.totalItemCount > 0) {
@@ -89,6 +91,7 @@ const ExceptionsViewerPaginationComponent = ({
               iconType="arrowDown"
               iconSide="right"
               onClick={onPerPageMenuClick}
+              data-test-subj="exceptionsPerPageBtn"
             >
               {i18n.ITEMS_PER_PAGE(pagination.pageSize)}
             </EuiButtonEmpty>
@@ -106,6 +109,7 @@ const ExceptionsViewerPaginationComponent = ({
           pageCount={totalPages}
           activePage={pagination.pageIndex}
           onPageClick={onPageClick}
+          data-test-subj="exceptionsPagination"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

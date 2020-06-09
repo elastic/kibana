@@ -18,6 +18,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
+          disableDelete={false}
           entries={[getFormattedEntryMock()]}
           handleDelete={jest.fn()}
           handleEdit={jest.fn()}
@@ -32,6 +33,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
+          disableDelete={false}
           entries={[getFormattedEntryMock(), getFormattedEntryMock()]}
           handleDelete={jest.fn()}
           handleEdit={jest.fn()}
@@ -47,6 +49,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
+          disableDelete={false}
           entries={[getFormattedEntryMock()]}
           handleDelete={jest.fn()}
           handleEdit={mockHandleEdit}
@@ -64,6 +67,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
+          disableDelete={false}
           entries={[getFormattedEntryMock()]}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
@@ -84,6 +88,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
+          disableDelete={false}
           entries={[parentEntry, getFormattedEntryMock(true)]}
           handleDelete={jest.fn()}
           handleEdit={jest.fn()}
@@ -125,6 +130,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
+          disableDelete={false}
           entries={[getFormattedEntryMock()]}
           handleDelete={jest.fn()}
           handleEdit={jest.fn()}
