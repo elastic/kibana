@@ -1,0 +1,18 @@
+.componentTemplatesSelector {
+  min-height: 160px;
+  max-height: 320px;
+  height: 320px;
+
+  &__selection {
+   padding: 16px;
+   background-color: #fafbfc;
+   color: #69707D;
+   overflow-y: auto;
+
+   &--is-empty {
+     align-items: center;
+     justify-content: center;
+   }
+  }
+}
+

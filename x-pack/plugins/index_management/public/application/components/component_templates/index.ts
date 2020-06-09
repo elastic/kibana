@@ -14,4 +14,6 @@ export { ComponentTemplates } from './component_templates';
 
 export { ComponentTemplatesList } from './component_templates_list';
 
+export { ComponentTemplatesSelector } from './component_templates_selector';
+
 export * from './types';

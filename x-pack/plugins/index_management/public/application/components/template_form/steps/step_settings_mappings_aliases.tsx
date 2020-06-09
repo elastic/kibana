@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 // import { documentationService } from '../../../services/documentation';
-import { ComponentTemplatesContainer, ComponentTemplates } from '../../../components';
+import { ComponentTemplatesSelector } from '../../../components';
 import { TemplateDeserialized } from '../../../../../common';
 import { ConfigureSection, SimulateTemplate } from '../components';
 import { StepProps, DataGetterFunc } from '../types';
@@ -37,17 +37,15 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const defaultTemplate = useMemo<TemplateDeserialized>(() => {
-    return {
-      composedOf: [],
-      template: {
-        settings: {},
-        mappings: {},
-        aliases: {},
-      },
-      ...indexTemplate,
-    } as TemplateDeserialized;
-  }, [indexTemplate]);
+  const defaultTemplate = {
+    composedOf: [],
+    template: {
+      settings: {},
+      mappings: {},
+      aliases: {},
+    },
+    ...indexTemplate,
+  } as TemplateDeserialized;
 
   const [isCreateComponentFromTemplateVisible, setIsCreateComponentFromTemplateVisible] = useState(
     false
@@ -85,6 +83,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
   }));
 
   const allGetters = useRef({
+    composedOf: () => ({ data: defaultTemplate.composedOf }),
     settings: async () => ({ isValid: true, data: defaultTemplate.template.settings }),
     mappings: async () => ({ isValid: true, data: defaultTemplate.template.mappings }),
     aliases: async () => ({ isValid: true, data: defaultTemplate.template.aliases }),
@@ -92,6 +91,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
 
   const updateDataGetter = useCallback(() => {
     dataGetter.current = async () => {
+      const composedOf = allGetters.current.composedOf().data;
       const { isValid: isSettingsValid, data: settingsData } = await allGetters.current.settings();
       const { isValid: isMappingsValid, data: mappingsData } = await allGetters.current.mappings();
       const { isValid: isAliasesValid, data: aliasesData } = await allGetters.current.aliases();
@@ -104,12 +104,21 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
             ...mappingsData,
             ...aliasesData,
           },
+          composedOf,
         },
       };
     };
 
     setDataGetter(dataGetter.current);
   }, [setDataGetter]);
+
+  const onComponentsSelectionChange = useCallback(
+    (stepDataGetter: () => { data: string[] }) => {
+      allGetters.current.composedOf = stepDataGetter;
+      updateDataGetter();
+    },
+    [updateDataGetter]
+  );
 
   const onCustomSettingsChange = useMemo(() => {
     return {
@@ -211,52 +220,10 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
           />
         }
       >
-        <EuiFlexGroup style={{ minHeight: '160px', maxHeight: '320px', height: '320px' }}>
-          <EuiFlexItem
-            style={{
-              padding: '16px',
-              backgroundColor: '#fafbfc',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#69707D',
-              overflowY: 'auto',
-            }}
-          >
-            <div>No component template selected.</div>
-          </EuiFlexItem>
-
-          <EuiFlexItem style={{ overflowY: 'auto' }}>
-            <ComponentTemplatesContainer>
-              {({ isLoading, components }) => {
-                return (
-                  <ComponentTemplates
-                    isLoading={isLoading}
-                    components={components ?? []}
-                    emptyPrompt={{
-                      showCreateButton: false,
-                    }}
-                    listProps={{
-                      actions: [
-                        {
-                          label: 'View',
-                          handler: (component) => {
-                            // console.log(component);
-                          },
-                        },
-                        {
-                          label: 'Select',
-                          handler: (component) => {
-                            // console.log(component);
-                          },
-                        },
-                      ],
-                    }}
-                  />
-                );
-              }}
-            </ComponentTemplatesContainer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ComponentTemplatesSelector
+          defaultValue={defaultTemplate.composedOf!}
+          onChange={onComponentsSelectionChange}
+        />
       </ConfigureSection>
 
       <EuiSpacer size="l" />
