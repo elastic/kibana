@@ -75,7 +75,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       dispatch({
         type: 'serverDeletedPolicy',
         payload: {
-          id: apiResponse[0].id,
+          id: apiResponse ? apiResponse[0].id : '',
           success: true,
         },
       });

@@ -13,7 +13,12 @@ import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../ingest_manage
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
 
-import { isOnPolicyListPage, selectIsLoading, urlSearchParams } from './selectors';
+import {
+  isOnPolicyListPage,
+  selectIsLoading,
+  urlSearchParams,
+  selectIsDeleting,
+} from './selectors';
 import { DepsStartMock, depsStartMock } from '../../../../../common/mock/endpoint';
 import { setPolicyListApiMockImplementation } from './test_mock_utils';
 import { INGEST_API_DATASOURCES } from './services/ingest';
@@ -78,6 +83,33 @@ describe('policy list store concerns', () => {
         pathname: policyListPathUrl,
         search: '',
         hash: '',
+      },
+    });
+    expect(selectIsLoading(store.getState())).toBe(true);
+    await waitForAction('serverReturnedPolicyListData');
+    expect(selectIsLoading(store.getState())).toBe(false);
+  });
+
+  it('it sets `isDeleting` when `userClickedPolicyListDeleteButton`', async () => {
+    expect(selectIsDeleting(store.getState())).toBe(false);
+    store.dispatch({
+      type: 'userClickedPolicyListDeleteButton',
+      payload: {
+        policyId: '123',
+      },
+    });
+    expect(selectIsDeleting(store.getState())).toBe(true);
+    await waitForAction('serverDeletedPolicy');
+    expect(selectIsDeleting(store.getState())).toBe(false);
+  });
+
+  it('it sets refreshes policy data when `serverDeletedPolicy`', async () => {
+    expect(selectIsLoading(store.getState())).toBe(false);
+    store.dispatch({
+      type: 'serverDeletedPolicy',
+      payload: {
+        policyId: '',
+        success: true,
       },
     });
     expect(selectIsLoading(store.getState())).toBe(true);

@@ -68,7 +68,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
     return {
       ...state,
       deleteStatus: action.payload.success,
-      isLoading: false,
+      isLoading: true,
       isDeleting: false,
     };
   }
