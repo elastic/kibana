@@ -21,7 +21,7 @@ import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(
   fields: IFieldType[],
-  isFieldDisabled?: (field: IFieldType) => boolean
+  isFieldDisabled?: (field?: IFieldType) => boolean
 ): Array<EuiComboBoxOptionOption<IFieldType>> {
   if (!fields) {
     return [];
@@ -47,7 +47,7 @@ type Props = Omit<
   EuiComboBoxProps<IFieldType>,
   'isDisabled' | 'onChange' | 'options' | 'renderOption' | 'selectedOptions' | 'singleSelection'
 > & {
-  fields: IFieldType[];
+  fields?: IFieldType[];
   onChange: (fieldName?: string) => void;
   value?: string; // index pattern field name
   isFieldDisabled?: (field: IFieldType) => boolean;
@@ -95,7 +95,7 @@ export function SingleFieldSelect({
   };
 
   const selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>> = [];
-  if (value) {
+  if (value && fields) {
     const selectedField = fields.find((field: IFieldType) => {
       return field.name === value;
     });
