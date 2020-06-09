@@ -82,7 +82,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
-              config: {
+              secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
             },
