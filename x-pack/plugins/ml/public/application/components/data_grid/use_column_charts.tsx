@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeHandler } from '@elastic/eui';
@@ -19,13 +19,11 @@ const mlDataGridChartRowClassName = `${mlDataGridChartClassName}Row`;
 type ColumnWidths = Record<string, number>;
 type RefValue = HTMLElement | null;
 
-export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartData[]) {
-  const [histogramVisible, setHistogramVisible] = useState(false);
-
-  const toggleChartVisibility = () => {
-    setHistogramVisible(!histogramVisible);
-  };
-
+export function useColumnCharts(
+  columns: EuiDataGridColumn[],
+  chartsData: ChartData[],
+  chartsVisible: boolean
+) {
   const ref = useRef<RefValue>(null);
   const refFn = (node: RefValue) => {
     renderCharts(node);
@@ -41,7 +39,7 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartD
       let chartRow;
       if (chartRows.length > 0) {
         chartRow = chartRows[0];
-        if (!histogramVisible) {
+        if (!chartsVisible) {
           chartRow.remove();
           const columnHeaders = tBody.getElementsByClassName('euiDataGridHeaderCell');
           for (let i = 0; i < columnHeaders.length; i++) {
@@ -49,7 +47,7 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartD
           }
           return;
         }
-      } else if (histogramVisible) {
+      } else if (chartsVisible) {
         chartRow = document.createElement('div');
         chartRow.classList.add(mlDataGridChartRowClassName);
         chartRow.classList.add('euiDataGridRow');
@@ -104,5 +102,5 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartD
     renderCharts(ref.current, columnWidths);
   };
 
-  return { columnResizeHandler, histogramVisible, refFn, toggleChartVisibility };
+  return { columnResizeHandler, refFn };
 }

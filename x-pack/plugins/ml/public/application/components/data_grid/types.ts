@@ -56,6 +56,7 @@ export interface SearchResponse7 extends SearchResponse<any> {
 export interface UseIndexDataReturnType
   extends Pick<
     UseDataGridReturnType,
+    | 'chartsVisible'
     | 'columnCharts'
     | 'errorMessage'
     | 'invalidSortingColumnns'
@@ -70,6 +71,7 @@ export interface UseIndexDataReturnType
     | 'sortingColumns'
     | 'status'
     | 'tableItems'
+    | 'toggleChartVisibility'
     | 'visibleColumns'
   > {
   columns: EuiDataGridColumn[];
@@ -77,6 +79,7 @@ export interface UseIndexDataReturnType
 }
 
 export interface UseDataGridReturnType {
+  chartsVisible: boolean;
   columnCharts: ChartData[];
   errorMessage: string;
   invalidSortingColumnns: ColumnId[];
@@ -99,5 +102,6 @@ export interface UseDataGridReturnType {
   sortingColumns: EuiDataGridSorting['columns'];
   status: INDEX_STATUS;
   tableItems: DataGridItem[];
+  toggleChartVisibility: () => void;
   visibleColumns: ColumnId[];
 }

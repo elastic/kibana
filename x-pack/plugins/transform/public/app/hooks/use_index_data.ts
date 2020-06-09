@@ -49,6 +49,7 @@ export const useIndexData = (
   const dataGrid = useDataGrid(columns);
 
   const {
+    chartsVisible,
     pagination,
     resetPagination,
     setColumnCharts,
@@ -127,10 +128,12 @@ export const useIndexData = (
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   useEffect(() => {
-    fetchColumnChartsData();
+    if (chartsVisible) {
+      fetchColumnChartsData();
+    }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern.title, JSON.stringify([query, dataGrid.visibleColumns])]);
+  }, [chartsVisible, indexPattern.title, JSON.stringify([query, dataGrid.visibleColumns])]);
 
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
 

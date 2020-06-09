@@ -60,6 +60,7 @@ type Props = PropsWithHeader | PropsWithoutHeader;
 export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
+      chartsVisible,
       columnCharts,
       columns,
       dataTestSubj,
@@ -77,12 +78,14 @@ export const DataGrid: FC<Props> = memo(
       status,
       tableItems: data,
       toastNotifications,
+      toggleChartVisibility,
       visibleColumns,
     } = props;
 
-    const { columnResizeHandler, histogramVisible, refFn, toggleChartVisibility } = useColumnCharts(
+    const { columnResizeHandler, refFn } = useColumnCharts(
       columns.filter((c) => visibleColumns.includes(c.id)),
-      columnCharts
+      columnCharts,
+      chartsVisible
     );
 
     // TODO Fix row hovering + bar highlighting
@@ -199,7 +202,7 @@ export const DataGrid: FC<Props> = memo(
               additionalControls: (
                 <EuiButtonEmpty
                   className={`euiDataGrid__controlBtn${
-                    histogramVisible ? ' euiDataGrid__controlBtn--active' : ''
+                    chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
                   }`}
                   size="xs"
                   iconType="visBarVertical"

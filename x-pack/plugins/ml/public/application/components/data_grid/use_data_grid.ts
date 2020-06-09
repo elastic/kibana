@@ -38,6 +38,11 @@ export const useDataGrid = (
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
+  const [chartsVisible, setChartsVisible] = useState(false);
+
+  const toggleChartVisibility = () => {
+    setChartsVisible(!chartsVisible);
+  };
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
     setPagination((p) => {
@@ -89,6 +94,7 @@ export const useDataGrid = (
   );
 
   return {
+    chartsVisible,
     columnCharts,
     errorMessage,
     invalidSortingColumnns,
@@ -111,6 +117,7 @@ export const useDataGrid = (
     sortingColumns,
     status,
     tableItems,
+    toggleChartVisibility,
     visibleColumns,
   };
 };
