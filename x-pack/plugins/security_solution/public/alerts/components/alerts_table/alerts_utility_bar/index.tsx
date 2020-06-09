@@ -68,7 +68,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     defaultNumberFormat
   );
 
-  const UtilityToolbar = (closePopover: () => void) => {
+  const UtilityBarPopoverContent = (closePopover: () => void) => {
     return (
       <EuiFlexGroup direction="column">
         {currentFilter !== FILTER_OPEN && (
@@ -76,9 +76,10 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
             <LinkIcon
               iconType={'securitySignalDetected'}
               iconSize="m"
+              ariaLabel="openSelectedAlerts"
               onClick={() => handleUpdateStatus('open')}
             >
-              {'Open Selected'}
+              {i18n.BATCH_ACTION_OPEN_SELECTED}
             </LinkIcon>
           </EuiFlexItem>
         )}
@@ -88,9 +89,10 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
             <LinkIcon
               iconType={'securitySignalResolved'}
               iconSize="m"
+              ariaLabel="closeSelectedAlerts"
               onClick={() => handleUpdateStatus('closed')}
             >
-              {'Close Selected'}
+              {i18n.BATCH_ACTION_CLOSE_SELECTED}
             </LinkIcon>
           </EuiFlexItem>
         )}
@@ -100,9 +102,10 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
             <LinkIcon
               iconType={'alert'}
               iconSize="m"
+              ariaLabel="markSelectedAlertsInProgress"
               onClick={() => handleUpdateStatus('in-progress')}
             >
-              {'Mark in progress'}
+              {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
             </LinkIcon>
           </EuiFlexItem>
         )}
@@ -135,9 +138,10 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
                   iconType="arrowDown"
                   iconSide="right"
-                  popoverContent={UtilityToolbar}
+                  ownFocus={false}
+                  popoverContent={UtilityBarPopoverContent}
                 >
-                  {'Take Action'}
+                  {i18n.TAKE_ACTION}
                 </UtilityBarAction>
 
                 <UtilityBarAction
