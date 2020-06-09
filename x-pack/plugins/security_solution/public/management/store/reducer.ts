@@ -14,18 +14,24 @@ import {
   initialPolicyListState,
 } from '../pages/policy/store/policy_list/reducer';
 import {
+  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
 import { Immutable } from '../../../common/endpoint/types';
 import { ManagementState } from '../types';
+import { hostListReducer, initialHostListState } from '../pages/endpoint_hosts/store/reducer';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
+/**
+ * Returns the initial state of the store for the SIEM Management section
+ */
 export const mockManagementState: Immutable<ManagementState> = {
-  policyList: initialPolicyListState(),
-  policyDetails: initialPolicyDetailsState(),
+  [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
+  [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
+  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState,
 };
 
 /**
@@ -34,4 +40,6 @@ export const mockManagementState: Immutable<ManagementState> = {
 export const managementReducer = immutableCombineReducers({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
+  // @ts-ignore
+  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: hostListReducer,
 });
