@@ -56,6 +56,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         onFailure: originalOnFailureProcessors,
         idGenerator: getIdGenerator(),
       }),
+    // TODO: Re-add the dependency on the props and make the state set-able
+    // when new props come in so that this component will be controllable
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
   const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
