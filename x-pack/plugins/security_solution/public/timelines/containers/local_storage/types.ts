@@ -6,8 +6,9 @@
 
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 
-type TimelineId = string;
+export type TimelineId = 'hosts-page-events' | 'hosts-page-external-alerts' | string;
 export interface SecuritySolutionStorage {
-  getAllTimelines: () => Record<TimelineId, TimelineModel>;
+  getAllTimelines: () => Record<TimelineId, TimelineModel | null>;
+  getTimelineById: (id: TimelineId) => TimelineModel | null;
   addTimeline: (id: string, timeline: TimelineModel) => void;
 }

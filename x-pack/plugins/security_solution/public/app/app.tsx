@@ -33,8 +33,6 @@ import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 
 import { ApolloClientContext } from '../common/utils/apollo_context';
 import { SecuritySubPlugins } from './types';
-import { createSecuritySolutionStorage } from '../common/lib/local_storage';
-import { initialTimelineState } from '../timelines/store/timeline/reducer';
 
 interface AppPluginRootComponentProps {
   apolloClient: AppApolloClient;
@@ -74,26 +72,17 @@ const AppPluginRoot = memo(AppPluginRootComponent);
 
 interface StartAppComponent extends AppFrontendLibs {
   subPlugins: SecuritySubPlugins;
+  storage: Storage;
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
+const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, storage, ...libs }) => {
   const { routes: subPluginRoutes, store: subPluginsStore } = subPlugins;
   const { i18n } = useKibana().services;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
-  const storage = createSecuritySolutionStorage(localStorage);
 
   const store = createStore(
-    createInitialState({
-      ...subPluginsStore.initialState,
-      timeline: {
-        ...(subPluginsStore.initialState.timeline ?? initialTimelineState),
-        timelineById: {
-          ...(subPluginsStore.initialState.timeline?.timelineById ?? {}),
-          ...storage.getAllTimelines(),
-        },
-      },
-    }),
+    createInitialState(subPluginsStore.initialState),
     subPluginsStore.reducer,
     libs$.pipe(pluck('apolloClient')),
     storage,
@@ -131,16 +120,17 @@ interface SiemAppComponentProps {
   subPlugins: SecuritySubPlugins;
 }
 
-const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ services, subPlugins }) => (
-  <KibanaContextProvider
-    services={{
-      appName: 'siem',
-      storage: new Storage(localStorage),
-      ...services,
-    }}
-  >
-    <StartApp subPlugins={subPlugins} {...compose(services)} />
-  </KibanaContextProvider>
-);
+const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ services, subPlugins }) => {
+  return (
+    <KibanaContextProvider
+      services={{
+        appName: 'siem',
+        ...services,
+      }}
+    >
+      <StartApp subPlugins={subPlugins} storage={services.storage} {...compose(services)} />
+    </KibanaContextProvider>
+  );
+};
 
 export const SiemApp = memo(SiemAppComponent);

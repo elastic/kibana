@@ -5,16 +5,27 @@
  */
 
 import { Storage, IStorage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { SecuritySolutionStorage } from './types';
+import { SecuritySolutionStorage, TimelineId } from './types';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
-const EMPTY_TIMELINE = {};
 
-export const createSecuritySolutionStorage = (store: IStorage): SecuritySolutionStorage => {
-  const storage = new Storage(store);
+export const getTimelineInStorageById = (storage: Storage, id: TimelineId) => {
+  const timelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+  if (timelines != null) {
+    return timelines[id];
+  }
+  return null;
+};
+
+export const useTimelinesStorage = (store: IStorage): SecuritySolutionStorage => {
+  const { storage } = useKibana().services;
 
   const getAllTimelines: SecuritySolutionStorage['getAllTimelines'] = () =>
-    storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? EMPTY_TIMELINE;
+    storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? null;
+
+  const getTimelineById: SecuritySolutionStorage['getTimelineById'] = (id: TimelineId) =>
+    getTimelineInStorageById(storage, id);
 
   const addTimeline: SecuritySolutionStorage['addTimeline'] = (id, timeline) => {
     const timelines = getAllTimelines();
@@ -24,7 +35,7 @@ export const createSecuritySolutionStorage = (store: IStorage): SecuritySolution
     });
   };
 
-  return { getAllTimelines, addTimeline };
+  return { getAllTimelines, getTimelineById, addTimeline };
 };
 
 export { SecuritySolutionStorage };

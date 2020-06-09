@@ -14,6 +14,7 @@ import {
   Plugin as IPlugin,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -50,12 +51,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     const mountSecurityApp = async (params: AppMountParameters) => {
+      const storage = new Storage(localStorage);
       const [coreStart, startPlugins] = await core.getStartServices();
       const { renderApp } = await import('./app');
       const services = {
         ...coreStart,
         ...startPlugins,
         security: plugins.security,
+        storage,
       } as StartServices;
 
       const alertsSubPlugin = new (await import('./alerts')).Alerts();
@@ -69,7 +72,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const alertsStart = alertsSubPlugin.start();
       const casesStart = casesSubPlugin.start();
-      const hostsStart = hostsSubPlugin.start();
+      const hostsStart = hostsSubPlugin.start(storage);
       const networkStart = networkSubPlugin.start();
       const overviewStart = overviewSubPlugin.start();
       const timelinesStart = timelinesSubPlugin.start();

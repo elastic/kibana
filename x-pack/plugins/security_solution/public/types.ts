@@ -12,6 +12,7 @@ import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public'
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { IngestManagerStart } from '../../ingest_manager/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
@@ -39,6 +40,7 @@ export interface StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     security: SecurityPluginSetup;
+    storage: Storage;
   };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
