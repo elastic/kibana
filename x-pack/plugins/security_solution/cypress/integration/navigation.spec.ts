@@ -10,7 +10,7 @@ import { navigateFromHeaderTo } from '../tasks/siem_header';
 
 import { TIMELINES_PAGE } from '../urls/navigation';
 
-describe('top-level navigation common to all pages in the SIEM app', () => {
+describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
     loginAndWaitForPage(TIMELINES_PAGE);
   });

@@ -243,7 +243,7 @@ describe('url state', () => {
         cy.wrap(intCount).should('be.above', 0);
       });
 
-    const timelineName = 'SIEM';
+    const timelineName = 'Security';
     addNameToTimeline(timelineName);
     addDescriptionToTimeline('This is the best timeline of the world');
     cy.wait(5000);
