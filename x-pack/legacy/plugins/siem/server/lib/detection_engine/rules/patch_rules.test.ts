@@ -97,4 +97,86 @@ describe('patchRules', () => {
       })
     );
   });
+
+  describe('regression tests', () => {
+    it("updates the rule's actions if provided", async () => {
+      const existingRule = getResult();
+      alertsClient.get.mockResolvedValue(existingRule);
+
+      const action = {
+        action_type_id: '.slack',
+        id: '2933e581-d81c-4fe3-88fe-c57c6b8a5bfd',
+        params: {
+          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
+        },
+        group: 'default',
+      };
+
+      await patchRules({
+        alertsClient,
+        actionsClient,
+        savedObjectsClient,
+        actions: [action],
+        id: existingRule.id,
+      });
+
+      expect(alertsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            actions: [
+              {
+                actionTypeId: '.slack',
+                id: '2933e581-d81c-4fe3-88fe-c57c6b8a5bfd',
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
+                },
+                group: 'default',
+              },
+            ],
+          }),
+        })
+      );
+    });
+
+    it('does not update actions if none are specified', async () => {
+      const existingRule = {
+        ...getResult(),
+        actions: [
+          {
+            actionTypeId: '.slack',
+            id: '2933e581-d81c-4fe3-88fe-c57c6b8a5bfd',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
+            },
+            group: 'default',
+          },
+        ],
+      };
+      alertsClient.get.mockResolvedValue(existingRule);
+
+      await patchRules({
+        alertsClient,
+        actionsClient,
+        savedObjectsClient,
+        id: existingRule.id,
+      });
+
+      expect(alertsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            actions: [
+              {
+                actionTypeId: '.slack',
+                id: '2933e581-d81c-4fe3-88fe-c57c6b8a5bfd',
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
+                },
+                group: 'default',
+              },
+            ],
+          }),
+        })
+      );
+    });
+  });
 });
