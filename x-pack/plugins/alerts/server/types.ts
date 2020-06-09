@@ -21,8 +21,6 @@ import {
 // This will have to remain `any` until we can extend Alert Executors with generics
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertTypeState = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AlertTypeContext = Record<string, any>;
 // This will have to remain `any` until we can extend Alert Executors with generics
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertTypeParams = Record<string, any>;

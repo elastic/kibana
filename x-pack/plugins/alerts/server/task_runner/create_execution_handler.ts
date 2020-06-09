@@ -5,7 +5,8 @@
  */
 
 import { pluck } from 'lodash';
-import { AlertAction, AlertTypeState, AlertTypeContext, AlertType } from '../types';
+import { AlertInstanceContext } from '../alert_instance';
+import { AlertAction, AlertTypeState, AlertType } from '../types';
 import { Logger } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
@@ -32,11 +33,11 @@ interface ExecutionHandlerOptions<State, Context> {
   state: State;
 }
 
-export type ExecutionHandler<State = AlertTypeState, Context = AlertTypeContext> = (
+export type ExecutionHandler<State = AlertTypeState, Context = AlertInstanceContext> = (
   opts: ExecutionHandlerOptions<State, Context>
 ) => void;
 
-export function createExecutionHandler<State = AlertTypeState, Context = AlertTypeContext>({
+export function createExecutionHandler<State = AlertTypeState, Context = AlertInstanceContext>({
   logger,
   alertId,
   alertName,

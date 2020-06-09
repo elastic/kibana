@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { parseDuration } from '../lib';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -10,14 +12,14 @@ import {
   rawAlertInstance,
 } from '../../common';
 
-import { AlertTypeContext } from '../types';
-import { parseDuration } from '../lib';
-
 interface ScheduledExecutionOptions {
   actionGroup: string;
-  context: AlertTypeContext;
+  context: AlertInstanceContext;
   state: AlertInstanceState;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AlertInstanceContext = Record<string, any>;
 export type AlertInstances = Record<string, AlertInstance>;
 export class AlertInstance {
   private scheduledExecutionOptions?: ScheduledExecutionOptions;
@@ -62,7 +64,7 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: AlertTypeContext = {}) {
+  scheduleActions(actionGroup: string, context: AlertInstanceContext = {}) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
