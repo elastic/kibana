@@ -84,8 +84,20 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
         explicitInput: {
           id: '5',
           attributes: {
-            title: 'Creating an embeddable by value: A Guide',
-            author: 'John A. ByValue',
+            title: 'The Sympathizer',
+            author: 'Viet Thanh Nguyen',
+            readIt: true,
+          },
+        },
+      },
+      '6': {
+        type: BOOK_EMBEDDABLE,
+        explicitInput: {
+          id: '6',
+          attributes: {
+            title: 'The Hobbit',
+            author: 'J.R.R. Tolkien',
+            readIt: false,
           },
         },
       },
