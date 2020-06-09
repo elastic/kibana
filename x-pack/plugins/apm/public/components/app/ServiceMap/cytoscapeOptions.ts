@@ -34,10 +34,7 @@ const getBorderColor: cytoscape.Css.MapperFunction<
   const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
   const nodeSeverity = el.data('anomaly_severity');
   if (hasAnomalyDetectionJob) {
-    return (
-      getSeverityColor(nodeSeverity) ||
-      (getSeverityColor(severity.warning) as string)
-    );
+    return getSeverityColor(nodeSeverity) || theme.euiColorMediumShade;
   }
   if (el.hasClass('primary') || el.selected()) {
     return theme.euiColorPrimary;
