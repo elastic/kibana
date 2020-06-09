@@ -50,7 +50,6 @@ describe('FieldSelect', () => {
           "label": "special ",
           "options": Array [
             Object {
-              "data-test-subj": "fieldSelectScriptOption",
               "label": "Script",
               "value": "__SCRIPT__",
             },
@@ -86,7 +85,6 @@ describe('FieldSelect', () => {
     expect(wrapper.find(EuiComboBox).props().selectedOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "fieldSelectScriptOption",
           "label": "Script",
           "value": "__SCRIPT__",
         },
