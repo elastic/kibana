@@ -89,7 +89,7 @@ export class BaseAlert {
     this.getLogger = getLogger;
   }
 
-  public getAlertType() {
+  public getAlertType(): AlertType {
     return {
       id: this.type,
       name: this.label,
@@ -103,6 +103,7 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       executor: (options: AlertExecutorOptions): Promise<any> => this.execute(options),
+      producer: 'monitoring',
     };
   }
 

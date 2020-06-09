@@ -10,10 +10,13 @@ import {
   AlertMessage,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
+  AlertMessageDocLinkToken,
 } from '../../server/alerts/types';
 // @ts-ignore
 import { formatTimestampToDuration } from '../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../common/constants';
+import { AlertMessageTokenType } from '../../common/enums';
+import { Legacy } from '../legacy_shims';
 
 export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
   if (!alertMessage) {
@@ -25,8 +28,15 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     return text;
   }
 
-  const timeTokens = alertMessage.tokens.filter((token) => token.type === 'time');
-  const linkTokens = alertMessage.tokens.filter((token) => token.type === 'link');
+  const timeTokens = alertMessage.tokens.filter(
+    (token) => token.type === AlertMessageTokenType.Time
+  );
+  const linkTokens = alertMessage.tokens.filter(
+    (token) => token.type === AlertMessageTokenType.Link
+  );
+  const docLinkTokens = alertMessage.tokens.filter(
+    (token) => token.type === AlertMessageTokenType.DocLink
+  );
 
   for (const token of timeTokens) {
     const timeToken = token as AlertMessageTimeToken;
@@ -52,6 +62,28 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
       <Fragment>
         {nonLinkText}
         <EuiLink href={`#${linkToken.url}`}>{linkPart[1]}</EuiLink>
+      </Fragment>
+    );
+  }
+
+  for (const token of docLinkTokens) {
+    const linkToken = token as AlertMessageDocLinkToken;
+    const linkPart = new RegExp(`${linkToken.startToken}(.+?)${linkToken.endToken}`).exec(text);
+    if (!linkPart || linkPart.length < 2) {
+      continue;
+    }
+
+    // TODO: we assume this is at the end, which works for now but will not always work
+    const nonLinkText = text.replace(linkPart[0], '');
+    const url = linkToken.partialUrl
+      .replace('{elasticWebsiteUrl}', Legacy.shims.docLinks.ELASTIC_WEBSITE_URL)
+      .replace('{docLinkVersion}', Legacy.shims.docLinks.DOC_LINK_VERSION);
+    element = (
+      <Fragment>
+        {nonLinkText}
+        <EuiLink target="_blank" href={`${url}`}>
+          {linkPart[1]}
+        </EuiLink>
       </Fragment>
     );
   }

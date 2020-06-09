@@ -16,6 +16,7 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
+  AlertMessageDocLinkToken,
 } from './types';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
@@ -204,7 +205,7 @@ export class CpuUsageAlert extends BaseAlert {
       }),
       nextSteps: [
         {
-          text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.message1', {
+          text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.investigateNode', {
             defaultMessage: `#start_linkInvestigate node#end_link`,
           }),
           tokens: [
@@ -214,6 +215,32 @@ export class CpuUsageAlert extends BaseAlert {
               type: AlertMessageTokenType.Link,
               url: `elasticsearch/nodes/${stat.nodeId}`,
             } as AlertMessageLinkToken,
+          ],
+        },
+        {
+          text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.hotThreads', {
+            defaultMessage: `#start_linkCheck hot threads#end_link`,
+          }),
+          tokens: [
+            {
+              startToken: '#start_link',
+              endToken: '#end_link',
+              type: AlertMessageTokenType.DocLink,
+              partialUrl: `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`,
+            } as AlertMessageDocLinkToken,
+          ],
+        },
+        {
+          text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.runningTasks', {
+            defaultMessage: `#start_linkCheck long running tasks#end_link`,
+          }),
+          tokens: [
+            {
+              startToken: '#start_link',
+              endToken: '#end_link',
+              type: AlertMessageTokenType.DocLink,
+              partialUrl: `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`,
+            } as AlertMessageDocLinkToken,
           ],
         },
       ],

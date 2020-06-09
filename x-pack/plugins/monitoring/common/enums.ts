@@ -19,6 +19,7 @@ export enum AlertSeverity {
 export enum AlertMessageTokenType {
   Time = 'time',
   Link = 'link',
+  DocLink = 'docLink',
 }
 
 export enum AlertParamType {

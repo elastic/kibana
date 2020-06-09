@@ -76,6 +76,10 @@ export interface AlertMessageTimeToken extends AlertMessageToken {
   timestamp: number;
 }
 
+export interface AlertMessageDocLinkToken extends AlertMessageToken {
+  partialUrl: string;
+}
+
 export interface AlertLicenseUiState extends AlertUiState {
   expirationTime: number;
 }
