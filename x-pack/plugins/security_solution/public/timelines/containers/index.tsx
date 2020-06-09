@@ -165,8 +165,10 @@ class TimelineQueryComponent extends QueryTemplate<
 
   private getUpdatedAt = () => this.updatedDate;
 
-  private getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
-    timelineEdges.map((e: TimelineEdges) => e.node);
+  private getTimelineEvents = (
+    _variables: string,
+    timelineEdges: TimelineEdges[]
+  ): TimelineItem[] => timelineEdges.map((e: TimelineEdges) => e.node);
 }
 
 const makeMapStateToProps = () => {
