@@ -41,7 +41,7 @@ export async function getServiceAnnotations({
     : [];
 
   if (storedAnnotations.length) {
-    derivedAnnotationsPromise.catch((error) => {
+    derivedAnnotationsPromise.catch(() => {
       // handle error silently to prevent Kibana from crashing
     });
     return { annotations: storedAnnotations };

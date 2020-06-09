@@ -61,6 +61,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setAbsoluteRangeDatePicker]
   );
 
