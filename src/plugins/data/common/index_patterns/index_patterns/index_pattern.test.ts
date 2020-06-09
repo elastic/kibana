@@ -30,8 +30,8 @@ import { Field } from '../fields';
 
 import { FieldFormatsStartCommon } from '../../field_formats';
 
-jest.mock('../../../../kibana_utils/common', () => {
-  const originalModule = jest.requireActual('../../../../kibana_utils/common');
+jest.mock('../../field_mapping', () => {
+  const originalModule = jest.requireActual('../../field_mapping');
 
   return {
     ...originalModule,
