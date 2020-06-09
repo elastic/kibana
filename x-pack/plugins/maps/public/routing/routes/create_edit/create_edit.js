@@ -132,8 +132,6 @@ export const MapsCreateEditView = class extends React.Component {
     }
   }
 
-
-
   componentWillUnmount() {
     if (this.storeSyncUnsubscribe) {
       this.storeSyncUnsubscribe();
@@ -147,6 +145,10 @@ export const MapsCreateEditView = class extends React.Component {
     if (this.visibleSubscription) {
       this.visibleSubscription.unsubscribe();
     }
+
+    // Clean up app state filters
+    const { filterManager } = getData().query;
+    filterManager.removeAll();
   }
 
   getInitialLayersFromUrlParam() {
@@ -243,7 +245,6 @@ export const MapsCreateEditView = class extends React.Component {
     });
 
     // globalState
-
     const refreshInterval = {
       pause: refreshConfig.isPaused,
       value: refreshConfig.interval,
