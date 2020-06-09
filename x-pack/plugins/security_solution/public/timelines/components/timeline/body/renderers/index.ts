@@ -15,6 +15,7 @@ import { suricataRowRenderer } from './suricata/suricata_row_renderer';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek/zeek_row_renderer';
 import { systemRowRenderers } from './system/generic_row_renderer';
+import { resolverRowRenderer } from './resolver/resolver_row_renderer';
 
 // The row renderers are order dependent and will return the first renderer
 // which returns true from its isInstance call. The bottom renderers which
@@ -26,6 +27,7 @@ import { systemRowRenderers } from './system/generic_row_renderer';
 export const rowRenderers: RowRenderer[] = [
   ...auditdRowRenderers,
   ...systemRowRenderers,
+  resolverRowRenderer,
   suricataRowRenderer,
   zeekRowRenderer,
   netflowRowRenderer,

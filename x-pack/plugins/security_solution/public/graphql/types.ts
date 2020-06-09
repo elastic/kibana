@@ -571,7 +571,7 @@ export interface IndexField {
   /** Example of field's value */
   example?: Maybe<string>;
   /** whether the field's belong to an alias index */
-  indexes: (Maybe<string>)[];
+  indexes: Maybe<string>[];
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -1272,6 +1272,8 @@ export interface ProcessEcsFields {
   thread?: Maybe<Thread>;
 
   working_directory?: Maybe<string[]>;
+
+  entity_id: Maybe<string>;
 }
 
 export interface ProcessHashData {
@@ -1413,17 +1415,17 @@ export interface CloudFields {
 
   machine?: Maybe<CloudMachine>;
 
-  provider?: Maybe<(Maybe<string>)[]>;
+  provider?: Maybe<Maybe<string>[]>;
 
-  region?: Maybe<(Maybe<string>)[]>;
+  region?: Maybe<Maybe<string>[]>;
 }
 
 export interface CloudInstance {
-  id?: Maybe<(Maybe<string>)[]>;
+  id?: Maybe<Maybe<string>[]>;
 }
 
 export interface CloudMachine {
-  type?: Maybe<(Maybe<string>)[]>;
+  type?: Maybe<Maybe<string>[]>;
 }
 
 export interface FirstLastSeenHost {
@@ -2106,7 +2108,7 @@ export interface SortTimelineResult {
 }
 
 export interface ResponseTimelines {
-  timeline: (Maybe<TimelineResult>)[];
+  timeline: Maybe<TimelineResult>[];
 
   totalCount?: Maybe<number>;
 }
@@ -2195,9 +2197,9 @@ export interface HostFields {
 
   id?: Maybe<string>;
 
-  ip?: Maybe<(Maybe<string>)[]>;
+  ip?: Maybe<Maybe<string>[]>;
 
-  mac?: Maybe<(Maybe<string>)[]>;
+  mac?: Maybe<Maybe<string>[]>;
 
   name?: Maybe<string>;
 
@@ -2669,7 +2671,7 @@ export namespace SourceQuery {
 
     example: Maybe<string>;
 
-    indexes: (Maybe<string>)[];
+    indexes: Maybe<string>[];
 
     name: string;
 
@@ -3022,21 +3024,21 @@ export namespace GetHostOverviewQuery {
 
     machine: Maybe<Machine>;
 
-    provider: Maybe<(Maybe<string>)[]>;
+    provider: Maybe<Maybe<string>[]>;
 
-    region: Maybe<(Maybe<string>)[]>;
+    region: Maybe<Maybe<string>[]>;
   };
 
   export type Instance = {
     __typename?: 'CloudInstance';
 
-    id: Maybe<(Maybe<string>)[]>;
+    id: Maybe<Maybe<string>[]>;
   };
 
   export type Machine = {
     __typename?: 'CloudMachine';
 
-    type: Maybe<(Maybe<string>)[]>;
+    type: Maybe<Maybe<string>[]>;
   };
 
   export type Inspect = {
@@ -4320,7 +4322,7 @@ export namespace GetAllTimeline {
 
     totalCount: Maybe<number>;
 
-    timeline: (Maybe<Timeline>)[];
+    timeline: Maybe<Timeline>[];
   };
 
   export type Timeline = {

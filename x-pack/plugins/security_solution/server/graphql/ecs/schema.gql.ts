@@ -6,6 +6,11 @@
 
 import gql from 'graphql-tag';
 
+/**
+ * These types define what fields can be returned for various top-level ECS fields.
+ * If you need to access new fields, this is the place to add them.
+ * NB: ToStringArray is used for strings.
+ */
 export const ecsSchema = gql`
   scalar ToStringArray
 
@@ -114,6 +119,7 @@ export const ecsSchema = gql`
     title: ToStringArray
     thread: Thread
     working_directory: ToStringArray
+    entity_id: ToStringArray
   }
 
   type SourceEcsFields {

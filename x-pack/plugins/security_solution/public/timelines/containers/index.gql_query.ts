@@ -288,6 +288,7 @@ export const timelineQuery = gql`
                 executable
                 title
                 working_directory
+                entity_id
               }
               zeek {
                 session_id
