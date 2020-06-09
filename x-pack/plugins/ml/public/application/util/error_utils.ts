@@ -6,9 +6,20 @@
 
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 
+// Adding temporary types until Kibana ResponseError is updated
+type MLResponseError =
+  | ResponseError
+  | {
+      message: {
+        msg: string;
+      };
+    }
+  | { msg: string };
+
 export const extractErrorMessage = (
-  error: CustomHttpResponseOptions<ResponseError> | undefined | string
+  error: CustomHttpResponseOptions<MLResponseError> | undefined | string
 ): string | undefined => {
+  // extract only the error message within the response error coming from Kibana, Elasticsearch, and our own ML messages
   if (typeof error === 'string') {
     return error;
   }
@@ -21,16 +32,12 @@ export const extractErrorMessage = (
       if (typeof error.body.message === 'string') {
         return error.body.message;
       }
-      // @ts-ignore
-      if (typeof (error.body.message?.msg === 'string')) {
-        // @ts-ignore
-        return error.body.message?.msg;
+      if (typeof (error.body.message.msg === 'string')) {
+        return error.body.message.msg;
       }
     }
     if (typeof error.body === 'object' && 'msg' in error.body) {
-      // @ts-ignore
       if (typeof error.body.msg === 'string') {
-        // @ts-ignore
         return error.body.msg;
       }
     }
