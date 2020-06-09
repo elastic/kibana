@@ -87,7 +87,7 @@ export function TimechartHeader({
   return (
     <I18nProvider>
       <EuiFlexGroup gutterSize="s" responsive justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="eui-hideFor--m">
           <EuiToolTip
             content={i18n.translate('discover.howToChangeTheTimeTooltip', {
               defaultMessage: 'To change the time, use the global time filter above',

@@ -69,20 +69,16 @@
       </div>
 
       <div class="dscWrapper__content" ng-show="resultState === 'ready'">
-        <!-- result -->
-        <div class="dscResults">
-          <hits-counter
-            hits="hits || 0"
-            show-reset-button="opts.savedSearch.id"
-            on-reset-query="resetQuery"
-          >
-          </hits-counter>
-
-          <section
-            aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
-            class="dscTimechart"
-            ng-if="opts.timefield"
-          >
+        <div class="dscResultCount">
+          <div class="dscResuntCount__title eui-textTruncate eui-textNoWrap">
+            <hits-counter
+              hits="hits || 0"
+              show-reset-button="opts.savedSearch.id"
+              on-reset-query="resetQuery"
+            >
+            </hits-counter>
+          </div>
+          <div class="dscResultCount__actions eui-textTruncate eui-textNoWrap">
             <timechart-header
               from="toMoment(timeRange.from)"
               to="toMoment(timeRange.to)"
@@ -92,8 +88,16 @@
               show-scaled-info="bucketInterval.scaled"
               bucket-interval-description="bucketInterval.description"
               bucket-interval-scale="bucketInterval.scale"
-            >
-            </timechart-header>
+            ></timechart-header>
+          </div>
+        </div>
+        <!-- result -->
+        <div class="dscResults">
+          <section
+            aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+            class="dscTimechart"
+            ng-if="opts.timefield"
+          >
             <discover-histogram
               class="dscHistogram"
               ng-show="vis && rows.length !== 0"
