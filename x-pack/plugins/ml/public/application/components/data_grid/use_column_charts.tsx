@@ -68,7 +68,7 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartD
                 style={{ width: `${d.initialWidth}px` }}
               >
                 {!d.isExpandable && chartData !== undefined && (
-                  <ColumnChart chartData={chartsData[i]} columnType={d} />
+                  <ColumnChart chartData={chartData} columnType={d} />
                 )}
               </div>
             );
