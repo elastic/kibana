@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../graphql/types';
-import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
+import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { Body, BodyProps } from '.';
@@ -16,13 +17,20 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
   columnId: '@timestamp',
   sortDirection: Direction.desc,
 };
+
+jest.mock('react-redux', () => {
+  const origin = jest.requireActual('react-redux');
+  return {
+    ...origin,
+    useSelector: jest.fn(),
+  };
+});
 
 jest.mock(
   'react-visibility-sensor',
@@ -39,6 +47,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
+  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
 
   describe('rendering', () => {
     test('it renders the column headers', () => {

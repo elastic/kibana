@@ -87,7 +87,6 @@ export const Actions = React.memo<Props>(
     const timeline = useSelector<StoreState, TimelineModel>((state) => {
       return state.timeline.timelineById['timeline-1'];
     });
-
     return (
       <EventsTdGroupActions
         actionsColumnWidth={actionsColumnWidth}

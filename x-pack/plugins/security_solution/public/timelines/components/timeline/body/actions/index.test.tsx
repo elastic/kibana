@@ -5,13 +5,24 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
+import { useSelector } from 'react-redux';
 
-import { TestProviders } from '../../../../../common/mock';
+import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 
 import { Actions } from '.';
 
+jest.mock('react-redux', () => {
+  const origin = jest.requireActual('react-redux');
+  return {
+    ...origin,
+    useSelector: jest.fn(),
+  };
+});
+
 describe('Actions', () => {
+  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>

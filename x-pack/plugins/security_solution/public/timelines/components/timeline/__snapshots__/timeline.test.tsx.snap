@@ -11,6 +11,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
     <FlyoutHeaderWithCloseButton
       onClose={[MockFunction]}
       timelineId="foo"
+      timelineType="default"
       usersViewing={
         Array [
           "elastic",

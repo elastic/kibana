@@ -30,11 +30,7 @@ describe('SelectableTimeline', () => {
     };
   });
 
-  const {
-    SelectableTimeline,
-
-    ORIGINAL_PAGE_SIZE,
-  } = jest.requireActual('./');
+  const { SelectableTimeline, ORIGINAL_PAGE_SIZE } = jest.requireActual('./');
 
   const props = {
     hideUntitled: false,
@@ -94,6 +90,7 @@ describe('SelectableTimeline', () => {
         sortField: SortFieldTimeline.updated,
         sortOrder: Direction.desc,
       },
+      status: null,
       onlyUserFavorite: false,
       timelineType: TimelineType.default,
     };

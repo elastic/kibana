@@ -65,7 +65,7 @@ describe('TimelinesTable', () => {
     expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
   });
 
-  test('it renders the notes column in the position of the Modified By column when showExtendedColumns is false', () => {
+  test.skip('it renders the notes column in the position of the Modified By column when showExtendedColumns is false', () => {
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
       showExtendedColumns: false,

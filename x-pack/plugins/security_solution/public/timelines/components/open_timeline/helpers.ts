@@ -12,7 +12,7 @@ import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../../graphql/types';
 
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -84,7 +84,8 @@ export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean
 ): TimelineModel => {
-  return Object.entries({
+  const isTemplate = timeline.timelineType === TimelineType.template;
+  const timelineEntries = {
     ...timeline,
     columns:
       timeline.columns != null
@@ -168,16 +169,25 @@ export const defaultTimelineToTimelineModel = (
         )
       : {},
     id: duplicate ? '' : timeline.savedObjectId,
-    status: TimelineStatus.active,
+    status:
+      timeline.title == null
+        ? TimelineStatus.draft
+        : timeline.status === TimelineStatus.immutiable
+        ? TimelineStatus.active
+        : TimelineStatus.draft,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
-    templateTimelineId: duplicate ? uuid.v4() : timeline.templateTimelineId,
-    templateTimelineVersion: duplicate ? null : timeline.templateTimelineVersion,
-  }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
-    ...timelineDefaults,
-    id: '',
-  });
+    templateTimelineId: duplicate && isTemplate ? uuid.v4() : timeline.templateTimelineId,
+    templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
+  };
+  return Object.entries(timelineEntries).reduce(
+    (acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc),
+    {
+      ...timelineDefaults,
+      id: '',
+    }
+  );
 };
 
 export const formatTimelineResultToModel = (

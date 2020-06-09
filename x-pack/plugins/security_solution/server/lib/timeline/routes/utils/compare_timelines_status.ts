@@ -84,7 +84,7 @@ export class CompareTimelinesStatus {
   public get isCreatableViaImport() {
     return (
       (this.isCreatable && !this.isHandlingTemplateTimeline) ||
-      (this.isCreatable && this.isHandlingTemplateTimeline && !this.isTemplateVersionConflict)
+      (this.isCreatable && this.isHandlingTemplateTimeline && !this.isTemplateVersionValid)
     );
   }
 
@@ -103,7 +103,7 @@ export class CompareTimelinesStatus {
       !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isUpdatableViaImport &&
-          !this.isTemplateVersionConflict &&
+          !this.isTemplateVersionValid &&
           this.isHandlingTemplateTimeline))
     );
   }
@@ -203,6 +203,11 @@ export class CompareTimelinesStatus {
       return true;
     }
     return false;
+  }
+
+  private get isTemplateVersionValid() {
+    const version = this.templateTimelineObject?.getVersion;
+    return typeof version === 'number' && this.isTemplateVersionConflict;
   }
 
   public get timelineId() {

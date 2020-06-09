@@ -23,7 +23,8 @@ export const CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE =
   'Create template timeline without a template timeline ID is not allowed';
 export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
 export const UPDATE_STATUS_ERROR_MESSAGE = 'Update an immutiable timeline is is not allowed';
-
+export const CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE =
+  'Create template timeline without a valid templateTimelineVersion is not allowed. Please start from 1 to create a new template timeline';
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
@@ -191,7 +192,12 @@ export const checkIsCreateFailureCases = (
   } else if (isHandlingTemplateTimeline && templateTimelineId == null) {
     return {
       body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
-      statusCode: 405,
+      statusCode: 403,
+    };
+  } else if (isHandlingTemplateTimeline && templateTimelineVersion == null) {
+    return {
+      body: CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE,
+      statusCode: 403,
     };
   } else {
     return null;
