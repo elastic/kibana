@@ -20,7 +20,7 @@ const querySchema = schema.object({
 
 export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index-templates'), validate: { body: bodySchema, query: querySchema } },
+    { path: addBasePath('/index_templates'), validate: { body: bodySchema, query: querySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
