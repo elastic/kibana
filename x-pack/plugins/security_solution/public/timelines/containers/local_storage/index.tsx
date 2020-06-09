@@ -22,7 +22,7 @@ export const useTimelinesStorage = (store: IStorage): SecuritySolutionStorage =>
   const { storage } = useKibana().services;
 
   const getAllTimelines: SecuritySolutionStorage['getAllTimelines'] = () =>
-    storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? null;
+    storage.get(LOCAL_STORAGE_TIMELINE_KEY);
 
   const getTimelineById: SecuritySolutionStorage['getTimelineById'] = (id: TimelineId) =>
     getTimelineInStorageById(storage, id);
