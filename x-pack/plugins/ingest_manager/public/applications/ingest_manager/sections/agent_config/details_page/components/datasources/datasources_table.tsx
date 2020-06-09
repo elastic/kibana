@@ -280,7 +280,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
           >
             <FormattedMessage
               id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-              defaultMessage="Create data source"
+              defaultMessage="Add data source"
             />
           </EuiButton>,
         ],
