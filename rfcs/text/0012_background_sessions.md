@@ -46,11 +46,17 @@ If there is no open session, Kibana will behave as before, suggesting a user to 
 
 ### Restoring a session
 
-Restoring a session means loading the results previously generated for each request within the session. 
+Restoring a session means loading the results previously generated for each request within the session.  
 
-Doing this requires a `sessionId` and *calling each request with the exact same parameters*. If done the request parameters and the `sessionId` match, the stored results will be returned immediatelly, instead of re-running the search.
+If, for example, the `sessionId` to be 
+
+Doing so requires a `sessionId` and *calling each request with the exact same parameters*. If the request parameters and the `sessionId` match, the stored results will be returned immediatelly, instead of re-running the search.
 
 If the `sessionId` is not found, the request parameters don't match or the stored results are expired, the requests will be re-run. 
+
+### Embeddable integration
+
+??
 
 # Motivation
 
