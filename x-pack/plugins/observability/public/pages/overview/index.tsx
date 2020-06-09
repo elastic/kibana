@@ -94,9 +94,6 @@ export const Overview = () => {
                     showLegend
                     legendPosition="bottom"
                     xDomain={{ min: startAPM, max: endAPM }}
-                    onElementOver={(x) => {
-                      console.log('##########3', x[0][0].x);
-                    }}
                   />
                   <Axis
                     id="bottom"
