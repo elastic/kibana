@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimelineModel } from '../../../timelines/store/timeline/model';
+
+type TimelineId = string;
 export interface SecuritySolutionStorage {
-  getAllTimelines: () => object | null;
-  addTimeline: (id: string, timeline: unknown) => void;
+  getAllTimelines: () => Record<TimelineId, TimelineModel>;
+  addTimeline: (id: string, timeline: TimelineModel) => void;
 }

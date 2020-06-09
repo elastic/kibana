@@ -8,16 +8,16 @@ import { Storage, IStorage } from '../../../../../../../src/plugins/kibana_utils
 import { SecuritySolutionStorage } from './types';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
+const EMPTY_TIMELINE = {};
 
 export const createSecuritySolutionStorage = (store: IStorage): SecuritySolutionStorage => {
   const storage = new Storage(store);
 
-  const getAllTimelines: SecuritySolutionStorage['getAllTimelines'] = () => {
-    return storage.get(LOCAL_STORAGE_TIMELINE_KEY);
-  };
+  const getAllTimelines: SecuritySolutionStorage['getAllTimelines'] = () =>
+    storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? EMPTY_TIMELINE;
 
   const addTimeline: SecuritySolutionStorage['addTimeline'] = (id, timeline) => {
-    const timelines = getAllTimelines() ?? {};
+    const timelines = getAllTimelines();
     storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
       ...timelines,
       [id]: timeline,

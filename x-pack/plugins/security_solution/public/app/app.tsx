@@ -90,7 +90,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
         ...(subPluginsStore.initialState.timeline ?? initialTimelineState),
         timelineById: {
           ...(subPluginsStore.initialState.timeline?.timelineById ?? {}),
-          ...(storage.getAllTimelines() ?? {}),
+          ...storage.getAllTimelines(),
         },
       },
     }),
