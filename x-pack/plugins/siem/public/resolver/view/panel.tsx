@@ -32,6 +32,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { EuiTextColor } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiBreadcrumbs } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 /**
  * The two query parameters we read/write on
@@ -52,6 +53,36 @@ const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   minute: '2-digit',
   second: '2-digit',
 });
+
+/**
+ * During user testing, one user indicated they wanted to see stronger visual relationships between
+ * Nodes on the graph and what's in the table. Using the same symbol in both places (as below) could help with that.
+ */
+const CubeForProcess = memo(function CubeForProcess({processEvent}: {processEvent: ResolverEvent}){
+  const { cubeSymbol, descriptionText } = useMemo(()=>{
+    if(!processEvent){
+      return {cubeSymbol: undefined, descriptionText: undefined}
+    }
+    return cubeAssetsForNode(processEvent);
+  },
+  [processEvent]);
+
+  return (<>
+  <svg style={{position: 'relative', top: '0.4em', marginRight: '.25em'}} className="table-process-icon" width="1.5em" height="1.5em" viewBox="0 0 1 1">
+    <desc>{descriptionText}</desc>
+    <use
+      role="presentation"
+      xlinkHref={cubeSymbol}
+      x={0}
+      y={0}
+      width={1}
+      height={1}
+      opacity="1"
+      className="cube"
+    />
+  </svg>
+  </>)
+})
 
 const EventCountsForProcess = memo(function EventCountsForProcess(){
   return (
@@ -101,7 +132,8 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
         }),
         sortable: true,
         truncateText: true,
-        render(name: string) {
+        render(name: string, item: ProcessTableView) {
+          
           return name === '' ? (
             <EuiBadge color="warning">
               {i18n.translate(
@@ -112,8 +144,14 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
               )}
             </EuiBadge>
           ) : (
-            name
-          );
+            <EuiButtonEmpty onClick={()=>{ 
+                handleBringIntoViewClick(item)
+                pushToQueryParams({crumbId: event.entityId(item.event), crumbEvent: ''});
+              }}>
+              <CubeForProcess processEvent={item.event}/>
+              {name}
+            </EuiButtonEmpty>
+          )
         },
       },
       {
@@ -137,30 +175,6 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
             </EuiBadge>
           );
         },
-      },
-      {
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.actionsTitle', {
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            name: i18n.translate(
-              'xpack.siem.endpoint.resolver.panel.table.row.actions.bringIntoViewButtonLabel',
-              {
-                defaultMessage: 'Bring into view',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.siem.endpoint.resolver.panel.table.row.bringIntoViewLabel',
-              {
-                defaultMessage: 'Bring the process into view on the map.',
-              }
-            ),
-            type: 'icon',
-            icon: 'flag',
-            onClick: handleBringIntoViewClick,
-          },
-        ],
       },
     ],
     [formatter, handleBringIntoViewClick]
@@ -188,16 +202,21 @@ const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryPa
     [processNodePositions]
   );
 
+  const crumbs = useMemo(()=>{
+    return [
+      {
+        text: i18n.translate('xpack.siem.endpoint.resolver.panel.processListWithCounts.events', {
+          defaultMessage: 'Events',
+        }),
+        onClick: ()=>{},
+      },
+    ]
+  },[])
+
   return (
     <>
-    <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
-            defaultMessage: 'Events',
-          })}
-        </h4>
-      </EuiTitle>
-      <HorizontalRule />
+    <EuiBreadcrumbs breadcrumbs={crumbs} />
+    <EuiSpacer size="l" />
     <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
   </>
   )
@@ -259,32 +278,30 @@ const ProcessDetails = memo(function ProcessListWithCounts({processEvent, pushTo
       });
   }, [processEvent]);
   
-  
-  /**
-   * During user testing, one user indicated they wanted to see stronger visual relationships between
-   * Nodes on the graph and what's in the table. Using the same symbol in both places (as below) could help with that.
-   */
-  const { cubeSymbol, descriptionText } = useMemo(()=>{
+  const crumbs = useMemo(()=>{
+    return [
+      {
+        text: i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.events', {
+          defaultMessage: 'Events',
+        }),
+        onClick: ()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) },
+      },
+      {
+        text: i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.details', {
+          defaultMessage: 'Details for: ',
+        }) + processName,
+        onClick: ()=>{}
+      }
+    ]
+  },[])
+  const { descriptionText } = useMemo(()=>{
     if(!processEvent){
-      return {cubeSymbol: undefined, descriptionText: undefined}
+      return {descriptionText: ''}
     }
     return cubeAssetsForNode(processEvent);
   },
   [processEvent]);
 
-  const crumbs = useMemo(()=>{
-    return [
-      {
-        text: 'All Events',
-        onClick: ()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) },
-      },
-      {
-        text: 'Details',
-        onClick: ()=>{}
-      }
-    ]
-  },[])
-  
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
@@ -292,19 +309,7 @@ const ProcessDetails = memo(function ProcessListWithCounts({processEvent, pushTo
     <EuiSpacer size="l" />
     <EuiTitle size="xs">
         <h4 id={titleId}>
-          {descriptionText && (<svg style={{position: 'relative', top: '0.4em', marginRight: '.25em'}} className="table-process-icon" width="1.5em" height="1.5em" viewBox="0 0 1 1">
-            <desc>{descriptionText}</desc>
-            <use
-              role="presentation"
-              xlinkHref={cubeSymbol}
-              x={0}
-              y={0}
-              width={1}
-              height={1}
-              opacity="1"
-              className="cube"
-            />
-          </svg>)}
+          <CubeForProcess processEvent={processEvent} />
           {processName}
         </h4>
     </EuiTitle>

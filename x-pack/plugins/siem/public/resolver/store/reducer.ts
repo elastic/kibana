@@ -39,10 +39,13 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
      * `uniquePidForProcess` and `resolverNodeIdGenerator` to resolve the determinant
      * html id of the node being brought into view.
      */
-    const processNodeId = resolverNodeIdGenerator(uniquePidForProcess(action.payload.process));
+    const processEntityId = uniquePidForProcess(action.payload.process);
+    const processNodeId = resolverNodeIdGenerator(processEntityId);
     return {
       ...uiState,
       activeDescendantId: processNodeId,
+      selectedDescendantId: processNodeId,
+      processEntityIdOfSelectedDescendant: processEntityId,
     };
   } else {
     return uiState;
