@@ -8,6 +8,8 @@ import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -19,7 +21,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
+import { OutputRuleAlertRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -29,10 +31,9 @@ import {
   OutputError,
 } from '../utils';
 import { hasListsFeature } from '../../feature_flags';
-// import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 import { RuleActions } from '../../rule_actions/types';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 export const getIdError = ({
   id,
@@ -148,7 +149,7 @@ export const transformAlertToRule = (
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
     // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
-    exceptions_list: hasListsFeature() ? alert.params.exceptions_list : null,
+    exceptions_list: hasListsFeature() ? alert.params.exceptionsList : null,
   });
 };
 
@@ -243,7 +244,10 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
+export const getDuplicates = (
+  ruleDefinitions: CreateRulesBulkSchemaDecoded,
+  by: 'rule_id'
+): string[] => {
   const mappedDuplicates = countBy(
     by,
     ruleDefinitions.filter((r) => r[by] != null)
@@ -265,21 +269,17 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(uuid.v4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
-        if (ruleId != null) {
-          if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
-            acc.errors.set(
-              uuid.v4(),
-              createBulkErrorObject({
-                ruleId,
-                statusCode: 400,
-                message: `More than one rule with rule-id: "${ruleId}" found`,
-              })
-            );
-          }
-          acc.rulesAcc.set(ruleId, parsedRule);
-        } else {
-          acc.rulesAcc.set(uuid.v4(), parsedRule);
+        if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+          acc.errors.set(
+            uuid.v4(),
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 400,
+              message: `More than one rule with rule-id: "${ruleId}" found`,
+            })
+          );
         }
+        acc.rulesAcc.set(ruleId, parsedRule);
       }
 
       return acc;

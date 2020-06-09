@@ -18,13 +18,26 @@ import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
-jest.mock('../../../../common/lib/kibana');
-
-let mockedWidth = 1000;
-jest.mock('../../../../common/components/utils');
-(useThrottledResizeObserver as jest.Mock).mockImplementation(() => ({
-  width: mockedWidth,
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          securitySolution: {
+            crud: true,
+          },
+        },
+      },
+    },
+  }),
+  useUiSetting$: jest.fn().mockReturnValue([]),
 }));
+
+jest.mock('../../../../common/components/utils', () => {
+  return {
+    useThrottledResizeObserver: jest.fn(),
+  };
+});
 
 jest.mock('react-redux', () => {
   const originalModule = jest.requireActual('react-redux');
@@ -44,16 +57,20 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('./use_create_timeline', () => ({
+  useCreateTimelineButton: jest.fn().mockReturnValue({ getButton: jest.fn() }),
+}));
+
 describe('Properties', () => {
   const usersViewing = ['elastic'];
-
   const state: State = mockGlobalState;
+  let mockedWidth = 1000;
   let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
     jest.clearAllMocks();
     store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
-    mockedWidth = 1000;
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 
   test('renders correctly', () => {
@@ -306,7 +323,9 @@ describe('Properties', () => {
 
   test('it renders a description on the left when the width is at least as wide as the threshold', () => {
     const description = 'strange';
-    mockedWidth = showDescriptionThreshold;
+
+    (useThrottledResizeObserver as jest.Mock).mockReset();
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: showDescriptionThreshold });
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
@@ -343,7 +362,11 @@ describe('Properties', () => {
 
   test('it does NOT render a description on the left when the width is less than the threshold', () => {
     const description = 'strange';
-    mockedWidth = showDescriptionThreshold - 1;
+
+    (useThrottledResizeObserver as jest.Mock).mockReset();
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({
+      width: showDescriptionThreshold - 1,
+    });
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
@@ -413,7 +436,10 @@ describe('Properties', () => {
   });
 
   test('it does NOT render a a notes button on the left when the width is less than the threshold', () => {
-    mockedWidth = showNotesThreshold - 1;
+    (useThrottledResizeObserver as jest.Mock).mockReset();
+    (useThrottledResizeObserver as jest.Mock).mockReturnValue({
+      width: showNotesThreshold - 1,
+    });
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
