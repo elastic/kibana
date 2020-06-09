@@ -10,6 +10,7 @@ import {
   isCloud,
   getNewJobDefaults,
   getNewJobLimits,
+  extractDeploymentId,
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
@@ -57,6 +58,26 @@ describe('ml_server_info', () => {
 
       expect(limits.max_model_memory_limit).toBe('128mb');
       done();
+    });
+  });
+
+  describe('cloud extract deployment ID', () => {
+    const cloudIdWithDeploymentName =
+      'cloud_message_test:ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
+
+    const cloudIdWithOutDeploymentName =
+      ':ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
+
+    it('cloud ID with deployment name', () => {
+      expect(extractDeploymentId(cloudIdWithDeploymentName)).toBe(
+        '85d666f3350c469e8c3242d76a7f459c'
+      );
+    });
+
+    it('cloud ID without deployment name', () => {
+      expect(extractDeploymentId(cloudIdWithOutDeploymentName)).toBe(
+        '85d666f3350c469e8c3242d76a7f459c'
+      );
     });
   });
 });
