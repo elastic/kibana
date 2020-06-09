@@ -50,7 +50,7 @@ const makeRequest = <T>(method: string, path: string, body?: object): Promise<T>
             reject(e);
           }
 
-          if (res.statusCode > 299) {
+          if (res.statusCode && res.statusCode > 299) {
             reject('Error calling App Search API: ' + JSON.stringify(responseBody));
           }
 

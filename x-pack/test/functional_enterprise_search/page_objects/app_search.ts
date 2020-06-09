@@ -5,23 +5,24 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { TestSubjects } from '../../../../../test/functional/services/test_subjects';
+import { TestSubjects } from '../../../../test/functional/services/common';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 export function AppSearchPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects') as TestSubjects;
 
   return {
-    async navigateToPage() {
+    async navigateToPage(): Promise<void> {
       return await PageObjects.common.navigateToApp('app_search');
     },
 
-    async getEngineLinks() {
+    async getEngineLinks(): Promise<WebElementWrapper[]> {
       const engines = await testSubjects.find('appSearchEngines');
       return await testSubjects.findAllDescendant('engineNameLink', engines);
     },
 
-    async getMetaEngineLinks() {
+    async getMetaEngineLinks(): Promise<WebElementWrapper[]> {
       const metaEngines = await testSubjects.find('appSearchMetaEngines');
       return await testSubjects.findAllDescendant('engineNameLink', metaEngines);
     },

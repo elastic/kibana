@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { EsArchiver } from 'src/es_archiver';
 import { AppSearchService, IEngine } from '../../../../services/app_search_service';
-import { Browser } from '../../../../../../../test/functional/services/browser';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { Browser } from '../../../../../../../test/functional/services/common';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function enterpriseSearchSetupEnginesTests({
   getService,
