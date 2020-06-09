@@ -64,13 +64,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       let apiResponse: DeleteDatasourcesResponse;
       try {
         apiResponse = await sendDeleteDatasource(http, { body: { datasourceIds } });
-      } catch (error) {
+      } catch (err) {
         dispatch({
           type: 'serverDeletedPolicyFailure',
-          payload: {
-            success: false,
-            error: error.body || error,
-          },
+          payload: err.body ?? err,
         });
         return;
       }
@@ -87,13 +84,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       let apiResponse: GetAgentStatusResponse;
       try {
         apiResponse = await sendGetFleetAgentStatusForConfig(http, agentConfigId);
-      } catch (error) {
+      } catch (err) {
         dispatch({
           type: 'serverReturnedPolicyAgentsSummaryForDeleteFailure',
-          payload: {
-            success: false,
-            error: error.body || error,
-          },
+          payload: err.body ?? err,
         });
         return;
       }
