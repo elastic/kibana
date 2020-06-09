@@ -191,6 +191,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         ))}
       </EuiTabs>
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
   const ruleError = useMemo(
@@ -203,6 +204,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           date={rule?.last_failure_at}
         />
       ) : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [rule, ruleDetailTab]
   );
 
