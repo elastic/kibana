@@ -113,7 +113,12 @@ export const ExpressionChart: React.FC<Props> = ({
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
       <EmptyContainer>
-        <EuiText color="subdued">Oops, no chart data available</EuiText>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.infra.metrics.alerts.noDataMessage"
+            defaultMessage="Oops, no chart data available"
+          />
+        </EuiText>
       </EmptyContainer>
     );
   }
