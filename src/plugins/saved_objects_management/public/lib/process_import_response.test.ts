@@ -179,4 +179,23 @@ describe('processImportResponse()', () => {
     `);
     expect(result.status).toBe('idle');
   });
+
+  test('success results get added to successfulImports and result in success status', () => {
+    const response = {
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'a', id: '1', meta: {} }],
+    };
+    const result = processImportResponse(response);
+    expect(result.successfulImports).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1",
+          "meta": Object {},
+          "type": "a",
+        },
+      ]
+    `);
+    expect(result.status).toBe('success');
+  });
 });

@@ -88,6 +88,7 @@ export interface FlyoutState {
   conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
   failedImports?: ProcessedImportResponse['failedImports'];
+  successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
   error?: string;
   file?: File;

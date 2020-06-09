@@ -25,6 +25,7 @@ import {
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
+  SavedObjectsImportSuccess,
 } from 'src/core/public';
 
 export interface FailedImport {
@@ -39,6 +40,7 @@ export interface FailedImport {
 
 export interface ProcessedImportResponse {
   failedImports: FailedImport[];
+  successfulImports: SavedObjectsImportSuccess[];
   unmatchedReferences: Array<{
     existingIndexPatternId: string;
     list: Array<Record<string, any>>;
@@ -81,6 +83,7 @@ export function processImportResponse(
 
   return {
     failedImports,
+    successfulImports: response.successResults ?? [],
     unmatchedReferences: Array.from(unmatchedReferences.values()),
     // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
     // returned errors of type missing_references.

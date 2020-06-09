@@ -225,6 +225,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "isOverwriteAllChecked": true,
           "loadingMessage": undefined,
           "status": "loading",
+          "successfulImports": Array [],
           "unmatchedReferences": Array [
             Object {
               "existingIndexPatternId": "MyIndexPattern*",
