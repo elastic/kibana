@@ -30,18 +30,13 @@ export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled }
     <EuiFlexItem
       className={`pipelineProcessorsEditor__tree__dropZoneContainer ${containerClasses}`}
     >
-      <div className="pipelineProcessorsEditor__tree__buttonContainer">
-        <div className="pipelineProcessorsEditor__tree__buttonContainerButton">
-          <EuiButtonIcon
-            className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
-            aria-label={MOVE_HERE_COPY}
-            disabled={isDisabled}
-            onClick={onClick}
-            iconType="pin"
-          />
-        </div>
-        <div className="pipelineProcessorsEditor__tree__buttonContainerArrow" />
-      </div>
+      <EuiButtonIcon
+        className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
+        aria-label={MOVE_HERE_COPY}
+        disabled={isDisabled}
+        onClick={onClick}
+        iconType="empty"
+      />
     </EuiFlexItem>
   );
 };

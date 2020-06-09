@@ -4,80 +4,27 @@
   &__dropZoneContainer {
     margin: 2px;
     visibility: hidden;
-    border: 1px solid $euiColorMediumShade;
+    border: 2px dashed $euiColorLightShade;
+    height: 12px;
+    border-radius: 2px;
 
-    transition: border .1s;
+    transition: border .5s;
 
     &--active {
       &:hover {
-        border: 1px solid $euiColorPrimary;
+        border: 2px dashed $euiColorPrimary;
       }
       visibility: visible;
     }
   }
 
-  &__buttonContainer {
-    position: relative;
-
-    &:before {
-      content: "";
-      display: block;
-      position: absolute;
-      left: -13px;
-      top: -12px;
-      margin-top: -3px;
-      width: 4px;
-      height: 4px;
-      border-top: 15px solid transparent;
-      border-left: 15px solid #FFF;
-      border-bottom: 15px solid transparent;
-      background: transparent;
-      z-index: 10;
-    }
-  }
-
-  &__buttonContainerArrow {
-    border-top: 16px solid transparent;
-    border-left: 16px solid $euiColorMediumShade;
-    border-bottom: 16px solid transparent;
-    content: "";
-    height: 0;
-    position: absolute;
-    top: -16px;
-    left: -13px;
-    width: 0;
-  }
-
-
-  &__buttonContainerButton {
-    text-align: center;
-    background: #fff;
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    border-top: 1px solid #98A2B3;
-    border-left: 1px solid #98A2B3;
-    border-bottom: 1px solid #98A2B3;
-    height: 32px;
-    width: 28px;
-    position: absolute;
-    top: -16px;
-    left: -41px;
-    &:hover {
-      opacity: 100%;
-    }
-  }
-
-
   &__dropZoneButton {
-    height: $euiSize;
+    height: 8px;
     opacity: 0;
     text-decoration: none !important;
 
-    transition: opacity .1s;
-
     &--active {
       &:hover {
-        opacity: 100%;
         transform: none !important;
       }
     }
@@ -91,14 +38,15 @@
   }
 
   &__onFailureHandlerContainer {
-    margin-top: $euiSize;
-    margin-bottom: $euiSize;
+    margin-top: $euiSizeS;
+    margin-bottom: $euiSizeS;
     & > * {
       overflow: visible;
     }
   }
 
   &__item {
+    transition: border-color 1s;
     &--selected {
       border: 1px solid $euiColorPrimary;
     }

@@ -7,7 +7,7 @@
 import React, { FunctionComponent, useMemo } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiAccordion, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
 import { PipelineProcessorsEditorItem, Handlers } from '../pipeline_processors_editor_item';
@@ -68,7 +68,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   });
 
   return (
-    <EuiPanel className={panelClasses} paddingSize="s">
+    <EuiPanel className={`pipelineProcessorsEditor__tree__item ${panelClasses}`} paddingSize="s">
       <PipelineProcessorsEditorItem
         processor={processor}
         handlers={handlers}
@@ -76,31 +76,27 @@ export const TreeNode: FunctionComponent<Props> = ({
         selected={Boolean(selectedProcessorInfo?.id === processor.id)}
       />
       {processor.onFailure?.length ? (
-        <div style={{ marginLeft: `${level * 34}px` }}>
-          <EuiAccordion
-            className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
-            id={`onFailureHandlers-${processor.id}`}
-            initialIsOpen
-            buttonContent={
-              <EuiText
-                className="pipelineProcessorsEditor__tree__onFailureHandlerLabel"
-                color="subdued"
-              >
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
-                  defaultMessage: 'Failure Handlers',
-                })}
-              </EuiText>
-            }
+        <div
+          className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
+          style={{ marginLeft: `${level * 34}px` }}
+        >
+          <EuiText
+            size="s"
+            className="pipelineProcessorsEditor__tree__onFailureHandlerLabel"
+            color="subdued"
           >
-            <PrivateTree
-              level={level + 1}
-              selectedProcessorInfo={selectedProcessorInfo}
-              privateOnAction={privateOnAction}
-              selector={processorInfo.selector.concat('onFailure')}
-              processors={processor.onFailure}
-              mode={mode}
-            />
-          </EuiAccordion>
+            {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
+              defaultMessage: 'Failure Handlers',
+            })}
+          </EuiText>
+          <PrivateTree
+            level={level + 1}
+            selectedProcessorInfo={selectedProcessorInfo}
+            privateOnAction={privateOnAction}
+            selector={processorInfo.selector.concat('onFailure')}
+            processors={processor.onFailure}
+            mode={mode}
+          />
         </div>
       ) : undefined}
     </EuiPanel>
