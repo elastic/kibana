@@ -15,14 +15,6 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty, get } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldMapping } from '../../../../../../siem/public/cases/components/configure_cases/field_mapping';
-import {
-  CasesConfigurationMapping,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../siem/public/cases/containers/configure/types';
 import { IErrorObject, ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';

@@ -6,7 +6,7 @@
 
 import { lazy } from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { isUrlInvalid } from '../../../../../../siem/public/common/utils/validators';
+import { isUrlInvalid } from '../../../../../../security_solution/public/common/lib/connectors/validators';
 import {
   ValidationResult,
   ActionTypeModel,
@@ -54,6 +54,7 @@ export function getActionType(): ActionTypeModel<
     iconClass: logo,
     selectMessage: i18n.SERVICENOW_DESC,
     actionTypeTitle: connector.name,
+    // minimumLicenseRequired: 'platinum',
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {

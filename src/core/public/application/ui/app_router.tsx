@@ -59,20 +59,22 @@ export const AppRouter: FunctionComponent<Props> = ({
           // legacy apps can have multiple sub-apps registered with the same route
           // which needs additional logic that is handled in the catch-all route below
           .filter(([_, mounter]) => !mounter.legacy)
-          .map(([appId, mounter]) => (
-            <Route
-              key={mounter.appRoute}
-              path={mounter.appRoute}
-              render={({ match: { url } }) => (
-                <AppContainer
-                  appPath={url}
-                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                  createScopedHistory={createScopedHistory}
-                  {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}
-                />
-              )}
-            />
-          ))}
+          .map(([appId, mounter]) => {
+            return (
+              <Route
+                key={mounter.appRoute}
+                path={mounter.appRoute}
+                render={({ match: { url } }) => (
+                  <AppContainer
+                    appPath={url}
+                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                    createScopedHistory={createScopedHistory}
+                    {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}
+                  />
+                )}
+              />
+            );
+          })}
         {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
         <Route
           path="/app/:appId"

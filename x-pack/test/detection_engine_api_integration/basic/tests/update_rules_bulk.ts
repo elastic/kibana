@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -269,7 +269,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
         const ruleUpdate = getSimpleRule('rule-1');
-        ruleUpdate.id = 'fake_id';
+        ruleUpdate.id = '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5';
         delete ruleUpdate.rule_id;
 
         const { body } = await supertest
@@ -279,7 +279,13 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql([
-          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          {
+            id: '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5',
+            error: {
+              status_code: 404,
+              message: 'id: "1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5" not found',
+            },
+          },
         ]);
       });
 
@@ -358,7 +364,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule2 = getSimpleRule();
         delete rule2.rule_id;
-        rule2.id = 'fake_id';
+        rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
         const { body } = await supertest
@@ -376,10 +382,10 @@ export default ({ getService }: FtrProviderContext) => {
           outputRule,
           {
             error: {
-              message: 'id: "fake_id" not found',
+              message: 'id: "b3aa019a-656c-4311-b13b-4d9852e24347" not found',
               status_code: 404,
             },
-            id: 'fake_id',
+            id: 'b3aa019a-656c-4311-b13b-4d9852e24347',
           },
         ]);
       });
