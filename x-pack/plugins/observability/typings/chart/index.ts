@@ -10,10 +10,9 @@ export interface ChartData {
   group: string;
 }
 
-export type ChartDataFetcher = ({
-  start,
-  end,
-}: {
+export interface SearchParams {
   start: number;
   end: number;
-}) => Promise<ChartData[]>;
+}
+
+export type ChartDataFetcher = (searchParams: SearchParams) => Promise<ChartData[]>;

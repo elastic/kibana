@@ -10,7 +10,8 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import { ObservabilityService, Setup } from './service';
+import { ObservabilityDataAccessService } from './data_access_service';
+import { Setup } from './typings/data_access_service';
 
 export interface ObservabilityPluginSetup {
   chartDataFetcher: Setup;
@@ -19,10 +20,9 @@ export interface ObservabilityPluginSetup {
 export type ObservabilityPluginStart = void;
 
 export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
-  private readonly observabilityService: ObservabilityService;
-  constructor(context: PluginInitializerContext) {
-    this.observabilityService = new ObservabilityService();
-  }
+  private readonly observabilityDataAccessService: ObservabilityDataAccessService = new ObservabilityDataAccessService();
+
+  constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     core.application.register({
@@ -38,12 +38,12 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         // Get start services
         const [coreStart] = await core.getStartServices();
 
-        return renderApp(coreStart, params, this.observabilityService.getHandlers());
+        return renderApp(coreStart, params, this.observabilityDataAccessService.getHandlers());
       },
     });
 
     return {
-      chartDataFetcher: this.observabilityService.setup(core),
+      chartDataFetcher: this.observabilityDataAccessService.setup(core),
     };
   }
   public start() {}

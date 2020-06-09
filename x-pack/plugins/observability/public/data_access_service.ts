@@ -4,26 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreSetup, Plugin, IContextContainer } from '../../../../src/core/public';
+import { Setup, DataAccessHandlerProvider } from './typings/data_access_service';
 import { ChartDataFetcher } from '../typings/chart';
 
-export interface Setup {
-  registerProvider: (opaqueId: symbol, name: string, handler: ChartDataFetcher) => void;
-}
-
-export class ObservabilityService implements Plugin<Setup, void> {
+export class ObservabilityDataAccessService implements Plugin<Setup, void> {
   private handlers = new Map<string, ChartDataFetcher>();
-  private contextContainer?: IContextContainer<ChartDataFetcher>;
+  private contextContainer?: IContextContainer<DataAccessHandlerProvider>;
 
   public setup(core: CoreSetup): Setup {
     this.contextContainer = core.context.createContextContainer();
 
     const api: Setup = {
-      registerProvider: (pluginOpaqueId, path, handler) => {
+      registerProvider: (pluginOpaqueId, dataType, handler) => {
         if (!this.contextContainer) {
           throw new Error("Context container wasn't defined");
         }
-        this.handlers.set(path, this.contextContainer.createHandler(pluginOpaqueId, handler));
+        this.handlers.set(dataType, this.contextContainer.createHandler(pluginOpaqueId, handler));
       },
+      registerContext: this.contextContainer!.registerContext,
     };
 
     return api;

@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChartDataFetcher } from '../../../../observability/typings/chart';
+import { DataAccessHandlerProvider } from '../../../../observability/public/typings/data_access_service';
 // import { callApmApi } from './createCallApmApi';
 
-export const getObservabilityChartData: ChartDataFetcher = ({ start, end }) => {
+export const getObservabilityChartData: DataAccessHandlerProvider = (
+  context,
+  { start, end }
+) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
