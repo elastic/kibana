@@ -246,10 +246,14 @@ interface DllFields {
 /**
  * Describes an Alert Event.
  */
-export type AlertEvent = Immutable<{
+export interface AlertEvent {
   '@timestamp': number;
   agent: {
     id: string;
+    version: string;
+    type: string;
+  };
+  ecs: {
     version: string;
   };
   event: {
@@ -327,7 +331,7 @@ export type AlertEvent = Immutable<{
   };
   host: Host;
   dll?: DllFields[];
-}>;
+}
 
 /**
  * The status of the host
@@ -425,13 +429,7 @@ export interface EndpointEvent {
     id: string;
     kind: string;
   };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: HostOS;
-  };
+  host: Host;
   process: {
     entity_id: string;
     name: string;

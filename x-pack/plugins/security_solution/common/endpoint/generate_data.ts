@@ -177,6 +177,7 @@ interface HostInfo {
   agent: {
     version: string;
     id: string;
+    type: string;
   };
   host: Host;
   endpoint: {
@@ -280,6 +281,7 @@ export class EndpointDocGenerator {
       agent: {
         version: this.randomVersion(),
         id: this.seededUUIDv4(),
+        type: 'endpoint',
       },
       elastic: {
         agent: {
@@ -327,6 +329,9 @@ export class EndpointDocGenerator {
     return {
       ...this.commonInfo,
       '@timestamp': ts,
+      ecs: {
+        version: '1.4.0',
+      },
       event: {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
