@@ -87,7 +87,26 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               alertInterval,
             });
 
-            return response.ok({});
+            const numberOfGroups = previewResult.length;
+            const resultTotals = previewResult.reduce(
+              (totals, groupResult) => {
+                if (groupResult === null) return { ...totals, noData: totals.noData + 1 };
+                if (isNaN(groupResult)) return { ...totals, error: totals.error + 1 };
+                return { ...totals, fired: totals.fired + groupResult };
+              },
+              {
+                fired: 0,
+                noData: 0,
+                error: 0,
+              }
+            );
+
+            return response.ok({
+              body: alertPreviewSuccessResponsePayloadRT.encode({
+                numberOfGroups,
+                resultTotals,
+              }),
+            });
           }
           default:
             throw new Error('Unknown alert type');

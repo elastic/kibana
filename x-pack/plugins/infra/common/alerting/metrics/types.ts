@@ -84,3 +84,6 @@ export const alertPreviewSuccessResponsePayloadRT = rt.type({
     tooManyBuckets: rt.number,
   }),
 });
+export type AlertPreviewSuccessResponsePayload = rt.TypeOf<
+  typeof alertPreviewSuccessResponsePayloadRT
+>;

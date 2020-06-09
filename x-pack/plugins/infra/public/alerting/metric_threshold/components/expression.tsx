@@ -6,7 +6,6 @@
 
 import { debounce, pick } from 'lodash';
 import * as rt from 'io-ts';
-import { HttpSetup } from 'src/core/public';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
@@ -24,15 +23,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import {
+  previewOptions,
+  firedTimeLabel,
+  firedTimesLabel,
+  getMetricThresholdAlertPreview as getAlertPreview,
+} from '../../common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
 import {
   Comparator,
   Aggregators,
-  INFRA_ALERT_PREVIEW_PATH,
-  alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
 import {
   ForLastExpression,
@@ -78,22 +80,6 @@ const defaultExpression = {
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
-
-async function getAlertPreview({
-  fetch,
-  params,
-}: {
-  fetch: HttpSetup['fetch'];
-  params: rt.TypeOf<typeof alertPreviewRequestParamsRT>;
-}): Promise<rt.TypeOf<typeof alertPreviewSuccessResponsePayloadRT>> {
-  return await fetch(`${INFRA_ALERT_PREVIEW_PATH}`, {
-    method: 'POST',
-    body: JSON.stringify({
-      ...params,
-      alertType: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    }),
-  });
-}
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
@@ -599,52 +585,6 @@ export const Expressions: React.FC<Props> = (props) => {
     </>
   );
 };
-
-const previewOptions = [
-  {
-    value: 'h',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastHourLabel', {
-      defaultMessage: 'Last hour',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.hourLabel', {
-      defaultMessage: 'hour',
-    }),
-  },
-  {
-    value: 'd',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastDayLabel', {
-      defaultMessage: 'Last day',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.dayLabel', {
-      defaultMessage: 'day',
-    }),
-  },
-  {
-    value: 'w',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastWeekLabel', {
-      defaultMessage: 'Last week',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.weekLabel', {
-      defaultMessage: 'week',
-    }),
-  },
-  {
-    value: 'M',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastMonthLabel', {
-      defaultMessage: 'Last month',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.monthLabel', {
-      defaultMessage: 'month',
-    }),
-  },
-];
-
-const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
-  defaultMessage: 'time',
-});
-const firedTimesLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTimes', {
-  defaultMessage: 'times',
-});
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export

@@ -18,8 +18,9 @@ import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
 import { InfraSourceConfiguration } from '../../sources';
 
 interface ConditionResult {
-  shouldFire: boolean;
+  shouldFire: boolean | boolean[];
   currentValue?: number | null;
+  metric: string;
   isNoData: boolean;
   isError: boolean;
 }
@@ -58,11 +59,16 @@ export const evaluateCondition = async (
   const comparisonFunction = comparatorMap[comparator];
 
   return mapValues(currentValues, (value) => ({
-    shouldFire: value !== undefined && value !== null && comparisonFunction(value, threshold),
+    shouldFire:
+      value !== undefined &&
+      value !== null &&
+      (Array.isArray(value)
+        ? value.map((v) => comparisonFunction(Number(v), threshold))
+        : comparisonFunction(value, threshold)),
     metric,
-    currentValue: value,
     isNoData: value === null,
     isError: value === undefined,
+    ...(!Array.isArray(value) ? { currentValue: value } : {}),
   }));
 };
 
@@ -86,15 +92,22 @@ const getData = async (
     sourceConfiguration,
     metric: { type: metric },
     timerange,
+    includeTimeseries: Boolean(timerange.lookbackSize),
   };
 
   const { nodes } = await snapshot.getNodes(esClient, options);
 
   return nodes.reduce((acc, n) => {
     const nodePathItem = last(n.path);
-    acc[nodePathItem.label] = n.metric && n.metric.value;
+    if (n.metric?.value && n.metric?.timeseries) {
+      const { timeseries } = n.metric;
+      const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
+      acc[nodePathItem.label] = values;
+    } else {
+      acc[nodePathItem.label] = n.metric && n.metric.value;
+    }
     return acc;
-  }, {} as Record<string, number | undefined | null>);
+  }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
 };
 
 const comparatorMap = {

@@ -44,6 +44,7 @@ export const previewInventoryMetricThresholdAlert = async ({
   const lookbackSize = Math.ceil(lookbackIntervalInSeconds / bucketIntervalInSeconds);
 
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
+  const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
 
   const results = await Promise.all(
     criteria.map((c) =>
@@ -52,16 +53,30 @@ export const previewInventoryMetricThresholdAlert = async ({
   );
 
   const inventoryItems = Object.keys(first(results));
-  for (const item of inventoryItems) {
-    console.log(JSON.stringify(result[item], null, 4));
+  const previewResults = inventoryItems.map((item) => {
+    const isNoData = results.some((result) => result[item].isNoData);
+    if (isNoData) {
+      return null;
+    }
+    const isError = results.some((result) => result[item].isError);
+    if (isError) {
+      return undefined;
+    }
 
-    // // AND logic; all criteria must be across the threshold
-    // const shouldAlertFire = results.every((result) => result[item].shouldFire);
+    const numberOfResultBuckets = lookbackSize;
+    const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
+    return [...Array(numberOfExecutionBuckets)].reduce(
+      (totalFired, _, i) =>
+        totalFired +
+        (results.every((result) => {
+          const shouldFire = result[item].shouldFire as boolean[];
+          return shouldFire[Math.floor(i * alertResultsPerExecution)];
+        })
+          ? 1
+          : 0),
+      0
+    );
+  });
 
-    // // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
-    // // whole alert is in a No Data/Error state
-    // const isNoData = results.some((result) => result[item].isNoData);
-    // const isError = results.some((result) => result[item].isError);
-  }
-  return true;
+  return previewResults;
 };
