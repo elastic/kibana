@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderTemplate, getMedianStringLength } from './string_utils';
+import { renderTemplate, getMedianStringLength, stringHash } from './string_utils';
 
 const strings: string[] = [
   'foo',
@@ -44,6 +44,12 @@ describe('ML - string utils', () => {
     test('test median for no strings', () => {
       const result = getMedianStringLength(noStrings);
       expect(result).toBe(0);
+    });
+  });
+
+  describe('stringHash', () => {
+    test('should return a number based off a string', () => {
+      expect(typeof stringHash('the-string')).toBe('number');
     });
   });
 });

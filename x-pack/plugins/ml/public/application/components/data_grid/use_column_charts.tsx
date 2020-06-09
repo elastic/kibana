@@ -9,23 +9,29 @@ import ReactDOM from 'react-dom';
 
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeHandler } from '@elastic/eui';
 
+import { stringHash } from '../../../../common/util/string_utils';
+
 import { mlDataGridChartClassName, ColumnChart } from './column_chart';
 import { ChartData } from './use_column_chart';
 
 const mlDataGridChartRowClassName = `${mlDataGridChartClassName}Row`;
 
+type ColumnWidths = Record<string, number>;
 type RefValue = HTMLElement | null;
 
 export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartData[]) {
   const [histogramVisible, setHistogramVisible] = useState(false);
 
-  const toggleHistogramVisibility = () => {
+  const toggleChartVisibility = () => {
     setHistogramVisible(!histogramVisible);
   };
 
   const ref = useRef<RefValue>(null);
-
   const refFn = (node: RefValue) => {
+    renderCharts(node);
+  };
+
+  const renderCharts = (node: RefValue, columnsWidths?: ColumnWidths) => {
     ref.current = node;
 
     if (node !== null) {
@@ -59,13 +65,16 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartD
 
       ReactDOM.render(
         <>
-          {columns.map((d, i) => {
+          {columns.map((d) => {
             const chartData = chartsData.find((cd) => cd.id === d.id);
+            const columnWidth = (columnsWidths && columnsWidths[d.id]) || d.initialWidth;
             return (
               <div
                 key={d.id}
-                className={`${mlDataGridChartClassName} ${mlDataGridChartClassName}-${i}`}
-                style={{ width: `${d.initialWidth}px` }}
+                className={`${mlDataGridChartClassName} ${mlDataGridChartClassName}-${stringHash(
+                  d.id
+                )}`}
+                style={{ width: `${columnWidth}px` }}
               >
                 {!d.isExpandable && chartData !== undefined && (
                   <ColumnChart chartData={chartData} columnType={d} />
@@ -80,14 +89,20 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartD
   };
 
   const columnResizeHandler: EuiDataGridOnColumnResizeHandler = ({ columnId, width }) => {
-    if (ref !== null && ref.current !== null) {
-      const columnIndex = columns.findIndex((c) => c.id === columnId);
-      const chartElement = ref.current.querySelector(`.${mlDataGridChartClassName}-${columnIndex}`);
-      if (chartElement !== null) {
-        (chartElement as HTMLElement).style.width = `${width}px`;
+    const columnWidths = columns.reduce((p, c) => {
+      if (columnId === c.id) {
+        p[c.id] = width;
+      } else if (ref !== null && ref.current !== null) {
+        const chartElement = ref.current.querySelector(
+          `.${mlDataGridChartClassName}-${stringHash(c.id)}`
+        );
+        p[c.id] =
+          chartElement !== null ? (chartElement as HTMLElement).offsetWidth : c?.initialWidth ?? 0;
       }
-    }
+      return p;
+    }, {} as ColumnWidths);
+    renderCharts(ref.current, columnWidths);
   };
 
-  return { columnResizeHandler, histogramVisible, refFn, toggleHistogramVisibility };
+  return { columnResizeHandler, histogramVisible, refFn, toggleChartVisibility };
 }

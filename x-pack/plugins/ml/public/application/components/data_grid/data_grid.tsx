@@ -80,12 +80,7 @@ export const DataGrid: FC<Props> = memo(
       visibleColumns,
     } = props;
 
-    const {
-      columnResizeHandler,
-      histogramVisible,
-      refFn,
-      toggleHistogramVisibility,
-    } = useColumnCharts(
+    const { columnResizeHandler, histogramVisible, refFn, toggleChartVisibility } = useColumnCharts(
       columns.filter((c) => visibleColumns.includes(c.id)),
       columnCharts
     );
@@ -191,7 +186,7 @@ export const DataGrid: FC<Props> = memo(
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
             columns={columns.map((c) => {
-              c.initialWidth = 160;
+              c.initialWidth = 150;
               return c;
             })}
             columnVisibility={{ visibleColumns, setVisibleColumns }}
@@ -209,7 +204,7 @@ export const DataGrid: FC<Props> = memo(
                   size="xs"
                   iconType="visBarVertical"
                   color="text"
-                  onClick={toggleHistogramVisibility}
+                  onClick={toggleChartVisibility}
                 >
                   {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
                     defaultMessage: 'Histogram Charts',
