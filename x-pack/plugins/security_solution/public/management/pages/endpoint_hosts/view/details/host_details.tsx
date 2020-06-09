@@ -46,11 +46,9 @@ const LinkToExternalApp = styled(LinkToApp)`
 `;
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { appId: logsAppId, appPath: logsAppPath, url: logsUrl } = useHostLogsUrl(details.host.id);
+  const { appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
   const endpointVersion = useHostSelector(latestEndpointVersion);
-  const { appId: ingestAppId, appPath: ingestAppPath, url: ingestUrl } = useHostIngestUrl(
-    endpointVersion
-  );
+  const { appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl(endpointVersion);
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -179,7 +177,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           className="hostDetailsLinkToIngest"
           appId={ingestAppId}
           appPath={ingestAppPath}
-          href={ingestUrl}
           data-test-subj="hostDetailsLinkToIngest"
         >
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
@@ -201,7 +198,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         <LinkToExternalApp
           appId={logsAppId}
           appPath={logsAppPath}
-          href={logsUrl}
           data-test-subj="hostDetailsLinkToLogs"
         >
           <EuiIcon type="logsApp" className="linkToAppIcon" />
