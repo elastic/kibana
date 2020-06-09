@@ -18,6 +18,11 @@ When plugin A (persister) stores some state that belongs to another plugin B a f
 
 const MY_STATE_ID = 'MyState';
 
+interface MyStateV76 extends PersistableState {
+  object: string,
+  val: number,
+}
+
 interface MyStateV77 extends PersistableState {
   objectId: string,
   val: number,
@@ -28,13 +33,15 @@ interface MyState extends PersistableState {
   value: number,
 }
 
-const migrate = (state: MyState, version: number) => {
-  let newState: MyState,
-  if (version < 7.8) {
-    const oldState = state as MyStateV77;
-    newState = { objectId: oldState.objectId, value: oldState.val };
-  } else {
-    newState = state;
+const migrate = (state: unknown, version: string) => {
+  let v76 = version === '7.6' ? state as MyStateV76 : undefined;
+  let v77 = version === '7.7' ? state as MyStateV77 : undefined;
+  let v78 = version === '7.8' ? state as MyState : undefined;
+  if (v76) {
+    v77 = { objectId: v76.object, val: v76.val };
+  }
+  if (v77) {
+    v78 = { objectId: v77.objectId, value: v77.val };
   }
   
   return newState;
@@ -81,7 +88,7 @@ interface PersistableStateDefinition {
   inject: (state: PersistableState, references: SavedObjectReference[]) => PersistableState,
   // extract function receives state and should return state with references extracted and array of references
   // default returns same state with empty reference array
-  extract: (state: PersistableState) => [PersistableState, SavedObjectReference[]]
+  extract: (state: PersistableState) => { state: PersistableState, references: SavedObjectReference[] }
 }
 
 class PersistableStatePlugin {
@@ -98,7 +105,7 @@ class PersistableStatePlugin {
       get: (id: string) => PersistableStateDefinition,
       // takes the state, extracts the references and returns them + version string
       beforeSave: (id: string, state: PersistableState) => [PersistableState, SavedObjectReference[], string],
-      // takes the state, references and version and returns latest state version with references injected
+      // takes the state, references and version and returns latest (migrated) state with references injected
       afterLoad: (id: string, state: PersistableState, references: SavedObjectReference[], version: string) => PersistableState,
     }
   }
@@ -111,9 +118,15 @@ class PersistableStatePlugin {
 When plugin A wants to store some state that it does not own it should check with persistableStateRegistry for a registered persistable state definition and execute `beforeSave` function.
 
 ```ts
-  const expressionReadyForSaving = persistableStatePlugin.beforeSave('expression', expressionString);
+  const stateForSaving = persistableStatePlugin.beforeSave(id, myState);
 
 ``` 
+
+WARNING: If state id is known at compile time we should rather import the correct utilities directly from expression plugin. As using the registry can hide dependencies between plugins when possible plugins should directly depend on plugins providing the state they want to store.
+
+## Handling corrupt state
+
+This is up to the registrator, but we will try to come up with a good recomendation.
 
 ## EnhacedDrilldownEmbeddableInput
 
@@ -137,6 +150,12 @@ const inject = (state, references) => {
 ```
 
 And drilldown plugin registers its state with persistableStateService.
+
+##
+
+## Use a `{pluginId}+{stateType}` pattern for your ID
+
+To avoid clashes with other unknown plugins.
 
 ## We have to avoid shared persistable state
 
@@ -184,12 +203,8 @@ It's probably a rare occurrence, but it's also very risky. EmbeddableInput think
 
 # Drawbacks
 
-- teaching impact: everyone storing state from belonging to another plugin will need to remember to use this service when saving and loading state. 
-
-# Alternatives
-
-Instead of having a central registry we could have each plugin export functions for migration, reference extraction and reference injection.
-Plugin consuming its state would need to import them from correct place.
+- teaching impact: everyone storing state from belonging to another plugin will need to remember to use this service when saving and loading state.
+- this proposal uses a different pattern than the current SO migration system which is having SOs register a migration function per version, where this system has users register a single function across all versions. That means consumer doesn't care what version his state is, he can assume he will always get the latest state out of the migrate function.
 
 # Adoption strategy
 
