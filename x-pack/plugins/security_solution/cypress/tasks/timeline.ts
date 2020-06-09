@@ -23,6 +23,7 @@ import {
   TOGGLE_TIMELINE_EXPAND_EVENT,
   REMOVE_COLUMN,
   RESET_FIELDS,
+  TIMELINE_COLUMN_SPINNER,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -104,10 +105,15 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   );
 };
 
+export const waitForTimelineActionToFinish = () => {
+  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
 export const removeColumn = (column: number) => {
   cy.get(REMOVE_COLUMN).first().should('exist');
   cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
-  cy.wait(3000); // wait for DOM updates
+  waitForTimelineActionToFinish();
 };
 
 export const resetFields = () => {

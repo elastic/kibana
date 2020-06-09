@@ -26,12 +26,19 @@ describe('persistent timeline', () => {
   });
 
   it('persist the deletion of a column', () => {
+    const numberOfTimelineColumns = 9;
+
     cy.get(DRAGGABLE_HEADER)
       .eq(TABLE_COLUMN_EVENTS_MESSAGE)
       .invoke('text')
       .should('equal', 'message');
+
+    cy.get(DRAGGABLE_HEADER).should('have.length', numberOfTimelineColumns);
+
     removeColumn(TABLE_COLUMN_EVENTS_MESSAGE);
     reload(waitsForEventsToBeLoaded);
+
+    cy.get(DRAGGABLE_HEADER).should('have.length', numberOfTimelineColumns - 1);
     cy.get(DRAGGABLE_HEADER).each(($el) => {
       expect($el.text()).not.equal('message');
     });
