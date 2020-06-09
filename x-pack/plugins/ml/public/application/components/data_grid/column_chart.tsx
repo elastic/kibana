@@ -9,6 +9,8 @@ import React, { FC } from 'react';
 import { BarSeries, Chart, Settings } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import './column_chart.scss';
 
 import {
@@ -19,6 +21,41 @@ import {
 } from './use_column_chart';
 
 export const mlDataGridChartClassName = 'mlDataGridChart';
+
+const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string => {
+  if (isOrdinalChartData(chartData) && chartData.cardinality === 1) {
+    return i18n.translate('xpack.ml.dataGridChart.singleCategoryLegend', {
+      defaultMessage: `{cardinality} category`,
+      values: { cardinality: chartData.cardinality },
+    });
+  }
+
+  if (isOrdinalChartData(chartData) && chartData.cardinality > MAX_CHART_COLUMNS) {
+    return i18n.translate('xpack.ml.dataGridChart.topCategoriesLegend', {
+      defaultMessage: `top {MAX_CHART_COLUMNS} of {cardinality} categories`,
+      values: { cardinality: chartData.cardinality, MAX_CHART_COLUMNS },
+    });
+  }
+
+  if (
+    isOrdinalChartData(chartData) &&
+    chartData.cardinality <= MAX_CHART_COLUMNS &&
+    chartData.cardinality > 1
+  ) {
+    return i18n.translate('xpack.ml.dataGridChart.categoriesLegend', {
+      defaultMessage: `{cardinality} categories`,
+      values: { cardinality: chartData.cardinality },
+    });
+  }
+
+  if (isNumericChartData(chartData)) {
+    return `${Math.round(chartData.stats[0] * 100) / 100} - ${
+      Math.round(chartData.stats[1] * 100) / 100
+    }`;
+  }
+
+  throw new Error('Invalid chart data.');
+};
 
 interface Props {
   chartData: ChartData;
@@ -70,20 +107,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
           isNumericChartData(chartData) ? ' mlDataGridChart__legend--numeric' : ''
         }`}
       >
-        {isOrdinalChartData(chartData) &&
-          chartData.cardinality === 1 &&
-          `${chartData.cardinality} category`}
-        {isOrdinalChartData(chartData) &&
-          chartData.cardinality > MAX_CHART_COLUMNS &&
-          `top ${MAX_CHART_COLUMNS} of ${chartData.cardinality} categories`}
-        {isOrdinalChartData(chartData) &&
-          chartData.cardinality <= MAX_CHART_COLUMNS &&
-          chartData.cardinality > 1 &&
-          `${chartData.cardinality} categories`}
-        {isNumericChartData(chartData) &&
-          `${Math.round(chartData.stats[0] * 100) / 100} - ${
-            Math.round(chartData.stats[1] * 100) / 100
-          }`}
+        {getLegendText(chartData, MAX_CHART_COLUMNS)}
       </div>
     </>
   );
