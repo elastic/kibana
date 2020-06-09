@@ -8398,7 +8398,6 @@
     "xpack.ingestManager.enrollmentTokensList.newKeyButton": "新しい登録トークン",
     "xpack.ingestManager.enrollmentTokensList.pageDescription": "これは、エージェントを登録するために使用できる登録トークンのリストです。",
     "xpack.ingestManager.enrollmentTokensList.secretTitle": "シークレット",
-    "xpack.ingestManager.epm.addDatasourceButtonText": "データソースを作成",
     "xpack.ingestManager.epm.browseAllButtonText": "すべての統合を参照",
     "xpack.ingestManager.epm.illustrationAltText": "Elastic統合の例",
     "xpack.ingestManager.epm.pageSubtitle": "一般的なアプリやサービスの統合を参照する",
