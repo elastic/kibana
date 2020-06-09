@@ -43,7 +43,7 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
   );
 
   const isNewSubAggAllowed: boolean = useMemo(() => {
-    let nestingLevel = 0;
+    let nestingLevel = 1;
     let parentItem = item.parentAgg;
     while (parentItem !== undefined) {
       nestingLevel++;
