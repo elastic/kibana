@@ -24,7 +24,7 @@ import { EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 
 const StyledEuiPage = styled(EuiPage)`
   &.endpoint--isListView {
-    padding: 0;
+    padding: 0 70px 0 24px;
 
     .endpoint-header {
       padding: ${(props) => props.theme.eui.euiSizeL};

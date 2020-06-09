@@ -86,7 +86,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
         isOpen={isOpen}
         closePopover={handleCloseMenu}
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} data-test-subj="policyActionsMenu" />
       </EuiPopover>
     );
   }

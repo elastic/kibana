@@ -79,12 +79,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(relativeDate).to.match(RELATIVE_DATE_FORMAT);
         });
       });
-      it('should show policy name as link', async () => {
-        const policyNameLink = await testSubjects.find('policyNameLink');
-        expect(await policyNameLink.getTagName()).to.equal('a');
-        expect(await policyNameLink.getAttribute('href')).to.match(
-          new RegExp(`\/management\/policy\/${policyInfo.datasource.id}$`)
-        );
+
+      it('should delete a policy', async () => {
+        await pageObjects.policy.launchAndFindDeleteModal();
+        await testSubjects.existOrFail('policyListDeleteModal');
+        await pageObjects.common.clickConfirmOnModal();
+        await pageObjects.endpoint.waitForTableToNotHaveData('policyTable');
+        const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
+        expect(policyTotal).to.equal('0 Policies');
       });
     });
   });
