@@ -18,11 +18,25 @@
  */
 
 import React from 'react';
-
-import { EuiCallOut, EuiTextColor, EuiLink, EuiButton } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+// import { getDocLink } from '../../../../../  legacy/ui/public/documentation_links';
 import { IBasePath } from 'kibana/public';
+
+import {
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiTitle,
+  EuiPageContentBody,
+  EuiPageContent,
+  EuiIcon,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiDescriptionList,
+  EuiFlexGrid,
+  EuiCard,
+  EuiLink,
+} from '@elastic/eui';
 
 export const EmptyState = ({
   onRefresh,
@@ -31,60 +45,140 @@ export const EmptyState = ({
   onRefresh: () => void;
   prependBasePath: IBasePath['prepend'];
 }) => (
-  <div>
-    <EuiCallOut
-      color="warning"
-      title={
-        <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.emptyStateHeader"
-          defaultMessage="Couldn't find any Elasticsearch data"
-        />
-      }
-    >
-      <p>
-        <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.emptyStateLabel.emptyStateDetail"
-          defaultMessage="{needToIndex} {learnHowLink} or {getStartedLink}"
-          values={{
-            needToIndex: (
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.emptyStateLabel.needToIndexLabel"
-                  defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
-                />
-              </EuiTextColor>
-            ),
-            learnHowLink: (
-              <EuiLink href={prependBasePath('/app/home#/tutorial_directory')}>
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.emptyStateLabel.learnHowLink"
-                  defaultMessage="Learn how"
-                />
-              </EuiLink>
-            ),
-            getStartedLink: (
-              <EuiLink href={prependBasePath('/app/home#/tutorial_directory/sampleData')}>
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.emptyStateLabel.getStartedLink"
-                  defaultMessage="get started with some sample data sets."
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-
-      <EuiButton
-        iconType="refresh"
-        onClick={onRefresh}
-        data-test-subj="refreshIndicesButton"
-        color="warning"
-      >
-        <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
-          defaultMessage="Check for new data"
-        />
-      </EuiButton>
-    </EuiCallOut>
-  </div>
+  <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
+    <EuiPageContentHeader>
+      <EuiPageContentHeaderSection>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.emptyState.noDataTitle"
+              defaultMessage="Ready to try Kibana? First, you need data."
+            />
+          </h2>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+    </EuiPageContentHeader>
+    <EuiSpacer size="m" />
+    <EuiPageContentBody>
+      <EuiFlexGrid className="inpEmptyState__cardGrid" columns={3} responsive={true}>
+        <EuiFlexItem>
+          <EuiCard
+            className="inpEmptyState__card"
+            href={prependBasePath('/app/home#/tutorial_directory')}
+            icon={<EuiIcon size="xl" type="database" color="subdued" />}
+            title={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardTitle"
+                defaultMessage="Add integration"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardDescription"
+                defaultMessage="Add data from a variety of sources."
+              />
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            className="inpEmptyState__card"
+            betaBadgeLabel={i18n.translate(
+              'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
+              {
+                defaultMessage: 'Basic',
+              }
+            )}
+            betaBadgeTooltipContent={i18n.translate(
+              'indexPatternManagement.createIndexPattern.emptyState.basicLicenseDescription',
+              {
+                defaultMessage: 'This feature requires a Basic license.',
+              }
+            )}
+            isDisabled
+            icon={<EuiIcon size="xl" type="document" color="subdued" />}
+            title={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
+                defaultMessage="Upload a file"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
+                defaultMessage="Import a CSV, NDJSON, or log file."
+              />
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            className="inpEmptyState__card"
+            href={prependBasePath('/app/home#/tutorial_directory/sampleData')}
+            icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
+            title={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardTitle"
+                defaultMessage="Add sample data"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
+                defaultMessage="Load a data set and a Kibana dashboard."
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="xxl" />
+      <div className="inpEmptyState__footer">
+        <EuiFlexGrid columns={3}>
+          <EuiFlexItem className="inpEmptyState__footerFlexItem">
+            <EuiDescriptionList
+              listItems={[
+                {
+                  title: (
+                    <FormattedMessage
+                      id="indexPatternManagement.createIndexPattern.emptyState.learnMore"
+                      defaultMessage="Want to learn more?"
+                    />
+                  ),
+                  description: (
+                    <EuiLink target="_blank" external>
+                      {/* href={getDocLink('addData')} */}
+                      Read documentation
+                    </EuiLink>
+                  ),
+                },
+              ]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem className="inpEmptyState__footerFlexItem">
+            <EuiDescriptionList
+              listItems={[
+                {
+                  title: (
+                    <FormattedMessage
+                      id="indexPatternManagement.createIndexPattern.emptyState.haveData"
+                      defaultMessage="Think you already have data?"
+                    />
+                  ),
+                  description: (
+                    <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
+                      <FormattedMessage
+                        id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
+                        defaultMessage="Check for new data"
+                      />{' '}
+                      <EuiIcon type="refresh" size="s" />
+                    </EuiLink>
+                  ),
+                },
+              ]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </div>
+    </EuiPageContentBody>
+  </EuiPageContent>
 );

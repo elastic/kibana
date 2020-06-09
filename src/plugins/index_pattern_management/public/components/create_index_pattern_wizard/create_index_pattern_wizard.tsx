@@ -19,7 +19,12 @@
 
 import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPanel } from '@elastic/eui';
+import {
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
+  EuiPageContent,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -254,29 +259,39 @@ export class CreateIndexPatternWizard extends Component<
       );
     }
 
+    const header = this.renderHeader();
+
     if (step === 1) {
       const { location } = this.props;
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
 
       return (
-        <StepIndexPattern
-          allIndices={allIndices}
-          initialQuery={indexPattern || initialQuery}
-          isIncludingSystemIndices={isIncludingSystemIndices}
-          indexPatternCreationType={this.state.indexPatternCreationType}
-          goToNextStep={this.goToTimeFieldStep}
-        />
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepIndexPattern
+            allIndices={allIndices}
+            initialQuery={indexPattern || initialQuery}
+            isIncludingSystemIndices={isIncludingSystemIndices}
+            indexPatternCreationType={this.state.indexPatternCreationType}
+            goToNextStep={this.goToTimeFieldStep}
+          />
+        </EuiPageContent>
       );
     }
 
     if (step === 2) {
       return (
-        <StepTimeField
-          indexPattern={indexPattern}
-          goToPreviousStep={this.goToIndexPatternStep}
-          createIndexPattern={this.createIndexPattern}
-          indexPatternCreationType={this.state.indexPatternCreationType}
-        />
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepTimeField
+            indexPattern={indexPattern}
+            goToPreviousStep={this.goToIndexPatternStep}
+            createIndexPattern={this.createIndexPattern}
+            indexPatternCreationType={this.state.indexPatternCreationType}
+          />
+        </EuiPageContent>
       );
     }
 
@@ -290,15 +305,11 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   render() {
-    const header = this.renderHeader();
     const content = this.renderContent();
 
     return (
-      <EuiPanel paddingSize={'l'}>
-        <div>
-          {header}
-          {content}
-        </div>
+      <>
+        {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={({ id }) => {
@@ -306,7 +317,7 @@ export class CreateIndexPatternWizard extends Component<
           }}
           toastLifeTimeMs={6000}
         />
-      </EuiPanel>
+      </>
     );
   }
 }
