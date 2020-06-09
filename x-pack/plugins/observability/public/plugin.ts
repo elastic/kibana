@@ -10,12 +10,19 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '../../../../src/core/public';
+import { ObservabilityService, Setup } from './service';
 
-export type ClientSetup = void;
-export type ClientStart = void;
+export interface ObservabilityPluginSetup {
+  chartDataFetcher: Setup;
+}
 
-export class Plugin implements PluginClass<ClientSetup, ClientStart> {
-  constructor(context: PluginInitializerContext) {}
+export type ObservabilityPluginStart = void;
+
+export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
+  private readonly observabilityService: ObservabilityService;
+  constructor(context: PluginInitializerContext) {
+    this.observabilityService = new ObservabilityService();
+  }
 
   public setup(core: CoreSetup) {
     core.application.register({
@@ -25,15 +32,19 @@ export class Plugin implements PluginClass<ClientSetup, ClientStart> {
       appRoute: '/app/observability',
       category: DEFAULT_APP_CATEGORIES.observability,
 
-      async mount(params: AppMountParameters<unknown>) {
+      mount: async (params: AppMountParameters<unknown>) => {
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services
         const [coreStart] = await core.getStartServices();
 
-        return renderApp(coreStart, params);
+        return renderApp(coreStart, params, this.observabilityService.getHandlers());
       },
     });
+
+    return {
+      chartDataFetcher: this.observabilityService.setup(core),
+    };
   }
   public start() {}
 }

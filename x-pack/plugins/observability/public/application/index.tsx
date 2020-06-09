@@ -9,12 +9,17 @@ import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_component
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { Home } from '../pages/home';
 import { PluginContext } from '../context/plugin_context';
+import { ChartDataFetcher } from '../../typings/chart';
 
-export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
+export const renderApp = (
+  core: CoreStart,
+  { element }: AppMountParameters,
+  registryHandlers: Map<string, ChartDataFetcher>
+) => {
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
   ReactDOM.render(
-    <PluginContext.Provider value={{ core }}>
+    <PluginContext.Provider value={{ core, registryHandlers }}>
       <EuiThemeProvider darkMode={isDarkMode}>
         <i18nCore.Context>
           <Home />
