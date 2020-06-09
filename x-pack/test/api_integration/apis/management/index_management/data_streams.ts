@@ -57,8 +57,8 @@ export default function ({ getService }: FtrProviderContext) {
     const testDataStreamName = 'test-data-stream';
 
     describe('Get', () => {
-      before(() => createDataStream(testDataStreamName));
-      after(() => deleteDataStream(testDataStreamName));
+      before(async () => await createDataStream(testDataStreamName));
+      after(async () => await deleteDataStream(testDataStreamName));
 
       describe('all data streams', () => {
         it('returns an array of data streams', async () => {
@@ -67,15 +67,15 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'xxx')
             .expect(200);
 
-          // ES determines this value so we'll just echo it back.
-          const { uuid } = dataStreams[0].indices[0];
+          // ES determines these values so we'll just echo them back.
+          const { name: indexName, uuid } = dataStreams[0].indices[0];
           expect(dataStreams).to.eql([
             {
               name: testDataStreamName,
               timeStampField: '@timestamp',
               indices: [
                 {
-                  name: `${testDataStreamName}-000001`,
+                  name: indexName,
                   uuid,
                 },
               ],
