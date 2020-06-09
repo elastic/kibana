@@ -203,7 +203,7 @@ export const PolicyList = React.memo(() => {
       setPolicyIdToDelete(policyId);
       setShowDelete(true);
     },
-    []
+    [dispatch]
   );
 
   const handleDeleteConfirmation = useCallback(
@@ -348,7 +348,7 @@ export const PolicyList = React.memo(() => {
         ],
       },
     ],
-    [services.application]
+    [services.application, handleDeleteOnClick]
   );
 
   return (
