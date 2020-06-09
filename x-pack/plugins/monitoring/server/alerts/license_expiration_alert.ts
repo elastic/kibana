@@ -16,7 +16,7 @@ import {
   AlertMessageLinkToken,
   AlertLicense,
   AlertLicenseState,
-  AlertStates,
+  AlertInstanceState,
 } from './types';
 import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
 import {
@@ -191,13 +191,15 @@ export class LicenseExpirationAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    alertStates: AlertStates,
+    instanceState: AlertInstanceState,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    const { states } = alertStates;
-    const alertState = states[0];
-    const license = item.meta as AlertLicense;
+    if (instanceState.alertStates.length === 0) {
+      return;
+    }
+    const alertState = instanceState.alertStates[0];
+    const license = item.meta;
     const $expiry = moment.utc(license.expiryDateMS);
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {

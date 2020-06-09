@@ -15,7 +15,7 @@ import {
   AlertCpuUsageNodeStats,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-  AlertStates,
+  AlertInstanceState,
 } from './types';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
@@ -132,12 +132,19 @@ export class CpuUsageAlert extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const state = (alertInstance.state as unknown) as AlertCpuUsageState;
+    const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
     if (filters && filters.length) {
       for (const _filter of filters) {
         const filter = _filter as CommonAlertCpuUsageFilter;
         if (filter && filter.nodeUuid) {
-          if (state.nodeId !== filter.nodeUuid) {
+          let nodeExistsInStates = false;
+          for (const state of alertInstanceState.alertStates) {
+            if ((state as AlertCpuUsageState).nodeId === filter.nodeUuid) {
+              nodeExistsInStates = true;
+              break;
+            }
+          }
+          if (!nodeExistsInStates) {
             return false;
           }
         }
@@ -224,30 +231,33 @@ export class CpuUsageAlert extends BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    alertStates: AlertStates,
+    instanceState: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    const { states, isFiring } = alertStates;
-    const nodes = states
+    if (instanceState.alertStates.length === 0) {
+      return;
+    }
+
+    const nodes = instanceState.alertStates
       .map((_state) => {
         const state = _state as AlertCpuUsageState;
         return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
       })
       .join(',');
 
-    const ccs = states.reduce((accum: string, state): string => {
+    const ccs = instanceState.alertStates.reduce((accum: string, state): string => {
       if (state.ccs) {
         return state.ccs;
       }
       return accum;
     }, '');
 
-    if (!isFiring) {
+    if (!instanceState.alertStates[0].ui.isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,
         nodes,
-        count: states.length,
+        count: instanceState.alertStates.length,
         clusterName: cluster.clusterName,
       });
     } else {
@@ -261,7 +271,7 @@ export class CpuUsageAlert extends BaseAlert {
       instance.scheduleActions('default', {
         state: FIRING,
         nodes,
-        count: states.length,
+        count: instanceState.alertStates.length,
         clusterName: cluster.clusterName,
         action: `[Investigate](${url})`,
       });
@@ -280,17 +290,14 @@ export class CpuUsageAlert extends BaseAlert {
         continue;
       }
 
-      const alertState: AlertStates = {
-        states: [],
-        isFiring: false,
-      };
+      const alertInstanceState: AlertInstanceState = { alertStates: [] };
       const instance = services.alertInstanceFactory(`${this.type}:${cluster.clusterUuid}`);
       let shouldExecuteActions = false;
       for (const node of nodes) {
-        const nodeState: AlertState = this.getDefaultAlertState(cluster, node);
+        const nodeState: AlertCpuUsageState = this.getDefaultAlertState(cluster, node);
         if (node.shouldFire) {
           nodeState.ui.triggeredMS = +new Date();
-          alertState.isFiring = nodeState.ui.isFiring = true;
+          nodeState.ui.isFiring = true;
           nodeState.ui.message = this.getUiMessage(nodeState, node);
           nodeState.ui.severity = node.severity;
           nodeState.ui.resolvedMS = 0;
@@ -301,12 +308,12 @@ export class CpuUsageAlert extends BaseAlert {
           nodeState.ui.message = this.getUiMessage(nodeState, node);
           shouldExecuteActions = true;
         }
-        alertState.states.push(nodeState);
+        alertInstanceState.alertStates.push(nodeState);
       }
 
-      instance.replaceState(alertState);
+      instance.replaceState(alertInstanceState);
       if (shouldExecuteActions) {
-        this.executeActions(instance, alertState, null, cluster);
+        this.executeActions(instance, alertInstanceState, null, cluster);
       }
     }
   }

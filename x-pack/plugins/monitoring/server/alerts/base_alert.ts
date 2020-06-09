@@ -20,7 +20,7 @@ import {
 } from '../../../alerts/server';
 import { Alert, RawAlertInstance } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
-import { AlertState, AlertCluster, AlertMessage, AlertData, AlertStates } from './types';
+import { AlertState, AlertCluster, AlertMessage, AlertData, AlertInstanceState } from './types';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -257,16 +257,16 @@ export class BaseAlert {
         continue;
       }
 
-      const alertStates: AlertStates = { states: [], isFiring: false };
+      const alertInstanceState: AlertInstanceState = { alertStates: [] };
       const instance = services.alertInstanceFactory(`${this.type}:${item.instanceKey}`);
       const alertState: AlertState = this.getDefaultAlertState(cluster, item);
-      alertStates.states.push(alertState);
+      alertInstanceState.alertStates.push(alertState);
 
       let shouldExecuteActions = false;
       if (item.shouldFire) {
         logger.debug(`${this.type} is firing`);
         alertState.ui.triggeredMS = +new Date();
-        alertStates.isFiring = alertState.ui.isFiring = true;
+        alertState.ui.isFiring = true;
         alertState.ui.message = this.getUiMessage(alertState, item);
         alertState.ui.severity = item.severity;
         alertState.ui.resolvedMS = 0;
@@ -279,9 +279,9 @@ export class BaseAlert {
         shouldExecuteActions = true;
       }
 
-      instance.replaceState(alertStates);
+      instance.replaceState(alertInstanceState);
       if (shouldExecuteActions) {
-        this.executeActions(instance, alertStates, item, cluster);
+        this.executeActions(instance, alertInstanceState, item, cluster);
       }
     }
   }
@@ -319,7 +319,7 @@ export class BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    alertStates: AlertStates,
+    instanceState: AlertInstanceState,
     item: AlertData,
     cluster: AlertCluster
   ) {

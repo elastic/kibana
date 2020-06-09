@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { AlertStates } from '../../alerts/types';
+import { AlertInstanceState } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerts/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
@@ -51,8 +51,8 @@ export async function fetchStatus(
       }
 
       result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
-        const alertStates = instance.state as AlertStates;
-        for (const state of alertStates.states) {
+        const alertInstanceState = instance.state as AlertInstanceState;
+        for (const state of alertInstanceState.alertStates) {
           const meta = instance.meta;
           if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {
             return accum;

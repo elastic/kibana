@@ -21,15 +21,14 @@ export interface AlertClusterHealth {
   ccs: string | null;
 }
 
+export interface AlertInstanceState {
+  alertStates: AlertState[];
+}
+
 export interface AlertState {
   cluster: AlertCluster;
   ccs: string | null;
   ui: AlertUiState;
-}
-
-export interface AlertStates {
-  states: AlertState[];
-  isFiring: boolean;
 }
 
 export interface AlertClusterHealthState extends AlertState {

@@ -14,7 +14,7 @@ import {
   AlertMessageLinkToken,
   AlertClusterHealth,
   AlertClusterHealthState,
-  AlertStates,
+  AlertInstanceState,
 } from './types';
 import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
 import {
@@ -175,13 +175,15 @@ export class ClusterHealthAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    alertStates: AlertStates,
+    instanceState: AlertInstanceState,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    const { states } = alertStates;
-    const alertState = states[0];
-    const clusterHealth = item.meta as AlertClusterHealth;
+    if (instanceState.alertStates.length === 0) {
+      return;
+    }
+    const alertState = instanceState.alertStates[0];
+    const clusterHealth = item.meta;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: 'resolved',
