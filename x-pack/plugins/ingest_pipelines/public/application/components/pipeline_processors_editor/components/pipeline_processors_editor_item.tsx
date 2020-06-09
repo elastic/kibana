@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiText,
-  EuiCode,
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
@@ -66,11 +65,9 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               ) : (
                 <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiCode>
-                      <EuiText size="s" color="subdued">
-                        {`#${processor.id}`}
-                      </EuiText>
-                    </EuiCode>
+                    <EuiText size="s" color="subdued">
+                      {`#${processor.id}`}
+                    </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
