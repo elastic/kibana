@@ -97,7 +97,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/canvas/**/*.{js,ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
