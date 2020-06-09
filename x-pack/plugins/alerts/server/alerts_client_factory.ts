@@ -12,6 +12,7 @@ import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/serv
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { AlertsAuthorization } from './alerts_authorization';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -56,18 +57,23 @@ export class AlertsClientFactory {
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
     const { securityPluginSetup, actions, features } = this;
     const spaceId = this.getSpaceId(request);
+    const authorization = new AlertsAuthorization({
+      authorization: securityPluginSetup?.authz,
+      request,
+      alertTypeRegistry: this.alertTypeRegistry,
+      features: features!,
+    });
+
     return new AlertsClient({
       spaceId,
       logger: this.logger,
-      features: features!,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert'],
       }),
-      authorization: this.securityPluginSetup?.authz,
-      request,
+      authorization,
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       async getUserName() {

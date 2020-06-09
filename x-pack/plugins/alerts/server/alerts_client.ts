@@ -5,17 +5,15 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, pluck, mapValues } from 'lodash';
+import { omit, isEqual, pluck } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectReference,
   SavedObject,
-  KibanaRequest,
 } from 'src/core/server';
 import { ActionsClient } from '../../actions/server';
-import { AlertsFeatureId } from '../common';
 import {
   Alert,
   PartialAlert,
@@ -32,14 +30,13 @@ import {
   InvalidateAPIKeyParams,
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-  SecurityPluginSetup,
 } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { AlertsAuthorization } from './alerts_authorization';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -52,17 +49,15 @@ export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  authorization?: SecurityPluginSetup['authz'];
-  request: KibanaRequest;
+  authorization: AlertsAuthorization;
   alertTypeRegistry: AlertTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
-  features: FeaturesPluginStart;
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
@@ -135,13 +130,11 @@ export interface UpdateOptions {
 export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
-  private readonly features: FeaturesPluginStart;
   private readonly spaceId?: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  private readonly request: KibanaRequest;
-  private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
   private readonly invalidateAPIKey: (
@@ -153,7 +146,6 @@ export class AlertsClient {
   constructor({
     alertTypeRegistry,
     unsecuredSavedObjectsClient,
-    request,
     authorization,
     taskManager,
     logger,
@@ -164,7 +156,6 @@ export class AlertsClient {
     invalidateAPIKey,
     encryptedSavedObjectsClient,
     getActionsClient,
-    features,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -173,18 +164,16 @@ export class AlertsClient {
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
-    this.request = request;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
     this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
-    this.features = features;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
     // Throws an error if alert type isn't registered
-    await this.ensureAuthorized(data.alertTypeId, data.consumer, 'create');
+    await this.authorization.ensureAuthorized(data.alertTypeId, data.consumer, 'create');
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const username = await this.getUserName();
@@ -239,7 +228,11 @@ export class AlertsClient {
 
   public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
-    await this.ensureAuthorized(result.attributes.alertTypeId, result.attributes.consumer, 'get');
+    await this.authorization.ensureAuthorized(
+      result.attributes.alertTypeId,
+      result.attributes.consumer,
+      'get'
+    );
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 
@@ -259,7 +252,7 @@ export class AlertsClient {
   }: { options?: FindOptions } = {}): Promise<FindResult> {
     const filters = filter ? [filter] : [];
 
-    const authorizedAlertTypes = await this.filterByAuthorized(
+    const authorizedAlertTypes = await this.authorization.filterByAuthorized(
       this.alertTypeRegistry.list(),
       'find'
     );
@@ -276,7 +269,7 @@ export class AlertsClient {
       };
     }
 
-    filters.push(`(${asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`);
+    filters.push(`(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`);
 
     const {
       page,
@@ -325,7 +318,11 @@ export class AlertsClient {
       attributes = alert.attributes;
     }
 
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'delete');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'delete'
+    );
 
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
@@ -352,7 +349,7 @@ export class AlertsClient {
       // Still attempt to load the object using SOC
       alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     }
-    await this.ensureAuthorized(
+    await this.authorization.ensureAuthorized(
       alertSavedObject.attributes.alertTypeId,
       alertSavedObject.attributes.consumer,
       'update'
@@ -458,7 +455,11 @@ export class AlertsClient {
       attributes = alert.attributes;
       version = alert.version;
     }
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'updateApiKey');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'updateApiKey'
+    );
 
     const username = await this.getUserName();
     await this.unsecuredSavedObjectsClient.update(
@@ -516,7 +517,11 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'enable');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'enable'
+    );
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -564,7 +569,11 @@ export class AlertsClient {
       version = alert.version;
     }
 
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'disable');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'disable'
+    );
 
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
@@ -592,7 +601,11 @@ export class AlertsClient {
 
   public async muteAll({ id }: { id: string }) {
     const { attributes } = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'muteAll');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'muteAll'
+    );
 
     await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: true,
@@ -603,7 +616,11 @@ export class AlertsClient {
 
   public async unmuteAll({ id }: { id: string }) {
     const { attributes } = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'unmuteAll');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'unmuteAll'
+    );
 
     await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: false,
@@ -618,7 +635,11 @@ export class AlertsClient {
       alertId
     );
 
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'muteInstance');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'muteInstance'
+    );
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -646,7 +667,11 @@ export class AlertsClient {
       'alert',
       alertId
     );
-    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'unmuteInstance');
+    await this.authorization.ensureAuthorized(
+      attributes.alertTypeId,
+      attributes.consumer,
+      'unmuteInstance'
+    );
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.unsecuredSavedObjectsClient.update(
@@ -663,106 +688,7 @@ export class AlertsClient {
   }
 
   public async listAlertTypes() {
-    return await this.filterByAuthorized(this.alertTypeRegistry.list(), 'get');
-  }
-
-  private async ensureAuthorized(alertTypeId: string, consumer: string, operation: string) {
-    const { authorization } = this;
-    if (authorization) {
-      const alertType = this.alertTypeRegistry.get(alertTypeId);
-      const requiredPrivilegesByScope = {
-        consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
-        producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
-      };
-
-      // We special case the Alerts Management `consumer` as we don't want to have to
-      // manually authorize each alert type in the management UI
-      const shouldAuthorizeConsumer = consumer !== AlertsFeatureId;
-
-      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, privileges } = await checkPrivileges(
-        shouldAuthorizeConsumer && consumer !== alertType.producer
-          ? [
-              // check for access at consumer level
-              requiredPrivilegesByScope.consumer,
-              // check for access at producer level
-              requiredPrivilegesByScope.producer,
-            ]
-          : [
-              // skip consumer privilege checks under `alerts` as all alert types can
-              // be created under `alerts` if you have producer level privileges
-              requiredPrivilegesByScope.producer,
-            ]
-      );
-
-      if (!hasAllRequested) {
-        const authorizedPrivileges = pluck(
-          privileges.filter((privilege) => privilege.authorized),
-          'privilege'
-        );
-        const unauthorizedScopes = mapValues(
-          requiredPrivilegesByScope,
-          (privilege) => !authorizedPrivileges.includes(privilege)
-        );
-
-        throw Boom.forbidden(
-          `Unauthorized to ${operation} a "${alertTypeId}" alert ${
-            shouldAuthorizeConsumer && unauthorizedScopes.consumer
-              ? `for "${consumer}"`
-              : `by "${alertType.producer}"`
-          }`
-        );
-      }
-    }
-  }
-
-  private async filterByAuthorized(
-    alertTypes: Set<RegistryAlertType>,
-    operation: string
-  ): Promise<Set<RegistryAlertTypeWithAuth>> {
-    const featuresIds = this.features.getFeatures().map((feature) => feature.id);
-
-    if (!this.authorization) {
-      return augmentWithAuthorizedConsumers(alertTypes, featuresIds);
-    } else {
-      const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
-        this.request
-      );
-
-      // add an empty `authorizedConsumers` array on each alertType
-      const alertTypesWithAutherization = augmentWithAuthorizedConsumers(alertTypes);
-
-      // map from privilege to alertType which we can refer back to when analyzing the result
-      // of checkPrivileges
-      const privilegeToAlertType = new Map<string, [RegistryAlertTypeWithAuth, string]>();
-      // as we can't ask ES for the user's individual privileges we need to ask for each feature
-      // and alertType in the system whether this user has this privilege
-      for (const alertType of alertTypesWithAutherization) {
-        for (const feature of featuresIds) {
-          privilegeToAlertType.set(
-            this.authorization!.actions.alerting.get(alertType.id, feature, operation),
-            [alertType, feature]
-          );
-        }
-      }
-
-      const { hasAllRequested, privileges } = await checkPrivileges([
-        ...privilegeToAlertType.keys(),
-      ]);
-
-      return hasAllRequested
-        ? // has access to all features
-          augmentWithAuthorizedConsumers(alertTypes, featuresIds)
-        : // only has some of the required privileges
-          privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
-            if (authorized && privilegeToAlertType.has(privilege)) {
-              const [alertType, consumer] = privilegeToAlertType.get(privilege)!;
-              alertType.authorizedConsumers.push(consumer);
-              authorizedAlertTypes.add(alertType);
-            }
-            return authorizedAlertTypes;
-          }, new Set<RegistryAlertTypeWithAuth>());
-    }
+    return await this.authorization.filterByAuthorized(this.alertTypeRegistry.list(), 'get');
   }
 
   private async scheduleAlert(id: string, alertTypeId: string) {
@@ -882,27 +808,15 @@ export class AlertsClient {
       references,
     };
   }
-}
 
-function augmentWithAuthorizedConsumers(
-  alertTypes: Set<RegistryAlertType>,
-  authorizedConsumers?: string[]
-): Set<RegistryAlertTypeWithAuth> {
-  return new Set(
-    Array.from(alertTypes).map((alertType) => ({
-      ...alertType,
-      authorizedConsumers: authorizedConsumers ?? [],
-    }))
-  );
-}
-
-function asFiltersByAlertTypeAndConsumer(alertTypes: Set<RegistryAlertTypeWithAuth>): string[] {
-  return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
-    for (const consumer of authorizedConsumers) {
-      filters.push(
-        `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:${consumer})`
-      );
-    }
-    return filters;
-  }, []);
+  private asFiltersByAlertTypeAndConsumer(alertTypes: Set<RegistryAlertTypeWithAuth>): string[] {
+    return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
+      for (const consumer of authorizedConsumers) {
+        filters.push(
+          `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:${consumer})`
+        );
+      }
+      return filters;
+    }, []);
+  }
 }

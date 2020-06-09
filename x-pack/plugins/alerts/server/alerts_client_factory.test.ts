@@ -21,6 +21,7 @@ import { actionsMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 
 jest.mock('./alerts_client');
+jest.mock('./alerts_authorization');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
@@ -73,10 +74,17 @@ test('creates an alerts client with proper constructor arguments when security i
     includedHiddenTypes: ['alert'],
   });
 
-  expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
-    unsecuredSavedObjectsClient: savedObjectsClient,
+  const { AlertsAuthorization } = jest.requireMock('./alerts_authorization');
+  expect(AlertsAuthorization).toHaveBeenCalledWith({
     request,
     authorization: securityPluginSetup.authz,
+    alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
+    features: alertsClientFactoryParams.features,
+  });
+
+  expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
+    unsecuredSavedObjectsClient: savedObjectsClient,
+    authorization: expect.any(AlertsAuthorization),
     logger: alertsClientFactoryParams.logger,
     taskManager: alertsClientFactoryParams.taskManager,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
@@ -87,7 +95,6 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
-    features: alertsClientFactoryParams.features,
   });
 });
 
@@ -105,9 +112,17 @@ test('creates an alerts client with proper constructor arguments', async () => {
     includedHiddenTypes: ['alert'],
   });
 
+  const { AlertsAuthorization } = jest.requireMock('./alerts_authorization');
+  expect(AlertsAuthorization).toHaveBeenCalledWith({
+    request,
+    authorization: undefined,
+    alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
+    features: alertsClientFactoryParams.features,
+  });
+
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
-    request,
+    authorization: expect.any(AlertsAuthorization),
     logger: alertsClientFactoryParams.logger,
     taskManager: alertsClientFactoryParams.taskManager,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
@@ -117,7 +132,6 @@ test('creates an alerts client with proper constructor arguments', async () => {
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
-    features: alertsClientFactoryParams.features,
     getActionsClient: expect.any(Function),
   });
 });
