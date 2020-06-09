@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiListGroup,
   EuiListGroupItem,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,6 +30,18 @@ const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
   .euiListGroupItem__text {
     padding: 0;
+  }
+`;
+
+const LinkToExternalApp = styled(LinkToApp)`
+  display: inline-block;
+  margin: ${(props) => props.theme.eui.ruleMargins.marginSmall} 0
+    ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
+  .linkToAppIcon {
+    margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+  }
+  .linkToAppPopoutIcon {
+    margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
   }
 `;
 
@@ -162,17 +175,20 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         data-test-subj="hostDetailsPolicyList"
       />
       {endpointVersion !== undefined && (
-        <LinkToApp
+        <LinkToExternalApp
+          className="hostDetailsLinkToIngest"
           appId={ingestAppId}
           appPath={ingestAppPath}
           href={ingestUrl}
           data-test-subj="hostDetailsLinkToIngest"
         >
+          <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
             defaultMessage="Reassign Policy"
           />
-        </LinkToApp>
+          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+        </LinkToExternalApp>
       )}
       <EuiHorizontalRule margin="s" />
       <EuiDescriptionList
@@ -182,17 +198,19 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       />
       <EuiHorizontalRule margin="s" />
       <p>
-        <LinkToApp
+        <LinkToExternalApp
           appId={logsAppId}
           appPath={logsAppPath}
           href={logsUrl}
           data-test-subj="hostDetailsLinkToLogs"
         >
+          <EuiIcon type="logsApp" className="linkToAppIcon" />
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToLogsTitle"
             defaultMessage="Endpoint Logs"
           />
-        </LinkToApp>
+          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+        </LinkToExternalApp>
       </p>
     </>
   );
