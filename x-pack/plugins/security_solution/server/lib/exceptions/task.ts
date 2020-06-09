@@ -89,6 +89,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
         try {
           // Create the new artifact
+          // TODO: let id be auto-generated... revert to previous algorithm, doesn't need to be atomic.
           const soResponse = await soClient.create(
             ArtifactConstants.SAVED_OBJECT_TYPE,
             exceptionSO,

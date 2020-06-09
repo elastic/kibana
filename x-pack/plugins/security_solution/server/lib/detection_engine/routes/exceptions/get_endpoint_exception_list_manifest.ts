@@ -17,6 +17,7 @@ export interface Manifest {
   schemaVersion: string;
   manifestVersion: string;
   artifacts: Artifacts;
+  signature: string; // TODO: stronger type?
 }
 export interface Artifacts {
   [key: string]: Artifact;
@@ -58,6 +59,7 @@ async function handleAllowlistManifest(context, req, res) {
     if (resp.saved_objects.length === 0) {
       return res.notFound({ body: `No manifest found for version ${req.params.schemaVersion}` });
     }
+
     const manifestResp: Manifest = {
       schemaVersion: req.params.schemaVersion,
       manifestVersion: '1.0.0', // TODO hardcode?
@@ -81,6 +83,9 @@ async function handleAllowlistManifest(context, req, res) {
         size: manifest.attributes.size,
       };
     }
+
+    // TODO: digitally sign
+    manifestResp.signature = 'abcd';
 
     return res.ok({ body: manifestResp });
   } catch (err) {

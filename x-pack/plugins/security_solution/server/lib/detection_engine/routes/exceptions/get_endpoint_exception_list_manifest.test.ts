@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface DownloadExceptionListRequestParams {
-  // TODO: this should probably be id?
-  sha256: string;
-}
-
-export interface GetExceptionListManifestRequestParams {
-  manifestVersion: string;
-  schemaVersion: string;
-}
+// TODO
