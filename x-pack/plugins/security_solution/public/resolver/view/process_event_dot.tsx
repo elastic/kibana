@@ -210,7 +210,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   display: flex;
   flex-flow: column;
   font-size: ${(props) => `${props.fontSize}px`};
-  left: 26%;
+  left: 20.8%;
   line-height: 140%;
   padding: 0.25rem 0 0 0.1rem;
   position: absolute;
@@ -294,17 +294,18 @@ const ProcessEventDotComponents = React.memo(
      * position to accomodate for that. This aligns the logical center of the process node
      * with the correct position on the map.
      */
-    const isZoomedOut = magFactorX < 0.95;
+
+    const isZoomedOut = magFactorX < 0.8;
     const isShowingDescriptionText = magFactorX >= 0.55;
 
     const nodeXOffsetValue = isZoomedOut
-      ? -0.177413 + (-magFactorX * (1 - magFactorX)) / 5
-      : -0.172413;
+      ? -0.143413 + (-magFactorX * (1 - magFactorX)) / 10
+      : -0.147413;
     const nodeYOffsetValue = isZoomedOut
-      ? -0.73684 + (-magFactorX * 0.5 * (1 - magFactorX)) / magFactorX
-      : -0.73684;
+      ? -0.53684 + (-magFactorX * 0.2 * (1 - magFactorX)) / magFactorX
+      : -0.53684;
 
-    const actionsBaseYOffsetPct = 30;
+    const actionsBaseYOffsetPct = 5;
     let actionsYOffsetPct;
     switch (true) {
       case !isZoomedOut:
@@ -343,8 +344,8 @@ const ProcessEventDotComponents = React.memo(
 
     const markerBaseSize = 15;
     const markerSize = markerBaseSize;
-    const markerPositionYOffset = -markerBaseSize / 2 + 3; // + 3 to align nodes centrally on edge
-    const markerPositionXOffset = -markerBaseSize / 2;
+    const markerPositionYOffset = -markerBaseSize / 2 - 4;
+    const markerPositionXOffset = -markerBaseSize / 2 - 4;
 
     /**
      * An element that should be animated when the node is clicked.
@@ -495,8 +496,8 @@ const ProcessEventDotComponents = React.memo(
               <use
                 xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
                 fill={backingFill} // Only visible on hover
-                x={-11.35}
-                y={-8.35}
+                x={-15.35}
+                y={-15.35}
                 stroke={strokeColor}
                 width={markerSize * 1.5}
                 height={markerSize * 1.5}
@@ -554,7 +555,7 @@ const ProcessEventDotComponents = React.memo(
                 size="s"
                 style={{
                   maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
-                  maxWidth: `${Math.min(150 * magFactorX, 400)}px`,
+                  maxWidth: `${isZoomedOut ? 210 * magFactorX : 400}px`,
                 }}
                 tabIndex={-1}
               >

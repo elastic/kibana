@@ -32,7 +32,7 @@ import {
 } from '../../models/indexed_process_tree';
 import { getRelativeTimeDifference } from '../../lib/date';
 
-const unit = 135;
+const unit = 140;
 const distanceBetweenNodesInUnits = 2;
 
 export function isLoading(state: DataState) {
