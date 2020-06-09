@@ -74,7 +74,10 @@ export function Header(props: HeaderProps) {
               >
                 <FormattedMessage
                   id="xpack.ingestManager.epm.addDatasourceButtonText"
-                  defaultMessage="Create data source"
+                  defaultMessage="Add {packageName}"
+                  values={{
+                    packageName: title,
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>
