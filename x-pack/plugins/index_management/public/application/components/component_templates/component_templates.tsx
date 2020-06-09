@@ -25,7 +25,7 @@ interface Props {
     text?: string | JSX.Element;
     showCreateButton?: boolean;
   };
-  list?: {
+  listProps?: {
     isSelectable?: boolean;
     isDragable?: boolean;
     actions?: Array<{ label: string; handler: (component: any) => void }>;
@@ -42,7 +42,7 @@ export const ComponentTemplates = ({
   isLoading,
   components,
   emptyPrompt: { text, showCreateButton } = {},
-  list = {},
+  listProps = {},
 }: Props) => {
   const [searchValue, setSearchValue] = useState('');
 
@@ -144,7 +144,7 @@ export const ComponentTemplates = ({
         </EuiFlexGroup>
       </div>
       <div>
-        <ComponentTemplatesList components={filteredComponents} {...list} />
+        <ComponentTemplatesList components={filteredComponents} {...listProps} />
       </div>
     </>
   );

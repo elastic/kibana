@@ -235,8 +235,14 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                     emptyPrompt={{
                       showCreateButton: false,
                     }}
-                    list={{
+                    listProps={{
                       actions: [
+                        {
+                          label: 'View',
+                          handler: (component) => {
+                            // console.log(component);
+                          },
+                        },
                         {
                           label: 'Select',
                           handler: (component) => {
