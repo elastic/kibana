@@ -23,16 +23,25 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { TimelineStatus } from '../../../../../common/types/timeline';
-import { Note } from '../../../../common/lib/note';
-import { Notes } from '../../notes';
-import { AssociateNote, UpdateNote } from '../../notes/helpers';
-import { NOTES_PANEL_WIDTH } from './notes_size';
-import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
-import * as i18n from './translations';
+import {
+  TimelineTypeLiteral,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../../common/types/timeline';
+
 import { SiemPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { State } from '../../../../common/store';
+import { useKibana } from '../../../../common/lib/kibana';
+import { Note } from '../../../../common/lib/note';
+
+import { Notes } from '../../notes';
+import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
+import { NOTES_PANEL_WIDTH } from './notes_size';
+import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
+import * as i18n from './translations';
+import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -44,7 +53,15 @@ const NotesCountBadge = (styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
+type CreateTimeline = ({
+  id,
+  show,
+  timelineType,
+}: {
+  id: string;
+  show?: boolean;
+  timelineType?: TimelineTypeLiteral;
+}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -161,30 +178,27 @@ export const NewCase = React.memo<NewCaseProps>(
 );
 NewCase.displayName = 'NewCase';
 
-interface NewTimelineProps {
-  createTimeline: CreateTimeline;
-  onClosePopover: () => void;
+export interface NewTimelineProps {
+  createTimeline?: CreateTimeline;
+  closeGearMenu?: () => void;
+  outline?: boolean;
   timelineId: string;
+  title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ createTimeline, onClosePopover, timelineId }) => {
-    const handleClick = useCallback(() => {
-      createTimeline({ id: timelineId, show: true });
-      onClosePopover();
-    }, [createTimeline, timelineId, onClosePopover]);
+  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
+    const uiCapabilities = useKibana().services.application.capabilities;
+    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
 
-    return (
-      <EuiButtonEmpty
-        data-test-subj="timeline-new"
-        color="text"
-        iconSide="left"
-        iconType="plusInCircle"
-        onClick={handleClick}
-      >
-        {i18n.NEW_TIMELINE}
-      </EuiButtonEmpty>
-    );
+    const { getButton } = useCreateTimelineButton({
+      timelineId,
+      timelineType: TimelineType.default,
+      closeGearMenu,
+    });
+    const button = getButton({ outline, title });
+
+    return capabilitiesCanUserCRUD ? button : null;
   }
 );
 NewTimeline.displayName = 'NewTimeline';
