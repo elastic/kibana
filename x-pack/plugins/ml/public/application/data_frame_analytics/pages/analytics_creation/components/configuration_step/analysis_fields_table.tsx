@@ -85,7 +85,7 @@ export const MemoizedAnalysisFieldsTable: FC<{
       if (excludes.length > 0) {
         setCurrentSelection(excludes);
       }
-    }, []);
+    }, [tableItems]);
 
     // Only set form state on unmount to prevent re-renders due to props changing if exludes was updated on each selection
     useEffect(() => {
