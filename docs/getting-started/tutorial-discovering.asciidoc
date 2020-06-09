@@ -5,7 +5,7 @@ Using *Discover*, enter
 an {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
 query] to search your data and filter the results.
 
-. Open *Discover*.
+. Open the menu, then go to *Discover*.
 +
 The `shakes*` index pattern appears.
 

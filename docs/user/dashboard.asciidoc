@@ -44,7 +44,7 @@ add them as you create the dashboard, or you can add
 <<add-sample-data, sample data sets>>,
 which include pre-built dashboards.
 
-To begin, open the menu, click *Kibana > Dashboard*, then click *Create dashboard.*
+To begin, open the menu, go to *Dashboard*, then click *Create dashboard.*
 
 [float]
 [[dashboard-add-elements]]

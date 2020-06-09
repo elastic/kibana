@@ -17,7 +17,7 @@ visualizations:
 Use the pie chart to
 gain insight into the account balances in the bank account data.
 
-. Open *Visualize*.
+. Open then menu, then go to *Visualize*.
 . Click *Create visualization*.
 +
 [role="screenshot"]
@@ -83,7 +83,7 @@ image::images/tutorial-visualize-pie-3.png[]
 Use a bar chart to look at the Shakespeare data set and compare
 the number of speaking parts in the plays.
 
-. Click *Create visualization > *Vertical Bar*, then set the source to `shakes*`.
+. Click *Create visualization > Vertical Bar*, then set the source to `shakes*`.
 +
 Initially, the chart is a single bar that shows the total count
 of documents that match the default wildcard query.
@@ -125,7 +125,7 @@ as `not analyzed`.
 
 Add formatted text to your dashboard with a markdown tool.
 
-. Click *Create visualization > *Markdown*.
+. Click *Create visualization > Markdown*.
 . In the text field, enter the following:
 +
 [source,markdown]
@@ -148,7 +148,7 @@ image::images/tutorial-visualize-md-2.png[]
 
 Using <<maps>>, you can visualize geographic information in the log file sample data.
 
-. Click *Create visualization > *Maps*.
+. Click *Create visualization > Maps*.
 
 . Set the time.
 .. In the time filter, click *Show dates*.

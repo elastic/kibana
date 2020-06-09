@@ -205,7 +205,7 @@ You have completed the steps for re-creating the sample data map.
 === Adding the map to a dashboard
 You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
-. Open the menu, then click *{kib} > Dashboard*.
+. Open the menu, then go to *Dashboard*.
 . Click *Create dashboard*.
 . Set the time range to *Last 7 days*.
 . Click *Add*.

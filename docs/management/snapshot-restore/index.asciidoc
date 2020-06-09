@@ -191,7 +191,7 @@ your master and data nodes.  You can do this in one of two ways:
 Use *Snapshot and Restore* to register the repository where your snapshots
 will live.
 
-. Open the menu, then go to *Management > {es} > Snapshot and Restore*.
+. Open the menu, then go to *Stack Management > {es} > Snapshot and Restore*.
 . Click *Register a repository* in either the introductory message or *Repository view*.
 . Enter a name for your repository, for example, `my_backup`.
 . Select *Shared file system*.
@@ -212,7 +212,7 @@ The repository currently doesn’t have any snapshots.
 ==== Add a snapshot to the repository
 Use the {ref}/snapshots-take-snapshot.html[snapshot API] to create a snapshot.
 
-. Open the menu, go to *Management > Dev Tools*, then select *Console*.
+. Open the menu, go to *Dev Tools*, then select *Console*.
 . Create the snapshot:
 +
 [source,js]

@@ -18,7 +18,7 @@ First you'll create index patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank`. These data sets don't contain time series data.
 
-. Open *Stack Management*, then click *Index Patterns*.
+. Open the menu, then go to *Stack Management > {kib} > Index Patterns*.
 . If this is your first index pattern, the *Create index pattern* page opens.
 Otherwise, click *Create index pattern*.
 . In the *Index pattern field*, enter `shakes*`.
@@ -46,7 +46,7 @@ contains the time series data.
 
 NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
-available, go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
+available, open the menu, then go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
 `curl -XGET "http://localhost:9200/_cat/indices"`.
 
 

@@ -4,7 +4,7 @@
 Build a dashboard that contains the visualizations and map that you saved during
 this tutorial.
 
-. Open *Dashboard*, then click *Create dashboard*.
+. Open the menu, go to *Dashboard*, then click *Create dashboard*.
 . Set the time filter to May 18, 2015 to May 20, 2015.
 . Click *Add*, then select the following:
  * *Bar Example*
