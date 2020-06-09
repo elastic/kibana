@@ -28,8 +28,8 @@
 }
 
 .monTableCell__transportAddress {
-  color: $euiColorDarkShade;
   @include euiFontSizeS;
+  color: $euiColorDarkShade;
 }
 
 .monTableCell__number {

@@ -22,7 +22,8 @@
     margin: $euiSizeS;
     border: 1px solid $euiColorMediumShade;
     border-radius: $euiSizeXS;
-    padding: $euiSizeXS/2 0;
+    padding: $euiSizeXS / 2 0;
+
     // SASS-TODO: Rename this class following Eui conventions
     &.index {
       border-left: $euiSizeXS solid $euiColorSuccess;
@@ -60,6 +61,7 @@
   td:first-child {
     width: 200px;
   }
+
   // SASS-TODO: Rename this class following Eui conventions
   .shard {
     align-self: center;

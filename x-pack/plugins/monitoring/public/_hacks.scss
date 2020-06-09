@@ -1,5 +1,6 @@
 @import '@elastic/eui/src/components/header/variables';
 
+// sass-lint:disable-block no-ids
 #monitoring-app {
   // SASSTODO: PUI tooltips can be replaced with EuiToolTip
   .pui-tooltip-inner {

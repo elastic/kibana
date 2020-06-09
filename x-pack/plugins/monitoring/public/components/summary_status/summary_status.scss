@@ -1,10 +1,11 @@
 .monSummaryStatusNoWrap {
   margin-left: $euiSizeM;
   margin-right: $euiSizeM;
+
   .euiTitle {
+    @include euiFontSizeXS;
     overflow-x: hidden;
     white-space: nowrap;
-    @include euiFontSizeXS;
   }
 
   .monSummaryStatusNoWrap__flexGroup {

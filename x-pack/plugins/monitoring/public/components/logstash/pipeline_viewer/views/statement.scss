@@ -22,7 +22,7 @@
 
   // This allows the border to be flush
   &:last-child {
-    width: 0px;
+    width: 0;
   }
 
   &:first-child {
@@ -72,7 +72,7 @@
     }
 
     .monPipelineViewer__metricFlexItem {
-      margin-bottom: $euiSizeXS !important;
+      margin-bottom: $euiSizeXS !important; // sass-lint:disable-line no-important
     }
 
     .monPipelineViewer__metric {
