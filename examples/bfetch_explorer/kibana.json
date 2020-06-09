@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["bfetch"],
+  "requiredPlugins": ["bfetch", "developerExamples"],
   "optionalPlugins": []
 }
