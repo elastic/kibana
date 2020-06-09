@@ -127,12 +127,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
             {name}
           </EuiButtonEmpty>
+          &emsp;
           <EuiBadgeGroup gutterSize="s">
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiBadge className="indexPatternList__badge" key={tagKey}>
-                  {tagName}
-                </EuiBadge>
+                <EuiBadge key={tagKey}>{tagName}</EuiBadge>
               ))}
           </EuiBadgeGroup>
         </>
