@@ -10,7 +10,6 @@ import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
-import { disableTemplate } from '../../../common/constants';
 
 jest.mock('../../overview/components/events_by_dataset');
 

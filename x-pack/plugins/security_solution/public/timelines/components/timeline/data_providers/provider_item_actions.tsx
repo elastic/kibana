@@ -8,6 +8,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiPopoverProps,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
@@ -156,7 +157,7 @@ export const getProviderActions = ({
         name: i18n.DELETE_DATA_PROVIDER,
         onClick: deleteItem,
       },
-    ].filter((item) => item != null),
+    ].filter((item) => item != null) as EuiContextMenuPanelItemDescriptor[],
   },
   {
     content:

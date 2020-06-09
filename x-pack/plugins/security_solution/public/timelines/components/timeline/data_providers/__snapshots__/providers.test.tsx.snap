@@ -10,26 +10,10 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
+          Button={[Function]}
           timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={true}
-      >
-        <AndOrBadge
-          type="or"
         />
       </styled.div>
     </Styled(EuiFlexItem)>
@@ -73,24 +57,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -136,24 +103,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -199,24 +149,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -262,24 +195,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -325,24 +241,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -388,24 +287,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -451,24 +333,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -514,24 +379,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -577,24 +425,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />
@@ -640,24 +471,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div
-        hideBadge={true}
-      >
-        <Memo(AddDataProviderPopoverComponent)
-          Button={
-            Object {
-              "$$typeof": Symbol(react.memo),
-              "compare": null,
-              "displayName": "AddFieldBadge",
-              "type": [Function],
-            }
-          }
-          timelineId="foo"
-        />
-      </styled.div>
-      <styled.div
-        hideBadge={false}
-      >
+      <styled.div>
         <AndOrBadge
           type="or"
         />

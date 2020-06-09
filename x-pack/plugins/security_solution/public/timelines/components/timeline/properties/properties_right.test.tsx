@@ -194,9 +194,9 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
       });
 
-      test('it renders create template timeline btn', () => {
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(true);
-      });
+      // test('it renders create template timeline btn', () => {
+      //   expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(true);
+      // });
 
       test('it renders create attach timeline to a case btn', () => {
         expect(wrapper.find('[data-test-subj="NewCase"]').exists()).toBeTruthy();

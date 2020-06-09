@@ -13,7 +13,6 @@ import { TimelineType } from '../../../../../common/types/timeline';
 import { History } from '../../../../common/lib/history';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
 import { appActions } from '../../../../common/store/app';
 import { inputsActions } from '../../../../common/store/inputs';

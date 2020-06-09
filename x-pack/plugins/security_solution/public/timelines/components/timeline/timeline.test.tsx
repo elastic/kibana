@@ -275,9 +275,9 @@ describe('Timeline', () => {
         );
 
         const andProviderBadgesText = andProviderBadges.map((node) => node.text()).join(' ');
-        expect(andProviderBadges.length).toEqual(6);
+        expect(andProviderBadges.length).toEqual(3);
         expect(andProviderBadgesText).toEqual(
-          'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'
+          'name: "Provider 1" name: "Provider 2" name: "Provider 3"'
         );
       });
 

@@ -5,7 +5,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiContextMenu, EuiFlexItem, EuiPopover, EuiIcon } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiFlexItem,
+  EuiPopover,
+  EuiIcon,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
@@ -84,7 +90,7 @@ const AddDataProviderPopoverComponent: React.FC<{
               panel: 2,
             }
           : null,
-      ].filter((item) => item !== null),
+      ].filter((item) => item !== null) as EuiContextMenuPanelItemDescriptor[],
     },
     {
       id: 1,

@@ -27,7 +27,7 @@ import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 
 import * as i18n from './translations';
 import { Description, NotesButton, NewCase, NewTimeline } from './helpers';
-import { NewTemplateTimeline } from './new_template_timeline';
+// import { NewTemplateTimeline } from './new_template_timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
