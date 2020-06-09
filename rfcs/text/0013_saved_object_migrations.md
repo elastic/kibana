@@ -16,7 +16,7 @@
     - [4.3.1.2 Algorithm](#4312-algorithm)
   - [4.5 Changes in 8.0](#45-changes-in-80)
     - [4.5.1 Migration algorithm (8.0):](#451-migration-algorithm-80)
-    - [4.5.2 Upgrade procedure](#452-upgrade-procedure)
+    - [4.5.2 Upgrade and rollback procedure](#452-upgrade-and-rollback-procedure)
 - [5. Alternatives](#5-alternatives)
 - [5.1 Rolling upgrades](#51-rolling-upgrades)
   - [5.2 Single node migrations coordinated through a lease/lock](#52-single-node-migrations-coordinated-through-a-leaselock)
@@ -318,17 +318,31 @@ Drawbacks:
 - It’s impossible to provide read-only functionality for outdated nodes which
   means we can't achieve goal (2.7).
 
-### 4.5.2 Upgrade procedure
-Kibana upgrades are only guaranteed to be safe if the following upgrade
-procedure is followed:
+### 4.5.2 Upgrade and rollback procedure
+To prevent data loss, the following procedure should be followed when
+upgrading Kibana:
 
-1. Wait for all traffic to outdated nodes to drain. This ensures that any bulk
-   operations have either completed or returned a timeout error.
-2. Start up the upgraded Kibana nodes. All running Kibana nodes should use be
-   on the same version, have the same plugins installed and use the same
+1. Gracefully shutdown outdated nodes by sending a `SIGTERM` signal
+   1. Node starts returning `500` from it's healthcheck endpoint to signal to
+      the load balancer that it's no longer accepting new traffic (requires https://github.com/elastic/kibana/issues/46984).
+   2. Allows ungoing HTTP requests to complete with a configurable timeout
+      before forcefully closing these.
+   3. Closes any keep-alive sockets by sending a `connection: close` header. 
+   4. Shutdown all plugins and Core services.
+2. Take a snapshot of all Kibana's Saved Objects indices.
+3. Start the upgraded Kibana nodes. All running Kibana nodes should be on the
+   same version, have the same plugins installed and use the same
    configuration. We recommend only bringing up a single node, let it finish
    the migration and only when it's status is green, bring up additional nodes
    if required.
+
+To rollback to a previous version of Kibana:
+ 4. Shutdown all Kibana nodes.
+ 5. Restore the Kibana Saved Objects indices and aliases from the snapshot in
+    (2).
+ 6. Start the Kibana nodes. All running Kibana nodes should be on the same
+    rollback version, have the same plugins installed and use the same
+    configuration.
 
 # 5. Alternatives
 # 5.1 Rolling upgrades
