@@ -10,12 +10,13 @@ import ReactDOM from 'react-dom';
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeHandler } from '@elastic/eui';
 
 import { mlDataGridChartClassName, ColumnChart } from './column_chart';
+import { ChartData } from './use_column_chart';
 
 const mlDataGridChartRowClassName = `${mlDataGridChartClassName}Row`;
 
 type RefValue = HTMLElement | null;
 
-export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: any) {
+export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: ChartData[]) {
   const [histogramVisible, setHistogramVisible] = useState(false);
 
   const toggleHistogramVisibility = () => {
@@ -58,15 +59,20 @@ export function useColumnCharts(columns: EuiDataGridColumn[], chartsData: any) {
 
       ReactDOM.render(
         <>
-          {columns.map((d, i) => (
-            <div
-              key={d.id}
-              className={`${mlDataGridChartClassName} ${mlDataGridChartClassName}-${i}`}
-              style={{ width: `${d.initialWidth}px` }}
-            >
-              {!d.isExpandable && <ColumnChart chartData={chartsData[i]} columnType={d} />}
-            </div>
-          ))}
+          {columns.map((d, i) => {
+            const chartData = chartsData.find((cd) => cd.id === d.id);
+            return (
+              <div
+                key={d.id}
+                className={`${mlDataGridChartClassName} ${mlDataGridChartClassName}-${i}`}
+                style={{ width: `${d.initialWidth}px` }}
+              >
+                {!d.isExpandable && chartData !== undefined && (
+                  <ColumnChart chartData={chartsData[i]} columnType={d} />
+                )}
+              </div>
+            );
+          })}
         </>,
         chartRow
       );

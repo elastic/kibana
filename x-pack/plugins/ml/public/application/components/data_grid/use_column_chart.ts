@@ -61,7 +61,7 @@ export const fetchChartData = async (
   indexPatternTitle: string,
   api: any,
   query: any,
-  columnType: any
+  columnType: EuiDataGridColumn
 ): Promise<ChartData> => {
   const fieldType = getFieldType(columnType.schema);
 
@@ -172,13 +172,18 @@ export const fetchChartData = async (
   };
 
   if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-    return (await fetchChartHistogramData()) as NumericChartData;
+    return {
+      ...((await fetchChartHistogramData()) as NumericChartData),
+      id: columnType.id,
+    };
   }
   if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
     // TODO query in parallel
-    const cardinality = await fetchCardinality();
-    const terms = await fetchChartTermsData();
-    return { cardinality, data: terms } as OrdinalChartData;
+    return {
+      cardinality: await fetchCardinality(),
+      data: await fetchChartTermsData(),
+      id: columnType.id,
+    } as OrdinalChartData;
   }
 
   throw new Error('Invalid fieldType');
@@ -192,13 +197,17 @@ interface NumericDataItem {
 
 interface NumericChartData {
   data: NumericDataItem[];
+  id: string;
   interval: number;
   stats: [number, number];
 }
 
 export const isNumericChartData = (arg: any): arg is NumericChartData => {
   return (
-    arg.hasOwnProperty('data') && arg.hasOwnProperty('interval') && arg.hasOwnProperty('stats')
+    arg.hasOwnProperty('data') &&
+    arg.hasOwnProperty('id') &&
+    arg.hasOwnProperty('interval') &&
+    arg.hasOwnProperty('stats')
   );
 };
 
@@ -210,10 +219,13 @@ interface OrdinalDataItem {
 interface OrdinalChartData {
   cardinality: number;
   data: OrdinalDataItem[];
+  id: string;
 }
 
 export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
-  return arg.hasOwnProperty('data') && arg.hasOwnProperty('cardinality');
+  return (
+    arg.hasOwnProperty('data') && arg.hasOwnProperty('cardinality') && arg.hasOwnProperty('id')
+  );
 };
 
 type ChartDataItem = NumericDataItem | OrdinalDataItem;

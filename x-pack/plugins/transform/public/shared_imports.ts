@@ -21,6 +21,7 @@ export {
   multiColumnSortFactory,
   useDataGrid,
   useRenderCellValue,
+  ChartData,
   DataGrid,
   EsSorting,
   RenderCellValue,

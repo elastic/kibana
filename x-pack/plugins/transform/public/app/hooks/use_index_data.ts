@@ -6,6 +6,8 @@
 
 import { useEffect } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import {
   fetchChartData,
   getDataGridSchemaFromKibanaFieldType,
@@ -13,6 +15,7 @@ import {
   getErrorMessage,
   useDataGrid,
   useRenderCellValue,
+  ChartData,
   EsSorting,
   SearchResponse7,
   UseIndexDataReturnType,
@@ -35,7 +38,7 @@ export const useIndexData = (
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
   // EuiDataGrid State
-  const columns = [
+  const columns: EuiDataGridColumn[] = [
     ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
@@ -101,6 +104,10 @@ export const useIndexData = (
   const fetchColumnChartsData = async function () {
     const fetchers = dataGrid.visibleColumns.map((vc) => {
       const columnType = columns.find((c) => c.id === vc);
+
+      if (columnType === undefined) {
+        return Promise.resolve(undefined);
+      }
       return fetchChartData(
         indexPattern.title,
         api,
@@ -109,8 +116,8 @@ export const useIndexData = (
       );
     });
 
-    const data = await Promise.all(fetchers);
-    setColumnCharts(data);
+    const data = (await Promise.all(fetchers)) as ChartData[];
+    setColumnCharts(data.filter((d) => d !== undefined));
   };
 
   useEffect(() => {
