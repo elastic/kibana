@@ -242,20 +242,20 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertGroupByEntryExists(index, expectedLabel, expectedIntervalLabel);
     },
 
-    getComboBoxInputSelector(parentSelector = ''): string {
+    getAggComboBoxInputSelector(parentSelector = ''): string {
       return `${parentSelector && `${parentSelector} > `}${
         parentSelector ? 'transformSubAggregationSelection' : 'transformAggregationSelection'
       } > comboBoxInput`;
     },
 
     async assertAggregationInputExists(parentSelector?: string) {
-      await testSubjects.existOrFail(this.getComboBoxInputSelector(parentSelector));
+      await testSubjects.existOrFail(this.getAggComboBoxInputSelector(parentSelector));
     },
 
     async assertAggregationInputValue(expectedIdentifier: string[], parentSelector?: string) {
       await retry.tryForTime(2000, async () => {
         const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-          this.getComboBoxInputSelector(parentSelector)
+          this.getAggComboBoxInputSelector(parentSelector)
         );
         expect(comboBoxSelectedOptions).to.eql(
           expectedIdentifier,
@@ -286,7 +286,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         await this.addAggregationEntry(index, agg.identifier, agg.label, agg.form, parentSelector);
 
         if (agg.subAggs) {
-          await this.addAggregationEntries(agg.subAggs, `transformAggregationEntry_${index}`);
+          await this.addAggregationEntries(
+            agg.subAggs,
+            `${parentSelector ? `${parentSelector} > ` : ''}transformAggregationEntry_${index}`
+          );
         }
       }
     },
@@ -298,7 +301,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       formData?: Record<string, any>,
       parentSelector = ''
     ) {
-      await comboBox.set(this.getComboBoxInputSelector(parentSelector), identifier);
+      await comboBox.set(this.getAggComboBoxInputSelector(parentSelector), identifier);
       await this.assertAggregationInputValue([], parentSelector);
       await this.assertAggregationEntryExists(index, expectedLabel, parentSelector);
 

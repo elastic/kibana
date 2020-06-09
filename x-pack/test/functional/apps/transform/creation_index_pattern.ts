@@ -62,6 +62,20 @@ export default function ({ getService }: FtrProviderContext) {
                 identifier: 'max(products.base_price)',
                 label: 'products.base_price.max',
               },
+              {
+                identifier: 'filter(customer_gender)',
+                label: 'customer_gender.filter',
+                form: {
+                  transformFilterAggTypeSelector: 'term',
+                  transformFilterTermValueSelector: 'FEMALE',
+                },
+                subAggs: [
+                  {
+                    identifier: 'avg(taxful_total_price)',
+                    label: 'taxful_total_price.avg',
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -93,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
                   field: 'products.base_price',
                 },
               },
-              'geoip.city_name.filter': {
+              'New York': {
                 filter: {
                   term: {
                     'geoip.city_name': 'New York',
@@ -103,6 +117,20 @@ export default function ({ getService }: FtrProviderContext) {
                   'products.base_price.max': {
                     max: {
                       field: 'products.base_price',
+                    },
+                  },
+                  FEMALE: {
+                    filter: {
+                      term: {
+                        customer_gender: 'FEMALE',
+                      },
+                    },
+                    aggs: {
+                      'taxful_total_price.avg': {
+                        avg: {
+                          field: 'taxful_total_price',
+                        },
+                      },
                     },
                   },
                 },
