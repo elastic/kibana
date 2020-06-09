@@ -43,7 +43,7 @@ const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   };
 };
 
-export const createMockConfig = (overrides?: any) => ({
+export const createMockConfigSchema = (overrides?: any) => ({
   index: '.reporting',
   kibanaServer: {
     hostname: 'localhost',
@@ -64,8 +64,8 @@ export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
 });
 
 const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
-  const mockConfig = createMockConfig(config);
-  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfig));
+  const mockConfigSchema = createMockConfigSchema(config);
+  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfigSchema));
   const setupMock = coreMock.createSetup();
   const coreStartMock = coreMock.createStart();
   const startMock = {
