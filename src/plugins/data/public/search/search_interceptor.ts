@@ -20,7 +20,7 @@
 import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent, Subject } from 'rxjs';
 import { takeUntil, finalize, mergeMapTo, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
-import { getCombinedSignal } from '../../common/utils';
+import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
 import { ISearchGeneric, ISearchOptions } from './i_search';
 import { RequestTimeoutError } from './request_timeout_error';
@@ -118,6 +118,10 @@ export class SearchInterceptor {
         mergeMapTo(throwError(new RequestTimeoutError()))
       );
 
+      const userAbort$ = fromEvent(this.abortController.signal, 'abort').pipe(
+        mergeMapTo(throwError(new AbortError()))
+      );
+
       // Schedule the notification to allow users to cancel or wait beyond the timeout
       const notificationSubscription = timer(LONG_QUERY_NOTIFICATION_DELAY).subscribe(
         this.showToast
@@ -136,6 +140,7 @@ export class SearchInterceptor {
 
       return search(request as any, { ...options, signal: combinedSignal }).pipe(
         takeUntil(timeoutError$),
+        takeUntil(userAbort$),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           this.timeoutSubscriptions.delete(subscription);

@@ -18,18 +18,20 @@
  */
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { ISearchStart } from './types';
+import { ISearchSetup, ISearchStart } from './types';
 import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
 
-const searchSetupMock = {
+export * from './search_source/mocks';
+
+const searchSetupMock: jest.Mocked<ISearchSetup> = {
   aggs: searchAggsSetupMock(),
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
+  registerSearchStrategy: jest.fn(),
 };
 
 const searchStartMock: jest.Mocked<ISearchStart> = {
   aggs: searchAggsStartMock(),
   setInterceptor: jest.fn(),
+  getSearchStrategy: jest.fn(),
   search: jest.fn(),
   session: {
     set: jest.fn(),
