@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { RenderError } from '../../../../plugins/expressions/public';
 
 interface Props {
@@ -27,7 +28,14 @@ interface Props {
 
 export function EmbeddableErrorLabel(props: Props) {
   if (!props.error) return null;
-  const labelText = props.error.name === 'AbortError' ? 'Aborted' : 'Error';
+  const labelText =
+    props.error.name === 'AbortError'
+      ? i18n.translate('visualizations.embeddable.labelAborted', {
+          defaultMessage: 'Aborted',
+        })
+      : i18n.translate('visualizations.embeddable.labelError', {
+          defaultMessage: 'Error',
+        });
 
   return (
     <EuiFlexGroup>
