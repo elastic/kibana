@@ -34,35 +34,27 @@ describe('extractErrors()', () => {
       {
         id: '1',
         type: 'dashboard',
-        attributes: {
-          title: 'My Dashboard 1',
-        },
+        attributes: { title: 'My Dashboard 1' },
         references: [],
       },
       {
         id: '2',
         type: 'dashboard',
-        attributes: {
-          title: 'My Dashboard 2',
-        },
+        attributes: { title: 'My Dashboard 2' },
         references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '2').output.payload,
       },
       {
         id: '3',
         type: 'dashboard',
-        attributes: {
-          title: 'My Dashboard 3',
-        },
+        attributes: { title: 'My Dashboard 3' },
         references: [],
         error: SavedObjectsErrorHelpers.createBadRequestError().output.payload,
       },
       {
         id: '4',
         type: 'dashboard',
-        attributes: {
-          title: 'My Dashboard 4',
-        },
+        attributes: { title: 'My Dashboard 4' },
         references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '4').output.payload,
         destinationId: 'foo',
@@ -76,6 +68,9 @@ Array [
       "type": "conflict",
     },
     "id": "2",
+    "meta": Object {
+      "title": "My Dashboard 2",
+    },
     "title": "My Dashboard 2",
     "type": "dashboard",
   },
@@ -87,6 +82,9 @@ Array [
       "type": "unknown",
     },
     "id": "3",
+    "meta": Object {
+      "title": "My Dashboard 3",
+    },
     "title": "My Dashboard 3",
     "type": "dashboard",
   },
@@ -96,6 +94,9 @@ Array [
       "type": "conflict",
     },
     "id": "4",
+    "meta": Object {
+      "title": "My Dashboard 4",
+    },
     "title": "My Dashboard 4",
     "type": "dashboard",
   },

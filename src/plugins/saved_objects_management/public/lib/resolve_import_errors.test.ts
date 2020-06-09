@@ -74,6 +74,7 @@ Object {
             obj: {
               type: 'a',
               id: '1',
+              meta: {},
             },
             error: {
               type: 'unknown',
@@ -91,6 +92,7 @@ Object {
       },
       "obj": Object {
         "id": "1",
+        "meta": Object {},
         "type": "a",
       },
     },
@@ -117,9 +119,12 @@ Object {
       state: {
         importCount: 0,
         failedImports: [
-          { obj: { type: 'a', id: '1' }, error: { type: 'conflict' } },
-          { obj: { type: 'a', id: '2' }, error: { type: 'conflict', destinationId: 'x' } },
-          { obj: { type: 'a', id: '3' }, error: { type: 'conflict' } },
+          { obj: { type: 'a', id: '1', meta: {} }, error: { type: 'conflict' } },
+          {
+            obj: { type: 'a', id: '2', meta: {} },
+            error: { type: 'conflict', destinationId: 'x' },
+          },
+          { obj: { type: 'a', id: '3', meta: {} }, error: { type: 'conflict' } },
         ],
       },
     });
@@ -173,7 +178,7 @@ Object {
         ],
         failedImports: [
           {
-            obj: { type: 'a', id: '1' },
+            obj: { type: 'a', id: '1', meta: {} },
             error: {
               type: 'missing_references',
               references: [{ type: 'index-pattern', id: '2' }],
@@ -233,6 +238,7 @@ Object {
             obj: {
               type: 'a',
               id: '1',
+              meta: {},
             },
             error: {
               type: 'missing_references',
@@ -284,7 +290,7 @@ Object {
         unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3' }],
         failedImports: [
           {
-            obj: { type: 'a', id: '1' },
+            obj: { type: 'a', id: '1', meta: {} },
             error: {
               type: 'missing_references',
               references: [{ type: 'index-pattern', id: '2' }],

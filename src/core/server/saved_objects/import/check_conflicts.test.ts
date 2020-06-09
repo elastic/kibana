@@ -117,10 +117,16 @@ describe('#checkConflicts', () => {
     expect(checkConflictsResult).toEqual({
       filteredObjects: [obj1, obj3],
       errors: [
-        { ...obj2Error, title: obj2.attributes.title, error: { type: 'conflict' } },
+        {
+          ...obj2Error,
+          title: obj2.attributes.title,
+          meta: { title: obj2.attributes.title },
+          error: { type: 'conflict' },
+        },
         {
           ...obj4Error,
           title: obj4.attributes.title,
+          meta: { title: obj4.attributes.title },
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
@@ -141,6 +147,7 @@ describe('#checkConflicts', () => {
           {
             ...obj4Error,
             title: obj4.attributes.title,
+            meta: { title: obj4.attributes.title },
             error: { ...obj4Error.error, type: 'unknown' },
           },
         ],

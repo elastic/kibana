@@ -28,7 +28,7 @@ import {
 } from 'src/core/public';
 
 export interface FailedImport {
-  obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
+  obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title' | 'meta'>;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError

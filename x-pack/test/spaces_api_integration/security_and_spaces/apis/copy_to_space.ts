@@ -139,7 +139,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
         tests: {
           noConflictsWithoutReferences: {
             statusCode: 200,
-            response: expectNoConflictsWithoutReferencesResult,
+            response: expectNoConflictsWithoutReferencesResult(spaceId),
           },
           noConflictsWithReferences: {
             statusCode: 200,
@@ -160,7 +160,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNoConflictsForNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult(spaceId),
           },
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'authorized'),
         },

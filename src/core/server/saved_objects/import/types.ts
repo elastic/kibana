@@ -104,7 +104,11 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportError {
   id: string;
   type: string;
+  /**
+   * @deprecated Use `meta.title` instead
+   */
   title?: string;
+  meta: { title?: string; icon?: string };
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError
@@ -131,6 +135,10 @@ export interface SavedObjectsImportSuccess {
    * this field will be redundant and can be removed.
    */
   createNewCopy?: boolean;
+  meta: {
+    title?: string;
+    icon?: string;
+  };
 }
 
 /**

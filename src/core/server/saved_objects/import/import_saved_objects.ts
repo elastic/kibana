@@ -108,20 +108,26 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
   const successResults = createSavedObjectsResult.createdObjects.map(
-    ({ type, id, destinationId, originId }) => {
+    ({ type, id, attributes: { title }, destinationId, originId }) => {
+      const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
       return {
         type,
         id,
+        meta,
         ...(destinationId && { destinationId }),
         ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
       };
     }
   );
+  const errorResults = errorAccumulator.map((error) => {
+    const icon = typeRegistry.getType(error.type)?.management?.icon;
+    return { ...error, meta: { ...error.meta, icon } };
+  });
 
   return {
     successCount: createSavedObjectsResult.createdObjects.length,
     success: errorAccumulator.length === 0,
     ...(successResults.length && { successResults }),
-    ...(errorAccumulator.length && { errors: errorAccumulator }),
+    ...(errorResults.length && { errors: errorResults }),
   };
 }

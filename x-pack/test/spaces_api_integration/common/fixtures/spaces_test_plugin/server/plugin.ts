@@ -16,6 +16,7 @@ export class Plugin {
       hidden: false,
       namespaceType: 'multiple',
       management: {
+        icon: 'beaker',
         importableAndExportable: true,
         getTitle(obj) {
           return obj.attributes.title;

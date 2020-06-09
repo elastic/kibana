@@ -47,6 +47,7 @@ describe('processImportResponse()', () => {
           error: {
             type: 'conflict',
           } as SavedObjectsImportConflictError,
+          meta: {},
         },
       ],
     };
@@ -59,6 +60,7 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },
@@ -78,6 +80,7 @@ describe('processImportResponse()', () => {
           error: {
             type: 'ambiguous_conflict',
           } as SavedObjectsImportAmbiguousConflictError,
+          meta: {},
         },
       ],
     };
@@ -90,6 +93,7 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },
@@ -109,6 +113,7 @@ describe('processImportResponse()', () => {
           error: {
             type: 'unknown',
           } as SavedObjectsImportUnknownError,
+          meta: {},
         },
       ],
     };
@@ -121,6 +126,7 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },
@@ -146,6 +152,7 @@ describe('processImportResponse()', () => {
               },
             ],
           } as SavedObjectsImportMissingReferencesError,
+          meta: {},
         },
       ],
     };
@@ -164,6 +171,7 @@ describe('processImportResponse()', () => {
           },
           "obj": Object {
             "id": "1",
+            "meta": Object {},
             "type": "a",
           },
         },

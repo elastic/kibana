@@ -41,6 +41,7 @@ export function extractErrors(
           id: savedObject.id,
           type: savedObject.type,
           title,
+          meta: { title },
           error: {
             type: 'conflict',
             ...(destinationId && { destinationId }),
@@ -52,6 +53,7 @@ export function extractErrors(
         id: savedObject.id,
         type: savedObject.type,
         title,
+        meta: { title },
         error: {
           ...savedObject.error,
           type: 'unknown',

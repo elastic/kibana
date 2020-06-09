@@ -25,6 +25,28 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('import', () => {
+    // mock results including metadata
+    const indexPattern = {
+      type: 'index-pattern',
+      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+    };
+    const visualization = {
+      type: 'visualization',
+      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+    };
+    const dashboard = {
+      type: 'dashboard',
+      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+      meta: { title: 'Requests', icon: 'dashboardApp' },
+    };
+    const createError = (object, type) => ({
+      ...object,
+      title: object.meta.title,
+      error: { type },
+    });
+
     describe('with kibana index', () => {
       describe('with basic data existing', () => {
         before(() => esArchiver.load('saved_objects/basic'));
@@ -40,11 +62,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
-                successResults: [
-                  { type: 'index-pattern', id: '91200a00-9efd-11e7-acb3-3dab96693fab' },
-                  { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' },
-                  { type: 'dashboard', id: 'be3733a0-9efe-11e7-acb3-3dab96693fab' },
-                ],
+                successResults: [indexPattern, visualization, dashboard],
               });
             });
         });
@@ -72,30 +90,9 @@ export default function ({ getService }) {
                 success: false,
                 successCount: 0,
                 errors: [
-                  {
-                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                    type: 'index-pattern',
-                    title: 'logstash-*',
-                    error: {
-                      type: 'conflict',
-                    },
-                  },
-                  {
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    type: 'visualization',
-                    title: 'Count of requests',
-                    error: {
-                      type: 'conflict',
-                    },
-                  },
-                  {
-                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                    type: 'dashboard',
-                    title: 'Requests',
-                    error: {
-                      type: 'conflict',
-                    },
-                  },
+                  createError(indexPattern, 'conflict'),
+                  createError(visualization, 'conflict'),
+                  createError(dashboard, 'conflict'),
                 ],
               });
             });
@@ -113,11 +110,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
-                successResults: [
-                  { type: 'index-pattern', id: '91200a00-9efd-11e7-acb3-3dab96693fab' },
-                  { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' },
-                  { type: 'dashboard', id: 'be3733a0-9efe-11e7-acb3-3dab96693fab' },
-                ],
+                successResults: [indexPattern, visualization, dashboard],
               });
             });
         });
@@ -140,9 +133,8 @@ export default function ({ getService }) {
                     id: '1',
                     type: 'wigwags',
                     title: 'my title',
-                    error: {
-                      type: 'unsupported_type',
-                    },
+                    meta: { title: 'my title' },
+                    error: { type: 'unsupported_type' },
                   },
                 ],
               });
@@ -172,7 +164,7 @@ export default function ({ getService }) {
             JSON.stringify({
               type: 'visualization',
               id: '1',
-              attributes: {},
+              attributes: { title: 'My visualization' },
               references: [
                 {
                   name: 'ref_0',
@@ -199,6 +191,8 @@ export default function ({ getService }) {
                   {
                     type: 'visualization',
                     id: '1',
+                    title: 'My visualization',
+                    meta: { title: 'My visualization', icon: 'visualizeApp' },
                     error: {
                       type: 'missing_references',
                       blocking: [],

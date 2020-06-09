@@ -83,7 +83,16 @@ export function resolveCopyToSpaceConflictsSuite(
       [destination]: {
         success: true,
         successCount: 1,
-        successResults: [{ id: 'cts_vis_3', type: 'visualization' }],
+        successResults: [
+          {
+            id: 'cts_vis_3',
+            type: 'visualization',
+            meta: {
+              title: `CTS vis 3 from ${sourceSpaceId} space`,
+              icon: 'visualizeApp',
+            },
+          },
+        ],
       },
     });
     const [dashboard, visualization] = await getObjectsAtSpace(destination);
@@ -102,7 +111,16 @@ export function resolveCopyToSpaceConflictsSuite(
       [destinationSpaceId]: {
         success: true,
         successCount: 1,
-        successResults: [{ id: 'cts_dashboard', type: 'dashboard' }],
+        successResults: [
+          {
+            id: 'cts_dashboard',
+            type: 'dashboard',
+            meta: {
+              title: `This is the ${sourceSpaceId} test space CTS dashboard`,
+              icon: 'dashboardApp',
+            },
+          },
+        ],
       },
     });
     const [dashboard, visualization] = await getObjectsAtSpace(destinationSpaceId);
@@ -131,6 +149,10 @@ export function resolveCopyToSpaceConflictsSuite(
             error: { type: 'conflict' },
             id: 'cts_vis_3',
             title: `CTS vis 3 from ${sourceSpaceId} space`,
+            meta: {
+              title: `CTS vis 3 from ${sourceSpaceId} space`,
+              icon: 'visualizeApp',
+            },
             type: 'visualization',
           },
         ],
@@ -158,8 +180,12 @@ export function resolveCopyToSpaceConflictsSuite(
           {
             error: { type: 'conflict' },
             id: 'cts_dashboard',
-            title: `This is the ${sourceSpaceId} test space CTS dashboard`,
             type: 'dashboard',
+            title: `This is the ${sourceSpaceId} test space CTS dashboard`,
+            meta: {
+              title: `This is the ${sourceSpaceId} test space CTS dashboard`,
+              icon: 'dashboardApp',
+            },
           },
         ],
       },
@@ -304,7 +330,12 @@ export function resolveCopyToSpaceConflictsSuite(
       expect(success).to.eql(true);
       expect(successCount).to.eql(1);
       expect(errors).to.be(undefined);
-      expect(successResults).to.eql([{ type, id, ...(destinationId && { destinationId }) }]);
+      const title =
+        id === exactMatchId
+          ? 'A shared saved-object in the default, space_1, and space_2 spaces'
+          : 'A shared saved-object in one space';
+      const meta = { title, icon: 'beaker' };
+      expect(successResults).to.eql([{ type, id, meta, ...(destinationId && { destinationId }) }]);
     };
 
     return [

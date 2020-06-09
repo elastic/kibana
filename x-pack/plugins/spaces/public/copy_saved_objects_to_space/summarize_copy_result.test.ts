@@ -32,18 +32,22 @@ const createCopyResult = (
   if (opts.withConflicts) {
     failedImports.push(
       {
-        obj: { type: 'visualization', id: 'foo-viz' },
+        obj: { type: 'visualization', id: 'foo-viz', meta: { title: 'my-viz' } },
         error: { type: 'conflict' },
       },
       {
-        obj: { type: 'index-pattern', id: 'transient-index-pattern-conflict' },
+        obj: {
+          type: 'index-pattern',
+          id: 'transitive-index-pattern-conflict',
+          meta: { title: 'my-index-pattern' },
+        },
         error: { type: 'conflict' },
       }
     );
   }
   if (opts.withUnresolvableError) {
     failedImports.push({
-      obj: { type: 'visualization', id: 'bar-viz' },
+      obj: { type: 'visualization', id: 'bar-viz', meta: { title: 'another-viz' } },
       error: { type: 'missing_references', blocking: [], references: [] },
     });
   }
@@ -97,7 +101,7 @@ describe('summarizeCopyResult', () => {
     `);
   });
 
-  it('processes failedImports to extract conflicts, including transient conflicts', () => {
+  it('processes failedImports to extract conflicts, including transitive conflicts', () => {
     const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult({ withConflicts: true });
     const includeRelated = true;
@@ -126,6 +130,9 @@ describe('summarizeCopyResult', () => {
               },
               "obj": Object {
                 "id": "foo-viz",
+                "meta": Object {
+                  "title": "my-viz",
+                },
                 "type": "visualization",
               },
             },
@@ -147,13 +154,16 @@ describe('summarizeCopyResult', () => {
                 "type": "conflict",
               },
               "obj": Object {
-                "id": "transient-index-pattern-conflict",
+                "id": "transitive-index-pattern-conflict",
+                "meta": Object {
+                  "title": "my-index-pattern",
+                },
                 "type": "index-pattern",
               },
             },
             "hasUnresolvableErrors": false,
-            "id": "transient-index-pattern-conflict",
-            "name": "transient-index-pattern-conflict",
+            "id": "transitive-index-pattern-conflict",
+            "name": "my-index-pattern",
             "type": "index-pattern",
           },
         ],

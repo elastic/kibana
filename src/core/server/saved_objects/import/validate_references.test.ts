@@ -344,6 +344,9 @@ describe('validateReferences()', () => {
               "type": "missing_references",
             },
             "id": "2",
+            "meta": Object {
+              "title": "My Visualization 2",
+            },
             "title": "My Visualization 2",
             "type": "visualization",
           },
@@ -367,6 +370,9 @@ describe('validateReferences()', () => {
               "type": "missing_references",
             },
             "id": "4",
+            "meta": Object {
+              "title": "My Visualization 4",
+            },
             "title": "My Visualization 4",
             "type": "visualization",
           },

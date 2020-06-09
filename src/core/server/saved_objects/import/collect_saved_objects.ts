@@ -54,10 +54,12 @@ export async function collectSavedObjects({
       if (supportedTypes.includes(obj.type)) {
         return true;
       }
+      const { title } = obj.attributes;
       errors.push({
         id: obj.id,
         type: obj.type,
-        title: obj.attributes.title,
+        title,
+        meta: { title },
         error: {
           type: 'unsupported_type',
         },

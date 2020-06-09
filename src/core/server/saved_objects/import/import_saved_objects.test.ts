@@ -82,6 +82,13 @@ describe('#importSavedObjectsFromStream', () => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
+    typeRegistry.getType.mockImplementation(
+      (type: string) =>
+        ({
+          // other attributes aren't needed for the purposes of injecting metadata
+          management: { icon: `${type}-icon` },
+        } as any)
+    );
     return {
       readStream,
       objectLimit,
@@ -92,11 +99,25 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
     };
   };
-  const createObject = () => {
-    return ({ type: 'foo-type', id: uuidv4() } as unknown) as SavedObject<{ title: string }>;
+  const createObject = (): SavedObject<{
+    title: string;
+  }> => {
+    return {
+      type: 'foo-type',
+      id: uuidv4(),
+      references: [],
+      attributes: { title: 'some-title' },
+    };
   };
-  const createError = () => {
-    return ({ type: 'foo-type', id: uuidv4() } as unknown) as SavedObjectsImportError;
+  const createError = (): SavedObjectsImportError => {
+    const title = 'some-title';
+    return {
+      type: 'foo-type',
+      id: uuidv4(),
+      title: 'some-title',
+      meta: { title },
+      error: { type: 'conflict' },
+    };
   };
 
   /**
@@ -298,24 +319,42 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('returns success=false if an error occurred', async () => {
       const options = setupOptions();
-      const errors = [createError()];
       getMockFn(collectSavedObjects).mockResolvedValue({
-        errors,
+        errors: [createError()],
         collectedObjects: [],
         importIdMap: new Map(), // doesn't matter
       });
 
       const result = await importSavedObjectsFromStream(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors });
+      expect(result).toEqual({ success: false, successCount: 0, errors: [expect.any(Object)] });
     });
 
-    describe('handles a mix of successes and errors', () => {
+    describe('handles a mix of successes and errors and injects metadata', () => {
       const obj1 = createObject();
       const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
       const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId
       const createdObjects = [obj1, obj2, obj3];
-      const errors = [createError()];
+      const error = createError();
+      // results
+      const success1 = {
+        type: obj1.type,
+        id: obj1.id,
+        meta: { title: obj1.attributes.title, icon: `${obj1.type}-icon` },
+      };
+      const success2 = {
+        type: obj2.type,
+        id: obj2.id,
+        meta: { title: obj2.attributes.title, icon: `${obj2.type}-icon` },
+        destinationId: obj2.destinationId,
+      };
+      const success3 = {
+        type: obj3.type,
+        id: obj3.id,
+        meta: { title: obj3.attributes.title, icon: `${obj3.type}-icon` },
+        destinationId: obj3.destinationId,
+      };
+      const errors = [{ ...error, meta: { ...error.meta, icon: `${error.type}-icon` } }];
 
       test('with createNewCopies disabled', async () => {
         const options = setupOptions();
@@ -324,18 +363,13 @@ describe('#importSavedObjectsFromStream', () => {
         const result = await importSavedObjectsFromStream(options);
         // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
         const successResults = [
-          { type: obj1.type, id: obj1.id },
-          { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
+          success1,
+          success2,
           // `createNewCopies` mode is not enabled, but obj3 ran into an ambiguous source conflict and it was created with an empty
           // originId; hence, this specific object is a new copy -- we would need this information for rendering the appropriate originId
           // in the client UI, and we would need it to construct a retry for this object if other objects had errors that needed to be
           // resolved
-          {
-            type: obj3.type,
-            id: obj3.id,
-            destinationId: obj3.destinationId,
-            createNewCopy: true,
-          },
+          { ...success3, createNewCopy: true },
         ];
         expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
       });
@@ -347,12 +381,8 @@ describe('#importSavedObjectsFromStream', () => {
 
         const result = await importSavedObjectsFromStream(options);
         // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
-        const successResults = [
-          { type: obj1.type, id: obj1.id },
-          // obj2 being created with createNewCopies mode enabled isn't a realistic test case (all objects would have originId omitted)
-          { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
-          { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId },
-        ];
+        // obj2 being created with createNewCopies mode enabled isn't a realistic test case (all objects would have originId omitted)
+        const successResults = [success1, success2, success3];
         expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
       });
     });
@@ -379,7 +409,8 @@ describe('#importSavedObjectsFromStream', () => {
       getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[4]], createdObjects: [] });
 
       const result = await importSavedObjectsFromStream(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors });
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
     });
   });
 });

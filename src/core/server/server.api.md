@@ -2365,6 +2365,11 @@ export interface SavedObjectsImportError {
     // (undocumented)
     id: string;
     // (undocumented)
+    meta: {
+        title?: string;
+        icon?: string;
+    };
+    // @deprecated (undocumented)
     title?: string;
     // (undocumented)
     type: string;
@@ -2434,6 +2439,11 @@ export interface SavedObjectsImportSuccess {
     destinationId?: string;
     // (undocumented)
     id: string;
+    // (undocumented)
+    meta: {
+        title?: string;
+        icon?: string;
+    };
     // (undocumented)
     type: string;
 }

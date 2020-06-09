@@ -25,7 +25,6 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../..';
-import { SavedObject } from '../../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -59,6 +58,11 @@ describe(`POST ${URL}`, () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
+    );
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
+      (type: string) =>
+        // other attributes aren't needed for the purposes of injecting metadata
+        ({ management: { icon: `${type}-icon` } } as any)
     );
 
     savedObjectsClient = handlerContext.savedObjects.client;
@@ -116,7 +120,13 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type: 'index-pattern', id: 'my-pattern' }],
+      successResults: [
+        {
+          type: 'index-pattern',
+          id: 'my-pattern',
+          meta: { title: 'my-pattern-*', icon: 'index-pattern-icon' },
+        },
+      ],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -155,8 +165,16 @@ describe(`POST ${URL}`, () => {
       success: true,
       successCount: 2,
       successResults: [
-        { type: mockIndexPattern.type, id: mockIndexPattern.id },
-        { type: mockDashboard.type, id: mockDashboard.id },
+        {
+          type: mockIndexPattern.type,
+          id: mockIndexPattern.id,
+          meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
+        },
+        {
+          type: mockDashboard.type,
+          id: mockDashboard.id,
+          meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+        },
       ],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -190,12 +208,19 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: false,
       successCount: 1,
-      successResults: [{ type: mockDashboard.type, id: mockDashboard.id }],
+      successResults: [
+        {
+          type: mockDashboard.type,
+          id: mockDashboard.id,
+          meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+        },
+      ],
       errors: [
         {
           id: mockIndexPattern.id,
           type: mockIndexPattern.type,
           title: mockIndexPattern.attributes.title,
+          meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
           error: { type: 'conflict' },
         },
       ],
@@ -238,6 +263,7 @@ describe(`POST ${URL}`, () => {
           id: 'my-vis',
           type: 'visualization',
           title: 'my-vis',
+          meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: {
             type: 'missing_references',
             references: [{ type: 'index-pattern', id: 'my-pattern' }],
@@ -258,12 +284,19 @@ describe(`POST ${URL}`, () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
       mockUuidv4.mockReturnValueOnce('new-id-1').mockReturnValueOnce('new-id-2');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
-      savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-        saved_objects: [
-          { type: 'visualization', id: 'new-id-1' } as SavedObject,
-          { type: 'dashboard', id: 'new-id-2' } as SavedObject,
-        ],
-      });
+      const obj1 = {
+        type: 'visualization',
+        id: 'new-id-1',
+        attributes: { title: 'Look at my visualization' },
+        references: [],
+      };
+      const obj2 = {
+        type: 'dashboard',
+        id: 'new-id-2',
+        attributes: { title: 'Look at my dashboard' },
+        references: [],
+      };
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
       const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?createNewCopies=true`)
@@ -274,7 +307,7 @@ describe(`POST ${URL}`, () => {
             'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
             'Content-Type: application/ndjson',
             '',
-            '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
+            '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
             '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
             '--EXAMPLE--',
           ].join('\r\n')
@@ -285,8 +318,18 @@ describe(`POST ${URL}`, () => {
         success: true,
         successCount: 2,
         successResults: [
-          { type: 'visualization', id: 'my-vis', destinationId: 'new-id-1' },
-          { type: 'dashboard', id: 'my-dashboard', destinationId: 'new-id-2' },
+          {
+            type: obj1.type,
+            id: 'my-vis',
+            meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+            destinationId: obj1.id,
+          },
+          {
+            type: obj2.type,
+            id: 'my-dashboard',
+            meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
+            destinationId: obj2.id,
+          },
         ],
       });
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present

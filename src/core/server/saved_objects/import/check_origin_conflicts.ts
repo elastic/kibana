@@ -182,10 +182,12 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
         importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
         filteredObjects.push(object);
       } else {
+        const { title } = attributes;
         errors.push({
           type,
           id,
-          title: attributes?.title,
+          title,
+          meta: { title },
           error: {
             type: 'conflict',
             destinationId: destinations[0].id,
@@ -205,10 +207,12 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       filteredObjects.push(object);
       return;
     }
+    const { title } = attributes;
     errors.push({
       type,
       id,
-      title: attributes?.title,
+      title,
+      meta: { title },
       error: {
         type: 'ambiguous_conflict',
         destinations,

@@ -96,7 +96,7 @@ export function summarizeCopyResult(
       objectMap.set(`${conflict.obj.type}:${conflict.obj.id}`, {
         type: conflict.obj.type,
         id: conflict.obj.id,
-        name: conflict.obj.title || conflict.obj.id,
+        name: conflict.obj.meta.title || conflict.obj.id,
         ...getErrorFields(conflict.obj),
       });
     });

@@ -93,6 +93,13 @@ describe('#importSavedObjectsFromStream', () => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
+    typeRegistry.getType.mockImplementation(
+      (type: string) =>
+        ({
+          // other attributes aren't needed for the purposes of injecting metadata
+          management: { icon: `${type}-icon` },
+        } as any)
+    );
     return {
       readStream,
       objectLimit,
@@ -113,13 +120,27 @@ describe('#importSavedObjectsFromStream', () => {
     const { id = uuidv4(), overwrite = false, replaceReferences = [] } = options ?? {};
     return { type: 'foo-type', id, overwrite, replaceReferences };
   };
-  const createObject = (references?: SavedObjectReference[]) => {
-    return ({ type: 'foo-type', id: uuidv4(), references } as unknown) as SavedObject<{
-      title: string;
-    }>;
+  const createObject = (
+    references?: SavedObjectReference[]
+  ): SavedObject<{
+    title: string;
+  }> => {
+    return {
+      type: 'foo-type',
+      id: uuidv4(),
+      references: references || [],
+      attributes: { title: 'some-title' },
+    };
   };
-  const createError = () => {
-    return ({ type: 'foo-type', id: uuidv4() } as unknown) as SavedObjectsImportError;
+  const createError = (): SavedObjectsImportError => {
+    const title = 'some-title';
+    return {
+      type: 'foo-type',
+      id: uuidv4(),
+      title: 'some-title',
+      meta: { title },
+      error: { type: 'conflict' },
+    };
   };
 
   /**
@@ -400,26 +421,25 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('returns success=false if an error occurred', async () => {
       const options = setupOptions();
-      const errors = [createError()];
       getMockFn(collectSavedObjects).mockResolvedValue({
-        errors,
+        errors: [createError()],
         collectedObjects: [],
         importIdMap: new Map(), // doesn't matter
       });
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors });
+      expect(result).toEqual({ success: false, successCount: 0, errors: [expect.any(Object)] });
     });
 
-    test('handles a mix of successes and errors', async () => {
+    test('handles a mix of successes and errors and injects metadata', async () => {
       const options = setupOptions();
-      const errors = [createError()];
+      const error = createError();
       const obj1 = createObject();
       const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
       const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId; this is a new copy
       getMockFn(createSavedObjects).mockResolvedValueOnce({
-        errors,
+        errors: [error],
         createdObjects: [obj1],
       });
       getMockFn(createSavedObjects).mockResolvedValueOnce({
@@ -430,10 +450,26 @@ describe('#importSavedObjectsFromStream', () => {
       const result = await resolveSavedObjectsImportErrors(options);
       // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
       const successResults = [
-        { type: obj1.type, id: obj1.id },
-        { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
-        { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId, createNewCopy: true },
+        {
+          type: obj1.type,
+          id: obj1.id,
+          meta: { title: obj1.attributes.title, icon: `${obj1.type}-icon` },
+        },
+        {
+          type: obj2.type,
+          id: obj2.id,
+          meta: { title: obj2.attributes.title, icon: `${obj2.type}-icon` },
+          destinationId: obj2.destinationId,
+        },
+        {
+          type: obj3.type,
+          id: obj3.id,
+          meta: { title: obj3.attributes.title, icon: `${obj3.type}-icon` },
+          destinationId: obj3.destinationId,
+          createNewCopy: true,
+        },
       ];
+      const errors = [{ ...error, meta: { ...error.meta, icon: `${error.type}-icon` } }];
       expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
     });
 
@@ -456,7 +492,8 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors });
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
     });
   });
 });

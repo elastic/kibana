@@ -73,9 +73,9 @@ export async function checkConflicts({
       importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId: createNewCopies });
       filteredObjects.push(object);
     } else if (errorObj && errorObj.statusCode !== 409) {
-      errors.push({ type, id, title, error: { ...errorObj, type: 'unknown' } });
+      errors.push({ type, id, title, meta: { title }, error: { ...errorObj, type: 'unknown' } });
     } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts) {
-      errors.push({ type, id, title, error: { type: 'conflict' } });
+      errors.push({ type, id, title, meta: { title }, error: { type: 'conflict' } });
     } else {
       filteredObjects.push(object);
     }

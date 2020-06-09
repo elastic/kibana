@@ -23,6 +23,7 @@ import {
   SavedObjectsImportError,
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportSuccess,
 } from './types';
 import { regenerateIds } from './regenerate_ids';
 import { validateReferences } from './validate_references';
@@ -127,9 +128,12 @@ export async function resolveSavedObjectsImportErrors({
   importIdMap = new Map([...importIdMap, ...importIdMapForRetries]);
 
   // Bulk create in two batches, overwrites and non-overwrites
-  let successResults: Array<{ type: string; id: string; destinationId?: string }> = [];
+  let successResults: SavedObjectsImportSuccess[] = [];
   const accumulatedErrors = [...errorAccumulator];
-  const bulkCreateObjects = async (objects: Array<SavedObject<unknown>>, overwrite?: boolean) => {
+  const bulkCreateObjects = async (
+    objects: Array<SavedObject<{ title?: string }>>,
+    overwrite?: boolean
+  ) => {
     const createSavedObjectsParams = {
       objects,
       accumulatedErrors,
@@ -145,12 +149,16 @@ export async function resolveSavedObjectsImportErrors({
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
-      ...createdObjects.map(({ type, id, destinationId, originId }) => ({
-        type,
-        id,
-        ...(destinationId && { destinationId }),
-        ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
-      })),
+      ...createdObjects.map(({ type, id, attributes: { title }, destinationId, originId }) => {
+        const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
+        return {
+          type,
+          id,
+          meta,
+          ...(destinationId && { destinationId }),
+          ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
+        };
+      }),
     ];
   };
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
@@ -160,10 +168,15 @@ export async function resolveSavedObjectsImportErrors({
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
 
+  const errorResults = errorAccumulator.map((error) => {
+    const icon = typeRegistry.getType(error.type)?.management?.icon;
+    return { ...error, meta: { ...error.meta, icon } };
+  });
+
   return {
     successCount,
     success: errorAccumulator.length === 0,
     ...(successResults.length && { successResults }),
-    ...(errorAccumulator.length && { errors: errorAccumulator }),
+    ...(errorResults.length && { errors: errorResults }),
   };
 }

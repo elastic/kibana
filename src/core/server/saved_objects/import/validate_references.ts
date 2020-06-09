@@ -102,10 +102,12 @@ export async function validateReferences(
     if (missingReferences.length === 0) {
       return true;
     }
+    const { title } = savedObject.attributes;
     errorMap[`${savedObject.type}:${savedObject.id}`] = {
       id: savedObject.id,
       type: savedObject.type,
-      title: savedObject.attributes && savedObject.attributes.title,
+      title,
+      meta: { title },
       error: {
         type: 'missing_references',
         references: missingReferences,
