@@ -78,7 +78,8 @@ export function SingleFieldSelect({
       </EuiFlexGroup>
     );
 
-    const disabledReason = option.disabled ? getFieldDisabledReason(option.value!) : null;
+    const disabledReason =
+      option.disabled && getFieldDisabledReason ? getFieldDisabledReason(option.value!) : null;
 
     return disabledReason ? (
       <EuiToolTip position="left" content={disabledReason}>

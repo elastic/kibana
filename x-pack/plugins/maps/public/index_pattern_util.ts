@@ -29,12 +29,9 @@ export function getGeoTileAggNotSupportedReason(field: IFieldType): string | nul
 export async function getIndexPatternsFromIds(
   indexPatternIds: string[] = []
 ): Promise<IndexPattern[]> {
-  const promises: Promise<IndexPattern[]> = [];
+  const promises: Array<Promise<IndexPattern>> = [];
   indexPatternIds.forEach((id) => {
-    const indexPatternPromise = getIndexPatternService().get(id);
-    if (indexPatternPromise) {
-      promises.push(indexPatternPromise);
-    }
+    promises.push(getIndexPatternService().get(id));
   });
 
   return await Promise.all(promises);
@@ -68,10 +65,10 @@ export function getFieldsWithGeoTileAgg(fields: IFieldType[]): IFieldType[] {
   return fields.filter(supportsGeoTileAgg);
 }
 
-export function supportsGeoTileAgg(field: IFieldType): boolean {
+export function supportsGeoTileAgg(field?: IFieldType): boolean {
   return (
-    field &&
-    field.aggregatable &&
+    !!field &&
+    !!field.aggregatable &&
     !indexPatterns.isNestedField(field) &&
     getAggregatableGeoFieldTypes().includes(field.type)
   );
