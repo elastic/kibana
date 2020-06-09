@@ -82,8 +82,8 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
           anchorClassName="eui-displayBlock"
           content={
             <FormattedMessage
-              id="xpack.transform.stepDefineForm.newSubAggNotAllowedMessage"
-              defaultMessage="You have reached the limit of nested sub-aggregations"
+              id="xpack.transform.stepDefineForm.maxSubAggsLevelsLimitMessage"
+              defaultMessage="You have reached the maximum number of levels of sub-aggregations that can be added in the form. Please edit the JSON config if you want to add another level."
             />
           }
         >
