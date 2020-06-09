@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -198,7 +198,13 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       return null;
     }
 
-    return <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />;
+    return (
+      <>
+        <EuiSpacer />
+        <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
+        <EuiSpacer />
+      </>
+    );
   }
 
   renderStatusMessage(matchedIndices: {
@@ -334,15 +340,15 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     );
 
     return (
-      <EuiPanel paddingSize="l">
+      <>
         {this.renderHeader(matchedIndices)}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {this.renderLoadingState()}
         {this.renderIndexPatternExists()}
         {this.renderStatusMessage(matchedIndices)}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {this.renderList(matchedIndices)}
-      </EuiPanel>
+      </>
     );
   }
 }

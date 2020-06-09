@@ -19,7 +19,14 @@
 
 import React from 'react';
 
-import { EuiForm, EuiFormRow, EuiFieldText, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,6 +45,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   onChangeIndexPatternId,
 }) => (
   <div>
+    <EuiHorizontalRule />
     <EuiButtonEmpty
       iconType={isVisible ? 'arrowDown' : 'arrowRight'}
       onClick={toggleAdvancedOptions}
@@ -45,12 +53,12 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
       {isVisible ? (
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepTime.options.hideButton"
-          defaultMessage="Hide advanced options"
+          defaultMessage="Hide advanced settings"
         />
       ) : (
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepTime.options.showButton"
-          defaultMessage="Show advanced options"
+          defaultMessage="Show advanced settings"
         />
       )}
     </EuiButtonEmpty>

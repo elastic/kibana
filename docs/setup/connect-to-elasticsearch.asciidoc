@@ -91,7 +91,7 @@ Using a wildcard is the more popular approach.
 comparisons.
 +
 Kibana reads the index mapping and lists all fields that contain a timestamp. If your
-index doesn't have time-based data, choose *I don't want to use the Time Filter*.
+index doesn't have time-based data, choose *I don't want to use the time filter*.
 +
 You must select a time field to use global time filters on your dashboards.
 

@@ -58,40 +58,37 @@ export const Header: React.FC<HeaderProps> = ({
       <h2>
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepHeader"
-          defaultMessage="Step 1 of 2: Define index pattern"
+          defaultMessage="Step 1 of 2: Define an index pattern"
         />
       </h2>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
             label={
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
-                defaultMessage="Index pattern"
+                defaultMessage="Index pattern name"
               />
             }
+            fullWidth
             isInvalid={isInputInvalid}
             error={errors}
             helpText={
-              <div>
-                <p>
-                  <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
-                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                    values={{ asterisk: <strong>*</strong> }}
-                  />
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
-                    defaultMessage="You can't use spaces or the characters {characterList}."
-                    values={{ characterList: <strong>{characterList}</strong> }}
-                  />
-                </p>
-              </div>
+              <>
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
+                  defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
+                  values={{ asterisk: <strong>*</strong> }}
+                />{' '}
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
+                  defaultMessage="Spaces and the characters {characterList} are not allowed."
+                  values={{ characterList: <strong>{characterList}</strong> }}
+                />
+              </>
             }
           >
             <EuiFieldText
@@ -102,6 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
                   defaultMessage: 'index-name-*',
                 }
               )}
+              fullWidth
               value={query}
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
@@ -111,17 +109,21 @@ export const Header: React.FC<HeaderProps> = ({
         </EuiForm>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="arrowRight"
-          onClick={() => goToNextStep(query)}
-          isDisabled={isNextStepDisabled}
-          data-test-subj="createIndexPatternGoToStep2Button"
-        >
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.step.nextStepButton"
-            defaultMessage="Next step"
-          />
-        </EuiButton>
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiButton
+            fill
+            iconSide="right"
+            iconType="arrowRight"
+            onClick={() => goToNextStep(query)}
+            isDisabled={isNextStepDisabled}
+            data-test-subj="createIndexPatternGoToStep2Button"
+          >
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+              defaultMessage="Next step"
+            />
+          </EuiButton>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>

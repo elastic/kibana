@@ -22,8 +22,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiText,
+  EuiTitle,
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -183,21 +182,22 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     if (isCreating) {
       return (
-        <EuiPanel>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
+        <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3 className="eui-textCenter">
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
                   defaultMessage="Creating index pattern…"
                 />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 
@@ -236,7 +236,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     ) : null;
 
     return (
-      <EuiPanel paddingSize="l">
+      <>
         <Header indexPattern={indexPattern} indexPatternName={indexPatternName} />
         <EuiSpacer size="m" />
         <TimeField
@@ -261,7 +261,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           submittable={submittable}
           createIndexPattern={this.createIndexPattern}
         />
-      </EuiPanel>
+      </>
     );
   }
 }
