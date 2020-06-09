@@ -4,57 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
-import { overviewFiltersSelector } from '../../../../state/selectors';
-import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
-import { StatusCheckFilters } from '../../../../../common/runtime_types';
+import { FilterExpressionsSelectProps } from './filters_expression_select_container';
+import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
 
-interface Props {
-  newFilters: string[];
-  onRemoveFilter: (val: string) => void;
-  setAlertParams: (key: string, value: any) => void;
+type FilterFieldUpdate = (updateTarget: { fieldName: string; values: string[] }) => void;
+
+interface OwnProps {
+  setUpdatedFieldValues: FilterFieldUpdate;
 }
 
+type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'> & OwnProps;
+
 export const FiltersExpressionsSelect: React.FC<Props> = ({
-  setAlertParams,
+  alertParams,
+  filters: overviewFilters,
   newFilters,
   onRemoveFilter,
+  setAlertParams,
+  setUpdatedFieldValues,
 }) => {
-  const {
-    filters: { tags, ports, schemes, locations },
-  } = useSelector(overviewFiltersSelector);
-
-  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
-    fieldName: string;
-    values: string[];
-  }>({ fieldName: '', values: [] });
-
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useFilterUpdate(
-    updatedFieldValues.fieldName,
-    updatedFieldValues.values
-  );
-
-  const [filters, setFilters] = useState<StatusCheckFilters>({
-    'observer.geo.name': selectedLocations,
-    'url.port': selectedPorts,
-    tags: selectedTags,
-    'monitor.type': selectedSchemes,
-  });
-
-  useEffect(() => {
-    setAlertParams('filters', filters);
-  }, [filters, setAlertParams]);
+  const { tags, ports, schemes, locations } = overviewFilters;
+  const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
+  const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
+  const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
+  const selectedTags = alertParams?.filters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    setFilters({
-      ...filters,
-      [fieldName]: values,
-    });
+    // the `filters` field is no longer a string
+    if (alertParams.filters && typeof alertParams.filters !== 'string') {
+      setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
+    } else {
+      setAlertParams(
+        'filters',
+        Object.assign(
+          {},
+          {
+            tags: [],
+            'url.port': [],
+            'observer.geo.name': [],
+            'monitor.type': [],
+          },
+          { [fieldName]: values }
+        )
+      );
+    }
     setUpdatedFieldValues({ fieldName, values });
   };
 
