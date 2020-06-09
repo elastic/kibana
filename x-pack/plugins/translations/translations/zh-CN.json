@@ -7605,7 +7605,6 @@
     "xpack.infra.logs.lastUpdate": "上次更新时间 {timestamp}",
     "xpack.infra.logs.loadingNewEntriesText": "正在加载新条目",
     "xpack.infra.logs.logEntryActionsDetailsButton": "查看详情",
-    "xpack.infra.logs.logEntryActionsMenuTitle": "日志行详情",
     "xpack.infra.logs.logEntryCategories.analyzeCategoryInMlButtonLabel": "在 ML 中分析",
     "xpack.infra.logs.logEntryCategories.analyzeCategoryInMlTooltipDescription": "在 ML 应用中分析此类别。",
     "xpack.infra.logs.logEntryCategories.categoryColumnTitle": "类别",
