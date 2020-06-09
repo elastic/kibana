@@ -211,14 +211,14 @@ export async function loadIndexData(type: string, indexName: string) {
 
 export function useLoadIndexTemplates() {
   return useRequest<{ templates: TemplateListItem[]; legacyTemplates: TemplateListItem[] }>({
-    path: `${API_BASE_PATH}/index-templates`,
+    path: `${API_BASE_PATH}/index_templates`,
     method: 'get',
   });
 }
 
 export async function deleteTemplates(templates: Array<{ name: string; isLegacy?: boolean }>) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/delete-index-templates`,
+    path: `${API_BASE_PATH}/delete_index_templates`,
     method: 'post',
     body: { templates },
   });
@@ -232,7 +232,7 @@ export async function deleteTemplates(templates: Array<{ name: string; isLegacy?
 
 export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegacy?: boolean) {
   return useRequest<TemplateDeserialized>({
-    path: `${API_BASE_PATH}/index-templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/index_templates/${encodeURIComponent(name)}`,
     method: 'get',
     query: {
       legacy: isLegacy,
@@ -242,7 +242,7 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
 
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/index-templates`,
+    path: `${API_BASE_PATH}/index_templates`,
     method: 'post',
     body: JSON.stringify(template),
   });
@@ -257,7 +257,7 @@ export async function saveTemplate(template: TemplateDeserialized, isClone?: boo
 export async function updateTemplate(template: TemplateDeserialized) {
   const { name } = template;
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/index-templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/index_templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
   });
