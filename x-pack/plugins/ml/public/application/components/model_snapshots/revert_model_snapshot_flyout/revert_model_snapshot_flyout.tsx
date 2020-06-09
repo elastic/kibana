@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
-import { XYBrushArea } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -28,18 +27,14 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
-  EuiTextArea,
   EuiFormRow,
-  EuiCheckbox,
   EuiSwitch,
   EuiConfirmModal,
   EuiOverlayMask,
   EuiCallOut,
-  EuiDatePicker,
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 import {
@@ -52,6 +47,7 @@ import { loadEventRateForJob, loadAnomalyDataForJob } from './utils';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
+import { CreateCalendar } from './create_calendar';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -76,8 +72,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [runInRealTime, setRunInRealTime] = useState(false);
   const [createCalendar, setCreateCalendar] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  // const [startDate, setStartDate] = useState<moment.Moment | null>(null);
-  // const [endDate, setEndDate] = useState<moment.Moment | null>(null);
 
   const [eventRateData, setEventRateData] = useState<any[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
@@ -112,63 +106,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     setRevertModalVisible(false);
   }
 
-  function onBrushEnd({ x }: XYBrushArea) {
-    if (x && x.length === 2) {
-      const end = x[1] < currentSnapshot.latest_record_time_stamp ? null : x[1];
-      if (end !== null) {
-        const start =
-          x[0] < currentSnapshot.latest_record_time_stamp
-            ? currentSnapshot.latest_record_time_stamp
-            : x[0];
-
-        setCalendarEvents([
-          ...calendarEvents,
-          {
-            start: moment(start),
-            end: moment(end),
-            description: `Auto created ${calendarEvents.length}`,
-          },
-        ]);
-        // setStartDate(moment(start));
-        // setEndDate(moment(end));
-      }
-    }
-  }
-
-  function setStartDate(start: moment.Moment | null, index: number) {
-    const event = calendarEvents[index];
-    if (event === undefined) {
-      setCalendarEvents([
-        ...calendarEvents,
-        { start, end: null, description: `Auto created ${index}` },
-      ]);
-    } else {
-      event.start = start;
-      setCalendarEvents([...calendarEvents]);
-    }
-  }
-
-  function setEndDate(end: moment.Moment | null, index: number) {
-    const event = calendarEvents[index];
-    if (event === undefined) {
-      setCalendarEvents([
-        ...calendarEvents,
-        { start: null, end, description: `Auto created ${index}` },
-      ]);
-    } else {
-      event.end = end;
-      setCalendarEvents([...calendarEvents]);
-    }
-  }
-
-  function removeCalendarEvent(index: number) {
-    if (calendarEvents[index] !== undefined) {
-      const ce = [...calendarEvents];
-      ce.splice(index, 1);
-      setCalendarEvents(ce);
-    }
-  }
-
   async function applyRevert() {
     const end =
       replay && runInRealTime === false ? job.data_counts.latest_record_timestamp : undefined;
@@ -185,9 +122,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
         replay,
         end,
         events
-        // createCalendar && startDate !== null && endDate !== null
-        // ? { start: startDate.valueOf(), end: endDate.valueOf() }
-        // : undefined
       );
       hideRevertModal();
       closeWithReload();
@@ -226,42 +160,41 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {false && (
-            <>
-              <EuiSpacer size="s" />
+          {/* <>
+            <EuiSpacer size="s" />
 
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
-                  {
-                    defaultMessage: 'Change snapshot',
-                  }
-                )}
-              >
-                <EuiSuperSelect
-                  options={snapshots
-                    .map((s) => ({
-                      value: s.snapshot_id,
-                      inputDisplay: s.snapshot_id,
-                      dropdownDisplay: (
-                        <>
-                          <strong>{s.snapshot_id}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p className="euiTextColor--subdued">{s.description}</p>
-                          </EuiText>
-                        </>
-                      ),
-                    }))
-                    .reverse()}
-                  valueOfSelected={currentSnapshot.snapshot_id}
-                  onChange={onSnapshotChange}
-                  itemLayoutAlign="top"
-                  hasDividers
-                />
-              </EuiFormRow>
-            </>
-          )}
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
+                {
+                  defaultMessage: 'Change snapshot',
+                }
+              )}
+            >
+              <EuiSuperSelect
+                options={snapshots
+                  .map((s) => ({
+                    value: s.snapshot_id,
+                    inputDisplay: s.snapshot_id,
+                    dropdownDisplay: (
+                      <>
+                        <strong>{s.snapshot_id}</strong>
+                        <EuiText size="s" color="subdued">
+                          <p className="euiTextColor--subdued">{s.description}</p>
+                        </EuiText>
+                      </>
+                    ),
+                  }))
+                  .reverse()}
+                valueOfSelected={currentSnapshot.snapshot_id}
+                onChange={onSnapshotChange}
+                itemLayoutAlign="top"
+                hasDividers
+              />
+            </EuiFormRow>
+          </> */}
+
           {/* <EuiHorizontalRule margin="m" /> */}
           {/* <EuiSpacer size="l" /> */}
 
@@ -365,70 +298,15 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
               </EuiFormRow>
 
               {createCalendar && (
-                <>
-                  <EuiSpacer size="l" />
-                  <div>Select time range for calendar event.</div>
-                  <EuiSpacer size="m" />
-                  <EventRateChart
-                    eventRateChartData={eventRateData}
-                    anomalyData={anomalies}
-                    loading={chartReady === false}
-                    height={'100px'}
-                    width={'100%'}
-                    fadeChart={true}
-                    overlayRanges={calendarEvents.filter(filterIncompleteEvents).map((c) => ({
-                      start: c.start!.valueOf(),
-                      end: c.end!.valueOf(),
-                      color: '#0000ff',
-                      showMarker: false,
-                    }))}
-                    // calendarEvents.length !== null && endDate !== null
-                    //   ? {
-                    //       start: startDate.valueOf(),
-                    //       end: endDate.valueOf(),
-                    //       color: '#0000ff',
-                    //       showMarker: false,
-                    //     }
-                    //   : undefined
-                    // }
-                    onBrushEnd={onBrushEnd}
-                  />
-                  <EuiSpacer size="s" />
-
-                  {calendarEvents.map((c, i) => (
-                    <EuiFlexGroup key={i} justifyContent="spaceBetween">
-                      <EuiFlexItem>
-                        <EuiFormRow label="From">
-                          <EuiDatePicker
-                            showTimeSelect
-                            selected={c.start}
-                            minDate={moment(currentSnapshot.latest_record_time_stamp)}
-                            maxDate={c.end ?? moment(job.data_counts.latest_record_timestamp)}
-                            onChange={(d) => setStartDate(d, i)}
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiFormRow label="To">
-                          <EuiDatePicker
-                            showTimeSelect
-                            selected={c.end}
-                            minDate={c.start ?? moment(currentSnapshot.latest_record_time_stamp)}
-                            onChange={(d) => setEndDate(d, i)}
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          color={'danger'}
-                          onClick={() => removeCalendarEvent(i)}
-                          iconType="trash"
-                          aria-label="replace me"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ))}
-                </>
+                <CreateCalendar
+                  calendarEvents={calendarEvents}
+                  setCalendarEvents={setCalendarEvents}
+                  minSelectableTimeStamp={snapshot.latest_record_time_stamp}
+                  maxSelectableTimeStamp={job.data_counts.latest_record_timestamp}
+                  eventRateData={eventRateData}
+                  anomalies={anomalies}
+                  chartReady={chartReady}
+                />
               )}
             </>
           )}
@@ -492,10 +370,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     </>
   );
 };
-
-// function filterNonNullable<T>(value: T | null | undefined): value is T {
-//   return value !== null && value !== undefined;
-// }
 
 function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {
   return event.start !== null && event.end !== null;
