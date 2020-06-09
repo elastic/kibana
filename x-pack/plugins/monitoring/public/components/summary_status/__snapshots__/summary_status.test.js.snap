@@ -6,7 +6,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive monSummaryStatusNoWrap__flexGroup"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -45,7 +45,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero monSummaryStatusNoWrap__flexItem"
       data-test-subj="transportAddress"
     >
       <div
@@ -72,7 +72,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero monSummaryStatusNoWrap__flexItem"
       data-test-subj="documentCount"
     >
       <div
@@ -110,10 +110,10 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive monSummaryStatusNoWrap__flexGroup"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero monSummaryStatusNoWrap__flexItem"
       data-test-subj="freeDiskSpace"
     >
       <div
@@ -142,7 +142,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero monSummaryStatusNoWrap__flexItem"
       data-test-subj="documentCount"
     >
       <div
@@ -180,7 +180,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive monSummaryStatusNoWrap__flexGroup"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -219,7 +219,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero monSummaryStatusNoWrap__flexItem"
       data-test-subj="freeDiskSpace"
     >
       <div
@@ -248,7 +248,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero monSummaryStatusNoWrap__flexItem"
       data-test-subj="documentCount"
     >
       <div
