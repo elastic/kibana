@@ -22,7 +22,7 @@ interface ListQuery {
 }
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export async function registerJobInfoRoutes(reporting: ReportingCore) {
+export function registerJobInfoRoutes(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);

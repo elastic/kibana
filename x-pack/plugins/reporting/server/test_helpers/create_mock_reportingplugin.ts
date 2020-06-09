@@ -36,30 +36,35 @@ const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
     licensing: {
       license$: of({ isAvailable: true, isActive: true, type: 'basic' }),
     } as any,
-    usageCollection: {} as any,
+    usageCollection: {
+      makeUsageCollector: jest.fn(),
+      registerCollector: jest.fn(),
+    } as any,
   };
 };
+
+export const createMockConfig = (overrides?: any) => ({
+  index: '.reporting',
+  kibanaServer: {
+    hostname: 'localhost',
+    port: '80',
+  },
+  capture: {
+    browser: {
+      chromium: {
+        disableSandbox: true,
+      },
+    },
+  },
+  ...overrides,
+});
 
 export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   data: startMock.data,
 });
 
 const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
-  const mockConfig = {
-    index: '.reporting',
-    kibanaServer: {
-      hostname: 'localhost',
-      port: '80',
-    },
-    capture: {
-      browser: {
-        chromium: {
-          disableSandbox: true,
-        },
-      },
-    },
-    ...config,
-  };
+  const mockConfig = createMockConfig(config);
   const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfig));
   const setupMock = coreMock.createSetup();
   const coreStartMock = coreMock.createStart();
