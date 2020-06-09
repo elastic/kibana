@@ -123,16 +123,18 @@ module.exports = async ({ config }) => {
 
   // Copy the DLL files to the Webpack build for use in the Storybook UI
   config.plugins.push(
-    new CopyWebpackPlugin([
-      {
-        from: resolve(DLL_DIST_DIR, 'dll.js'),
-        to: 'dll.js',
-      },
-      {
-        from: resolve(DLL_DIST_DIR, 'dll.css'),
-        to: 'dll.css',
-      },
-    ])
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolve(DLL_DIST_DIR, 'dll.js'),
+          to: 'dll.js',
+        },
+        {
+          from: resolve(DLL_DIST_DIR, 'dll.css'),
+          to: 'dll.css',
+        },
+      ],
+    })
   );
 
   // Tell Webpack about the ts/x extensions
