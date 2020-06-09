@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestReadable } from '../../../common/test_readable.mock';
 import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '../items';
 import { LIST_ID, LIST_ITEM_INDEX, META, TYPE, USER } from '../../../common/constants.mock';
+
+import { TestReadable } from './test_readable.mock';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
   callCluster: getCallClusterMock(),
