@@ -51,3 +51,7 @@ export const REQUEST_TIMESTAMP_DESC = i18n.translate(
     defaultMessage: 'Time when the start of the request has been logged',
   }
 );
+
+export const NO_ALERT_INDEX_FOUND = i18n.translate('xpack.siem.inspect.modal.noAlertIndexFound', {
+  defaultMessage: 'No alert index found',
+});
