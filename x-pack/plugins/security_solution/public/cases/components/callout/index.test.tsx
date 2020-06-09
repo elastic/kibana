@@ -26,7 +26,7 @@ const defaultProps = {
 
 describe('CaseCallOut ', () => {
   beforeEach(() => {
-    useSecurityLocalStorageMock.mockReset();
+    jest.clearAllMocks();
     useSecurityLocalStorageMock.mockImplementation(() => securityLocalStorageMock);
   });
 
@@ -152,5 +152,27 @@ describe('CaseCallOut ', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).last().exists()).toBeFalsy();
+  });
+
+  it('do not persist a callout of type danger', () => {
+    const props = {
+      ...defaultProps,
+      messages: [
+        {
+          id: 'message-one',
+          title: 'title one',
+          description: <p>{'we have two messages'}</p>,
+          errorType: 'danger' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+      ],
+    };
+
+    mount(
+      <TestProviders>
+        <CaseCallOut {...props} />
+      </TestProviders>
+    );
+
+    expect(securityLocalStorageMock.persistDismissCallout).not.toHaveBeenCalled();
   });
 });

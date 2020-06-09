@@ -43,11 +43,13 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
 
   const [calloutVisibility, setCalloutVisibility] = useState(dismissedCallouts);
   const handleCallOut = useCallback(
-    (id) => {
+    (id, type) => {
       setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
-      persistDismissCallout('case', id);
+      if (type !== 'danger') {
+        persistDismissCallout('case', id);
+      }
     },
-    [setCalloutVisibility]
+    [setCalloutVisibility, persistDismissCallout]
   );
 
   let callOutMessages = messages ?? [];

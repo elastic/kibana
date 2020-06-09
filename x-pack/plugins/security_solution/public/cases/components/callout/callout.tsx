@@ -17,7 +17,7 @@ interface CallOutProps {
   title: string;
   messages: ErrorMessage[];
   showCallOut: boolean;
-  handleDismissCallout: (id: string) => void;
+  handleDismissCallout: (id: string, type: NonNullable<ErrorMessage['errorType']>) => void;
 }
 
 const CallOutComponent = ({
@@ -28,7 +28,11 @@ const CallOutComponent = ({
   showCallOut,
   handleDismissCallout,
 }: CallOutProps) => {
-  const handleCallOut = useCallback(() => handleDismissCallout(id), [handleDismissCallout]);
+  const handleCallOut = useCallback(() => handleDismissCallout(id, type), [
+    handleDismissCallout,
+    id,
+    type,
+  ]);
 
   return showCallOut ? (
     <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-callout-${id}`}>

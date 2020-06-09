@@ -105,6 +105,17 @@ export const usePushToService = ({
             />
           ),
         },
+        {
+          id: 'connector-deleted-error',
+          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          description: (
+            <FormattedMessage
+              defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
+              id="xpack.securitySolution.case.caseView.pushToServiceDisableByInvalidConnector"
+            />
+          ),
+          errorType: 'danger',
+        },
       ];
     } else if (caseConnectorId === 'none' && !loadingLicense) {
       errors = [
