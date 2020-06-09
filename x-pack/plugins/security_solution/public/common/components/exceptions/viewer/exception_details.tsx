@@ -15,7 +15,7 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
-import { ExceptionListItemSchema } from '../types';
+import { DescriptionListItem, ExceptionListItemSchema } from '../types';
 import { getDescriptionListContent } from '../helpers';
 import * as i18n from '../translations';
 
@@ -43,9 +43,10 @@ const ExceptionDetailsComponent = ({
   exceptionItem: ExceptionListItemSchema;
   onCommentsClick: () => void;
 }): JSX.Element => {
-  const descriptionListItems = useMemo(() => getDescriptionListContent(exceptionItem), [
-    exceptionItem,
-  ]);
+  const descriptionListItems = useMemo(
+    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem),
+    [exceptionItem]
+  );
 
   const commentsSection = useMemo((): JSX.Element => {
     const { comments } = exceptionItem;
@@ -73,7 +74,7 @@ const ExceptionDetailsComponent = ({
         <EuiFlexItem grow={1}>
           <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
             {descriptionListItems.map((item) => (
-              <Fragment key={item.title.toString()}>
+              <Fragment key={`${item.title}`}>
                 <MyDescriptionListTitle>{item.title}</MyDescriptionListTitle>
                 <MyDescriptionListDescription>{item.description}</MyDescriptionListDescription>
               </Fragment>

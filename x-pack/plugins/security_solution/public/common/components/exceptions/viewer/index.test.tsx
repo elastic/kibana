@@ -20,8 +20,8 @@ describe('ExceptionItem', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
           commentsAccordionId={'accordion--comments'}
-          handleDelete={jest.fn()}
-          handleEdit={jest.fn()}
+          onDeleteException={jest.fn()}
+          onEditException={jest.fn()}
           exceptionItem={exceptionItem}
         />
       </ThemeProvider>
@@ -31,16 +31,16 @@ describe('ExceptionItem', () => {
     expect(wrapper.find('ExceptionEntries')).toHaveLength(1);
   });
 
-  it('it invokes "handleEdit" when edit button clicked', () => {
-    const mockHandleEdit = jest.fn();
+  it('it invokes "onEditException" when edit button clicked', () => {
+    const mockOnEditException = jest.fn();
     const exceptionItem = getExceptionItemMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
           commentsAccordionId={'accordion--comments'}
-          handleDelete={jest.fn()}
-          handleEdit={mockHandleEdit}
+          onDeleteException={jest.fn()}
+          onEditException={mockOnEditException}
           exceptionItem={exceptionItem}
         />
       </ThemeProvider>
@@ -49,19 +49,19 @@ describe('ExceptionItem', () => {
     const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
     editBtn.simulate('click');
 
-    expect(mockHandleEdit).toHaveBeenCalledTimes(1);
+    expect(mockOnEditException).toHaveBeenCalledTimes(1);
   });
 
-  it('it invokes "handleDelete" when delete button clicked', () => {
-    const mockHandleDelete = jest.fn();
+  it('it invokes "onDeleteException" when delete button clicked', () => {
+    const mockOnDeleteException = jest.fn();
     const exceptionItem = getExceptionItemMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
           commentsAccordionId={'accordion--comments'}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
+          onDeleteException={mockOnDeleteException}
+          onEditException={jest.fn()}
           exceptionItem={exceptionItem}
         />
       </ThemeProvider>
@@ -70,19 +70,19 @@ describe('ExceptionItem', () => {
     const editBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
     editBtn.simulate('click');
 
-    expect(mockHandleDelete).toHaveBeenCalledTimes(1);
+    expect(mockOnDeleteException).toHaveBeenCalledTimes(1);
   });
 
   it('it renders comment accordion closed to begin with', () => {
-    const mockHandleDelete = jest.fn();
+    const mockOnDeleteException = jest.fn();
     const exceptionItem = getExceptionItemMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
           commentsAccordionId={'accordion--comments'}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
+          onDeleteException={mockOnDeleteException}
+          onEditException={jest.fn()}
           exceptionItem={exceptionItem}
         />
       </ThemeProvider>
@@ -92,15 +92,15 @@ describe('ExceptionItem', () => {
   });
 
   it('it renders comment accordion open when showComments is true', () => {
-    const mockHandleDelete = jest.fn();
+    const mockOnDeleteException = jest.fn();
     const exceptionItem = getExceptionItemMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
           commentsAccordionId={'accordion--comments'}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
+          onDeleteException={mockOnDeleteException}
+          onEditException={jest.fn()}
           exceptionItem={exceptionItem}
         />
       </ThemeProvider>

@@ -30,15 +30,15 @@ const MyFlexItem = styled(EuiFlexItem)`
 interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
-  handleDelete: ({ id }: { id: string }) => void;
-  handleEdit: (item: ExceptionListItemSchema) => void;
+  onDeleteException: ({ id }: { id: string }) => void;
+  onEditException: (item: ExceptionListItemSchema) => void;
 }
 
 const ExceptionItemComponent = ({
   exceptionItem,
   commentsAccordionId,
-  handleDelete,
-  handleEdit,
+  onDeleteException,
+  onEditException,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -49,12 +49,12 @@ const ExceptionItemComponent = ({
   }, [exceptionItem.entries]);
 
   const onDelete = useCallback((): void => {
-    handleDelete({ id: exceptionItem.id });
-  }, [handleDelete, exceptionItem]);
+    onDeleteException({ id: exceptionItem.id });
+  }, [onDeleteException, exceptionItem]);
 
   const onEdit = useCallback((): void => {
-    handleEdit(exceptionItem);
-  }, [handleEdit, exceptionItem]);
+    onEditException(exceptionItem);
+  }, [onEditException, exceptionItem]);
 
   const onCommentsClick = useCallback((): void => {
     setShowComments(!showComments);
@@ -74,7 +74,7 @@ const ExceptionItemComponent = ({
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
             />
-            <ExceptionEntries entries={entryItems} handleDelete={onDelete} handleEdit={onEdit} />
+            <ExceptionEntries entries={entryItems} onDelete={onDelete} onEdit={onEdit} />
           </EuiFlexGroup>
         </EuiFlexItem>
         <MyFlexItem className={showComments ? 'comments--show' : ''}>

@@ -13,7 +13,7 @@ import { Operator } from '../types';
 import { getExceptionItemMock } from '../mocks';
 
 const withTheme = (storyFn: () => ReactNode) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
+  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 );
 
 storiesOf('components/exceptions', module)
@@ -35,8 +35,8 @@ storiesOf('components/exceptions', module)
       <ExceptionItem
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
-        handleDelete={() => {}}
-        handleEdit={() => {}}
+        onDeleteException={() => {}}
+        onEditException={() => {}}
       />
     );
   })
@@ -57,8 +57,8 @@ storiesOf('components/exceptions', module)
       <ExceptionItem
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
-        handleDelete={() => {}}
-        handleEdit={() => {}}
+        onDeleteException={() => {}}
+        onEditException={() => {}}
       />
     );
   })
@@ -79,8 +79,8 @@ storiesOf('components/exceptions', module)
       <ExceptionItem
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
-        handleDelete={() => {}}
-        handleEdit={() => {}}
+        onDeleteException={() => {}}
+        onEditException={() => {}}
       />
     );
   })
@@ -94,8 +94,8 @@ storiesOf('components/exceptions', module)
       <ExceptionItem
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
-        handleDelete={() => {}}
-        handleEdit={() => {}}
+        onDeleteException={() => {}}
+        onEditException={() => {}}
       />
     );
   })
@@ -106,8 +106,8 @@ storiesOf('components/exceptions', module)
       <ExceptionItem
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
-        handleDelete={() => {}}
-        handleEdit={() => {}}
+        onDeleteException={() => {}}
+        onEditException={() => {}}
       />
     );
   });
