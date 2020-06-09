@@ -17,6 +17,7 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
@@ -47,41 +48,43 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
+  const props: BodyProps = {
+    addNoteToEvent: jest.fn(),
+    browserFields: mockBrowserFields,
+    columnHeaders: defaultHeaders,
+    columnRenderers,
+    data: mockTimelineData,
+    eventIdToNoteIds: {},
+    height: testBodyHeight,
+    id: 'timeline-test',
+    isSelectAllChecked: false,
+    getNotesByIds: mockGetNotesByIds,
+    loadingEventIds: [],
+    onColumnRemoved: jest.fn(),
+    onColumnResized: jest.fn(),
+    onColumnSorted: jest.fn(),
+    onFilterChange: jest.fn(),
+    onPinEvent: jest.fn(),
+    onRowSelected: jest.fn(),
+    onSelectAll: jest.fn(),
+    onUnPinEvent: jest.fn(),
+    onUpdateColumns: jest.fn(),
+    pinnedEventIds: {},
+    rowRenderers,
+    selectedEventIds: {},
+    sort: mockSort,
+    showCheckboxes: false,
+    status: TimelineStatus.active,
+    toggleColumn: jest.fn(),
+    updateNote: jest.fn(),
+  };
   (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
 
   describe('rendering', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body
-            addNoteToEvent={jest.fn()}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            columnRenderers={columnRenderers}
-            data={mockTimelineData}
-            eventIdToNoteIds={{}}
-            height={testBodyHeight}
-            id={'timeline-test'}
-            isSelectAllChecked={false}
-            getNotesByIds={mockGetNotesByIds}
-            loadingEventIds={[]}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
-            onFilterChange={jest.fn()}
-            onPinEvent={jest.fn()}
-            onRowSelected={jest.fn()}
-            onSelectAll={jest.fn()}
-            onUnPinEvent={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            pinnedEventIds={{}}
-            rowRenderers={rowRenderers}
-            selectedEventIds={{}}
-            sort={mockSort}
-            showCheckboxes={false}
-            toggleColumn={jest.fn()}
-            updateNote={jest.fn()}
-          />
+          <Body {...props} />
         </TestProviders>
       );
 
@@ -91,35 +94,7 @@ describe('Body', () => {
     test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body
-            addNoteToEvent={jest.fn()}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            columnRenderers={columnRenderers}
-            data={mockTimelineData}
-            eventIdToNoteIds={{}}
-            height={testBodyHeight}
-            id={'timeline-test'}
-            isSelectAllChecked={false}
-            getNotesByIds={mockGetNotesByIds}
-            loadingEventIds={[]}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
-            onFilterChange={jest.fn()}
-            onPinEvent={jest.fn()}
-            onRowSelected={jest.fn()}
-            onSelectAll={jest.fn()}
-            onUnPinEvent={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            pinnedEventIds={{}}
-            rowRenderers={rowRenderers}
-            selectedEventIds={{}}
-            sort={mockSort}
-            showCheckboxes={false}
-            toggleColumn={jest.fn()}
-            updateNote={jest.fn()}
-          />
+          <Body {...props} />
         </TestProviders>
       );
 
@@ -129,35 +104,7 @@ describe('Body', () => {
     test('it renders events', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body
-            addNoteToEvent={jest.fn()}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            columnRenderers={columnRenderers}
-            data={mockTimelineData}
-            eventIdToNoteIds={{}}
-            height={testBodyHeight}
-            id={'timeline-test'}
-            isSelectAllChecked={false}
-            getNotesByIds={mockGetNotesByIds}
-            loadingEventIds={[]}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
-            onFilterChange={jest.fn()}
-            onPinEvent={jest.fn()}
-            onRowSelected={jest.fn()}
-            onSelectAll={jest.fn()}
-            onUnPinEvent={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            pinnedEventIds={{}}
-            rowRenderers={rowRenderers}
-            selectedEventIds={{}}
-            sort={mockSort}
-            showCheckboxes={false}
-            toggleColumn={jest.fn()}
-            updateNote={jest.fn()}
-          />
+          <Body {...props} />
         </TestProviders>
       );
 
@@ -166,38 +113,10 @@ describe('Body', () => {
 
     test('it renders a tooltip for timestamp', async () => {
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-
+      const testProps = { ...props, columnHeaders: headersJustTimestamp };
       const wrapper = mount(
         <TestProviders>
-          <Body
-            addNoteToEvent={jest.fn()}
-            browserFields={mockBrowserFields}
-            columnHeaders={headersJustTimestamp}
-            columnRenderers={columnRenderers}
-            data={mockTimelineData}
-            eventIdToNoteIds={{}}
-            height={testBodyHeight}
-            id={'timeline-test'}
-            isSelectAllChecked={false}
-            getNotesByIds={mockGetNotesByIds}
-            loadingEventIds={[]}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
-            onFilterChange={jest.fn()}
-            onPinEvent={jest.fn()}
-            onRowSelected={jest.fn()}
-            onSelectAll={jest.fn()}
-            onUnPinEvent={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            pinnedEventIds={{}}
-            rowRenderers={rowRenderers}
-            selectedEventIds={{}}
-            sort={mockSort}
-            showCheckboxes={false}
-            toggleColumn={jest.fn()}
-            updateNote={jest.fn()}
-          />
+          <Body {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -218,6 +137,11 @@ describe('Body', () => {
   describe('action on event', () => {
     const dispatchAddNoteToEvent = jest.fn();
     const dispatchOnPinEvent = jest.fn();
+    const testProps = {
+      ...props,
+      addNoteToEvent: dispatchAddNoteToEvent,
+      onPinEvent: dispatchOnPinEvent,
+    };
 
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
@@ -254,35 +178,7 @@ describe('Body', () => {
     test('Add a Note to an event', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body
-            addNoteToEvent={dispatchAddNoteToEvent}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            columnRenderers={columnRenderers}
-            data={mockTimelineData}
-            eventIdToNoteIds={{}}
-            height={testBodyHeight}
-            id={'timeline-test'}
-            isSelectAllChecked={false}
-            getNotesByIds={mockGetNotesByIds}
-            loadingEventIds={[]}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
-            onFilterChange={jest.fn()}
-            onPinEvent={dispatchOnPinEvent}
-            onRowSelected={jest.fn()}
-            onSelectAll={jest.fn()}
-            onUnPinEvent={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            pinnedEventIds={{}}
-            rowRenderers={rowRenderers}
-            selectedEventIds={{}}
-            sort={mockSort}
-            showCheckboxes={false}
-            toggleColumn={jest.fn()}
-            updateNote={jest.fn()}
-          />
+          <Body {...testProps} />
         </TestProviders>
       );
       addaNoteToEvent(wrapper, 'hello world');
@@ -292,43 +188,13 @@ describe('Body', () => {
     });
 
     test('Add two Note to an event', () => {
-      const Proxy = (props: BodyProps) => (
+      const Proxy = (proxyProps: BodyProps) => (
         <TestProviders>
-          <Body {...props} />
+          <Body {...proxyProps} />
         </TestProviders>
       );
 
-      const wrapper = mount(
-        <Proxy
-          addNoteToEvent={dispatchAddNoteToEvent}
-          browserFields={mockBrowserFields}
-          columnHeaders={defaultHeaders}
-          columnRenderers={columnRenderers}
-          data={mockTimelineData}
-          eventIdToNoteIds={{}}
-          height={testBodyHeight}
-          id={'timeline-test'}
-          isSelectAllChecked={false}
-          getNotesByIds={mockGetNotesByIds}
-          loadingEventIds={[]}
-          onColumnRemoved={jest.fn()}
-          onColumnResized={jest.fn()}
-          onColumnSorted={jest.fn()}
-          onFilterChange={jest.fn()}
-          onPinEvent={dispatchOnPinEvent}
-          onRowSelected={jest.fn()}
-          onSelectAll={jest.fn()}
-          onUnPinEvent={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          pinnedEventIds={{}}
-          rowRenderers={rowRenderers}
-          selectedEventIds={{}}
-          sort={mockSort}
-          showCheckboxes={false}
-          toggleColumn={jest.fn()}
-          updateNote={jest.fn()}
-        />
-      );
+      const wrapper = mount(<Proxy {...testProps} />);
       addaNoteToEvent(wrapper, 'hello world');
       dispatchAddNoteToEvent.mockClear();
       dispatchOnPinEvent.mockClear();

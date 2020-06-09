@@ -6,6 +6,7 @@
 
 import React, { useMemo, useRef } from 'react';
 
+import { TimelineStatusLiteralWithNull } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
@@ -55,6 +56,7 @@ export interface BodyProps {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
+  status: TimelineStatusLiteralWithNull;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   sort: Sort;

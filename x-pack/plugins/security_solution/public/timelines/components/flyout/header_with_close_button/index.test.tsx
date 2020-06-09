@@ -11,6 +11,23 @@ import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            securitySolution: {
+              crud: true,
+            },
+          },
+        },
+      },
+    }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+  };
+});
+
 describe('FlyoutHeaderWithCloseButton', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(

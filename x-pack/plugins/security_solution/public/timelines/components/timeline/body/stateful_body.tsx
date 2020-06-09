@@ -95,6 +95,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     const onAddNoteToEvent: AddNoteToEvent = useCallback(
       ({ eventId, noteId }: { eventId: string; noteId: string }) =>
         addNoteToEvent!({ id, eventId, noteId }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -132,27 +133,34 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       (sorted) => {
         updateSort!({ id, sort: sorted });
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
     const onColumnRemoved: OnColumnRemoved = useCallback(
       (columnId) => removeColumn!({ id, columnId }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
     const onColumnResized: OnColumnResized = useCallback(
       ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [id]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [id]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
 
     const onUpdateColumns: OnUpdateColumns = useCallback(
       (columns) => updateColumns!({ id, columns }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id]
     );
 
@@ -161,6 +169,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       if (selectAll) {
         onSelectAll({ isSelected: true });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectAll]); // onSelectAll dependency not necessary
 
     return (

@@ -50,6 +50,7 @@ export const useEditTimelineBatchActions = ({
       disableExportTimelineDownloader();
       onCloseDeleteTimelineModal();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef.current]
   );
 

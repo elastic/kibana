@@ -31,12 +31,14 @@ export const pickSavedTimeline = (
     savedTimeline.status = !isEmpty(savedTimeline.title)
       ? TimelineStatus.active
       : TimelineStatus.draft;
-    savedTimeline.templateTimelineId = null;
-    savedTimeline.templateTimelineVersion = null;
   } else if (savedTimeline.timelineType === TimelineType.default) {
     savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
+  }
+
+  if (!isEmpty(savedTimeline.title) && savedTimeline.status === TimelineStatus.draft) {
+    savedTimeline.status = TimelineStatus.active;
   }
 
   return savedTimeline;

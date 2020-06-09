@@ -96,6 +96,7 @@ export const useTimelineTypes = ({
         <EuiSpacer size="m" />
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabName]);
 
   const timelineFilters = useMemo(() => {
@@ -110,7 +111,7 @@ export const useTimelineTypes = ({
         {tab.name}
       </EuiFilterButton>
     ));
-  }, [timelineType, getFilterOrTabs]);
+  }, [timelineType, getFilterOrTabs, onFilterClicked]);
 
   return {
     timelineType,

@@ -27,9 +27,10 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
-
+jest.mock('./properties/properties_right');
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
+
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('Timeline', () => {

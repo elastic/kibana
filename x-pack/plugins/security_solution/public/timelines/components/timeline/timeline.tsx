@@ -174,12 +174,15 @@ export const TimelineComponent: React.FC<Props> = ({
   } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({ id, indexToAdd });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingIndexName, isQueryLoading]);
   useEffect(() => {
     setTimelineFilterManager({ id, filterManager });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterManager]);
 
   return (

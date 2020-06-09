@@ -153,6 +153,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelineType,
       onlyFavorites,
       timelineStatus,
+      fetchAllTimeline,
     ]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
@@ -205,6 +206,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
       async (timelineIds: string[]) => {
+        // The type for `deleteTimelines` is incorrect, it returns a Promise
         await deleteTimelines(timelineIds);
       },
       [deleteTimelines]
@@ -212,6 +214,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     /** Invoked when the user clicks the action to delete the selected timelines */
     const onDeleteSelected: OnDeleteSelected = useCallback(async () => {
+      // The type for `deleteTimelines` is incorrect, it returns a Promise
       await deleteTimelines(getSelectedTimelineIds(selectedItems));
 
       // NOTE: we clear the selection state below, but if the server fails to
@@ -219,6 +222,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       resetSelectionState();
 
       // TODO: the query must re-execute to show the results of the deletion
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedItems, deleteTimelines]);
 
     /** Invoked when the user selects (or de-selects) timelines */
@@ -272,6 +276,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           updateTimeline,
         });
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [apolloClient, updateIsLoading, updateTimeline]
     );
 

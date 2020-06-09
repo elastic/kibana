@@ -63,6 +63,7 @@ export const allTimelinesQuery = gql`
         }
         noteIds
         pinnedEventIds
+        status
         title
         status
         timelineType
