@@ -68,7 +68,7 @@ export interface RuleAlertParams {
   type: RuleType;
   version: number;
   throttle: string | undefined | null;
-  exceptions_list: ListsDefaultArraySchema | null | undefined;
+  exceptionsList: ListsDefaultArraySchema | null | undefined;
 }
 
 export type RuleTypeParams = Omit<
@@ -83,6 +83,7 @@ export type RuleAlertParamsRest = Omit<
   | 'falsePositives'
   | 'immutable'
   | 'maxSignals'
+  | 'exceptionsList'
   | 'machineLearningJobId'
   | 'savedId'
   | 'riskScore'
@@ -101,6 +102,7 @@ export type RuleAlertParamsRest = Omit<
     | 'lastFailureMessage'
   > & {
     anomaly_threshold: RuleAlertParams['anomalyThreshold'];
+    exceptions_list: RuleAlertParams['exceptionsList'];
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
     saved_id?: RuleAlertParams['savedId'];
@@ -126,24 +128,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   updated_by: string | undefined | null;
   immutable: boolean;
 };
-
-export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
-  id: string | undefined | null;
-  rule_id: string;
-  immutable: boolean;
-};
-
-export type PrepackagedRules = Omit<
-  RuleAlertParamsRest,
-  | 'status'
-  | 'status_date'
-  | 'last_failure_at'
-  | 'last_success_at'
-  | 'last_failure_message'
-  | 'last_success_message'
-  | 'updated_at'
-  | 'created_at'
-> & { rule_id: string; immutable: boolean };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CallWithRequest<T extends Record<string, any>, V> = (

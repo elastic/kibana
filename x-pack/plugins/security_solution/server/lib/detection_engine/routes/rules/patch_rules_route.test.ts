@@ -167,11 +167,11 @@ describe('patch_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         body: { ...typicalPayload(), rule_id: undefined },
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" must contain at least one of [id, rule_id]'
-      );
+      const response = await server.inject(request, context);
+      expect(response.body).toEqual({
+        message: ['either "id" or "rule_id" must be set'],
+        status_code: 400,
+      });
     });
 
     test('allows query rule type', async () => {
@@ -194,7 +194,7 @@ describe('patch_rules', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]'
+        'Invalid value "unknown_type" supplied to "type"'
       );
     });
   });
