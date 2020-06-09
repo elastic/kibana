@@ -141,6 +141,7 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionLicense, caseStatus, connectors.length, caseConnectorId, loadingLicense, urlSearch]);
 
   const pushToServiceButton = useMemo(() => {
@@ -160,6 +161,7 @@ export const usePushToService = ({
           : i18n.PUSH_THIRD(caseConnectorName)}
       </EuiButton>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     caseConnectorId,
     caseConnectorName,
