@@ -61,8 +61,8 @@ Sensitive properties, such as passwords, can also be stored in the <<creating-ke
 ==== View preconfigured connectors
 ////
 
-In *Management > Alerts and Actions*, preconfigured connectors
-appear in the <<connector-management, *Connectors* tab>>,
+When you open the menu, then go to *Stack Management > {kib} > Alerts and Actions*, preconfigured connectors
+appear on the <<connector-management, *Connectors* tab>>,
 regardless of which space you are in.
 They are tagged as “preconfigured”, and you cannot delete them.
 
@@ -101,7 +101,7 @@ This example shows a preconfigured action type with one out-of-the box connector
 [[managing-pre-configured-action-types]]
 To attach a preconfigured action to an alert:
 
-. In *Management > Alerts and Actions*, open the *Connectors* tab.
+. Open the menu, then go to *Stack Management > {kib} > Alerts and Actions*, open the *Connectors* tab.
 
 . Click *Create connector.*
 
