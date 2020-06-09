@@ -23,7 +23,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
-  private isInitialized?: boolean = false;
+  private isInitialized?: Promise<boolean>;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
@@ -34,7 +34,6 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.httpSetup = appContext.httpSetup;
-    this.isInitialized = false;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -91,7 +90,7 @@ class AppContextService {
   }
 
   public setIsInitialized(value: boolean) {
-    this.isInitialized = value;
+    this.isInitialized = Promise.resolve(value);
   }
 
   public getIsProductionMode() {

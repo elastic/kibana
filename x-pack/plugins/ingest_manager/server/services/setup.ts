@@ -34,6 +34,12 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
+  console.log('setupIngestManager()');
+  if (appContextService.getIsInitialized()) {
+    console.log('setupIngestManager early exit');
+    return;
+  }
+  console.log('setupIngestManager set it up');
   const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
@@ -95,8 +101,9 @@ export async function setupIngestManager(
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }
-
+  console.log('setupIngestManager WORKED');
   appContextService.setIsInitialized(true);
+  return;
 }
 
 export async function setupFleet(

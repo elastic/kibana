@@ -62,7 +62,7 @@ export const createFleetSetupHandler: RequestHandler<
     });
 
     return response.ok({
-      body: { isInitialized: appContextService.getIsInitialized() },
+      body: { isInitialized: true },
     });
   } catch (e) {
     return response.customError({
@@ -77,12 +77,10 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const logger = appContextService.getLogger();
   try {
-    if (!appContextService.getIsInitialized()) {
-      await setupIngestManager(soClient, callCluster);
-    }
+    await setupIngestManager(soClient, callCluster);
 
     return response.ok({
-      body: { isInitialized: appContextService.getIsInitialized() },
+      body: { isInitialized: true },
     });
   } catch (e) {
     if (e instanceof IngestManagerError) {
