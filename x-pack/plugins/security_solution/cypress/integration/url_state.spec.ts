@@ -29,8 +29,8 @@ import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../tasks/hosts/
 import { openAllHosts } from '../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
-import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/siem_header';
-import { openTimeline } from '../tasks/siem_main';
+import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
+import { openTimeline } from '../tasks/security_main';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,

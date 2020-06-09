@@ -6,7 +6,7 @@
 import { DETECTIONS, HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../screens/security_header';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { navigateFromHeaderTo } from '../tasks/siem_header';
+import { navigateFromHeaderTo } from '../tasks/security_header';
 
 import { TIMELINES_PAGE } from '../urls/navigation';
 
