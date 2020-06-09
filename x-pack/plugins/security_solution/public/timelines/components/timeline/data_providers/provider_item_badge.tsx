@@ -112,27 +112,29 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       () => () => {
         unRegisterProvider();
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+      [unRegisterProvider]
+    );
+
+    const button = (
+      <ProviderBadge
+        deleteProvider={!isLoading ? deleteProvider : noop}
+        field={field}
+        kqlQuery={kqlQuery}
+        isEnabled={isEnabled}
+        isExcluded={isExcluded}
+        providerId={providerId}
+        togglePopover={togglePopover}
+        val={val}
+        operator={operator}
+        type={type}
+      />
     );
 
     return (
       <ProviderItemActions
         andProviderId={andProviderId}
         browserFields={browserFields}
-        button={
-          <ProviderBadge
-            deleteProvider={!isLoading ? deleteProvider : noop}
-            field={field}
-            kqlQuery={kqlQuery}
-            isEnabled={isEnabled}
-            isExcluded={isExcluded}
-            providerId={providerId}
-            togglePopover={togglePopover}
-            val={val}
-            operator={operator}
-          />
-        }
+        button={button}
         closePopover={closePopover}
         deleteProvider={deleteProvider}
         field={field}

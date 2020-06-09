@@ -52,7 +52,7 @@ export const getActionsColumns = ({
 
   const createTemplateFromTimeline = {
     name: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
-    icon: 'timeline',
+    icon: 'string',
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,

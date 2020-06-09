@@ -12,6 +12,7 @@ import { Description, Name, NotesButton, StarIcon } from './helpers';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
 
@@ -22,6 +23,7 @@ type UpdateDescription = ({ id, description }: { id: string; description: string
 interface Props {
   isFavorite: boolean;
   timelineId: string;
+  timelineType: TimelineType;
   updateIsFavorite: UpdateIsFavorite;
   showDescription: boolean;
   description: string;
@@ -73,6 +75,7 @@ export const PropertiesLeft = React.memo<Props>(
   ({
     isFavorite,
     timelineId,
+    timelineType,
     updateIsFavorite,
     showDescription,
     description,
@@ -99,7 +102,12 @@ export const PropertiesLeft = React.memo<Props>(
         />
       </EuiFlexItem>
 
-      <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
+      <Name
+        timelineId={timelineId}
+        timelineType={timelineType}
+        title={title}
+        updateTitle={updateTitle}
+      />
 
       {showDescription ? (
         <EuiFlexItem grow={2}>

@@ -158,7 +158,9 @@ export const useWithSource = (sourceId: string, indexToAdd?: string[]) => {
             updateErrorMessage(null);
             setIndicesExist(get('data.source.status.indicesExist', result));
             setBrowserFields(getBrowserFields(get('data.source.status.indexFields', result)));
-            setIndexPattern(getIndexFields(get('data.source.status.indexFields', result)));
+            setIndexPattern(
+              getIndexFields(defaultIndex.join(), get('data.source.status.indexFields', result))
+            );
           },
           (error) => {
             updateLoading(false);

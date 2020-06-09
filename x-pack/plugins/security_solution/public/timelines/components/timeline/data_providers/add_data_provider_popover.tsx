@@ -62,7 +62,7 @@ const AddDataProviderPopoverComponent: React.FC<{
         timelineId,
       });
     },
-    [timelineId, dataProviders]
+    [dataProviders, timelineId, dispatch, handleClosePopover]
   );
 
   if (!indexPattern || !browserFields) return <></>;

@@ -143,13 +143,13 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                 </EuiFlexItem>
               )}
 
-              <EuiFlexItem grow={false}>
+              {/* <EuiFlexItem grow={false}>
                 <NewTemplateTimeline
                   closeGearMenu={onClosePopover}
                   timelineId={timelineId}
                   title={i18n.NEW_TEMPLATE_TIMELINE}
                 />
-              </EuiFlexItem>
+              </EuiFlexItem> */}
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />

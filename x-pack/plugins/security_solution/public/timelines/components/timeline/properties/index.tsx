@@ -17,15 +17,6 @@ import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -33,7 +24,6 @@ type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 interface Props {
   associateNote: AssociateNote;
-  createTimeline: CreateTimeline;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
   isDataInTimeline: boolean;
@@ -41,6 +31,7 @@ interface Props {
   isFavorite: boolean;
   noteIds: string[];
   timelineId: string;
+  timelineType: TimelineTypeLiteral;
   status: TimelineStatus;
   title: string;
   toggleLock: ToggleLock;
@@ -66,7 +57,6 @@ const settingsWidth = 55;
 export const Properties = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     getNotesByIds,
     isDataInTimeline,
@@ -75,6 +65,7 @@ export const Properties = React.memo<Props>(
     noteIds,
     status,
     timelineId,
+    timelineType,
     title,
     toggleLock,
     updateDescription,
@@ -128,6 +119,7 @@ export const Properties = React.memo<Props>(
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
           timelineId={timelineId}
+          timelineType={timelineType}
           title={title}
           toggleLock={onToggleLock}
           updateDescription={updateDescription}

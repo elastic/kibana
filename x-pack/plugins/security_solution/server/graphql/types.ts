@@ -187,6 +187,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -342,6 +344,11 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
 }
 
 export enum TimelineStatus {
@@ -2015,6 +2022,8 @@ export interface DataProviderResult {
   kqlQuery?: Maybe<string>;
 
   queryMatch?: Maybe<QueryMatchResult>;
+
+  type?: Maybe<DataProviderType>;
 
   and?: Maybe<DataProviderResult[]>;
 }
@@ -8301,6 +8310,8 @@ export namespace DataProviderResultResolvers {
 
     queryMatch?: QueryMatchResolver<Maybe<QueryMatchResult>, TypeParent, TContext>;
 
+    type?: TypeResolver<Maybe<DataProviderType>, TypeParent, TContext>;
+
     and?: AndResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
   }
 
@@ -8331,6 +8342,11 @@ export namespace DataProviderResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type QueryMatchResolver<
     R = Maybe<QueryMatchResult>,
+    Parent = DataProviderResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TypeResolver<
+    R = Maybe<DataProviderType>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

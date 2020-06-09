@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
-import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
+import { DataProviderType, EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
@@ -45,6 +45,10 @@ const ProviderBadgeStyled = (styled(EuiBadge)`
   }
 ` as unknown) as typeof EuiBadge;
 
+const TemplateFieldIcon = styled(EuiIcon)`
+  float: left;
+`;
+
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
 interface ProviderBadgeProps {
@@ -57,6 +61,7 @@ interface ProviderBadgeProps {
   togglePopover: () => void;
   val: string | number;
   operator: QueryOperator;
+  type: DataProviderType;
 }
 
 const closeButtonProps = {
@@ -66,7 +71,17 @@ const closeButtonProps = {
 };
 
 export const ProviderBadge = React.memo<ProviderBadgeProps>(
-  ({ deleteProvider, field, isEnabled, isExcluded, operator, providerId, togglePopover, val }) => {
+  ({
+    deleteProvider,
+    field,
+    isEnabled,
+    isExcluded,
+    operator,
+    providerId,
+    togglePopover,
+    val,
+    type,
+  }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         // Make sure it doesn't also trigger the onclick for the whole badge
@@ -93,6 +108,39 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     const prefix = useMemo(() => (isExcluded ? <span>{i18n.NOT} </span> : null), [isExcluded]);
 
+    const content = useMemo(() => {
+      if (type === DataProviderType.template) {
+        return (
+          <>
+            <TemplateFieldIcon type="string" size="m" />
+            <strong>{'{ '}</strong>
+            {prefix}
+            {operator !== EXISTS_OPERATOR ? (
+              <span className="field-value">{`${field}`}</span>
+            ) : (
+              <span className="field-value">
+                {field} {i18n.EXISTS_LABEL}
+              </span>
+            )}
+            <strong>{' }'}</strong>
+          </>
+        );
+      }
+
+      return (
+        <>
+          {prefix}
+          {operator !== EXISTS_OPERATOR ? (
+            <span className="field-value">{`${field}: "${formattedValue}"`}</span>
+          ) : (
+            <span className="field-value">
+              {field} {i18n.EXISTS_LABEL}
+            </span>
+          )}
+        </>
+      );
+    }, [field, formattedValue, operator, prefix, type]);
+
     return (
       <ProviderContainer>
         <ProviderBadgeStyled
@@ -109,17 +157,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           closeButtonProps={closeButtonProps}
           data-test-subj="providerBadge"
         >
-          {prefix}
-          {operator !== EXISTS_OPERATOR ? (
-            <>
-              <span className="field-value">{`${field}: `}</span>
-              <span className="field-value">{`"${formattedValue}"`}</span>
-            </>
-          ) : (
-            <span className="field-value">
-              {field} {i18n.EXISTS_LABEL}
-            </span>
-          )}
+          {content}
         </ProviderBadgeStyled>
       </ProviderContainer>
     );

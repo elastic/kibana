@@ -106,12 +106,3 @@ export const AndOrBadge = React.memo<{ type: AndOr; includeAntennas?: boolean }>
 );
 
 AndOrBadge.displayName = 'AndOrBadge';
-
-export const AddFieldBadge = React.memo(({ onClick }: { onClick: () => void }) => (
-  // @ts-ignore
-  <RoundedBadge onClick={onClick} data-test-subj="add-field-badge" color="secondary">
-    {`+`}
-  </RoundedBadge>
-));
-
-AddFieldBadge.displayName = 'AddFieldBadge';

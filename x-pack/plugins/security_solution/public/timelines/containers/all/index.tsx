@@ -78,6 +78,7 @@ export const getAllTimeline = memoizeOne((timelines: TimelineResult[]): OpenTime
     title: timeline.title,
     updated: timeline.updated,
     updatedBy: timeline.updatedBy,
+    timelineType: timeline.timelineType ?? TimelineType.default,
   }))
 );
 

@@ -52,6 +52,13 @@ export const UNTITLED_TIMELINE = i18n.translate(
   }
 );
 
+export const UNTITLED_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.untitledTemplatePlaceholder',
+  {
+    defaultMessage: 'Untitled template',
+  }
+);
+
 export const DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.properties.descriptionPlaceholder',
   {

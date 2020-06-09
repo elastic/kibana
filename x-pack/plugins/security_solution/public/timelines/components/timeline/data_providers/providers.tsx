@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled, { css } from 'styled-components';
 
-import { AndOrBadge, AddFieldBadge } from '../../../../common/components/and_or_badge';
+import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
@@ -83,8 +83,8 @@ const Parens = styled.span`
   `}
 `;
 
-const AndOrBadgeContainer = styled.div<{ hideBadge: boolean }>`
-  display: ${({ hideBadge }) => (hideBadge ? 'none' : 'block')};
+const AndOrBadgeContainer = styled.div`
+  width: 44px;
 `;
 
 const LastAndOrBadgeInGroup = styled.div`
@@ -137,11 +137,21 @@ export const Providers = React.memo<Props>(
         {dataProviderGroups.map((group, groupIndex) => (
           <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
             <OrFlexItem grow={false}>
-              <AndOrBadgeContainer hideBadge={groupIndex !== 0}>
-                <AddDataProviderPopover timelineId={timelineId} Button={AddFieldBadge} />
-              </AndOrBadgeContainer>
-              <AndOrBadgeContainer hideBadge={groupIndex === 0}>
-                <AndOrBadge type="or" />
+              <AndOrBadgeContainer>
+                {groupIndex === 0 ? (
+                  <AddDataProviderPopover
+                    timelineId={timelineId}
+                    Button={({ onClick }) => (
+                      <EuiButtonIcon
+                        iconSize="xl"
+                        iconType="createSingleMetricJob"
+                        onClick={onClick}
+                      />
+                    )}
+                  />
+                ) : (
+                  <AndOrBadge type="or" />
+                )}
               </AndOrBadgeContainer>
             </OrFlexItem>
             <EuiFlexItem grow={false}>

@@ -9961,6 +9961,14 @@
             "deprecationReason": null
           },
           {
+            "name": "type",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "DataProviderType", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "",
             "args": [],
@@ -10031,6 +10039,29 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "DataProviderType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "default",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "template",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -11133,6 +11164,12 @@
                 "ofType": { "kind": "INPUT_OBJECT", "name": "DataProviderInput", "ofType": null }
               }
             },
+            "defaultValue": null
+          },
+          {
+            "name": "type",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "DataProviderType", "ofType": null },
             "defaultValue": null
           }
         ],

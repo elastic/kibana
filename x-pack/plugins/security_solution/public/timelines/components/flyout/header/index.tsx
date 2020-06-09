@@ -9,6 +9,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { isEmpty, get } from 'lodash/fp';
+import { TimelineType } from '../../../../../common/types/timeline';
 import { History } from '../../../../common/lib/history';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, inputsModel, inputsSelectors, State } from '../../../../common/store';
@@ -31,7 +32,6 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     isFavorite,
     isDataInTimeline,
@@ -41,6 +41,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
     notesById,
     status,
     timelineId,
+    timelineType,
     toggleLock,
     updateDescription,
     updateIsFavorite,
@@ -55,7 +56,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
     return (
       <Properties
         associateNote={associateNote}
-        createTimeline={createTimeline}
         description={description}
         getNotesByIds={getNotesByIds}
         isDataInTimeline={isDataInTimeline}
@@ -65,6 +65,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
         noteIds={noteIds}
         status={status}
         timelineId={timelineId}
+        timelineType={timelineType}
         toggleLock={toggleLock}
         updateDescription={updateDescription}
         updateIsFavorite={updateIsFavorite}
@@ -97,6 +98,7 @@ const makeMapStateToProps = () => {
       title = '',
       noteIds = emptyNotesId,
       status,
+      timelineType = TimelineType.default,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
@@ -112,6 +114,7 @@ const makeMapStateToProps = () => {
       noteIds,
       status,
       title,
+      timelineType,
     };
   };
   return mapStateToProps;
@@ -119,14 +122,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  createTimeline: ({ id, show }: { id: string; show?: boolean }) =>
-    dispatch(
-      timelineActions.createTimeline({
-        id,
-        columns: defaultHeaders,
-        show,
-      })
-    ),
   updateDescription: ({ id, description }: { id: string; description: string }) =>
     dispatch(timelineActions.updateDescription({ id, description })),
   updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
