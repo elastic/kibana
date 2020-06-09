@@ -27,6 +27,7 @@ const toggleButtonsIcons = [
     }),
     iconType: 'stats',
     value: 'timeseriesexplorer',
+    'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
   },
   {
     id: 'explorer',
@@ -35,6 +36,7 @@ const toggleButtonsIcons = [
     }),
     iconType: 'tableOfContents',
     value: 'explorer',
+    'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
   },
 ];
 

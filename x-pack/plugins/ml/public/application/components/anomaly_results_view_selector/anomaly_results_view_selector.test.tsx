@@ -17,7 +17,7 @@ describe('AnomalyResultsViewSelector', () => {
   test('creates selector with correctly selected value', () => {
     const history = createBrowserHistory();
 
-    const { getByLabelText } = render(
+    const { getByTestId } = render(
       <I18nProvider>
         <Router history={history}>
           <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
@@ -26,10 +26,10 @@ describe('AnomalyResultsViewSelector', () => {
     );
 
     // Check the Single Metric Viewer element exists in the selector, and that it is checked.
-    expect(getByLabelText('View results in the Single Metric Viewer')).toBeInTheDocument();
-    expect(getByLabelText('View results in the Single Metric Viewer').hasAttribute('checked')).toBe(
-      true
-    );
+    expect(getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')).toBeInTheDocument();
+    expect(
+      getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer').hasAttribute('checked')
+    ).toBe(true);
   });
 
   test('opens window to other results view when clicking on non-checked input', () => {
@@ -40,7 +40,7 @@ describe('AnomalyResultsViewSelector', () => {
 
     const history = createBrowserHistory();
 
-    const { getByLabelText } = render(
+    const { getByTestId } = render(
       <I18nProvider>
         <Router history={history}>
           <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
@@ -48,7 +48,7 @@ describe('AnomalyResultsViewSelector', () => {
       </I18nProvider>
     );
 
-    fireEvent.click(getByLabelText('View results in the Anomaly Explorer'));
+    fireEvent.click(getByTestId('mlAnomalyResultsViewSelectorExplorer'));
     expect(mockedOpen).toHaveBeenCalledWith('#/explorer', '_self');
 
     // Clean-up window.open.
