@@ -558,7 +558,7 @@ export const Expressions: React.FC<Props> = (props) => {
                   id="xpack.infra.metrics.alertFlyout.tooManyBucketsError"
                   defaultMessage="Too much data to preview. Please select a shorter preview length, or increase the amount of time in the {forTheLast} field."
                   values={{
-                    checkEvery: <strong>FOR THE LAST</strong>,
+                    forTheLast: <strong>FOR THE LAST</strong>,
                   }}
                 />
               </EuiText>
