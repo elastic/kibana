@@ -322,7 +322,7 @@ export const getJobConfigFromFormState = (
   return jobConfig;
 };
 
-function getCamelCase(property: string): string {
+function toCamelCase(property: string): string {
   const camelCased = property.replace(/_([a-z])/g, function (g) {
     return g[1].toUpperCase();
   });
@@ -357,7 +357,7 @@ export function getCloneFormStateFromJobConfig(
 
     for (const key in analysisConfig) {
       if (analysisConfig.hasOwnProperty(key)) {
-        const camelCased = getCamelCase(key);
+        const camelCased = toCamelCase(key);
         // @ts-ignore
         resultState[camelCased] = analysisConfig[key];
       }
