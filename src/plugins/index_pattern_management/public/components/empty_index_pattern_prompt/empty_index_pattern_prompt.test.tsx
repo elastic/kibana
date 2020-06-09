@@ -17,15 +17,16 @@
  * under the License.
  */
 
-export { IndexPatternTableWithRouter } from './index_pattern_table';
-export {
-  EditIndexPattern,
-  EditIndexPatternContainer,
-  CreateEditField,
-  CreateEditFieldContainer,
-} from './edit_index_pattern';
-export { CreateIndexPatternWizardWithRouter } from './create_index_pattern_wizard';
-export {
-  EmptyIndexPatternPrompt,
-  EmptyIndexPatternPromptWithRouter,
-} from './empty_index_pattern_prompt';
+import React from 'react';
+import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+
+describe('EmptyIndexPatternPrompt', () => {
+  it('should render normally', () => {
+    const component = shallowWithI18nProvider(
+      <EmptyIndexPatternPrompt indexPatternCreationOptions={[]} />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+});
