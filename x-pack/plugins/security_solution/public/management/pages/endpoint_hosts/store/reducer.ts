@@ -111,6 +111,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           loading: true,
           error: undefined,
           detailsError: undefined,
+          endpointVersionError: undefined,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
@@ -124,6 +125,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           error: undefined,
           detailsError: undefined,
           policyResponseError: undefined,
+          endpointVersionError: undefined,
         };
       } else {
         // if previous page was not host list or host details, load both list and details
@@ -136,6 +138,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           error: undefined,
           detailsError: undefined,
           policyResponseError: undefined,
+          endpointVersionError: undefined,
         };
       }
     }
@@ -146,6 +149,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
+      endpointVersionError: undefined,
     };
   }
   return state;

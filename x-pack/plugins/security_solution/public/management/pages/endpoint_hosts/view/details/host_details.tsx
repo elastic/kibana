@@ -161,17 +161,19 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsPolicy}
         data-test-subj="hostDetailsPolicyList"
       />
-      <LinkToApp
-        appId={ingestAppId}
-        appPath={ingestAppPath}
-        href={ingestUrl}
-        data-test-subj="hostDetailsLinkToIngest"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-          defaultMessage="Reassign Policy"
-        />
-      </LinkToApp>
+      {endpointVersion !== undefined && (
+        <LinkToApp
+          appId={ingestAppId}
+          appPath={ingestAppPath}
+          href={ingestUrl}
+          data-test-subj="hostDetailsLinkToIngest"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            defaultMessage="Reassign Policy"
+          />
+        </LinkToApp>
+      )}
       <EuiHorizontalRule margin="s" />
       <EuiDescriptionList
         type="column"
