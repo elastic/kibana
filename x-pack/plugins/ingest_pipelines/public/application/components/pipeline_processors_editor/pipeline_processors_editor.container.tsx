@@ -56,7 +56,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         onFailure: originalOnFailureProcessors,
         idGenerator: getIdGenerator(),
       }),
-    [originalProcessors, originalOnFailureProcessors]
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
   const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
   const { processors, onFailure } = processorsState;

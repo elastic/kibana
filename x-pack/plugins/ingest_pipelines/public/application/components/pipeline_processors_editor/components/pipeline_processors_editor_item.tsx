@@ -88,7 +88,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                       }
                     >
                       <EuiLink target="_blank" href={links.learnMoreAboutProcessorsUrl}>
-                        <EuiIcon color="primary" size="s" type="questionInCircle" />
+                        <EuiIcon color="primary" type="questionInCircle" />
                       </EuiLink>
                     </EuiToolTip>
                   </EuiFlexItem>
