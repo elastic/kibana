@@ -9,12 +9,13 @@ import React from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { EmptyPage } from '../../../common/components/empty_page';
 import * as i18n from '../../../common/translations';
+import { ADD_DATA_PATH } from '../../../../common/constants';
 
 export const DetectionEngineEmptyPage = React.memo(() => (
   <EmptyPage
     actionPrimaryIcon="gear"
     actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-    actionPrimaryUrl={`${useKibana().services.http.basePath.get()}/app/home#/tutorial_directory/siem`}
+    actionPrimaryUrl={`${useKibana().services.http.basePath.get()}${ADD_DATA_PATH}`}
     actionSecondaryIcon="popout"
     actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
     actionSecondaryTarget="_blank"

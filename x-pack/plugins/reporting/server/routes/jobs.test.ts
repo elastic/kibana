@@ -6,8 +6,7 @@
 
 import { UnwrapPromise } from '@kbn/utility-types';
 import { of } from 'rxjs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setupServer } from 'src/core/server/saved_objects/routes/integration_tests/test_utils';
+import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
