@@ -91,10 +91,6 @@ describe('Stat Items Component', () => {
       ),
     ],
   ])('disable charts', (wrapper) => {
-    test('it renders the default widget', () => {
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('should render titles', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
@@ -179,9 +175,6 @@ describe('Stat Items Component', () => {
           <StatItemsComponent {...mockStatItemsData} />
         </ReduxStoreProvider>
       );
-    });
-    test('it renders the default widget', () => {
-      expect(wrapper).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {
