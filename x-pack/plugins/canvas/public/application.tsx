@@ -36,7 +36,7 @@ import { CapabilitiesStrings } from '../i18n';
 
 import { startServices, services } from './services';
 // @ts-ignore Untyped local
-import { destroyHistory } from './lib/history_provider';
+import { createHistory, destroyHistory } from './lib/history_provider';
 // @ts-ignore Untyped local
 import { stopRouter } from './lib/router_provider';
 import { initFunctions } from './functions';
@@ -109,6 +109,9 @@ export const initializeCanvas = async (
   for (const fn of canvasFunctions) {
     services.expressions.getService().registerFunction(fn);
   }
+
+  // Re-initialize our history
+  createHistory();
 
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
