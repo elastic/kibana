@@ -90,6 +90,7 @@ export const ExpressionChart: React.FC<Props> = ({
       : (value: number) => `${value}`;
   }, [data]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
 
   if (loading || !data) {

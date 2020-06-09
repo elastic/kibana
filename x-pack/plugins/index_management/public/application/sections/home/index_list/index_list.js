@@ -8,15 +8,10 @@ import React from 'react';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
-export function IndexList({
-  match: {
-    params: { filter },
-  },
-  location,
-}) {
+export function IndexList() {
   return (
     <div className="im-snapshotTestSubject" data-test-subj="indicesList">
-      <IndexTable filterFromURI={filter} location={location} />
+      <IndexTable />
       <DetailPanel />
     </div>
   );
