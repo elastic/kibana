@@ -8,7 +8,7 @@ import { pick, mapValues, omit, without } from 'lodash';
 import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
-import { createExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
@@ -134,7 +134,7 @@ export class TaskRunner {
   async executeAlertInstance(
     alertInstanceId: string,
     alertInstance: AlertInstance,
-    executionHandler: ReturnType<typeof createExecutionHandler>
+    executionHandler: ExecutionHandler
   ) {
     const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
     alertInstance.updateLastScheduledActions(actionGroup);
@@ -145,7 +145,7 @@ export class TaskRunner {
   async executeAlertInstances(
     services: Services,
     alertInfoParams: AlertInfoParams,
-    executionHandler: ReturnType<typeof createExecutionHandler>,
+    executionHandler: ExecutionHandler,
     spaceId: string
   ): Promise<AlertTaskState> {
     const {

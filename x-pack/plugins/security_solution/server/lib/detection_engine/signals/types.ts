@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerts/server';
+import { AlertType, AlertTypeState, AlertExecutorOptions } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
@@ -104,7 +104,7 @@ export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is Aler
 };
 
 export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
+  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
 };
 
 export interface Ancestor {

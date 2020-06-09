@@ -5,7 +5,7 @@
  */
 
 import { pluck } from 'lodash';
-import { AlertAction, State, Context, AlertType } from '../types';
+import { AlertAction, AlertTypeState, AlertTypeContext, AlertType } from '../types';
 import { Logger } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
@@ -25,14 +25,18 @@ interface CreateExecutionHandlerOptions {
   eventLogger: IEventLogger;
 }
 
-interface ExecutionHandlerOptions {
+interface ExecutionHandlerOptions<State, Context> {
   actionGroup: string;
   alertInstanceId: string;
   context: Context;
   state: State;
 }
 
-export function createExecutionHandler({
+export type ExecutionHandler<State = AlertTypeState, Context = AlertTypeContext> = (
+  opts: ExecutionHandlerOptions<State, Context>
+) => void;
+
+export function createExecutionHandler<State = AlertTypeState, Context = AlertTypeContext>({
   logger,
   alertId,
   alertName,
@@ -43,9 +47,14 @@ export function createExecutionHandler({
   apiKey,
   alertType,
   eventLogger,
-}: CreateExecutionHandlerOptions) {
+}: CreateExecutionHandlerOptions): ExecutionHandler<State, Context> {
   const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
-  return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
+  return async ({
+    actionGroup,
+    context,
+    state,
+    alertInstanceId,
+  }: ExecutionHandlerOptions<State, Context>) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
