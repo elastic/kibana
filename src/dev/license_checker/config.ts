@@ -39,6 +39,7 @@ export const LICENSE_WHITELIST = [
   'Apache*',
   'Apache, Version 2.0',
   'Apache-2.0',
+  '0BSD',
   'BSD 3-Clause',
   'BSD New',
   'BSD',

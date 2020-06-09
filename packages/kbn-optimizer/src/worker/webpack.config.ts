@@ -157,7 +157,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       noParse: [
         /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [

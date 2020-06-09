@@ -333,7 +333,7 @@ describe('VegaVisualizations', () => {
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(
           `{
-            "$schema": "https://vega.github.io/schema/vega/v3.json",
+            "$schema": "https://vega.github.io/schema/vega/v5.json",
             "marks": [
               {
                 "type": "text",
