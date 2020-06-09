@@ -22,7 +22,7 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { DefaultUuid } from '../types/default_uuid';
+import { DefaultUuid } from '../../siem_common_deps';
 
 export const createExceptionListSchema = t.intersection([
   t.exact(

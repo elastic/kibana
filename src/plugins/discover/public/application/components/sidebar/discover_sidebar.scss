@@ -107,6 +107,7 @@
  */
 .dscSidebarItem__action {
   opacity: 0; /* 1 */
+  transition: none;
 
   &:focus {
     opacity: 1; /* 2 */

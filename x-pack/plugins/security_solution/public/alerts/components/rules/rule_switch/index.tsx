@@ -94,6 +94,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dispatch, id]
   );
 
@@ -101,12 +102,14 @@ export const RuleSwitchComponent = ({
     if (myEnabled !== enabled) {
       setMyEnabled(enabled);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
   useEffect(() => {
     if (myIsLoading !== isLoading) {
       setMyIsLoading(isLoading ?? false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
   return (
