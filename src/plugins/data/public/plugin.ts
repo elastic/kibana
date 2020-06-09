@@ -154,7 +154,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
@@ -165,7 +165,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService(
-      core,
+      uiSettings,
       savedObjects.client,
       http,
       fieldFormats,
@@ -173,7 +173,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         notifications.toasts.add(toastInputFields);
       },
       notifications.toasts.addError,
-      onRedirectNoIndexPattern(core)
+      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
     );
     setIndexPatterns(indexPatterns);
 
