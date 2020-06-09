@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         name: generateUniqueKey(),
         tags: ['foo', 'bar'],
         alertTypeId: 'test.noop',
-        consumer: 'test',
+        consumer: 'alerts',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
