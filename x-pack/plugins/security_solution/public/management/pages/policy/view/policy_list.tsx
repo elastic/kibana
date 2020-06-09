@@ -72,8 +72,10 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
       <EuiPopover
         anchorPosition="downRight"
         panelPaddingSize="none"
+        data-test-subj="policyActions"
         button={
           <EuiButtonIcon
+            data-test-subj="policyActionsButton"
             iconType="boxesHorizontal"
             onClick={handleToggleMenu}
             aria-label={i18n.translate('xpack.securitySolution.endpoint.policyList.actionMenu', {
@@ -154,7 +156,7 @@ export const PolicyList = React.memo(() => {
           }),
           body: (
             <FormattedMessage
-              id="'xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
+              id="xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
               defaultMessage="Policy has been deleted."
             />
           ),
@@ -326,6 +328,7 @@ export const PolicyList = React.memo(() => {
                       </LinkToApp>
                     </EuiContextMenuItem>,
                     <DangerEuiContextMenuItem
+                      data-test-subj="policyDeleteButton"
                       icon="trash"
                       key="policyDeletAction"
                       onClick={() => {
