@@ -68,7 +68,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   let nullableEventId = '';
 
-  describe('Endpoint alert API', () => {
+  // SKIPPED as it is failing ES PROMOTION: https://github.com/elastic/kibana/issues/68613
+  describe.skip('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(async () => {
         await esArchiver.load('endpoint/alerts/api_feature');
