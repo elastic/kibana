@@ -13,6 +13,8 @@ import {
 import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
 
+export const popoverMinWidth = 280;
+
 export const getSeverityColor = (nodeSeverity?: string) => {
   switch (nodeSeverity) {
     case severity.warning:
@@ -185,7 +187,8 @@ const style: cytoscape.Stylesheet[] = [
   // actually "hidden"
   {
     selector: 'edge[isInverseEdge]',
-    style: { visibility: 'none' },
+    // @ts-ignore
+    style: { visibility: 'hidden' },
   },
   {
     selector: 'edge.nodeHover',

@@ -6,7 +6,7 @@
 
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { getSeverity } from '../../../common/ml_job_constants';
-import { ConnectionNode } from '../../../common/service_map';
+import { ConnectionNode, ServiceNode } from '../../../common/service_map';
 import { ServiceAnomalies } from './get_service_map';
 
 export function addAnomaliesDataToNodes(
@@ -47,7 +47,7 @@ export function addAnomaliesDataToNodes(
     }
   );
 
-  const servicesDataWithAnomalies = nodes.map((service) => {
+  const servicesDataWithAnomalies: ServiceNode[] = nodes.map((service) => {
     const serviceAnomaly = anomaliesMap[service[SERVICE_NAME]];
     if (serviceAnomaly) {
       const anomalyScore = serviceAnomaly.anomaly_score;
