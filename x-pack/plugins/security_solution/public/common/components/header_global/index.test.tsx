@@ -9,7 +9,9 @@ import React from 'react';
 
 import '../../mock/match_media';
 import { HeaderGlobal } from './index';
+import { useWithSource } from '../../containers/source';
 
+jest.mock('../../containers/source');
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     pathname: '/app/siem#/hosts/allHosts',
@@ -28,8 +30,11 @@ jest.mock('../search_bar', () => ({
 }));
 
 describe('HeaderGlobal', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
+  beforeAll(() => {
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: {},
+    });
   });
 
   test('it renders', () => {

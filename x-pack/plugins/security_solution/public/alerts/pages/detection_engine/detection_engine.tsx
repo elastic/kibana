@@ -10,10 +10,7 @@ import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { GlobalTime } from '../../../common/containers/global_time';
-import {
-  indicesExistOrDataTemporarilyUnavailable,
-  WithSource,
-} from '../../../common/containers/source';
+import { useWithSource } from '../../../common/containers/source';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
@@ -68,6 +65,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
     signalIndexName,
   ]);
+  const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
@@ -90,75 +88,71 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      <WithSource sourceId="default" indexToAdd={indexToAdd}>
-        {({ indicesExist, indexPattern }) => {
-          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <StickyContainer>
-              <FiltersGlobal>
-                <SiemSearchBar id="global" indexPattern={indexPattern} />
-              </FiltersGlobal>
-              <WrapperPage>
-                <DetectionEngineHeaderPage
-                  subtitle={
-                    lastAlerts != null && (
-                      <>
-                        {i18n.LAST_ALERT}
-                        {': '}
-                        {lastAlerts}
-                      </>
-                    )
-                  }
-                  title={i18n.PAGE_TITLE}
-                >
-                  <EuiButton
-                    fill
-                    href={getRulesUrl()}
-                    iconType="gear"
-                    data-test-subj="manage-alert-detection-rules"
-                  >
-                    {i18n.BUTTON_MANAGE_RULES}
-                  </EuiButton>
-                </DetectionEngineHeaderPage>
+      {indicesExist ? (
+        <StickyContainer>
+          <FiltersGlobal>
+            <SiemSearchBar id="global" indexPattern={indexPattern} />
+          </FiltersGlobal>
+          <WrapperPage>
+            <DetectionEngineHeaderPage
+              subtitle={
+                lastAlerts != null && (
+                  <>
+                    {i18n.LAST_ALERT}
+                    {': '}
+                    {lastAlerts}
+                  </>
+                )
+              }
+              title={i18n.PAGE_TITLE}
+            >
+              <EuiButton
+                fill
+                href={getRulesUrl()}
+                iconType="gear"
+                data-test-subj="manage-alert-detection-rules"
+              >
+                {i18n.BUTTON_MANAGE_RULES}
+              </EuiButton>
+            </DetectionEngineHeaderPage>
 
-                <GlobalTime>
-                  {({ to, from, deleteQuery, setQuery }) => (
-                    <>
-                      <>
-                        <AlertsHistogramPanel
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          query={query}
-                          setQuery={setQuery}
-                          showTotalAlertsCount={true}
-                          signalIndexName={signalIndexName}
-                          stackByOptions={alertsHistogramOptions}
-                          to={to}
-                          updateDateRange={updateDateRangeCallback}
-                        />
-                        <EuiSpacer size="l" />
-                        <AlertsTable
-                          loading={loading}
-                          hasIndexWrite={hasIndexWrite ?? false}
-                          canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
-                          from={from}
-                          signalsIndex={signalIndexName ?? ''}
-                          to={to}
-                        />
-                      </>
-                    </>
-                  )}
-                </GlobalTime>
-              </WrapperPage>
-            </StickyContainer>
-          ) : (
-            <WrapperPage>
-              <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-              <DetectionEngineEmptyPage />
-            </WrapperPage>
-          );
-        }}
-      </WithSource>
+            <GlobalTime>
+              {({ to, from, deleteQuery, setQuery }) => (
+                <>
+                  <>
+                    <AlertsHistogramPanel
+                      deleteQuery={deleteQuery}
+                      filters={filters}
+                      from={from}
+                      query={query}
+                      setQuery={setQuery}
+                      showTotalAlertsCount={true}
+                      signalIndexName={signalIndexName}
+                      stackByOptions={alertsHistogramOptions}
+                      to={to}
+                      updateDateRange={updateDateRangeCallback}
+                    />
+                    <EuiSpacer size="l" />
+                    <AlertsTable
+                      loading={loading}
+                      hasIndexWrite={hasIndexWrite ?? false}
+                      canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
+                      from={from}
+                      signalsIndex={signalIndexName ?? ''}
+                      to={to}
+                    />
+                  </>
+                </>
+              )}
+            </GlobalTime>
+          </WrapperPage>
+        </StickyContainer>
+      ) : (
+        <WrapperPage>
+          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
+          <DetectionEngineEmptyPage />
+        </WrapperPage>
+      )}
       <SpyRoute />
     </>
   );

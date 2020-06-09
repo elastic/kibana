@@ -19,12 +19,7 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 
 jest.mock('../../../common/containers/source', () => ({
-  indicesExistOrDataTemporarilyUnavailable: () => true,
-  WithSource: ({
-    children,
-  }: {
-    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
-  }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
+  useWithSource: jest.fn().mockReturnValue({ indicesExist: true, indexPattern: mockIndexPattern }),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work

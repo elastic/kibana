@@ -18,10 +18,7 @@ import { MlHostConditionalContainer } from '../../common/components/ml/condition
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
-import {
-  WithSource,
-  indicesExistOrDataTemporarilyUnavailable,
-} from '../../common/containers/source';
+import { useWithSource } from '../../common/containers/source';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { NotFoundPage } from '../404';
@@ -67,48 +64,45 @@ export const HomePage: React.FC<HomePageProps> = ({ subPlugins }) => {
   );
 
   const [showTimeline] = useShowTimeline();
+  const { browserFields, indexPattern, indicesExist } = useWithSource();
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
       <Main data-test-subj="pageContainer">
-        <WithSource sourceId="default">
-          {({ browserFields, indexPattern, indicesExist }) => (
-            <DragDropContextWrapper browserFields={browserFields}>
-              <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-              {indicesExistOrDataTemporarilyUnavailable(indicesExist) && showTimeline && (
-                <>
-                  <AutoSaveWarningMsg />
-                  <Flyout
-                    flyoutHeight={flyoutHeight}
-                    timelineId="timeline-1"
-                    usersViewing={usersViewing}
-                  />
-                </>
-              )}
-
-              <Switch>
-                <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                {subPlugins}
-                <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
-                <Route
-                  path="/ml-hosts"
-                  render={({ location, match }) => (
-                    <MlHostConditionalContainer location={location} url={match.url} />
-                  )}
-                />
-                <Route
-                  path="/ml-network"
-                  render={({ location, match }) => (
-                    <MlNetworkConditionalContainer location={location} url={match.url} />
-                  )}
-                />
-                <Route render={() => <NotFoundPage />} />
-              </Switch>
-            </DragDropContextWrapper>
+        <DragDropContextWrapper browserFields={browserFields}>
+          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+          {indicesExist && showTimeline && (
+            <>
+              <AutoSaveWarningMsg />
+              <Flyout
+                flyoutHeight={flyoutHeight}
+                timelineId="timeline-1"
+                usersViewing={usersViewing}
+              />
+            </>
           )}
-        </WithSource>
+
+          <Switch>
+            <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
+            {subPlugins}
+            <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
+            <Route
+              path="/ml-hosts"
+              render={({ location, match }) => (
+                <MlHostConditionalContainer location={location} url={match.url} />
+              )}
+            />
+            <Route
+              path="/ml-network"
+              render={({ location, match }) => (
+                <MlNetworkConditionalContainer location={location} url={match.url} />
+              )}
+            />
+            <Route render={() => <NotFoundPage />} />
+          </Switch>
+        </DragDropContextWrapper>
       </Main>
 
       <HelpMenu />

@@ -5,15 +5,12 @@
  */
 
 import { mount } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
 
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import '../../common/mock/match_media';
-import { mocksSource } from '../../common/containers/source/mock';
-import { wait } from '../../common/lib/helpers';
+import { useWithSource } from '../../common/containers/source';
 import {
   apolloClientObservable,
   TestProviders,
@@ -27,6 +24,8 @@ import { HostsComponentProps } from './types';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 
+jest.mock('../../common/containers/source');
+
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../common/components/search_bar', () => ({
@@ -35,19 +34,6 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-
-let localSource: Array<{
-  request: {};
-  result: {
-    data: {
-      source: {
-        status: {
-          indicesExist: boolean;
-        };
-      };
-    };
-  };
-}>;
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -83,57 +69,49 @@ describe('Hosts - rendering', () => {
     hostsPagePath: '',
   };
 
-  beforeEach(() => {
-    localSource = cloneDeep(mocksSource);
-  });
-
   test('it renders the Setup Instructions text when no index is available', async () => {
-    localSource[0].result.data.source.status.indicesExist = false;
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: false,
+    });
+
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={localSource} addTypename={false}>
-          <Router history={mockHistory}>
-            <Hosts {...hostProps} />
-          </Router>
-        </MockedProvider>
+        <Router history={mockHistory}>
+          <Hosts {...hostProps} />
+        </Router>
       </TestProviders>
     );
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise((resolve) => setTimeout(resolve));
-    wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    localSource[0].result.data.source.status.indicesExist = true;
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: {},
+    });
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={localSource} addTypename={false}>
-          <Router history={mockHistory}>
-            <Hosts {...hostProps} />
-          </Router>
-        </MockedProvider>
+        <Router history={mockHistory}>
+          <Hosts {...hostProps} />
+        </Router>
       </TestProviders>
     );
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise((resolve) => setTimeout(resolve));
-    wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
   });
 
   test('it should render tab navigation', async () => {
-    localSource[0].result.data.source.status.indicesExist = true;
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: {},
+    });
+
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={localSource} addTypename={false}>
-          <Router history={mockHistory}>
-            <Hosts {...hostProps} />
-          </Router>
-        </MockedProvider>
+        <Router history={mockHistory}>
+          <Hosts {...hostProps} />
+        </Router>
       </TestProviders>
     );
-    await wait();
-    wrapper.update();
     expect(wrapper.find(SiemNavigation).exists()).toBe(true);
   });
 
@@ -169,21 +147,20 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    localSource[0].result.data.source.status.indicesExist = true;
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: { fields: [], title: 'title' },
+    });
     const myState: State = mockGlobalState;
     const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
     const wrapper = mount(
       <TestProviders store={myStore}>
-        <MockedProvider mocks={localSource} addTypename={false}>
-          <Router history={mockHistory}>
-            <Hosts {...hostProps} />
-          </Router>
-        </MockedProvider>
+        <Router history={mockHistory}>
+          <Hosts {...hostProps} />
+        </Router>
       </TestProviders>
     );
-    await wait();
     wrapper.update();
-
     myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
     wrapper.update();
     expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(

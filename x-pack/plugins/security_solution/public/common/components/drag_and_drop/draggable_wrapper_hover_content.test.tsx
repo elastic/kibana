@@ -6,10 +6,9 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 
-import { mocksSource } from '../../containers/source/mock';
-import { wait } from '../../lib/helpers';
+import { useWithSource } from '../../containers/source';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
@@ -23,6 +22,14 @@ import {
 } from '../../../timelines/components/manage_timeline';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../containers/source', () => {
+  const original = jest.requireActual('../../containers/source');
+
+  return {
+    ...original,
+    useWithSource: jest.fn(),
+  };
+});
 
 jest.mock('uuid', () => {
   return {
@@ -50,6 +57,9 @@ describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
     // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
     (useAddToTimeline as jest.Mock).mockReturnValue(jest.fn());
+    (useWithSource as jest.Mock).mockReturnValue({
+      browserFields: mockBrowserFields,
+    });
   });
 
   // Suppress warnings about "react-beautiful-dnd"
@@ -321,17 +331,15 @@ describe('DraggableWrapperHoverContent', () => {
           test(`it ${assertion} the 'Add to timeline investigation' button when showTopN is ${showTopN}, value is ${maybeValue}, and a draggableId is ${maybeDraggableId}`, () => {
             const wrapper = mount(
               <TestProviders>
-                <MockedProvider mocks={mocksSource} addTypename={false}>
-                  <DraggableWrapperHoverContent
-                    {...{
-                      ...defaultProps,
-                      draggableId: maybeDraggableId,
-                      field: aggregatableStringField,
-                      showTopN,
-                      value: maybeValue,
-                    }}
-                  />
-                </MockedProvider>
+                <DraggableWrapperHoverContent
+                  {...{
+                    ...defaultProps,
+                    draggableId: maybeDraggableId,
+                    field: aggregatableStringField,
+                    showTopN,
+                    value: maybeValue,
+                  }}
+                />
               </TestProviders>
             );
 
@@ -346,15 +354,13 @@ describe('DraggableWrapperHoverContent', () => {
     test('when clicked, it invokes the `startDragToTimeline` function returned by the `useAddToTimeline` hook', () => {
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                draggableId,
-                field: aggregatableStringField,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              draggableId,
+              field: aggregatableStringField,
+            }}
+          />
         </TestProviders>
       );
 
@@ -378,18 +384,15 @@ describe('DraggableWrapperHoverContent', () => {
       const aggregatableStringField = 'cloud.account.id';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: aggregatableStringField,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: aggregatableStringField,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait(); // https://github.com/apollographql/react-apollo/issues/1711
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
@@ -399,18 +402,15 @@ describe('DraggableWrapperHoverContent', () => {
       const whitelistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: whitelistedField,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: whitelistedField,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
@@ -420,18 +420,15 @@ describe('DraggableWrapperHoverContent', () => {
       const notKnownToBrowserFields = 'unknown.field';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: notKnownToBrowserFields,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: notKnownToBrowserFields,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
@@ -441,18 +438,15 @@ describe('DraggableWrapperHoverContent', () => {
       const whitelistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: whitelistedField,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: whitelistedField,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       wrapper.find('[data-test-subj="show-top-field"]').first().simulate('click');
@@ -465,18 +459,15 @@ describe('DraggableWrapperHoverContent', () => {
       const whitelistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: whitelistedField,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: whitelistedField,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="eventsByDatasetOverviewPanel"]').first().exists()).toBe(
@@ -488,19 +479,16 @@ describe('DraggableWrapperHoverContent', () => {
       const whitelistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: whitelistedField,
-                showTopN: true,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: whitelistedField,
+              showTopN: true,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
@@ -510,19 +498,16 @@ describe('DraggableWrapperHoverContent', () => {
       const whitelistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={mocksSource} addTypename={false}>
-            <DraggableWrapperHoverContent
-              {...{
-                ...defaultProps,
-                field: whitelistedField,
-                showTopN: true,
-              }}
-            />
-          </MockedProvider>
+          <DraggableWrapperHoverContent
+            {...{
+              ...defaultProps,
+              field: whitelistedField,
+              showTopN: true,
+            }}
+          />
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       expect(

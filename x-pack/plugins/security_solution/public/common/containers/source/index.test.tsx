@@ -4,55 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import { mount } from 'enzyme';
-import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { wait } from '../../lib/helpers';
-
-import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
+import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../utils/apollo_context', () => ({
+  useApolloClient: jest.fn().mockReturnValue({
+    query: jest.fn().mockImplementation(() => Promise.resolve(mocksSource[0].result)),
+  }),
+}));
 
 describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {
-    mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ indexPattern }) => {
-            if (!isEqual(indexPattern.fields, [])) {
-              expect(indexPattern.fields).toEqual(mockIndexFields);
-            }
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
 
-            return null;
-          }}
-        </WithSource>
-      </MockedProvider>
-    );
+    await waitForNextUpdate();
 
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
-  });
-
-  test('Browser Fields', async () => {
-    mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ browserFields }) => {
-            if (!isEqual(browserFields, {})) {
-              expect(browserFields).toEqual(mockBrowserFields);
-            }
-
-            return null;
-          }}
-        </WithSource>
-      </MockedProvider>
-    );
-
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
+    return expect(result).toEqual({
+      current: {
+        indicesExist: true,
+        browserFields: mockBrowserFields,
+        indexPattern: {
+          fields: mockIndexFields,
+          title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+        },
+        loading: false,
+        errorMessage: null,
+      },
+      error: undefined,
+    });
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {

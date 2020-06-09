@@ -12,9 +12,10 @@ import '../../../common/mock/match_media';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { DetectionEnginePageComponent } from './detection_engine';
 import { useUserInfo } from '../../components/user_info';
+import { useWithSource } from '../../../common/containers/source';
 
 jest.mock('../../components/user_info');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/source');
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 
@@ -28,7 +29,12 @@ describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
     (useUserInfo as jest.Mock).mockReturnValue({});
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: {},
+    });
   });
+
   it('renders correctly', () => {
     const wrapper = shallow(
       <DetectionEnginePageComponent
@@ -38,6 +44,6 @@ describe('DetectionEnginePageComponent', () => {
       />
     );
 
-    expect(wrapper.find('WithSource')).toHaveLength(1);
+    expect(wrapper.find('FiltersGlobal')).toHaveLength(1);
   });
 });

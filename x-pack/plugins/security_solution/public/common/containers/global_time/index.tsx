@@ -94,3 +94,5 @@ export const connector = connect(mapStateToProps, mapDispatchToProps);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const GlobalTime = connector(React.memo(GlobalTimeComponent));
+
+GlobalTime.displayName = 'GlobalTime';
