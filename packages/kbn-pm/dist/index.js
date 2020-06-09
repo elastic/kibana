@@ -42634,7 +42634,7 @@ const copyDirectory = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(ncp
 
 async function statTest(path, block) {
   try {
-    return block((await lstat(path)));
+    return block(await lstat(path));
   } catch (e) {
     if (e.code === 'ENOENT') {
       return false;
@@ -47974,7 +47974,7 @@ class Project {
     this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
-    this.allDependencies = _objectSpread({}, this.devDependencies, {}, this.productionDependencies);
+    this.allDependencies = _objectSpread(_objectSpread({}, this.devDependencies), this.productionDependencies);
     this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
     this.scripts = this.json.scripts || {};
   }
@@ -56483,10 +56483,10 @@ async function workspacePackagePaths(rootPath) {
   let workspaceProjectsPaths = [];
 
   for (const pattern of workspacesPathsPatterns) {
-    workspaceProjectsPaths = workspaceProjectsPaths.concat((await packagesFromGlobPattern({
+    workspaceProjectsPaths = workspaceProjectsPaths.concat(await packagesFromGlobPattern({
       pattern,
       rootPath
-    })));
+    }));
   } // Filter out exclude glob patterns
 
 
@@ -56844,7 +56844,7 @@ async function getAllChecksums(kbn, log) {
 
   const cacheKeys = new Map();
   await Promise.all(Array.from(projects.values()).map(async project => {
-    cacheKeys.set(project.name, (await getChecksum(project, changesByProject.get(project), yarnLock, kbn, log)));
+    cacheKeys.set(project.name, await getChecksum(project, changesByProject.get(project), yarnLock, kbn, log));
   }));
   return cacheKeys;
 }
@@ -78872,7 +78872,7 @@ async function runCommand(command, config) {
     const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_2__["buildProjectGraph"])(projects);
     _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(`Found ${projects.size.toString()} projects`);
     _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(Object(_utils_projects_tree__WEBPACK_IMPORTED_MODULE_3__["renderProjectsTree"])(config.rootPath, projects));
-    await command.run(projects, projectGraph, _objectSpread({}, config, {
+    await command.run(projects, projectGraph, _objectSpread(_objectSpread({}, config), {}, {
       kbn
     }));
   } catch (error) {
@@ -79115,9 +79115,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 class Kibana {
   static async loadFrom(rootPath) {
-    return new Kibana((await Object(_projects__WEBPACK_IMPORTED_MODULE_3__["getProjects"])(rootPath, Object(_config__WEBPACK_IMPORTED_MODULE_4__["getProjectPaths"])({
+    return new Kibana(await Object(_projects__WEBPACK_IMPORTED_MODULE_3__["getProjects"])(rootPath, Object(_config__WEBPACK_IMPORTED_MODULE_4__["getProjectPaths"])({
       rootPath
-    }))));
+    })));
   }
 
   constructor(allWorkspaceProjects) {
@@ -79183,7 +79183,7 @@ class Kibana {
     const allProjects = this.getAllProjects();
     const filteredProjects = new Map();
     const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
-    const filteredPkgJsonGlobs = Object(_config__WEBPACK_IMPORTED_MODULE_4__["getProjectPaths"])(_objectSpread({}, options, {
+    const filteredPkgJsonGlobs = Object(_config__WEBPACK_IMPORTED_MODULE_4__["getProjectPaths"])(_objectSpread(_objectSpread({}, options), {}, {
       rootPath: this.kibanaProject.path
     })).map(g => path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(g, 'package.json'));
     const matchingPkgJsonPaths = multimatch__WEBPACK_IMPORTED_MODULE_1___default()(pkgJsonPaths, filteredPkgJsonGlobs);
