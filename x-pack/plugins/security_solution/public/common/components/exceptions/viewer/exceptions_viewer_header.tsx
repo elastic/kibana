@@ -69,8 +69,7 @@ const ExceptionsViewerHeaderComponent = ({
   }, [showEndpointList, setShowEndpointList, setShowDetectionsList]);
 
   const handleOnSearch = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      const searchValue = event.target.value;
+    (searchValue: string): void => {
       const tagsRegex = /(tags:[^\s]*)/i;
       const tagsMatch = searchValue.match(tagsRegex);
       const foundTags: string = tagsMatch != null ? tagsMatch[0].split(':')[1] : '';
@@ -121,7 +120,7 @@ const ExceptionsViewerHeaderComponent = ({
           data-test-subj="exceptionsHeaderSearch"
           aria-label={i18n.SEARCH_DEFAULT}
           placeholder={i18n.SEARCH_DEFAULT}
-          onChange={handleOnSearch}
+          onSearch={handleOnSearch}
           disabled={isInitLoading}
           incremental={false}
           fullWidth

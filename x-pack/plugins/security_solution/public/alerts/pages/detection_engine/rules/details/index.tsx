@@ -6,6 +6,7 @@
 
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable complexity */
+// TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
   EuiButton,
@@ -404,7 +405,18 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           ExceptionListType.ENDPOINT,
                         ]}
                         commentsAccordionId={'ruleDetailsTabExceptions'}
-                        exceptionListsMeta={[]}
+                        exceptionListsMeta={[
+                          {
+                            id: '5b543420-a6c3-11ea-989f-53aa81611022',
+                            type: 'endpoint',
+                            namespaceType: 'single',
+                          },
+                          {
+                            id: '98440bc0-a750-11ea-989f-53aa81611022',
+                            type: 'detection',
+                            namespaceType: 'single',
+                          },
+                        ]}
                       />
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}

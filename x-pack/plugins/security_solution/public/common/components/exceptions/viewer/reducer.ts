@@ -10,7 +10,7 @@ import {
   ExceptionListItemSchema,
   Pagination,
 } from '../types';
-import { ExceptionList } from '../../../../../public/lists_plugin_deps';
+import { ExceptionList, ExceptionIdentifiers } from '../../../../../public/lists_plugin_deps';
 
 export interface State {
   filterOptions: FilterOptions;
@@ -20,7 +20,9 @@ export interface State {
   allExceptions: ExceptionListItemSchema[];
   exceptions: ExceptionListItemSchema[];
   exceptionToEdit: ExceptionListItemSchema | null;
+  loadingLists: ExceptionIdentifiers[];
   loadingItemIds: ApiProps[];
+  isLoading: boolean;
   isModalOpen: boolean;
 }
 
@@ -35,7 +37,9 @@ export type Action =
       type: 'updateFilterOptions';
       filterOptions: Partial<FilterOptions>;
       pagination: Partial<ExceptionsPagination>;
+      allLists: ExceptionIdentifiers[];
     }
+  | { type: 'updateIsLoading'; isLoading: boolean }
   | { type: 'updateModalOpen'; isOpen: boolean }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
   | { type: 'updateLoadingItemIds'; items: ApiProps[] };
@@ -62,6 +66,7 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         },
         allExceptions: action.exceptions,
         exceptions: action.exceptions,
+        isLoading: false,
       };
     }
     case 'updateFilterOptions': {
@@ -75,28 +80,35 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
           ...state.pagination,
           ...action.pagination,
         },
+        isLoading: true,
       };
 
       if (action.filterOptions.showEndpointList) {
-        const exceptions = state.allExceptions.filter((t) => t._tags.includes('endpoint'));
+        const list = action.allLists.filter((t) => t.type === 'endpoint');
 
         return {
           ...returnState,
-          exceptions,
+          loadingLists: list,
         };
       } else if (action.filterOptions.showDetectionsList) {
-        const exceptions = state.allExceptions.filter((t) => t._tags.includes('detection'));
+        const list = action.allLists.filter((t) => t.type === 'detection');
 
         return {
           ...returnState,
-          exceptions,
+          loadingLists: list,
         };
       } else {
         return {
           ...returnState,
-          exceptions: state.allExceptions,
+          loadingLists: action.allLists,
         };
       }
+    }
+    case 'updateIsLoading': {
+      return {
+        ...state,
+        isLoading: action.isLoading,
+      };
     }
     case 'updateLoadingItemIds': {
       return {

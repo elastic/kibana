@@ -5,7 +5,11 @@
  */
 import { ReactNode } from 'react';
 
-import { NamespaceType, ExceptionList } from '../../../lists_plugin_deps';
+import {
+  NamespaceType,
+  ExceptionList,
+  ExceptionListItemSchema as ExceptionItem,
+} from '../../../lists_plugin_deps';
 
 export interface OperatorOption {
   message: string;
@@ -77,7 +81,7 @@ export interface Filter {
 
 export interface SetExceptionsProps {
   lists: ExceptionList[];
-  exceptions: ExceptionListItemSchema[];
+  exceptions: ExceptionItem[];
   pagination: Pagination;
 }
 

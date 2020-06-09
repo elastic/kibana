@@ -55,7 +55,19 @@ const StyledText = styled(EuiText)`
   font-style: italic;
 `;
 
-const MyExceptionsContainer = styled.div`
+const MyFlexItem = styled(EuiFlexItem)`
+  margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
+
+  &:first-child {
+    margin: ${({ theme }) => `${theme.eui.euiSizeXS} 0 ${theme.eui.euiSize}`};
+  }
+`;
+
+const MyUtilities = styled(EuiFlexGroup)`
+  height: 50px;
+`;
+
+const MyExceptionsContainer = styled(EuiFlexGroup)`
   height: 600px;
   overflow: hidden;
 `;
@@ -73,7 +85,9 @@ const initialState: State = {
   allExceptions: [],
   exceptions: [],
   exceptionToEdit: null,
+  loadingLists: [],
   loadingItemIds: [],
+  isLoading: false,
   isModalOpen: false,
 };
 
@@ -122,11 +136,13 @@ const ExceptionsViewerComponent = ({
       exceptions,
       filterOptions,
       pagination,
+      loadingLists,
       loadingItemIds,
+      isLoading,
       isModalOpen,
     },
     dispatch,
-  ] = useReducer(allExceptionItemsReducer(), initialState);
+  ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
 
   const setExceptions = useCallback(
     ({
@@ -137,7 +153,7 @@ const ExceptionsViewerComponent = ({
       dispatch({
         type: 'setExceptions',
         lists: newLists,
-        exceptions: newExceptions,
+        exceptions: (newExceptions as unknown) as ExceptionListItemSchema[],
         pagination: newPagination,
       });
     },
@@ -145,7 +161,7 @@ const ExceptionsViewerComponent = ({
   );
   const [loadingList, , , , fetchList] = useExceptionList({
     http: services.http,
-    lists: exceptionListsMeta,
+    lists: loadingLists,
     filterOptions,
     pagination: {
       page: pagination.pageIndex + 1,
@@ -160,6 +176,16 @@ const ExceptionsViewerComponent = ({
     }),
   });
 
+  const setIsLoading = useCallback(
+    (loading: boolean): void => {
+      dispatch({
+        type: 'updateIsLoading',
+        isLoading: loading,
+      });
+    },
+    [dispatch]
+  );
+
   const setIsModalOpen = useCallback(
     (isOpen: boolean): void => {
       dispatch({
@@ -172,9 +198,10 @@ const ExceptionsViewerComponent = ({
 
   const onFetchList = useCallback((): void => {
     if (fetchList != null) {
+      setIsLoading(true);
       fetchList();
     }
-  }, [fetchList]);
+  }, [fetchList, setIsLoading]);
 
   const onFiltersChange = useCallback(
     ({ filter, pagination: pag }: Filter): void => {
@@ -182,9 +209,10 @@ const ExceptionsViewerComponent = ({
         type: 'updateFilterOptions',
         filterOptions: filter,
         pagination: pag,
+        allLists: exceptionListsMeta,
       });
     },
-    [dispatch]
+    [dispatch, exceptionListsMeta]
   );
 
   const onAddException = useCallback(
@@ -329,7 +357,9 @@ const ExceptionsViewerComponent = ({
       )}
 
       <Panel loading={initLoading}>
-        {initLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
+        {(initLoading || isLoading) && (
+          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+        )}
 
         <ExceptionsViewerHeader
           isInitLoading={initLoading}
@@ -340,66 +370,72 @@ const ExceptionsViewerComponent = ({
           onAddExceptionClick={onAddException}
         />
 
-        {(filterOptions.showEndpointList || filterOptions.showDetectionsList) && (
-          <>
-            <EuiSpacer size="xs" />
-            <StyledText size="s">{exceptionsSubtext}</StyledText>
-          </>
-        )}
-
         <EuiSpacer size="l" />
 
-        <UtilityBar>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText dataTestSubj="showingRules">
-                {i18n.SHOWING_EXCEPTIONS(pagination.totalItemCount ?? 0)}
-              </UtilityBarText>
-            </UtilityBarGroup>
+        <MyUtilities alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <UtilityBar>
+              <UtilityBarSection>
+                <UtilityBarGroup>
+                  <UtilityBarText dataTestSubj="showingRules">
+                    {i18n.SHOWING_EXCEPTIONS(pagination.totalItemCount ?? 0)}
+                  </UtilityBarText>
+                </UtilityBarGroup>
 
-            <UtilityBarGroup>
-              <UtilityBarAction iconSide="left" iconType="refresh" onClick={onFetchList}>
-                {i18n.REFRESH}
-              </UtilityBarAction>
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
+                <UtilityBarGroup>
+                  <UtilityBarAction iconSide="left" iconType="refresh" onClick={onFetchList}>
+                    {i18n.REFRESH}
+                  </UtilityBarAction>
+                </UtilityBarGroup>
+              </UtilityBarSection>
+            </UtilityBar>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StyledText size="s">{exceptionsSubtext}</StyledText>
+          </EuiFlexItem>
+        </MyUtilities>
 
-        <EuiSpacer size="s" />
-
-        <MyExceptionsContainer className="eui-yScrollWithShadows">
-          {showEmpty && (
-            <EuiEmptyPrompt
-              iconType="advancedSettingsApp"
-              title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
-              body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
-              data-test-subj="exceptionsEmptyPrompt"
-            />
+        <MyExceptionsContainer
+          gutterSize="none"
+          direction="column"
+          className="eui-yScrollWithShadows"
+        >
+          {showEmpty ? (
+            <EuiFlexItem grow={1}>
+              <EuiEmptyPrompt
+                iconType="advancedSettingsApp"
+                title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
+                body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
+                data-test-subj="exceptionsEmptyPrompt"
+              />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
+              <EuiFlexGroup gutterSize="none" direction="column">
+                {!initLoading &&
+                  exceptions.length > 0 &&
+                  exceptions.map((exception, index) => (
+                    <MyFlexItem grow={false} key={exception.id}>
+                      {index !== 0 ? (
+                        <>
+                          <AndOrBadge type="or" />
+                          <EuiSpacer />
+                        </>
+                      ) : (
+                        <EuiSpacer size="s" />
+                      )}
+                      <ExceptionItem
+                        loadingItemIds={loadingItemIds}
+                        commentsAccordionId={commentsAccordionId}
+                        exceptionItem={exception}
+                        handleDelete={onDeleteException}
+                        handleEdit={onEditExceptionItem}
+                      />
+                    </MyFlexItem>
+                  ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           )}
-
-          <EuiSpacer size="s" />
-
-          <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
-            {!initLoading &&
-              exceptions.length > 0 &&
-              exceptions.map((exception, index) => (
-                <EuiFlexItem grow={false} key={exception.id}>
-                  {index !== 0 && (
-                    <>
-                      <AndOrBadge type="or" />
-                      <EuiSpacer />
-                    </>
-                  )}
-                  <ExceptionItem
-                    loadingItemIds={loadingItemIds}
-                    commentsAccordionId={commentsAccordionId}
-                    exceptionItem={exception}
-                    handleDelete={onDeleteException}
-                    handleEdit={onEditExceptionItem}
-                  />
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
         </MyExceptionsContainer>
         <ExceptionsViewerPagination onPaginationChange={onFiltersChange} pagination={pagination} />
       </Panel>
