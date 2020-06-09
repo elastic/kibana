@@ -22,7 +22,7 @@ export interface Connector {
 }
 
 const caseTimeline: Timeline = {
-  title: 'SIEM test',
+  title: 'Security test',
   description: 'description',
   query: 'host.name:*',
 };
