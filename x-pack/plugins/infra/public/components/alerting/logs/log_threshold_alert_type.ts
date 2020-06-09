@@ -17,7 +17,7 @@ export function getAlertType(): AlertTypeModel {
       defaultMessage: 'Log threshold',
     }),
     iconClass: 'bell',
-    alertParamsExpression: React.lazy(() => import('./expression_editor/editor_lazy')),
+    alertParamsExpression: React.lazy(() => import('./expression_editor/editor')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',

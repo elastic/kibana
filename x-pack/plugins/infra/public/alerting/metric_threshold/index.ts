@@ -18,7 +18,7 @@ export function createMetricThresholdAlertType(): AlertTypeModel {
       defaultMessage: 'Metric threshold',
     }),
     iconClass: 'bell',
-    alertParamsExpression: React.lazy(() => import('./components/expression_lazy')),
+    alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',

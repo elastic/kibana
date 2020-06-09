@@ -18,7 +18,7 @@ export function getInventoryMetricAlertType(): AlertTypeModel {
       defaultMessage: 'Inventory',
     }),
     iconClass: 'bell',
-    alertParamsExpression: React.lazy(() => import('./expression_lazy')),
+    alertParamsExpression: React.lazy(() => import('./expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
