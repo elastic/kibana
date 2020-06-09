@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { storiesOf } from '@storybook/react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -12,7 +12,12 @@ import { ExceptionItem } from '../viewer';
 import { Operator } from '../types';
 import { getExceptionItemMock } from '../mocks';
 
+const withTheme = (storyFn: () => ReactNode) => (
+  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
+);
+
 storiesOf('components/exceptions', module)
+  .addDecorator(withTheme)
   .add('ExceptionItem/with os', () => {
     const payload = getExceptionItemMock();
     payload.description = '';
@@ -27,14 +32,12 @@ storiesOf('components/exceptions', module)
     ];
 
     return (
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          exceptionItem={payload}
-          handleDelete={() => {}}
-          handleEdit={() => {}}
-        />
-      </ThemeProvider>
+      <ExceptionItem
+        commentsAccordionId={'accordion--comments'}
+        exceptionItem={payload}
+        handleDelete={() => {}}
+        handleEdit={() => {}}
+      />
     );
   })
   .add('ExceptionItem/with description', () => {
@@ -51,14 +54,12 @@ storiesOf('components/exceptions', module)
     ];
 
     return (
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          exceptionItem={payload}
-          handleDelete={() => {}}
-          handleEdit={() => {}}
-        />
-      </ThemeProvider>
+      <ExceptionItem
+        commentsAccordionId={'accordion--comments'}
+        exceptionItem={payload}
+        handleDelete={() => {}}
+        handleEdit={() => {}}
+      />
     );
   })
   .add('ExceptionItem/with comments', () => {
@@ -75,14 +76,12 @@ storiesOf('components/exceptions', module)
     ];
 
     return (
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          exceptionItem={payload}
-          handleDelete={() => {}}
-          handleEdit={() => {}}
-        />
-      </ThemeProvider>
+      <ExceptionItem
+        commentsAccordionId={'accordion--comments'}
+        exceptionItem={payload}
+        handleDelete={() => {}}
+        handleEdit={() => {}}
+      />
     );
   })
   .add('ExceptionItem/with nested entries', () => {
@@ -92,27 +91,23 @@ storiesOf('components/exceptions', module)
     payload.comments = [];
 
     return (
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          exceptionItem={payload}
-          handleDelete={() => {}}
-          handleEdit={() => {}}
-        />
-      </ThemeProvider>
+      <ExceptionItem
+        commentsAccordionId={'accordion--comments'}
+        exceptionItem={payload}
+        handleDelete={() => {}}
+        handleEdit={() => {}}
+      />
     );
   })
   .add('ExceptionItem/with everything', () => {
     const payload = getExceptionItemMock();
 
     return (
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          exceptionItem={payload}
-          handleDelete={() => {}}
-          handleEdit={() => {}}
-        />
-      </ThemeProvider>
+      <ExceptionItem
+        commentsAccordionId={'accordion--comments'}
+        exceptionItem={payload}
+        handleDelete={() => {}}
+        handleEdit={() => {}}
+      />
     );
   });
