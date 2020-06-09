@@ -20,13 +20,7 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/public';
-import {
-  DuplicateField,
-  SavedObjectNotFound,
-  expandShorthand,
-  FieldMappingSpec,
-  MappingObject,
-} from '../../../../kibana_utils/common';
+import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 import {
   ES_FIELD_TYPES,
@@ -46,6 +40,7 @@ import { TypeMeta } from '.';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
+import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
