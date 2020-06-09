@@ -29,7 +29,6 @@ import { EuiLink } from '@elastic/eui';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { IndexPatternManagmentContext } from '../../types';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
-// import { getDocLink } from 'ui/documentation_links';
 import { IndexPatternCreationOption } from '../types';
 import { CreateButton } from '../create_button';
 // @ts-ignore
@@ -40,7 +39,7 @@ interface Props extends RouteComponentProps {
 }
 
 export const EmptyIndexPatternPrompt = ({ canSave, history }: Props) => {
-  const { indexPatternManagementStart, setBreadcrumbs } = useKibana<
+  const { indexPatternManagementStart, setBreadcrumbs, docLinks } = useKibana<
     IndexPatternManagmentContext
   >().services;
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -107,8 +106,7 @@ export const EmptyIndexPatternPrompt = ({ canSave, history }: Props) => {
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiLink target="_blank" external>
-            {/* href={getDocLink('indexPatterns.introduction')} */}
+          <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
             <FormattedMessage
               id="kbn.management.emptyIndexPatternPrompt.documentation"
               defaultMessage="Read documentation"

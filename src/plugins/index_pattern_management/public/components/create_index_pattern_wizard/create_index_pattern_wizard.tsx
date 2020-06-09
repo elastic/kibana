@@ -28,6 +28,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { DocLinksStart } from 'src/core/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -51,6 +52,7 @@ interface CreateIndexPatternWizardState {
   isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
+  docLinks: DocLinksStart;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -77,6 +79,7 @@ export class CreateIndexPatternWizard extends Component<
       isIncludingSystemIndices: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
+      docLinks: context.services.docLinks,
     };
   }
 
@@ -221,7 +224,7 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   renderHeader() {
-    const { isIncludingSystemIndices } = this.state;
+    const { isIncludingSystemIndices, docLinks } = this.state;
 
     return (
       <Header
@@ -231,6 +234,7 @@ export class CreateIndexPatternWizard extends Component<
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
+        docLinks={docLinks}
       />
     );
   }
@@ -243,6 +247,7 @@ export class CreateIndexPatternWizard extends Component<
       step,
       indexPattern,
       remoteClustersExist,
+      docLinks,
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
@@ -255,6 +260,7 @@ export class CreateIndexPatternWizard extends Component<
         <EmptyState
           onRefresh={this.fetchData}
           prependBasePath={this.context.services.http.basePath.prepend}
+          docLinks={docLinks}
         />
       );
     }

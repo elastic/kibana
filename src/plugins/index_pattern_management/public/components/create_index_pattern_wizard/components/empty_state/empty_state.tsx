@@ -21,7 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // import { getDocLink } from '../../../../../  legacy/ui/public/documentation_links';
-import { IBasePath } from 'kibana/public';
+import { IBasePath, DocLinksSetup } from 'kibana/public';
 
 import {
   EuiPageContentHeader,
@@ -41,9 +41,11 @@ import {
 export const EmptyState = ({
   onRefresh,
   prependBasePath,
+  docLinks,
 }: {
   onRefresh: () => void;
   prependBasePath: IBasePath['prepend'];
+  docLinks: DocLinksSetup;
 }) => (
   <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
     <EuiPageContentHeader>
@@ -145,8 +147,7 @@ export const EmptyState = ({
                     />
                   ),
                   description: (
-                    <EuiLink target="_blank" external>
-                      {/* href={getDocLink('addData')} */}
+                    <EuiLink href={docLinks.links.addData} target="_blank" external>
                       Read documentation
                     </EuiLink>
                   ),
