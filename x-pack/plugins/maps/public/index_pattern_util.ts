@@ -4,11 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { i18n } from '@kbn/i18n';
 import { getIndexPatternService, getIsGoldPlus } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 
-export async function getIndexPatternsFromIds(indexPatternIds = []) {
+export function getGeoTileAggNotSupportedReason(field: IFieldType): string | null {
+  if (!field.aggregatable) {
+    return i18n.translate('xpack.maps.geoTileAgg.disabled.docValues', {
+      defaultMessage: 'Clustering requires doc_values.',
+    });
+  }
+
+  if (field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE && !getIsGoldPlus()) {
+    return i18n.translate('xpack.maps.geoTileAgg.disabled.license', {
+      defaultMessage: 'Geo_shape clustering requires a Gold license.',
+    });
+  }
+
+  return null;
+}
+
+export async function getIndexPatternsFromIds(
+  indexPatternIds: string[] = []
+): Promise<IndexPattern[]> {
   const promises = [];
   indexPatternIds.forEach((id) => {
     const indexPatternPromise = getIndexPatternService().get(id);
@@ -20,7 +40,7 @@ export async function getIndexPatternsFromIds(indexPatternIds = []) {
   return await Promise.all(promises);
 }
 
-export function getTermsFields(fields) {
+export function getTermsFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     return (
       field.aggregatable &&
@@ -30,7 +50,7 @@ export function getTermsFields(fields) {
   });
 }
 
-export function getAggregatableGeoFieldTypes() {
+export function getAggregatableGeoFieldTypes(): string[] {
   const aggregatableFieldTypes = [ES_GEO_FIELD_TYPE.GEO_POINT];
   if (getIsGoldPlus()) {
     aggregatableFieldTypes.push(ES_GEO_FIELD_TYPE.GEO_SHAPE);
@@ -38,17 +58,17 @@ export function getAggregatableGeoFieldTypes() {
   return aggregatableFieldTypes;
 }
 
-export function getGeoFields(fields) {
+export function getGeoFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
   });
 }
 
-export function getFieldsWithGeoTileAgg(fields) {
+export function getFieldsWithGeoTileAgg(fields: IFieldType[]): IFieldType[] {
   return fields.filter(supportsGeoTileAgg);
 }
 
-export function supportsGeoTileAgg(field) {
+export function supportsGeoTileAgg(field: IFieldType): boolean {
   return (
     field &&
     field.aggregatable &&
@@ -58,7 +78,7 @@ export function supportsGeoTileAgg(field) {
 }
 
 // Returns filtered fields list containing only fields that exist in _source.
-export function getSourceFields(fields) {
+export function getSourceFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
     const isMultiField = field.subType && field.subType.multi;

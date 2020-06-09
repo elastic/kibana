@@ -10,11 +10,7 @@ import PropTypes from 'prop-types';
 
 import { ES_GEO_FIELD_TYPES } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-  getIsGoldPlus,
-} from '../../../kibana_services';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 
@@ -22,30 +18,13 @@ import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import {
   getFieldsWithGeoTileAgg,
   getGeoFields,
+  getGeoTileAggNotSupportedReason,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
 import { RenderAsSelect } from './render_as_select';
 
 function doesNotSupportGeoTileAgg(field) {
   return !supportsGeoTileAgg(field);
-}
-
-function getGeoTileAggNotSupportedReason(field) {
-  if (!field.aggregatable) {
-    return i18n.translate('xpack.maps.geoTileAgg.disabled.docValues', {
-      defaultMessage:
-        'Doc values not enabled for {field.name}. Turn on doc_values in elasticsearch index mapping to enable.',
-      values: { name: field.name },
-    });
-  }
-
-  if (!getIsGoldPlus()) {
-    return i18n.translate('xpack.maps.geoTileAgg.disabled.license', {
-      defaultMessage: 'Clustering geo_shape fields requires Gold license or higher.',
-    });
-  }
-
-  return null;
 }
 
 export class CreateSourceEditor extends Component {

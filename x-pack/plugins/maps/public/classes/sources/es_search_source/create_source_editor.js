@@ -16,7 +16,12 @@ import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPES, SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ScalingForm } from './scaling_form';
-import { getGeoFields, getTermsFields, supportsGeoTileAgg } from '../../../index_pattern_util';
+import {
+  getGeoFields,
+  getTermsFields,
+  getGeoTileAggNotSupportedReason,
+  supportsGeoTileAgg,
+} from '../../../index_pattern_util';
 
 function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
   return indexPattern ? supportsGeoTileAgg(indexPattern.fields.getByName(geoFieldName)) : false;
@@ -207,6 +212,13 @@ export class CreateSourceEditor extends Component {
             this.state.indexPattern,
             this.state.geoFieldName
           )}
+          clusteringDisabledReason={
+            this.state.indexPattern
+              ? getGeoTileAggNotSupportedReason(
+                  this.state.indexPattern.fields.getByName(this.state.geoFieldName)
+                )
+              : null
+          }
           termFields={getTermsFields(this.state.indexPattern.fields)}
           topHitsSplitField={this.state.topHitsSplitField}
           topHitsSize={this.state.topHitsSize}
