@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(statuses.size).to.eql(1);
-        expect(statuses).to.eql(new Set('failure'));
+        expect(Array.from(statuses)).to.eql(['failure']);
       });
 
       it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
