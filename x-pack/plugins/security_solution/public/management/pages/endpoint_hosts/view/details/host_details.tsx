@@ -35,7 +35,7 @@ const HostIds = styled(EuiListGroupItem)`
 
 const LinkToExternalApp = styled(LinkToApp)`
   display: inline-block;
-  margin: ${(props) => props.theme.eui.ruleMargins.marginSmall} 0
+  margin: ${(props) => props.theme.eui.ruleMargins.marginMedium} 0
     ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
   .linkToAppIcon {
     margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
