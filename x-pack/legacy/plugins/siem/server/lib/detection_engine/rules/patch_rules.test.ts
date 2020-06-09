@@ -101,6 +101,7 @@ describe('patchRules', () => {
   describe('regression tests', () => {
     it("updates the rule's actions if provided", async () => {
       const existingRule = getResult();
+      alertsClient.get.mockResolvedValue(existingRule);
 
       const action = {
         action_type_id: '.slack',
@@ -113,9 +114,10 @@ describe('patchRules', () => {
 
       await patchRules({
         alertsClient,
+        actionsClient,
         savedObjectsClient,
         actions: [action],
-        rule: existingRule,
+        id: existingRule.id,
       });
 
       expect(alertsClient.update).toHaveBeenCalledWith(
@@ -150,11 +152,13 @@ describe('patchRules', () => {
           },
         ],
       };
+      alertsClient.get.mockResolvedValue(existingRule);
 
       await patchRules({
         alertsClient,
+        actionsClient,
         savedObjectsClient,
-        rule: existingRule,
+        id: existingRule.id,
       });
 
       expect(alertsClient.update).toHaveBeenCalledWith(
