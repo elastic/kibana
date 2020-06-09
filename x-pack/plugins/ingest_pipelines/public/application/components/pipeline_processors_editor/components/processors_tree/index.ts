@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Tree, OnActionHandler } from './tree';
+export { ProcessorsTree, OnActionHandler } from './processors_tree';

@@ -8,14 +8,14 @@ import React, { FunctionComponent, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 
-import { DropSpecialLocations } from '../../constants';
-import { ProcessorInternal, ProcessorSelector } from '../../types';
-import { isChildPath } from '../../processors_reducer';
+import { DropSpecialLocations } from '../../../constants';
+import { ProcessorInternal, ProcessorSelector } from '../../../types';
+import { isChildPath } from '../../../processors_reducer';
 
 import { DropZoneButton } from './drop_zone_button';
 import { TreeNode } from './tree_node';
-import { calculateItemHeight } from './utils';
-import { TreeMode, Action, ProcessorInfo } from './tree';
+import { calculateItemHeight } from '../utils';
+import { TreeMode, Action, ProcessorInfo } from '../processors_tree';
 
 export type PrivateAction =
   | Action

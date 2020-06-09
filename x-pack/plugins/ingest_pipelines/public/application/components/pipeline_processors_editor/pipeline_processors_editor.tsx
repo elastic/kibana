@@ -14,7 +14,7 @@ import './pipeline_processors_editor.scss';
 import {
   ProcessorsTitleAndTestButton,
   OnFailureProcessorsTitle,
-  Tree,
+  ProcessorsTree,
   SettingsFormFlyout,
   ProcessorRemoveModal,
   OnActionHandler,
@@ -227,7 +227,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               className="pipelineProcessorsEditor__editorContainer"
             >
               <EuiFlexItem grow={false}>
-                <Tree
+                <ProcessorsTree
                   baseSelector={PROCESSOR_STATE_SCOPE}
                   processors={processors}
                   onAction={onTreeAction}
@@ -291,7 +291,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 className="pipelineProcessorsEditor__editorContainer"
               >
                 <EuiFlexItem grow={false}>
-                  <Tree
+                  <ProcessorsTree
                     baseSelector={ON_FAILURE_STATE_SCOPE}
                     processors={onFailureProcessors}
                     onAction={onTreeAction}

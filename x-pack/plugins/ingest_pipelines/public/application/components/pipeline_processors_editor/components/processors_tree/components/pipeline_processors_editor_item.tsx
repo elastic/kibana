@@ -16,9 +16,9 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { ProcessorInternal } from '../types';
+import { ProcessorInternal } from '../../../types';
 
-import { usePipelineProcessorsContext } from '../context';
+import { usePipelineProcessorsContext } from '../../../context';
 
 export interface Handlers {
   onMove: () => void;
