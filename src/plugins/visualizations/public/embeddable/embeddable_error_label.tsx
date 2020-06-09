@@ -18,12 +18,12 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiToolTip, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RenderError } from '../../../../plugins/expressions/public';
+import { ExpressionRenderError } from '../../../../plugins/expressions/public';
 
 interface Props {
-  error?: RenderError;
+  error?: ExpressionRenderError;
 }
 
 export function EmbeddableErrorLabel(props: Props) {
@@ -38,12 +38,8 @@ export function EmbeddableErrorLabel(props: Props) {
         });
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiToolTip content={props.error.message}>
-          <EuiBadge color="danger">{labelText}</EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiToolTip content={props.error.message}>
+      <EuiBadge color="danger">{labelText}</EuiBadge>
+    </EuiToolTip>
   );
 }
