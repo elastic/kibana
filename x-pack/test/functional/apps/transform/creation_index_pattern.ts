@@ -57,6 +57,26 @@ export default function ({ getService }: FtrProviderContext) {
               transformFilterAggTypeSelector: 'term',
               transformFilterTermValueSelector: 'New York',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.base_price)',
+                label: 'products.base_price.max',
+              },
+              {
+                identifier: 'filter(customer_gender)',
+                label: 'customer_gender.filter',
+                form: {
+                  transformFilterAggTypeSelector: 'term',
+                  transformFilterTermValueSelector: 'FEMALE',
+                },
+                subAggs: [
+                  {
+                    identifier: 'avg(taxful_total_price)',
+                    label: 'taxful_total_price.avg',
+                  },
+                ],
+              },
+            ],
           },
         ],
         transformId: `ec_1_${Date.now()}`,
@@ -87,10 +107,31 @@ export default function ({ getService }: FtrProviderContext) {
                   field: 'products.base_price',
                 },
               },
-              'geoip.city_name.filter': {
+              'New York': {
                 filter: {
                   term: {
                     'geoip.city_name': 'New York',
+                  },
+                },
+                aggs: {
+                  'products.base_price.max': {
+                    max: {
+                      field: 'products.base_price',
+                    },
+                  },
+                  FEMALE: {
+                    filter: {
+                      term: {
+                        customer_gender: 'FEMALE',
+                      },
+                    },
+                    aggs: {
+                      'taxful_total_price.avg': {
+                        avg: {
+                          field: 'taxful_total_price',
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -131,6 +172,12 @@ export default function ({ getService }: FtrProviderContext) {
             form: {
               transformFilterAggTypeSelector: 'exists',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.discount_amount)',
+                label: 'products.discount_amount.max',
+              },
+            ],
           },
         ],
         transformId: `ec_2_${Date.now()}`,
@@ -160,6 +207,13 @@ export default function ({ getService }: FtrProviderContext) {
                 filter: {
                   exists: {
                     field: 'customer_phone',
+                  },
+                },
+                aggs: {
+                  'products.discount_amount.max': {
+                    max: {
+                      field: 'products.discount_amount',
+                    },
                   },
                 },
               },
@@ -249,11 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label, agg.form);
-          }
+          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
         });
 
         it('displays the advanced pivot editor switch', async () => {

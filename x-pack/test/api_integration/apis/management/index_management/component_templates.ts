@@ -61,7 +61,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(testComponentTemplate).to.eql({
             name: COMPONENT_NAME,
-            component_template: COMPONENT,
+            usedBy: [],
+            hasSettings: true,
+            hasMappings: true,
+            hasAliases: false,
           });
         });
       });
@@ -74,8 +77,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body).to.eql({
             name: COMPONENT_NAME,
-            component_template: {
-              ...COMPONENT,
+            ...COMPONENT,
+            _kbnMeta: {
+              usedBy: [],
             },
           });
         });

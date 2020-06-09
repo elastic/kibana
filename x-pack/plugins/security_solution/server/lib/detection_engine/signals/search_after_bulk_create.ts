@@ -18,7 +18,7 @@ interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
   listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
-  exceptionsList: RuleAlertParams['exceptions_list'];
+  exceptionsList: RuleAlertParams['exceptionsList'];
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
