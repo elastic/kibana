@@ -49,9 +49,9 @@ export interface TemplateDeserialized {
   };
 }
 
-export interface TemplateV2Es {
+export interface TemplateFromEs {
   name: string;
-  index_template: Omit<TemplateSerialized, 'name'>;
+  index_template: TemplateSerialized;
 }
 
 /**

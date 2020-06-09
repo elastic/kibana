@@ -10,7 +10,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   Client.prototype.dataManagement = components.clientAction.namespaceFactory();
   const dataManagement = Client.prototype.dataManagement.prototype;
 
-  // Component template routes
+  // Component templates
   dataManagement.getComponentTemplates = ca({
     urls: [
       {
@@ -62,7 +62,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'DELETE',
   });
 
-  // Index templates v2
+  // Composable index templates
   dataManagement.getComposableIndexTemplates = ca({
     urls: [
       {

@@ -31,7 +31,7 @@ export const EmptyPrompt: FunctionComponent = () => {
             defaultMessage="For example, you might create a component template that defines index settings that can be reused across index templates."
           />
           <br />
-          <EuiLink href={documentation.getComponentTemplatesLink()} target="_blank" external>
+          <EuiLink href={documentation.componentTemplates} target="_blank" external>
             {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink', {
               defaultMessage: 'Learn more',
             })}

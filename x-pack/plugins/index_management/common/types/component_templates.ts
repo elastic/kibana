@@ -25,7 +25,7 @@ export interface ComponentTemplateDeserialized extends ComponentTemplateSerializ
   };
 }
 
-export interface ComponentTemplateEs {
+export interface ComponentTemplateFromEs {
   name: string;
   component_template: ComponentTemplateSerialized;
 }

@@ -10,11 +10,7 @@ export const getDocumentation = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocL
   const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
   const esDocsBase = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
 
-  function getComponentTemplatesLink() {
-    return `${esDocsBase}/indices-component-template.html`;
-  }
-
   return {
-    getComponentTemplatesLink,
+    componentTemplates: `${esDocsBase}/indices-component-template.html`,
   };
 };

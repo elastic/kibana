@@ -10,11 +10,10 @@ import {
   EuiInMemoryTable,
   EuiButton,
   EuiInMemoryTableProps,
-  EuiTableFieldDataColumnType,
+  EuiTextColor,
   EuiIcon,
 } from '@elastic/eui';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ComponentTemplateListItem } from '../types';
 
 export interface Props {
@@ -39,24 +38,17 @@ export const ComponentTable: FunctionComponent<Props> = ({
       onSelectionChange: setSelection,
       selectable: ({ usedBy }) => usedBy.length === 0,
       selectableMessage: (selectable) =>
-        !selectable
-          ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
-              defaultMessage: 'Component template is in use and cannot be deleted',
-            })
-          : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
+        selectable
+          ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
               defaultMessage: 'Select this component template',
+            })
+          : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
+              defaultMessage: 'Component template is in use and cannot be deleted',
             }),
     },
     rowProps: () => ({
       'data-test-subj': 'componentTemplateTableRow',
     }),
-    cellProps: (componentTemplate, column) => {
-      const { field } = column as EuiTableFieldDataColumnType<ComponentTemplateListItem>;
-
-      return {
-        'data-test-subj': `componentTemplateTableRow-${field}`,
-      };
-    },
     search: {
       toolsLeft:
         selection.length > 0 ? (
@@ -132,34 +124,23 @@ export const ComponentTable: FunctionComponent<Props> = ({
       {
         field: 'usedBy',
         name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
-          defaultMessage: 'Used by',
+          defaultMessage: 'Index templates',
         }),
         sortable: true,
         render: (usedBy: string[]) => {
           if (usedBy.length) {
-            return i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.inUseCellDescription',
-              {
-                defaultMessage: '{count} index {count, plural, one {template} other {templates}}',
-                values: {
-                  count: usedBy.length,
-                },
-              }
-            );
+            return usedBy.length;
           }
 
           return (
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="cross" color="danger" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+            <EuiTextColor color="subdued">
+              <i>
                 <FormattedMessage
                   id="xpack.idxMgmt.componentTemplatesList.table.notInUseCellDescription"
                   defaultMessage="Not in use"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </i>
+            </EuiTextColor>
           );
         },
       },

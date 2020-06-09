@@ -9,7 +9,7 @@ import {
   deserializeComponentTemplate,
   deserializeComponenTemplateList,
 } from '../../../../common/lib';
-import { ComponentTemplateEs } from '../../../../common';
+import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
@@ -27,7 +27,7 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
       try {
         const {
           component_templates: componentTemplates,
-        }: { component_templates: ComponentTemplateEs[] } = await callAsCurrentUser(
+        }: { component_templates: ComponentTemplateFromEs[] } = await callAsCurrentUser(
           'dataManagement.getComponentTemplates'
         );
 
