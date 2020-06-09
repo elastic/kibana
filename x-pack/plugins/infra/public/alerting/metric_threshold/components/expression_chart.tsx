@@ -114,7 +114,7 @@ export const ExpressionChart: React.FC<Props> = ({
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
       <EmptyContainer>
-        <EuiText color="subdued">
+        <EuiText color="subdued" data-test-subj="noChartData">
           <FormattedMessage
             id="xpack.infra.metrics.alerts.noDataMessage"
             defaultMessage="Oops, no chart data available"
