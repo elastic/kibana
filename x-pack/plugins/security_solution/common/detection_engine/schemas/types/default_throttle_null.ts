@@ -8,20 +8,16 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { ThrottleOrNull, throttle } from '../common/schemas';
 
-export type DefaultThrottleNullC = t.Type<ThrottleOrNull, ThrottleOrNull, unknown>;
-
 /**
  * Types the DefaultThrottleNull as:
  *   - If null or undefined, then a null will be set
  */
-export const DefaultThrottleNull: DefaultThrottleNullC = new t.Type<
-  ThrottleOrNull,
-  ThrottleOrNull,
-  unknown
->(
+export const DefaultThrottleNull = new t.Type<ThrottleOrNull, ThrottleOrNull, unknown>(
   'DefaultThreatNull',
   throttle.is,
   (input): Either<t.Errors, ThrottleOrNull> =>
     input == null ? t.success(null) : throttle.decode(input),
   t.identity
 );
+
+export type DefaultThrottleNullC = typeof DefaultThrottleNull;

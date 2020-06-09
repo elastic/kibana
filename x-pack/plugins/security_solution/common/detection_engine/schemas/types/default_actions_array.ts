@@ -8,15 +8,15 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { actions, Actions } from '../common/schemas';
 
-export type DefaultActionsArrayC = t.Type<Actions, Actions, unknown>;
-
 /**
  * Types the DefaultStringArray as:
  *   - If null or undefined, then a default action array will be set
  */
-export const DefaultActionsArray: DefaultActionsArrayC = new t.Type<Actions, Actions, unknown>(
+export const DefaultActionsArray = new t.Type<Actions, Actions, unknown>(
   'DefaultActionsArray',
   actions.is,
   (input): Either<t.Errors, Actions> => (input == null ? t.success([]) : actions.decode(input)),
   t.identity
 );
+
+export type DefaultActionsArrayC = typeof DefaultActionsArray;

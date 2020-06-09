@@ -606,7 +606,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
     expect(message.schema).toEqual({});
@@ -619,7 +619,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
     expect(message.schema).toEqual({});
@@ -727,7 +727,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "something-made-up" supplied to "language"',
@@ -743,7 +743,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "-1" supplied to "max_signals"',
@@ -759,7 +759,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
     expect(message.schema).toEqual({});
@@ -773,7 +773,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: PatchRulesSchemaDecoded = {
@@ -791,7 +791,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: PatchRulesSchemaDecoded = {
@@ -808,7 +808,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "should not work" supplied to "meta"',
@@ -823,7 +823,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "should not work" supplied to "filters"',
@@ -979,7 +979,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: PatchRulesSchemaDecoded = {
@@ -997,7 +997,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
     expect(message.schema).toEqual({});
@@ -1019,7 +1019,7 @@ describe('patch_rules_schema', () => {
       };
 
       const decoded = patchRulesSchema.decode(payload);
-      const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: PatchRulesSchemaDecoded = {
@@ -1044,7 +1044,7 @@ describe('patch_rules_schema', () => {
       };
 
       const decoded = patchRulesSchema.decode(payload);
-      const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: PatchRulesSchemaDecoded = {
@@ -1063,7 +1063,7 @@ describe('patch_rules_schema', () => {
       };
 
       const decoded = patchRulesSchema.decode(payload);
-      const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       // TODO: Change the formatter to output something more readable than [object Object]
       expect(getPaths(left(message.errors))).toEqual([
@@ -1080,7 +1080,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,group"',
@@ -1095,7 +1095,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,id"',
@@ -1110,7 +1110,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,params"',
@@ -1132,7 +1132,7 @@ describe('patch_rules_schema', () => {
     };
 
     const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck<PatchRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,action_type_id"',

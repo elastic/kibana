@@ -117,7 +117,7 @@ describe('find_rules_schema', () => {
     };
 
     const decoded = findRulesSchema.decode(payload);
-    const checked = exactCheck<FindRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "fields"']);
     expect(message.schema).toEqual({});
@@ -161,7 +161,7 @@ describe('find_rules_schema', () => {
     };
 
     const decoded = findRulesSchema.decode(payload);
-    const checked = exactCheck<FindRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "filter"']);
     expect(message.schema).toEqual({});
@@ -174,7 +174,7 @@ describe('find_rules_schema', () => {
     };
 
     const decoded = findRulesSchema.decode(payload);
-    const checked = exactCheck<FindRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     expect((message.schema as FindRulesSchema).sort_order).toEqual(payload.sort_order);
@@ -188,7 +188,7 @@ describe('find_rules_schema', () => {
     };
 
     const decoded = findRulesSchema.decode(payload);
-    const checked = exactCheck<FindRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "some other string" supplied to "sort_order"',

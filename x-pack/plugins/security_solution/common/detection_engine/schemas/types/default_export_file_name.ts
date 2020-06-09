@@ -7,16 +7,16 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type DefaultExportFileNameC = t.Type<string, string, unknown>;
-
 /**
  * Types the DefaultExportFileName as:
  *   - If null or undefined, then a default of "export.ndjson" will be used
  */
-export const DefaultExportFileName: DefaultExportFileNameC = new t.Type<string, string, unknown>(
+export const DefaultExportFileName = new t.Type<string, string, unknown>(
   'DefaultExportFileName',
   t.string.is,
   (input): Either<t.Errors, string> =>
     input == null ? t.success('export.ndjson') : t.string.decode(input),
   t.identity
 );
+
+export type DefaultExportFileNameC = typeof DefaultExportFileName;

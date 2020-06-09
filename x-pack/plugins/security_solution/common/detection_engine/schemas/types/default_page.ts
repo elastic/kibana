@@ -8,15 +8,13 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_zero';
 
-export type DefaultPageC = t.Type<number, number, unknown>;
-
 /**
  * Types the DefaultPerPage as:
  *   - If a string this will convert the string to a number
  *   - If null or undefined, then a default of 1 will be used
  *   - If the number is 0 or less this will not validate as it has to be a positive number greater than zero
  */
-export const DefaultPage: DefaultPageC = new t.Type<number, number, unknown>(
+export const DefaultPage = new t.Type<number, number, unknown>(
   'DefaultPerPage',
   t.number.is,
   (input): Either<t.Errors, number> => {
@@ -30,3 +28,5 @@ export const DefaultPage: DefaultPageC = new t.Type<number, number, unknown>(
   },
   t.identity
 );
+
+export type DefaultPageC = typeof DefaultPage;

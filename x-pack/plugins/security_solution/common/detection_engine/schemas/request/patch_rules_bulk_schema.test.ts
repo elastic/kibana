@@ -28,7 +28,7 @@ describe('patch_rules_bulk_schema', () => {
     const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
 
     const decoded = patchRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as PatchRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUp"']);
     expect(output.schema).toEqual({});
@@ -90,7 +90,7 @@ describe('patch_rules_bulk_schema', () => {
     ];
 
     const decoded = patchRulesBulkSchema.decode(payload);
-    const checked = exactCheck<PatchRulesBulkSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     // TODO: Fix the formatter to give something better than [object Object]
     expect(formatErrors(output.errors)).toEqual([

@@ -7,18 +7,12 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type DefaultStringBooleanFalseC = t.Type<boolean, boolean, unknown>;
-
 /**
  * Types the DefaultStringBooleanFalse as:
  *   - If a string this will convert the string to a boolean
  *   - If null or undefined, then a default false will be set
  */
-export const DefaultStringBooleanFalse: DefaultStringBooleanFalseC = new t.Type<
-  boolean,
-  boolean,
-  unknown
->(
+export const DefaultStringBooleanFalse = new t.Type<boolean, boolean, unknown>(
   'DefaultStringBooleanFalse',
   t.boolean.is,
   (input): Either<t.Errors, boolean> => {
@@ -34,3 +28,5 @@ export const DefaultStringBooleanFalse: DefaultStringBooleanFalseC = new t.Type<
   },
   t.identity
 );
+
+export type DefaultStringBooleanFalseC = typeof DefaultStringBooleanFalse;

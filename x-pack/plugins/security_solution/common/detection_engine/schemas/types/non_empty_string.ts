@@ -7,13 +7,11 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type NonEmptyStringC = t.Type<string, string, unknown>;
-
 /**
  * Types the NonEmptyString as:
  *   - A string that is not empty
  */
-export const NonEmptyString: NonEmptyStringC = new t.Type<string, string, unknown>(
+export const NonEmptyString = new t.Type<string, string, unknown>(
   'NonEmptyString',
   t.string.is,
   (input, context): Either<t.Errors, string> => {
@@ -25,3 +23,5 @@ export const NonEmptyString: NonEmptyStringC = new t.Type<string, string, unknow
   },
   t.identity
 );
+
+export type NonEmptyStringC = typeof NonEmptyString;

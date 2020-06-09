@@ -10,8 +10,6 @@ import { Either } from 'fp-ts/lib/Either';
 import { max_signals } from '../common/schemas';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
-export type DefaultMaxSignalsNumberC = t.Type<number, number, unknown>;
-
 /**
  * Types the default max signal:
  *   - Natural Number (positive integer and not a float),
@@ -30,3 +28,5 @@ export const DefaultMaxSignalsNumber: DefaultMaxSignalsNumberC = new t.Type<
   },
   t.identity
 );
+
+export type DefaultMaxSignalsNumberC = t.Type<number, number, unknown>;

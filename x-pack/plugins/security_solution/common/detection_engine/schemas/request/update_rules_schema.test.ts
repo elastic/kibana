@@ -606,7 +606,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
     expect(message.schema).toEqual({});
@@ -619,7 +619,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
     expect(message.schema).toEqual({});
@@ -690,7 +690,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "some string" supplied to "filters"',
@@ -739,7 +739,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "something-made-up" supplied to "language"',
@@ -814,7 +814,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "0" supplied to ""',
@@ -848,7 +848,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "framework"',
@@ -876,7 +876,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "tactic"',
@@ -902,7 +902,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "technique"',
@@ -934,7 +934,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "5" supplied to ""',
@@ -950,7 +950,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
     expect(message.schema).toEqual({});
@@ -963,7 +963,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "101" supplied to "risk_score"',
@@ -978,7 +978,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
     expect(message.schema).toEqual({});
@@ -1046,7 +1046,7 @@ describe('update rules schema', () => {
     };
 
     const decoded = updateRulesSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "should not work" supplied to "meta"',
@@ -1305,7 +1305,7 @@ describe('update rules schema', () => {
       };
 
       const decoded = updateRulesSchema.decode(payload);
-      const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "null" supplied to "note"']);
       expect(message.schema).toEqual({});
@@ -1320,7 +1320,7 @@ describe('update rules schema', () => {
       };
 
       const decoded = updateRulesSchema.decode(payload);
-      const checked = exactCheck<UpdateRulesSchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
         // TODO: Fix/Change the formatErrors to be better able to handle objects

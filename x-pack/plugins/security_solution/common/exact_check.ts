@@ -25,7 +25,10 @@ import { isObject, get } from 'lodash/fp';
  * @param decoded The decoded either which has either an existing error or the
  * decoded object which could have additional keys stripped from it.
  */
-export const exactCheck = <T>(original: T, decoded: Either<t.Errors, T>): Either<t.Errors, T> => {
+export const exactCheck = <T>(
+  original: unknown,
+  decoded: Either<t.Errors, T>
+): Either<t.Errors, T> => {
   const onLeft = (errors: t.Errors): Either<t.Errors, T> => left(errors);
   const onRight = (decodedValue: T): Either<t.Errors, T> => {
     const differences = findDifferencesRecursive(original, decodedValue);

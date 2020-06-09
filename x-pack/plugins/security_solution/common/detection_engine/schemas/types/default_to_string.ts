@@ -7,15 +7,15 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type DefaultToStringC = t.Type<string, string, unknown>;
-
 /**
  * Types the DefaultToString as:
  *   - If null or undefined, then a default of the string "now" will be used
  */
-export const DefaultToString: DefaultToStringC = new t.Type<string, string, unknown>(
+export const DefaultToString = new t.Type<string, string, unknown>(
   'DefaultFromString',
   t.string.is,
   (input): Either<t.Errors, string> => (input == null ? t.success('now') : t.string.decode(input)),
   t.identity
 );
+
+export type DefaultToStringC = typeof DefaultToString;

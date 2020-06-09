@@ -8,16 +8,16 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { language } from '../common/schemas';
 
-export type DefaultLanguageStringC = t.Type<string, string, unknown>;
-
 /**
  * Types the DefaultLanguageString as:
  *   - If null or undefined, then a default of the string "kuery" will be used
  */
-export const DefaultLanguageString: DefaultLanguageStringC = new t.Type<string, string, unknown>(
+export const DefaultLanguageString = new t.Type<string, string, unknown>(
   'DefaultLanguageString',
   t.string.is,
   (input): Either<t.Errors, string> =>
     input == null ? t.success('kuery') : language.decode(input),
   t.identity
 );
+
+export type DefaultLanguageStringC = typeof DefaultLanguageString;

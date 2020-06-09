@@ -7,15 +7,15 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type DefaultIntervalStringC = t.Type<string, string, unknown>;
-
 /**
  * Types the DefaultIntervalString as:
  *   - If null or undefined, then a default of the string "5m" will be used
  */
-export const DefaultIntervalString: DefaultIntervalStringC = new t.Type<string, string, unknown>(
+export const DefaultIntervalString = new t.Type<string, string, unknown>(
   'DefaultIntervalString',
   t.string.is,
   (input): Either<t.Errors, string> => (input == null ? t.success('5m') : t.string.decode(input)),
   t.identity
 );
+
+export type DefaultIntervalStringC = typeof DefaultIntervalString;

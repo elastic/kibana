@@ -623,7 +623,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
     expect(message.schema).toEqual({});
@@ -636,7 +636,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
     expect(message.schema).toEqual({});
@@ -707,7 +707,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "some string" supplied to "filters"',
@@ -756,7 +756,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "something-made-up" supplied to "language"',
@@ -831,7 +831,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "0" supplied to ""',
@@ -865,7 +865,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "framework"',
@@ -893,7 +893,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "tactic"',
@@ -919,7 +919,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "technique"',
@@ -951,7 +951,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "5" supplied to ""',
@@ -967,7 +967,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "immutable"']);
     expect(message.schema).toEqual({});
@@ -980,7 +980,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(getImportRulesSchemaDecodedMock());
@@ -993,7 +993,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "true" supplied to "immutable"',
@@ -1008,7 +1008,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "immutable"']);
     expect(message.schema).toEqual({});
@@ -1021,7 +1021,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "101" supplied to "risk_score"',
@@ -1036,7 +1036,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
     expect(message.schema).toEqual({});
@@ -1104,7 +1104,7 @@ describe('import rules schema', () => {
     };
 
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "should not work" supplied to "meta"',
@@ -1251,7 +1251,7 @@ describe('import rules schema', () => {
       };
 
       const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck<ImportRulesQuerySchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "invalid-string" supplied to ""',
@@ -1279,10 +1279,7 @@ describe('import rules schema', () => {
       };
 
       const decoded = importRulesPayloadSchema.decode(payload);
-      const checked = exactCheck<ImportRulesPayloadSchema>(
-        (payload as unknown) as ImportRulesPayloadSchema,
-        decoded
-      );
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "undefined" supplied to "file"',
@@ -1513,7 +1510,7 @@ describe('import rules schema', () => {
       };
 
       const decoded = importRulesSchema.decode(payload);
-      const checked = exactCheck<ImportRulesSchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
         // TODO: Fix/Change the formatErrors to be better able to handle objects

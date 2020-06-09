@@ -7,16 +7,16 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type DefaultStringArrayC = t.Type<string[], string[], unknown>;
-
 /**
  * Types the DefaultStringArray as:
  *   - If null or undefined, then a default array will be set
  */
-export const DefaultStringArray: DefaultStringArrayC = new t.Type<string[], string[], unknown>(
+export const DefaultStringArray = new t.Type<string[], string[], unknown>(
   'DefaultStringArray',
   t.array(t.string).is,
   (input): Either<t.Errors, string[]> =>
     input == null ? t.success([]) : t.array(t.string).decode(input),
   t.identity
 );
+
+export type DefaultStringArrayC = typeof DefaultStringArray;

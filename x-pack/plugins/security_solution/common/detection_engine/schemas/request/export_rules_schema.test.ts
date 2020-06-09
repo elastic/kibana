@@ -68,7 +68,7 @@ describe('create rules schema', () => {
       };
 
       const decoded = exportRulesSchema.decode(payload);
-      const checked = exactCheck((payload as unknown) as ExportRulesSchema, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       // TODO: Change formatter to display a better value than [object Object]
       expect(getPaths(left(message.errors))).toEqual([
@@ -118,7 +118,7 @@ describe('create rules schema', () => {
       };
 
       const decoded = exportRulesQuerySchema.decode(payload);
-      const checked = exactCheck<ExportRulesQuerySchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "10" supplied to ""']);
       expect(message.schema).toEqual({});
@@ -148,7 +148,7 @@ describe('create rules schema', () => {
       };
 
       const decoded = exportRulesQuerySchema.decode(payload);
-      const checked = exactCheck<ExportRulesQuerySchema>(payload, decoded);
+      const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "invalid string" supplied to ""',

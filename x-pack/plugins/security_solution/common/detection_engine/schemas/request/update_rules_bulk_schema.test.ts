@@ -32,7 +32,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
       'Invalid value "undefined" supplied to "description"',
@@ -73,7 +73,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
       'Invalid value "undefined" supplied to "risk_score"',
@@ -88,7 +88,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
       'Invalid value "undefined" supplied to "risk_score"',
@@ -103,7 +103,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
       'Invalid value "undefined" supplied to "risk_score"',
@@ -119,7 +119,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
       'Invalid value "undefined" supplied to "risk_score"',
@@ -137,7 +137,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue"']);
     expect(output.schema).toEqual({});
@@ -152,7 +152,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue"']);
     expect(output.schema).toEqual({});
@@ -170,7 +170,7 @@ describe('update_rules_bulk_schema', () => {
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue,madeUpValue"']);
     expect(output.schema).toEqual({});
@@ -203,10 +203,7 @@ describe('update_rules_bulk_schema', () => {
     const payload = [badSeverity];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck<UpdateRulesBulkSchema>(
-      (payload as unknown) as UpdateRulesBulkSchema,
-      decoded
-    );
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['Invalid value "madeup" supplied to "severity"']);
     expect(output.schema).toEqual({});
@@ -247,7 +244,7 @@ describe('update_rules_bulk_schema', () => {
     ];
 
     const decoded = updateRulesBulkSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as UpdateRulesBulkSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     // TODO: We should change the formatter used to better print objects
     expect(formatErrors(output.errors)).toEqual([

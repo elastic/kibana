@@ -72,7 +72,7 @@ describe('set signal status schema', () => {
     };
 
     const decoded = setSignalsStatusSchema.decode(payload);
-    const checked = exactCheck((payload as unknown) as SetSignalsStatusSchema, decoded);
+    const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "fakeVal" supplied to "status"',
