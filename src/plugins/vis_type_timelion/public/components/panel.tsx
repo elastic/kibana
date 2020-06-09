@@ -38,6 +38,11 @@ import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
 
+interface CrosshairPlot extends jquery.flot.plot {
+  setCrosshair: (pos: Position) => void;
+  clearCrosshair: () => void;
+}
+
 interface PanelProps {
   interval: string;
   seriesList: Sheet;
@@ -70,8 +75,8 @@ const emptyCaption = '<br>';
 function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const [canvasElem, setCanvasElem] = useState<JQuery<HTMLElement>>();
-  const [chartElem, setChartElem] = useState<JQuery<HTMLElement>>();
+  const [canvasElem, setCanvasElem] = useState<HTMLDivElement>();
+  const [chartElem, setChartElem] = useState<HTMLDivElement>();
 
   const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
@@ -83,13 +88,13 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const [legendValueNumbers, setLegendValueNumbers] = useState<JQuery<HTMLElement>>();
   const [legendCaption, setLegendCaption] = useState<JQuery<HTMLElement>>();
 
-  const canvasRef = useCallback((node) => {
+  const canvasRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
       setCanvasElem(node);
     }
   }, []);
 
-  const elementRef = useCallback((node) => {
+  const elementRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
       setChartElem(node);
     }
@@ -97,7 +102,9 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   useEffect(
     () => () => {
-      $(chartElem).off('plotselected').off('plothover').off('mouseleave');
+      if (chartElem) {
+        $(chartElem).off('plotselected').off('plothover').off('mouseleave');
+      }
     },
     [chartElem]
   );
@@ -149,7 +156,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   const updateCaption = useCallback(
     (plotData: any) => {
-      if (get(plotData, '[0]._global.legend.showTime', true)) {
+      if (canvasElem && get(plotData, '[0]._global.legend.showTime', true)) {
         const caption = $('<caption class="timChart__legendCaption"></caption>');
         caption.html(emptyCaption);
         setLegendCaption(caption);
@@ -199,7 +206,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
           });
         }
 
-        const newPlot = $.plot(canvasElem, updatedSeries, options);
+        const newPlot = $.plot($(canvasElem), updatedSeries, options);
         setPlot(newPlot);
         renderComplete();
 
@@ -265,7 +272,8 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
         const useNearestPoint = series.lines!.show && !series.lines!.steps;
         const precision = get(series, '_meta.precision', 2);
 
-        if (series._hide) {
+        // We're setting this flag on top on the series object belonging to the flot library, so we're simply casting here.
+        if ((series as { _hide?: boolean })._hide) {
           continue;
         }
 
@@ -287,8 +295,9 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
             legendValueNumbers.eq(i).empty();
           } else {
             let label = y.toFixed(precision);
-            if (series.yaxis.tickFormatter) {
-              label = series.yaxis.tickFormatter(Number(label), series.yaxis);
+            const formatter = ((series.yaxis as unknown) as Axis).tickFormatter;
+            if (formatter) {
+              label = formatter(Number(label), (series.yaxis as unknown) as Axis);
             }
             legendValueNumbers.eq(i).text(`(${label})`);
           }
@@ -322,7 +331,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       if (!plot) {
         return;
       }
-      plot.setCrosshair(pos);
+      (plot as CrosshairPlot).setCrosshair(pos);
       debouncedSetLegendNumbers(pos);
     },
     [plot, debouncedSetLegendNumbers]
@@ -331,7 +340,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     if (!plot) {
       return;
     }
-    plot.clearCrosshair();
+    (plot as CrosshairPlot).clearCrosshair();
     clearLegendNumbers();
   }, [plot, clearLegendNumbers]);
 

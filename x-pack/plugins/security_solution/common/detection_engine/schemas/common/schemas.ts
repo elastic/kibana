@@ -12,6 +12,7 @@ import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
+import { SavedObjectAttributesRuntimeType } from '../../../types/saved_objects';
 
 export const description = t.string;
 export const enabled = t.boolean;
@@ -32,13 +33,12 @@ export const filters = t.array(t.record(t.string, t.unknown)); // Filters are no
 export const action_group = t.string;
 export const action_id = t.string;
 export const action_action_type_id = t.string;
-export const action_params = t.record(t.string, t.union([t.string, t.array(t.string)]));
 export const action = t.exact(
   t.type({
     group: action_group,
     id: action_id,
     action_type_id: action_action_type_id,
-    params: action_params,
+    params: SavedObjectAttributesRuntimeType,
   })
 );
 
@@ -75,7 +75,7 @@ export const machine_learning_job_id = t.string;
  * TODO: Strip away extra information and possibly even "freeze" this object
  * so we have tighter control over 3rd party data structures.
  */
-export const meta = t.record(t.string, t.string);
+export const meta = t.record(t.string, t.union([t.string, t.object]));
 export const max_signals = PositiveIntegerGreaterThanZero;
 export const name = t.string;
 export const risk_score = RiskScore;
