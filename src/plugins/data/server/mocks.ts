@@ -17,14 +17,24 @@
  * under the License.
  */
 
-export function createSearchSetupMock() {
+import { createSearchSetupMock, createSearchStartMock } from './search/mocks';
+import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
+
+function createSetupContract() {
   return {
-    registerSearchStrategy: jest.fn(),
+    search: createSearchSetupMock(),
+    fieldFormats: createFieldFormatsSetupMock(),
   };
 }
 
-export function createSearchStartMock() {
+function createStartContract() {
   return {
-    getSearchStrategy: jest.fn(),
+    search: createSearchStartMock(),
+    fieldFormats: createFieldFormatsStartMock(),
   };
 }
+
+export const dataPluginMock = {
+  createSetupContract,
+  createStartContract,
+};

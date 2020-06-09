@@ -60,7 +60,10 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
-  public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<object, DataPluginStart>,
+    { usageCollection }: DataPluginSetupDependencies
+  ) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.queryService.setup(core);
@@ -70,8 +73,8 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     core.uiSettings.register(getUiSettings());
 
     return {
-      fieldFormats: this.fieldFormats.setup(),
       search: this.searchService.setup(core),
+      fieldFormats: this.fieldFormats.setup(),
     };
   }
 

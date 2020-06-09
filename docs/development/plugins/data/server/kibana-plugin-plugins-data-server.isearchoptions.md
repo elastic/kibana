@@ -14,5 +14,5 @@ export interface ISearchOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [signal](./kibana-plugin-plugins-data-server.isearchoptions.signal.md) | <code>AbortSignal</code> |  |
+|  [signal](./kibana-plugin-plugins-data-server.isearchoptions.signal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
 

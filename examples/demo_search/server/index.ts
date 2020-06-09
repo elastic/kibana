@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext, PluginInitializer } from 'kibana/server';
 import { DemoDataPlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = (
-  initializerContext: PluginInitializerContext
-) => new DemoDataPlugin(initializerContext);
+export const plugin = () => new DemoDataPlugin();

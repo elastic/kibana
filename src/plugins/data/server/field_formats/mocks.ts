@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export function createSearchSetupMock() {
+export function createFieldFormatsSetupMock() {
   return {
-    registerSearchStrategy: jest.fn(),
+    register: jest.fn(),
   };
 }
 
-export function createSearchStartMock() {
+export function createFieldFormatsStartMock() {
   return {
-    getSearchStrategy: jest.fn(),
+    fieldFormatServiceFactory: jest.fn(),
   };
 }

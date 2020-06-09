@@ -107,5 +107,5 @@ export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
 export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
 
 export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: ISearchStrategy<K>;
+  [K in TStrategyTypes]?: ISearchStrategy<any>;
 };

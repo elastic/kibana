@@ -77,7 +77,7 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
       const { strategy, id } = request.params;
 
       const [, , selfStart] = await core.getStartServices();
-      const searchStrategy = selfStart.getSearchStrategy(strategy);
+      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
       if (!searchStrategy.cancel) return res.ok();
 
       try {

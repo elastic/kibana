@@ -18,11 +18,13 @@
  */
 
 import { ISearchStrategy } from '../../../src/plugins/data/server';
-import { DEMO_SEARCH_STRATEGY } from '../common';
+import { DEMO_SEARCH_STRATEGY, IDemoRequest } from '../common';
 
-export const demoSearchStrategyProvider = (): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
+export const demoSearchStrategyProvider = async (): Promise<
+  ISearchStrategy<typeof DEMO_SEARCH_STRATEGY>
+> => {
   return {
-    search: (context, request) => {
+    search: (context, request: IDemoRequest) => {
       return Promise.resolve({
         greeting:
           request.mood === 'happy'

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { demoSearchStrategyProvider } from './demo_search_strategy';
 import {
