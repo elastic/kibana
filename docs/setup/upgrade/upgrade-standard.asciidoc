@@ -1,8 +1,8 @@
 [[upgrade-standard]]
 === Standard upgrade
 
-NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
-to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
 [IMPORTANT]
 ===========================================
@@ -13,7 +13,7 @@ necessary remediation steps as per those instructions.
 ===========================================
 
 [float]
-==== Upgrading using a `deb` or `rpm` package
+==== Upgrade using a `deb` or `rpm` package
 
 . Stop the existing {kib} process using the appropriate command for your
   system.
@@ -37,7 +37,7 @@ otherwise {kib} will fail to start.
 . Start the new {kib} process using the appropriate command for your system.
 
 [float]
-==== Upgrading using a `zip` or `tar.gz` archive
+==== Upgrade using a `zip` or `tar.gz` archive
 
 . Extract the `zip` or `tar.gz` archive to a new directory to be sure that you
   don't overwrite the `config` or `data` directories. +
