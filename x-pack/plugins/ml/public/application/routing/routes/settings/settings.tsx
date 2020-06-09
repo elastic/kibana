@@ -42,11 +42,18 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canGetFilters = checkPermission('canGetFilters');
+  const canCreateFilter = checkPermission('canCreateFilter');
   const canGetCalendars = checkPermission('canGetCalendars');
+  const canCreateCalendar = checkPermission('canCreateCalendar');
 
   return (
     <PageLoader context={context}>
-      <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
+      <Settings
+        canGetCalendars={canGetCalendars}
+        canCreateFilter={canCreateFilter}
+        canGetFilters={canGetFilters}
+        canCreateCalendar={canCreateCalendar}
+      />
     </PageLoader>
   );
 };
