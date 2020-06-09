@@ -7,7 +7,7 @@
 .monCluster {
   .monUnassigned {
     vertical-align: middle;
-    width: 150px;
+    width: $euiSize * 10;
   }
 
   .monUnassigned__children,
@@ -59,7 +59,7 @@
   }
 
   td:first-child {
-    width: 200px;
+    width: $euiSize * 12.5;
   }
 
   // SASS-TODO: Rename this class following Eui conventions
