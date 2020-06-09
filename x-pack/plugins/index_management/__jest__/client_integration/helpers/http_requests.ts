@@ -12,7 +12,7 @@ type HttpResponse = Record<string, any> | any[];
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   const setLoadTemplatesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/index-templates`, [
+    server.respondWith('GET', `${API_BASE_PATH}/index_templates`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
@@ -36,7 +36,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setDeleteTemplateResponse = (response: HttpResponse = []) => {
-    server.respondWith('POST', `${API_BASE_PATH}/delete-index-templates`, [
+    server.respondWith('POST', `${API_BASE_PATH}/delete_index_templates`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
@@ -47,7 +47,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? error.body : response;
 
-    server.respondWith('GET', `${API_BASE_PATH}/index-templates/:id`, [
+    server.respondWith('GET', `${API_BASE_PATH}/index_templates/:id`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -58,7 +58,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.body.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
-    server.respondWith('POST', `${API_BASE_PATH}/index-templates`, [
+    server.respondWith('POST', `${API_BASE_PATH}/index_templates`, [
       status,
       { 'Content-Type': 'application/json' },
       body,
@@ -69,7 +69,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
-    server.respondWith('PUT', `${API_BASE_PATH}/index-templates/:name`, [
+    server.respondWith('PUT', `${API_BASE_PATH}/index_templates/:name`, [
       status,
       { 'Content-Type': 'application/json' },
       body,
