@@ -235,11 +235,11 @@ export const MapsCreateEditView = class extends React.Component {
     }
   };
 
-  getAppStateFilters() {
+  getAppStateFilters = () => {
     return this.appStateManager.getFilters() || [];
-  }
+  };
 
-  syncAppAndGlobalState() {
+  syncAppAndGlobalState = () => {
     const { query, time, refreshConfig } = this.state;
     const { filterManager } = getData().query;
 
@@ -260,7 +260,7 @@ export const MapsCreateEditView = class extends React.Component {
       filters: filterManager.getGlobalFilters(),
     });
     this.setState({ refreshInterval });
-  }
+  };
 
   onQueryChange = async ({ filters, query, time, refresh }) => {
     const { filterManager } = getData().query;
