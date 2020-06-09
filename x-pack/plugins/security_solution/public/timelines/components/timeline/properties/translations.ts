@@ -109,6 +109,13 @@ export const NEW_TIMELINE = i18n.translate(
   }
 );
 
+export const NEW_TEMPLATE_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
+  {
+    defaultMessage: 'Create template timeline',
+  }
+);
+
 export const ATTACH_TIMELINE_TO_NEW_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newCaseButtonLabel',
   {
