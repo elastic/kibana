@@ -95,26 +95,6 @@ export const MapsCreateEditView = class extends React.Component {
     if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
       updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
     }
-    this.updateFromGlobalState();
-  }
-
-  updateFromGlobalState() {
-    const { filters, refreshInterval, time } = this.state;
-    const globalState = getGlobalState();
-    const newState = {};
-
-    if (!_.isEqual(globalState.filters, filters)) {
-      newState.filters = globalState.filters;
-    }
-    if (!_.isEqual(globalState.refreshInterval, refreshInterval)) {
-      newState.refreshInterval = globalState.refreshInterval;
-    }
-    if (!_.isEqual(globalState.time, time)) {
-      newState.time = globalState.time;
-    }
-    if (!_.isEmpty(newState)) {
-      this.setState(newState, this.syncAppAndGlobalState);
-    }
   }
 
   componentWillUnmount() {
@@ -243,9 +223,11 @@ export const MapsCreateEditView = class extends React.Component {
     const { filterManager } = getData().query;
     const { dispatchSetQuery } = this.props;
     const newState = {};
+    let newFilters;
     if (filters) {
       filterManager.setFilters(filters); // Maps and merges filters
-      newState.filters = filterManager.getFilters();
+      newFilters = filterManager.getFilters();
+      newState.filters = newFilters;
     }
     if (query) {
       newState.query = query;
@@ -253,15 +235,16 @@ export const MapsCreateEditView = class extends React.Component {
     if (time) {
       newState.time = time;
     }
-    this.syncAppAndGlobalState();
-    dispatchSetQuery(
-      refresh,
-      filters || this.state.filters,
-      query || this.state.query,
-      time || this.state.time
-    );
-    updateGlobalState(newState);
-    this.setState(newState);
+    this.setState(newState, () => {
+      this.syncAppAndGlobalState();
+      dispatchSetQuery(
+        refresh,
+        newFilters || this.state.filters,
+        query || this.state.query,
+        time || this.state.time
+      );
+      updateGlobalState({ ...newState, filters: filterManager.getGlobalFilters() });
+    });
   };
 
   async _fetchSavedMap(savedObjectId) {
