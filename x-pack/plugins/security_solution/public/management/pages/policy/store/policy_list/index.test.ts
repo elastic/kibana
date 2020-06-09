@@ -108,9 +108,18 @@ describe('policy list store concerns', () => {
       location: undefined,
       policyItems: [],
       isLoading: false,
+      isDeleting: false,
+      deleteStatus: undefined,
       pageIndex: 0,
       pageSize: 10,
       total: 0,
+      agentStatusSummary: {
+        error: 0,
+        events: 0,
+        offline: 0,
+        online: 0,
+        total: 0,
+      },
     });
   });
   it('uses default pagination params when not included in url', async () => {

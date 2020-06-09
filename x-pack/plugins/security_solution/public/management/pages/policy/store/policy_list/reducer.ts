@@ -24,6 +24,13 @@ export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
   pageSize: 10,
   total: 0,
   location: undefined,
+  agentStatusSummary: {
+    error: 0,
+    events: 0,
+    offline: 0,
+    online: 0,
+    total: 0,
+  },
 });
 
 export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
