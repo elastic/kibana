@@ -277,7 +277,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.domNode = div;
 
     const expressions = getExpressions();
-    this.handler = new expressions.ExpressionLoader(this.domNode, '', {
+    this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
       onRenderError: (element: HTMLElement, error: RenderError) => {
         this.onContainerError(error);
       },
