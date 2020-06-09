@@ -6,10 +6,7 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
-/src/legacy/server/url_shortening/ @elastic/kibana-app
-/src/legacy/server/sample_data/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
@@ -37,9 +34,11 @@
 /src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
 
 # App Architecture
+/examples/developer_examples/ @elastic/kibana-app-arch
 /examples/url_generators_examples/ @elastic/kibana-app-arch
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
+/packages/elastic-datemath/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
@@ -142,6 +141,8 @@
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/x-pack/plugins/global_search/  @elastic/kibana-platform
+/x-pack/plugins/cloud/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -157,7 +158,6 @@
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
-/x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
@@ -179,7 +179,7 @@
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
 
 # Kibana Alerting Services
-/x-pack/plugins/alerting/ @elastic/kibana-alerting-services
+/x-pack/plugins/alerts/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
@@ -228,12 +228,12 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem
 
-# SIEM
-/x-pack/plugins/siem/ @elastic/siem @elastic/endpoint-app-team
+# Security Solution
+/x-pack/plugins/security_solution/ @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
-/x-pack/test/api_integration/apis/siem @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/security_solution @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
 
 # Security Intelligence And Analytics
-/x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
+/x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

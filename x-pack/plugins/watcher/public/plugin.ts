@@ -38,9 +38,9 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         { defaultMessage: 'Watcher' }
       ),
       order: 3,
-      mount: async ({ element, setBreadcrumbs }) => {
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const [core] = await getStartServices();
-        const { i18n: i18nDep, docLinks, savedObjects } = core;
+        const { i18n: i18nDep, docLinks, savedObjects, application } = core;
         const { boot } = await import('./application/boot');
         const { TimeBuckets } = await import('./legacy');
 
@@ -58,11 +58,11 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
+          history,
+          getUrlForApp: application.getUrlForApp,
         });
       },
     });
-
-    watcherESApp.disable();
 
     // TODO: Fix the below dependency on `home` plugin inner workings
     // Because the home feature catalogue does not have enable/disable functionality we pass
@@ -76,16 +76,23 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.',
       }),
       icon: 'watchesApp',
-      path: '/app/kibana#/management/insightsAndAlerting/watcher/watches',
+      path: '/app/management/insightsAndAlerting/watcher/watches',
       showOnHomePage: false,
     };
 
     home.featureCatalogue.register(watcherHome);
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
+      // NOTE: We enable the plugin by default instead of disabling it by default because this
+      // creates a race condition that can cause the app nav item to not render in the side nav.
+      // The race condition still exists, but it will result in the item rendering when it shouldn't
+      // (e.g. on a license it's not available for), instead of *not* rendering when it *should*,
+      // which is a less frustrating UX.
       if (valid) {
         watcherESApp.enable();
         watcherHome.showOnHomePage = true;
+      } else {
+        watcherESApp.disable();
       }
     });
   }

@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/machine_learning'),
+      resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
@@ -113,8 +113,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/monitoring',
       },
       logstashPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/ingest/pipelines',
+        pathname: '/app/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -150,59 +149,46 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/ml',
       },
       roleMappings: {
-        pathname: '/app/kibana',
-        hash: '/management/security/role_mappings',
+        pathname: '/app/management/security/role_mappings',
       },
       rollupJob: {
-        pathname: '/app/kibana',
-        hash: '/management/data/rollup_jobs/',
+        pathname: '/app/management/data/rollup_jobs',
       },
       apiKeys: {
-        pathname: '/app/kibana',
-        hash: '/management/security/api_keys/',
+        pathname: '/app/management/security/api_keys',
       },
       licenseManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/stack/license_management',
+        pathname: '/app/management/stack/license_management',
       },
       indexManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/data/index_management',
+        pathname: '/app/management/data/index_management',
       },
       indexLifecycleManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/data/index_lifecycle_management',
+        pathname: '/app/management/data/index_lifecycle_management',
       },
       ingestPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/ingest/ingest_pipelines',
+        pathname: '/app/management/ingest/ingest_pipelines',
       },
       snapshotRestore: {
-        pathname: '/app/kibana',
-        hash: '/management/data/snapshot_restore',
-      },
-      crossClusterReplication: {
-        pathname: '/app/kibana',
-        hash: '/management/data/cross_cluster_replication',
+        pathname: '/app/management/data/snapshot_restore',
       },
       remoteClusters: {
-        pathname: '/app/kibana',
-        hash: '/management/data/remote_clusters',
+        pathname: '/app/management/data/remote_clusters',
+      },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',
       },
       watcher: {
-        pathname: '/app/kibana',
-        hash: '/management/insightsAndAlerting/watcher/watches/',
+        pathname: '/app/management/insightsAndAlerting/watcher/watches',
       },
       transform: {
-        pathname: '/app/kibana/',
-        hash: '/management/data/transform',
+        pathname: '/app/management/data/transform',
       },
       reporting: {
-        pathname: '/app/kibana/',
-        hash: '/management/insightsAndAlerting/reporting',
+        pathname: '/app/management/insightsAndAlerting/reporting',
       },
     },
 

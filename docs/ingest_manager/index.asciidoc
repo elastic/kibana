@@ -110,12 +110,12 @@ fetched by this input should be processed and which Data Stream to send it to.
 Ingest Management enforces an indexing strategy to allow the system to automatically detect indices and run queries on it. In short the indexing strategy looks as following:
 
 ```
-{type}-{dataset}-{namespace}
+{dataset.type}-{dataset.name}-{dataset.namespace}
 ```
 
-The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only two requirement are that it has only characters allowed in an Elasticsearch index name and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. The same requirements as for the namespace apply. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords. If there is a dataset or a namespace with a `-` inside, it is recommended to replace it either by a `.` or a `_`.
+The `{dataset.type}` can be `logs` or `metrics`. The `{dataset.namespace}` is the part where the user can use free form. The only two requirement are that it has only characters allowed in an Elasticsearch index name and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. The same requirements as for the namespace apply. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords. If there is a dataset or a namespace with a `-` inside, it is recommended to replace it either by a `.` or a `_`.
 
-Note: More `{type}`s might be added in the future like `apm` and `endpoint`.
+Note: More `{dataset.type}`s might be added in the future like `traces`.
 
 This indexing strategy has a few advantages:
 
@@ -133,7 +133,7 @@ Overall it creates smaller indices in size, makes querying more efficient and al
 The ingest pipelines for a specific dataset will have the following naming scheme:
 
 ```
-{type}-{dataset}-{package.version}
+{dataset.type}-{dataset.name}-{package.version}
 ```
 
 As an example, the ingest pipeline for the Nginx access logs is called `logs-nginx.access-3.4.1`. The same ingest pipeline is used for all namespaces. It is possible that a dataset has multiple ingest pipelines in which case a suffix is added to the name.
@@ -151,7 +151,7 @@ Each type template contains an ILM policy. Modifying this default ILM policy wil
 The templates for a dataset are called as following:
 
 ```
-{type}-{dataset}
+{dataset.type}-{dataset.name}
 ```
 
 The pattern used inside the index template is `{type}-{dataset}-*` to match all namespaces.

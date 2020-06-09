@@ -47,7 +47,21 @@ export {
   expandLiteralStrings,
 } from './console_lang';
 
-export * from './authorization';
+import * as Monaco from './monaco';
+
+export { Monaco };
+
+export {
+  AuthorizationContext,
+  AuthorizationProvider,
+  NotAuthorizedSection,
+  WithPrivileges,
+  Privileges,
+  MissingPrivileges,
+  SectionError,
+  Error,
+  useAuthorizationContext,
+} from './authorization';
 
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {
