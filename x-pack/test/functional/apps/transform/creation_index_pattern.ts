@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
                 aggs: {
                   'products.discount_amount.max': {
                     max: {
-                      feild: 'products.discount_amount',
+                      field: 'products.discount_amount',
                     },
                   },
                 },
