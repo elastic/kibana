@@ -12,19 +12,19 @@ import {
   rawAlertInstance,
 } from '../../common';
 
-interface ScheduledExecutionOptions {
+interface ScheduledExecutionOptions<State, Context> {
   actionGroup: string;
-  context: AlertInstanceContext;
-  state: AlertInstanceState;
+  context: Context | {};
+  state: State | {};
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertInstanceContext = Record<string, any>;
 export type AlertInstances = Record<string, AlertInstance>;
-export class AlertInstance {
-  private scheduledExecutionOptions?: ScheduledExecutionOptions;
+export class AlertInstance<State = AlertInstanceState, Context = AlertInstanceContext> {
+  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context>;
   private meta: AlertInstanceMeta;
-  private state: AlertInstanceState;
+  private state: State | {};
 
   constructor({ state = {}, meta = {} }: RawAlertInstance = {}) {
     this.state = state;
@@ -64,7 +64,7 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: AlertInstanceContext = {}) {
+  scheduleActions(actionGroup: string, context: Context | {} = {}) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
@@ -72,7 +72,7 @@ export class AlertInstance {
     return this;
   }
 
-  replaceState(state: AlertInstanceState) {
+  replaceState(state: State) {
     this.state = state;
     return this;
   }
@@ -90,7 +90,7 @@ export class AlertInstance {
 
   toRaw(): RawAlertInstance {
     return {
-      state: this.state,
+      state: this.state || {},
       meta: this.meta,
     };
   }
