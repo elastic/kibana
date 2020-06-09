@@ -77,9 +77,12 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const logger = appContextService.getLogger();
   try {
-    await setupIngestManager(soClient, callCluster);
+    if (!appContextService.getIsInitialized()) {
+      await setupIngestManager(soClient, callCluster);
+    }
+
     return response.ok({
-      body: { isInitialized: true },
+      body: { isInitialized: appContextService.getIsInitialized() },
     });
   } catch (e) {
     if (e instanceof IngestManagerError) {

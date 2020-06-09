@@ -28,7 +28,7 @@ export type IngestManagerSetup = void;
  */
 export interface IngestManagerStart {
   registerDatasource: typeof registerDatasource;
-  success: boolean;
+  success?: boolean;
   error?: {
     message: string;
   };
@@ -81,8 +81,8 @@ export class IngestManagerPlugin
     try {
       const permissionsResponse = await core.http.get(appRoutesService.getCheckPermissionsPath());
       if (permissionsResponse.success) {
-        const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
-        return { success, registerDatasource };
+        core.http.post(setupRouteService.getSetupPath());
+        return { registerDatasource };
       } else {
         throw new Error(permissionsResponse.error);
       }

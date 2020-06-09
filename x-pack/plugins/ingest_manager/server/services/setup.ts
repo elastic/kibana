@@ -95,6 +95,8 @@ export async function setupIngestManager(
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }
+
+  appContextService.setIsInitialized(true);
 }
 
 export async function setupFleet(

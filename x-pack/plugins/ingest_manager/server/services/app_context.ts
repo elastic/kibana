@@ -23,6 +23,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
+  private isInitialized?: boolean = false;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
@@ -33,6 +34,7 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.httpSetup = appContext.httpSetup;
+    this.isInitialized = false;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -82,6 +84,14 @@ class AppContextService {
       throw new Error('Saved objects start service not set.');
     }
     return this.savedObjects;
+  }
+
+  public getIsInitialized() {
+    return this.isInitialized;
+  }
+
+  public setIsInitialized(value: boolean) {
+    this.isInitialized = value;
   }
 
   public getIsProductionMode() {
