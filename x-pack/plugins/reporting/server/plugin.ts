@@ -57,9 +57,8 @@ export class ReportingPlugin
       this.logger.debug('Setup complete');
       this.setup$.next(true);
     })().catch((e) => {
-      this.logger.error(
-        `Error in Reporting setup, reporting may not function properly\n` + e.stack
-      );
+      this.logger.error(`Error in Reporting setup, reporting may not function properly`);
+      this.logger.error(e);
     });
 
     return {};
@@ -95,9 +94,8 @@ export class ReportingPlugin
       this.logger.debug('Start complete');
       this.start$.next(true);
     })().catch((e) => {
-      this.logger.error(
-        `Error in Reporting startup, reporting may not function properly\n` + e.stack
-      );
+      this.logger.error(`Error in Reporting start, reporting may not function properly`);
+      this.logger.error(e);
     });
 
     return {};

@@ -71,19 +71,11 @@ describe('Reporting Plugin', () => {
     await sleep(5);
 
     // @ts-ignore overloading error logger
-    expect(plugin.logger.error.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Error in Reporting setup, reporting may not function properly
-      TypeError: Cannot read property 'legacy' of null
-          at jobsQueryFactory (/Users/joelgriffith/Projects/kibana/x-pack/plugins/reporting/server/lib/jobs_query.ts:50:48)
-          at registerJobInfoRoutes (/Users/joelgriffith/Projects/kibana/x-pack/plugins/reporting/server/routes/jobs.ts:30:21)
-          at registerRoutes (/Users/joelgriffith/Projects/kibana/x-pack/plugins/reporting/server/routes/index.ts:14:3)
-          at /Users/joelgriffith/Projects/kibana/x-pack/plugins/reporting/server/plugin.ts:54:7
-          at process._tickCallback (internal/process/next_tick.js:68:7)",
-        ],
-      ]
-    `);
+    expect(plugin.logger.error.mock.calls[0][0]).toMatch(
+      /Error in Reporting setup, reporting may not function properly/
+    );
+    // @ts-ignore overloading error logger
+    expect(plugin.logger.error).toHaveBeenCalledTimes(2);
   });
 
   it('has a sync startup process', async () => {
@@ -102,14 +94,10 @@ describe('Reporting Plugin', () => {
     plugin.start(null as any, pluginStart);
     await sleep(10);
     // @ts-ignore overloading error logger
-    expect(plugin.logger.error.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Error in Reporting startup, reporting may not function properly
-      TypeError: Cannot read property 'savedObjects' of null
-          at /Users/joelgriffith/Projects/kibana/x-pack/plugins/reporting/server/plugin.ts:86:28",
-        ],
-      ]
-    `);
+    expect(plugin.logger.error.mock.calls[0][0]).toMatch(
+      /Error in Reporting start, reporting may not function properly/
+    );
+    // @ts-ignore overloading error logger
+    expect(plugin.logger.error).toHaveBeenCalledTimes(2);
   });
 });
