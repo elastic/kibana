@@ -58,8 +58,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
         });
 
-        it('loads the job creation flyout', async () => {
+        it('loads the source selection modal', async () => {
           await ml.dataFrameAnalytics.startAnalyticsCreation();
+        });
+
+        it('selects the source data and loads the job wizard page', async () => {
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
         });
 
         it('selects the job type', async () => {
@@ -75,6 +79,19 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputMissing();
         });
 
+        it('continues to the additional options step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
+        });
+
+        it('inputs the model memory limit', async () => {
+          await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
+          await ml.dataFrameAnalyticsCreation.setModelMemory(testData.modelMemory);
+        });
+
+        it('continues to the details step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
+        });
+
         it('inputs the job id', async () => {
           await ml.dataFrameAnalyticsCreation.assertJobIdInputExists();
           await ml.dataFrameAnalyticsCreation.setJobId(testData.jobId);
@@ -85,19 +102,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
         });
 
-        it('selects the source index', async () => {
-          await ml.dataFrameAnalyticsCreation.assertSourceIndexInputExists();
-          await ml.dataFrameAnalyticsCreation.selectSourceIndex(testData.source);
-        });
-
         it('inputs the destination index', async () => {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
-        });
-
-        it('inputs the model memory limit', async () => {
-          await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
-          await ml.dataFrameAnalyticsCreation.setModelMemory(testData.modelMemory);
         });
 
         it('sets the create index pattern switch', async () => {
@@ -107,19 +114,14 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('creates the analytics job', async () => {
+        it('continues to the create step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+        });
+
+        it('creates and starts the analytics job', async () => {
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
+          await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
-        });
-
-        it('starts the analytics job', async () => {
-          await ml.dataFrameAnalyticsCreation.assertStartButtonExists();
-          await ml.dataFrameAnalyticsCreation.startAnalyticsJob();
-        });
-
-        it('closes the create job flyout', async () => {
-          await ml.dataFrameAnalyticsCreation.assertCloseButtonExists();
-          await ml.dataFrameAnalyticsCreation.closeCreateAnalyticsJobFlyout();
         });
 
         it('finishes analytics processing', async () => {
@@ -127,6 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('displays the analytics table', async () => {
+          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalytics.assertAnalyticsTableExists();
         });
 

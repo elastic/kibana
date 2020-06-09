@@ -20,6 +20,7 @@ import {
   FilterManager,
   IFieldType,
   IIndexPattern,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
@@ -191,7 +192,7 @@ describe('Lens App', () => {
       jest.fn((type) => {
         if (type === 'timepicker:timeDefaults') {
           return { from: 'now-7d', to: 'now' };
-        } else if (type === 'search:queryLanguage') {
+        } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
         } else if (type === 'state:storeInSessionStorage') {
           return false;
