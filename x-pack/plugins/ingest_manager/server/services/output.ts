@@ -13,7 +13,7 @@ const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<OutputSOAttributes>({
+    const outputs = await soClient.find<Output>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });

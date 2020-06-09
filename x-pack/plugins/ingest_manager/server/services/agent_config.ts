@@ -85,7 +85,7 @@ class AgentConfigService {
     }
 
     return {
-      id: configs.saved_objects[0],
+      id: configs.saved_objects[0].id,
       ...configs.saved_objects[0].attributes,
     };
   }
