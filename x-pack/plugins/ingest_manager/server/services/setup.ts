@@ -34,11 +34,14 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
+  // eslint-disable-next-line no-console
   console.log('setupIngestManager()');
   if (appContextService.getIsInitialized()) {
+    // eslint-disable-next-line no-console
     console.log('setupIngestManager early exit');
     return;
   }
+  // eslint-disable-next-line no-console
   console.log('setupIngestManager set it up');
   const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
@@ -101,6 +104,7 @@ export async function setupIngestManager(
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }
+  // eslint-disable-next-line no-console
   console.log('setupIngestManager WORKED');
   appContextService.setIsInitialized(true);
   return;

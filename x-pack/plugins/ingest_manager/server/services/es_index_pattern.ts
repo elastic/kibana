@@ -14,6 +14,7 @@ export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined> {
+    // eslint-disable-next-line no-console
     console.log(
       'ESIndexPatternSavedObjectService#getESIndexPattern()',
       appContextService.getIsInitialized()
