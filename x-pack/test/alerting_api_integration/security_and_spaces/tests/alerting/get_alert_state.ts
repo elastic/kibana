@@ -62,13 +62,13 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           }
         });
 
-        it('should handle getAlertState alert request appropriately', async () => {
+        it('should handle getAlertState alert request appropriately when unauthorized', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                alertTypeId: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
@@ -85,7 +85,11 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'get',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -95,7 +99,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
                 error: 'Forbidden',
                 message: getProducerUnauthorizedErrorMessage(
                   'get',
-                  'test.noop',
+                  'test.unrestricted-noop',
                   'alertsRestrictedFixture'
                 ),
                 statusCode: 403,
@@ -111,6 +115,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
         it(`shouldn't getAlertState for an alert from another space`, async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)

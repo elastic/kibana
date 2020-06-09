@@ -46,7 +46,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             read: ['alert'],
           },
           alerting: {
-            read: ['test.restricted-noop', 'test.unrestricted-noop'],
+            read: ['test.restricted-noop', 'test.unrestricted-noop', 'test.noop'],
           },
           ui: [],
         },

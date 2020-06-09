@@ -103,6 +103,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -121,9 +122,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
-              // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -153,6 +151,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -170,9 +169,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
-              // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
               break;
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(403);
@@ -185,9 +181,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
-              // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -217,6 +210,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
 
@@ -227,12 +221,13 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('disable', 'test.noop', 'alerts'),
+                message: getProducerUnauthorizedErrorMessage(
+                  'disable',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
-              // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduledTaskId);
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':

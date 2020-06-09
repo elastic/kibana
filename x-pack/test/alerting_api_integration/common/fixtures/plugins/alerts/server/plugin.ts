@@ -69,6 +69,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.onlyContextVariables',
               'test.onlyStateVariables',
               'test.noop',
+              'test.unrestricted-noop',
             ],
           },
           ui: [],

@@ -675,18 +675,22 @@ export class AlertsClient {
         producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
       };
 
+      // We special case the Alerts Management `consumer` as we don't want to have to
+      // manually authorize each alert type in the management UI
+      const shouldAuthorizeConsumer = consumer !== AlertsFeatureId;
+
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, privileges } = await checkPrivileges(
-        consumer === AlertsFeatureId || consumer === alertType.producer
+        shouldAuthorizeConsumer && consumer !== alertType.producer
           ? [
-              // skip consumer privilege checks under `alerts` as all alert types can
-              // be created under `alerts` if you have producer level privileges
-              requiredPrivilegesByScope.producer,
-            ]
-          : [
               // check for access at consumer level
               requiredPrivilegesByScope.consumer,
               // check for access at producer level
+              requiredPrivilegesByScope.producer,
+            ]
+          : [
+              // skip consumer privilege checks under `alerts` as all alert types can
+              // be created under `alerts` if you have producer level privileges
               requiredPrivilegesByScope.producer,
             ]
       );
@@ -703,7 +707,9 @@ export class AlertsClient {
 
         throw Boom.forbidden(
           `Unauthorized to ${operation} a "${alertTypeId}" alert ${
-            unauthorizedScopes.consumer ? `for "${consumer}"` : `by "${alertType.producer}"`
+            shouldAuthorizeConsumer && unauthorizedScopes.consumer
+              ? `for "${consumer}"`
+              : `by "${alertType.producer}"`
           }`
         );
       }

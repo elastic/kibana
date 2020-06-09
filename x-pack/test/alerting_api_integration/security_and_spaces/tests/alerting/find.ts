@@ -125,7 +125,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.total).to.equal(0);
               expect(response.body.data.length).to.equal(0);
               break;
-            case 'global_read at space1':
             case 'space_1_all at space1':
               expect(response.body.page).to.equal(1);
               expect(response.body.perPage).to.be.equal(3);
@@ -140,6 +139,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
               }
               break;
+            case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body.page).to.equal(1);

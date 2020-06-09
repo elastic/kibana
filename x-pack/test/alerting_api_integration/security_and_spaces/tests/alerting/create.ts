@@ -239,7 +239,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
+                message: getProducerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;

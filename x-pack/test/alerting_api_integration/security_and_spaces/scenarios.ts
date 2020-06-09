@@ -50,6 +50,7 @@ const GlobalRead: User = {
           alerts: ['read'],
           actions: ['read'],
           alertsFixture: ['read'],
+          alertsRestrictedFixture: ['read'],
         },
         spaces: ['*'],
       },
