@@ -91,8 +91,10 @@ export const Create = React.memo(() => {
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
     if (isValid) {
+      // `postCase`'s type is incorrect, it actually returns a promise
       await postCase(data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   const handleSetIsCancel = useCallback(() => {
