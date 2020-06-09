@@ -128,6 +128,7 @@ const ExceptionsViewerComponent = ({
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), initialState);
 
+  // TODO: Update icky typing once api updated
   const setExceptions = useCallback(
     ({
       lists: newLists,
@@ -137,7 +138,7 @@ const ExceptionsViewerComponent = ({
       dispatch({
         type: 'setExceptions',
         lists: newLists,
-        exceptions: newExceptions,
+        exceptions: (newExceptions as unknown) as ExceptionListItemSchema[],
         pagination: newPagination,
       });
     },
@@ -274,13 +275,13 @@ const ExceptionsViewerComponent = ({
     if (filterOptions.showEndpointList) {
       return (
         <FormattedMessage
-          id="xpack.siem.exceptions.viewer.exceptionEndpointDetailsDescription"
+          id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription"
           defaultMessage="All exceptions to this rule are applied to the endpoint and the detection rule. View {ruleSettings} for more details."
           values={{
             ruleSettings: (
               <EuiLink href={ruleSettingsUrl} target="_blank">
                 <FormattedMessage
-                  id="xpack.siem.exceptions.viewer.exceptionEndpointDetailsDescription.ruleSettingsLink"
+                  id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription.ruleSettingsLink"
                   defaultMessage="rule settings"
                 />
               </EuiLink>
@@ -291,13 +292,13 @@ const ExceptionsViewerComponent = ({
     } else if (filterOptions.showDetectionsList) {
       return (
         <FormattedMessage
-          id="xpack.siem.exceptions.viewer.exceptionDetectionDetailsDescription"
+          id="xpack.securitySolution.exceptions.viewer.exceptionDetectionDetailsDescription"
           defaultMessage="All exceptions to this rule are applied to the detection rule, not the endpoint. View {ruleSettings} for more details."
           values={{
             ruleSettings: (
               <EuiLink href={ruleSettingsUrl} target="_blank">
                 <FormattedMessage
-                  id="xpack.siem.exceptions.viewer.exceptionDetectionDetailsDescription.ruleSettingsLink"
+                  id="xpack.securitySolution.exceptions.viewer.exceptionDetectionDetailsDescription.ruleSettingsLink"
                   defaultMessage="rule settings"
                 />
               </EuiLink>
