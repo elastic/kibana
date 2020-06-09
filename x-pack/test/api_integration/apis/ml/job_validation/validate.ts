@@ -226,6 +226,15 @@ export default ({ getService }: FtrProviderContext) => {
         .send(requestBody)
         .expect(200);
 
+      // The existance and value of maxModelMemoryLimit depends on ES settings
+      // and may vary between test environments, e.g. cloud vs non-cloud,
+      // so it should not be part of the validation
+      body.forEach((element: any) => {
+        if (element.hasOwnProperty('maxModelMemoryLimit')) {
+          delete element.maxModelMemoryLimit;
+        }
+      });
+
       expect(body).to.eql([
         {
           id: 'job_id_valid',
