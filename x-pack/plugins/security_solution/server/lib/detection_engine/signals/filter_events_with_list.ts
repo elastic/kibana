@@ -14,7 +14,7 @@ import { RuleAlertParams } from '../types';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
-  exceptionsList: RuleAlertParams['exceptions_list'];
+  exceptionsList: RuleAlertParams['exceptionsList'];
   logger: Logger;
   eventSearchResult: SignalSearchResponse;
 }
