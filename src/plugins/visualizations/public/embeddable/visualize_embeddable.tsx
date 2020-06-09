@@ -41,7 +41,7 @@ import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public'
 import {
   IExpressionLoaderParams,
   ExpressionsStart,
-  RenderError,
+  ExpressionRenderError,
 } from '../../../../plugins/expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
@@ -95,7 +95,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
-  private labelNode: any;
+  private labelNode?: HTMLDivElement;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
@@ -236,7 +236,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.domNode.setAttribute('data-render-complete', 'false');
     this.domNode.setAttribute('data-loading', '');
     this.domNode.removeAttribute('data-error');
-    ReactDOM.render(<EmbeddableErrorLabel />, this.labelNode);
+    ReactDOM.render(<EmbeddableErrorLabel />, this.labelNode!);
   };
 
   onContainerRender = (count: number) => {
@@ -246,7 +246,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     dispatchRenderComplete(this.domNode);
   };
 
-  onContainerError = (error: RenderError) => {
+  onContainerError = (error: ExpressionRenderError) => {
     if (this.abortController) {
       this.abortController.abort();
     }
@@ -254,7 +254,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.domNode.setAttribute('data-error', '');
     this.domNode.setAttribute('data-render-complete', 'false');
 
-    ReactDOM.render(<EmbeddableErrorLabel error={error} />, this.labelNode);
+    ReactDOM.render(<EmbeddableErrorLabel error={error} />, this.labelNode!);
   };
 
   /**
@@ -267,7 +267,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.transferCustomizationsToUiState();
 
     this.labelNode = document.createElement('div');
-    this.labelNode.className = `panel-label`;
+    this.labelNode.className = `embPanel-label`;
     domNode.appendChild(this.labelNode);
 
     const div = document.createElement('div');
@@ -278,7 +278,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     const expressions = getExpressions();
     this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
-      onRenderError: (element: HTMLElement, error: RenderError) => {
+      onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
     });
