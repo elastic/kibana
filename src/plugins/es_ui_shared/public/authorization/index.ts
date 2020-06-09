@@ -18,11 +18,13 @@
  */
 
 export {
-  WithPrivileges,
-  NotAuthorizedSection,
-  AuthorizationProvider,
   AuthorizationContext,
-  SectionError,
+  AuthorizationProvider,
   Error,
+  MissingPrivileges,
+  NotAuthorizedSection,
+  Privileges,
+  SectionError,
   useAuthorizationContext,
+  WithPrivileges,
 } from '../../__packages_do_not_import__/authorization';
