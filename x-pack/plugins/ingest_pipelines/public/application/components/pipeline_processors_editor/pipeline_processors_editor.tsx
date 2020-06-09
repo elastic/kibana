@@ -199,12 +199,15 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
           case 'duplicate':
             processorsDispatch({
               type: 'duplicateProcessor',
-              payload: action.payload,
+              payload: {
+                source: action.payload.source,
+                getId: () => services.idGenerator.getId(),
+              },
             });
             break;
         }
       },
-      [processorsDispatch, setSettingsFormMode]
+      [processorsDispatch, setSettingsFormMode, services.idGenerator]
     );
 
     return (

@@ -7,6 +7,7 @@
 import { reducer, State } from './processors_reducer';
 import { DropSpecialLocations } from '../constants';
 import { PARENT_CHILD_NEST_ERROR } from './utils';
+import { IdGenerator } from '../services';
 
 const initialState: State = {
   processors: [],
@@ -211,6 +212,8 @@ describe('Processors reducer', () => {
   });
 
   it('places copies and places the copied processor below the original', () => {
+    const idGenerator = new IdGenerator();
+    const getId = () => idGenerator.getId();
     const processor1 = { id: expect.any(String), type: 'test1', options: {} };
     const processor2 = { id: expect.any(String), type: 'test2', options: {} };
     const processor3 = { id: expect.any(String), type: 'test3', options: {} };
@@ -244,19 +247,24 @@ describe('Processors reducer', () => {
 
     const s5 = reducer(s4, {
       type: 'duplicateProcessor',
-      payload: { source: ['processors', '1', 'onFailure', '0', 'onFailure', '0'] },
+      payload: { getId, source: ['processors', '1', 'onFailure', '0', 'onFailure', '0'] },
     });
 
     const s6 = reducer(s5, {
       type: 'duplicateProcessor',
-      payload: { source: ['processors', '1', 'onFailure', '0', 'onFailure', '0'] },
+      payload: { getId, source: ['processors', '1', 'onFailure', '0', 'onFailure', '0'] },
     });
 
     expect(s6.processors).toEqual([
       processor1,
       {
         ...processor2,
-        onFailure: [{ ...processor3, onFailure: [processor4, processor4, processor4] }],
+        onFailure: [
+          {
+            ...processor3,
+            onFailure: [processor4, { ...processor4, id: '2' }, { ...processor4, id: '1' }],
+          },
+        ],
       },
     ]);
   });

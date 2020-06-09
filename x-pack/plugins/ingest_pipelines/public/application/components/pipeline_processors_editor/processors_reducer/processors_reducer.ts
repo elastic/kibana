@@ -42,7 +42,10 @@ export type Action =
     }
   | {
       type: 'duplicateProcessor';
-      payload: { source: ProcessorSelector };
+      payload: {
+        source: ProcessorSelector;
+        getId: () => string;
+      };
     };
 
 export type ProcessorsDispatch = Dispatch<Action>;
@@ -113,7 +116,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const sourceProcessorsArray = [
       ...getValue<ProcessorInternal[]>(sourceProcessorsArraySelector, state),
     ];
-    const copy = duplicateProcessor(sourceProcessor);
+    const copy = duplicateProcessor(sourceProcessor, action.payload.getId);
     sourceProcessorsArray.splice(sourceIdx + 1, 0, copy);
     return setValue(sourceProcessorsArraySelector, state, sourceProcessorsArray);
   }
