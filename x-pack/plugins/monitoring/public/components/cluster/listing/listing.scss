@@ -9,12 +9,12 @@
   color: $euiTextColor;
 }
 
-.monTableCell__clusterCellLiscense {
+.monTableCell__clusterCellLicense {
   font-size: 16px;
 }
+
 .monTableCell__clusterCellExpiration {
   color: $euiColorDarkShade;
-  @include euiFontSizeS;
 }
 
 .monTableCell__name,

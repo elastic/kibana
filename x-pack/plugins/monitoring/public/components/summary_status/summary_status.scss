@@ -7,6 +7,10 @@
     @include euiFontSizeXS;
   }
 
+  .monSummaryStatusNoWrap__flexGroup {
+    align-items: center;
+  }
+
   .monSummaryStatusNoWrap__flexItem {
     margin: $euiSizeS;
   }

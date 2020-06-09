@@ -80,7 +80,7 @@ export function SummaryStatus({
 }) {
   return (
     <div {...props} className="monSummaryStatusNoWrap">
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup className="monSummaryStatusNoWrap__flexGroup" justifyContent="spaceBetween">
         <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
         {metrics.map(wrapChild)}
       </EuiFlexGroup>
