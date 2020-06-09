@@ -8,8 +8,8 @@
 
 import * as t from 'io-ts';
 
-import { DefaultStringArray, NonEmptyString } from '../types';
 import { DefaultNamespace } from '../types/default_namespace';
+import { DefaultStringArray, NonEmptyString } from '../../siem_common_deps';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
