@@ -57,6 +57,12 @@ export default function ({ getService }: FtrProviderContext) {
               transformFilterAggTypeSelector: 'term',
               transformFilterTermValueSelector: 'New York',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.base_price)',
+                label: 'products.base_price.max',
+              },
+            ],
           },
         ],
         transformId: `ec_1_${Date.now()}`,
@@ -91,6 +97,13 @@ export default function ({ getService }: FtrProviderContext) {
                 filter: {
                   term: {
                     'geoip.city_name': 'New York',
+                  },
+                },
+                aggs: {
+                  'products.base_price.max': {
+                    max: {
+                      field: 'products.base_price',
+                    },
                   },
                 },
               },
@@ -131,6 +144,12 @@ export default function ({ getService }: FtrProviderContext) {
             form: {
               transformFilterAggTypeSelector: 'exists',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.discount_amount)',
+                label: 'products.discount_amount.max',
+              },
+            ],
           },
         ],
         transformId: `ec_2_${Date.now()}`,
@@ -160,6 +179,13 @@ export default function ({ getService }: FtrProviderContext) {
                 filter: {
                   exists: {
                     field: 'customer_phone',
+                  },
+                },
+                aggs: {
+                  'products.discount_amount.max': {
+                    max: {
+                      feild: 'products.discount_amount',
+                    },
                   },
                 },
               },
@@ -249,11 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label, agg.form);
-          }
+          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
         });
 
         it('displays the advanced pivot editor switch', async () => {
