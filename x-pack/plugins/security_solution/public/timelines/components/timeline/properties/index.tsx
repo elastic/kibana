@@ -8,10 +8,11 @@ import React, { useState, useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
+
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import { TimelineProperties } from './styles';
@@ -24,7 +25,15 @@ import { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 
-type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
+type CreateTimeline = ({
+  id,
+  show,
+  timelineType,
+}: {
+  id: string;
+  show?: boolean;
+  timelineType?: TimelineTypeLiteral;
+}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -161,7 +170,6 @@ export const Properties = React.memo<Props>(
         />
         <PropertiesRight
           associateNote={associateNote}
-          createTimeline={createTimeline}
           description={description}
           getNotesByIds={getNotesByIds}
           isDataInTimeline={isDataInTimeline}

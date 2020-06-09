@@ -1,6 +1,6 @@
 [role="xpack"]
 [[security-settings-kb]]
-=== Security settings in Kibana
+=== Security settings in {kib}
 ++++
 <titleabbrev>Security settings</titleabbrev>
 ++++

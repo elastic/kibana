@@ -99,6 +99,7 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -131,6 +132,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         sort,
         showCheckboxes,
         showRowRenderers,
+        timelineType = TimelineType.default,
         filters,
       }
     ) => ({
@@ -148,6 +150,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         showCheckboxes,
         showRowRenderers,
         timelineById: state.timelineById,
+        timelineType,
       }),
     })
   )

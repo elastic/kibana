@@ -10,20 +10,27 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: jest.fn(),
+}));
+jest.mock('../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../common/lib/kibana'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          securitySolution: {
+            crud: true,
+          },
+        },
+      },
+    },
+  }),
+  useUiSetting$: jest.fn().mockReturnValue([]),
+  useGetUserSavedObjectPermissions: jest.fn(),
+}));
+
 describe('FlyoutHeaderWithCloseButton', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
