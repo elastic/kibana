@@ -456,9 +456,6 @@ describe('#extends', () => {
       original: 'foo',
       mutated: 'bar',
     });
-    expectType<TypeOf<typeof extended>>({
-      mutated: 'bar',
-    });
   });
 
   it(`allows to override the original schema's options`, () => {
