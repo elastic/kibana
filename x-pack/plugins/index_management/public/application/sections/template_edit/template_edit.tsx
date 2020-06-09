@@ -8,12 +8,12 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
+import { TemplateDeserialized } from '../../../../common';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
-import { getFormatVersionFromQueryparams } from '../../lib/index_templates';
+import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 
 interface MatchParams {
   name: string;
@@ -27,16 +27,12 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const decodedTemplateName = decodePath(name);
-  const formatVersion =
-    getFormatVersionFromQueryparams(location) ?? DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT;
+  const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error, data: template, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName,
-    formatVersion
-  );
+  const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('templateEdit');
@@ -55,7 +51,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(getTemplateDetailsLink(name, updatedTemplate._kbnMeta.formatVersion));
+    history.push(getTemplateDetailsLink(name, updatedTemplate._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {
@@ -87,7 +83,10 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       />
     );
   } else if (template) {
-    const { name: templateName, isManaged } = template;
+    const {
+      name: templateName,
+      _kbnMeta: { isManaged },
+    } = template;
     const isSystemTemplate = templateName && templateName.startsWith('.');
 
     if (isManaged) {

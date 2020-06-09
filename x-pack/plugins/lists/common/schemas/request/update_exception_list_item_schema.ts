@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 
 import {
+  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -18,6 +19,7 @@ import {
   id,
   meta,
   name,
+  namespace_type,
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
@@ -40,6 +42,7 @@ export const updateExceptionListItemSchema = t.intersection([
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
       meta, // defaults to undefined if not set during decode
+      namespace_type, // defaults to 'single' if not set during decode
       tags, // defaults to empty array if not set during decode
     })
   ),
@@ -52,12 +55,12 @@ export type UpdateExceptionListItemSchema = RequiredKeepUndefined<
   t.TypeOf<typeof updateExceptionListItemSchema>
 >;
 
-// This type is used after a decode since the arrays turn into defaults of empty arrays
-// and if a item_id is not specified it turns into a default GUID
+// This type is used after a decode since some things are defaults after a decode.
 export type UpdateExceptionListItemSchemaDecoded = Identity<
-  Omit<UpdateExceptionListItemSchema, '_tags' | 'tags' | 'entries'> & {
+  Omit<UpdateExceptionListItemSchema, '_tags' | 'tags' | 'entries' | 'namespace_type'> & {
     _tags: _Tags;
     tags: Tags;
     entries: EntriesArray;
+    namespace_type: NamespaceType;
   }
 >;

@@ -1,0 +1,14 @@
+.dscTable__footer {
+  background-color: $euiColorLightShade;
+  padding: $euiSize / 2 $euiSize;
+  margin-top: $euiSize / 4;
+  text-align: center;
+}
+
+.dscTable__flyoutHeader {
+  white-space: nowrap;
+}
+// this is a hack than needs to be improved
+div[data-rbd-draggable-id="Time"] {
+  display: none;
+}

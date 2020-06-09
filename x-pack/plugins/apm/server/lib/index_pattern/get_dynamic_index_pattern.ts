@@ -38,7 +38,7 @@ export const getDynamicIndexPattern = async ({
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
     (...rest: Parameters<APICaller>) =>
-      context.core.elasticsearch.adminClient.callAsCurrentUser(...rest)
+      context.core.elasticsearch.legacy.client.callAsCurrentUser(...rest)
   );
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)

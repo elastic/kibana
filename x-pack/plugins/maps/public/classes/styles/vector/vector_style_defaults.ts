@@ -16,7 +16,6 @@ import {
   COLOR_PALETTES,
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
-  // @ts-ignore
 } from '../color_utils';
 import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
@@ -58,9 +57,13 @@ export function getDefaultProperties(mapColors: string[] = []): VectorStylePrope
 export function getDefaultStaticProperties(
   mapColors: string[] = []
 ): VectorStylePropertiesDescriptor {
-  // Colors must be state-aware to reduce unnecessary incrementation
-  const lastColor = mapColors.pop();
-  const nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1) % DEFAULT_FILL_COLORS.length;
+  let nextColorIndex = 0;
+  if (mapColors.length) {
+    const lastColor = mapColors[mapColors.length - 1];
+    if (DEFAULT_FILL_COLORS.includes(lastColor)) {
+      nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1) % DEFAULT_FILL_COLORS.length;
+    }
+  }
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 

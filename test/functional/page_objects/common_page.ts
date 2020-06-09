@@ -67,6 +67,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * @param appUrl Kibana URL
      */
     private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
+      // Disable the welcome screen. This is relevant for environments
+      // which don't allow to use the yml setting, e.g. cloud production.
+      // It is done here so it applies to logins but also to a login re-use.
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
       await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
@@ -142,12 +147,18 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted = true,
         useActualUrl = false,
         insertTimestamp = true,
+        shouldUseHashForSubUrl = true,
       } = {}
     ) {
-      const appConfig = {
+      const appConfig: { pathname: string; hash?: string } = {
         pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
-        hash: useActualUrl ? subUrl : `/${appName}/${subUrl}`,
       };
+
+      if (shouldUseHashForSubUrl) {
+        appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
+      } else {
+        appConfig.pathname += `/${subUrl}`;
+      }
 
       await this.navigate({
         appConfig,

@@ -33,6 +33,7 @@ export function createDiscoverGridDirective(reactDirective: any) {
     ['onFilter', { watchDepth: 'reference', wrapApply: false }],
     ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
     ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
+    ['onSetColumns', { watchDepth: 'reference', wrapApply: false }],
     ['getContextAppHref', { watchDepth: 'reference', wrapApply: false }],
     ['onSort', { watchDepth: 'reference' }],
   ]);

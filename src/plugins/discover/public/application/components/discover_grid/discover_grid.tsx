@@ -18,6 +18,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
+import './discover_grid.scss';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -43,6 +44,7 @@ import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { shortenDottedString } from '../../helpers';
+import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
@@ -69,6 +71,7 @@ interface Props {
   getContextAppHref: (id: string | number | Record<string, unknown>) => string;
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
+  onSetColumns: (columns: string[]) => void;
 }
 
 function CellPopover({
@@ -140,54 +143,69 @@ export const DiscoverGrid = function DiscoverGridInner({
   onRemoveColumn,
   onAddColumn,
   showTimeCol,
+  onSetColumns,
 }: Props) {
   const lowestPageSize = 50;
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
   });
   const [flyoutRow, setFlyoutRow] = useState<number | undefined>(undefined);
+  const buildColumns = useCallback(
+    (cols: any) => {
+      const mappedCols = cols.map(
+        (columnName: string): EuiDataGridColumn => {
+          const column: EuiDataGridColumn = {
+            id: columnName,
+            schema: indexPattern.getFieldByName(columnName)?.type,
+          };
 
-  const dataGridColumns = columns.map(
-    (columnName): EuiDataGridColumn => {
-      const column: EuiDataGridColumn = {
-        id: columnName,
-        schema: indexPattern.getFieldByName(columnName)?.type,
-      };
+          // Default DataGrid schemas: boolean, numeric, datetime, json, currency
+          // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
+          switch (column.schema) {
+            case 'date':
+              column.schema = 'datetime';
+              break;
+            case 'number':
+              column.schema = 'numeric';
+              break;
+            case '_source':
+            case 'object':
+              column.schema = kibanaJSON;
+              break;
+            case 'geo_point':
+              column.schema = geoPoint;
+              break;
+            default:
+              column.schema = undefined;
+              break;
+          }
 
-      // Default DataGrid schemas: boolean, numeric, datetime, json, currency
-      // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
-      switch (column.schema) {
-        case 'date':
-          column.schema = 'datetime';
-          break;
-        case 'number':
-          column.schema = 'numeric';
-          break;
-        case '_source':
-        case 'object':
-          column.schema = kibanaJSON;
-          break;
-        case 'geo_point':
-          column.schema = geoPoint;
-          break;
-        default:
-          column.schema = undefined;
-          break;
+          if (useShortDots) {
+            column.display = <>{shortenDottedString(columnName)}</>;
+          }
+
+          return column;
+        }
+      );
+      // Discover always injects a Time column as the first item (unless advance settings turned it off)
+      // Have to guard against this to allow users to request the same column again later
+      if (showTimeCol) {
+        mappedCols.unshift({ id: timeString, schema: 'datetime', initialWidth: 200 });
       }
-
-      if (useShortDots) {
-        column.display = <>{shortenDottedString(columnName)}</>;
-      }
-
-      return column;
-    }
+      return mappedCols;
+    },
+    [indexPattern, showTimeCol, timeString, useShortDots]
   );
 
-  // Discover always injects a Time column as the first item (unless advance settings turned it off)
-  // Have to guard against this to allow users to request the same column again later
-  if (showTimeCol) {
-    dataGridColumns.unshift({ id: timeString, schema: 'datetime', initialWidth: 172 });
-  }
+  const [dataGridColumns, setDataGridColumns] = useState<EuiDataGridColumn[]>(
+    buildColumns(columns)
+  );
+  useEffect(() => {
+    const prevColums = dataGridColumns.map((col) => col.id);
+    if (isEqual(columns, prevColums)) {
+      setDataGridColumns(buildColumns(columns));
+    }
+  }, [columns, buildColumns, setDataGridColumns, dataGridColumns]);
 
   /**
    * Pagination
@@ -205,7 +223,15 @@ export const DiscoverGrid = function DiscoverGridInner({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
+  const sortingColumns = useMemo(
+    () =>
+      sort.length === 0
+        ? getDefaultSort(indexPattern).map(
+            ([id, direction]) => ({ id, direction } as { id: string; direction: 'asc' | 'desc' })
+          )
+        : sort.map(([id, direction]) => ({ id, direction })),
+    [sort, indexPattern]
+  );
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
@@ -214,65 +240,45 @@ export const DiscoverGrid = function DiscoverGridInner({
   );
 
   /**
-   * Visibility and order
-   */
-  const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map((obj) => obj.id));
-  const mounted = React.useRef(false);
-  useEffect(() => {
-    // every time a column is added, make it visible
-    if (!mounted.current) {
-      mounted.current = true;
-    } else {
-      const newColumns = dataGridColumns.map((obj) => obj.id);
-      if (!isEqual(newColumns, visibleColumns)) {
-        setVisibleColumns(newColumns);
-      }
-    }
-  }, [dataGridColumns, visibleColumns]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /**
    * Cell rendering
    */
-  const showFilterActions = (isDetails: boolean, fieldName: string) => {
-    return isDetails && indexPattern.fields.getByName(fieldName)?.filterable;
-  };
-  const createFilter = (fieldName: string, row: any, type: '-' | '+') => {
-    return onFilter(
-      indexPattern.fields.getByName(fieldName),
-      indexPattern.flattenHit(row)[fieldName],
-      type
-    );
-  };
-  const formattedField = function (row: any, columnId: string) {
-    const formattedValue = indexPattern.formatField(row, columnId);
-    // TODO Field formatters need to be fixed
-    // eslint-disable-next-line react/no-danger
-    return <span dangerouslySetInnerHTML={{ __html: formattedValue }} />;
-  };
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+      const row = rows[rowIndex];
 
-  const renderCellValue = ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-    const row = rows[rowIndex];
-    let value: string | ReactNode;
-    value = '-';
+      if (typeof row === 'undefined') {
+        return '-';
+      }
 
-    if (typeof row === 'undefined') {
-      return value;
-    }
+      const createFilter = (fieldName: string, type: '-' | '+') => {
+        return onFilter(
+          indexPattern.fields.getByName(fieldName),
+          indexPattern.flattenHit(row)[fieldName],
+          type
+        );
+      };
 
-    const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
-    value = formattedField(row, fieldName);
+      const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
 
-    if (showFilterActions(isDetails, fieldName)) {
-      return (
-        <CellPopover
-          value={value}
-          onPositiveFilterClick={() => createFilter(fieldName, rows[rowIndex], '+')}
-          onNegativeFilterClick={() => createFilter(fieldName, rows[rowIndex], '-')}
-        />
+      const value = (
+        // TODO Field formatters need to be fixed
+        // eslint-disable-next-line react/no-danger
+        <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, fieldName) }} />
       );
-    }
-    return value;
-  };
+
+      if (isDetails && indexPattern.fields.getByName(fieldName)?.filterable) {
+        return (
+          <CellPopover
+            value={value}
+            onPositiveFilterClick={() => createFilter(fieldName, '+')}
+            onNegativeFilterClick={() => createFilter(fieldName, '-')}
+          />
+        );
+      }
+      return value;
+    },
+    [rows, indexPattern, onFilter, timeString]
+  );
 
   /**
    * Render variables
@@ -280,7 +286,7 @@ export const DiscoverGrid = function DiscoverGridInner({
   const pageCount = Math.ceil(rows.length / pagination.pageSize);
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
   const showDisclaimer = rows.length === sampleSize && isOnLastPage;
-  const randomId = useMemo(() => htmlIdGenerator(), []);
+  const randomId = useMemo(() => String(htmlIdGenerator()), []);
   let searchString: ReactNode = <></>;
   if (searchTitle) {
     if (searchDescription) {
@@ -296,7 +302,38 @@ export const DiscoverGrid = function DiscoverGridInner({
     }
   }
 
-  if (!rows || !rows.length) {
+  const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+  const leadingControlControls = useMemo(
+    () => [
+      {
+        id: 'openDetails',
+        width: 31,
+        headerCellRender: () => (
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate('discover.controlColumnHeader', {
+                defaultMessage: 'Control column',
+              })}
+            </span>
+          </EuiScreenReaderOnly>
+        ),
+        rowCellRender: ({ rowIndex }: { rowIndex: number }) => (
+          <button
+            aria-label={i18n.translate('discover.grid.viewDoc', {
+              defaultMessage: 'Toggle dialog with details',
+            })}
+            onClick={() => setFlyoutRow(rowIndex)}
+            className="dscTable__buttonToggle"
+          >
+            <EuiIcon size="s" type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} />
+          </button>
+        ),
+      },
+    ],
+    [flyoutRow]
+  );
+
+  if (!rowCount) {
     return null;
   }
 
@@ -304,41 +341,20 @@ export const DiscoverGrid = function DiscoverGridInner({
     <>
       <EuiDataGrid
         aria-labelledby={ariaLabelledBy}
-        aria-describedby={String(randomId)}
+        aria-describedby={randomId}
         inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort: onTableSort }}
-        rowCount={rows.length}
+        rowCount={rowCount}
         columns={dataGridColumns}
         renderCellValue={renderCellValue}
-        leadingControlColumns={[
-          {
-            id: 'openDetails',
-            width: 31,
-            headerCellRender: () => (
-              <EuiScreenReaderOnly>
-                <span>
-                  {i18n.translate('discover.controlColumnHeader', {
-                    defaultMessage: 'Control column',
-                  })}
-                </span>
-              </EuiScreenReaderOnly>
-            ),
-            rowCellRender: ({ rowIndex }) => (
-              <button
-                aria-label={i18n.translate('discover.grid.viewDoc', {
-                  defaultMessage: 'Toggle dialog with details',
-                })}
-                onClick={() => setFlyoutRow(rowIndex)}
-                className="dscTable__buttonToggle"
-              >
-                <EuiIcon type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} size="s" />
-              </button>
-            ),
-          },
-        ]}
+        leadingControlColumns={leadingControlControls}
         columnVisibility={{
-          visibleColumns,
-          setVisibleColumns,
+          visibleColumns: dataGridColumns.map((obj) => obj.id),
+          setVisibleColumns: (col) => {
+            const newColumns = showTimeCol ? col.slice(1) : col;
+            setDataGridColumns(buildColumns(newColumns));
+            onSetColumns(newColumns);
+          },
         }}
         pagination={{
           ...pagination,
@@ -471,7 +487,7 @@ export const DiscoverGrid = function DiscoverGridInner({
             <EuiFlyoutBody>
               <DocViewer
                 hit={rows[flyoutRow]}
-                columns={visibleColumns}
+                columns={columns}
                 indexPattern={indexPattern}
                 filter={onFilter}
                 onRemoveColumn={onRemoveColumn}

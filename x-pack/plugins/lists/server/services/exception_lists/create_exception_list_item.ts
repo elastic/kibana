@@ -18,12 +18,12 @@ import {
   ListId,
   MetaOrUndefined,
   Name,
+  NamespaceType,
   Tags,
   _Tags,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';
-import { NamespaceType } from './types';
 
 interface CreateExceptionListItemOptions {
   _tags: _Tags;
@@ -77,5 +77,5 @@ export const createExceptionListItem = async ({
     type,
     updated_by: user,
   });
-  return transformSavedObjectToExceptionListItem({ savedObject });
+  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
 };
