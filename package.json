@@ -126,7 +126,7 @@
     "@elastic/apm-rum": "^5.1.1",
     "@elastic/charts": "19.2.0",
     "@elastic/datemath": "5.0.3",
-    "@elastic/ems-client": "7.9.2",
+    "@elastic/ems-client": "7.9.3",
     "@elastic/eui": "23.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
