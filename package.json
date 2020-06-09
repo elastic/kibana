@@ -120,9 +120,9 @@
     ]
   },
   "dependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
-    "@babel/register": "^7.9.0",
+    "@babel/core": "^7.10.2",
+    "@babel/plugin-transform-modules-commonjs": "^7.10.1",
+    "@babel/register": "^7.10.1",
     "@elastic/apm-rum": "^5.1.1",
     "@elastic/charts": "19.2.0",
     "@elastic/datemath": "5.0.3",
@@ -292,8 +292,8 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@babel/parser": "^7.9.3",
-    "@babel/types": "^7.9.0",
+    "@babel/parser": "^7.10.2",
+    "@babel/types": "^7.10.2",
     "@elastic/elasticsearch": "^7.4.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
