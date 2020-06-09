@@ -99,7 +99,9 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_SHAPE = 'geo_shape',
 }
 
-export const ES_GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+// TODO replace ES_GEO_FIELD_TYPE enum with strings from core kibana.
+export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
   INTERSECTS = 'INTERSECTS',

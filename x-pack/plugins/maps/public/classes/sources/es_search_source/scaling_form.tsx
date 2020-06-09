@@ -89,7 +89,7 @@ export class ScalingForm extends Component<Props, State> {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
-  _onTopHitsSplitFieldChange = (topHitsSplitField: string) => {
+  _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
     this.props.onChange({ propName: 'topHitsSplitField', value: topHitsSplitField });
   };
 

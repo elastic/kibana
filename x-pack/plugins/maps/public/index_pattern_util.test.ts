@@ -18,6 +18,7 @@ describe('getSourceFields', () => {
     const fields = [
       {
         name: 'agent',
+        type: 'string',
       },
       {
         name: 'agent.keyword',
@@ -26,6 +27,7 @@ describe('getSourceFields', () => {
             parent: 'agent',
           },
         },
+        type: 'string',
       },
     ];
     const sourceFields = getSourceFields(fields);
@@ -37,6 +39,7 @@ describe('Gold+ licensing', () => {
   const testStubs = [
     {
       field: {
+        name: 'location',
         type: 'geo_point',
         aggregatable: true,
       },
@@ -45,6 +48,7 @@ describe('Gold+ licensing', () => {
     },
     {
       field: {
+        name: 'location',
         type: 'geo_shape',
         aggregatable: false,
       },
@@ -53,6 +57,7 @@ describe('Gold+ licensing', () => {
     },
     {
       field: {
+        name: 'location',
         type: 'geo_shape',
         aggregatable: true,
       },

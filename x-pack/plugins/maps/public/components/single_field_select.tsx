@@ -21,7 +21,7 @@ import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(
   fields: IFieldType[],
-  isFieldDisabled?: (field: IField) => boolean
+  isFieldDisabled?: (field: IFieldType) => boolean
 ): Array<EuiComboBoxOptionOption<IFieldType>> {
   if (!fields) {
     return [];
@@ -31,7 +31,7 @@ function fieldsToOptions(
     .map((field) => {
       const option: EuiComboBoxOptionOption<IFieldType> = {
         value: field,
-        label: 'label' in field ? field.label : field.name,
+        label: field.name,
       };
       if (isFieldDisabled && isFieldDisabled(field)) {
         option.disabled = true;
@@ -70,7 +70,7 @@ export function SingleFieldSelect({
     const content = (
       <EuiFlexGroup className={contentClassName} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={null}>
-          <FieldIcon type={option.value.type} fill="none" />
+          <FieldIcon type={option.value!.type} fill="none" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
@@ -78,7 +78,7 @@ export function SingleFieldSelect({
       </EuiFlexGroup>
     );
 
-    const disabledReason = option.disabled ? getFieldDisabledReason(option.value) : null;
+    const disabledReason = option.disabled ? getFieldDisabledReason(option.value!) : null;
 
     return disabledReason ? (
       <EuiToolTip position="left" content={disabledReason}>

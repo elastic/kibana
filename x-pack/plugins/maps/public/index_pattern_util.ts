@@ -29,7 +29,7 @@ export function getGeoTileAggNotSupportedReason(field: IFieldType): string | nul
 export async function getIndexPatternsFromIds(
   indexPatternIds: string[] = []
 ): Promise<IndexPattern[]> {
-  const promises = [];
+  const promises: Promise<IndexPattern[]> = [];
   indexPatternIds.forEach((id) => {
     const indexPatternPromise = getIndexPatternService().get(id);
     if (indexPatternPromise) {
