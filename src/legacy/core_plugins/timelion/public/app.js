@@ -42,6 +42,7 @@ import './directives/saved_object_finder';
 import 'ui/directives/listen';
 import './directives/saved_object_save_as_checkbox';
 import './services/saved_sheet_register';
+import 'ui/error_url_overflow';
 
 import rootTemplate from 'plugins/timelion/index.html';
 

@@ -14,6 +14,7 @@ import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 
 import 'ui/autoload/all';
+import 'ui/error_url_overflow';
 import 'react-vis/dist/style.css';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
