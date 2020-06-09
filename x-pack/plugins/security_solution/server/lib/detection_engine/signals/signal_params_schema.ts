@@ -39,5 +39,5 @@ export const signalParamsSchema = () =>
     type: schema.string(),
     references: schema.arrayOf(schema.string(), { defaultValue: [] }),
     version: schema.number({ defaultValue: 1 }),
-    exceptions_list: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   });
