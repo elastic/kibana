@@ -29,7 +29,7 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_FLYOUT_HEADER).should('have.css', 'visibility', 'visible');
   });
 
-  it('sets the flyout button background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the flyout button', () => {
+  it('sets the flyout button background to euiColorSuccess with a 20% alpha channel when the user starts dragging a host, but is not hovering over the flyout button', () => {
     dragFirstHostToTimeline();
 
     cy.get(TIMELINE_NOT_READY_TO_DROP_BUTTON).should(
