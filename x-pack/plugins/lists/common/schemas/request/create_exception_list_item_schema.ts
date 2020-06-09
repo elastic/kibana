@@ -24,8 +24,9 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { DefaultEntryArray, DefaultUuid } from '../types';
+import { DefaultEntryArray } from '../types';
 import { EntriesArray } from '../types/entries';
+import { DefaultUuid } from '../../siem_common_deps';
 
 export const createExceptionListItemSchema = t.intersection([
   t.exact(
