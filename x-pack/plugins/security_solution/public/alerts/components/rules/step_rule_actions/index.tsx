@@ -99,6 +99,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [form]
   );
 
@@ -112,12 +113,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.ruleActions, form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
@@ -142,6 +145,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         options: throttleOptions,
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLoading, updateThrottle]
   );
 
@@ -162,7 +166,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             {myStepData.throttle !== stepActionsDefaultValue.throttle ? (
               <>
                 <EuiSpacer />
-
                 <UseField
                   path="actions"
                   defaultValue={myStepData.actions}
@@ -170,11 +173,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                   componentProps={{
                     messageVariables: actionMessageParams,
                   }}
-                />
-                <UseField
-                  path="kibanaSiemAppUrl"
-                  defaultValue={kibanaAbsoluteUrl}
-                  component={GhostFormField}
                 />
               </>
             ) : (
@@ -184,6 +182,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 component={GhostFormField}
               />
             )}
+            <UseField
+              path="kibanaSiemAppUrl"
+              defaultValue={kibanaAbsoluteUrl}
+              component={GhostFormField}
+            />
             <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
           </EuiForm>
         </Form>

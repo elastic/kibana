@@ -48,6 +48,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       items: [
         {
           icon: 'dashboardApp',
+          /* eslint-disable-next-line react-hooks/rules-of-hooks */
           href: useKibanaLink(`/dashboard/${dashboards[0].id || ''}`),
           name: actionNameSingular,
         },
@@ -70,6 +71,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       items: dashboards.map((dashboard) => {
         return {
           icon: 'dashboardApp',
+          /* eslint-disable-next-line react-hooks/rules-of-hooks */
           href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
           name: dashboard.title,
         };

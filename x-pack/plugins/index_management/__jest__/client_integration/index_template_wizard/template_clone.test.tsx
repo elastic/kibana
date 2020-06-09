@@ -53,6 +53,7 @@ describe.skip('<TemplateClone />', () => {
     template: {
       mappings: MAPPINGS,
     },
+    isLegacy: true,
   });
 
   beforeEach(async () => {

@@ -116,6 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
         expect(body.invalid_transform_id.transformDeleted.success).to.eql(false);
+        expect(body.invalid_transform_id.transformDeleted).to.have.property('error');
       });
     });
 
