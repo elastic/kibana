@@ -39,7 +39,7 @@ import { getOptionLabel } from '../../../../../../../common/agent_configuration/
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => v != null && v !== '')
+    Object.entries(obj).filter(([_, v]) => v != null && v !== '')
   );
 }
 

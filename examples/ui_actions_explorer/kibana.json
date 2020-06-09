@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "uiActionsExamples"],
+  "requiredPlugins": ["uiActions", "uiActionsExamples", "developerExamples"],
   "optionalPlugins": []
 }

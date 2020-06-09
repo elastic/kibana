@@ -24,7 +24,7 @@ import {
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 // get list of configurations
-export const agentConfigurationRoute = createRoute((core) => ({
+export const agentConfigurationRoute = createRoute(() => ({
   path: '/api/apm/settings/agent-configuration',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);

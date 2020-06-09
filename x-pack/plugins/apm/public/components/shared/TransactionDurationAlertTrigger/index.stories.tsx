@@ -14,37 +14,34 @@ import {
 import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
 
-storiesOf('app/TransactionDurationAlertTrigger', module).add(
-  'example',
-  (context) => {
-    const params = {
-      threshold: 1500,
-      aggregationType: 'avg' as const,
-      window: '5m',
-    };
+storiesOf('app/TransactionDurationAlertTrigger', module).add('example', () => {
+  const params = {
+    threshold: 1500,
+    aggregationType: 'avg' as const,
+    window: '5m',
+  };
 
-    const contextMock = (merge(cloneDeep(mockApmPluginContextValue), {
-      core: {
-        http: {
-          get: () => {
-            return Promise.resolve({ transactionTypes: ['request'] });
-          },
+  const contextMock = (merge(cloneDeep(mockApmPluginContextValue), {
+    core: {
+      http: {
+        get: () => {
+          return Promise.resolve({ transactionTypes: ['request'] });
         },
       },
-    }) as unknown) as ApmPluginContextValue;
+    },
+  }) as unknown) as ApmPluginContextValue;
 
-    return (
-      <div style={{ width: 400 }}>
-        <MockApmPluginContextWrapper value={contextMock}>
-          <MockUrlParamsContextProvider>
-            <TransactionDurationAlertTrigger
-              alertParams={params as any}
-              setAlertParams={() => undefined}
-              setAlertProperty={() => undefined}
-            />
-          </MockUrlParamsContextProvider>
-        </MockApmPluginContextWrapper>
-      </div>
-    );
-  }
-);
+  return (
+    <div style={{ width: 400 }}>
+      <MockApmPluginContextWrapper value={contextMock}>
+        <MockUrlParamsContextProvider>
+          <TransactionDurationAlertTrigger
+            alertParams={params as any}
+            setAlertParams={() => undefined}
+            setAlertProperty={() => undefined}
+          />
+        </MockUrlParamsContextProvider>
+      </MockApmPluginContextWrapper>
+    </div>
+  );
+});

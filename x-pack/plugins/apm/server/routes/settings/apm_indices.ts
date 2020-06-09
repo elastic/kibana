@@ -50,7 +50,7 @@ export const saveApmIndicesRoute = createRoute(() => ({
       'apm_oss.metricsIndices': t.string,
     }),
   },
-  handler: async ({ context, request }) => {
+  handler: async ({ context }) => {
     const { body } = context.params;
     const savedObjectsClient = context.core.savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);
