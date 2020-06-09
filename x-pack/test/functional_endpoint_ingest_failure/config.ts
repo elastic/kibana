@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional_endpoint/config.ts')
+    require.resolve('../security_solution_endpoint/config.ts')
   );
 
   return {
