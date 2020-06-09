@@ -56,7 +56,7 @@ export function getCloudDeploymentId(): string | null {
   if (cloudInfo.cloudId === null) {
     return null;
   }
-  const tempCloudId = cloudInfo.cloudId.replace(/^.+:/, '');
+  const tempCloudId = cloudInfo.cloudId.replace(/^(.+)?:/, '');
   try {
     const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
     return matches !== null && matches.length === 2 ? matches[1] : null;
