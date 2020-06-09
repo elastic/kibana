@@ -108,20 +108,18 @@ export function DiscoverSidebar({
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
 
-  const uiCapabilites = getServices().capabilities.discover;
-
   const onShowDetails = useCallback(
     (show: boolean, field: IndexPatternField) => {
       if (!show) {
         setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
       } else {
         setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        if (uiCapabilites.save) {
+        if (services.capabilities.discover.save) {
           selectedIndexPattern.popularizeField(field.name, 1);
         }
       }
     },
-    [openFieldMap, selectedIndexPattern, uiCapabilites.save]
+    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
   );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
