@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'header']);
+  const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
@@ -73,7 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'Jan 24, 2020 @ 16:06:09.541',
         ],
       ];
-      const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
+      const tableData = await pageObjects.endpointPageUtils.tableData('hostListTable');
       expect(tableData).to.eql(expectedData);
     });
 
@@ -126,7 +126,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       it('displays no items found when empty', async () => {
         // get the endpoint list table data and verify message
-        const [, [noItemsFoundMessage]] = await pageObjects.endpoint.getEndpointAppTableData(
+        const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
           'hostListTable'
         );
         expect(noItemsFoundMessage).to.equal('No items found');
