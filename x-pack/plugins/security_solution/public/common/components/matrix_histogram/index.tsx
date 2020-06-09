@@ -19,12 +19,7 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useQuery } from '../../containers/matrix_histogram';
-import {
-  MatrixHistogramProps,
-  MatrixHistogramOption,
-  HistogramAggregation,
-  MatrixHistogramQueryProps,
-} from './types';
+import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { InspectButtonContainer } from '../inspect';
 
 import { State, inputsSelectors } from '../../store';
@@ -125,6 +120,7 @@ export const MatrixHistogramComponent: React.FC<
         yTickFormatter,
         showLegend,
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       chartHeight,
       startDate,
@@ -145,21 +141,20 @@ export const MatrixHistogramComponent: React.FC<
         stackByOptions.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
-    {
-      endDate,
-      errorMessage,
-      filterQuery,
-      histogramType,
-      indexToAdd,
-      startDate,
-      isInspected,
-      stackByField: selectedStackByOption.value,
-    }
-  );
+  const { data, loading, inspect, totalCount, refetch = noop } = useQuery({
+    endDate,
+    errorMessage,
+    filterQuery,
+    histogramType,
+    indexToAdd,
+    startDate,
+    isInspected,
+    stackByField: selectedStackByOption.value,
+  });
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -260,7 +255,7 @@ export const MatrixHistogram = React.memo(MatrixHistogramComponent);
 
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id }: OwnProps) => {
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       isInspected,

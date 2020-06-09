@@ -54,6 +54,7 @@ export const SiemNavigationComponent: React.FC<
         chrome
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chrome, pathName, search, navTabs, urlState, state]);
 
   return (
