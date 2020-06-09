@@ -331,6 +331,19 @@ describe('Processors reducer', () => {
       expect(s5.processors).toEqual(s4.processors);
     });
 
+    it('does not remove top level processor and onFailure arrays if they are emptied', () => {
+      const processor1 = { id: expect.any(String), type: 'test1', options: {} };
+      const s1 = reducer(initialState, {
+        type: 'addTopLevelProcessor',
+        payload: { processor: processor1, selector: ['processors'] },
+      });
+      const s2 = reducer(s1, {
+        type: 'removeProcessor',
+        payload: { selector: ['processors', '0'] },
+      });
+      expect(s2.processors).not.toBe(undefined);
+    });
+
     it('throws for bad move processor', () => {
       const processor1 = { id: expect.any(String), type: 'test1', options: {} };
       const processor2 = { id: expect.any(String), type: 'test2', options: {} };

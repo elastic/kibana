@@ -65,10 +65,12 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'removeProcessor') {
     const { selector } = action.payload;
     const processorsSelector = selector.slice(0, -1);
+    const parentProcessorSelector = processorsSelector.slice(0, -1);
     const idx = parseInt(selector[selector.length - 1], 10);
     const processors = getValue<ProcessorInternal[]>(processorsSelector, state);
     processors.splice(idx, 1);
-    if (!processors.length && selector.length) {
+    const parentProcessor = getValue(parentProcessorSelector, state);
+    if (!processors.length && selector.length && !(parentProcessor as State).isRoot) {
       return setValue(processorsSelector, state, undefined);
     }
     return setValue(processorsSelector, state, [...processors]);
