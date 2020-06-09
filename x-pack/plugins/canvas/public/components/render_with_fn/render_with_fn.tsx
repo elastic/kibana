@@ -118,7 +118,7 @@ export const RenderWithFn: FC<Props> = ({
     } catch (err) {
       onError(err, { title: strings.getRenderErrorMessage(functionName) });
     }
-  }, [config, domNode, functionName, onError, renderFn, resetRenderTarget, reuseNode]);
+  }, [config, renderFn]);
 
   return (
     <div className="canvasWorkpad--element_render canvasRenderEl" style={style}>
