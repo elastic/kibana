@@ -5,6 +5,10 @@
 [partintro]
 --
 
+++++
+<titleabbrev>Maps</titleabbrev>
+++++
+
 *Elastic Maps* enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
 
 With *Elastic Maps*, you can:

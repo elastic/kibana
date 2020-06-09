@@ -1,6 +1,11 @@
 [role="xpack"]
 [[maps-troubleshooting]]
-== Elastic Maps troubleshooting
+== Troubleshoot Elastic Maps
+
+++++
+<titleabbrev>Troubleshoot</titleabbrev>
+++++
+
 
 Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.
 
@@ -35,4 +40,3 @@ image::maps/images/inspector.png[]
 
 Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a choice in the New Visualization menu because you can create these maps in *Elastic Maps*.
 If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
-
