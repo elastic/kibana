@@ -35,6 +35,7 @@ import { useAppStateSyncing } from '../../state_syncing/app_sync';
 import { getStoreSyncSubscription } from '../../store_operations';
 import { MapsRoot } from '../../page_elements/maps_root';
 import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export const MapsCreateEditView = class extends React.Component {
   visibleSubscription = null;
@@ -148,7 +149,11 @@ export const MapsCreateEditView = class extends React.Component {
 
     // Clean up app state filters
     const { filterManager } = getData().query;
-    filterManager.removeAll();
+    filterManager.filters.forEach((filter) => {
+      if (filter.$state.store === esFilters.FilterStateStore.APP_STATE) {
+        filterManager.removeFilter(filter);
+      }
+    });
   }
 
   getInitialLayersFromUrlParam() {
