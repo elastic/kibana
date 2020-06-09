@@ -24,8 +24,7 @@
     border-radius: $euiSizeXS;
     padding: $euiSizeXS / 2 0;
 
-    // SASS-TODO: Rename this class following Eui conventions
-    &.index {
+    &.monChild--index {
       border-left: $euiSizeXS solid $euiColorSuccess;
 
       &.monChild--danger {
@@ -62,8 +61,7 @@
     width: $euiSize * 12.5;
   }
 
-  // SASS-TODO: Rename this class following Eui conventions
-  .shard {
+  .monShard {
     align-self: center;
     padding: $euiSizeXS $euiSizeS;
     font-size: $euiFontSizeXS;
