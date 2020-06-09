@@ -62,7 +62,7 @@ export const createFleetSetupHandler: RequestHandler<
     });
 
     return response.ok({
-      body: { isInitialized: true },
+      body: { isInitialized: appContextService.getIsInitialized() },
     });
   } catch (e) {
     return response.customError({
