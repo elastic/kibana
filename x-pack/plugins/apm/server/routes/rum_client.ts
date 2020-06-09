@@ -5,12 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
 import { createRoute } from './create_route';
-import {
-  invalidLicenseMessage,
-  isValidPlatinumLicense,
-} from '../../common/service_map';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { rangeRt, uiFiltersRt } from './default_api_types';
@@ -23,10 +18,6 @@ export const rumClientMetricsRoute = createRoute(() => ({
     query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
-    if (!isValidPlatinumLicense(context.licensing.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-
     const setup = await setupRequest(context, request);
 
     return getClientMetrics({ setup });
@@ -39,10 +30,6 @@ export const rumPageLoadDistributionRoute = createRoute(() => ({
     query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
-    if (!isValidPlatinumLicense(context.licensing.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-
     const setup = await setupRequest(context, request);
 
     return getPageLoadDistribution({ setup });
@@ -55,10 +42,6 @@ export const rumImpressionTrendRoute = createRoute(() => ({
     query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
-    if (!isValidPlatinumLicense(context.licensing.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-
     const setup = await setupRequest(context, request);
     return getImpressionTrends({ setup });
   },

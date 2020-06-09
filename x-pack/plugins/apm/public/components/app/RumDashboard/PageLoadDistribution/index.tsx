@@ -5,15 +5,16 @@
  */
 // @flow
 import * as React from 'react';
-import { EuiSpacer, EuiStat } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   AnnotationDomainTypes,
-  AreaSeries,
   Axis,
   Chart,
   LineAnnotation,
   LineAnnotationDatum,
   ScaleType,
+  LineSeries,
+  CurveType,
 } from '@elastic/charts';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -64,8 +65,11 @@ export const PageLoadDistribution = () => {
     },
   };
   return (
-    <div style={{ height: '400px' }}>
+    <div style={{ height: '300px' }}>
       <EuiSpacer size="l" />
+      <EuiTitle size="s">
+        <h3>Page load distribution</h3>
+      </EuiTitle>
       <ChartWrapper loading={status !== 'success'}>
         <Chart className="story-chart">
           <LineAnnotation
@@ -78,15 +82,16 @@ export const PageLoadDistribution = () => {
           <Axis id="bottom" title="Page load time" position={Position.Bottom} />
           <Axis
             id="left"
-            title={'test'}
+            title={'Percentages of page loaded'}
             position={Position.Left}
             tickFormat={(d) => Number(d).toFixed(2) + '%'}
           />
-          <AreaSeries
-            id="areas"
+          <LineSeries
+            id={'pageLoadSeries'}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
+            curve={CurveType.CURVE_NATURAL}
           />
         </Chart>
       </ChartWrapper>

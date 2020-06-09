@@ -21,20 +21,11 @@ export async function getClientMetrics({
     setup,
   });
 
-  const { filter } = projection.body.query.bool;
-
   const params = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
-        bool: {
-          ...projection.body.query.bool,
-          filter: filter.concat({
-            term: {
-              'transaction.type': 'page-load',
-            },
-          }),
-        },
+        bool: projection.body.query.bool,
       },
       aggs: {
         pageViews: { value_count: { field: 'transaction.type' } },
@@ -44,15 +35,10 @@ export async function getClientMetrics({
             missing: 0,
           },
         },
-        frontEnd: {
+        domInteractive: {
           avg: {
-            script: {
-              lang: 'painless',
-              source: `
-              if(doc[\'transaction.marks.agent.timeToFirstByte\'].size()!==0 &&  doc[\'transaction.marks.agent.domInteractive\'].size()!==0)  {
-                  doc[\'transaction.marks.agent.domInteractive\'].value - doc[\'transaction.marks.agent.timeToFirstByte\'].value
-              }`,
-            },
+            field: 'transaction.marks.agent.domInteractive',
+            missing: 0,
           },
         },
       },
@@ -62,6 +48,11 @@ export async function getClientMetrics({
   const { client } = setup;
 
   const response = await client.search(params);
+  const { backEnd, domInteractive, pageViews } = response.aggregations!;
 
-  return response.aggregations;
+  return {
+    pageViews,
+    backEnd,
+    frontEnd: { value: domInteractive.value! - backEnd.value! },
+  };
 }

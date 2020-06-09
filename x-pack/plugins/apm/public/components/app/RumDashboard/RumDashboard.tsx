@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
@@ -27,6 +27,7 @@ export function RumDashboard() {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <PageLoadDistribution />
+          <EuiSpacer size="xxl" />
           <ImpressionTrend />
         </EuiFlexItem>
       </EuiFlexGroup>

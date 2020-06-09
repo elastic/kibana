@@ -5,7 +5,6 @@
  */
 
 import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
   Setup,
@@ -22,20 +21,11 @@ export async function getPageLoadDistribution({
     setup,
   });
 
-  const { filter } = projection.body.query.bool;
-
   const params = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
-        bool: {
-          ...projection.body.query.bool,
-          filter: filter.concat({
-            term: {
-              'transaction.type': 'page-load',
-            },
-          }),
-        },
+        bool: projection.body.query.bool,
       },
       aggs: {
         durationMinMax: {
@@ -47,7 +37,7 @@ export async function getPageLoadDistribution({
         durationPercentiles: {
           percentiles: {
             field: 'transaction.duration.us',
-            percents: [50, 80, 90, 95, 96],
+            percents: [50, 80, 90, 95, 99],
             script: {
               lang: 'painless',
               source: "doc['transaction.duration.us'].value / params.timeUnit",
@@ -63,19 +53,20 @@ export async function getPageLoadDistribution({
 
   const { client } = setup;
 
-  const response = await client.search(params);
+  const { aggregations } = await client.search(params);
 
-  const minDuration = response.aggregations.durationMinMax.value! / 1000;
-  const durationPercentiles = response.aggregations.durationPercentiles.values;
-  const maxPercentile = durationPercentiles['96.0'];
+  const minDuration = aggregations?.durationMinMax.value ?? 0 / 1000;
+
+  const maxPercentile = aggregations?.durationPercentiles.values['99.0'] ?? 100;
+
   const pageDist = await getPercentilesDistribution(
-    options,
+    setup,
     minDuration,
     maxPercentile
   );
   return {
     pageLoadDistribution: pageDist,
-    percentiles: durationPercentiles,
+    percentiles: aggregations?.durationPercentiles,
   };
 }
 
@@ -84,9 +75,9 @@ const getPercentilesDistribution = async (
   minPercentiles: number,
   maxPercentile: number
 ) => {
-  const stepValue = (maxPercentile - minPercentiles) / 100;
+  const stepValue = (maxPercentile - minPercentiles) / 50;
   const stepValues = [];
-  for (let i = 1; i < 100; i++) {
+  for (let i = 1; i < 50; i++) {
     stepValues.push((stepValue * i + minPercentiles).toFixed(2));
   }
 
@@ -94,20 +85,11 @@ const getPercentilesDistribution = async (
     setup,
   });
 
-  const { filter } = projection.body.query.bool;
-
   const params = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
-        bool: {
-          ...projection.body.query.bool,
-          filter: filter.concat({
-            term: {
-              'transaction.type': 'page-load',
-            },
-          }),
-        },
+        bool: projection.body.query.bool,
       },
       aggs: {
         loadDistribution: {
@@ -130,10 +112,14 @@ const getPercentilesDistribution = async (
 
   const { client } = setup;
 
-  const response = await client.search(params);
+  const { aggregations } = await client.search(params);
 
-  const pageDist = response.aggregations.loadDistribution.values;
-  return pageDist.map(({ key, value }, index, arr) => {
+  const pageDist = (aggregations?.loadDistribution.values ?? []) as Array<{
+    key: number;
+    value: number;
+  }>;
+
+  return pageDist.map(({ key, value }, index: number, arr) => {
     return {
       x: key,
       y: index === 0 ? value : value - arr[index - 1].value,

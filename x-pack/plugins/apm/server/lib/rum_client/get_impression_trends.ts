@@ -4,36 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getServicesProjection } from '../../../common/projections/services';
+import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { IEnvOptions } from '../service_map/get_service_map';
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters,
+} from '../helpers/setup_request';
 
-export async function getImpressionTrends(options: IEnvOptions) {
-  const { setup } = options;
-
-  const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+export async function getImpressionTrends({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const projection = getRumOverviewProjection({
+    setup,
   });
-
-  const { filter } = projection.body.query.bool;
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
-        bool: {
-          ...projection.body.query.bool,
-          filter: filter.concat({
-            term: {
-              'transaction.type': 'page-load',
-            },
-          }),
-        },
+        bool: projection.body.query.bool,
       },
       aggs: {
         impressions: {
@@ -57,7 +49,7 @@ export async function getImpressionTrends(options: IEnvOptions) {
 
   const response = await client.search(params);
 
-  const result = response.aggregations.impressions.buckets;
+  const result = response.aggregations.impressions.buckets ?? [];
   return result.map(({ key, trans_count }) => ({
     x: key,
     y: trans_count.value,

@@ -5,7 +5,7 @@
  */
 // @flow
 import * as React from 'react';
-import { EuiSpacer, EuiStat } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   Axis,
   BarSeries,
@@ -19,55 +19,65 @@ import { Position } from '@elastic/charts/dist/utils/commons';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { ChartWrapper } from '../ChartWrapper';
 
 export const ImpressionTrend = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
 
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi({
-      pathname: '/api/apm/rum-client/impression-trend',
-      params: {
-        // path: {
-        //   serviceName,
-        // },
-        query: {
-          // start,
-          // end,
-          // uiFilters: JSON.stringify(uiFilters),
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        pathname: '/api/apm/rum-client/impression-trend',
+        params: {
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+          },
         },
-      },
-    });
-  }, []);
+      });
+    },
+    [end, start, uiFilters]
+  );
   const formatter = timeFormatter(niceTimeFormatByDay(2));
 
   return (
-    <div style={{ height: '400px' }}>
+    <div style={{ height: '300px' }}>
       <EuiSpacer size="l" />
-      <Chart className="story-chart">
-        <Settings
-          showLegend={false}
-          showLegendExtra
-          legendPosition={Position.Bottom}
-        />
-        <Axis
-          id="horizontal"
-          position={Position.Bottom}
-          title="x-domain axis"
-          tickFormat={formatter}
-        />
-        <Axis id="vertical" title="y-domain axis" position={Position.Left} />
-        <BarSeries
-          id="bars"
-          color={[euiLightVars.euiColorLightShade]}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={data ?? []}
-        />
-      </Chart>
+      <EuiTitle size="s">
+        <h3>Impressions trends</h3>
+      </EuiTitle>
+      <ChartWrapper loading={status !== 'success'}>
+        <Chart className="story-chart">
+          <Settings
+            showLegend={false}
+            showLegendExtra
+            legendPosition={Position.Bottom}
+          />
+          <Axis
+            id="horizontal"
+            position={Position.Bottom}
+            title="Date/Time"
+            tickFormat={formatter}
+          />
+          <Axis
+            id="vertical"
+            title="Number of impressions"
+            position={Position.Left}
+          />
+          <BarSeries
+            id="bars"
+            color={[euiLightVars.euiColorLightShade]}
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={data ?? []}
+          />
+        </Chart>
+      </ChartWrapper>
     </div>
   );
 };
