@@ -73,7 +73,7 @@ describe('Data Streams tab', () => {
     });
 
     test('goes to index templates tab when "Get started" link is clicked', async () => {
-      const { actions, exists, component } = testBed;
+      const { actions, exists } = testBed;
 
       await act(async () => {
         actions.clickEmptyPromptIndexTemplateLink();
