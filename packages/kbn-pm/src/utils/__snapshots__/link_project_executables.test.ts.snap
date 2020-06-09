@@ -1,5 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`bin script points nowhere does not try to create symlink or node_modules/.bin directory: fs module calls 1`] = `
+Object {
+  "chmod": Array [],
+  "copyDirectory": Array [],
+  "createSymlink": Array [],
+  "isDirectory": Array [],
+  "isFile": Array [
+    Array [
+      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
+    ],
+    Array [
+      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
+    ],
+  ],
+  "isSymlink": Array [],
+  "mkdirp": Array [],
+  "readFile": Array [],
+  "unlink": Array [],
+}
+`;
+
 exports[`bin script points to a file creates a symlink in the project node_modules/.bin directory: fs module calls 1`] = `
 Object {
   "chmod": Array [
