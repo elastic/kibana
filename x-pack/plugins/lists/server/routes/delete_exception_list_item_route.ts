@@ -13,7 +13,11 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import { deleteExceptionListItemSchema, exceptionListItemSchema } from '../../common/schemas';
+import {
+  DeleteExceptionListItemSchemaDecoded,
+  deleteExceptionListItemSchema,
+  exceptionListItemSchema,
+} from '../../common/schemas';
 
 import { getErrorMessageExceptionListItem, getExceptionListClient } from './utils';
 
@@ -25,14 +29,17 @@ export const deleteExceptionListItemRoute = (router: IRouter): void => {
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(deleteExceptionListItemSchema),
+        query: buildRouteValidation<
+          typeof deleteExceptionListItemSchema,
+          DeleteExceptionListItemSchemaDecoded
+        >(deleteExceptionListItemSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
         const exceptionLists = getExceptionListClient(context);
-        const { item_id: itemId, id } = request.query;
+        const { item_id: itemId, id, namespace_type: namespaceType } = request.query;
         if (itemId == null && id == null) {
           return siemResponse.error({
             body: 'Either "item_id" or "id" needs to be defined in the request',
@@ -42,7 +49,7 @@ export const deleteExceptionListItemRoute = (router: IRouter): void => {
           const deleted = await exceptionLists.deleteExceptionListItem({
             id,
             itemId,
-            namespaceType: 'single', // TODO: Bubble this up
+            namespaceType,
           });
           if (deleted == null) {
             return siemResponse.error({

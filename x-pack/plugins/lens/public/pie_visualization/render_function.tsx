@@ -31,6 +31,7 @@ import { ColumnGroups, PieExpressionProps } from './types';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
+import { desanitizeFilterContext } from '../utils';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -242,7 +243,7 @@ export function PieComponent(
               firstTable
             );
 
-            onClickValue(context);
+            onClickValue(desanitizeFilterContext(context));
           }}
         />
         <Partition

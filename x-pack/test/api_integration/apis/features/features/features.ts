@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
             'logs',
             'maps',
             'uptime',
-            'siem',
+            'securitySolution',
             'ingestManager',
           ].sort()
         );

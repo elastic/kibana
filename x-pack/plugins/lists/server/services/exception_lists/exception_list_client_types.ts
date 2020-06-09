@@ -14,6 +14,7 @@ import {
   EntriesArrayOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  FilterOrUndefined,
   IdOrUndefined,
   ItemId,
   ItemIdOrUndefined,
@@ -22,13 +23,16 @@ import {
   MetaOrUndefined,
   Name,
   NameOrUndefined,
+  NamespaceType,
+  PageOrUndefined,
+  PerPageOrUndefined,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
   Tags,
   TagsOrUndefined,
   _Tags,
   _TagsOrUndefined,
 } from '../../../common/schemas';
-
-import { NamespaceType } from './types';
 
 export interface ConstructorOptions {
   user: string;
@@ -113,18 +117,18 @@ export interface UpdateExceptionListItemOptions {
 export interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
-  filter: string | undefined;
-  perPage: number | undefined;
-  page: number | undefined;
-  sortField: string | undefined;
-  sortOrder: string | undefined;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
 }
 
 export interface FindExceptionListOptions {
   namespaceType: NamespaceType;
-  filter: string | undefined;
-  perPage: number | undefined;
-  page: number | undefined;
-  sortField: string | undefined;
-  sortOrder: string | undefined;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
 }

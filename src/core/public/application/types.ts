@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { History } from 'history';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -235,13 +236,31 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
   appRoute?: string;
 }
 
-/** @internal */
+/** @public */
 export interface LegacyApp extends AppBase {
   appUrl: string;
   subUrlBase?: string;
   linkToLastSubUrl?: boolean;
   disableSubUrlTracking?: boolean;
 }
+
+/**
+ * Public information about a registered {@link App | application}
+ *
+ * @public
+ */
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+  legacy: false;
+};
+
+/**
+ * Information about a registered {@link LegacyApp | legacy application}
+ *
+ * @public
+ */
+export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+  legacy: true;
+};
 
 /**
  * A mount function called when the user navigates to this app's route.
@@ -435,10 +454,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
+   * export renderApp = ({ element, history, onAppLeave }: AppMountParameters) => {
    *    const { renderApp, hasUnsavedChanges } = await import('./application');
    *    onAppLeave(actions => {
    *      if(hasUnsavedChanges()) {
@@ -650,6 +669,15 @@ export interface ApplicationStart {
   capabilities: RecursiveReadonly<Capabilities>;
 
   /**
+   * Observable emitting the list of currently registered apps and their associated status.
+   *
+   * @remarks
+   * Applications disabled by {@link Capabilities} will not be present in the map. Applications manually disabled from
+   * the client-side using an {@link AppUpdater | application updater} are present, with their status properly set as `inaccessible`.
+   */
+  applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
+
+  /**
    * Navigate to a given app
    *
    * @param appId
@@ -721,18 +749,7 @@ export interface ApplicationStart {
 }
 
 /** @internal */
-export interface InternalApplicationStart
-  extends Pick<
-    ApplicationStart,
-    'capabilities' | 'navigateToApp' | 'navigateToUrl' | 'getUrlForApp' | 'currentAppId$'
-  > {
-  /**
-   * Apps available based on the current capabilities.
-   * Should be used to show navigation links and make routing decisions.
-   * Applications manually disabled from the client-side using {@link AppUpdater}
-   */
-  applications$: Observable<ReadonlyMap<string, App | LegacyApp>>;
-
+export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
@@ -750,6 +767,12 @@ export interface InternalApplicationStart
 
   // Internal APIs
   getComponent(): JSX.Element | null;
+
+  /**
+   * The global history instance, exposed only to Core. Undefined when rendering a legacy application.
+   * @internal
+   */
+  history: History<unknown> | undefined;
 }
 
 /** @internal */
