@@ -60,6 +60,7 @@ export const MapsCreateEditView = class extends React.Component {
       currentPath: '',
       initialLayerListConfig: null,
       savedMap: null,
+      globalStateSnapshot: {},
     };
   }
 
@@ -91,11 +92,47 @@ export const MapsCreateEditView = class extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { currentPath: prevCurrentPath } = prevState;
-    const { currentPath, initialLayerListConfig, savedMap } = this.state;
+    const { currentPath, initialLayerListConfig, savedMap, globalStateSnapshot } = this.state;
     if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
       updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
     }
+    const globalState = getGlobalState();
+    if (!_.isEqual(globalStateSnapshot, globalState)) {
+      this.setState({ globalStateSnapshot: globalState });
+      this.updateFromGlobalState(globalState);
+    }
   }
+
+  updateFromGlobalState(globalState) {
+    const { filterManager } = getData().query;
+    const { filters, refreshInterval, time } = this.state;
+    const newState = {};
+
+    let newFilters;
+    if (!_.isEqual(globalState.filters, filters)) {
+      filterManager.setFilters(filters); // Maps and merges filters
+      newFilters = filterManager.getFilters();
+      newState.filters = newFilters;
+    }
+    if (!_.isEqual(globalState.refreshInterval, refreshInterval)) {
+      newState.refreshInterval = globalState.refreshInterval;
+    }
+    if (!_.isEqual(globalState.time, time)) {
+      newState.time = globalState.time;
+    }
+    if (!_.isEmpty(newState)) {
+      this.setState(newState, () => {
+        const { query, filters, refreshInterval, time } = this.state;
+        this.appStateManager.setQueryAndFilters({
+          query: this.state.query,
+          filters: filterManager.getAppFilters(),
+        });
+        this.props.dispatchSetQuery(refreshInterval, filters, query, time);
+      });
+    }
+  }
+
+
 
   componentWillUnmount() {
     if (this.storeSyncUnsubscribe) {
