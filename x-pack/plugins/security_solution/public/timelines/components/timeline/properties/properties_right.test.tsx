@@ -194,10 +194,6 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
       });
 
-      test('it renders no create timeline btn', () => {
-        expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).not.toBeTruthy();
-      });
-
       test('it renders create template timeline btn', () => {
         expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(true);
       });

@@ -42,6 +42,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
+import { disableTemplate } from '../../../../common/constants';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;

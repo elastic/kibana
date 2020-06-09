@@ -31,7 +31,7 @@ export const useCreateTimelineButton = ({
           timelineType,
         })
       ),
-    [dispatch]
+    [dispatch, timelineType]
   );
 
   const handleButtonClick = useCallback(() => {
@@ -39,7 +39,7 @@ export const useCreateTimelineButton = ({
     if (typeof closeGearMenu === 'function') {
       closeGearMenu();
     }
-  }, [createTimeline, timelineId, closeGearMenu]);
+  }, [createTimeline, timelineId, timelineType, closeGearMenu]);
 
   const getButton = useCallback(
     ({ outline, title }: { outline?: boolean; title?: string }) => {
@@ -59,7 +59,7 @@ export const useCreateTimelineButton = ({
         </EuiButtonEmpty>
       );
     },
-    [handleButtonClick]
+    [handleButtonClick, timelineType]
   );
 
   return { getButton };

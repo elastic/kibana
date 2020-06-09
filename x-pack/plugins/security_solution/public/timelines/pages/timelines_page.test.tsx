@@ -10,6 +10,7 @@ import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
+import { disableTemplate } from '../../../common/constants';
 
 jest.mock('../../overview/components/events_by_dataset');
 
@@ -60,7 +61,7 @@ describe('TimelinesPageComponent', () => {
       ).toEqual(true);
     });
 
-    test('it renders create timelin btn', () => {
+    test('it renders create timeline btn', () => {
       expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
     });
   });
