@@ -23,6 +23,11 @@ import { SearchService } from './search_service';
 import { CoreSetup } from '../../../../core/server';
 import { DataPluginStart } from '../plugin';
 
+const mockSearchApi = { search: jest.fn() };
+jest.mock('./create_api', () => ({
+  createApi: () => mockSearchApi,
+}));
+
 describe('Search service', () => {
   let plugin: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
