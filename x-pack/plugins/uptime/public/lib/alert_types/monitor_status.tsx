@@ -13,6 +13,7 @@ import { AtomicStatusCheckParamsType } from '../../../common/runtime_types';
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
+import { AlertMonitorStatus } from '../../components/overview';
 
 export const validate = (alertParams: unknown) => {
   const errors: Record<string, any> = {};
@@ -38,10 +39,6 @@ export const validate = (alertParams: unknown) => {
 };
 
 const { defaultActionMessage } = MonitorStatusTranslations;
-
-const AlertMonitorStatus = React.lazy(() =>
-  import('../../components/overview/alerts/alerts_containers/alert_monitor_status')
-);
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   autocomplete,
