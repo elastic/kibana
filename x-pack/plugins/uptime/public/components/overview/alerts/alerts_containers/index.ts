@@ -9,4 +9,5 @@ export {
   ToggleAlertFlyoutButton,
   ToggleAlertFlyoutButtonProps,
 } from './toggle_alert_flyout_button';
+export { AlertTls } from './alert_tls';
 export { UptimeAlertsFlyoutWrapper } from './uptime_alerts_flyout_wrapper';

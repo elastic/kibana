@@ -47,6 +47,3 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     />
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { AlertMonitorStatus as default };
