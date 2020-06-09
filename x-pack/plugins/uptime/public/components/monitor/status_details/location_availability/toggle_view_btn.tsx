@@ -8,7 +8,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import { EuiButtonGroup } from '@elastic/eui';
 import { useSelectedView } from './use_selected_view';
-import { ChangeToListView, ChangeToMapView, ToggleMapListView } from '../translations';
+import { ChangeToListView, ChangeToMapView } from '../translations';
 
 const ToggleViewButtons = styled.span`
   margin-left: auto;
