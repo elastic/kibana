@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  savedObjectsTypeRegistryMock,
+  savedObjectsClientMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../src/core/server/mocks';
+import { GlobalSearchProviderContext } from '../types';
+
+const createContextMock = (): jest.Mocked<GlobalSearchProviderContext> => {
+  return {
+    core: {
+      savedObjects: {
+        client: savedObjectsClientMock.create(),
+        typeRegistry: savedObjectsTypeRegistryMock.create(),
+      },
+      elasticsearch: {
+        legacy: {
+          client: elasticsearchServiceMock.createScopedClusterClient(),
+        },
+      },
+      uiSettings: {
+        client: uiSettingsServiceMock.createClient(),
+      },
+    },
+  };
+};
+
+const createFactoryMock = () => () => () => createContextMock();
+
+export const contextMock = {
+  create: createContextMock,
+  createFactory: createFactoryMock,
+};
