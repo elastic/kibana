@@ -36,13 +36,19 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
+  defaultKuery?: string;
   'data-test-subj': string;
+  shouldUpdateUrl?: boolean;
+  updateDefaultKuery?: (value: string) => void;
 }
 
 export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
+  defaultKuery,
   'data-test-subj': dataTestSubj,
+  shouldUpdateUrl,
+  updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
   const { updateSearchText } = useSearchText();
@@ -68,8 +74,6 @@ export function KueryBar({
     if (!indexPattern) {
       return;
     }
-
-    updateSearchText(inputValue);
 
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
@@ -122,7 +126,13 @@ export function KueryBar({
         return;
       }
 
-      updateUrlParams({ search: inputValue.trim() });
+      if (shouldUpdateUrl !== false) {
+        updateUrlParams({ search: inputValue.trim() });
+      }
+      updateSearchText(inputValue);
+      if (updateDefaultKuery) {
+        updateDefaultKuery(inputValue);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
@@ -139,7 +149,7 @@ export function KueryBar({
         data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={kuery}
+        initialValue={defaultKuery || kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions.slice(0, suggestionLimit)}
