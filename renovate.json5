@@ -427,14 +427,6 @@
         ],
       },
       {
-        groupSlug: 'indent-string',
-        groupName: 'indent-string related packages',
-        packageNames: [
-          'indent-string',
-          '@types/indent-string',
-        ],
-      },
-      {
         groupSlug: 'inquirer',
         groupName: 'inquirer related packages',
         packageNames: [
@@ -1073,14 +1065,6 @@
           '@types/mini-css-extract-plugin',
           'chokidar',
           '@types/chokidar',
-        ],
-      },
-      {
-        groupSlug: 'wrap-ansi',
-        groupName: 'wrap-ansi related packages',
-        packageNames: [
-          'wrap-ansi',
-          '@types/wrap-ansi',
         ],
       },
       {
