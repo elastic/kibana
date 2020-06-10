@@ -102,6 +102,8 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       case 'boolean':
         schema = 'boolean';
         break;
+      case 'text':
+        schema = NON_AGGREGATABLE;
     }
 
     if (
@@ -122,7 +124,10 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
   });
 };
 
-export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefined) => {
+export const NON_AGGREGATABLE = 'non-aggregatable';
+export const getDataGridSchemaFromKibanaFieldType = (
+  field: IFieldType | undefined
+): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
   let schema;
@@ -141,6 +146,10 @@ export const getDataGridSchemaFromKibanaFieldType = (field: IFieldType | undefin
     case KBN_FIELD_TYPES.NUMBER:
       schema = 'numeric';
       break;
+  }
+
+  if (schema === undefined && field?.aggregatable === false) {
+    return NON_AGGREGATABLE;
   }
 
   return schema;

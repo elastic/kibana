@@ -11,12 +11,15 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
+  fetchChartData,
   getDataGridSchemasFromFieldTypes,
   useDataGrid,
   useRenderCellValue,
+  ChartData,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { ml } from '../../../../../services/ml_api_service';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import {
@@ -65,6 +68,28 @@ export const useExplorationResults = (
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
+
+  const fetchColumnChartsData = async function () {
+    const fetchers = dataGrid.visibleColumns.map((vc) => {
+      const columnType = columns.find((c) => c.id === vc);
+
+      if (columnType === undefined || jobConfig === undefined) {
+        return Promise.resolve(undefined);
+      }
+      return fetchChartData(jobConfig.dest.index, ml, { match_all: {} }, columnType);
+    });
+
+    const data = (await Promise.all(fetchers)) as ChartData[];
+    dataGrid.setColumnCharts(data.filter((d) => d !== undefined));
+  };
+
+  useEffect(() => {
+    if (dataGrid.chartsVisible) {
+      fetchColumnChartsData();
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataGrid.chartsVisible, jobConfig?.dest.index, JSON.stringify([dataGrid.visibleColumns])]);
 
   const renderCellValue = useRenderCellValue(
     indexPattern,

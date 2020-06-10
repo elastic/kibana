@@ -74,7 +74,7 @@ export function useColumnCharts(
                 )}`}
                 style={{ width: `${columnWidth}px` }}
               >
-                {!d.isExpandable && chartData !== undefined && (
+                {chartData !== undefined && chartData.data.length > 0 && (
                   <ColumnChart chartData={chartData} columnType={d} />
                 )}
               </div>

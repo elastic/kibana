@@ -13,6 +13,8 @@ import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
+import { NON_AGGREGATABLE } from './common';
+
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
 
 const BAR_COLOR = euiPaletteColorBlind()[0];
@@ -34,7 +36,11 @@ const getXScaleType = (
   }
 };
 
-const getFieldType = (schema: EuiDataGridColumn['schema']) => {
+const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYPES | undefined => {
+  if (schema === NON_AGGREGATABLE) {
+    return undefined;
+  }
+
   let fieldType: KBN_FIELD_TYPES;
 
   switch (schema) {
@@ -190,7 +196,7 @@ export const fetchChartData = async (
       data: await fetchChartTermsData(),
       id: columnType.id,
     } as OrdinalChartData;
-  } else if (fieldType === KBN_FIELD_TYPES.OBJECT) {
+  } else if (fieldType === KBN_FIELD_TYPES.OBJECT || fieldType === undefined) {
     return {
       cardinality: 0,
       data: [],
@@ -247,6 +253,10 @@ export const useColumnChart = (chartData: ChartData, columnType: EuiDataGridColu
   const fieldType = getFieldType(columnType.schema);
 
   const hoveredRow = useObservable(hoveredRow$);
+
+  if (fieldType === undefined) {
+    throw new Error('Invalid fieldType');
+  }
 
   const xScaleType = getXScaleType(fieldType);
 
