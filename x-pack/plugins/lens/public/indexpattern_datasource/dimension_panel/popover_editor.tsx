@@ -314,17 +314,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     data-test-subj="indexPattern-label-edit"
                     value={selectedColumn.label}
                     onChange={(e) => {
-                      setState(
-                        changeColumn({
-                          state,
-                          layerId,
-                          columnId,
-                          newColumn: {
-                            ...selectedColumn,
-                            label: e.target.value,
+                      setState({
+                        ...state,
+                        layers: {
+                          ...state.layers,
+                          [layerId]: {
+                            ...state.layers[layerId],
+                            columns: {
+                              ...state.layers[layerId].columns,
+                              [columnId]: {
+                                ...selectedColumn,
+                                label: e.target.value,
+                                customLabel: true,
+                              },
+                            },
                           },
-                        })
-                      );
+                        },
+                      });
                     }}
                   />
                 </EuiFormRow>
