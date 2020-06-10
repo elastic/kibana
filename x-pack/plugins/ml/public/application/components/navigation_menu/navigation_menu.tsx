@@ -28,12 +28,11 @@ export const NavigationMenu: FC<Props> = ({ tabId }) => {
 
   return (
     <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" className="mlNavigationMenu" gutterSize="none">
         <EuiFlexItem grow={false}>
           <MainTabs tabId={tabId} disableLinks={disableLinks} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule className="mlNavHorizontalRule" />
     </Fragment>
   );
 };

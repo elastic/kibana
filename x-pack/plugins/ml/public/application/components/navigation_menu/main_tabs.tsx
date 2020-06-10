@@ -103,20 +103,22 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
             {tab.name}
           </EuiTab>
         ) : (
-          <EuiLink
-            data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-            href={`#/${defaultPathId}${fullGlobalStateString}`}
-            key={`${id}-key`}
-            color="text"
-          >
-            <EuiTab
-              className={'mlNavigationMenu__mainTab'}
-              onClick={() => onSelectedTabChanged(id)}
-              isSelected={id === selectedTabId}
+          <div className="euiTab">
+            <EuiLink
+              data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
+              href={`#/${defaultPathId}${fullGlobalStateString}`}
+              key={`${id}-key`}
+              color="text"
             >
-              {tab.name}
-            </EuiTab>
-          </EuiLink>
+              <EuiTab
+                className={'mlNavigationMenu__mainTab'}
+                onClick={() => onSelectedTabChanged(id)}
+                isSelected={id === selectedTabId}
+              >
+                {tab.name}
+              </EuiTab>
+            </EuiLink>
+          </div>
         );
       })}
     </EuiTabs>
