@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { IndexPatternSelect } from './index_pattern_select';
-import { createLayerDescriptors } from './create_layer_descriptors';
+import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 import { IndexPatternMeta } from './security_index_pattern_utils';
 
 interface State {
@@ -38,7 +38,7 @@ export class SecurityLayerTemplate extends Component<RenderWizardArguments, Stat
     }
 
     this.props.previewLayers(
-      createLayerDescriptors(this.state.indexPatternId!, this.state.indexPatternTitle!)
+      createSecurityLayerDescriptors(this.state.indexPatternId!, this.state.indexPatternTitle!)
     );
   }
 

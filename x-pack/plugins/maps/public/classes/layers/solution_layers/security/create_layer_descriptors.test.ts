@@ -23,11 +23,11 @@ jest.mock('uuid/v4', () => {
   };
 });
 
-import { createLayerDescriptors } from './create_layer_descriptors';
+import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
 describe('createLayerDescriptor', () => {
   test('amp index', () => {
-    expect(createLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
+    expect(createSecurityLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
       {
         __dataRequests: [],
         alpha: 0.75,
@@ -357,7 +357,7 @@ describe('createLayerDescriptor', () => {
   });
 
   test('non-apm index', () => {
-    expect(createLayerDescriptors('id', 'filebeat-*')).toEqual([
+    expect(createSecurityLayerDescriptors('id', 'filebeat-*')).toEqual([
       {
         __dataRequests: [],
         alpha: 0.75,

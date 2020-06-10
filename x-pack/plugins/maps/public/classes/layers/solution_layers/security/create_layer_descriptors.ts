@@ -196,7 +196,7 @@ function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: st
   });
 }
 
-export function createLayerDescriptors(
+export function createSecurityLayerDescriptors(
   indexPatternId: string,
   indexPatternTitle: string
 ): LayerDescriptor[] {

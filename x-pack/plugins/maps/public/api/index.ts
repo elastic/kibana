@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createSecurityLayerDescriptors } from './create_layer_descriptors';
-export { SecurityLayerWizardConfig } from './security_layer_wizard';
+export { createSecurityLayerDescriptors } from './create_security_layer_descriptors';
