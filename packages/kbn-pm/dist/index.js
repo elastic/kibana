@@ -55525,6 +55525,7 @@ __webpack_require__.r(__webpack_exports__);
  * under the License.
  */
 
+const YARN_EXEC = process.env.npm_execpath || 'yarn';
 
 /**
  * Install all dependencies in the given directory
@@ -55533,7 +55534,7 @@ async function installInDir(directory, extraArgs = []) {
   const options = ['install', '--non-interactive', ...extraArgs]; // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
 
-  await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', options, {
+  await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])(YARN_EXEC, options, {
     cwd: directory
   });
 }
@@ -55545,7 +55546,7 @@ async function runScriptInPackage(script, args, pkg) {
   const execOpts = {
     cwd: pkg.path
   };
-  await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['run', script, ...args], execOpts);
+  await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])(YARN_EXEC, ['run', script, ...args], execOpts);
 }
 /**
  * Run script in the given directory
@@ -55560,7 +55561,7 @@ function runScriptInPackageStreaming({
   const execOpts = {
     cwd: pkg.path
   };
-  return Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawnStreaming"])('yarn', ['run', script, ...args], execOpts, {
+  return Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawnStreaming"])(YARN_EXEC, ['run', script, ...args], execOpts, {
     prefix: pkg.name,
     debug
   });
@@ -55568,7 +55569,7 @@ function runScriptInPackageStreaming({
 async function yarnWorkspacesInfo(directory) {
   const {
     stdout
-  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['--json', 'workspaces', 'info'], {
+  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])(YARN_EXEC, ['--json', 'workspaces', 'info'], {
     cwd: directory,
     stdio: 'pipe'
   });

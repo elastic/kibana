@@ -392,12 +392,12 @@ const getIndexQuery = (templateName: string) => ({
         must: [
           {
             exists: {
-              field: 'stream.namespace',
+              field: 'dataset.namespace',
             },
           },
           {
             exists: {
-              field: 'stream.dataset',
+              field: 'dataset.name',
             },
           },
         ],
