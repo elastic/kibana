@@ -57,7 +57,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     });
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};
@@ -70,7 +70,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
-  public isCompatible = async (context: ActionContext) => {
+  public isCompatible = (context: ActionContext) => {
     if (!this.canDownloadCSV) {
       return false;
     }
