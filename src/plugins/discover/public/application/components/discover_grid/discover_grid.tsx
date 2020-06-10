@@ -202,15 +202,21 @@ export const DiscoverGrid = function DiscoverGridInner({
   }, [columns, buildColumns, setDataGridColumns, dataGridColumns]);
 
   const getColumns = useCallback(() => {
-    // Discover always injects a Time column as the first item (unless advance settings turned it off)
-    // Have to guard against this to allow users to request the same column again later
+    const timeFieldName = indexPattern.timeFieldName;
 
-    if (showTimeCol) {
-      return [{ id: timeString, schema: 'datetime', initialWidth: 200 }, ...dataGridColumns];
-    } else {
-      return dataGridColumns;
+    if (showTimeCol && !dataGridColumns.find((col) => col.id === timeFieldName)) {
+      return [
+        {
+          id: indexPattern.timeFieldName,
+          display: timeString,
+          schema: 'datetime',
+          initialWidth: 200,
+        } as EuiDataGridColumn,
+        ...dataGridColumns,
+      ];
     }
-  }, [dataGridColumns, showTimeCol, timeString]);
+    return dataGridColumns;
+  }, [dataGridColumns, showTimeCol, timeString, indexPattern.timeFieldName]);
 
   /**
    * Pagination
@@ -228,15 +234,13 @@ export const DiscoverGrid = function DiscoverGridInner({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(
-    () =>
-      sort.length === 0
-        ? getDefaultSort(indexPattern).map(
-            ([id, direction]) => ({ id, direction } as { id: string; direction: 'asc' | 'desc' })
-          )
-        : sort.map(([id, direction]) => ({ id, direction })),
-    [sort, indexPattern]
-  );
+  const sortingColumns = useMemo(() => {
+    return sort.length === 0
+      ? getDefaultSort(indexPattern).map(
+          ([id, direction]) => ({ id, direction } as { id: string; direction: 'asc' | 'desc' })
+        )
+      : sort.map(([id, direction]) => ({ id, direction }));
+  }, [sort, indexPattern]);
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
@@ -263,26 +267,24 @@ export const DiscoverGrid = function DiscoverGridInner({
         );
       };
 
-      const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
-
       const value = (
         // TODO Field formatters need to be fixed
         // eslint-disable-next-line react/no-danger
-        <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, fieldName) }} />
+        <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
       );
 
-      if (isDetails && indexPattern.fields.getByName(fieldName)?.filterable) {
+      if (isDetails && indexPattern.fields.getByName(columnId)?.filterable) {
         return (
           <CellPopover
             value={value}
-            onPositiveFilterClick={() => createFilter(fieldName, '+')}
-            onNegativeFilterClick={() => createFilter(fieldName, '-')}
+            onPositiveFilterClick={() => createFilter(columnId, '+')}
+            onNegativeFilterClick={() => createFilter(columnId, '-')}
           />
         );
       }
       return value;
     },
-    [rows, indexPattern, onFilter, timeString]
+    [rows, indexPattern, onFilter]
   );
 
   /**
@@ -347,7 +349,7 @@ export const DiscoverGrid = function DiscoverGridInner({
       <EuiDataGrid
         aria-labelledby={ariaLabelledBy}
         aria-describedby={randomId}
-        inMemory={{ level: 'sorting' }}
+        inMemory={{ level: 'pagination' }}
         sorting={{ columns: sortingColumns, onSort: onTableSort }}
         rowCount={rowCount}
         columns={getColumns()}
@@ -355,8 +357,7 @@ export const DiscoverGrid = function DiscoverGridInner({
         leadingControlColumns={leadingControlControls}
         columnVisibility={{
           visibleColumns: getColumns().map((obj) => obj.id),
-          setVisibleColumns: (col) => {
-            const newColumns = showTimeCol ? col.slice(1) : col;
+          setVisibleColumns: (newColumns) => {
             setDataGridColumns(buildColumns(newColumns));
             onSetColumns(newColumns);
           },
