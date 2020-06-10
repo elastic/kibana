@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { inspect } from 'util';
 import { PluginInitializerContext } from 'kibana/public';
 import { TelemetryPlugin, TelemetryPluginConfig } from './plugin';
 export { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
-  // eslint-disable-next-line
-  console.log(inspect('test'));
   return new TelemetryPlugin(initializerContext);
 }
