@@ -36,7 +36,7 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
     .sync(
       Array.from(
         new Set([
-          ...scanDirs.map((dir) => `${dir}/*/kibana.json`),
+          ...scanDirs.map((dir) => `${dir}/**/kibana.json`),
           ...paths.map((path) => `${path}/kibana.json`),
         ])
       ),
