@@ -18,7 +18,7 @@
  */
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { IIndexPattern } from '../../../common/index_patterns';
-import { IndexPatternsContract } from '../../index_patterns';
+import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
