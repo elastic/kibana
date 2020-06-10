@@ -4,31 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act } from 'react-dom/test-utils';
-
-import { BASE_PATH } from '../../../../../../../common';
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-  nextTick,
-} from '../../../../../../../../../test_utils';
+import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateDetailsFlyout } from '../../../component_template_details';
-
-const getTestBedConfig = (props: Record<string, any>) => {
-  const testBed: TestBedConfig = {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-    defaultProps: props,
-  };
-  return testBed;
-};
-
-const initTestBed = (props: Record<string, any>) =>
-  registerTestBed(WithAppDependencies(ComponentTemplateDetailsFlyout), getTestBedConfig(props));
 
 export type ComponentTemplateDetailsTestBed = TestBed<ComponentTemplateDetailsTestSubjects> & {
   actions: ReturnType<typeof createActions>;

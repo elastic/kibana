@@ -29,7 +29,7 @@ const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   _kbnMeta: { usedBy: ['template_1'] },
 };
 
-const COMPONENT_TEMPLATE_REQUIRED_FIELDS: ComponentTemplateDeserialized = {
+const COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS: ComponentTemplateDeserialized = {
   name: 'comp-base',
   template: {},
   _kbnMeta: { usedBy: [] },
@@ -108,11 +108,13 @@ describe('<ComponentTemplateDetails />', () => {
 
   describe('With only required component template fields', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE_REQUIRED_FIELDS);
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS
+      );
 
       await act(async () => {
         testBed = setup({
-          componentTemplateName: COMPONENT_TEMPLATE_REQUIRED_FIELDS.name,
+          componentTemplateName: COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
           onClose: () => {},
         });
       });
@@ -123,7 +125,7 @@ describe('<ComponentTemplateDetails />', () => {
     test('renders the details flyout', () => {
       const { exists, actions, component } = testBed;
 
-      // [Summary tab] Verify description list items do not display
+      // [Summary tab] Verify optional description list items do not display
       expect(exists('summaryTabContent.usedByTitle')).toBe(false);
       expect(exists('summaryTabContent.versionTitle')).toBe(false);
       expect(exists('summaryTabContent.metaTitle')).toBe(false);
