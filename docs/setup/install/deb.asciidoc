@@ -1,5 +1,8 @@
 [[deb]]
 === Install {kib} with Debian package
+++++
+<titleabbrev>Install with Debian package</titleabbrev>
+++++
 
 The Debian package for Kibana can be <<install-deb,downloaded from our website>>
 or from our <<deb-repo,APT repository>>. It can be used to install

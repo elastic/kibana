@@ -11,6 +11,25 @@ import {
   NestedExceptionEntry,
   FormattedEntry,
 } from './types';
+import { ExceptionList } from '../../../lists_plugin_deps';
+
+export const getExceptionListMock = (): ExceptionList => ({
+  id: '5b543420',
+  created_at: '2020-04-23T00:19:13.289Z',
+  created_by: 'user_name',
+  list_id: 'test-exception',
+  tie_breaker_id: '77fd1909-6786-428a-a671-30229a719c1f',
+  updated_at: '2020-04-23T00:19:13.289Z',
+  updated_by: 'user_name',
+  namespace_type: 'single',
+  name: '',
+  description: 'This is a description',
+  _tags: ['os:windows'],
+  tags: [],
+  type: 'endpoint',
+  meta: {},
+  totalItems: 0,
+});
 
 export const getExceptionItemEntryMock = (): ExceptionEntry => ({
   field: 'actingProcess.file.signer',
@@ -44,7 +63,7 @@ export const getExceptionItemMock = (): ExceptionListItemSchema => ({
   namespace_type: 'single',
   name: '',
   description: 'This is a description',
-  comments: [
+  comment: [
     {
       user: 'user_name',
       timestamp: '2020-04-23T00:19:13.289Z',
