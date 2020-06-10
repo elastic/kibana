@@ -20,10 +20,10 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExpressionRenderError } from '../../../../plugins/expressions/public';
+import { EmbeddableError } from '../embeddables/i_embeddable';
 
 interface Props {
-  error?: ExpressionRenderError;
+  error?: EmbeddableError;
 }
 
 export function EmbeddableErrorLabel(props: Props) {
@@ -38,8 +38,10 @@ export function EmbeddableErrorLabel(props: Props) {
         });
 
   return (
-    <EuiToolTip content={props.error.message}>
-      <EuiBadge color="danger">{labelText}</EuiBadge>
-    </EuiToolTip>
+    <div className="embPanel-label">
+      <EuiToolTip content={props.error.message}>
+        <EuiBadge color="danger">{labelText}</EuiBadge>
+      </EuiToolTip>
+    </div>
   );
 }

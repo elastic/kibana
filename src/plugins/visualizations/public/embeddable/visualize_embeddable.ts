@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import ReactDOM from 'react-dom';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -48,7 +46,6 @@ import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { EmbeddableErrorLabel } from './embeddable_error_label';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -234,15 +231,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   onContainerLoading = () => {
     this.domNode.setAttribute('data-render-complete', 'false');
-    this.domNode.setAttribute('data-loading', '');
-    this.domNode.removeAttribute('data-error');
-    ReactDOM.render(<EmbeddableErrorLabel />, this.labelNode!);
+    this.updateOutput({ loading: true, error: undefined });
   };
 
   onContainerRender = (count: number) => {
-    this.domNode.removeAttribute('data-loading');
     this.domNode.setAttribute('data-render-complete', 'true');
     this.domNode.setAttribute('data-rendering-count', count.toString());
+    this.updateOutput({ loading: false, error: undefined });
     dispatchRenderComplete(this.domNode);
   };
 
@@ -250,11 +245,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.abortController) {
       this.abortController.abort();
     }
-    this.domNode.removeAttribute('data-loading');
-    this.domNode.setAttribute('data-error', '');
     this.domNode.setAttribute('data-render-complete', 'false');
-
-    ReactDOM.render(<EmbeddableErrorLabel error={error} />, this.labelNode!);
+    this.updateOutput({ loading: false, error });
   };
 
   /**
@@ -262,6 +254,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
+    super.render(domNode);
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
