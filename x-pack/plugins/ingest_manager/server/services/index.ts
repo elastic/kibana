@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AgentStatus } from '../types';
+import { AgentStatus, CallESAsCurrentUser } from '../types';
 import * as settingsService from './settings';
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
@@ -15,6 +15,7 @@ export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export interface ESIndexPatternService {
   getESIndexPattern(
     savedObjectsClient: SavedObjectsClientContract,
+    callCluster: CallESAsCurrentUser,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined>;

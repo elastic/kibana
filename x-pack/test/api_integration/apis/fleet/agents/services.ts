@@ -33,16 +33,10 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
 
 export function setupIngest({ getService }: FtrProviderContext) {
   before(async () => {
-    // eslint-disable-next-line no-console
-    console.log('test fleet agents#setupIngest');
     await getService('supertest').post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
-    // eslint-disable-next-line no-console
-    console.log('test fleet agents#setupIngest ingest setup');
     await getService('supertest')
       .post(`/api/ingest_manager/fleet/setup`)
       .set('kbn-xsrf', 'xxx')
       .send({ forceRecreate: true });
-    // eslint-disable-next-line no-console
-    console.log('test fleet agents#setupIngest fleet setup');
   });
 }

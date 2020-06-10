@@ -6,19 +6,17 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { getInstallation } from './epm/packages';
 import { ESIndexPatternService } from '../../server';
-import { appContextService } from './index';
+import { CallESAsCurrentUser } from '../types';
+import { setupIngestManager } from './setup';
 
 export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
   public async getESIndexPattern(
     savedObjectsClient: SavedObjectsClientContract,
+    callCluster: CallESAsCurrentUser,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined> {
-    // eslint-disable-next-line no-console
-    console.log(
-      'ESIndexPatternSavedObjectService#getESIndexPattern()',
-      appContextService.getIsInitialized()
-    );
+    await setupIngestManager(savedObjectsClient, callCluster);
     const installation = await getInstallation({ savedObjectsClient, pkgName });
     return installation?.es_index_patterns[datasetPath];
   }

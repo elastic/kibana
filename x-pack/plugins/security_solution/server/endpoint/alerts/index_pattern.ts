@@ -60,6 +60,7 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
     try {
       const pattern = await this.service.getESIndexPattern(
         ctx.core.savedObjects.client,
+        ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
         IngestIndexPatternRetriever.endpointPackageName,
         datasetPath
       );

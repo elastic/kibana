@@ -34,78 +34,76 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
-  // eslint-disable-next-line no-console
-  console.log('setupIngestManager()');
   if (appContextService.getIsInitialized()?.status === 'success') {
-    // eslint-disable-next-line no-console
-    console.log('setupIngestManager early exit');
     return;
   }
-  // eslint-disable-next-line no-console
-  console.log('setupIngestManager set it up');
-  const [installedPackages, defaultOutput, config] = await Promise.all([
-    // packages installed by default
-    ensureInstalledDefaultPackages(soClient, callCluster),
-    outputService.ensureDefaultOutput(soClient),
-    agentConfigService.ensureDefaultAgentConfig(soClient),
-    ensureDefaultIndices(callCluster),
-    settingsService.getSettings(soClient).catch((e: any) => {
-      if (e.isBoom && e.output.statusCode === 404) {
-        const http = appContextService.getHttpSetup();
-        const serverInfo = http.getServerInfo();
-        const basePath = http.basePath;
 
-        const cloud = appContextService.getCloud();
-        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
-        const defaultUrl = url.format({
-          protocol: serverInfo.protocol,
-          hostname: serverInfo.host,
-          port: serverInfo.port,
-          pathname: basePath.serverBasePath,
-        });
+  try {
+    const [installedPackages, defaultOutput, config] = await Promise.all([
+      // packages installed by default
+      ensureInstalledDefaultPackages(soClient, callCluster),
+      outputService.ensureDefaultOutput(soClient),
+      agentConfigService.ensureDefaultAgentConfig(soClient),
+      ensureDefaultIndices(callCluster),
+      settingsService.getSettings(soClient).catch((e: any) => {
+        if (e.isBoom && e.output.statusCode === 404) {
+          const http = appContextService.getHttpSetup();
+          const serverInfo = http.getServerInfo();
+          const basePath = http.basePath;
 
-        return settingsService.saveSettings(soClient, {
-          agent_auto_upgrade: true,
-          package_auto_upgrade: true,
-          kibana_url: cloudUrl || flagsUrl || defaultUrl,
-        });
+          const cloud = appContextService.getCloud();
+          const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+          const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+          const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+          const defaultUrl = url.format({
+            protocol: serverInfo.protocol,
+            hostname: serverInfo.host,
+            port: serverInfo.port,
+            pathname: basePath.serverBasePath,
+          });
+
+          return settingsService.saveSettings(soClient, {
+            agent_auto_upgrade: true,
+            package_auto_upgrade: true,
+            kibana_url: cloudUrl || flagsUrl || defaultUrl,
+          });
+        }
+
+        return Promise.reject(e);
+      }),
+    ]);
+
+    // ensure default packages are added to the default conifg
+    const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
+    if (!configWithDatasource) {
+      throw new Error('Config not found');
+    }
+    if (
+      configWithDatasource.datasources.length &&
+      typeof configWithDatasource.datasources[0] === 'string'
+    ) {
+      throw new Error('Config not found');
+    }
+    for (const installedPackage of installedPackages) {
+      const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+        (packageName) => installedPackage.name === packageName
+      );
+      if (!packageShouldBeInstalled) {
+        continue;
       }
 
-      return Promise.reject(e);
-    }),
-  ]);
+      const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
+        return typeof d !== 'string' && d.package?.name === installedPackage.name;
+      });
 
-  // ensure default packages are added to the default conifg
-  const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
-  if (!configWithDatasource) {
-    throw new Error('Config not found');
-  }
-  if (
-    configWithDatasource.datasources.length &&
-    typeof configWithDatasource.datasources[0] === 'string'
-  ) {
-    throw new Error('Config not found');
-  }
-  for (const installedPackage of installedPackages) {
-    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-      (packageName) => installedPackage.name === packageName
-    );
-    if (!packageShouldBeInstalled) {
-      continue;
+      if (!isInstalled) {
+        await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+      }
     }
-
-    const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
-      return typeof d !== 'string' && d.package?.name === installedPackage.name;
-    });
-
-    if (!isInstalled) {
-      await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
-    }
+  } catch (e) {
+    appContextService.setIsInitialized({ status: 'error', error: e });
   }
-  // eslint-disable-next-line no-console
-  console.log('setupIngestManager WORKED');
+
   appContextService.setIsInitialized({ status: 'success' });
   return;
 }
