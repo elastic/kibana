@@ -14,21 +14,22 @@ const Container = styled.div<{ color: string }>`
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
-const Wrapper = styled.div<{ maxWidth?: number }>`
+const Wrapper = styled.div<{ restrictWidth?: number }>`
   width: 100%;
-  max-width: 1200px;
+  max-width: ${(props) => `${props.restrictWidth}px`};
   margin: 0 auto;
   overflow: hidden;
 `;
 
 interface Props {
   color: string;
+  restrictWidth?: number;
 }
 
-export const Header = ({ color }: Props) => {
+export const Header = ({ color, restrictWidth }: Props) => {
   return (
     <Container color={color}>
-      <Wrapper>
+      <Wrapper restrictWidth={restrictWidth}>
         <EuiSpacer size="xxl" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
