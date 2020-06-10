@@ -9,12 +9,14 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   Axis,
   BarSeries,
+  BrushEndListener,
   Chart,
   niceTimeFormatByDay,
   ScaleType,
   Settings,
   timeFormatter,
 } from '@elastic/charts';
+import moment from 'moment';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -25,6 +27,8 @@ import {
   ImpressionsTrendsLabel,
   NoOfImpressionsLabels,
 } from '../translations';
+import { history } from '../../../../utils/history';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 
 export const ImpressionTrend = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -50,6 +54,25 @@ export const ImpressionTrend = () => {
   );
   const formatter = timeFormatter(niceTimeFormatByDay(2));
 
+  const onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [minX, maxX] = x;
+
+    const rangeFrom = moment(minX).toISOString();
+    const rangeTo = moment(maxX).toISOString();
+
+    history.push({
+      ...history.location,
+      search: fromQuery({
+        ...toQuery(history.location.search),
+        rangeFrom,
+        rangeTo,
+      }),
+    });
+  };
+
   return (
     <div>
       <EuiSpacer size="l" />
@@ -62,6 +85,7 @@ export const ImpressionTrend = () => {
             showLegend={false}
             showLegendExtra
             legendPosition={Position.Bottom}
+            onBrushEnd={onBrushEnd}
           />
           <Axis
             id="date_time"
