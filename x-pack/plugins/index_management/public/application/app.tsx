@@ -31,9 +31,9 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={`/create_template`} component={TemplateCreate} />
-    <Route exact path={`/clone_template/:name*`} component={TemplateClone} />
-    <Route exact path={`/edit_template/:name*`} component={TemplateEdit} />
+    <Route exact path="/create_template" component={TemplateCreate} />
+    <Route exact path="/clone_template/:name*" component={TemplateClone} />
+    <Route exact path="/edit_template/:name*" component={TemplateEdit} />
     <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
     <Redirect from={`/`} to={`/indices`} />
   </Switch>
