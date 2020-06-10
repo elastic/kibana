@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
@@ -14,48 +14,38 @@ import {
   LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
 import { useTrackPageview } from '../../../../../observability/public';
-
-import { LogEntryRateSetupFlyout } from './setup_flyout';
+import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
 export const LogEntryRateSetupContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
-
-  const [isOpen, setIsOpen] = useState<boolean>(true);
-  const openFlyout = useCallback(() => setIsOpen(true), []);
-  const closeFlyout = useCallback(() => setIsOpen(false), []);
+  const { viewSetupForInitialization } = useLogEntryRateModuleContext();
 
   return (
-    <>
-      <LogAnalysisSetupPage>
-        <LogAnalysisSetupPageHeader>
-          <h3>
+    <LogAnalysisSetupPage>
+      <LogAnalysisSetupPageHeader>
+        <FormattedMessage
+          id="xpack.infra.logs.logEntryRate.setupTitle"
+          defaultMessage="FIXME: Placeholder title"
+        />
+      </LogAnalysisSetupPageHeader>
+      <LogAnalysisSetupPageContent>
+        <EuiText size="s">
+          <p>
             <FormattedMessage
-              id="xpack.infra.logs.logEntryRate.setupTitle"
-              defaultMessage="FIXME: Placeholder title"
+              id="xpack.infra.logs.logEntryRate.setupDescription"
+              defaultMessage="FIXME: Placeholder description"
             />
-          </h3>
-        </LogAnalysisSetupPageHeader>
-        <LogAnalysisSetupPageContent>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.infra.logs.logEntryRate.setupDescription"
-                defaultMessage="FIXME: Placeholder description"
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiButton fill onClick={openFlyout}>
-            <FormattedMessage
-              id="xpack.infra.logs.logEntryRate.setupCta"
-              defaultMessage="FIXME: Placeholder CTA"
-            />
-          </EuiButton>
-        </LogAnalysisSetupPageContent>
-      </LogAnalysisSetupPage>
-
-      <LogEntryRateSetupFlyout isOpen={isOpen} onClose={closeFlyout} />
-    </>
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton fill onClick={viewSetupForInitialization}>
+          <FormattedMessage
+            id="xpack.infra.logs.logEntryRate.setupCta"
+            defaultMessage="FIXME: Placeholder CTA"
+          />
+        </EuiButton>
+      </LogAnalysisSetupPageContent>
+    </LogAnalysisSetupPage>
   );
 };

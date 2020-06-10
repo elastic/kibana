@@ -111,6 +111,14 @@ export const useLogAnalysisModule = <JobType extends string>({
     [cleanUpModule, dispatchModuleStatus, setUpModule]
   );
 
+  const hideSetup = useCallback(() => {
+    dispatchModuleStatus({ type: 'hiddenSetup' });
+  }, [dispatchModuleStatus]);
+
+  const viewSetupForInitialization = useCallback(() => {
+    dispatchModuleStatus({ type: 'requestedJobConfigurationInitialization' });
+  }, [dispatchModuleStatus]);
+
   const viewSetupForReconfiguration = useCallback(() => {
     dispatchModuleStatus({ type: 'requestedJobConfigurationUpdate' });
   }, [dispatchModuleStatus]);
@@ -143,7 +151,9 @@ export const useLogAnalysisModule = <JobType extends string>({
     setupStatus: moduleStatus.setupStatus,
     sourceConfiguration,
     viewResults,
+    viewSetupForInitialization,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
+    hideSetup,
   };
 };
