@@ -91,7 +91,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/canvas/**/*.{js,ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
@@ -590,8 +589,11 @@ module.exports = {
      * Security Solution overrides
      */
     {
-      // front end typescript and javascript files only
-      files: ['x-pack/plugins/security_solution/public/**/*.{js,ts,tsx}'],
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/security_solution/public/**/*.{js,ts,tsx}',
+        'x-pack/plugins/security_solution/common/**/*.{js,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -767,6 +769,23 @@ module.exports = {
     /**
      * Lists overrides
      */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/lists/public/**/*.{js,ts,tsx}',
+        'x-pack/plugins/lists/common/**/*.{js,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
     {
       // typescript and javascript for front and back end
       files: ['x-pack/plugins/lists/**/*.{js,ts,tsx}'],

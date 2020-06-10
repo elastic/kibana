@@ -6,17 +6,26 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
+  CreateAgentConfigRequest,
   CreateAgentConfigResponse,
+  CreateDatasourceRequest,
   CreateDatasourceResponse,
+  DeleteAgentConfigRequest,
+  DeleteDatasourcesRequest,
+  GetFullAgentConfigResponse,
+  GetPackagesResponse,
 } from '../../../plugins/ingest_manager/common';
-import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
+import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 
 const INGEST_API_ROOT = '/api/ingest_manager';
 const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_configs`;
 const INGEST_API_AGENT_CONFIGS_DELETE = `${INGEST_API_AGENT_CONFIGS}/delete`;
 const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_DATASOURCES_DELETE = `${INGEST_API_DATASOURCES}/delete`;
+const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
+
+const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security`;
 
 /**
  * Holds information about the test resources created to support an Endpoint Policy
@@ -28,56 +37,103 @@ export interface PolicyTestResourceInfo {
    * This is where Endpoint Policy is stored.
    */
   datasource: Immutable<CreateDatasourceResponse['item']>;
+  /**
+   * Information about the endpoint package
+   */
+  packageInfo: Immutable<GetPackagesResponse['response'][0]>;
   /** will clean up (delete) the objects created (agent config + datasource) */
   cleanup: () => Promise<void>;
 }
 
 export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
+
+  const logSupertestApiErrorAndThrow = (message: string, error: any) => {
+    const responseBody = error?.response?.body;
+    const responseText = error?.response?.text;
+    log.error(JSON.stringify(responseBody || responseText, null, 2));
+    log.error(error);
+    throw new Error(message);
+  };
 
   return {
+    /**
+     * Retrieves the full Agent configuration, which mirrors what the Elastic Agent would get
+     * once they checkin.
+     */
+    async getFullAgentConfig(agentConfigId: string): Promise<GetFullAgentConfigResponse['item']> {
+      let fullAgentConfig: GetFullAgentConfigResponse['item'];
+      try {
+        const apiResponse: { body: GetFullAgentConfigResponse } = await supertest
+          .get(`${INGEST_API_AGENT_CONFIGS}/${agentConfigId}/full`)
+          .expect(200);
+
+        fullAgentConfig = apiResponse.body.item;
+      } catch (error) {
+        logSupertestApiErrorAndThrow('Unable to get full Agent Configuration', error);
+      }
+
+      return fullAgentConfig!;
+    },
+
     /**
      * Creates an Ingest Agent Configuration and adds to it the Endpoint Datasource that
      * stores the Policy configuration data
      */
     async createPolicy(): Promise<PolicyTestResourceInfo> {
-      // FIXME: Refactor after https://github.com/elastic/kibana/issues/64822 is fixed. `isInitialized` setup below should be deleted
-      // Due to an issue in Ingest API, we first create the Fleet user. This avoids the Agent Config api throwing a 500
-      const isFleetSetupResponse = await supertest
-        .get('/api/ingest_manager/fleet/setup')
+      // Retrieve information about the Endpoint security package
+      // EPM does not currently have an API to get the "lastest" information for a page given its name,
+      // so we'll retrieve a list of packages for a category of Security, and will then find the
+      // endpoint package info. in the list. The request is kicked off here, but handled below after
+      // agent config creation so that they can be executed concurrently
+      const secPackagesRequest = supertest
+        .get(SECURITY_PACKAGES_ROUTE)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      if (!isFleetSetupResponse.body.isInitialized) {
-        await supertest
-          .post('/api/ingest_manager/fleet/setup')
-          .set('kbn-xsrf', 'xxx')
-          .send()
-          .expect(200);
-      }
 
       // create agent config
-      const {
-        body: { item: agentConfig },
-      }: { body: CreateAgentConfigResponse } = await supertest
-        .post(INGEST_API_AGENT_CONFIGS)
-        .set('kbn-xsrf', 'xxx')
-        .send({ name: 'East Coast', description: 'East Coast call center', namespace: '' })
-        .expect(200);
+      let agentConfig: CreateAgentConfigResponse['item'];
+      try {
+        const newAgentconfigData: CreateAgentConfigRequest['body'] = {
+          name: 'East Coast',
+          description: 'East Coast call center',
+          namespace: 'default',
+        };
+        const { body: createResponse }: { body: CreateAgentConfigResponse } = await supertest
+          .post(INGEST_API_AGENT_CONFIGS)
+          .set('kbn-xsrf', 'xxx')
+          .send(newAgentconfigData)
+          .expect(200);
+        agentConfig = createResponse.item;
+      } catch (error) {
+        logSupertestApiErrorAndThrow(`Unable to create Agent Config via Ingest!`, error);
+      }
+
+      // Retrieve the Endpoint package information
+      let endpointPackageInfo: GetPackagesResponse['response'][0] | undefined;
+      try {
+        const { body: secPackages }: { body: GetPackagesResponse } = await secPackagesRequest;
+        endpointPackageInfo = secPackages.response.find(
+          (epmPackage) => epmPackage.name === 'endpoint'
+        );
+        if (!endpointPackageInfo) {
+          throw new Error(`Endpoint package was not found via ${SECURITY_PACKAGES_ROUTE}`);
+        }
+      } catch (error) {
+        logSupertestApiErrorAndThrow(`Unable to retrieve Endpoint package via Ingest!`, error);
+      }
 
       // create datasource and associated it to agent config
-      const {
-        body: { item: datasource },
-      }: { body: CreateDatasourceResponse } = await supertest
-        .post(INGEST_API_DATASOURCES)
-        .set('kbn-xsrf', 'xxx')
-        .send({
+      let datasource: CreateDatasourceResponse['item'];
+      try {
+        const newDatasourceData: CreateDatasourceRequest['body'] = {
           name: 'Protect East Coast',
           description: 'Protect the worlds data - but in the East Coast',
-          config_id: agentConfig.id,
+          config_id: agentConfig!.id,
           enabled: true,
           output_id: '',
           inputs: [
-            // TODO: should we retrieve the latest Endpoint Package and build the input (policy) from that?
             {
               type: 'endpoint',
               enabled: true,
@@ -89,32 +145,55 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               },
             },
           ],
-          namespace: '',
+          namespace: 'default',
           package: {
             name: 'endpoint',
-            title: 'Elastic Endpoint',
-            version: '1.0.0',
+            title: endpointPackageInfo?.title ?? '',
+            version: endpointPackageInfo?.version ?? '',
           },
-        })
-        .expect(200);
+        };
+        const { body: createResponse }: { body: CreateDatasourceResponse } = await supertest
+          .post(INGEST_API_DATASOURCES)
+          .set('kbn-xsrf', 'xxx')
+          .send(newDatasourceData)
+          .expect(200);
+        datasource = createResponse.item;
+      } catch (error) {
+        logSupertestApiErrorAndThrow(`Unable to create Datasource via Ingest!`, error);
+      }
 
       return {
-        agentConfig,
-        datasource,
+        agentConfig: agentConfig!,
+        datasource: datasource!,
+        packageInfo: endpointPackageInfo!,
         async cleanup() {
           // Delete Datasource
-          await supertest
-            .post(INGEST_API_DATASOURCES_DELETE)
-            .set('kbn-xsrf', 'xxx')
-            .send({ datasourceIds: [datasource.id] })
-            .expect(200);
+          try {
+            const deleteDatasourceData: DeleteDatasourcesRequest['body'] = {
+              datasourceIds: [datasource.id],
+            };
+            await supertest
+              .post(INGEST_API_DATASOURCES_DELETE)
+              .set('kbn-xsrf', 'xxx')
+              .send(deleteDatasourceData)
+              .expect(200);
+          } catch (error) {
+            logSupertestApiErrorAndThrow('Unable to delete Datasource via Ingest!', error);
+          }
 
           // Delete Agent config
-          await supertest
-            .post(INGEST_API_AGENT_CONFIGS_DELETE)
-            .set('kbn-xsrf', 'xxx')
-            .send({ agentConfigId: agentConfig.id })
-            .expect(200);
+          try {
+            const deleteAgentConfigData: DeleteAgentConfigRequest['body'] = {
+              agentConfigId: agentConfig.id,
+            };
+            await supertest
+              .post(INGEST_API_AGENT_CONFIGS_DELETE)
+              .set('kbn-xsrf', 'xxx')
+              .send(deleteAgentConfigData)
+              .expect(200);
+          } catch (error) {
+            logSupertestApiErrorAndThrow('Unable to delete Agent Config via Ingest!', error);
+          }
         },
       };
     },
