@@ -36,6 +36,11 @@ interface ConnectedFlyoutManageDrilldownsProps {
   dynamicActionManager: DynamicActionManager;
   viewMode?: 'create' | 'manage';
   onClose?: () => void;
+
+  /**
+   * TODO?
+   */
+  context?: object;
 }
 
 /**
@@ -74,9 +79,10 @@ export function createFlyoutManageDrilldowns({
 
     const factoryContext: object = React.useMemo(
       () => ({
+        ...props.context,
         triggers: selectedTriggers,
       }),
-      [selectedTriggers]
+      [props.context, selectedTriggers]
     );
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
