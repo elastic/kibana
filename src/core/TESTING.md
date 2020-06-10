@@ -1306,7 +1306,7 @@ when using promise-based services, such as core's `http`, for instance.
 ```typescript
 export const callServerAPI = (
   http: HttpStart,
-  term: string,
+  body: Record<string, any>,
   { abort$ }: { abort$: Observable<undefined> }
 ): Observable<SomeResponse> => {
   let controller: AbortController | undefined;
@@ -1318,7 +1318,7 @@ export const callServerAPI = (
   }
   return from(
     http.post<SomeResponse>('/api/endpoint', {
-      body: JSON.stringify({ term }),
+      body,
       signal: controller?.signal,
     })
   ).pipe(
@@ -1348,7 +1348,7 @@ it('callServerAPI result observable emits when the response is received', () => 
   getTestScheduler().run(({ expectObservable, hot }) => {
     http.post.mockReturnValue(hot('---(a|)', { a: { someData: 'foo' } }) as any);
 
-    const results = callServerAPI(http, 'term', {});
+    const results = callServerAPI(http, { query: 'term' }, {});
 
     expectObservable(results).toBe('---(a|)', {
       a: { someData: 'foo' },
@@ -1361,7 +1361,7 @@ it('completes without returning results if aborted$ emits before the response', 
   getTestScheduler().run(({ expectObservable, hot }) => {
     http.post.mockReturnValue(hot('---(a|)', { a: { someData: 'foo' } }) as any);
     const aborted$ = hot('-(a|)', { a: undefined });
-    const results = callServerAPI(http, 'term', { aborted$ });
+    const results = callServerAPI(http, { query: 'term' }, { aborted$ });
 
     expectObservable(results).toBe('-|');
   });
