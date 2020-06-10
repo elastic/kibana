@@ -30,7 +30,7 @@ export function createIndexDocRecordsStream(client: Client, stats: Stats, progre
       stats.indexedDoc(doc.index);
       body.push(
         {
-          index: {
+          create: {
             _index: doc.index,
             _id: doc.id,
           },

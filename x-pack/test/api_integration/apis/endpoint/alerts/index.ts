@@ -7,6 +7,7 @@ import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AlertData } from '../../../../../plugins/security_solution/common/endpoint_alerts/types';
 import { AlertId } from '../../../../../plugins/security_solution/server/endpoint/alerts/handlers/lib/index';
+import { deleteEventsStream, deleteMetadataStream } from '../data_stream_helper';
 
 /**
  * The number of alert documents in the es archive.
@@ -70,8 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   let nullableEventId = '';
 
-  // SKIPPED as it is failing ES PROMOTION: https://github.com/elastic/kibana/issues/68613
-  describe.skip('Endpoint alert API', () => {
+  describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(async () => {
         await esArchiver.load('endpoint/alerts/api_feature');
@@ -84,8 +84,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('endpoint/alerts/api_feature');
-        await esArchiver.unload('endpoint/alerts/host_api_feature');
+        // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
+        // to do it manually
+        await deleteEventsStream(getService);
+        await deleteMetadataStream(getService);
       });
 
       it('should not support POST requests', async () => {

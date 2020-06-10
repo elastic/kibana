@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { deleteMetadataStream } from './data_stream_helper';
 
 /**
  * The number of host documents in the es archive.
@@ -14,11 +15,12 @@ const numberOfHostsInFixture = 3;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  // SKIPPED as it is failing on ES PROMOTION: https://github.com/elastic/kibana/issues/68584
-  describe.skip('test metadata api', () => {
+  describe('test metadata api', () => {
     describe('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {
-        await esArchiver.unload('endpoint/metadata/api_feature');
+        // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
+        // to do it manually
+        await deleteMetadataStream(getService);
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -32,8 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/endpoint/metadata when index is not empty', () => {
-      before(() => esArchiver.load('endpoint/metadata/api_feature'));
-      after(() => esArchiver.unload('endpoint/metadata/api_feature'));
+      before(async () => await esArchiver.load('endpoint/metadata/api_feature'));
+      // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
+      // to do it manually
+      after(async () => await deleteMetadataStream(getService));
       it('metadata api should return one entry for each host with default paging', async () => {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
