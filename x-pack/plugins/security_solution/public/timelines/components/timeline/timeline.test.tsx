@@ -26,11 +26,36 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 jest.mock('../../../common/lib/kibana');
-
+jest.mock('./properties/properties_right');
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
+
 mockUseResizeObserver.mockImplementation(() => ({}));
 
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
+        },
+      },
+    }),
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
 describe('Timeline', () => {
   let props = {} as TimelineComponentProps;
   const sort: Sort = {
