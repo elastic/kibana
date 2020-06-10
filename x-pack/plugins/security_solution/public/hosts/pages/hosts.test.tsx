@@ -172,13 +172,8 @@ describe('Hosts - rendering', () => {
     ];
     localSource[0].result.data.source.status.indicesExist = true;
     const myState: State = mockGlobalState;
-    const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-    const myStore = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      securitySolutionLocalStorageMock
-    );
+    const { storage } = createSecuritySolutionStorageMock();
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <MockedProvider mocks={localSource} addTypename={false}>

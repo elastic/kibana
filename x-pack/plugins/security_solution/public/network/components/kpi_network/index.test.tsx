@@ -24,21 +24,11 @@ describe('KpiNetwork Component', () => {
   const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
   const narrowDateRange = jest.fn();
 
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      securitySolutionLocalStorageMock
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
   });
 
   describe('rendering', () => {

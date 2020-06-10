@@ -119,21 +119,11 @@ describe('Ip Details', () => {
   });
 
   const state: State = mockGlobalState;
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      securitySolutionLocalStorageMock
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     localSource = cloneDeep(mocksSource);
   });
 

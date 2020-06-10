@@ -54,13 +54,8 @@ jest.mock('../charts/barchart', () => {
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   describe.each([
     [

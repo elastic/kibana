@@ -30,13 +30,8 @@ export const alertPageTestRender = () => {
   /**
    * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
    */
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-  const store = createStore(
-    mockGlobalState,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   const depsStart = depsStartMock();
   depsStart.data.ui.SearchBar.mockImplementation(() => <div />);

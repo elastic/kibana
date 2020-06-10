@@ -28,22 +28,12 @@ describe('NetworkHttp Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      securitySolutionLocalStorageMock
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
   });
 
   describe('rendering', () => {

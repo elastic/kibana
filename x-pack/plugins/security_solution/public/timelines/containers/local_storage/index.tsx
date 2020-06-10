@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage, IStorage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { SecuritySolutionStorage, TimelineId } from './types';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { TimelinesStorage, TimelineId } from './types';
 import { useKibana } from '../../../common/lib/kibana';
+import { TimelineModel } from '../../store/timeline/model';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 
@@ -18,24 +19,30 @@ export const getTimelineInStorageById = (storage: Storage, id: TimelineId) => {
   return null;
 };
 
-export const useTimelinesStorage = (store: IStorage): SecuritySolutionStorage => {
+export const getAllTimelinesInStorage = (storage: Storage) =>
+  storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+
+export const addTimelineInStorage = (storage: Storage, id: TimelineId, timeline: TimelineModel) => {
+  const timelines = getAllTimelinesInStorage(storage);
+  storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
+    ...timelines,
+    [id]: timeline,
+  });
+};
+
+export const useTimelinesStorage = (): TimelinesStorage => {
   const { storage } = useKibana().services;
 
-  const getAllTimelines: SecuritySolutionStorage['getAllTimelines'] = () =>
-    storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+  const getAllTimelines: TimelinesStorage['getAllTimelines'] = () =>
+    getAllTimelinesInStorage(storage);
 
-  const getTimelineById: SecuritySolutionStorage['getTimelineById'] = (id: TimelineId) =>
+  const getTimelineById: TimelinesStorage['getTimelineById'] = (id: TimelineId) =>
     getTimelineInStorageById(storage, id);
 
-  const addTimeline: SecuritySolutionStorage['addTimeline'] = (id, timeline) => {
-    const timelines = getAllTimelines();
-    storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
-      ...timelines,
-      [id]: timeline,
-    });
-  };
+  const addTimeline: TimelinesStorage['addTimeline'] = (id, timeline) =>
+    addTimelineInStorage(storage, id, timeline);
 
   return { getAllTimelines, getTimelineById, addTimeline };
 };
 
-export { SecuritySolutionStorage };
+export { TimelinesStorage };

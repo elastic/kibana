@@ -32,7 +32,7 @@ const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  const { storage } = createSecuritySolutionStorageMock();
 
   describe('rendering', () => {
     test('it renders correctly against snapshot', () => {
@@ -62,7 +62,7 @@ describe('Flyout', () => {
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        securitySolutionLocalStorageMock
+        storage
       );
 
       const wrapper = mount(
@@ -86,7 +86,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        securitySolutionLocalStorageMock
+        storage
       );
 
       const wrapper = mount(
@@ -108,7 +108,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        securitySolutionLocalStorageMock
+        storage
       );
 
       const wrapper = mount(
@@ -142,7 +142,7 @@ describe('Flyout', () => {
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
         apolloClientObservable,
-        securitySolutionLocalStorageMock
+        storage
       );
 
       const wrapper = mount(

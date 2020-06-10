@@ -65,24 +65,14 @@ jest.mock('./use_create_timeline', () => ({
 describe('Properties', () => {
   const usersViewing = ['elastic'];
   const state: State = mockGlobalState;
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  const { storage } = createSecuritySolutionStorageMock();
   let mockedWidth = 1000;
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      securitySolutionLocalStorageMock
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: mockedWidth });
   });
 

@@ -26,7 +26,7 @@ describe('Inspect Button', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const refetch = jest.fn();
   const state: State = mockGlobalState;
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
     inputId: 'global',
     id: 'myQuery',
@@ -36,23 +36,13 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   describe('Render', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        securitySolutionLocalStorageMock
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
@@ -156,12 +146,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        securitySolutionLocalStorageMock
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(

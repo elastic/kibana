@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IStorage } from '../../../../../../src/plugins/kibana_utils/public';
+import { IStorage, Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -25,7 +25,10 @@ export const localStorageMock = (): IStorage => {
   };
 };
 
-export const createSecuritySolutionStorageMock = () => ({
-  getAllTimelines: jest.fn(),
-  addTimeline: jest.fn(),
-});
+export const createSecuritySolutionStorageMock = () => {
+  const localStorage = localStorageMock();
+  return {
+    localStorage,
+    storage: new Storage(localStorage),
+  };
+};

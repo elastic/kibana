@@ -56,22 +56,16 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+  const { storage } = createSecuritySolutionStorageMock();
 
-  const store = createStore(
-    mockGlobalState,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock,
-    [
-      substateMiddlewareFactory(
-        (globalState) => globalState.alertList,
-        alertMiddlewareFactory(coreStart, depsStart)
-      ),
-      ...managementMiddlewareFactory(coreStart, depsStart),
-      middlewareSpy.actionSpyMiddleware,
-    ]
-  );
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage, [
+    substateMiddlewareFactory(
+      (globalState) => globalState.alertList,
+      alertMiddlewareFactory(coreStart, depsStart)
+    ),
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const MockKibanaContextProvider = createKibanaContextProviderMock();
 

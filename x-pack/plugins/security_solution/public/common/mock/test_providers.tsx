@@ -44,17 +44,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
-const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
+const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
@@ -74,12 +69,7 @@ export const TestProviders = React.memo(TestProvidersComponent);
 
 const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage),
 }) => (
   <I18nProvider>
     <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>

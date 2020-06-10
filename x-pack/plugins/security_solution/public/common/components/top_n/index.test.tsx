@@ -143,13 +143,8 @@ const state: State = {
   },
 };
 
-const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
-  securitySolutionLocalStorageMock
-);
+const { storage } = createSecuritySolutionStorageMock();
+const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"

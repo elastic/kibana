@@ -4,45 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSecuritySolutionStorage, LOCAL_STORAGE_TIMELINE_KEY } from '.';
-import { localStorageMock, mockTimelineModel } from '../../mock';
+import { LOCAL_STORAGE_TIMELINE_KEY, useTimelinesStorage } from '.';
+import { mockTimelineModel, createSecuritySolutionStorageMock } from '../../../common/mock';
+import { useKibana } from '../../../common/lib/kibana';
+import { createUseKibanaMock } from '../../../common/mock/kibana_react';
+
+jest.mock('../../../common/lib/kibana');
+
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('SiemLocalStorage', () => {
-  const localStorage = localStorageMock();
-  const storage = createSecuritySolutionStorage(localStorage);
+  const { localStorage, storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
+    jest.resetAllMocks();
+    useKibanaMock.mockImplementation(() => ({
+      services: {
+        ...createUseKibanaMock()().services,
+        storage,
+      },
+    }));
     localStorage.clear();
   });
 
   it('adds a timeline when storage is empty', () => {
-    storage.addTimeline('timeline-1', mockTimelineModel);
+    const timelineStorage = useTimelinesStorage();
+    timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
     expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-      'timeline-1': mockTimelineModel,
+      'hosts-page-events': mockTimelineModel,
     });
   });
 
   it('adds a timeline when storage contains another timelines', () => {
-    storage.addTimeline('timeline-1', mockTimelineModel);
-    storage.addTimeline('timeline-2', mockTimelineModel);
+    const timelineStorage = useTimelinesStorage();
+    timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
+    timelineStorage.addTimeline('hosts-page-external-alerts', mockTimelineModel);
     expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-      'timeline-1': mockTimelineModel,
-      'timeline-2': mockTimelineModel,
+      'hosts-page-events': mockTimelineModel,
+      'hosts-page-external-alerts': mockTimelineModel,
     });
   });
 
   it('gets all timelines correctly', () => {
-    storage.addTimeline('timeline-1', mockTimelineModel);
-    storage.addTimeline('timeline-2', mockTimelineModel);
-    const timelines = storage.getAllTimelines();
+    const timelineStorage = useTimelinesStorage();
+    timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
+    timelineStorage.addTimeline('hosts-page-external-alerts', mockTimelineModel);
+    const timelines = timelineStorage.getAllTimelines();
     expect(timelines).toEqual({
-      'timeline-1': mockTimelineModel,
-      'timeline-2': mockTimelineModel,
+      'hosts-page-events': mockTimelineModel,
+      'hosts-page-external-alerts': mockTimelineModel,
     });
   });
 
-  it('returns an empty object if there is no timelines', () => {
-    const timelines = storage.getAllTimelines();
-    expect(timelines).toEqual({});
+  it('returns null if there is no timelines', () => {
+    const timelineStorage = useTimelinesStorage();
+    const timelines = timelineStorage.getAllTimelines();
+    expect(timelines).toEqual(null);
+  });
+
+  it('gets a timeline by id', () => {
+    const timelineStorage = useTimelinesStorage();
+    timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
+    const timeline = timelineStorage.getTimelineById('hosts-page-events');
+    expect(timeline).toEqual(mockTimelineModel);
   });
 });

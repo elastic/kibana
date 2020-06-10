@@ -93,22 +93,12 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
 describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
-  const securitySolutionLocalStorageMock = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    securitySolutionLocalStorageMock
-  );
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      securitySolutionLocalStorageMock
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
   });
 
   test('it renders the expected widget title', () => {
