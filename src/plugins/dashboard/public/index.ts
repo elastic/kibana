@@ -34,6 +34,8 @@ export { DashboardConstants, createDashboardEditUrl } from './dashboard_constant
 export { DashboardStart, DashboardUrlGenerator } from './plugin';
 export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
 export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
+export { SavedObjectDashboard } from './saved_dashboards';
+export { SavedDashboardPanel } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

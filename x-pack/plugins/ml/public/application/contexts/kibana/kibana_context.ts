@@ -17,6 +17,7 @@ interface StartPlugins {
   data: DataPublicPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  kibanaVersion: string;
 }
 export type StartServices = CoreStart & StartPlugins;
 // eslint-disable-next-line react-hooks/rules-of-hooks

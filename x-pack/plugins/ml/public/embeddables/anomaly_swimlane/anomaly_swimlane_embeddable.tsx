@@ -43,9 +43,12 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
-export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
+export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
+  AnomalySwimlaneEmbeddableCustomOutput;
+
+export interface AnomalySwimlaneEmbeddableCustomOutput {
   jobIds: JobId[];
-  swimlaneType: string;
+  swimlaneType: 'overall' | 'viewBy' | string;
   viewBy?: string;
   limit?: number;
 }

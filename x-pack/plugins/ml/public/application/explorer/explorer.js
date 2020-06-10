@@ -64,6 +64,7 @@ import {
   escapeDoubleQuotes,
 } from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
+import { AddToDashboardControl } from './add_to_dashboard_control';
 
 import {
   DRAG_SELECT_ACTION,
@@ -408,6 +409,11 @@ export class Explorer extends React.Component {
               </h2>
             </EuiTitle>
 
+            <AddToDashboardControl
+              jobIds={this.props.explorerState.selectedJobs.map((job) => job.id)}
+              swimlaneType="overall"
+            />
+
             <div
               className="ml-explorer-swimlane euiText"
               onMouseEnter={this.onSwimlaneEnterHandler}
@@ -415,23 +421,25 @@ export class Explorer extends React.Component {
               data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             >
               {showOverallSwimlane && (
-                <MlTooltipComponent>
-                  {(tooltipService) => (
-                    <ExplorerSwimlane
-                      chartWidth={swimlaneContainerWidth}
-                      filterActive={filterActive}
-                      filteredFields={filteredFields}
-                      maskAll={maskAll}
-                      timeBuckets={this.timeBuckets}
-                      swimlaneCellClick={this.swimlaneCellClick}
-                      swimlaneData={overallSwimlaneData}
-                      swimlaneType={SWIMLANE_TYPE.OVERALL}
-                      selection={selectedCells}
-                      swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                      tooltipService={tooltipService}
-                    />
-                  )}
-                </MlTooltipComponent>
+                <>
+                  <MlTooltipComponent>
+                    {(tooltipService) => (
+                      <ExplorerSwimlane
+                        chartWidth={swimlaneContainerWidth}
+                        filterActive={filterActive}
+                        filteredFields={filteredFields}
+                        maskAll={maskAll}
+                        timeBuckets={this.timeBuckets}
+                        swimlaneCellClick={this.swimlaneCellClick}
+                        swimlaneData={overallSwimlaneData}
+                        swimlaneType={SWIMLANE_TYPE.OVERALL}
+                        selection={selectedCells}
+                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                        tooltipService={tooltipService}
+                      />
+                    )}
+                  </MlTooltipComponent>
+                </>
               )}
             </div>
 
