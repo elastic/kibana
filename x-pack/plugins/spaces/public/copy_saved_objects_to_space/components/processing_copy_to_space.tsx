@@ -90,11 +90,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
       {props.copyOptions.selectedSpaceIds.map((id) => {
         const space = props.spaces.find((s) => s.id === id) as Space;
         const spaceCopyResult = props.copyResult[space.id];
-        const summarizedSpaceCopyResult = summarizeCopyResult(
-          props.savedObject,
-          spaceCopyResult,
-          props.copyOptions.includeRelated
-        );
+        const summarizedSpaceCopyResult = summarizeCopyResult(props.savedObject, spaceCopyResult);
 
         return (
           <Fragment key={id}>

@@ -6,7 +6,14 @@
 
 import './space_result_details.scss';
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiToolTip,
+  EuiIcon,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
@@ -21,6 +28,17 @@ interface Props {
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
   conflictResolutionInProgress: boolean;
+}
+
+function getSavedObjectLabel(type: string) {
+  switch (type) {
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return 'index patterns';
+    default:
+      return type;
+  }
 }
 
 export const SpaceCopyResultDetails = (props: Props) => {
@@ -64,10 +82,19 @@ export const SpaceCopyResultDetails = (props: Props) => {
             gutterSize="s"
             className="spcCopyToSpaceResultDetails__row"
           >
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content={getSavedObjectLabel(object.type)}>
+                <EuiIcon
+                  aria-label={getSavedObjectLabel(object.type)}
+                  type={object.icon}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
             <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
               <EuiText size="s">
-                <p className="eui-textTruncate" title={object.name || object.id}>
-                  {object.type}: {object.name || object.id}
+                <p className="eui-textTruncate" title={object.name}>
+                  {object.name}
                 </p>
               </EuiText>
             </EuiFlexItem>

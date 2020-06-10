@@ -15,6 +15,7 @@ export interface SummarizedSavedObjectResult {
   type: string;
   id: string;
   name: string;
+  icon: string;
   conflict?: FailedImportConflict;
   hasUnresolvableErrors: boolean;
 }
@@ -46,6 +47,8 @@ interface FailedImportConflict {
 
 const isConflict = (failure: FailedImport): failure is FailedImportConflict =>
   failure.error.type === 'conflict';
+const typeComparator = (a: { type: string }, b: { type: string }) =>
+  a.type > b.type ? 1 : a.type < b.type ? -1 : 0;
 
 export type SummarizedCopyToSpaceResult =
   | SuccessfulResponse
@@ -54,8 +57,7 @@ export type SummarizedCopyToSpaceResult =
 
 export function summarizeCopyResult(
   savedObject: SavedObjectsManagementRecord,
-  copyResult: ProcessedImportResponse | undefined,
-  includeRelated: boolean
+  copyResult: ProcessedImportResponse | undefined
 ): SummarizedCopyToSpaceResult {
   const conflicts = copyResult?.failedImports.filter(isConflict) ?? [];
   const unresolvableErrors =
@@ -73,34 +75,30 @@ export function summarizeCopyResult(
     type: savedObject.type,
     id: savedObject.id,
     name: savedObject.meta.title,
+    icon: savedObject.meta.icon,
     ...getErrorFields(savedObject),
   });
 
-  if (includeRelated) {
-    savedObject.references.forEach((ref) => {
-      objectMap.set(`${ref.type}:${ref.id}`, {
-        type: ref.type,
-        id: ref.id,
-        name: ref.name,
-        ...getErrorFields(ref),
+  const addObjectsToMap = (
+    objects: Array<{ id: string; type: string; meta: { title?: string; icon?: string } }>
+  ) => {
+    objects.forEach((obj) => {
+      const { type, id, meta } = obj;
+      objectMap.set(`${type}:${id}`, {
+        type,
+        id,
+        name: meta.title || `${type} [id=${id}]`,
+        icon: meta.icon || 'apps',
+        ...getErrorFields(obj),
       });
     });
-
-    // The `savedObject.references` array only includes the direct references. It does not include any references of references.
-    // Therefore, if there are conflicts detected in these transitive references, we need to include them here so that they are visible
-    // in the UI as resolvable conflicts.
-    const transitiveConflicts = conflicts.filter(
-      (c) => !objectMap.has(`${c.obj.type}:${c.obj.id}`)
-    );
-    transitiveConflicts.forEach((conflict) => {
-      objectMap.set(`${conflict.obj.type}:${conflict.obj.id}`, {
-        type: conflict.obj.type,
-        id: conflict.obj.id,
-        name: conflict.obj.meta.title || conflict.obj.id,
-        ...getErrorFields(conflict.obj),
-      });
-    });
-  }
+  };
+  const failedImports = (copyResult?.failedImports ?? [])
+    .map(({ obj }) => obj)
+    .sort(typeComparator);
+  addObjectsToMap(failedImports);
+  const successfulImports = (copyResult?.successfulImports ?? []).sort(typeComparator);
+  addObjectsToMap(successfulImports);
 
   if (typeof copyResult === 'undefined') {
     return {

@@ -5,54 +5,100 @@
  */
 
 import { summarizeCopyResult } from './summarize_copy_result';
-import { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
 
-const createSavedObjectsManagementRecord = () => ({
-  type: 'dashboard',
-  id: 'foo',
-  meta: { icon: 'foo-icon', title: 'my-dashboard' },
-  references: [
-    {
-      type: 'visualization',
-      id: 'foo-viz',
-      name: 'Foo Viz',
-    },
-    {
-      type: 'visualization',
-      id: 'bar-viz',
-      name: 'Bar Viz',
-    },
-  ],
-});
+// Sample data references:
+//
+//             /-> Visualization foo -> Index pattern foo
+// My dashboard
+//             \-> Visualization bar -> Index pattern bar
+//
+// Dashboard has references to visualizations, and transitive references to index patterns
+
+const OBJECTS = {
+  MY_DASHBOARD: {
+    type: 'dashboard',
+    id: 'foo',
+    meta: { title: 'my-dashboard-title', icon: 'dashboardApp' },
+    references: [
+      { type: 'visualization', id: 'foo', name: 'Visualization foo' },
+      { type: 'visualization', id: 'bar', name: 'Visualization bar' },
+    ],
+  },
+  VISUALIZATION_FOO: {
+    type: 'visualization',
+    id: 'bar',
+    meta: { title: 'visualization-foo-title', icon: 'visualizeApp' },
+    references: [{ type: 'index-pattern', id: 'foo', name: 'Index pattern foo' }],
+  },
+  VISUALIZATION_BAR: {
+    type: 'visualization',
+    id: 'baz',
+    meta: { title: 'visualization-bar-title', icon: 'visualizeApp' },
+    references: [{ type: 'index-pattern', id: 'bar', name: 'Index pattern bar' }],
+  },
+  INDEX_PATTERN_FOO: {
+    type: 'index-pattern',
+    id: 'foo',
+    meta: {},
+    references: [],
+  },
+  INDEX_PATTERN_BAR: {
+    type: 'index-pattern',
+    id: 'bar',
+    meta: {},
+    references: [],
+  },
+};
+
+interface ObjectProperties {
+  type: string;
+  id: string;
+  meta: { title?: string; icon?: string };
+}
+const createSuccessResult = ({ type, id, meta }: ObjectProperties) => {
+  return { type, id, meta };
+};
+const createFailureConflict = ({ type, id, meta }: ObjectProperties): FailedImport => {
+  return { obj: { type, id, meta }, error: { type: 'conflict' } };
+};
+const createFailureMissingReferences = ({ type, id, meta }: ObjectProperties): FailedImport => {
+  return {
+    obj: { type, id, meta },
+    error: { type: 'missing_references', blocking: [], references: [] },
+  };
+};
 
 const createCopyResult = (
   opts: { withConflicts?: boolean; withUnresolvableError?: boolean } = {}
 ) => {
+  const successfulImports: ProcessedImportResponse['successfulImports'] = [
+    createSuccessResult(OBJECTS.MY_DASHBOARD),
+  ];
   const failedImports: ProcessedImportResponse['failedImports'] = [];
   if (opts.withConflicts) {
     failedImports.push(
-      {
-        obj: { type: 'visualization', id: 'foo-viz', meta: { title: 'my-viz' } },
-        error: { type: 'conflict' },
-      },
-      {
-        obj: {
-          type: 'index-pattern',
-          id: 'transitive-index-pattern-conflict',
-          meta: { title: 'my-index-pattern' },
-        },
-        error: { type: 'conflict' },
-      }
+      createFailureConflict(OBJECTS.VISUALIZATION_FOO),
+      createFailureConflict(OBJECTS.INDEX_PATTERN_FOO)
+    );
+  } else {
+    successfulImports.push(
+      createSuccessResult(OBJECTS.VISUALIZATION_FOO),
+      createSuccessResult(OBJECTS.INDEX_PATTERN_FOO)
     );
   }
   if (opts.withUnresolvableError) {
-    failedImports.push({
-      obj: { type: 'visualization', id: 'bar-viz', meta: { title: 'another-viz' } },
-      error: { type: 'missing_references', blocking: [], references: [] },
-    });
+    failedImports.push(createFailureMissingReferences(OBJECTS.VISUALIZATION_BAR));
+    // INDEX_PATTERN_BAR is not present in the source space, therefore VISUALIZATION_BAR resulted in a missing_references error
+  } else {
+    successfulImports.push(
+      createSuccessResult(OBJECTS.VISUALIZATION_BAR),
+      createSuccessResult(OBJECTS.INDEX_PATTERN_BAR)
+    );
   }
 
   const copyResult: ProcessedImportResponse = {
+    successfulImports,
     failedImports,
   } as ProcessedImportResponse;
 
@@ -61,15 +107,8 @@ const createCopyResult = (
 
 describe('summarizeCopyResult', () => {
   it('indicates the result is processing when not provided', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = undefined;
-    const includeRelated = true;
-
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
@@ -77,23 +116,10 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
             "type": "dashboard",
-          },
-          Object {
-            "conflict": undefined,
-            "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
-            "type": "visualization",
-          },
-          Object {
-            "conflict": undefined,
-            "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
-            "type": "visualization",
           },
         ],
         "processing": true,
@@ -102,15 +128,9 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes failedImports to extract conflicts, including transitive conflicts', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult({ withConflicts: true });
-    const includeRelated = true;
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": true,
@@ -119,8 +139,9 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
             "type": "dashboard",
           },
           Object {
@@ -129,24 +150,16 @@ describe('summarizeCopyResult', () => {
                 "type": "conflict",
               },
               "obj": Object {
-                "id": "foo-viz",
-                "meta": Object {
-                  "title": "my-viz",
-                },
-                "type": "visualization",
+                "id": "foo",
+                "meta": Object {},
+                "type": "index-pattern",
               },
             },
             "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
-            "type": "visualization",
-          },
-          Object {
-            "conflict": undefined,
-            "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
-            "type": "visualization",
+            "icon": "apps",
+            "id": "foo",
+            "name": "index-pattern [id=foo]",
+            "type": "index-pattern",
           },
           Object {
             "conflict": Object {
@@ -154,17 +167,35 @@ describe('summarizeCopyResult', () => {
                 "type": "conflict",
               },
               "obj": Object {
-                "id": "transitive-index-pattern-conflict",
+                "id": "bar",
                 "meta": Object {
-                  "title": "my-index-pattern",
+                  "icon": "visualizeApp",
+                  "title": "visualization-foo-title",
                 },
-                "type": "index-pattern",
+                "type": "visualization",
               },
             },
             "hasUnresolvableErrors": false,
-            "id": "transitive-index-pattern-conflict",
-            "name": "my-index-pattern",
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
+            "type": "visualization",
+          },
+          Object {
+            "conflict": undefined,
+            "hasUnresolvableErrors": false,
+            "icon": "apps",
+            "id": "bar",
+            "name": "index-pattern [id=bar]",
             "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "type": "visualization",
           },
         ],
         "processing": false,
@@ -174,15 +205,9 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes failedImports to extract unresolvable errors', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult({ withUnresolvableError: true });
-    const includeRelated = true;
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": false,
@@ -191,22 +216,33 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
             "type": "dashboard",
           },
           Object {
             "conflict": undefined,
-            "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
+            "hasUnresolvableErrors": true,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
             "type": "visualization",
           },
           Object {
             "conflict": undefined,
-            "hasUnresolvableErrors": true,
-            "id": "bar-viz",
-            "name": "Bar Viz",
+            "hasUnresolvableErrors": false,
+            "icon": "apps",
+            "id": "foo",
+            "name": "index-pattern [id=foo]",
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
             "type": "visualization",
           },
         ],
@@ -217,15 +253,9 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes a result without errors', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult();
-    const includeRelated = true;
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
 
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": false,
@@ -234,52 +264,42 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
             "id": "foo",
-            "name": "my-dashboard",
+            "name": "my-dashboard-title",
             "type": "dashboard",
           },
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
-            "type": "visualization",
-          },
-          Object {
-            "conflict": undefined,
-            "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
-            "type": "visualization",
-          },
-        ],
-        "processing": false,
-        "successful": true,
-      }
-    `);
-  });
-
-  it('does not include references unless requested', () => {
-    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
-    const copyResult = createCopyResult();
-    const includeRelated = false;
-
-    const summarizedResult = summarizeCopyResult(
-      SavedObjectsManagementRecord,
-      copyResult,
-      includeRelated
-    );
-    expect(summarizedResult).toMatchInlineSnapshot(`
-      Object {
-        "hasConflicts": false,
-        "hasUnresolvableErrors": false,
-        "objects": Array [
-          Object {
-            "conflict": undefined,
-            "hasUnresolvableErrors": false,
+            "icon": "apps",
             "id": "foo",
-            "name": "my-dashboard",
-            "type": "dashboard",
+            "name": "index-pattern [id=foo]",
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasUnresolvableErrors": false,
+            "icon": "apps",
+            "id": "bar",
+            "name": "index-pattern [id=bar]",
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
+            "type": "visualization",
+          },
+          Object {
+            "conflict": undefined,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "type": "visualization",
           },
         ],
         "processing": false,
