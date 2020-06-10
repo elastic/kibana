@@ -8,6 +8,8 @@
 
 .inpEmptyIndexPatternPrompt__footer {
   @extend %inp-empty-state-footer;
+  // override EUI specificity
+  align-items: baseline !important;  // sass-lint:disable-line no-important
 }
 
 .inpEmptyIndexPatternPrompt__title {
