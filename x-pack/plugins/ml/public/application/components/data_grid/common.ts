@@ -29,6 +29,7 @@ import {
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
+  TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
@@ -110,7 +111,10 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       schema = 'numeric';
     }
 
-    if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
+    if (
+      field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`) ||
+      field.includes(`${resultsField}.${TOP_CLASSES}`)
+    ) {
       schema = 'json';
     }
 

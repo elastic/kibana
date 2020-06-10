@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
@@ -17,11 +18,13 @@ import {
   SavedObjectSaveModal,
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
+import { createMemoryHistory, History } from 'history';
 import {
   esFilters,
   FilterManager,
   IFieldType,
   IIndexPattern,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
@@ -103,6 +106,8 @@ function createMockTimefilter() {
         return unsubscribe;
       },
     }),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
   };
 }
 
@@ -127,6 +132,7 @@ describe('Lens App', () => {
     ) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
+    history: History;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -147,6 +153,7 @@ describe('Lens App', () => {
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          state$: new Observable(),
         },
         indexPatterns: {
           get: jest.fn((id) => {
@@ -170,6 +177,7 @@ describe('Lens App', () => {
         ) => {}
       ),
       onAppLeave: jest.fn(),
+      history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -186,6 +194,7 @@ describe('Lens App', () => {
       ) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
+      history: History;
     }>;
   }
 
@@ -197,8 +206,10 @@ describe('Lens App', () => {
       jest.fn((type) => {
         if (type === 'timepicker:timeDefaults') {
           return { from: 'now-7d', to: 'now' };
-        } else if (type === 'search:queryLanguage') {
+        } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
+        } else if (type === 'state:storeInSessionStorage') {
+          return false;
         } else {
           return [];
         }

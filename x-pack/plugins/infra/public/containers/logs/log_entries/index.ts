@@ -269,6 +269,7 @@ const useFetchEntriesEffect = (
     }
   };
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const fetchNewerEntries = useCallback(
     throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
     [props, state.bottomCursor]
@@ -330,10 +331,12 @@ const useFetchEntriesEffect = (
     props.timestampsLastUpdate,
   ];
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
   useEffect(streamEntriesEffect, streamEntriesEffectDependencies);
   useEffect(expandRangeEffect, expandRangeEffectDependencies);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return { fetchNewerEntries, checkForNewEntries: runFetchNewEntriesRequest };
 };
