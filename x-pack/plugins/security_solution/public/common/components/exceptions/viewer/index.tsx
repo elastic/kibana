@@ -7,8 +7,6 @@
 import React, { useCallback, useState, useMemo, useEffect, useReducer } from 'react';
 import {
   EuiEmptyPrompt,
-  EuiText,
-  EuiLink,
   EuiOverlayMask,
   EuiModal,
   EuiModalBody,
@@ -17,7 +15,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import uuid from 'uuid';
 
@@ -43,17 +40,7 @@ import {
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
-import {
-  UtilityBar,
-  UtilityBarSection,
-  UtilityBarGroup,
-  UtilityBarText,
-  UtilityBarAction,
-} from '../../utility_bar';
-
-const StyledText = styled(EuiText)`
-  font-style: italic;
-`;
+import { ExceptionsViewerUtility } from './exeptions_utility';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
@@ -61,10 +48,6 @@ const MyFlexItem = styled(EuiFlexItem)`
   &:first-child {
     margin: ${({ theme }) => `${theme.eui.euiSizeXS} 0 ${theme.eui.euiSize}`};
   }
-`;
-
-const MyUtilities = styled(EuiFlexGroup)`
-  height: 50px;
 `;
 
 const MyExceptionsContainer = styled(EuiFlexGroup)`
@@ -168,7 +151,7 @@ const ExceptionsViewerComponent = ({
       perPage: pagination.pageSize,
       total: pagination.totalItemCount,
     },
-    dispatchListsInReducer: setExceptions,
+    onSuccess: setExceptions,
     onError: onDispatchToaster({
       color: 'danger',
       title: i18n.FETCH_LIST_ERROR,
@@ -298,46 +281,6 @@ const ExceptionsViewerComponent = ({
     );
   }, [ruleId, services.application]);
 
-  const exceptionsSubtext = useMemo((): JSX.Element => {
-    if (filterOptions.showEndpointList) {
-      return (
-        <FormattedMessage
-          id="xpack.siem.exceptions.viewer.exceptionEndpointDetailsDescription"
-          defaultMessage="All exceptions to this rule are applied to the endpoint and the detection rule. View {ruleSettings} for more details."
-          values={{
-            ruleSettings: (
-              <EuiLink href={ruleSettingsUrl} target="_blank">
-                <FormattedMessage
-                  id="xpack.siem.exceptions.viewer.exceptionEndpointDetailsDescription.ruleSettingsLink"
-                  defaultMessage="rule settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      );
-    } else if (filterOptions.showDetectionsList) {
-      return (
-        <FormattedMessage
-          id="xpack.siem.exceptions.viewer.exceptionDetectionDetailsDescription"
-          defaultMessage="All exceptions to this rule are applied to the detection rule, not the endpoint. View {ruleSettings} for more details."
-          values={{
-            ruleSettings: (
-              <EuiLink href={ruleSettingsUrl} target="_blank">
-                <FormattedMessage
-                  id="xpack.siem.exceptions.viewer.exceptionDetectionDetailsDescription.ruleSettingsLink"
-                  defaultMessage="rule settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      );
-    } else {
-      return <></>;
-    }
-  }, [filterOptions.showEndpointList, filterOptions.showDetectionsList, ruleSettingsUrl]);
-
   const showEmpty = useMemo((): boolean => {
     return !initLoading && !loadingList && exceptions.length === 0;
   }, [initLoading, exceptions.length, loadingList]);
@@ -372,28 +315,12 @@ const ExceptionsViewerComponent = ({
 
         <EuiSpacer size="l" />
 
-        <MyUtilities alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <UtilityBar>
-              <UtilityBarSection>
-                <UtilityBarGroup>
-                  <UtilityBarText dataTestSubj="showingRules">
-                    {i18n.SHOWING_EXCEPTIONS(pagination.totalItemCount ?? 0)}
-                  </UtilityBarText>
-                </UtilityBarGroup>
-
-                <UtilityBarGroup>
-                  <UtilityBarAction iconSide="left" iconType="refresh" onClick={onFetchList}>
-                    {i18n.REFRESH}
-                  </UtilityBarAction>
-                </UtilityBarGroup>
-              </UtilityBarSection>
-            </UtilityBar>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StyledText size="s">{exceptionsSubtext}</StyledText>
-          </EuiFlexItem>
-        </MyUtilities>
+        <ExceptionsViewerUtility
+          pagination={pagination}
+          filterOptions={filterOptions}
+          onRefreshClick={onFetchList}
+          ruleSettingsUrl={ruleSettingsUrl}
+        />
 
         <MyExceptionsContainer
           gutterSize="none"
