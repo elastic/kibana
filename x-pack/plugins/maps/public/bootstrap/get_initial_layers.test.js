@@ -26,7 +26,7 @@ describe('Saved object has layer list', () => {
       },
     ];
     const layerListJSON = JSON.stringify(layerListFromSavedObject);
-    expect(JSON.parse(layerListJSON)).toEqual(layerListFromSavedObject);
+    expect(getInitialLayers(layerListJSON)).toEqual(layerListFromSavedObject);
   });
 });
 

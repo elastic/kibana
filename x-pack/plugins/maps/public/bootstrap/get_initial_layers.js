@@ -19,7 +19,10 @@ import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile
 import { getIsEmsEnabled } from '../kibana_services';
 import { getKibanaTileMap } from '../meta';
 
-export function getInitialLayers(initialLayers = []) {
+export function getInitialLayers(layerListJSON, initialLayers = []) {
+  if (layerListJSON) {
+    return JSON.parse(layerListJSON);
+  }
   const tilemapSourceFromKibana = getKibanaTileMap();
   if (_.get(tilemapSourceFromKibana, 'url')) {
     const layerDescriptor = TileLayer.createDescriptor({

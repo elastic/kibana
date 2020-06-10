@@ -328,13 +328,9 @@ export const MapsCreateEditView = class extends React.Component {
 
   initMapAndLayerSettings(savedMap) {
     // Get saved map & layer settings
-    let layerList;
     this.initQueryTimeRefresh(savedMap);
-    if (savedMap.layerListJSON) {
-      layerList = JSON.parse(savedMap.layerListJSON);
-    } else {
-      layerList = getInitialLayers(this.getInitialLayersFromUrlParam());
-    }
+
+    const layerList = getInitialLayers(savedMap.layerListJSON, this.getInitialLayersFromUrlParam());
     this.props.replaceLayerList(layerList);
     this.setState(
       {
