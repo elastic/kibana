@@ -46,7 +46,7 @@ import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsConfigType, MapsXPackConfig } from '../config';
 import { ILicense } from '../../licensing/common/types';
-import { createSecurityLayerDescriptors } from './api';
+import { createSecurityLayerDescriptors, MapsStartApi } from './api';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -144,7 +144,7 @@ export class MapsPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: any) {
+  public start(core: CoreStart, plugins: any): MapsStartApi {
     bindStartCoreAndPlugins(core, plugins);
     return {
       createSecurityLayerDescriptors,

@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MapsStartApi } from './start_api';
-export { createSecurityLayerDescriptors } from './create_security_layer_descriptors';
+import { LayerDescriptor } from '../../common/descriptor_types';
+
+export interface MapsStartApi {
+  createSecurityLayerDescriptors: (
+    indexPatternId: string,
+    indexPatternTitle: string
+  ) => Promise<LayerDescriptor[]>;
+}
