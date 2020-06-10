@@ -641,3 +641,7 @@ const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime
 const firedTimesLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTimes', {
   defaultMessage: 'times',
 });
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default Expressions;
