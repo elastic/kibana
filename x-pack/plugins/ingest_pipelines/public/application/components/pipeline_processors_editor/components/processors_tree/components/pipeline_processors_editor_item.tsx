@@ -48,6 +48,51 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
   }) => {
     const { links } = usePipelineProcessorsContext();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
+
+    const contextMenuItems = [
+      <EuiContextMenuItem
+        key="duplicate"
+        icon="copy"
+        onClick={() => {
+          setIsContextMenuOpen(false);
+          onDuplicate();
+        }}
+      >
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moreMenu.duplicateButtonLabel', {
+          defaultMessage: 'Duplicate this processor',
+        })}
+      </EuiContextMenuItem>,
+      processor.onFailure?.length ? undefined : (
+        <EuiContextMenuItem
+          key="addOnFailure"
+          icon="indexClose"
+          onClick={() => {
+            setIsContextMenuOpen(false);
+            onAddOnFailure();
+          }}
+        >
+          {i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.item.moreMenu.addOnFailureHandlerButtonLabel',
+            {
+              defaultMessage: 'Add on failure handler',
+            }
+          )}
+        </EuiContextMenuItem>
+      ),
+      <EuiContextMenuItem
+        key="delete"
+        icon="trash"
+        color="danger"
+        onClick={() => {
+          setIsContextMenuOpen(false);
+          onDelete();
+        }}
+      >
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moreMenu.deleteButtonLabel', {
+          defaultMessage: 'Delete',
+        })}
+      </EuiContextMenuItem>,
+    ].filter(Boolean) as JSX.Element[];
     return (
       <EuiFlexGroup
         gutterSize="none"
@@ -180,56 +225,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               />
             }
           >
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  key="duplicate"
-                  icon="copy"
-                  onClick={() => {
-                    setIsContextMenuOpen(false);
-                    onDuplicate();
-                  }}
-                >
-                  {i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.item.moreMenu.duplicateButtonLabel',
-                    {
-                      defaultMessage: 'Duplicate this processor',
-                    }
-                  )}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key="addOnFailure"
-                  icon="indexClose"
-                  onClick={() => {
-                    setIsContextMenuOpen(false);
-                    onAddOnFailure();
-                  }}
-                >
-                  {i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.item.moreMenu.addOnFailureHandlerButtonLabel',
-                    {
-                      defaultMessage: 'Add on failure handler',
-                    }
-                  )}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key="delete"
-                  icon="trash"
-                  color="danger"
-                  onClick={() => {
-                    setIsContextMenuOpen(false);
-                    onDelete();
-                  }}
-                >
-                  {i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.item.moreMenu.deleteButtonLabel',
-                    {
-                      defaultMessage: 'Delete',
-                    }
-                  )}
-                </EuiContextMenuItem>,
-              ]}
-            />
+            <EuiContextMenuPanel items={contextMenuItems} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
