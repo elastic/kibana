@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-// import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { pageObjects } from '../functional/page_objects';
 
@@ -21,7 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kibana: {
       ...kibanaFunctionalConfig.get('servers.kibana'),
-      // protocol: 'https',
+      protocol: 'https',
     },
   };
 
@@ -44,14 +44,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${iframeEmbeddedPlugin}`,
-        // '--server.ssl.enabled=true',
-        // `--server.ssl.key=${KBN_KEY_PATH}`,
-        // `--server.ssl.certificate=${KBN_CERT_PATH}`,
-        // `--server.ssl.certificateAuthorities=${JSON.stringify([CA_CERT_PATH])}`,
-        // `--server.ssl.clientAuthentication=optional`,
+        '--server.ssl.enabled=true',
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.certificateAuthorities=${JSON.stringify([CA_CERT_PATH])}`,
 
         // '--xpack.security.sameSiteCookies=None',
-        // '--xpack.security.secureCookies=true',
+        '--xpack.security.secureCookies=true',
       ],
     },
   };

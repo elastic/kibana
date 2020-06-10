@@ -32,8 +32,9 @@ export class IframeEmbeddedPlugin implements Plugin {
         validate: false,
       },
       async (context, request, response) => {
-        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
-        const kibanaUrl = Url.format({ protocol, hostname, port });
+        const { hostname, port } = kbnTestConfig.getUrlParts();
+        const kibanaUrl = Url.format({ protocol: 'https', hostname, port });
+
         return response.ok({
           body: renderBody(kibanaUrl),
           headers: {

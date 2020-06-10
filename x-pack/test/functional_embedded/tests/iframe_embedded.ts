@@ -6,21 +6,23 @@
 import Url from 'url';
 import { By, until } from 'selenium-webdriver';
 import testSubjSelector from '@kbn/test-subj-selector';
-import { kbnTestConfig } from '@kbn/test';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'common']);
   const browser = getService('browser');
+  const config = getService('config');
   const testSubjects = getService('testSubjects');
 
   const WD = getService('__webdriver__');
 
-  describe('Kibana embedded', () => {
+  describe('in iframe', () => {
     it('should open Kibana for logged-in user', async () => {
       await PageObjects.security.login();
-      const { protocol, hostname, port } = await kbnTestConfig.getUrlParts();
+
+      const { protocol, hostname, port } = config.get('servers.kibana');
+
       const url = Url.format({
         protocol,
         hostname,

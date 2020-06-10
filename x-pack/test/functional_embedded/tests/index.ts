@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('apis', function () {
+  describe('Kibana embedded', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./iframe_embedded'));
   });
