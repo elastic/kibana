@@ -7,19 +7,30 @@
 import { CreateRulesSchema, CreateRulesSchemaDecoded } from './create_rules_schema';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
-export const getCreateRulesSchemaMock = (): CreateRulesSchema => ({
-  description: 'some description',
+export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',
   type: 'query',
   risk_score: 55,
   language: 'kuery',
-  rule_id: 'rule-1',
+  rule_id: ruleId,
 });
 
+export const getCreateMlRulesSchemaMock = (ruleId = 'rule-1') => {
+  const { query, language, index, ...mlParams } = getCreateRulesSchemaMock(ruleId);
+
+  return {
+    ...mlParams,
+    type: 'machine_learning',
+    anomaly_threshold: 58,
+    machine_learning_job_id: 'typical-ml-job-id',
+  };
+};
+
 export const getCreateRulesSchemaDecodedMock = (): CreateRulesSchemaDecoded => ({
-  description: 'some description',
+  description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',
