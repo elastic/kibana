@@ -13,7 +13,7 @@ import {
 } from '../screens/date_picker';
 import { HOSTS_NAMES } from '../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../screens/hosts/main';
-import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/siem_header';
+import { BREADCRUMBS, HOSTS, KQL_INPUT, NETWORK } from '../screens/security_header';
 import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -29,8 +29,8 @@ import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../tasks/hosts/
 import { openAllHosts } from '../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
-import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/siem_header';
-import { openTimeline } from '../tasks/siem_main';
+import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
+import { openTimeline } from '../tasks/security_main';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,
@@ -243,7 +243,7 @@ describe('url state', () => {
         cy.wrap(intCount).should('be.above', 0);
       });
 
-    const timelineName = 'SIEM';
+    const timelineName = 'Security';
     addNameToTimeline(timelineName);
     addDescriptionToTimeline('This is the best timeline of the world');
     cy.wait(5000);
