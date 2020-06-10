@@ -183,12 +183,15 @@ export const DiscoverGrid = function DiscoverGridInner({
           if (useShortDots) {
             column.display = <>{shortenDottedString(columnName)}</>;
           }
+          if (column.id === indexPattern.timeFieldName) {
+            column.display = `${timeString} (${indexPattern.timeFieldName})`;
+          }
 
           return column;
         }
       );
     },
-    [indexPattern, useShortDots]
+    [indexPattern, useShortDots, timeString]
   );
 
   const [dataGridColumns, setDataGridColumns] = useState<EuiDataGridColumn[]>(
@@ -208,7 +211,7 @@ export const DiscoverGrid = function DiscoverGridInner({
       return [
         {
           id: indexPattern.timeFieldName,
-          display: timeString,
+          display: `${timeString} (${indexPattern.timeFieldName})`,
           schema: 'datetime',
           initialWidth: 200,
         } as EuiDataGridColumn,
