@@ -301,12 +301,25 @@ export class EndpointDocGenerator {
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     const processName = options.processName ? options.processName : randomProcessName();
+    const detailRecordForEventType = ((eventCategory) => {
+      if(eventCategory === 'registry'){
+        return {registry: {key: `HKLM/Windows/Software/${this.randomString(5)}`}}
+      }
+      if(eventCategory === 'network'){
+        return {network: {direction: this.randomChoice(['inbound','outbound']), forwarded_ip: `${this.randomN(255)}.${this.randomN(255)}.${this.randomN(255)}.${this.randomN(255)}`}}
+      }
+      if(eventCategory === 'file'){
+        return {file: {path: processName}} 
+      }
+      return {};
+    })(options.eventCategory)
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
+      ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',

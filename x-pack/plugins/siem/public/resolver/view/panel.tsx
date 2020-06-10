@@ -160,7 +160,7 @@ const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByT
         return {
           formattedDate,
           eventType: eventType + ' ' + event.ecsEventType(resolverEvent),
-          name: event.eventId(resolverEvent),
+          name: event.descriptiveName(resolverEvent),
         }
       })
     },
