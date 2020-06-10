@@ -6,13 +6,13 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { HostState } from '../types';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
 import { State } from '../../../../common/store';
-
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
@@ -25,14 +25,16 @@ export function useHostSelector<TSelected>(selector: (state: HostState) => TSele
  * Returns an object that contains Kibana Logs app and URL information for a given host id
  * @param hostId
  */
-export const useHostLogsUrl = (hostId: string): { appId: string; appPath: string } => {
+export const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
   return useMemo(() => {
     const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
     return {
+      url: `${services.application.getUrlForApp('logs')}${appPath}`,
       appId: 'logs',
       appPath,
     };
-  }, [hostId]);
+  }, [hostId, services.application]);
 };
 
 /**
@@ -40,15 +42,17 @@ export const useHostLogsUrl = (hostId: string): { appId: string; appPath: string
  */
 export const useHostIngestUrl = (
   latestEndpointVersion: string | undefined
-): { appId: string; appPath: string } => {
+): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
   return useMemo(() => {
     let appPath = `#/integrations`;
     if (latestEndpointVersion !== undefined) {
       appPath = `#/integrations/endpoint-${latestEndpointVersion}/add-datasource`;
     }
     return {
+      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
       appId: 'ingestManager',
       appPath,
     };
-  }, [latestEndpointVersion]);
+  }, [latestEndpointVersion, services.application]);
 };

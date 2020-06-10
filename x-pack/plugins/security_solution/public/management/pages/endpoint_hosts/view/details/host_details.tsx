@@ -33,22 +33,25 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
-const LinkToExternalApp = styled(LinkToApp)`
-  display: inline-block;
+const LinkToExternalApp = styled.div`
   margin: ${(props) => props.theme.eui.ruleMargins.marginMedium} 0
     ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
-  .linkToAppIcon {
-    margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
-  }
-  .linkToAppPopoutIcon {
-    margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+  .hostDetailsLinkToExternalApp {
+    .linkToAppIcon {
+      margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+    }
+    .linkToAppPopoutIcon {
+      margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+    }
   }
 `;
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
+  const { url: logsUrl, appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
   const endpointVersion = useHostSelector(latestEndpointVersion);
-  const { appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl(endpointVersion);
+  const { url: ingestUrl, appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl(
+    endpointVersion
+  );
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -173,18 +176,21 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         data-test-subj="hostDetailsPolicyList"
       />
       {endpointVersion !== undefined && (
-        <LinkToExternalApp
-          className="hostDetailsLinkToIngest"
-          appId={ingestAppId}
-          appPath={ingestAppPath}
-          data-test-subj="hostDetailsLinkToIngest"
-        >
-          <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-            defaultMessage="Reassign Policy"
-          />
-          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+        <LinkToExternalApp>
+          <LinkToApp
+            className="hostDetailsLinkToExternalApp"
+            appId={ingestAppId}
+            appPath={ingestAppPath}
+            href={ingestUrl}
+            data-test-subj="hostDetailsLinkToIngest"
+          >
+            <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+              defaultMessage="Reassign Policy"
+            />
+            <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+          </LinkToApp>
         </LinkToExternalApp>
       )}
       <EuiHorizontalRule margin="s" />
@@ -194,10 +200,12 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         data-test-subj="hostDetailsLowerList"
       />
       <EuiHorizontalRule margin="s" />
-      <p>
-        <LinkToExternalApp
+      <LinkToExternalApp>
+        <LinkToApp
+          className="hostDetailsLinkToExternalApp"
           appId={logsAppId}
           appPath={logsAppPath}
+          href={logsUrl}
           data-test-subj="hostDetailsLinkToLogs"
         >
           <EuiIcon type="logsApp" className="linkToAppIcon" />
@@ -206,8 +214,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
             defaultMessage="Endpoint Logs"
           />
           <EuiIcon type="popout" className="linkToAppPopoutIcon" />
-        </LinkToExternalApp>
-      </p>
+        </LinkToApp>
+      </LinkToExternalApp>
     </>
   );
 });
