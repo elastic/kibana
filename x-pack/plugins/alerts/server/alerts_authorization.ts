@@ -87,7 +87,36 @@ export class AlertsAuthorization {
     }
   }
 
-  public async filterByAuthorized(
+  public async getFindAuthorizationFilter(): Promise<{
+    filter?: string;
+    ensureAlertTypeIsAuthorized: (alertTypeId: string) => void;
+  }> {
+    if (this.authorization) {
+      const authorizedAlertTypes = await this.checkAlertTypeAuthorization(
+        this.alertTypeRegistry.list(),
+        'find'
+      );
+
+      if (!authorizedAlertTypes.size) {
+        throw Boom.forbidden(`Unauthorized to find a any alert types`);
+      }
+
+      const authorizedAlertTypeIds = new Set(pluck([...authorizedAlertTypes], 'id'));
+      return {
+        filter: `(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`,
+        ensureAlertTypeIsAuthorized: (alertTypeId: string) => {
+          if (!authorizedAlertTypeIds.has(alertTypeId)) {
+            throw Boom.forbidden(`Unauthorized to find "${alertTypeId}" alerts`);
+          }
+        },
+      };
+    }
+    return {
+      ensureAlertTypeIsAuthorized: (alertTypeId: string) => {},
+    };
+  }
+
+  public async checkAlertTypeAuthorization(
     alertTypes: Set<RegistryAlertType>,
     operation: string
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
@@ -146,5 +175,16 @@ export class AlertsAuthorization {
         authorizedConsumers: authorizedConsumers ?? [],
       }))
     );
+  }
+
+  private asFiltersByAlertTypeAndConsumer(alertTypes: Set<RegistryAlertTypeWithAuth>): string[] {
+    return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
+      filters.push(
+        `(alert.attributes.alertTypeId:${id} and (${authorizedConsumers
+          .map((consumer) => `alert.attributes.consumer:${consumer}`)
+          .join(' or ')}))`
+      );
+      return filters;
+    }, []);
   }
 }

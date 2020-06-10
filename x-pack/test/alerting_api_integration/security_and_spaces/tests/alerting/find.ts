@@ -39,19 +39,21 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             )
             .auth(user.username, user.password);
 
-          expect(response.statusCode).to.eql(200);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.body.page).to.equal(0);
-              expect(response.body.perPage).to.equal(0);
-              expect(response.body.total).to.equal(0);
-              expect(response.body.data.length).to.equal(0);
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find a any alert types`,
+                statusCode: 403,
+              });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.perPage).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -104,37 +106,51 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               consumer: 'alertsRestrictedFixture',
             });
           }
+          function createUnrestrictedNoOpAlert() {
+            return createNoOpAlert({
+              alertTypeId: 'test.unrestricted-noop',
+              consumer: 'alertsFixture',
+            });
+          }
           const allAlerts = [];
           allAlerts.push(await createNoOpAlert());
           allAlerts.push(await createNoOpAlert());
           allAlerts.push(await createRestrictedNoOpAlert());
+          allAlerts.push(await createUnrestrictedNoOpAlert());
+          allAlerts.push(await createUnrestrictedNoOpAlert());
           allAlerts.push(await createRestrictedNoOpAlert());
           allAlerts.push(await createNoOpAlert());
           allAlerts.push(await createNoOpAlert());
 
+          const perPage = 4;
+
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/_find?per_page=3&sort_field=createdAt`)
+            .get(
+              `${getUrlPrefix(space.id)}/api/alerts/_find?per_page=${perPage}&sort_field=createdAt`
+            )
             .auth(user.username, user.password);
 
-          expect(response.statusCode).to.eql(200);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.body.page).to.equal(0);
-              expect(response.body.perPage).to.equal(0);
-              expect(response.body.total).to.equal(0);
-              expect(response.body.data.length).to.equal(0);
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find a any alert types`,
+                statusCode: 403,
+              });
               break;
             case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.equal(3);
-              expect(response.body.total).to.be.equal(4);
+              expect(response.body.perPage).to.be.equal(perPage);
+              expect(response.body.total).to.be.equal(6);
               {
                 const [firstPage] = chunk(
                   allAlerts
                     .filter((alert) => alert.alertTypeId !== 'test.restricted-noop')
                     .map((alert) => alert.id),
-                  3
+                  perPage
                 );
                 expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
               }
@@ -142,13 +158,15 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.equal(3);
-              expect(response.body.total).to.be.equal(6);
+              expect(response.body.perPage).to.be.equal(perPage);
+              expect(response.body.total).to.be.equal(8);
+
               {
                 const [firstPage, secondPage] = chunk(
                   allAlerts.map((alert) => alert.id),
-                  3
+                  perPage
                 );
                 expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
 
@@ -156,9 +174,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                   .get(
                     `${getUrlPrefix(
                       space.id
-                    )}/api/alerts/_find?per_page=3&sort_field=createdAt&page=2`
+                    )}/api/alerts/_find?per_page=${perPage}&sort_field=createdAt&page=2`
                   )
                   .auth(user.username, user.password);
+
                 expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
               }
 
@@ -209,10 +228,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.body.page).to.equal(0);
-              expect(response.body.perPage).to.equal(0);
-              expect(response.body.total).to.equal(0);
-              expect(response.body.data.length).to.equal(0);
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find a any alert types`,
+                statusCode: 403,
+              });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
@@ -276,10 +297,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body.page).to.equal(0);
-              expect(response.body.perPage).to.equal(0);
-              expect(response.body.total).to.equal(0);
-              expect(response.body.data.length).to.equal(0);
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find a any alert types`,
+                statusCode: 403,
+              });
               break;
             case 'global_read at space1':
             case 'superuser at space1':

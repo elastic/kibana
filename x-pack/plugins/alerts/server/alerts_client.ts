@@ -247,29 +247,17 @@ export class AlertsClient {
     }
   }
 
-  public async find({
-    options: { filter, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult> {
-    const filters = filter ? [filter] : [];
+  public async find({ options = {} }: { options?: FindOptions } = {}): Promise<FindResult> {
+    const {
+      filter: authorizationFilter,
+      ensureAlertTypeIsAuthorized,
+    } = await this.authorization.getFindAuthorizationFilter();
 
-    const authorizedAlertTypes = await this.authorization.filterByAuthorized(
-      this.alertTypeRegistry.list(),
-      'find'
-    );
-    const authorizedAlertTypeIds = new Set(pluck([...authorizedAlertTypes], 'id'));
-
-    if (!authorizedAlertTypes.size) {
-      // the current user isn't authorized to get any alertTypes
-      // we can short circuit here
-      return {
-        page: 0,
-        perPage: 0,
-        total: 0,
-        data: [],
-      };
+    if (authorizationFilter) {
+      options.filter = options.filter
+        ? `${options.filter} and ${authorizationFilter}`
+        : authorizationFilter;
     }
-
-    filters.push(`(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`);
 
     const {
       page,
@@ -278,7 +266,6 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
-      filter: filters.join(` and `),
       type: 'alert',
     });
 
@@ -287,9 +274,7 @@ export class AlertsClient {
       perPage,
       total,
       data: data.map(({ id, attributes, updated_at, references }) => {
-        if (!authorizedAlertTypeIds.has(attributes.alertTypeId)) {
-          throw Boom.forbidden(`Unauthorized to find "${attributes.alertTypeId}" alerts`);
-        }
+        ensureAlertTypeIsAuthorized(attributes.alertTypeId);
         return this.getAlertFromRaw(id, attributes, updated_at, references);
       }),
     };
@@ -688,7 +673,10 @@ export class AlertsClient {
   }
 
   public async listAlertTypes() {
-    return await this.authorization.filterByAuthorized(this.alertTypeRegistry.list(), 'get');
+    return await this.authorization.checkAlertTypeAuthorization(
+      this.alertTypeRegistry.list(),
+      'get'
+    );
   }
 
   private async scheduleAlert(id: string, alertTypeId: string) {
@@ -807,16 +795,5 @@ export class AlertsClient {
       actions,
       references,
     };
-  }
-
-  private asFiltersByAlertTypeAndConsumer(alertTypes: Set<RegistryAlertTypeWithAuth>): string[] {
-    return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
-      for (const consumer of authorizedConsumers) {
-        filters.push(
-          `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:${consumer})`
-        );
-      }
-      return filters;
-    }, []);
   }
 }

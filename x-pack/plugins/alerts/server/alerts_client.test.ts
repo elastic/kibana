@@ -2144,6 +2144,9 @@ describe('find()', () => {
     },
   ]);
   beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureAlertTypeIsAuthorized() {},
+    });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
@@ -2179,7 +2182,7 @@ describe('find()', () => {
       ],
     });
     alertTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByAuthorized.mockResolvedValue(
+    authorization.checkAlertTypeAuthorization.mockResolvedValue(
       new Set([
         {
           id: 'myType',
@@ -2230,7 +2233,6 @@ describe('find()', () => {
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "filter": "((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp))",
           "type": "alert",
         },
       ]
@@ -2239,51 +2241,28 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
-      authorization.filterByAuthorized.mockResolvedValue(
-        new Set([
-          {
-            id: 'myType',
-            name: 'Test',
-            actionGroups: [{ id: 'default', name: 'Default' }],
-            defaultActionGroupId: 'default',
-            producer: 'alerts',
-            authorizedConsumers: ['myApp'],
-          },
-          {
-            id: 'myOtherType',
-            name: 'Test',
-            actionGroups: [{ id: 'default', name: 'Default' }],
-            defaultActionGroupId: 'default',
-            producer: 'alerts',
-            authorizedConsumers: ['myApp', 'myOtherApp'],
-          },
-        ])
-      );
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter:
+          '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
+        ensureAlertTypeIsAuthorized() {},
+      });
 
       const alertsClient = new AlertsClient(alertsClientParams);
-      await alertsClient.find({ options: {} });
+      await alertsClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
       expect(options.filter).toMatchInlineSnapshot(
-        `"((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))"`
+        `"someTerm and ((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))"`
       );
-      expect(authorization.filterByAuthorized).toHaveBeenCalledWith(listedTypes, 'find');
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
 
-    test('short circuits if user is not authorized to find any types', async () => {
-      authorization.filterByAuthorized.mockResolvedValue(new Set([]));
-
+    test('throws if user is not authorized to find any types', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
-      expect(await alertsClient.find({ options: {} })).toEqual({
-        data: [],
-        page: 0,
-        perPage: 0,
-        total: 0,
-      });
-
-      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(0);
-
-      expect(authorization.filterByAuthorized).toHaveBeenCalledWith(listedTypes, 'find');
+      authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('not authorized'));
+      await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"not authorized"`
+      );
     });
   });
 });
@@ -3679,7 +3658,7 @@ describe('listAlertTypes', () => {
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-    authorization.filterByAuthorized.mockResolvedValue(
+    authorization.checkAlertTypeAuthorization.mockResolvedValue(
       new Set([
         { ...myAppAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
         { ...alertingAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
@@ -3726,7 +3705,7 @@ describe('listAlertTypes', () => {
           authorizedConsumers: ['myApp'],
         },
       ]);
-      authorization.filterByAuthorized.mockResolvedValue(authorizedTypes);
+      authorization.checkAlertTypeAuthorization.mockResolvedValue(authorizedTypes);
 
       expect(await alertsClient.listAlertTypes()).toEqual(authorizedTypes);
     });
