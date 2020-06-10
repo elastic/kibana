@@ -21,7 +21,7 @@ jest.mock('./ml_api_service', () => ({
 }));
 
 describe('ml_server_info initial state', () => {
-  it('server info not loaded ', () => {
+  it('should fail to get server info ', () => {
     expect(isCloud()).toBe(false);
     expect(getCloudDeploymentId()).toBe(null);
   });
@@ -34,14 +34,14 @@ describe('ml_server_info', () => {
   });
 
   describe('cloud information', () => {
-    it('can get could deployment id', () => {
+    it('should get could deployment id', () => {
       expect(isCloud()).toBe(true);
       expect(getCloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
     });
   });
 
   describe('defaults', () => {
-    it('can get defaults', async (done) => {
+    it('should get defaults', async (done) => {
       const defaults = getNewJobDefaults();
 
       expect(defaults.anomaly_detectors.model_memory_limit).toBe('128mb');
@@ -53,7 +53,7 @@ describe('ml_server_info', () => {
   });
 
   describe('limits', () => {
-    it('can get limits', async (done) => {
+    it('should get limits', async (done) => {
       const limits = getNewJobLimits();
 
       expect(limits.max_model_memory_limit).toBe('128mb');
@@ -70,19 +70,19 @@ describe('ml_server_info', () => {
 
     const badCloudId = 'cloud_message_test:this_is_not_a_base64_string';
 
-    it('cloud ID with deployment name', () => {
+    it('should extract cloud ID when deployment name is present', () => {
       expect(extractDeploymentId(cloudIdWithDeploymentName)).toBe(
         '85d666f3350c469e8c3242d76a7f459c'
       );
     });
 
-    it('cloud ID without deployment name', () => {
+    it('should extract cloud ID when deployment name is not present', () => {
       expect(extractDeploymentId(cloudIdWithOutDeploymentName)).toBe(
         '85d666f3350c469e8c3242d76a7f459c'
       );
     });
 
-    it('bad cloud ID', () => {
+    it('should fail to extract cloud ID', () => {
       expect(extractDeploymentId(badCloudId)).toBe(null);
     });
   });
