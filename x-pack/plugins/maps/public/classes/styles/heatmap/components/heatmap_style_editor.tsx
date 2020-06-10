@@ -6,14 +6,22 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { COLOR_GRADIENTS } from '../../color_utils';
-import { ColorGradient } from '../../components/color_gradient';
+import { EuiFormRow, EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { NUMERICAL_COLOR_PALETTES } from '../../color_palettes';
 import {
   DEFAULT_RGB_HEATMAP_COLOR_RAMP,
   DEFAULT_HEATMAP_COLOR_RAMP_NAME,
   HEATMAP_COLOR_RAMP_LABEL,
 } from './heatmap_constants';
+
+const HEATMAP_COLOR_PALETTES = [
+  {
+    value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
+    palette: DEFAULT_RGB_HEATMAP_COLOR_RAMP,
+    type: 'gradient',
+  },
+  ...NUMERICAL_COLOR_PALETTES,
+];
 
 interface Props {
   colorRampName: string;
@@ -21,28 +29,18 @@ interface Props {
 }
 
 export function HeatmapStyleEditor({ colorRampName, onHeatmapColorChange }: Props) {
-  const onColorRampChange = (selectedColorRampName: string) => {
+  const onColorRampChange = (selectedPaletteId: string) => {
     onHeatmapColorChange({
-      colorRampName: selectedColorRampName,
+      colorRampName: selectedPaletteId,
     });
   };
 
-  const colorRampOptions = [
-    {
-      value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
-      text: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
-      inputDisplay: <ColorGradient colorRamp={DEFAULT_RGB_HEATMAP_COLOR_RAMP} />,
-    },
-    ...COLOR_GRADIENTS,
-  ];
-
   return (
     <EuiFormRow label={HEATMAP_COLOR_RAMP_LABEL} display="rowCompressed">
-      <EuiSuperSelect
-        options={colorRampOptions}
+      <EuiColorPalettePicker
+        palettes={HEATMAP_COLOR_PALETTES}
         onChange={onColorRampChange}
         valueOfSelected={colorRampName}
-        hasDividers={true}
         compressed
       />
     </EuiFormRow>
