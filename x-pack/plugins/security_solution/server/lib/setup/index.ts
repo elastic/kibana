@@ -5,7 +5,13 @@
  */
 
 import uuid from 'uuid';
-import { FakeRequest, IRouter, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import {
+  FakeRequest,
+  IRouter,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  IScopedClusterClient,
+} from 'src/core/server';
 import { SetupPlugins } from '../../plugin';
 
 const ENDPOINT_MANAGER_ROLE = 'endpoint_manager_role';
@@ -24,8 +30,8 @@ export function postEndpointSetup(router: IRouter, security: SetupPlugins['secur
     async (context, req, res) => {
       try {
         const soClient = context.core.savedObjects.client;
-        const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-        await setupEndpointUser(soClient, security, callCluster);
+        const client = context.core.elasticsearch.legacy.client;
+        await setupEndpointUser(soClient, security, client);
         return res.ok();
       } catch (err) {
         return res.internalError({ body: err });
@@ -40,9 +46,9 @@ export function postEndpointSetup(router: IRouter, security: SetupPlugins['secur
 async function setupEndpointUser(
   soClient: SavedObjectsClientContract,
   security: SetupPlugins['security'],
-  callCluster: any // todo
+  client: IScopedClusterClient // todo
 ) {
-  const res = await callCluster('transport.request', {
+  const res = await client.callAsCurrentUser('transport.request', {
     method: 'PUT',
     path: `/_security/role/${ENDPOINT_MANAGER_ROLE}`,
     body: {
@@ -58,7 +64,7 @@ async function setupEndpointUser(
 
   const password = Buffer.from(uuid.v4()).toString('base64');
 
-  const resp = await callCluster('transport.request', {
+  const resp = await client.callAsCurrentUser('transport.request', {
     method: 'PUT',
     path: `/_security/user/${ENDPOINT_MANAGER_USERNAME}`,
     body: {
