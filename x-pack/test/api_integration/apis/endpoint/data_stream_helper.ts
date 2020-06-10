@@ -8,7 +8,15 @@ import { Client } from '@elastic/elasticsearch';
 
 export async function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
   const client = getService('es');
-  await client.transport.request({ method: 'DELETE', path: `_data_stream/${index}` });
+  await client.transport.request(
+    {
+      method: 'DELETE',
+      path: `_data_stream/${index}`,
+    },
+    {
+      ignore: [404],
+    }
+  );
 }
 
 export async function deleteMetadataStream(getService: (serviceName: 'es') => Client) {

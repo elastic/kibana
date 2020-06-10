@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
   const nextPrevPrefixOrder = 'order=desc';
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
-  const alertIndex = 'events-endpoint-1';
+  const alertIndex = '.ds-events-endpoint-1-000001';
 
   let nullableEventId = '';
 
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load('endpoint/alerts/api_feature');
         await esArchiver.load('endpoint/alerts/host_api_feature');
         const res = await es.search({
-          index: alertIndex,
+          index: 'events-endpoint-*',
           body: ES_QUERY_MISSING,
         });
         nullableEventId = res.hits.hits[0]._source.event.id;
