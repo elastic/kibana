@@ -117,7 +117,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           }
         } catch (error) {
           if (error.statusCode === 409) {
-            context.logger.debug('No update to Endpoint Exceptions, skipping.');
+            context.logger.debug(`No update to Endpoint Exceptions (${artifactName}), skipping.`);
           } else {
             context.logger.error(error);
           }

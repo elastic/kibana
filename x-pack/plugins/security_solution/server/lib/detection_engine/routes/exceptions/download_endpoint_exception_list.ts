@@ -52,8 +52,6 @@ async function handleEndpointExceptionDownload(context, req, res) {
           'content-disposition': `attachment; filename=${artifact.attributes.name}.xz`,
         },
       });
-    } else if (res.total > 1) {
-      context.logger.warn(`Duplicate allowlist entries found: ${req.params.sha256}`);
     } else {
       return res.notFound();
     }
