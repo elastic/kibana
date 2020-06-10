@@ -20,20 +20,19 @@
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { deepFreeze } from '../../utils';
 
-interface SetupDeps {
+interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
 /** @internal */
 export class DocLinksService {
-  private service?: DocLinksSetup;
-
-  public setup({ injectedMetadata }: SetupDeps): DocLinksSetup {
+  public setup() {}
+  public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
 
-    this.service = deepFreeze({
+    return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
@@ -126,21 +125,11 @@ export class DocLinksService {
         },
       },
     });
-
-    return this.service;
-  }
-
-  public start(): DocLinksStart {
-    if (!this.service) {
-      throw new Error(`DocLinksService#setup() must be called first!`);
-    }
-
-    return this.service;
   }
 }
 
 /** @public */
-export interface DocLinksSetup {
+export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
@@ -230,6 +219,3 @@ export interface DocLinksSetup {
     readonly management: Record<string, string>;
   };
 }
-
-/** @public */
-export type DocLinksStart = DocLinksSetup;
