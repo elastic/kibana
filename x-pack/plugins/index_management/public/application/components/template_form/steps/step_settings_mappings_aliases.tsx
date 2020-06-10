@@ -83,7 +83,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
   }));
 
   const allGetters = useRef({
-    composedOf: () => ({ data: defaultTemplate.composedOf }),
+    composedOf: async () => ({ isValid: true, data: defaultTemplate.composedOf }),
     settings: async () => ({ isValid: true, data: defaultTemplate.template.settings }),
     mappings: async () => ({ isValid: true, data: defaultTemplate.template.mappings }),
     aliases: async () => ({ isValid: true, data: defaultTemplate.template.aliases }),
@@ -91,7 +91,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
 
   const updateDataGetter = useCallback(() => {
     dataGetter.current = async () => {
-      const composedOf = allGetters.current.composedOf().data;
+      const { data: composedOf } = await allGetters.current.composedOf();
       const { isValid: isSettingsValid, data: settingsData } = await allGetters.current.settings();
       const { isValid: isMappingsValid, data: mappingsData } = await allGetters.current.mappings();
       const { isValid: isAliasesValid, data: aliasesData } = await allGetters.current.aliases();
@@ -113,7 +113,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
   }, [setDataGetter]);
 
   const onComponentsSelectionChange = useCallback(
-    (stepDataGetter: () => { data: string[] }) => {
+    (stepDataGetter: DataGetterFunc) => {
       allGetters.current.composedOf = stepDataGetter;
       updateDataGetter();
     },

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { serializers } from '../../../shared_imports';
+import { SectionError } from '../section_error';
 import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
 import { TemplateSteps } from './template_steps';
 import {
@@ -26,7 +27,7 @@ import {
   StepReview,
 } from './steps';
 import { StepProps, DataGetterFunc } from './types';
-import { SectionError } from '../section_error';
+import { TemplateFormBottomBar } from './template_form_bottom_bar';
 
 const { stripEmptyFields } = serializers;
 
@@ -275,6 +276,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
       </EuiForm>
 
       <EuiSpacer size="m" />
+      <TemplateFormBottomBar />
     </Fragment>
   );
 };

@@ -54,22 +54,22 @@ const getDescriptionText = (data: any) => {
   );
 };
 
-export const StepReview: React.FunctionComponent<StepProps> = ({ template, updateCurrentStep }) => {
+export const StepReview: React.FunctionComponent<StepProps> = ({
+  indexTemplate,
+  updateCurrentStep,
+}) => {
   const {
     name,
     indexPatterns,
     version,
     order,
     _kbnMeta: { formatVersion },
-  } = template!;
+  } = indexTemplate!;
 
   const serializedTemplate =
     formatVersion === 1
-      ? serializeV1Template(stripEmptyFields(template!) as TemplateDeserialized)
-      : serializeV2Template(stripEmptyFields(template!) as TemplateDeserialized);
-
-  // Name not included in ES request body
-  delete serializedTemplate.name;
+      ? serializeV1Template(stripEmptyFields(indexTemplate!) as TemplateDeserialized)
+      : serializeV2Template(stripEmptyFields(indexTemplate!) as TemplateDeserialized);
 
   const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
   const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
@@ -234,7 +234,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
                 defaultMessage="All new indices that you create will use this template."
               />{' '}
               {/* Edit link navigates back to step 1 (logistics) */}
-              <EuiLink onClick={updateCurrentStep.bind(null, 1)}>
+              <EuiLink onClick={updateCurrentStep!.bind(null, 1)}>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
                   defaultMessage="Edit index patterns."
