@@ -197,30 +197,25 @@ class AgentConfigService {
     if (!baseAgentConfig) {
       throw new Error('Agent config not found');
     }
-
+    const { namespace, monitoring_enabled } = baseAgentConfig;
     const newAgentConfig = await this.create(
       soClient,
       {
+        namespace,
+        monitoring_enabled,
         ...newAgentConfigProps,
-        namespace: baseAgentConfig.namespace,
       },
       options
     );
 
-    // Copy each datasource
-    await Promise.all(
-      (baseAgentConfig.datasources as Datasource[]).map(async (datasource: Datasource) => {
+    // Copy all datasources
+    const newDatasources = (baseAgentConfig.datasources as Datasource[]).map(
+      (datasource: Datasource) => {
         const { id: datasourceId, ...newDatasource } = datasource;
-        return await datasourceService.create(
-          soClient,
-          {
-            ...newDatasource,
-            config_id: newAgentConfig.id,
-          },
-          options
-        );
-      })
+        return newDatasource;
+      }
     );
+    await datasourceService.bulkCreate(soClient, newDatasources, newAgentConfig.id, options);
 
     // Get updated config
     const updatedAgentConfig = await this.get(soClient, newAgentConfig.id, true);
@@ -255,7 +250,6 @@ class AgentConfigService {
       soClient,
       id,
       {
-        ...oldAgentConfig,
         datasources: uniq(
           [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds)
         ),
