@@ -40,7 +40,11 @@ export const cleanDraftTimelinesRoute = (
         } = await getDraftTimeline(frameworkRequest, request.body.timelineType);
 
         if (draftTimeline?.savedObjectId) {
-          await resetTimeline(frameworkRequest, [draftTimeline.savedObjectId]);
+          await resetTimeline(
+            frameworkRequest,
+            [draftTimeline.savedObjectId],
+            request.body.timelineType
+          );
           const cleanedDraftTimeline = await getTimeline(
             frameworkRequest,
             draftTimeline.savedObjectId
@@ -57,12 +61,10 @@ export const cleanDraftTimelinesRoute = (
           });
         }
 
-        const newTimelineResponse = await persistTimeline(
-          frameworkRequest,
-          null,
-          null,
-          draftTimelineDefaults
-        );
+        const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
+          ...draftTimelineDefaults,
+          timelineType: request.body.timelineType,
+        });
 
         if (newTimelineResponse.code === 200) {
           return response.ok({
