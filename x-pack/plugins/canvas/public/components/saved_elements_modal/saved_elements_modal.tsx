@@ -84,7 +84,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   const handleEdit = async (name: string, description: string, image: string) => {
     if (elementToEdit) {
-      await updateCustomElement(elementToEdit.id, name, description, image);
+      updateCustomElement(elementToEdit.id, name, description, image);
     }
     hideEditModal();
   };
@@ -94,7 +94,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   const handleDelete = async () => {
     if (elementToDelete) {
-      await removeCustomElement(elementToDelete.id);
+      removeCustomElement(elementToDelete.id);
     }
     hideDeleteModal();
   };
