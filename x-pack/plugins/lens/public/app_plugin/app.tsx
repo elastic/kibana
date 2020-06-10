@@ -24,6 +24,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import {
   SavedObjectSaveModalOrigin,
   OnSaveProps,
+  checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -252,9 +253,11 @@ export function App({
     // state.persistedDoc,
   ]);
 
-  const runSave = (
+  const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+      newDescription?: string;
     }
   ) => {
     if (!lastKnownDoc) {
@@ -276,9 +279,29 @@ export function App({
 
     const doc = {
       ...lastDocWithoutPinned,
+      description: saveProps.newDescription,
       id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
       title: saveProps.newTitle,
     };
+
+    await checkForDuplicateTitle(
+      {
+        ...doc,
+        copyOnSave: saveProps.newCopyOnSave,
+        lastSavedTitle: lastKnownDoc?.title,
+        getEsType: () => 'lens',
+        getDisplayName: () =>
+          i18n.translate('xpack.lens.app.saveModalType', {
+            defaultMessage: 'Lens visualization',
+          }),
+      },
+      saveProps.isTitleDuplicateConfirmed,
+      saveProps.onTitleDuplicate,
+      {
+        savedObjectsClient: core.savedObjects.client,
+        overlays: core.overlays,
+      }
+    );
 
     const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
     docStorage
@@ -492,6 +515,7 @@ export function App({
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',
+              description: lastKnownDoc.description || '',
             }}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
