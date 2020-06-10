@@ -37,7 +37,7 @@ import {
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 
-interface CalendarEvent {
+export interface CalendarEvent {
   start: moment.Moment | null;
   end: moment.Moment | null;
   description: string;

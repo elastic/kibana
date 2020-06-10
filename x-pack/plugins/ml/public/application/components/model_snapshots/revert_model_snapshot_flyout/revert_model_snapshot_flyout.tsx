@@ -12,7 +12,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
+import {} from 'lodash';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,7 +33,7 @@ import {
   EuiOverlayMask,
   EuiCallOut,
   EuiHorizontalRule,
-  EuiSuperSelect,
+  // EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 
@@ -44,18 +44,13 @@ import {
 import { ml } from '../../../services/ml_api_service';
 import { useNotifications } from '../../../contexts/kibana';
 import { loadEventRateForJob, loadAnomalyDataForJob } from './utils';
+import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { CreateCalendar } from './create_calendar';
+import { CreateCalendar, CalendarEvent } from './create_calendar';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
-interface CalendarEvent {
-  start: moment.Moment | null;
-  end: moment.Moment | null;
-  description: string;
-}
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -73,13 +68,28 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [createCalendar, setCreateCalendar] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
-  const [eventRateData, setEventRateData] = useState<any[]>([]);
+  const [eventRateData, setEventRateData] = useState<LineChartPoint[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [chartReady, setChartReady] = useState(false);
 
   useEffect(() => {
     createChartData();
   }, [currentSnapshot]);
+
+  useEffect(() => {
+    // a bug in elastic charts selection can
+    // cause duplicate selected areas to be added
+    // dedupe the calendars based on start and end times
+    const calMap = new Map(
+      calendarEvents.map((c) => [`${c.start?.valueOf()}${c.end?.valueOf()}`, c])
+    );
+    const dedupedCalendarEvents = [...calMap.values()];
+
+    if (calendarEvents.length !== dedupedCalendarEvents.length) {
+      // deduped list is shorter, we must have removed something.
+      setCalendarEvents(dedupedCalendarEvents);
+    }
+  }, [calendarEvents]);
 
   async function createChartData() {
     // setTimeout(async () => {
@@ -134,12 +144,12 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     }
   }
 
-  function onSnapshotChange(ssId: string) {
-    const ss = snapshots.find((s) => s.snapshot_id === ssId);
-    if (ss !== undefined) {
-      setCurrentSnapshot(ss);
-    }
-  }
+  // function onSnapshotChange(ssId: string) {
+  //   const ss = snapshots.find((s) => s.snapshot_id === ssId);
+  //   if (ss !== undefined) {
+  //     setCurrentSnapshot(ss);
+  //   }
+  // }
 
   return (
     <>

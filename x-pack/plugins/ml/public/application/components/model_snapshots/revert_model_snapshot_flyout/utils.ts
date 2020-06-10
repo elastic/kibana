@@ -12,12 +12,13 @@ import {
 } from '../../../../../common/types/anomaly_detection_jobs';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export async function loadEventRateForJob(
   job: CombinedJobWithStats,
   bucketSpanMs: number,
   bars: number
-) {
+): Promise<LineChartPoint[]> {
   const intervalMs = Math.max(
     Math.floor(
       (job.data_counts.latest_record_timestamp - job.data_counts.earliest_record_timestamp) / bars

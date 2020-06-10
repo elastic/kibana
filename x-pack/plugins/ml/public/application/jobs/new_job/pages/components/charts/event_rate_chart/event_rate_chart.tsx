@@ -7,11 +7,13 @@
 import React, { FC } from 'react';
 import {
   BarSeries,
+  HistogramBarSeries,
   Chart,
   ScaleType,
   Settings,
   TooltipType,
   BrushEndListener,
+  PartialTheme,
 } from '@elastic/charts';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
@@ -52,6 +54,10 @@ export const EventRateChart: FC<Props> = ({
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
 
+  const theme: PartialTheme = {
+    scales: { histogramPadding: 0.2 },
+  };
+
   return (
     <div
       style={{ width, height }}
@@ -62,9 +68,9 @@ export const EventRateChart: FC<Props> = ({
           {showAxis === true && <Axes />}
 
           {onBrushEnd === undefined ? (
-            <Settings tooltip={TooltipType.None} />
+            <Settings tooltip={TooltipType.None} theme={theme} />
           ) : (
-            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} />
+            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
           )}
 
           {overlayRanges &&
@@ -81,7 +87,7 @@ export const EventRateChart: FC<Props> = ({
             ))}
 
           <Anomalies anomalyData={anomalyData} />
-          <BarSeries
+          <HistogramBarSeries
             id="event_rate"
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}

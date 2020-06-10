@@ -67,7 +67,7 @@ export const OverlayRange: FC<Props> = ({
         marker={
           showMarker ? (
             <>
-              <div style={{ marginLeft: '14px' }}>
+              <div style={{ marginLeft: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
                   <EuiIcon type="arrowUp" />
                 </div>

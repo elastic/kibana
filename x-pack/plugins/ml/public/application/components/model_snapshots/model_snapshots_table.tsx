@@ -9,19 +9,15 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  // EuiBadge,
-  // EuiButtonIcon,
-  // EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  // EuiLink,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiConfirmModal,
-  // EuiToolTip,
 } from '@elastic/eui';
 
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
@@ -109,8 +105,6 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         defaultMessage: 'ID',
       }),
       sortable: true,
-      // width: '50%',
-      // scope: 'row',
     },
     {
       field: 'description',
@@ -206,7 +200,6 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
             direction: 'asc',
           },
         }}
-        // rowProps={getRowProps}
       />
       {editSnapshot !== null && (
         <EditModelSnapshotFlyout
@@ -239,9 +232,15 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
       {closeJobModalVisible !== null && combinedJobState !== null && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.title', {
-              defaultMessage: 'Close job?',
-            })}
+            title={
+              combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
+                ? i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.title', {
+                    defaultMessage: 'Stop datafeed and close job?',
+                  })
+                : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.title', {
+                    defaultMessage: 'Close job?',
+                  })
+            }
             onCancel={hideCloseJobModalVisible}
             onConfirm={forceCloseJob}
             cancelButtonText={i18n.translate(
@@ -250,15 +249,26 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
                 defaultMessage: 'Cancel',
               }
             )}
-            confirmButtonText={i18n.translate(
-              'xpack.ml.modelSnapshotTable.closeJobConfirm.deleteButton',
-              {
-                defaultMessage: 'Force close',
-              }
-            )}
+            confirmButtonText={
+              combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
+                ? i18n.translate(
+                    'xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.button',
+                    {
+                      defaultMessage: 'Force stop and close',
+                    }
+                  )
+                : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.button', {
+                    defaultMessage: 'Force close',
+                  })
+            }
             defaultFocusedButton="confirm"
           >
-            <p>Close this job blah</p>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.modelSnapshotTable.closeJobConfirm.content"
+                defaultMessage="Job is currently "
+              />
+            </p>
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
