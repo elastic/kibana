@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ListAndOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { ListClient } from '../../../../../lists/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes, RuleAlertParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -18,7 +19,7 @@ interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
   listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
-  exceptionsList: RuleAlertParams['exceptions_list'];
+  exceptionsList: ListAndOrUndefined;
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
