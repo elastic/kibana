@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import _ from 'lodash';
 import { create as createHandlebars } from 'handlebars';
 import {
   EuiFormRow,
@@ -33,7 +34,6 @@ import {
   Query,
   TimeRange,
 } from '../../../../../../src/plugins/data/public';
-import { pick } from '../../../../../../src/core/utils';
 
 const handlebars = createHandlebars();
 function interpolate(url: string, scope: Scope): string {

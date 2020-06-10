@@ -30,7 +30,7 @@ import {
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
 import { UrlDrilldownDefinition } from './drilldowns/url_drilldown';
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public/core';
+import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 declare module '../../../../src/plugins/ui_actions/public' {
