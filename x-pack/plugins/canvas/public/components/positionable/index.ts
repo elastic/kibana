@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { Positionable as Component } from './positionable';
-
-export const Positionable = pure(Component);
+export { Positionable } from './positionable';

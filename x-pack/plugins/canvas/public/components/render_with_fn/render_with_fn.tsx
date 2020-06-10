@@ -6,7 +6,6 @@
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useDeepCallback } from '../../lib/deep_hooks';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
@@ -86,11 +85,10 @@ export const RenderWithFn: FC<Props> = ({
     []
   );
 
-  const render = useDeepCallback(() => {
+  const render = useCallback(() => {
     renderFn(renderTarget.current!, config, handlers.current);
-  }, [config, renderFn]);
+  }, [renderTarget, config, renderFn]);
 
-  // Re-render the Element if these properties change.
   useEffect(() => {
     if (!domNode) {
       return;
