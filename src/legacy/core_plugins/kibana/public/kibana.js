@@ -42,6 +42,7 @@ import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
+import 'ui/error_url_overflow';
 import './discover/legacy';
 import './management';
 import './dev_tools';
