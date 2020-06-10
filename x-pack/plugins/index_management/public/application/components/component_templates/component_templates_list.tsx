@@ -7,31 +7,21 @@
 import React from 'react';
 
 import { ComponentTemplateDeserialized } from '../../../../common';
-import { ComponentTemplatesListItem } from './component_templates_list_item';
+import {
+  ComponentTemplatesListItem,
+  Props as ComponentTemplatesListItemProps,
+} from './component_templates_list_item';
 
 interface Props {
   components: ComponentTemplateDeserialized[];
-  isSelectable?: boolean;
-  isDragable?: boolean;
-  actions?: Array<{ label: string; handler: (component: any) => void }>;
+  listItemProps: Omit<ComponentTemplatesListItemProps, 'component'>;
 }
 
-export const ComponentTemplatesList = ({
-  components,
-  isSelectable,
-  isDragable,
-  actions,
-}: Props) => {
+export const ComponentTemplatesList = ({ components, listItemProps }: Props) => {
   return (
     <>
       {components.map((component) => (
-        <ComponentTemplatesListItem
-          key={component.name}
-          component={component}
-          isSelectable={isSelectable}
-          isDragable={isDragable}
-          actions={actions}
-        />
+        <ComponentTemplatesListItem key={component.name} component={component} {...listItemProps} />
       ))}
     </>
   );

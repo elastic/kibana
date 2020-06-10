@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
 
+import { DataGetterFunc } from '../template_form/types';
 import { ComponentTemplates } from './component_templates';
 import { ComponentTemplatesList } from './component_templates_list';
 import { ComponentTemplateDeserialized } from './types';
@@ -15,23 +16,35 @@ import { useApi } from './component_templates_context';
 
 import './component_templates_selector.scss';
 
+interface ComponentsSelected {
+  [name: string]: ComponentTemplateDeserialized;
+}
+
 interface Props {
-  onChange: (dataGetter: () => { data: string[] }) => void;
+  onChange: (dataGetter: DataGetterFunc<string[]>) => void;
   defaultValue: string[];
 }
 
 export const ComponentTemplatesSelector = ({ onChange, defaultValue }: Props) => {
   const { data: components, isLoading } = useApi().useComponentTemplates();
 
-  const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateDeserialized[]>([]);
+  const [componentsSelected, setComponentsSelected] = useState<ComponentsSelected>({});
+  const hasSelection = Object.keys(componentsSelected).length > 0;
 
   useEffect(() => {
-    onChange(() => ({ data: componentsSelected.map(({ name }) => name) }));
+    onChange(async () => ({ data: Object.keys(componentsSelected), isValid: true }));
   }, [componentsSelected, onChange]);
 
   useEffect(() => {
     if (components) {
-      setComponentsSelected(components.filter(({ name }) => defaultValue.includes(name)));
+      setComponentsSelected(
+        components.reduce((acc, component) => {
+          if (defaultValue.includes(component.name)) {
+            acc[component.name] = component;
+          }
+          return acc;
+        }, {} as ComponentsSelected)
+      );
     }
   }, [components, defaultValue]);
 
@@ -39,29 +52,32 @@ export const ComponentTemplatesSelector = ({ onChange, defaultValue }: Props) =>
     <EuiFlexGroup className="componentTemplatesSelector">
       <EuiFlexItem
         className={classNames('componentTemplatesSelector__selection', {
-          'componentTemplatesSelector__selection--is-empty': componentsSelected.length === 0,
+          'componentTemplatesSelector__selection--is-empty': !hasSelection,
         })}
       >
-        {componentsSelected.length > 0 ? (
+        {hasSelection ? (
           <ComponentTemplatesList
-            components={componentsSelected}
-            actions={[
-              {
-                label: 'View',
-                handler: (component) => {
-                  // console.log(component);
+            components={Object.values(componentsSelected)}
+            listItemProps={{
+              actions: [
+                {
+                  label: 'View',
+                  handler: (component) => {
+                    // console.log(component);
+                  },
                 },
-              },
-              {
-                label: 'Remove',
-                handler: (component) => {
-                  setComponentsSelected((prev) =>
-                    prev.filter(({ name }) => name !== component.name)
-                  );
-                  // console.log(component);
+                {
+                  label: 'Remove',
+                  handler: (component) => {
+                    setComponentsSelected((prev) => {
+                      const nextState = { ...prev };
+                      delete nextState[component.name];
+                      return nextState;
+                    });
+                  },
                 },
-              },
-            ]}
+              ],
+            }}
           />
         ) : (
           <div> No component template selected.</div>
@@ -75,7 +91,7 @@ export const ComponentTemplatesSelector = ({ onChange, defaultValue }: Props) =>
           emptyPrompt={{
             showCreateButton: false,
           }}
-          listProps={{
+          listItemProps={{
             actions: [
               {
                 label: 'View',
@@ -86,11 +102,17 @@ export const ComponentTemplatesSelector = ({ onChange, defaultValue }: Props) =>
               {
                 label: 'Select',
                 handler: (component) => {
-                  setComponentsSelected((prev) => [...prev, component]);
-                  // console.log(component);
+                  setComponentsSelected((prev) => {
+                    const nextState = { ...prev };
+                    nextState[component.name] = component;
+                    return nextState;
+                  });
                 },
               },
             ],
+            isSelected: (component: ComponentTemplateDeserialized) => {
+              return componentsSelected.hasOwnProperty(component.name);
+            },
           }}
         />
       </EuiFlexItem>

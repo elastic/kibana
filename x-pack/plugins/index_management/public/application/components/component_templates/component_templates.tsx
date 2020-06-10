@@ -17,6 +17,7 @@ import {
 import { ComponentTemplateDeserialized } from '../../../../common';
 import { CreateButtonPopOver, FilterListButton } from './components';
 import { ComponentTemplatesList } from './component_templates_list';
+import { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
 
 interface Props {
   isLoading: boolean;
@@ -25,11 +26,7 @@ interface Props {
     text?: string | JSX.Element;
     showCreateButton?: boolean;
   };
-  listProps?: {
-    isSelectable?: boolean;
-    isDragable?: boolean;
-    actions?: Array<{ label: string; handler: (component: any) => void }>;
-  };
+  listItemProps?: Omit<ComponentTemplatesListItemProps, 'component'>;
 }
 
 function fuzzyMatch(pattern: string, text: string) {
@@ -42,7 +39,7 @@ export const ComponentTemplates = ({
   isLoading,
   components,
   emptyPrompt: { text, showCreateButton } = {},
-  listProps = {},
+  listItemProps = {},
 }: Props) => {
   const [searchValue, setSearchValue] = useState('');
 
@@ -144,7 +141,7 @@ export const ComponentTemplates = ({
         </EuiFlexGroup>
       </div>
       <div>
-        <ComponentTemplatesList components={filteredComponents} {...listProps} />
+        <ComponentTemplatesList components={filteredComponents} listItemProps={listItemProps} />
       </div>
     </>
   );

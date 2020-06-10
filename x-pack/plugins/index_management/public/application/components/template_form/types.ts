@@ -14,11 +14,11 @@ export interface StepProps {
   isEditing?: boolean;
 }
 
-export type DataGetterFunc = () => Promise<{
+export type DataGetterFunc<T = any> = () => Promise<{
   /** Is the step data valid or not */
   isValid: boolean;
   /** The current step data (can be invalid) */
-  data: any;
+  data: T;
   /** Optional "slice" of the complete object the step is updating  */
   path?: string;
 }>;

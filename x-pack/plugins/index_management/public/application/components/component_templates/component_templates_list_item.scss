@@ -1,0 +1,25 @@
+.componentTemplatesListItem {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+
+  &--selected {
+    &::before {
+      content: '';
+      background-color: rgba(255, 255, 255, 0.7);
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: 1;
+    }
+  }
+
+  &__checkIcon {
+    position: absolute;
+    right: 4px;
+    top: 12px;
+    z-index: 2;
+  }
+}

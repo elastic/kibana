@@ -4,27 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCheckbox,
+  EuiButtonEmpty,
+  EuiText,
+  EuiIcon,
+} from '@elastic/eui';
+import classNames from 'classnames';
 
 import { ComponentTemplateDeserialized } from '../../../../common';
 import { TemplateContentIndicator } from '../template_content_indicator';
 
+import './component_templates_list_item.scss';
+
 const hasEntries = (obj?: Record<string, any>) =>
   obj === undefined ? false : Object.keys(obj).length > 0;
 
-interface Props {
+export interface Props {
   component: ComponentTemplateDeserialized;
   isSelectable?: boolean;
   isDragable?: boolean;
-  actions?: Array<{ label: string; handler: (component: any) => void }>;
+  isSelected?: boolean | ((component: ComponentTemplateDeserialized) => boolean);
+  actions?: Array<{ label: string; handler: (component: ComponentTemplateDeserialized) => void }>;
 }
 
-export const ComponentTemplatesListItem = ({ component, isSelectable = false, actions }: Props) => {
+export const ComponentTemplatesListItem = ({
+  component,
+  actions,
+  isSelectable = false,
+  isSelected = false,
+}: Props) => {
   const [checked, setChecked] = useState(false);
   const hasActions = actions && actions.length > 0;
+  const isSelectedValue = typeof isSelected === 'function' ? isSelected(component) : isSelected;
 
   return (
-    <div style={{ padding: '12px', borderBottom: '1px solid #eee' }}>
+    <div
+      className={classNames('componentTemplatesListItem', {
+        'componentTemplatesListItem--selected': isSelectedValue,
+      })}
+    >
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center">
@@ -53,7 +74,7 @@ export const ComponentTemplatesListItem = ({ component, isSelectable = false, ac
         {/* Actions */}
         {hasActions && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="xs">
               {actions!.map((action, i) => (
                 <EuiFlexItem key={i}>
                   <EuiButtonEmpty
@@ -69,6 +90,11 @@ export const ComponentTemplatesListItem = ({ component, isSelectable = false, ac
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+
+      {/* Check icon when selected */}
+      {isSelectedValue && (
+        <EuiIcon className="componentTemplatesListItem__checkIcon" type="check" color="secondary" />
+      )}
     </div>
   );
 };
