@@ -93,7 +93,7 @@ export async function getServiceAnomalies(
     },
   };
 
-  const response = (await ml.mlSystem.mlAnomalySearch(params)) as {
+  const response = (await ml.mlSystem.mlSearch(params)) as {
     aggregations: {
       jobs: {
         buckets: Array<{
