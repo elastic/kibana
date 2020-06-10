@@ -44,6 +44,8 @@ import {
   MockContextService,
   IntegrationsServiceConstructor,
   MockIntegrationsService,
+  CoreAppConstructor,
+  MockCoreApp,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -88,6 +90,7 @@ describe('constructor', () => {
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -231,6 +234,11 @@ describe('#setup()', () => {
     await setupCore();
     expect(MockIntegrationsService.setup).toHaveBeenCalledTimes(1);
   });
+
+  it('calls coreApp#setup()', async () => {
+    await setupCore();
+    expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#start()', () => {
@@ -315,9 +323,14 @@ describe('#start()', () => {
     });
   });
 
-  it('calls start#setup()', async () => {
+  it('calls integrations#start()', async () => {
     await startCore();
     expect(MockIntegrationsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls coreApp#start()', async () => {
+    await startCore();
+    expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -375,6 +388,14 @@ describe('#stop()', () => {
     expect(MockIntegrationsService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockIntegrationsService.stop).toHaveBeenCalled();
+  });
+
+  it('calls coreApp.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockCoreApp.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockCoreApp.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {
