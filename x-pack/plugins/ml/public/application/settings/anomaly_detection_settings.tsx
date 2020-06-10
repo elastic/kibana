@@ -133,7 +133,7 @@ export const AnomalyDetectionSettings: FC<Props> = ({
               )}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="ml_calendars_mng_button"
+                  data-test-subj="mlCalendarsMngButton"
                   flush="left"
                   size="l"
                   color="primary"
@@ -148,7 +148,7 @@ export const AnomalyDetectionSettings: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="ml_calendars_create_button"
+                  data-test-subj="mlCalendarsCreateButton"
                   flush="left"
                   size="l"
                   color="primary"
@@ -199,7 +199,7 @@ export const AnomalyDetectionSettings: FC<Props> = ({
               )}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="ml_filter_lists_mng_button"
+                  data-test-subj="mlFilterListsMngButton"
                   flush="left"
                   size="l"
                   color="primary"
@@ -214,7 +214,7 @@ export const AnomalyDetectionSettings: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="ml_filter_lists_create_button"
+                  data-test-subj="mlFilterListsCreateButton"
                   size="l"
                   color="primary"
                   href="#/settings/filter_lists/new_filter_list"
