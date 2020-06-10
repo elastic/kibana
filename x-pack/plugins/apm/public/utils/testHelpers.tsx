@@ -7,7 +7,7 @@
 /* global jest */
 
 import React from 'react';
-import { ReactWrapper, mount, shallow } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
