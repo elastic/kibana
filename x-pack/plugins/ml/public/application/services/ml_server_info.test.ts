@@ -68,6 +68,8 @@ describe('ml_server_info', () => {
     const cloudIdWithOutDeploymentName =
       ':ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
 
+    const badCloudId = 'cloud_message_test:this_is_not_a_base64_string';
+
     it('cloud ID with deployment name', () => {
       expect(extractDeploymentId(cloudIdWithDeploymentName)).toBe(
         '85d666f3350c469e8c3242d76a7f459c'
@@ -78,6 +80,10 @@ describe('ml_server_info', () => {
       expect(extractDeploymentId(cloudIdWithOutDeploymentName)).toBe(
         '85d666f3350c469e8c3242d76a7f459c'
       );
+    });
+
+    it('bad cloud ID', () => {
+      expect(extractDeploymentId(badCloudId)).toBe(null);
     });
   });
 });
