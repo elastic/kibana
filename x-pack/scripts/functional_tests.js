@@ -6,6 +6,7 @@
 
 const alwaysImportedTests = [
   require.resolve('../test/functional/config.js'),
+  require.resolve('../test/functional_endpoint/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/functional/config_security_trial.ts'),
