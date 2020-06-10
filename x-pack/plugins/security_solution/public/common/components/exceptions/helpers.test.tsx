@@ -439,7 +439,7 @@ describe('Exception helpers', () => {
 
   describe('#getFormattedComments', () => {
     test('it returns formatted comment object with username and timestamp', () => {
-      const payload = getExceptionItemMock().comments;
+      const payload = getExceptionItemMock().comment;
       const result = getFormattedComments(payload);
 
       expect(result[0].username).toEqual('user_name');
@@ -447,7 +447,7 @@ describe('Exception helpers', () => {
     });
 
     test('it returns formatted timeline icon with comment users initial', () => {
-      const payload = getExceptionItemMock().comments;
+      const payload = getExceptionItemMock().comment;
       const result = getFormattedComments(payload);
 
       const wrapper = mount<React.ReactElement>(result[0].timelineIcon as React.ReactElement);
@@ -456,7 +456,7 @@ describe('Exception helpers', () => {
     });
 
     test('it returns comment text', () => {
-      const payload = getExceptionItemMock().comments;
+      const payload = getExceptionItemMock().comment;
       const result = getFormattedComments(payload);
 
       const wrapper = mount<React.ReactElement>(result[0].children as React.ReactElement);

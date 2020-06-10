@@ -17,10 +17,10 @@ import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
 
-import { AndOrBadge } from '../../and_or_badge';
-import { getEmptyValue } from '../../empty_value';
-import * as i18n from '../translations';
-import { FormattedEntry } from '../types';
+import { AndOrBadge } from '../../../and_or_badge';
+import { getEmptyValue } from '../../../empty_value';
+import * as i18n from '../../translations';
+import { FormattedEntry } from '../../types';
 
 const EntriesDetails = styled(EuiFlexItem)`
   padding: ${({ theme }) => theme.eui.euiSize};
@@ -48,12 +48,14 @@ const AndOrBadgeContainer = styled(EuiFlexItem)`
 
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
+  disableDelete: boolean;
   onDelete: () => void;
   onEdit: () => void;
 }
 
 const ExceptionEntriesComponent = ({
   entries,
+  disableDelete,
   onDelete,
   onEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
@@ -149,6 +151,7 @@ const ExceptionEntriesComponent = ({
                 size="s"
                 color="primary"
                 onClick={onEdit}
+                isDisabled={disableDelete}
                 data-test-subj="exceptionsViewerEditBtn"
               >
                 {i18n.EDIT}
@@ -159,6 +162,7 @@ const ExceptionEntriesComponent = ({
                 size="s"
                 color="danger"
                 onClick={onDelete}
+                isLoading={disableDelete}
                 data-test-subj="exceptionsViewerDeleteBtn"
               >
                 {i18n.REMOVE}

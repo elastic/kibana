@@ -15,9 +15,9 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
-import { DescriptionListItem, ExceptionListItemSchema } from '../types';
-import { getDescriptionListContent } from '../helpers';
-import * as i18n from '../translations';
+import { DescriptionListItem, ExceptionListItemSchema } from '../../types';
+import { getDescriptionListContent } from '../../helpers';
+import * as i18n from '../../translations';
 
 const StyledExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
@@ -49,8 +49,9 @@ const ExceptionDetailsComponent = ({
   );
 
   const commentsSection = useMemo((): JSX.Element => {
-    const { comments } = exceptionItem;
-    if (comments.length > 0) {
+    // TODO: return back to exceptionItem.comments once updated
+    const { comment } = exceptionItem;
+    if (comment.length > 0) {
       return (
         <EuiButtonEmpty
           onClick={onCommentsClick}
@@ -58,9 +59,7 @@ const ExceptionDetailsComponent = ({
           size="xs"
           data-test-subj="exceptionsViewerItemCommentsBtn"
         >
-          {!showComments
-            ? i18n.COMMENTS_SHOW(comments.length)
-            : i18n.COMMENTS_HIDE(comments.length)}
+          {!showComments ? i18n.COMMENTS_SHOW(comment.length) : i18n.COMMENTS_HIDE(comment.length)}
         </EuiButtonEmpty>
       );
     } else {

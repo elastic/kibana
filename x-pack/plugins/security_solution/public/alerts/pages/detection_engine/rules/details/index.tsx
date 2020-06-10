@@ -5,6 +5,7 @@
  */
 
 /* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable complexity */
 
 import {
   EuiButton,
@@ -70,16 +71,24 @@ import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
+import { ExceptionListType } from '../../../../../common/components/exceptions/types';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
+  exceptions = 'exceptions',
 }
 
 const ruleDetailTabs = [
   {
     id: RuleDetailTabs.alerts,
     name: detectionI18n.ALERT,
+    disabled: false,
+  },
+  {
+    id: RuleDetailTabs.exceptions,
+    name: i18n.EXCEPTIONS_TAB,
     disabled: false,
   },
   {
@@ -386,6 +395,28 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           />
                         )}
                       </>
+                    )}
+                    {ruleDetailTab === RuleDetailTabs.exceptions && (
+                      <ExceptionsViewer
+                        ruleId={ruleId ?? ''}
+                        availableListTypes={[
+                          ExceptionListType.DETECTION_ENGINE,
+                          ExceptionListType.ENDPOINT,
+                        ]}
+                        commentsAccordionId={'ruleDetailsTabExceptions'}
+                        exceptionListsMeta={[
+                          {
+                            id: '5b543420-a6c3-11ea-989f-53aa81611022',
+                            type: 'endpoint',
+                            namespaceType: 'single',
+                          },
+                          {
+                            id: '98440bc0-a750-11ea-989f-53aa81611022',
+                            type: 'detection',
+                            namespaceType: 'single',
+                          },
+                        ]}
+                      />
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
                   </WrapperPage>
