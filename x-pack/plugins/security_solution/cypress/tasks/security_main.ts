@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MAIN_PAGE, TIMELINE_TOGGLE_BUTTON } from '../screens/siem_main';
+import { MAIN_PAGE, TIMELINE_TOGGLE_BUTTON } from '../screens/security_main';
 
 export const openTimeline = () => {
   cy.get(TIMELINE_TOGGLE_BUTTON).click();

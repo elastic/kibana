@@ -22,7 +22,6 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   isRuleStatusFindType,
 } from '../../rules/types';
-import { OutputRuleAlertRest } from '../../types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
@@ -36,7 +35,7 @@ export const transformValidateFindAlerts = (
     page: number;
     perPage: number;
     total: number;
-    data: Array<Partial<OutputRuleAlertRest>>;
+    data: Array<Partial<RulesSchema>>;
   } | null,
   string | null
 ] => {
