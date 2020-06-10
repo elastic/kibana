@@ -208,8 +208,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     nameFilter: '',
     typeFilter: [],
     isTypeFilterOpen: false,
-    isAvailableFieldsAccordionOpen: true,
-    isEmptyFieldsAccordionOpen: false,
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -235,13 +233,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       scrollContainer.scrollTop = 0;
       setPageSize(PAGINATION_SIZE);
       lazyScroll();
-    }
-    if (localState.nameFilter.length || localState.typeFilter.length) {
-      setLocalState(() => ({
-        ...localState,
-        isAvailableFieldsAccordionOpen: true,
-        isEmptyFieldsAccordionOpen: true,
-      }));
     }
   }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId]);
 
@@ -443,13 +434,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
               <EuiSpacer size="s" />
               <EuiAccordion
-                forceState={localState.isAvailableFieldsAccordionOpen ? 'open' : 'closed'}
-                onClick={() =>
-                  setLocalState({
-                    ...localState,
-                    isAvailableFieldsAccordionOpen: !localState.isAvailableFieldsAccordionOpen,
-                  })
-                }
+                initialIsOpen={true}
                 id="availableFieldsLabel"
                 buttonContent={
                   <EuiFormLabel>
@@ -560,13 +545,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               </EuiAccordion>
               <EuiSpacer size="s" />
               <EuiAccordion
-                forceState={localState.isEmptyFieldsAccordionOpen ? 'open' : 'closed'}
-                onClick={() =>
-                  setLocalState({
-                    ...localState,
-                    isEmptyFieldsAccordionOpen: !localState.isEmptyFieldsAccordionOpen,
-                  })
-                }
+                initialIsOpen={false}
                 id="emptyFieldsLabel"
                 buttonContent={
                   <EuiFormLabel>
