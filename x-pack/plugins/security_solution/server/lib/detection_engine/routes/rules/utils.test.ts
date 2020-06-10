@@ -19,7 +19,7 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../types';
+import { RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
@@ -28,8 +28,10 @@ import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
   beforeAll(() => {
@@ -485,7 +487,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as RuleAlertParamsRest[],
+        ] as CreateRulesBulkSchemaDecoded,
         'rule_id'
       );
       const expected = ['value2', 'value3'];
@@ -499,7 +501,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as RuleAlertParamsRest[],
+        ] as CreateRulesBulkSchemaDecoded,
         'rule_id'
       );
       const expected: string[] = [];

@@ -83,6 +83,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { loading, ...privilegeUser };

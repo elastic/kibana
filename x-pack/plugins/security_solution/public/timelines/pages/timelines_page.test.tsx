@@ -10,6 +10,7 @@ import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
+import { disableTemplate } from '../../../common/constants';
 
 jest.mock('../../overview/components/events_by_dataset');
 
@@ -18,6 +19,7 @@ jest.mock('../../common/lib/kibana', () => {
     useKibana: jest.fn(),
   };
 });
+
 describe('TimelinesPageComponent', () => {
   const mockAppollloClient = {} as ApolloClient<object>;
   let wrapper: ShallowWrapper;
@@ -57,6 +59,20 @@ describe('TimelinesPageComponent', () => {
       expect(
         wrapper.find('[data-test-subj="stateful-open-timeline"]').prop('importDataModalToggle')
       ).toEqual(true);
+    });
+
+    test('it renders create timelin btn', () => {
+      expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
+    });
+
+    /*
+     * CreateTemplateTimelineBtn
+     * Remove the comment here to enable CreateTemplateTimelineBtn
+     */
+    test('it renders no create template timelin btn', () => {
+      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(
+        !disableTemplate
+      );
     });
   });
 
