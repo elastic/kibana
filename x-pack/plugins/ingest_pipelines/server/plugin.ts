@@ -11,7 +11,7 @@ import { PLUGIN_ID, PLUGIN_MIN_LICENSE_TYPE } from '../common/constants';
 
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError } from './shared_imports';
+import { handleErrors, isEsError } from './shared_imports';
 import { Dependencies } from './types';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
@@ -51,6 +51,7 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
       lib: {
+        handleErrors,
         isEsError,
       },
     });
