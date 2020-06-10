@@ -83,8 +83,9 @@ export class CompareTimelinesStatus {
 
   public get isCreatableViaImport() {
     return (
-      (this.isCreatable && !this.isHandlingTemplateTimeline) ||
-      (this.isCreatable && this.isHandlingTemplateTimeline && !this.isTemplateVersionValid)
+      this.isStatusValid &&
+      ((this.isCreatable && !this.isHandlingTemplateTimeline) ||
+        (this.isCreatable && this.isHandlingTemplateTimeline && this.isTemplateVersionValid))
     );
   }
 
@@ -98,10 +99,12 @@ export class CompareTimelinesStatus {
 
   public get isUpdatableViaImport() {
     return (
+      this.isStatusValid &&
+      this.isTimelineTypeValid &&
       !this.isSavedObjectVersionConflict &&
-      ((this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
+      (this.timelineObject.isUpdatableViaImport ||
         (this.templateTimelineObject.isUpdatableViaImport &&
-          !this.isTemplateVersionValid &&
+          this.isTemplateVersionValid &&
           this.isHandlingTemplateTimeline))
     );
   }
@@ -160,20 +163,10 @@ export class CompareTimelinesStatus {
     return this.timelineType === TimelineType.template;
   }
 
-  // private get isUpdatingImmutiableTimeline() {
-  //   const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-  //   /*
-  //    * Do not allow
-  //    * 1. Existing timeline is immutiable
-  //    * 2. Converting existing timeline's status
-  //    */
-  //   return (
-  //     obj.isExists &&
-  //     obj.getData?.status == null &&
-  //     this.status !== TimelineStatus.active &&
-  //     this.status != null
-  //   );
-  // }
+  private get isStatusValid() {
+    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+    return this.status === obj.getData?.status && this.status !== TimelineStatus.draft;
+  }
 
   private get isSavedObjectVersionConflict() {
     const version = this.timelineObject?.getVersion;
@@ -204,7 +197,7 @@ export class CompareTimelinesStatus {
 
   private get isTemplateVersionValid() {
     const version = this.templateTimelineObject?.getVersion;
-    return typeof version === 'number' && this.isTemplateVersionConflict;
+    return typeof version === 'number' && !this.isTemplateVersionConflict;
   }
 
   public get timelineId() {
@@ -215,8 +208,18 @@ export class CompareTimelinesStatus {
   }
 
   public get timelineVersion() {
-    const version = this.timelineInput.data?.version ?? this.timelineInput.getVersion;
+    const version = this.isHandlingTemplateTimeline
+      ? this.templateTimelineInput.data?.version ?? this.timelineInput.getVersion
+      : this.timelineInput.data?.version ?? this.timelineInput.getVersion;
     return version != null ? version.toString() : null;
+  }
+
+  public get isTimelineTypeValid() {
+    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+    const timelineType = this.isHandlingTemplateTimeline
+      ? TimelineType.template
+      : TimelineType.default;
+    return obj.getData?.timelineType === timelineType;
   }
 
   public async init() {

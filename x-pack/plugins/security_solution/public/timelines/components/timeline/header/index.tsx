@@ -59,6 +59,13 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
+    <EuiCallOut
+      data-test-subj="timelineImmutableCallOut"
+      title={'the timeline is immutable'}
+      color="primary"
+      iconType="info"
+      size="s"
+    />
     {show && (
       <DataProviders
         browserFields={browserFields}

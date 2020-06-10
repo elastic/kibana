@@ -107,7 +107,7 @@ export const getTimelineByTemplateTimelineId = async (
 }> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
-    filter: `siem-ui-timeline.attributes.templateTimelineId: ${templateTimelineId}`,
+    filter: `siem-ui-timeline.attributes.templateTimelineId: "${templateTimelineId}"`,
   };
   return getAllSavedTimeline(request, options);
 };
@@ -473,7 +473,6 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   }
 
   const savedObjects = await savedObjectsClient.find(options);
-
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {
       const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);

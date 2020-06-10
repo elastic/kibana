@@ -171,6 +171,13 @@ export const createTimelineEpic = <State>(): Epic<
           isItAtimelineAction(timelineId)
         ) {
           return true;
+        } else if (
+          isItAtimelineAction(timelineId) &&
+          timelineObj != null &&
+          timelineObj.status != null &&
+          TimelineStatus.immutiable === timelineObj.status
+        ) {
+          return true;
         }
         return false;
       }),

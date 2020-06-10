@@ -137,7 +137,7 @@ export const importTimelinesRoute = (
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
-
+                    // console.log('parsedTimeline', JSON.stringify(parsedTimeline));
                     let newTimeline = null;
                     try {
                       const compareTimelinesStatus = new CompareTimelinesStatus({
