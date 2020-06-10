@@ -19,4 +19,11 @@
 
 export * from './fields';
 export * from './types';
-export * from './index_patterns';
+export {
+  IndexPatternsService,
+  IndexPatternsApiClient,
+  IndexPatternsContract,
+  IndexPattern,
+  TypeMeta,
+  AggregationRestrictions,
+} from './index_patterns';
