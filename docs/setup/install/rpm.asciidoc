@@ -1,5 +1,9 @@
 [[rpm]]
 === Install {kib} with RPM
+++++
+<titleabbrev>Install with RPM</titleabbrev>
+++++
+
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
 or from our <<rpm-repo,RPM repository>>. It can be used to install
