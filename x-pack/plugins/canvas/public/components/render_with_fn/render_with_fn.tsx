@@ -5,8 +5,8 @@
  */
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
-import { isEqual } from 'lodash';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useDeepCallback } from '../../lib/deep_hooks';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
@@ -30,22 +30,6 @@ interface Props {
 }
 
 const style = { height: '100%', width: '100%' };
-
-const useDeepEffect = (fn: () => void, deps: any[]) => {
-  const isFirst = useRef(true);
-  const prevDeps = useRef(deps);
-
-  useEffect(() => {
-    const isSame = prevDeps.current.every((obj, i) => isEqual(obj, deps[i]));
-
-    if (isFirst.current || !isSame) {
-      fn();
-    }
-
-    isFirst.current = false;
-    prevDeps.current = deps;
-  });
-};
 
 export const RenderWithFn: FC<Props> = ({
   name: functionName,
@@ -102,8 +86,12 @@ export const RenderWithFn: FC<Props> = ({
     []
   );
 
+  const render = useDeepCallback(() => {
+    renderFn(renderTarget.current!, config, handlers.current);
+  }, [config, renderFn]);
+
   // Re-render the Element if these properties change.
-  useDeepEffect(() => {
+  useEffect(() => {
     if (!domNode) {
       return;
     }
@@ -113,12 +101,12 @@ export const RenderWithFn: FC<Props> = ({
     }
 
     try {
-      renderFn(renderTarget.current!, config, handlers.current);
+      render();
       firstRender.current = false;
     } catch (err) {
       onError(err, { title: strings.getRenderErrorMessage(functionName) });
     }
-  }, [config, renderFn]);
+  }, [domNode, functionName, onError, render, resetRenderTarget, reuseNode]);
 
   return (
     <div className="canvasWorkpad--element_render canvasRenderEl" style={style}>
