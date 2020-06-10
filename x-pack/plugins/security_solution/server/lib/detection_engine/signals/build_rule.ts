@@ -72,7 +72,7 @@ export const buildRule = ({
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
-    exceptions_list: ruleParams.exceptions_list,
+    exceptions_list: ruleParams.exceptionsList,
     machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
   });

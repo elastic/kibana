@@ -31,6 +31,7 @@ module.exports = {
   collectCoverageFrom: [
     '**/*.{js,jsx,ts,tsx}',
     '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
+    '!**/*.stories.{js,ts,tsx}',
     '!**/*.test.{js,ts,tsx}',
     '!**/dev_docs/**',
     '!**/e2e/**',

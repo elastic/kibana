@@ -12,16 +12,6 @@ import { NotFoundPage } from './404';
 import { HomePage } from './home';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
-import { useWithSource } from '../common/containers/source/index';
-
-/* Uncomment only during debugging */
-// const whyDidYouRender = require('@welldone-software/why-did-you-render'); // eslint-disable-line
-// whyDidYouRender(React, {
-//   exclude: [/^ColumnHeadersComponent/, /^Connect/],
-//   trackAllPureComponents: false,
-//   trackHooks: false,
-//   trackExtraHooks: [[useWithSource]],
-// });
 
 interface RouterProps {
   history: History;
