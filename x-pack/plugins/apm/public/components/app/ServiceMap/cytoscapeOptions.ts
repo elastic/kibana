@@ -15,7 +15,7 @@ import { defaultIcon, iconForNode } from './icons';
 
 export const popoverMinWidth = 280;
 
-export const getSeverityColor = (nodeSeverity?: string, theme: EuiTheme) => {
+export const getSeverityColor = (theme: EuiTheme, nodeSeverity?: string) => {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.euiColorVis0;
@@ -29,19 +29,20 @@ export const getSeverityColor = (nodeSeverity?: string, theme: EuiTheme) => {
   }
 };
 
-const getBorderColor: cytoscape.Css.MapperFunction<
-  cytoscape.NodeSingular,
-  string
-> = (el: cytoscape.NodeSingular) => {
-  const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
-  const nodeSeverity = el.data('anomaly_severity');
-  if (hasAnomalyDetectionJob) {
-    return getSeverityColor(nodeSeverity) || theme.euiColorMediumShade;
-  }
-  if (el.hasClass('primary') || el.selected()) {
-    return theme.euiColorPrimary;
-  }
-  return theme.euiColorMediumShade;
+const getBorderColorFn = (
+  theme: EuiTheme
+): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> => {
+  return (el: cytoscape.NodeSingular) => {
+    const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
+    const nodeSeverity = el.data('anomaly_severity');
+    if (hasAnomalyDetectionJob) {
+      return getSeverityColor(nodeSeverity) || theme.euiColorMediumShade;
+    }
+    if (el.hasClass('primary') || el.selected()) {
+      return theme.euiColorPrimary;
+    }
+    return theme.euiColorMediumShade;
+  };
 };
 
 const getBorderStyle: cytoscape.Css.MapperFunction<
@@ -116,7 +117,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
         isService(el) ? '60%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
         isService(el) ? '60%' : '40%',
-      'border-color': getBorderColor,
+      'border-color': getBorderColorFn(theme),
       'border-style': getBorderStyle,
       'border-width': getBorderWidth,
       color: (el: cytoscape.NodeSingular) =>

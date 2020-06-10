@@ -5,9 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import styled from 'styled-components';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,11 +32,11 @@ const VerticallyCentered = styled.div`
 `;
 
 const SubduedText = styled.span`
-  color: ${theme.euiTextSubduedColor};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
 `;
 
 const EnableText = styled.section`
-  color: ${theme.euiTextSubduedColor};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   line-height: 1.4;
   font-size: ${fontSize};
   width: ${px(popoverMinWidth)};
@@ -52,6 +51,7 @@ interface AnomalyDetectionProps {
 }
 
 export function AnomalyDetection({ serviceNodeData }: AnomalyDetectionProps) {
+  const theme = useContext(ThemeContext);
   const anomalySeverity = serviceNodeData.anomaly_severity;
   const anomalyScore = serviceNodeData.anomaly_score;
   const actualValue = serviceNodeData.actual_value;
@@ -81,7 +81,7 @@ export function AnomalyDetection({ serviceNodeData }: AnomalyDetectionProps) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getSeverityColor(anomalySeverity)} />
+                <EuiHealth color={getSeverityColor(theme, anomalySeverity)} />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>
