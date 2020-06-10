@@ -309,7 +309,7 @@ export class EndpointDocGenerator {
         return {network: {direction: this.randomChoice(['inbound','outbound']), forwarded_ip: `${this.randomN(255)}.${this.randomN(255)}.${this.randomN(255)}.${this.randomN(255)}`}}
       }
       if(eventCategory === 'file'){
-        return {file: {path: processName}} 
+        return {file: {path: 'C:\\My Documents\\business\\January\\processName'}} 
       }
       return {};
     })(options.eventCategory)

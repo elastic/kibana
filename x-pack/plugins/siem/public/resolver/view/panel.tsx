@@ -36,6 +36,7 @@ import { EuiI18nNumber } from '@elastic/eui';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiCard } from '@elastic/eui';
 
 /**
  * The two query parameters we read/write on to control which view the table presents:
@@ -63,6 +64,23 @@ function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
     return 'Invalid Date';
   }
 }
+
+const surfacePrimitives = function* (obj: object, prefix=''): Generator<{title: string, description: string}> {
+  const nextPrefix = prefix.length ? prefix+'/' : '';
+  for(const [metaKey,metaValue] of Object.entries(obj)){
+      if (typeof metaValue === 'number' || typeof metaValue === 'string') {
+          yield {title: nextPrefix+metaKey, description: `${metaValue}`}
+      }
+      else if (metaValue instanceof Array) {
+          yield {title: nextPrefix+metaKey, description: metaValue.filter((arrayEntry)=>{
+              return (typeof arrayEntry === 'number' || typeof arrayEntry === 'string')
+          }).join(',')}
+      }
+      else if(typeof metaValue === 'object'){
+          yield* surfacePrimitives(metaValue, nextPrefix+metaKey)
+      }
+  }
+};
 
 const BoldCode = styled(EuiCode)`
   &.euiCodeBlock code.euiCodeBlock__code {
@@ -176,15 +194,10 @@ const WaitForRelatedEvents = memo(function({processEvent, relatedEventsState}: {
 });
 
 /**
- * This view presents a list of related events of a given type for a given process.
- * It will appear like:
- * 
- * |                                                        |
- * | :----------------------------------------------------- |
- * | **registry deletion** @ *3:32PM..* *HKLM/software...*  |
- * | **file creation** @ *3:34PM..* *C:/directory/file.exe* |
+ * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
+ * it appears in the underlying ResolverEvent
  */
-const RelatedEventDetail = memo(function ProcessEventListNarrowedByType({relatedEvent, pushToQueryParams, relatedEventsState, eventType}: {
+const RelatedEventDetail = memo(function RelatedEventDetail({relatedEvent, pushToQueryParams, relatedEventsState, eventType}: {
   relatedEvent: ResolverEvent;
   pushToQueryParams: (arg0: crumbInfo)=>unknown;
   relatedEventsState: RelatedEventDataEntryWithStats;
@@ -196,6 +209,7 @@ const RelatedEventDetail = memo(function ProcessEventListNarrowedByType({related
   const eventsString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedEventDetail.events', {
     defaultMessage: 'Events',
   });
+
   const matchingEvents = useMemo(() =>{
       return relatedEventsState.relatedEvents.reduce((a: ResolverEvent[] ,{relatedEvent, relatedEventType})=>{
         relatedEventType === eventType && a.push(relatedEvent)
@@ -203,6 +217,23 @@ const RelatedEventDetail = memo(function ProcessEventListNarrowedByType({related
       },[]);
     },
   [relatedEventsState, eventType]);
+
+  const sections = useMemo(()=>{
+    const {agent, ecs, process, ...relevantData} = relatedEvent as ResolverEvent & {ecs: unknown};
+    const sections: {sectionTitle: string, entries: Array<{title: string, description: string}>}[] = Object.entries(relevantData).map(([sectionTitle, val])=>{
+      if(sectionTitle === '@timestamp') {
+        return {sectionTitle, entries: [{title: 'time', description: formatDate(val)}]};
+      }
+      if(typeof val !== 'object'){
+        return {sectionTitle, entries: [{title: sectionTitle, description: `${val}`}]};
+      }
+      return {sectionTitle, entries: [...surfacePrimitives(val)]}
+    });
+    return sections;
+  },[])
+
+  
+
   const crumbs = useMemo(()=>{
     return [
       {
@@ -227,10 +258,18 @@ const RelatedEventDetail = memo(function ProcessEventListNarrowedByType({related
       }
     ]
   },[]);
-  return (<>
+  return (
+  <>
     <EuiBreadcrumbs breadcrumbs={crumbs} />
     <EuiSpacer  size="l" />
-    
+    <EuiText textAlign="center"><BoldCode>{eventType + ' ' + event.ecsEventType(relatedEvent)}</BoldCode></EuiText>
+    <EuiText textAlign="center">{event.descriptiveName(relatedEvent)}</EuiText>
+    <EuiSpacer  size="l" />
+    {sections.map(({sectionTitle, entries})=>{
+      return (<EuiCard title={sectionTitle} description={''}>
+        <EuiDescriptionList type="inline" listItems={entries} />
+      </EuiCard>)
+    })} 
   </>)
 });
 
@@ -266,6 +305,7 @@ const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByT
           formattedDate,
           eventType: eventType + ' ' + event.ecsEventType(resolverEvent),
           name: event.descriptiveName(resolverEvent),
+          entityId: event.entityId(resolverEvent),
         }
       })
     },
@@ -299,7 +339,7 @@ const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByT
           <>
             <EuiText><BoldCode>{eventView.eventType}</BoldCode>{' @ '}{eventView.formattedDate}</EuiText>
             <EuiSpacer  size="xs" />
-            <EuiButtonEmpty onClick={()=>{}}>{eventView.name}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={()=>{ pushToQueryParams({crumbId: eventView.entityId, crumbEvent: processEntityId}) }}>{eventView.name}</EuiButtonEmpty>
             {index === matchingEvents.length - 1 ? null : (<EuiHorizontalRule margin="m" />)}
           </>
         )
@@ -743,7 +783,7 @@ const PanelContent = memo(function PanelContent() {
           //Return an indication that it no longer exists (it may have been removed/purged/etc.)
           return console.log('relatedEventDNE'),<TableServiceError errorMessage={relatedEventDNEMessage} pushToQueryParams={pushToQueryParams} />;
         }
-        return console.log('relatedEventDetail'),'relatedEventDetail';
+        return console.log('relatedEventDetail'),<RelatedEventDetail relatedEvent={eventFromCrumbId.relatedEvent} pushToQueryParams={pushToQueryParams} relatedEventsState={relatedEventsState} eventType={event.eventType(eventFromCrumbId.relatedEvent)} />;
       }
     }
     else if(graphableProcessEntityIds.has(crumbId)) {

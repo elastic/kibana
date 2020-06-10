@@ -132,8 +132,8 @@ export function descriptiveName(event: ResolverEvent): string {
   }
   if (ecsCategory === 'file' && isRecordNamable(event, ecsCategory)){
     if(event?.file?.path) {
-      const ecsType = event?.event?.type;
-      return `${ecsType ? ecsType + ': ' : ''}${event.file.path}`;
+      
+      return `${event.file.path}`;
     }
   }
 
@@ -141,8 +141,8 @@ export function descriptiveName(event: ResolverEvent): string {
   if (ecsCategory === 'registry' && isRecordNamable(event, ecsCategory)){
     const pathOrKey = event?.registry?.path || event?.registry?.key;
     if(pathOrKey) {
-      const ecsType = event?.event?.type;
-      return `${ecsType ? ecsType + ': ' : ''}${pathOrKey}`;
+      
+      return `${pathOrKey}`;
     }
   }
   if (ecsCategory === 'dns' && isRecordNamable(event, ecsCategory)){
@@ -151,6 +151,6 @@ export function descriptiveName(event: ResolverEvent): string {
     }
   }
 
-  //Fall back on eventName if we can't fish a more descriptive one out.
-  return eventName(event);
+  //Fall back on entityId if we can't fish a more descriptive name out.
+  return entityId(event);
 }
