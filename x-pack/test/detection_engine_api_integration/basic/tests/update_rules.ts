@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should give a 404 if it is given a fake id', async () => {
         const simpleRule = getSimpleRule();
-        simpleRule.id = 'fake_id';
+        simpleRule.id = '5096dec6-b6b9-4d8d-8f93-6c2602079d9d';
         delete simpleRule.rule_id;
 
         const { body } = await supertest
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           status_code: 404,
-          message: 'id: "fake_id" not found',
+          message: 'id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" not found',
         });
       });
 

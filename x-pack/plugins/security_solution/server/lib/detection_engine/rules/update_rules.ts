@@ -7,11 +7,12 @@
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerts/server';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
+import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
+import { Meta } from '../types';
 
 export const updateRules = async ({
   alertsClient,
@@ -43,11 +44,11 @@ export const updateRules = async ({
   references,
   version,
   note,
-  exceptions_list,
+  exceptionsList,
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: UpdateRuleParams): Promise<PartialAlert | null> => {
+}: UpdateRulesOptions): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
@@ -62,7 +63,7 @@ export const updateRules = async ({
     savedId,
     timelineId,
     timelineTitle,
-    meta,
+    meta: meta as Meta, // TODO: Remove this cast once we fix the types for calculate version and patch
     filters,
     from,
     index,
@@ -83,7 +84,7 @@ export const updateRules = async ({
   });
 
   // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
+  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
 
   const update = await alertsClient.update({
     id: rule.id,

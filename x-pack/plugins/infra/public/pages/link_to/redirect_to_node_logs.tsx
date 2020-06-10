@@ -71,7 +71,7 @@ export const RedirectToNodeLogs = ({
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/?${searchString}`} />;
+  return <Redirect to={`/stream?${searchString}`} />;
 };
 
 export const getNodeLogsUrl = ({

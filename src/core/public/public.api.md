@@ -1430,6 +1430,9 @@ export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'sel
 export type UnmountCallback = () => void;
 
 // @public
+export const URL_MAX_LENGTH: number;
+
+// @public
 export interface URLMeaningfulParts {
     // (undocumented)
     auth?: string | null;

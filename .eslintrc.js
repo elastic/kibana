@@ -91,7 +91,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/canvas/**/*.{js,ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
@@ -758,10 +757,6 @@ module.exports = {
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
-        // might be introduced after the other warns are fixed
-        // 'react/jsx-sort-props': 'error',
-        // might be introduced after the other warns are fixed
-        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
