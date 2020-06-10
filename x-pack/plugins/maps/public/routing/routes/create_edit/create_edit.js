@@ -299,21 +299,24 @@ export const MapsCreateEditView = class extends React.Component {
     const { setRefreshConfig } = this.props;
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
-    const query = getInitialQuery({
-      mapStateJSON,
-      appState: this.appStateManager.getAppState(),
-      userQueryLanguage: getUiSettings().get('search:queryLanguage'),
-    });
-    const time = getInitialTimeFilters({
-      mapStateJSON,
-      globalState,
-    });
-    const refreshConfig = getInitialRefreshConfig({
-      mapStateJSON,
-      globalState,
-    });
-    this.setState({ query, time, refreshConfig });
-    setRefreshConfig(refreshConfig);
+    const newState = {
+      query: getInitialQuery({
+        mapStateJSON,
+        appState: this.appStateManager.getAppState(),
+        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
+      }),
+      time: getInitialTimeFilters({
+        mapStateJSON,
+        globalState,
+      }),
+      refreshConfig: getInitialRefreshConfig({
+        mapStateJSON,
+        globalState,
+      }),
+    };
+    this.setState(newState);
+    updateGlobalState({ ...newState, refreshInterval: newState.refreshConfig });
+    setRefreshConfig(newState.refreshConfig);
   }
 
   initMapAndLayerSettings(savedMap) {
