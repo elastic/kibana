@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams, ChartData, ChartDataFetcher } from '../../typings/chart';
+import { ChartDataFetcher } from '../../typings/chart';
 import { IContextProvider } from '../../../../../src/core/public';
 
 export type DataAccessHandlerProvider = (
   context: Record<string, unknown>,
-  searchParams: SearchParams
-) => Promise<ChartData[]>;
+  ...args: Parameters<ChartDataFetcher>
+) => ReturnType<ChartDataFetcher>;
 
 export interface Setup {
   registerProvider: (
