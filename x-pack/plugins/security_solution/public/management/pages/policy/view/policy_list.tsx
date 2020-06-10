@@ -354,17 +354,14 @@ export const PolicyList = React.memo(() => {
   return (
     <>
       {showDelete && (
-        <>
-          <ConfirmDelete
-            hostCount={agentStatusSummary ? agentStatusSummary.total : 0}
-            onCancel={handleDeleteCancel}
-            isDeleting={isDeleting}
-            onConfirm={() => {
-              handleDeleteConfirmation({ policyId: policyIdToDelete });
-            }}
-          />
-          <SpyRoute />
-        </>
+        <ConfirmDelete
+          hostCount={agentStatusSummary ? agentStatusSummary.total : 0}
+          onCancel={handleDeleteCancel}
+          isDeleting={isDeleting}
+          onConfirm={() => {
+            handleDeleteConfirmation({ policyId: policyIdToDelete });
+          }}
+        />
       )}
       <ManagementPageView
         viewType="list"
