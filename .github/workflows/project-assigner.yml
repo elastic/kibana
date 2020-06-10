@@ -12,6 +12,6 @@ jobs:
         id: project_assigner
         with:
           issue-mappings: '[{"label": "Team:AppArch", "projectNumber": 37, "columnName": "To triage"}, {"label": "Feature:Lens", "projectNumber": 32, "columnName": "Long-term goals"}, {"label": "Team:Canvas", "projectNumber": 38, "columnName": "Inbox"}]'
-          ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          ghToken: ${{ secrets.GITHUB_TOKEN }}
 
 
