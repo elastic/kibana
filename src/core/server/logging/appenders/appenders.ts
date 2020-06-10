@@ -32,7 +32,7 @@ const appendersSchema = schema.oneOf([
   LegacyAppender.configSchema,
 ]);
 
-/** @internal */
+/** @public */
 export type AppenderConfigType = TypeOf<typeof appendersSchema>;
 
 /**

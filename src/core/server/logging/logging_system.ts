@@ -22,23 +22,35 @@ import { LogLevel } from './log_level';
 import { BaseLogger, Logger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
 import { LoggerFactory } from './logger_factory';
-import { LoggingConfigType, LoggerConfigType, LoggingConfig } from './logging_config';
+import {
+  LoggingConfigType,
+  LoggerConfigType,
+  LoggingConfig,
+  LoggerContextConfigType,
+  LoggerContextConfigInput,
+  loggerContextConfigSchema,
+} from './logging_config';
 
 export type ILoggingSystem = PublicMethodsOf<LoggingSystem>;
+
 /**
  * System that is responsible for maintaining loggers and logger appenders.
  * @internal
  */
 export class LoggingSystem implements LoggerFactory {
-  private config?: LoggingConfig;
+  /** The configuration set by the user. */
+  private baseConfig?: LoggingConfig;
+  /** The fully computed configuration extended by context-specific configurations set programmatically */
+  private computedConfig?: LoggingConfig;
   private readonly appenders: Map<string, DisposableAppender> = new Map();
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
+  private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
     if (!this.loggers.has(context)) {
-      this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.config)));
+      this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.computedConfig)));
     }
     return this.loggers.get(context)!;
   }
@@ -55,31 +67,47 @@ export class LoggingSystem implements LoggerFactory {
    * @param rawConfig New config instance.
    */
   public upgrade(rawConfig: LoggingConfigType) {
-    const config = new LoggingConfig(rawConfig);
-    // Config update is asynchronous and may require some time to complete, so we should invalidate
-    // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
-    this.config = undefined;
+    const config = new LoggingConfig(rawConfig)!;
+    this.applyConfig(config);
+  }
 
-    // Appenders must be reset, so we first dispose of the current ones, then
-    // build up a new set of appenders.
-    for (const appender of this.appenders.values()) {
-      appender.dispose();
-    }
-    this.appenders.clear();
+  /**
+   * Customizes the logging config for a specific context.
+   *
+   * @remarks
+   * Assumes that that the `context` property of the individual items in `rawConfig.loggers`
+   * are relative to the `baseContextParts`.
+   *
+   * @example
+   * Customize the configuration for the plugins.data.search context.
+   * ```ts
+   * loggingSystem.setContextConfig(
+   *   ['plugins', 'data'],
+   *   {
+   *     loggers: [{ context: 'search', appenders: ['default'] }]
+   *   }
+   * )
+   * ```
+   *
+   * @param baseContextParts
+   * @param rawConfig
+   */
+  public setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput) {
+    const context = LoggingConfig.getLoggerContext(baseContextParts);
+    const contextConfig = loggerContextConfigSchema.validate(rawConfig);
+    this.contextConfigs.set(context, {
+      ...contextConfig,
+      // Automatically prepend the base context to the logger sub-contexts
+      loggers: contextConfig.loggers.map((l) => ({
+        ...l,
+        context: LoggingConfig.getLoggerContext([context, l.context]),
+      })),
+    });
 
-    for (const [appenderKey, appenderConfig] of config.appenders) {
-      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
-    }
-
-    for (const [loggerKey, loggerAdapter] of this.loggers) {
-      loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
-    }
-
-    this.config = config;
-
-    // Re-log all buffered log records with newly configured appenders.
-    for (const logRecord of this.bufferAppender.flush()) {
-      this.get(logRecord.context).log(logRecord);
+    // If we already have a base config, apply the config. If not, custom context configs
+    // will be picked up on next call to `upgrade`.
+    if (this.baseConfig) {
+      this.applyConfig(this.baseConfig);
     }
   }
 
@@ -123,5 +151,42 @@ export class LoggingSystem implements LoggerFactory {
     // let's move up to the parent context (eg. `foo.bar`) and check if it has config we can rely on. Otherwise
     // we fallback to the `root` context that should always be defined (enforced by configuration schema).
     return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
+  }
+
+  private applyConfig(newBaseConfig: LoggingConfig) {
+    // Config update is asynchronous and may require some time to complete, so we should invalidate
+    // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
+    this.baseConfig = undefined;
+    this.computedConfig = undefined;
+
+    const computedConfig = [...this.contextConfigs.values()].reduce(
+      (baseConfig, contextConfig) => baseConfig.extend(contextConfig),
+      newBaseConfig
+    );
+
+    // Appenders must be reset, so we first dispose of the current ones, then
+    // build up a new set of appenders.
+    for (const appender of this.appenders.values()) {
+      appender.dispose();
+    }
+    this.appenders.clear();
+
+    for (const [appenderKey, appenderConfig] of computedConfig.appenders) {
+      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
+    }
+
+    for (const [loggerKey, loggerAdapter] of this.loggers) {
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, computedConfig));
+    }
+
+    // We keep a reference to the base config so we can properly extend it
+    // on each config change.
+    this.baseConfig = newBaseConfig;
+    this.computedConfig = computedConfig;
+
+    // Re-log all buffered log records with newly configured appenders.
+    for (const logRecord of this.bufferAppender.flush()) {
+      this.get(logRecord.context).log(logRecord);
+    }
   }
 }

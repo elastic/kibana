@@ -53,6 +53,7 @@ import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './ty
 import { LegacyService } from './legacy_service';
 import { coreMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -100,6 +101,7 @@ beforeEach(() => {
       metrics: metricsServiceMock.createInternalSetupContract(),
       uuid: uuidSetup,
       status: statusServiceMock.createInternalSetupContract(),
+      logging: loggingServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {

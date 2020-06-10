@@ -61,7 +61,7 @@ const createLoggerSchema = schema.object({
   level: createLevelSchema,
 });
 
-/** @internal */
+/** @public */
 export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
 export const config = {
   path: 'logging',
@@ -92,6 +92,23 @@ export const config = {
 };
 
 export type LoggingConfigType = TypeOf<typeof config.schema>;
+
+export const loggerContextConfigSchema = schema.object({
+  appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
+    defaultValue: new Map<string, AppenderConfigType>(),
+  }),
+
+  loggers: schema.arrayOf(createLoggerSchema, { defaultValue: [] }),
+});
+
+/** @public */
+export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
+/** @public */
+export interface LoggerContextConfigInput {
+  // config-schema knows how to handle either Maps or Records
+  appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
+  loggers?: LoggerConfigType[];
+}
 
 /**
  * Describes the config used to fully setup logging subsystem.
@@ -147,9 +164,29 @@ export class LoggingConfig {
    */
   public readonly loggers: Map<string, LoggerConfigType> = new Map();
 
-  constructor(configType: LoggingConfigType) {
+  constructor(private readonly configType: LoggingConfigType) {
     this.fillAppendersConfig(configType);
     this.fillLoggersConfig(configType);
+  }
+
+  /**
+   * Returns a new LoggingConfig that merges the existing config with the specified config.
+   *
+   * @remarks
+   * Does not support merging the `root` config property.
+   *
+   * @param contextConfig
+   */
+  public extend(contextConfig: LoggerContextConfigType) {
+    const mergedConfig: LoggingConfigType = {
+      appenders: new Map([...this.configType.appenders, ...contextConfig.appenders]),
+      // Could include duplicate contexts, however the logic in `fillLoggersConfig` should
+      // ensure the latest value wins (from the new config)
+      loggers: [...this.configType.loggers, ...contextConfig.loggers],
+      root: this.configType.root,
+    };
+
+    return new LoggingConfig(mergedConfig);
   }
 
   private fillAppendersConfig(loggingConfig: LoggingConfigType) {

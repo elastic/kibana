@@ -17,20 +17,35 @@
  * under the License.
  */
 
-export { Logger, LogMeta } from './logger';
-export { LoggerFactory } from './logger_factory';
-export { LogRecord } from './log_record';
-export { LogLevel } from './log_level';
-export {
-  config,
-  LoggingConfigType,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-} from './logging_config';
-export { LoggingSystem, ILoggingSystem } from './logging_system';
-export {
-  InternalLoggingServiceSetup,
-  LoggingServiceSetup,
+import {
   LoggingService,
+  LoggingServiceSetup,
+  InternalLoggingServiceSetup,
 } from './logging_service';
-export { AppenderConfigType } from './appenders/appenders';
+
+const createInternalSetupMock = (): jest.Mocked<InternalLoggingServiceSetup> => ({
+  configure: jest.fn(),
+});
+
+const createSetupMock = (): jest.Mocked<LoggingServiceSetup> => ({
+  configure: jest.fn(),
+});
+
+type LoggingServiceContract = PublicMethodsOf<LoggingService>;
+const createMock = (): jest.Mocked<LoggingServiceContract> => {
+  const service: jest.Mocked<LoggingServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  service.setup.mockReturnValue(createInternalSetupMock());
+
+  return service;
+};
+
+export const loggingServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupMock,
+  createInternalSetupContract: createInternalSetupMock,
+};

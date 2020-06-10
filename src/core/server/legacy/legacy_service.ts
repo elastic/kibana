@@ -305,6 +305,9 @@ export class LegacyService implements CoreService {
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
+      logging: {
+        configure: (config$) => setupDeps.core.logging.configure([], config$),
+      },
       metrics: {
         getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
       },

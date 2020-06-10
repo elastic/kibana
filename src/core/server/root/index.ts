@@ -42,7 +42,7 @@ export class Root {
     this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('root');
-    this.server = new Server(rawConfigProvider, env, this.logger);
+    this.server = new Server(rawConfigProvider, env, this.loggingSystem);
   }
 
   public async setup() {

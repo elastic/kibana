@@ -167,6 +167,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       isTlsEnabled: deps.http.isTlsEnabled,
       getServerInfo: deps.http.getServerInfo,
     },
+    logging: {
+      configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
+    },
     metrics: {
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },

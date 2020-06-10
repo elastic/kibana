@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockLoggingService } from './config_deprecation.test.mocks';
+import { mockLoggingSystem } from './config_deprecation.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
@@ -35,7 +35,7 @@ describe('configuration deprecations', () => {
 
     await root.setup();
 
-    const logs = loggingSystemMock.collect(mockLoggingService);
+    const logs = loggingSystemMock.collect(mockLoggingSystem);
     const warnings = logs.warn.flatMap((i) => i);
     expect(warnings).not.toContain(
       '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
@@ -55,7 +55,7 @@ describe('configuration deprecations', () => {
 
     await root.setup();
 
-    const logs = loggingSystemMock.collect(mockLoggingService);
+    const logs = loggingSystemMock.collect(mockLoggingSystem);
     const warnings = logs.warn.flatMap((i) => i);
     expect(warnings).toContain(
       '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'

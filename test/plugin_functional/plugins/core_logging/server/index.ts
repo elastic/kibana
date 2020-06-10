@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { loggingSystemMock } from '../../logging/logging_system.mock';
-export const mockLoggingSystem = loggingSystemMock.create();
-mockLoggingSystem.asLoggerFactory.mockImplementation(() => mockLoggingSystem);
-jest.doMock('../../logging/logging_system', () => ({
-  LoggingSystem: jest.fn(() => mockLoggingSystem),
-}));
+import type { PluginInitializerContext } from '../../../../../src/core/server';
+import { CoreLoggingPlugin } from './plugin';
+
+export const plugin = (init: PluginInitializerContext) => new CoreLoggingPlugin(init);

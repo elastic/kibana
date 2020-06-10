@@ -180,3 +180,169 @@ test('asLoggerFactory() only allows to create new loggers.', () => {
   expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchSnapshot(dynamicProps);
   expect(JSON.parse(mockConsoleLog.mock.calls[2][0])).toMatchSnapshot(dynamicProps);
 });
+
+test('setContextConfig() updates config with relative contexts', () => {
+  const testsLogger = system.get('tests');
+  const testsChildLogger = system.get('tests', 'child');
+  const testsGrandchildLogger = system.get('tests', 'child', 'grandchild');
+
+  system.upgrade(
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  system.setContextConfig(['tests', 'child'], {
+    appenders: new Map([
+      [
+        'custom',
+        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+      ],
+    ]),
+    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+  });
+
+  testsLogger.warn('tests log to default!');
+  testsChildLogger.error('tests.child log to default!');
+  testsGrandchildLogger.debug('tests.child.grandchild log to default and custom!');
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(4);
+  // Parent contexts are unaffected
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    context: 'tests',
+    message: 'tests log to default!',
+    level: 'WARN',
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchObject({
+    context: 'tests.child',
+    message: 'tests.child log to default!',
+    level: 'ERROR',
+  });
+  // Customized context is logged in both appender formats
+  expect(JSON.parse(mockConsoleLog.mock.calls[2][0])).toMatchObject({
+    context: 'tests.child.grandchild',
+    message: 'tests.child.grandchild log to default and custom!',
+    level: 'DEBUG',
+  });
+  expect(mockConsoleLog.mock.calls[3][0]).toMatchInlineSnapshot(
+    `"[DEBUG][tests.child.grandchild] tests.child.grandchild log to default and custom!"`
+  );
+});
+
+test('custom context configs are applied on subsequent calls to update()', () => {
+  system.setContextConfig(['tests', 'child'], {
+    appenders: new Map([
+      [
+        'custom',
+        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+      ],
+    ]),
+    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+  });
+
+  // Calling upgrade after setContextConfig should not throw away the context-specific config
+  system.upgrade(
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  system
+    .get('tests', 'child', 'grandchild')
+    .debug('tests.child.grandchild log to default and custom!');
+
+  // Customized context is logged in both appender formats still
+  expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    context: 'tests.child.grandchild',
+    message: 'tests.child.grandchild log to default and custom!',
+    level: 'DEBUG',
+  });
+  expect(mockConsoleLog.mock.calls[1][0]).toMatchInlineSnapshot(
+    `"[DEBUG][tests.child.grandchild] tests.child.grandchild log to default and custom!"`
+  );
+});
+
+test('subsequent calls to setContextConfig() for the same context override the previous config', () => {
+  system.upgrade(
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  system.setContextConfig(['tests', 'child'], {
+    appenders: new Map([
+      [
+        'custom',
+        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+      ],
+    ]),
+    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+  });
+
+  // Call again, this time with level: 'warn' and a different pattern
+  system.setContextConfig(['tests', 'child'], {
+    appenders: new Map([
+      [
+        'custom',
+        {
+          kind: 'console',
+          layout: { kind: 'pattern', pattern: '[%level][%logger] second pattern! %message' },
+        },
+      ],
+    ]),
+    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
+  });
+
+  const logger = system.get('tests', 'child', 'grandchild');
+  logger.debug('this should not show anywhere!');
+  logger.warn('tests.child.grandchild log to default and custom!');
+
+  // Only the warn log should have been logged
+  expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    context: 'tests.child.grandchild',
+    message: 'tests.child.grandchild log to default and custom!',
+    level: 'WARN',
+  });
+  expect(mockConsoleLog.mock.calls[1][0]).toMatchInlineSnapshot(
+    `"[WARN ][tests.child.grandchild] second pattern! tests.child.grandchild log to default and custom!"`
+  );
+});
+
+test('subsequent calls to setContextConfig() for the same context can disable the previous config', () => {
+  system.upgrade(
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  system.setContextConfig(['tests', 'child'], {
+    appenders: new Map([
+      [
+        'custom',
+        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+      ],
+    ]),
+    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+  });
+
+  // Call again, this time no customizations (effectively disabling)
+  system.setContextConfig(['tests', 'child'], {});
+
+  const logger = system.get('tests', 'child', 'grandchild');
+  logger.debug('this should not show anywhere!');
+  logger.warn('tests.child.grandchild log to default!');
+
+  // Only the warn log should have been logged once on the default appender
+  expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    context: 'tests.child.grandchild',
+    message: 'tests.child.grandchild log to default!',
+    level: 'WARN',
+  });
+});

@@ -1,0 +1,7 @@
+{
+  "id": "core_logging",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core_logging"],
+  "server": true
+}
