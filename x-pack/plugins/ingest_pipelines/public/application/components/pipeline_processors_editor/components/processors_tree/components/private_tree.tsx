@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 
 import { DropSpecialLocations } from '../../../constants';
@@ -15,25 +15,13 @@ import { isChildPath } from '../../../processors_reducer';
 import { DropZoneButton } from '.';
 import { TreeNode } from '.';
 import { calculateItemHeight } from '../utils';
-import { Action, ProcessorInfo } from '../processors_tree';
-
-export type PrivateAction =
-  | Action
-  | {
-      type: 'selectToMove';
-      payload: ProcessorInfo;
-    }
-  | {
-      type: 'cancelMove';
-    };
-
-export type PrivateOnActionHandler = (args: PrivateAction) => void;
+import { OnActionHandler, ProcessorInfo } from '../processors_tree';
 
 export interface PrivateProps {
   processors: ProcessorInternal[];
   selector: ProcessorSelector;
-  privateOnAction: PrivateOnActionHandler;
-  selectedProcessorInfo?: ProcessorInfo;
+  onAction: OnActionHandler;
+  movingProcessor?: ProcessorInfo;
   level: number;
   // Only passed into the top level list
   onHeightChange?: () => void;
@@ -71,8 +59,8 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
 export const PrivateTree: FunctionComponent<PrivateProps> = ({
   processors,
   selector,
-  selectedProcessorInfo,
-  privateOnAction,
+  movingProcessor,
+  onAction,
   level,
   windowScrollerRef,
   listRef,
@@ -91,17 +79,18 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
       <>
         {idx === 0 ? (
           <DropZoneButton
-            onClick={() => {
-              privateOnAction({
+            onClick={(event) => {
+              event.preventDefault();
+              onAction({
                 type: 'move',
                 payload: {
                   destination: selector.concat(DropSpecialLocations.top),
-                  source: selectedProcessorInfo!.selector,
+                  source: movingProcessor!.selector,
                 },
               });
             }}
             isDisabled={Boolean(
-              !selectedProcessorInfo || isDropZoneAboveDisabled(info, selectedProcessorInfo!)
+              !movingProcessor || isDropZoneAboveDisabled(info, movingProcessor!)
             )}
           />
         ) : undefined}
@@ -110,20 +99,19 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
             level={level}
             processor={processor}
             processorInfo={info}
-            privateOnAction={privateOnAction}
-            selectedProcessorInfo={selectedProcessorInfo}
+            onAction={onAction}
+            movingProcessor={movingProcessor}
           />
         </EuiFlexItem>
         <DropZoneButton
-          isDisabled={Boolean(
-            !selectedProcessorInfo || isDropZoneBelowDisabled(info, selectedProcessorInfo!)
-          )}
-          onClick={() => {
-            privateOnAction({
+          isDisabled={Boolean(!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor!))}
+          onClick={(event) => {
+            event.preventDefault();
+            onAction({
               type: 'move',
               payload: {
                 destination: selector.concat(String(idx + 1)),
-                source: selectedProcessorInfo!.selector,
+                source: movingProcessor!.selector,
               },
             });
           }}
@@ -147,58 +135,51 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
       <WindowScroller ref={windowScrollerRef} scrollElement={window}>
         {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
           return (
-            <EuiOutsideClickDetector
-              isDisabled={!selectedProcessorInfo}
-              onOutsideClick={() => {
-                privateOnAction({ type: 'cancelMove' });
-              }}
-            >
-              <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
-                <AutoSizer disableHeight>
-                  {({ width }) => {
-                    return (
-                      <div ref={registerChild}>
-                        <List
-                          ref={listRef}
-                          autoHeight
-                          height={height}
-                          width={width}
-                          overScanRowCount={5}
-                          isScrolling={isScrolling}
-                          onChildScroll={onChildScroll}
-                          scrollTop={scrollTop}
-                          rowCount={processors.length}
-                          rowHeight={({ index }) => {
-                            return calculateItemHeight({
-                              processor: processors[index],
-                              isFirstInArray: index === 0,
-                            });
-                          }}
-                          rowRenderer={({ index: idx, style }) => {
-                            const processor = processors[idx];
-                            const above = processors[idx - 1];
-                            const below = processors[idx + 1];
-                            const info: ProcessorInfo = {
-                              id: processor.id,
-                              selector: selector.concat(String(idx)),
-                              aboveId: above?.id,
-                              belowId: below?.id,
-                            };
+            <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
+              <AutoSizer disableHeight>
+                {({ width }) => {
+                  return (
+                    <div ref={registerChild}>
+                      <List
+                        ref={listRef}
+                        autoHeight
+                        height={height}
+                        width={width}
+                        overScanRowCount={5}
+                        isScrolling={isScrolling}
+                        onChildScroll={onChildScroll}
+                        scrollTop={scrollTop}
+                        rowCount={processors.length}
+                        rowHeight={({ index }) => {
+                          return calculateItemHeight({
+                            processor: processors[index],
+                            isFirstInArray: index === 0,
+                          });
+                        }}
+                        rowRenderer={({ index: idx, style }) => {
+                          const processor = processors[idx];
+                          const above = processors[idx - 1];
+                          const below = processors[idx + 1];
+                          const info: ProcessorInfo = {
+                            id: processor.id,
+                            selector: selector.concat(String(idx)),
+                            aboveId: above?.id,
+                            belowId: below?.id,
+                          };
 
-                            return (
-                              <div style={style} key={processor.id}>
-                                {renderRow({ processor, info, idx })}
-                              </div>
-                            );
-                          }}
-                          processors={processors}
-                        />
-                      </div>
-                    );
-                  }}
-                </AutoSizer>
-              </EuiFlexGroup>
-            </EuiOutsideClickDetector>
+                          return (
+                            <div style={style} key={processor.id}>
+                              {renderRow({ processor, info, idx })}
+                            </div>
+                          );
+                        }}
+                        processors={processors}
+                      />
+                    </div>
+                  );
+                }}
+              </AutoSizer>
+            </EuiFlexGroup>
           );
         }}
       </WindowScroller>

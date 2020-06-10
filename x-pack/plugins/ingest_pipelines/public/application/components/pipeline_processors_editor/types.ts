@@ -7,6 +7,7 @@
 import { ESCommonProcessorOptions } from '../../../../common/types';
 import { OnFormUpdateArg } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SerializeResult } from './serialize';
+import { ProcessorInfo } from './components/processors_tree';
 
 /**
  * An array of keys that map to a value in an object
@@ -40,3 +41,14 @@ export interface FormValidityState {
 export interface OnUpdateHandlerArg extends FormValidityState {
   getData: () => SerializeResult;
 }
+
+/**
+ * The editor can be in different modes. This enables us to hold
+ * a reference to data dispatch to * the reducer (like the {@link ProcessorSelector}
+ * which will be used to update the in-memory processors data structure.
+ */
+export type EditorMode =
+  | { id: 'creatingProcessor'; arg: ProcessorSelector }
+  | { id: 'movingProcessor'; arg: ProcessorInfo }
+  | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
+  | { id: 'idle' };

@@ -8,20 +8,20 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, memo, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiText,
-  EuiLink,
   EuiIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
+  EuiLink,
   EuiPopover,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
-import { ProcessorInternal } from '../../../types';
+import { ProcessorInternal } from '../../types';
 
-import { usePipelineProcessorsContext } from '../../../context';
+import { usePipelineProcessorsContext } from '../../context';
 
 export interface Handlers {
   onMove: () => void;
@@ -43,11 +43,18 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
   ({
     processor,
     description,
-    handlers: { onMove, onCancelMove, onAddOnFailure, onEdit, onDelete, onDuplicate },
+    handlers: { onAddOnFailure, onCancelMove, onDelete, onDuplicate, onEdit, onMove },
     selected,
   }) => {
-    const { links } = usePipelineProcessorsContext();
+    const {
+      links,
+      state: { editor },
+    } = usePipelineProcessorsContext();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
+
+    const disabled = editor.mode.id !== 'idle';
+    const shouldDarkBold =
+      editor.mode.id === 'editingProcessor' ? processor.id === editor.mode.arg.processor.id : true;
 
     const contextMenuItems = [
       <EuiContextMenuItem
@@ -103,7 +110,9 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
-              <b>{processor.type}</b>
+              <EuiText color={shouldDarkBold ? undefined : 'subdued'}>
+                <b>{processor.type}</b>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
               {description ? (
@@ -138,49 +147,32 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.item.editButtonLabel',
+              <EuiButtonIcon
+                disabled={disabled}
+                aria-label={i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.item.editButtonAriaLabel',
                   {
                     defaultMessage: 'Edit this processor',
                   }
                 )}
-              >
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.item.editButtonAriaLabel',
-                    {
-                      defaultMessage: 'Edit this processor',
-                    }
-                  )}
-                  iconType="pencil"
-                  size="s"
-                  onClick={onEdit}
-                />
-              </EuiToolTip>
+                iconType="pencil"
+                size="s"
+                onClick={onEdit}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {selected ? (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonLabel',
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonAriaLabel',
                     {
                       defaultMessage: 'Cancel moving this processor',
                     }
                   )}
-                >
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonAriaLabel',
-                      {
-                        defaultMessage: 'Cancel moving this processor',
-                      }
-                    )}
-                    size="s"
-                    onClick={onCancelMove}
-                    iconType="crossInACircleFilled"
-                  />
-                </EuiToolTip>
+                  size="s"
+                  onClick={onCancelMove}
+                  iconType="crossInACircleFilled"
+                />
               ) : (
                 <EuiToolTip
                   content={i18n.translate(
@@ -191,6 +183,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   )}
                 >
                   <EuiButtonIcon
+                    disabled={disabled}
                     aria-label={i18n.translate(
                       'xpack.ingestPipelines.pipelineEditor.item.moveButtonAriaLabel',
                       {
@@ -214,6 +207,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             closePopover={() => setIsContextMenuOpen(false)}
             button={
               <EuiButtonIcon
+                disabled={disabled}
                 onClick={() => setIsContextMenuOpen((v) => !v)}
                 iconType="boxesHorizontal"
                 aria-label={i18n.translate(
@@ -229,14 +223,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  },
-  (prev, current) => {
-    return (
-      prev.handlers === current.handlers &&
-      prev.processor === current.processor &&
-      prev.description === current.description &&
-      prev.selected === current.selected
     );
   }
 );

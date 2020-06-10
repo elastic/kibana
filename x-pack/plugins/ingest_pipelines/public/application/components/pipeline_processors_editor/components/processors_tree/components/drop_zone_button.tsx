@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 
 export interface Props {
   isDisabled: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
 const MOVE_HERE_COPY = i18n.translate('xpack.ingestPipelines.pipelineEditor.moveTargetLabel', {

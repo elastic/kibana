@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, FunctionComponent, useContext } from 'react';
+import React, { createContext, Dispatch, FunctionComponent, useContext, useState } from 'react';
 import { IdGenerator } from './services';
+import { EditorMode } from './types';
 
 interface Links {
   learnMoreAboutProcessorsUrl: string;
@@ -19,13 +20,13 @@ interface Services {
 const PipelineProcessorsContext = createContext<{
   services: Services;
   links: Links;
-}>({
-  services: {} as any,
-  links: {
-    learnMoreAboutProcessorsUrl: '',
-    learnMoreAboutOnFailureProcessorsUrl: '',
-  },
-});
+  state: {
+    editor: {
+      mode: EditorMode;
+      setMode: Dispatch<EditorMode>;
+    };
+  };
+}>({} as any);
 
 interface Props {
   services: Services;
@@ -37,8 +38,11 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   links,
   children,
 }) => {
+  const [mode, setMode] = useState<EditorMode>({ id: 'idle' });
   return (
-    <PipelineProcessorsContext.Provider value={{ services, links }}>
+    <PipelineProcessorsContext.Provider
+      value={{ services, links, state: { editor: { mode, setMode } } }}
+    >
       {children}
     </PipelineProcessorsContext.Provider>
   );

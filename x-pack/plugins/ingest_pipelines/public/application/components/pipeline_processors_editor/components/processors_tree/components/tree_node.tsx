@@ -8,59 +8,62 @@ import React, { FunctionComponent, useMemo } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText } from '@elastic/eui';
+
 import { ProcessorInternal } from '../../../types';
 
-import { PipelineProcessorsEditorItem, Handlers, AddProcessorButton } from '.';
+import { ProcessorInfo, OnActionHandler } from '../processors_tree';
 
-import { ProcessorInfo } from '../processors_tree';
-import { PrivateTree, PrivateOnActionHandler } from './private_tree';
+import { PipelineProcessorsEditorItem, Handlers } from '../../pipeline_processors_editor_item';
+import { AddProcessorButton } from '../../add_processor_button';
+
+import { PrivateTree } from './private_tree';
 
 export interface Props {
   processor: ProcessorInternal;
   processorInfo: ProcessorInfo;
-  privateOnAction: PrivateOnActionHandler;
+  onAction: OnActionHandler;
   level: number;
-  selectedProcessorInfo?: ProcessorInfo;
+  movingProcessor?: ProcessorInfo;
 }
 
 export const TreeNode: FunctionComponent<Props> = ({
   processor,
   processorInfo,
-  privateOnAction,
-  selectedProcessorInfo,
+  onAction,
+  movingProcessor,
   level,
 }) => {
   const stringSelector = processorInfo.selector.join('.');
   const handlers = useMemo((): Handlers => {
     return {
       onMove: () => {
-        privateOnAction({ type: 'selectToMove', payload: processorInfo });
+        onAction({ type: 'selectToMove', payload: { info: processorInfo } });
       },
       onCancelMove: () => {
-        privateOnAction({ type: 'cancelMove' });
+        onAction({ type: 'cancelMove' });
       },
       onDuplicate: () => {
-        privateOnAction({ type: 'duplicate', payload: { source: processorInfo.selector } });
+        onAction({ type: 'duplicate', payload: { source: processorInfo.selector } });
       },
       onDelete: () => {
-        privateOnAction({
+        onAction({
           type: 'remove',
           payload: { selector: processorInfo.selector, processor },
         });
       },
       onEdit: () => {
-        privateOnAction({
+        onAction({
           type: 'edit',
           payload: { processor, selector: processorInfo.selector },
         });
       },
       onAddOnFailure: () => {
-        privateOnAction({ type: 'addProcessor', payload: { target: processorInfo.selector } });
+        onAction({ type: 'addProcessor', payload: { target: processorInfo.selector } });
       },
     };
-  }, [privateOnAction, stringSelector, processor]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [onAction, stringSelector, processor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const selected = selectedProcessorInfo?.id === processor.id;
+  const selected = movingProcessor?.id === processor.id;
 
   const panelClasses = classNames({
     'pipelineProcessorsEditor__tree__item--selected': selected,
@@ -73,7 +76,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         handlers={handlers}
         // TODO: Replace with processor.options.description when it is available
         description={processor.options.tag}
-        selected={Boolean(selectedProcessorInfo?.id === processor.id)}
+        selected={Boolean(movingProcessor?.id === processor.id)}
       />
       {processor.onFailure?.length ? (
         <div
@@ -91,14 +94,14 @@ export const TreeNode: FunctionComponent<Props> = ({
           </EuiText>
           <PrivateTree
             level={level + 1}
-            selectedProcessorInfo={selectedProcessorInfo}
-            privateOnAction={privateOnAction}
+            movingProcessor={movingProcessor}
+            onAction={onAction}
             selector={processorInfo.selector.concat('onFailure')}
             processors={processor.onFailure}
           />
           <AddProcessorButton
             onClick={() =>
-              privateOnAction({
+              onAction({
                 type: 'addProcessor',
                 payload: { target: processorInfo.selector.concat('onFailure') },
               })

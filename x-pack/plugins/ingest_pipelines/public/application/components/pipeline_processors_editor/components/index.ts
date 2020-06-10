@@ -8,9 +8,9 @@ export { SettingsFormFlyout, OnSubmitHandler } from './settings_form_flyout';
 
 export { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
 
-export * from './processors_tree';
+export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 
-export { PipelineProcessorsEditorItem } from './processors_tree/components/pipeline_processors_editor_item';
+export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item/pipeline_processors_editor_item';
 
 export { ProcessorRemoveModal } from './processor_remove_modal';
 

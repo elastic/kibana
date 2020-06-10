@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ProcessorsTree, OnActionHandler, ProcessorInfo } from './processors_tree';
+export { PipelineProcessorsEditorItem, Handlers } from './pipeline_processors_editor_item';

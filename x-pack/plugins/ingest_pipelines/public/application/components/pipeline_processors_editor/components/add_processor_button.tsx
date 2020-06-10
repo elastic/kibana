@@ -7,14 +7,23 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { usePipelineProcessorsContext } from '../context';
 
 export interface Props {
   onClick: () => void;
 }
 
 export const AddProcessorButton: FunctionComponent<Props> = ({ onClick }) => {
+  const {
+    state: { editor },
+  } = usePipelineProcessorsContext();
   return (
-    <EuiButtonEmpty iconSide="left" iconType="plusInCircle" onClick={onClick}>
+    <EuiButtonEmpty
+      disabled={editor.mode.id !== 'idle'}
+      iconSide="left"
+      iconType="plusInCircle"
+      onClick={onClick}
+    >
       {i18n.translate('xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel', {
         defaultMessage: 'Add a processor',
       })}

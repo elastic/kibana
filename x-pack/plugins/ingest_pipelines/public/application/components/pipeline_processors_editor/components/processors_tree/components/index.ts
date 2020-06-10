@@ -6,10 +6,6 @@
 
 export { DropZoneButton } from './drop_zone_button';
 
-export { PrivateTree, PrivateOnActionHandler } from './private_tree';
+export { PrivateTree } from './private_tree';
 
 export { TreeNode } from './tree_node';
-
-export { PipelineProcessorsEditorItem, Handlers } from './pipeline_processors_editor_item';
-
-export { AddProcessorButton } from './add_processor_button';

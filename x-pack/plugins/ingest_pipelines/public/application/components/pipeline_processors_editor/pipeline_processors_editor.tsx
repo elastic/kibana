@@ -20,8 +20,6 @@ import {
   OnSubmitHandler,
 } from './components';
 
-import { usePipelineProcessorsContext } from './context';
-
 import {
   ProcessorInternal,
   ProcessorSelector,
@@ -32,16 +30,7 @@ import {
 
 import { serialize } from './serialize';
 import { getValue } from './utils';
-
-/**
- * The settings form can be in different modes. This enables us to hold
- * a reference to data dispatch to * the reducer (like the {@link ProcessorSelector}
- * which will be used to update the in-memory processors data structure.
- */
-export type SettingsFormMode =
-  | { id: 'creatingProcessor'; arg: ProcessorSelector }
-  | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
-  | { id: 'closed' };
+import { usePipelineProcessorsContext } from './context';
 
 export interface Props {
   processors: ProcessorInternal[];
@@ -64,12 +53,14 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     isTestButtonDisabled,
     onUpdate,
   }) {
-    const { services } = usePipelineProcessorsContext();
+    const {
+      services,
+      state: { editor },
+    } = usePipelineProcessorsContext();
+    const { mode: editorMode, setMode: setEditorMode } = editor;
     const [processorToDeleteSelector, setProcessorToDeleteSelector] = useState<
       ProcessorSelector | undefined
     >();
-
-    const [settingsFormMode, setSettingsFormMode] = useState<SettingsFormMode>({ id: 'closed' });
 
     const [formState, setFormState] = useState<FormValidityState>({
       validate: () => Promise.resolve(true),
@@ -97,7 +88,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       onUpdate({
         validate: async () => {
           const formValid = await formState.validate();
-          return formValid && settingsFormMode.id === 'closed';
+          return formValid && editorMode.id === 'idle';
         },
         getData: () =>
           serialize({
@@ -105,24 +96,17 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             processors,
           }),
       });
-    }, [
-      processors,
-      onFailureProcessors,
-      onUpdate,
-      formState,
-      settingsFormMode,
-      showGlobalOnFailure,
-    ]);
+    }, [processors, onFailureProcessors, onUpdate, formState, editorMode, showGlobalOnFailure]);
 
     const onSubmit = useCallback<OnSubmitHandler>(
       (processorTypeAndOptions) => {
-        switch (settingsFormMode.id) {
+        switch (editorMode.id) {
           case 'creatingProcessor':
             processorsDispatch({
               type: 'addProcessor',
               payload: {
                 processor: { id: services.idGenerator.getId(), ...processorTypeAndOptions },
-                targetSelector: settingsFormMode.arg,
+                targetSelector: editorMode.arg,
               },
             });
             break;
@@ -131,45 +115,44 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               type: 'updateProcessor',
               payload: {
                 processor: {
-                  ...settingsFormMode.arg.processor,
+                  ...editorMode.arg.processor,
                   ...processorTypeAndOptions,
                 },
-                selector: settingsFormMode.arg.selector,
+                selector: editorMode.arg.selector,
               },
             });
             break;
           default:
         }
-        dismissFlyout();
+        setEditorMode({ id: 'idle' });
       },
-      [processorsDispatch, settingsFormMode, services.idGenerator]
+      [processorsDispatch, editorMode, setEditorMode, services.idGenerator]
     );
 
     const onCloseSettingsForm = useCallback(() => {
-      dismissFlyout();
+      setEditorMode({ id: 'idle' });
       setFormState({ validate: () => Promise.resolve(true) });
-    }, [setFormState]);
-
-    const dismissFlyout = () => {
-      setSettingsFormMode({ id: 'closed' });
-    };
+    }, [setFormState, setEditorMode]);
 
     const onTreeAction = useCallback<OnActionHandler>(
       (action) => {
         switch (action.type) {
           case 'edit':
-            setSettingsFormMode({
+            setEditorMode({
               id: 'editingProcessor',
               arg: { processor: action.payload.processor, selector: action.payload.selector },
             });
             break;
           case 'remove':
+            setEditorMode({ id: 'idle' });
             setProcessorToDeleteSelector(action.payload.selector);
             break;
           case 'addProcessor':
-            setSettingsFormMode({ id: 'creatingProcessor', arg: action.payload.target });
+            setEditorMode({ id: 'idle' });
+            setEditorMode({ id: 'creatingProcessor', arg: action.payload.target });
             break;
           case 'move':
+            setEditorMode({ id: 'idle' });
             processorsDispatch({
               type: 'moveProcessor',
               payload: action.payload,
@@ -184,10 +167,18 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               },
             });
             break;
+          case 'selectToMove':
+            setEditorMode({ id: 'movingProcessor', arg: action.payload.info });
+            break;
+          case 'cancelMove':
+            setEditorMode({ id: 'idle' });
+            break;
         }
       },
-      [processorsDispatch, setSettingsFormMode, services.idGenerator]
+      [processorsDispatch, setEditorMode, services.idGenerator]
     );
+
+    const movingProcessor = editorMode.id === 'movingProcessor' ? editorMode.arg : undefined;
 
     return (
       <div className="pipelineProcessorsEditor">
@@ -203,6 +194,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               baseSelector={PROCESSOR_STATE_SCOPE}
               processors={processors}
               onAction={onTreeAction}
+              movingProcessor={movingProcessor}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -230,19 +222,16 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                 baseSelector={ON_FAILURE_STATE_SCOPE}
                 processors={onFailureProcessors}
                 onAction={onTreeAction}
+                movingProcessor={movingProcessor}
               />
             </EuiFlexItem>
           ) : undefined}
         </EuiFlexGroup>
-        {settingsFormMode.id !== 'closed' ? (
+        {editorMode.id === 'editingProcessor' || editorMode.id === 'creatingProcessor' ? (
           <SettingsFormFlyout
             onFormUpdate={onFormUpdate}
             onSubmit={onSubmit}
-            processor={
-              settingsFormMode.id === 'editingProcessor'
-                ? settingsFormMode.arg.processor
-                : undefined
-            }
+            processor={editorMode.id === 'editingProcessor' ? editorMode.arg.processor : undefined}
             onClose={onCloseSettingsForm}
           />
         ) : undefined}

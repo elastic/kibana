@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent, useState, memo, useCallback, useRef, useEffect } from 'react';
+import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keyCodes } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import './processors_tree.scss';
-
-import { PrivateOnActionHandler, PrivateTree, AddProcessorButton } from './components';
+import { AddProcessorButton } from '../add_processor_button';
+import { PrivateTree } from './components';
 
 export interface ProcessorInfo {
   id: string;
@@ -21,6 +21,8 @@ export interface ProcessorInfo {
 
 export type Action =
   | { type: 'move'; payload: { source: ProcessorSelector; destination: ProcessorSelector } }
+  | { type: 'selectToMove'; payload: { info: ProcessorInfo } }
+  | { type: 'cancelMove' }
   | { type: 'edit'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } }
   | { type: 'duplicate'; payload: { source: ProcessorSelector } }
   | { type: 'addProcessor'; payload: { target: ProcessorSelector } }
@@ -32,6 +34,7 @@ export interface Props {
   processors: ProcessorInternal[];
   baseSelector: ProcessorSelector;
   onAction: OnActionHandler;
+  movingProcessor?: ProcessorInfo;
 }
 
 /**
@@ -39,56 +42,40 @@ export interface Props {
  * also contains top-level state concerns for an instance of the component
  */
 export const ProcessorsTree: FunctionComponent<Props> = memo(
-  ({ processors, baseSelector, onAction }) => {
+  ({ processors, baseSelector, onAction, movingProcessor }) => {
     // These refs are created here so they can be shared with all
     // recursively rendered trees. Their values should come from react-virtualized
     // List component and WindowScroller component.
     const windowScrollerRef = useRef<any>();
     const listRef = useRef<any>();
 
-    const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
-
     useEffect(() => {
-      const cancelMoveListener = (event: KeyboardEvent) => {
+      const cancelMoveKbListener = (event: KeyboardEvent) => {
         // x-browser support per https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
         if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
-          setSelectedProcessorInfo(undefined);
+          onAction({ type: 'cancelMove' });
         }
       };
-      if (selectedProcessorInfo) {
-        window.addEventListener('keyup', cancelMoveListener);
-      } else {
-        window.removeEventListener('keyup', cancelMoveListener);
-      }
-      return () => window.removeEventListener('keyup', cancelMoveListener);
-    }, [selectedProcessorInfo]);
-
-    const privateOnAction = useCallback<PrivateOnActionHandler>(
-      (action) => {
-        if (action.type === 'selectToMove') {
-          setSelectedProcessorInfo(action.payload);
-          return;
+      const cancelMoveClickListener = (ev: any) => {
+        onAction({ type: 'cancelMove' });
+      };
+      // Give the browser a chance to flush any click events including the click
+      // event that triggered any state transition into selecting a processor to move
+      setTimeout(() => {
+        if (movingProcessor) {
+          window.addEventListener('keyup', cancelMoveKbListener);
+          window.addEventListener('click', cancelMoveClickListener);
+        } else {
+          window.removeEventListener('keyup', cancelMoveKbListener);
+          window.removeEventListener('click', cancelMoveClickListener);
         }
+      });
+      return () => {
+        window.removeEventListener('keyup', cancelMoveKbListener);
+        window.removeEventListener('click', cancelMoveClickListener);
+      };
+    }, [movingProcessor, onAction]);
 
-        if (action.type === 'cancelMove') {
-          setSelectedProcessorInfo(undefined);
-          return;
-        }
-
-        if (
-          action.type === 'move' ||
-          action.type === 'edit' ||
-          action.type === 'remove' ||
-          action.type === 'addProcessor' ||
-          action.type === 'duplicate'
-        ) {
-          onAction(action);
-          setSelectedProcessorInfo(undefined);
-          return;
-        }
-      },
-      [onAction, setSelectedProcessorInfo]
-    );
     return (
       <EuiFlexGroup
         direction="column"
@@ -102,8 +89,8 @@ export const ProcessorsTree: FunctionComponent<Props> = memo(
             listRef={listRef}
             onHeightChange={() => windowScrollerRef.current?.updatePosition()}
             level={1}
-            privateOnAction={privateOnAction}
-            selectedProcessorInfo={selectedProcessorInfo}
+            onAction={onAction}
+            movingProcessor={movingProcessor}
             processors={processors}
             selector={baseSelector}
           />
@@ -113,7 +100,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false}>
               <AddProcessorButton
                 onClick={() => {
-                  privateOnAction({ type: 'addProcessor', payload: { target: baseSelector } });
+                  onAction({ type: 'addProcessor', payload: { target: baseSelector } });
                 }}
               />
             </EuiFlexItem>
