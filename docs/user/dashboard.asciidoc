@@ -159,6 +159,8 @@ When you're finished adding and arranging the panels, save the dashboard.
 
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
+include::{kib-repo-dir}/drilldowns/drilldowns.asciidoc[]
+
 [[sharing-dashboards]]
 == Share the dashboard
 
