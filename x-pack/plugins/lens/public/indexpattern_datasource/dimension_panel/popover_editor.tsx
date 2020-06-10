@@ -188,7 +188,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <FieldSelect
             currentIndexPattern={currentIndexPattern}
             existingFields={state.existingFields}
-            showEmptyFields={state.showEmptyFields}
             fieldMap={fieldMap}
             operationFieldSupportMatrix={operationFieldSupportMatrix}
             selectedColumnOperationType={selectedColumn && selectedColumn.operationType}

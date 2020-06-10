@@ -26,7 +26,6 @@ export interface FieldChoice {
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
-  showEmptyFields: boolean;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
@@ -39,7 +38,6 @@ export interface FieldSelectProps {
 
 export function FieldSelect({
   currentIndexPattern,
-  showEmptyFields,
   fieldMap,
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
@@ -86,7 +84,7 @@ export function FieldSelect({
             fieldExists(existingFields, currentIndexPattern.title, field),
           compatible: isCompatibleWithCurrentOperation(field),
         }))
-        .filter((field) => showEmptyFields || field.exists)
+        .filter((field) => field.exists)
         .sort((a, b) => {
           if (a.compatible && !b.compatible) {
             return -1;
@@ -126,7 +124,6 @@ export function FieldSelect({
     operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
-    showEmptyFields,
   ]);
 
   return (
