@@ -24,7 +24,7 @@ import { SavedObjectReference, SavedObjectsMigrationVersion } from '../../../typ
  */
 interface SavedObjectUiSettings<T = unknown> {
   attributes: T;
-  id?: string; // NOTE: SavedObjectUiSettings is used for uncreated objects where `id` is optional
+  id?: string;
   type: string;
   namespace?: string;
   namespaces?: string[];
