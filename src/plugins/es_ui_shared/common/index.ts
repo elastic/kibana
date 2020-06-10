@@ -17,14 +17,4 @@
  * under the License.
  */
 
-export {
-  AuthorizationContext,
-  AuthorizationProvider,
-  Error,
-  MissingPrivileges,
-  NotAuthorizedSection,
-  Privileges,
-  SectionError,
-  useAuthorizationContext,
-  WithPrivileges,
-} from '../../__packages_do_not_import__/authorization';
+export { Privileges, MissingPrivileges } from '../__packages_do_not_import__/authorization';
