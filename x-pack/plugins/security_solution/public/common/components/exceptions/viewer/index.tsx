@@ -4,18 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useMemo, useEffect, useReducer } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalBody,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import styled from 'styled-components';
+import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import { EuiOverlayMask, EuiModal, EuiModalBody, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import * as i18n from '../translations';
@@ -37,23 +27,9 @@ import {
   ExceptionIdentifiers,
   useApi,
 } from '../../../../../public/lists_plugin_deps';
-import { ExceptionItem } from './exception_item';
-import { AndOrBadge } from '../../and_or_badge';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exeptions_utility';
-
-const MyFlexItem = styled(EuiFlexItem)`
-  margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
-
-  &:first-child {
-    margin: ${({ theme }) => `${theme.eui.euiSizeXS} 0 ${theme.eui.euiSize}`};
-  }
-`;
-
-const MyExceptionsContainer = styled(EuiFlexGroup)`
-  height: 600px;
-  overflow: hidden;
-`;
+import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
 const initialState: State = {
   filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
@@ -70,7 +46,7 @@ const initialState: State = {
   exceptionToEdit: null,
   loadingLists: [],
   loadingItemIds: [],
-  isLoading: false,
+  isInitLoading: true,
   isModalOpen: false,
 };
 
@@ -96,7 +72,6 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
-  const [initLoading, setInitLoading] = useState(true);
   const onDispatchToaster = useCallback(
     ({ title, color, iconType }) => (): void => {
       dispatchToaster({
@@ -121,7 +96,7 @@ const ExceptionsViewerComponent = ({
       pagination,
       loadingLists,
       loadingItemIds,
-      isLoading,
+      isInitLoading,
       isModalOpen,
     },
     dispatch,
@@ -159,16 +134,6 @@ const ExceptionsViewerComponent = ({
     }),
   });
 
-  const setIsLoading = useCallback(
-    (loading: boolean): void => {
-      dispatch({
-        type: 'updateIsLoading',
-        isLoading: loading,
-      });
-    },
-    [dispatch]
-  );
-
   const setIsModalOpen = useCallback(
     (isOpen: boolean): void => {
       dispatch({
@@ -181,10 +146,9 @@ const ExceptionsViewerComponent = ({
 
   const onFetchList = useCallback((): void => {
     if (fetchList != null) {
-      setIsLoading(true);
       fetchList();
     }
-  }, [fetchList, setIsLoading]);
+  }, [fetchList]);
 
   const onFiltersChange = useCallback(
     ({ filter, pagination: pag }: Filter): void => {
@@ -270,11 +234,15 @@ const ExceptionsViewerComponent = ({
 
   // Logic for initial render
   useEffect((): void => {
-    if (initLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
-      setInitLoading(false);
+    if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
+      dispatch({
+        type: 'updateIsInitLoading',
+        loading: false,
+      });
     }
-  }, [initLoading, exceptions, loadingList]);
+  }, [isInitLoading, exceptions, loadingList, dispatch]);
 
+  // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {
     return services.application.getUrlForApp(
       `security#/detections/rules/id/${encodeURI(ruleId)}/edit`
@@ -282,8 +250,8 @@ const ExceptionsViewerComponent = ({
   }, [ruleId, services.application]);
 
   const showEmpty = useMemo((): boolean => {
-    return !initLoading && !loadingList && exceptions.length === 0;
-  }, [initLoading, exceptions.length, loadingList]);
+    return !isInitLoading && !loadingList && exceptions.length === 0;
+  }, [isInitLoading, exceptions.length, loadingList]);
 
   return (
     <>
@@ -299,13 +267,13 @@ const ExceptionsViewerComponent = ({
         </EuiOverlayMask>
       )}
 
-      <Panel loading={initLoading}>
-        {(initLoading || isLoading) && (
+      <Panel loading={isInitLoading || loadingList}>
+        {(isInitLoading || loadingList) && (
           <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
         )}
 
         <ExceptionsViewerHeader
-          isInitLoading={initLoading}
+          isInitLoading={isInitLoading}
           supportedListTypes={availableListTypes}
           detectionsListItems={detectionsList != null ? detectionsList.totalItems : 0}
           endpointListItems={endpointList != null ? endpointList.totalItems : 0}
@@ -322,48 +290,16 @@ const ExceptionsViewerComponent = ({
           ruleSettingsUrl={ruleSettingsUrl}
         />
 
-        <MyExceptionsContainer
-          gutterSize="none"
-          direction="column"
-          className="eui-yScrollWithShadows"
-        >
-          {showEmpty ? (
-            <EuiFlexItem grow={1}>
-              <EuiEmptyPrompt
-                iconType="advancedSettingsApp"
-                title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
-                body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
-                data-test-subj="exceptionsEmptyPrompt"
-              />
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
-              <EuiFlexGroup gutterSize="none" direction="column">
-                {!initLoading &&
-                  exceptions.length > 0 &&
-                  exceptions.map((exception, index) => (
-                    <MyFlexItem grow={false} key={exception.id}>
-                      {index !== 0 ? (
-                        <>
-                          <AndOrBadge type="or" />
-                          <EuiSpacer />
-                        </>
-                      ) : (
-                        <EuiSpacer size="s" />
-                      )}
-                      <ExceptionItem
-                        loadingItemIds={loadingItemIds}
-                        commentsAccordionId={commentsAccordionId}
-                        exceptionItem={exception}
-                        handleDelete={onDeleteException}
-                        handleEdit={onEditExceptionItem}
-                      />
-                    </MyFlexItem>
-                  ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </MyExceptionsContainer>
+        <ExceptionsViewerItems
+          showEmpty={showEmpty}
+          isInitLoading={isInitLoading}
+          exceptions={exceptions}
+          loadingItemIds={loadingItemIds}
+          commentsAccordionId={commentsAccordionId}
+          onDeleteException={onDeleteException}
+          onEditExceptionItem={onEditExceptionItem}
+        />
+
         <ExceptionsViewerPagination onPaginationChange={onFiltersChange} pagination={pagination} />
       </Panel>
     </>

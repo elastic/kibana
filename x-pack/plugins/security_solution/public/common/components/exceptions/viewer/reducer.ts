@@ -22,7 +22,7 @@ export interface State {
   exceptionToEdit: ExceptionListItemSchema | null;
   loadingLists: ExceptionIdentifiers[];
   loadingItemIds: ApiProps[];
-  isLoading: boolean;
+  isInitLoading: boolean;
   isModalOpen: boolean;
 }
 
@@ -39,7 +39,7 @@ export type Action =
       pagination: Partial<ExceptionsPagination>;
       allLists: ExceptionIdentifiers[];
     }
-  | { type: 'updateIsLoading'; isLoading: boolean }
+  | { type: 'updateIsInitLoading'; loading: boolean }
   | { type: 'updateModalOpen'; isOpen: boolean }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
   | { type: 'updateLoadingItemIds'; items: ApiProps[] };
@@ -66,7 +66,6 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         },
         allExceptions: action.exceptions,
         exceptions: action.exceptions,
-        isLoading: false,
       };
     }
     case 'updateFilterOptions': {
@@ -80,7 +79,6 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
           ...state.pagination,
           ...action.pagination,
         },
-        isLoading: true,
       };
 
       if (action.filterOptions.showEndpointList) {
@@ -104,10 +102,10 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         };
       }
     }
-    case 'updateIsLoading': {
+    case 'updateIsInitLoading': {
       return {
         ...state,
-        isLoading: action.isLoading,
+        isInitLoading: action.loading,
       };
     }
     case 'updateLoadingItemIds': {
