@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../../types';
 
-import { PipelineProcessorsEditorItem, Handlers } from './pipeline_processors_editor_item';
+import { PipelineProcessorsEditorItem, Handlers } from '.';
 
 import { TreeMode, ProcessorInfo } from '../processors_tree';
 import { PrivateTree, PrivateOnActionHandler } from './private_tree';

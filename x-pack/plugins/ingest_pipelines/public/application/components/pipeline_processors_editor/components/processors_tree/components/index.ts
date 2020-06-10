@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './drop_zone_button';
+export { DropZoneButton } from './drop_zone_button';
 
-export * from './private_tree';
+export { PrivateTree, PrivateOnActionHandler } from './private_tree';
 
-export * from './tree_node';
+export { TreeNode } from './tree_node';
 
-export * from './pipeline_processors_editor_item';
+export { PipelineProcessorsEditorItem, Handlers } from './pipeline_processors_editor_item';

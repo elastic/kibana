@@ -12,8 +12,8 @@ import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';
 import { isChildPath } from '../../../processors_reducer';
 
-import { DropZoneButton } from './drop_zone_button';
-import { TreeNode } from './tree_node';
+import { DropZoneButton } from '.';
+import { TreeNode } from '.';
 import { calculateItemHeight } from '../utils';
 import { TreeMode, Action, ProcessorInfo } from '../processors_tree';
 
