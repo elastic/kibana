@@ -16,13 +16,13 @@
 .mlDataGridChart__legend {
   color: $euiColorMediumShade;
   display: block;
-  overflow: hidden;
+  overflow-x: hidden;
   margin: $euiSizeXS $euiSizeXS 0px $euiSizeXS;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.75rem;
   font-style: italic;
-  line-height: 1;
+  line-height: 1.4;
   text-align: left;
 }
 
