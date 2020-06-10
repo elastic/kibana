@@ -132,6 +132,14 @@
   }
 }
 
+// LOADING and ERRORS
+
+.embPanel--loading {
+  .embPanel__title {
+    color: $euiTextSubduedColor;
+  }
+}
+
 .embPanel__error {
   text-align: center;
   justify-content: center;

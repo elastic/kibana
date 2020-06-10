@@ -195,6 +195,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const viewOnlyMode = this.state.viewMode === ViewMode.VIEW;
     const classes = classNames('embPanel', {
       'embPanel--editing': !viewOnlyMode,
+      'embPanel--loading': this.state.loading,
     });
 
     const contentAttrs: { [key: string]: boolean } = {};
