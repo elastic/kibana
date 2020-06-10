@@ -5,10 +5,12 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
+
 import { UIM_APP_LOAD } from '../../common/constants';
-import { IndexManagementHome } from './sections/home';
+import { IndexManagementHome, homeSections } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
@@ -32,7 +34,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={`/create_template`} component={TemplateCreate} />
     <Route exact path={`/clone_template/:name*`} component={TemplateClone} />
     <Route exact path={`/edit_template/:name*`} component={TemplateEdit} />
-    <Route path={`/:section(indices|templates)`} component={IndexManagementHome} />
+    <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
     <Redirect from={`/`} to={`/indices`} />
   </Switch>
 );
