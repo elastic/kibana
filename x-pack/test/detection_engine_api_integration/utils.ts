@@ -8,6 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
+import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/security_solution/common/constants';
 
@@ -61,10 +62,36 @@ export const getSimpleRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
 });
 
 /**
+ * This is a typical simple rule for testing that is easy for most basic testing
+ * @param ruleId
+ */
+export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index: ['auditbeat-*'],
+  type: 'query',
+  query: 'user.name: root or user.name: admin',
+});
+
+/**
  * This is a representative ML rule payload as expected by the server
  * @param ruleId
  */
 export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
+});
+
+export const getSimpleMlRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   anomaly_threshold: 44,
@@ -253,7 +280,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: RulesSchema): Buffer => {
+export const ruleToNdjson = (rule: Partial<RulesSchema>): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
