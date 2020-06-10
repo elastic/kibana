@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import {
   deleteAnalytics,
   deleteAnalyticsAndDestIndex,
@@ -30,6 +29,7 @@ import {
 } from '../../../../../capabilities/check_capabilities';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
+import { extractErrorMessage } from '../../../../../util/error_utils';
 
 interface DeleteActionProps {
   item: DataFrameAnalyticsListRow;
