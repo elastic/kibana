@@ -79,10 +79,39 @@ export function ecsEventType(event: ResolverEvent): string {
 }
 
 /**
+ * #Descriptive Names For Related Events:
+ * 
+ * The following section provides facilities for deriving **Descriptive Names** for ECS-compliant event data.
+ * There are drawbacks to trying to do this: It *will* require ongoing maintenance. It presents temptations to overarticulate.
+ * On balance, however, it seems that the benefit of giving the user some form of information they can recognize & scan outweighs the drawbacks.  
+ */
+
+/**
+ * A type that annotates the basic requirements for giving the event a `descriptive name`
+ */
+type detailRecord<T> = T extends 'registry' ? {path: unknown, key: unknown} : 
+  (T extends 'dns' ? {question: {name: unknown}} : 
+  (T extends 'network' ? {direction: unknown, forwarded_ip: unknown} : 
+  (T extends 'file' ? {path: unknown} : unknown)));
+type ecsRecordWithType<T extends string> = Record<T, detailRecord<T>>;
+
+/**
+ * Verify that the `ecsCategory` exists as a key on the event record. i.e. if ecsCategory is `registry`, the event is shaped like {registry: object}
+ * 
+ * @param event 
+ * @param ecsCategory 
+ */
+export function isRecordNamable<T extends string>(event: object, ecsCategory: T): event is ecsRecordWithType<T> {
+  //The goal here is to reach in and grab a better name for the event (if one exists) without being too obtrusive/assertive about ECS
+  return typeof (event as ecsRecordWithType<T>)[ecsCategory] === 'object';
+}
+
+/**
  * Based on the ECS category of the event, attempt to provide a more descriptive name
  * (e.g. the `event.registry.key` for `registry` or the `dns.question.name` for `dns`, etc.).
  * see: https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html
  * @param event The ResolverEvent to get the descriptive name for
+ * @returns { descriptiveName } An attempt at providing a readable name to the user
  */
 export function descriptiveName(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
@@ -90,28 +119,18 @@ export function descriptiveName(event: ResolverEvent): string {
   }
   //For the purposes of providing a descriptive name, we're taking the first entry in the `event.type`
   const ecsCategory = eventType(event);
-  type detailRecord<T> = T extends 'registry' ? {key: unknown} : 
-  (T extends 'dns' ? {question: {name: unknown}} : 
-  (T extends 'network' ? {direction: unknown, forwarded_ip: unknown} : 
-  (T extends 'file' ? {path: unknown} : unknown)));
-  type ecsRecordWithType<T extends string> = Record<T, detailRecord<T>>;
-  //Verify that the `ecsCategory` exists as a key on the event record. i.e. if ecsCategory is `registry`, the event is shaped like {registry: object}
-  //The goal here is to reach in and grab a better name for the event (if one exists) without being too obtrusive/assertive about ECS
-  function isRecordWithTypeAsKey<T extends string>(event: object, ecsCategory: T): event is ecsRecordWithType<T> {
-    return typeof (event as ecsRecordWithType<T>)[ecsCategory] === 'object';
-  }
 
   /**
    * This list of attempts can be expanded/adjusted as the underlying model changes over time:
    */
 
   //Stable, per ECS 1.5: https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html
-  if (ecsCategory === 'network' && isRecordWithTypeAsKey(event, ecsCategory)){
+  if (ecsCategory === 'network' && isRecordNamable(event, ecsCategory)){
     if(event?.network?.forwarded_ip) {
       return `${event?.network?.direction ? event?.network?.direction + ' ' : ''}${event.network.forwarded_ip}`;
     }
   }
-  if (ecsCategory === 'file' && isRecordWithTypeAsKey(event, ecsCategory)){
+  if (ecsCategory === 'file' && isRecordNamable(event, ecsCategory)){
     if(event?.file?.path) {
       const ecsType = event?.event?.type;
       return `${ecsType ? ecsType + ': ' : ''}${event.file.path}`;
@@ -119,13 +138,14 @@ export function descriptiveName(event: ResolverEvent): string {
   }
 
   //Extended categories (per ECS 1.5):
-  if (ecsCategory === 'registry' && isRecordWithTypeAsKey(event, ecsCategory)){
-    if(event?.registry?.key) {
+  if (ecsCategory === 'registry' && isRecordNamable(event, ecsCategory)){
+    const pathOrKey = event?.registry?.path || event?.registry?.key;
+    if(pathOrKey) {
       const ecsType = event?.event?.type;
-      return `${ecsType ? ecsType + ': ' : ''}${event.registry.key}`;
+      return `${ecsType ? ecsType + ': ' : ''}${pathOrKey}`;
     }
   }
-  if (ecsCategory === 'dns' && isRecordWithTypeAsKey(event, ecsCategory)){
+  if (ecsCategory === 'dns' && isRecordNamable(event, ecsCategory)){
     if(event?.dns?.question?.name){
       return `${event.dns.question.name}`
     }

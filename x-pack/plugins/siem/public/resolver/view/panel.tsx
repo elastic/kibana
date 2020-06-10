@@ -184,6 +184,65 @@ const WaitForRelatedEvents = memo(function({processEvent, relatedEventsState}: {
  * | **registry deletion** @ *3:32PM..* *HKLM/software...*  |
  * | **file creation** @ *3:34PM..* *C:/directory/file.exe* |
  */
+const RelatedEventDetail = memo(function ProcessEventListNarrowedByType({relatedEvent, pushToQueryParams, relatedEventsState, eventType}: {
+  relatedEvent: ResolverEvent;
+  pushToQueryParams: (arg0: crumbInfo)=>unknown;
+  relatedEventsState: RelatedEventDataEntryWithStats;
+  eventType: string;
+}){
+  const processName = relatedEvent && event.eventName(relatedEvent);
+  const processEntityId = event.entityId(relatedEvent);
+  const totalCount = Object.values(relatedEventsState.stats).reduce((a,v)=>{ return a + v }, 0);
+  const eventsString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedEventDetail.events', {
+    defaultMessage: 'Events',
+  });
+  const matchingEvents = useMemo(() =>{
+      return relatedEventsState.relatedEvents.reduce((a: ResolverEvent[] ,{relatedEvent, relatedEventType})=>{
+        relatedEventType === eventType && a.push(relatedEvent)
+        return a
+      },[]);
+    },
+  [relatedEventsState, eventType]);
+  const crumbs = useMemo(()=>{
+    return [
+      {
+        text: eventsString,
+        onClick: ()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) },
+      },
+      {
+        text: processName,
+        onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: ''}) }
+      },
+      {
+        text: <><EuiI18nNumber value={totalCount} />{/*Non-breaking space->*/` ${eventsString}`}</>,
+        onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: 'all'}) }
+      },
+      {
+        text: <><EuiI18nNumber value={matchingEvents.length} />{/*Non-breaking space->*/` ${eventType}`}</>,
+        onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: eventType}) }
+      },
+      {
+        text: event.descriptiveName(relatedEvent),
+        onClick: ()=>{}
+      }
+    ]
+  },[]);
+  return (<>
+    <EuiBreadcrumbs breadcrumbs={crumbs} />
+    <EuiSpacer  size="l" />
+    
+  </>)
+});
+
+/**
+ * This view presents a list of related events of a given type for a given process.
+ * It will appear like:
+ * 
+ * |                                                        |
+ * | :----------------------------------------------------- |
+ * | **registry deletion** @ *3:32PM..* *HKLM/software...*  |
+ * | **file creation** @ *3:34PM..* *C:/directory/file.exe* |
+ */
 const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByType({processEvent, eventType, relatedEventsState, pushToQueryParams}: {
   processEvent: ResolverEvent;
   pushToQueryParams: (arg0: crumbInfo)=>unknown;
@@ -656,7 +715,10 @@ const PanelContent = memo(function PanelContent() {
     const relatedEventsState =  uiSelectedEvent && relatedEvents.get(uiSelectedEvent);
     console.log({crumbId, crumbEvent});
     const fetchingErrorMessage = i18n.translate('xpack.siem.endpoint.resolver.panel.fetchError', {
-      defaultMessage: 'Error: Fetching requested related event data failed',
+      defaultMessage: 'Error: Fetching requested related event data failed.',
+    });
+    const relatedEventDNEMessage = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedDNE', {
+      defaultMessage: 'Error: The requested event is not available in this view.',
     });
 
     if(graphableProcessEntityIds.has(crumbEvent)){
@@ -679,7 +741,7 @@ const PanelContent = memo(function PanelContent() {
         )
         if(!eventFromCrumbId){
           //Return an indication that it no longer exists (it may have been removed/purged/etc.)
-          return console.log('relatedEventDNE'),'relatedEventDNE';
+          return console.log('relatedEventDNE'),<TableServiceError errorMessage={relatedEventDNEMessage} pushToQueryParams={pushToQueryParams} />;
         }
         return console.log('relatedEventDetail'),'relatedEventDetail';
       }
