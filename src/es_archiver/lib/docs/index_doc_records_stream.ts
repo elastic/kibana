@@ -26,7 +26,7 @@ export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
   progress: Progress,
-  useCreate: boolean
+  useCreate: boolean = false
 ) {
   async function indexDocs(docs: any[]) {
     const body: any[] = [];
