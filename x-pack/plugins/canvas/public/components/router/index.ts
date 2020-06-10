@@ -11,7 +11,6 @@ import {
   enableAutoplay,
   setRefreshInterval,
   setAutoplayInterval,
-  // @ts-ignore untyped local
 } from '../../state/actions/workpad';
 // @ts-ignore untyped local
 import { Router as Component } from './router';
