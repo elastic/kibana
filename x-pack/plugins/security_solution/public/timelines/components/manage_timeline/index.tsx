@@ -190,6 +190,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
       initializeTimeline({ id });
       return { ...timelineDefaults, id };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state]
   );
   const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);
