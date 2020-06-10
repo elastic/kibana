@@ -121,15 +121,6 @@ export function Cytoscape({
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  // Trigger a custom "data" event when data changes
-  useEffect(() => {
-    if (cy) {
-      cy.remove(cy.elements());
-      cy.add(elements);
-      cy.trigger('data');
-    }
-  }, [cy, elements]);
-
   // Set up cytoscape event handlers
   useEffect(() => {
     const resetConnectedEdgeStyle = (node?: cytoscape.NodeSingular) => {
@@ -223,6 +214,10 @@ export function Cytoscape({
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
+
+      cy.remove(cy.elements());
+      cy.add(elements);
+      cy.trigger('data');
     }
 
     return () => {
@@ -241,7 +236,7 @@ export function Cytoscape({
       }
       clearTimeout(layoutstopDelayTimeout);
     };
-  }, [cy, height, serviceName, trackApmEvent, width]);
+  }, [cy, elements, height, serviceName, trackApmEvent, width]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
