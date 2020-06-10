@@ -58,7 +58,7 @@ export const AgentConfigActionMenu = memo<{ configId: string; fullButton?: boole
             >
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigActionMenu.createDatasourceActionText"
-                defaultMessage="Create data source"
+                defaultMessage="Add data source"
               />
             </EuiContextMenuItem>,
           ]}
