@@ -152,7 +152,7 @@ export const DiscoverGrid = function DiscoverGridInner({
   const [flyoutRow, setFlyoutRow] = useState<number | undefined>(undefined);
   const buildColumns = useCallback(
     (cols: any) => {
-      const mappedCols = cols.map(
+      return cols.map(
         (columnName: string): EuiDataGridColumn => {
           const column: EuiDataGridColumn = {
             id: columnName,
@@ -187,25 +187,30 @@ export const DiscoverGrid = function DiscoverGridInner({
           return column;
         }
       );
-      // Discover always injects a Time column as the first item (unless advance settings turned it off)
-      // Have to guard against this to allow users to request the same column again later
-      if (showTimeCol) {
-        mappedCols.unshift({ id: timeString, schema: 'datetime', initialWidth: 200 });
-      }
-      return mappedCols;
     },
-    [indexPattern, showTimeCol, timeString, useShortDots]
+    [indexPattern, useShortDots]
   );
 
   const [dataGridColumns, setDataGridColumns] = useState<EuiDataGridColumn[]>(
     buildColumns(columns)
   );
   useEffect(() => {
-    const prevColums = dataGridColumns.map((col) => col.id);
-    if (isEqual(columns, prevColums)) {
+    const prevColumns = dataGridColumns.map((col) => col.id);
+    if (!isEqual(columns, prevColumns)) {
       setDataGridColumns(buildColumns(columns));
     }
   }, [columns, buildColumns, setDataGridColumns, dataGridColumns]);
+
+  const getColumns = useCallback(() => {
+    // Discover always injects a Time column as the first item (unless advance settings turned it off)
+    // Have to guard against this to allow users to request the same column again later
+
+    if (showTimeCol) {
+      return [{ id: timeString, schema: 'datetime', initialWidth: 200 }, ...dataGridColumns];
+    } else {
+      return dataGridColumns;
+    }
+  }, [dataGridColumns, showTimeCol, timeString]);
 
   /**
    * Pagination
@@ -345,11 +350,11 @@ export const DiscoverGrid = function DiscoverGridInner({
         inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort: onTableSort }}
         rowCount={rowCount}
-        columns={dataGridColumns}
+        columns={getColumns()}
         renderCellValue={renderCellValue}
         leadingControlColumns={leadingControlControls}
         columnVisibility={{
-          visibleColumns: dataGridColumns.map((obj) => obj.id),
+          visibleColumns: getColumns().map((obj) => obj.id),
           setVisibleColumns: (col) => {
             const newColumns = showTimeCol ? col.slice(1) : col;
             setDataGridColumns(buildColumns(newColumns));

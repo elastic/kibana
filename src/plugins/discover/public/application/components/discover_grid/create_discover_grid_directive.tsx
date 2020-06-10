@@ -24,7 +24,7 @@ export function createDiscoverGridDirective(reactDirective: any) {
     ['columns', { watchDepth: 'collection' }],
     ['rows', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['sort', { watchDepth: 'value' }],
+    ['sort', { watchDepth: 'collection' }],
     ['sampleSize', { watchDepth: 'reference' }],
     ['searchDescription', { watchDepth: 'reference' }],
     ['searchTitle', { watchDepth: 'reference' }],
