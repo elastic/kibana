@@ -40,7 +40,7 @@ interface ExceptionsViewerItemsProps {
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
 
-export const ExceptionsViewerItems: React.FC<ExceptionsViewerItemsProps> = ({
+const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   showEmpty,
   isInitLoading,
   exceptions,
@@ -48,9 +48,9 @@ export const ExceptionsViewerItems: React.FC<ExceptionsViewerItemsProps> = ({
   commentsAccordionId,
   onDeleteException,
   onEditExceptionItem,
-}) => (
+}): JSX.Element => (
   <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
-    {showEmpty ? (
+    {showEmpty || isInitLoading ? (
       <EuiFlexItem grow={1}>
         <EuiEmptyPrompt
           iconType="advancedSettingsApp"
@@ -61,14 +61,18 @@ export const ExceptionsViewerItems: React.FC<ExceptionsViewerItemsProps> = ({
       </EuiFlexItem>
     ) : (
       <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
-        <MyExceptionItemContainer gutterSize="none" direction="column">
+        <MyExceptionItemContainer
+          data-test-subj="exceptionsContainer"
+          gutterSize="none"
+          direction="column"
+        >
           {!isInitLoading &&
             exceptions.length > 0 &&
             exceptions.map((exception, index) => (
-              <MyFlexItem grow={false} key={exception.id}>
+              <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
                 {index !== 0 ? (
                   <>
-                    <AndOrBadge type="or" />
+                    <AndOrBadge data-test-subj="exceptionItemOrBadge" type="or" />
                     <EuiSpacer />
                   </>
                 ) : (
@@ -78,8 +82,8 @@ export const ExceptionsViewerItems: React.FC<ExceptionsViewerItemsProps> = ({
                   loadingItemIds={loadingItemIds}
                   commentsAccordionId={commentsAccordionId}
                   exceptionItem={exception}
-                  handleDelete={onDeleteException}
-                  handleEdit={onEditExceptionItem}
+                  onDeleteException={onDeleteException}
+                  onEditException={onEditExceptionItem}
                 />
               </MyFlexItem>
             ))}
@@ -88,5 +92,9 @@ export const ExceptionsViewerItems: React.FC<ExceptionsViewerItemsProps> = ({
     )}
   </MyExceptionsContainer>
 );
+
+ExceptionsViewerItemsComponent.displayName = 'ExceptionsViewerItemsComponent';
+
+export const ExceptionsViewerItems = React.memo(ExceptionsViewerItemsComponent);
 
 ExceptionsViewerItems.displayName = 'ExceptionsViewerItems';

@@ -28,7 +28,7 @@ import {
   useApi,
 } from '../../../../../public/lists_plugin_deps';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
-import { ExceptionsViewerUtility } from './exeptions_utility';
+import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
 const initialState: State = {
@@ -86,7 +86,6 @@ const ExceptionsViewerComponent = ({
     },
     [dispatchToaster]
   );
-  const { deleteExceptionItem } = useApi(services.http);
   const [
     {
       endpointList,
@@ -101,6 +100,7 @@ const ExceptionsViewerComponent = ({
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
+  const { deleteExceptionItem } = useApi(services.http);
 
   const setExceptions = useCallback(
     ({
@@ -144,13 +144,13 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const onFetchList = useCallback((): void => {
+  const handleFetchList = useCallback((): void => {
     if (fetchList != null) {
       fetchList();
     }
   }, [fetchList]);
 
-  const onFiltersChange = useCallback(
+  const handleFilterChange = useCallback(
     ({ filter, pagination: pag }: Filter): void => {
       dispatch({
         type: 'updateFilterOptions',
@@ -162,7 +162,7 @@ const ExceptionsViewerComponent = ({
     [dispatch, exceptionListsMeta]
   );
 
-  const onAddException = useCallback(
+  const handleAddException = useCallback(
     (type: ExceptionListType): void => {
       setIsModalOpen(true);
     },
@@ -193,9 +193,9 @@ const ExceptionsViewerComponent = ({
         onAssociateList(listId);
       }
 
-      onFetchList();
+      handleFetchList();
     },
-    [setIsModalOpen, onFetchList, onAssociateList]
+    [setIsModalOpen, handleFetchList, onAssociateList]
   );
 
   const setLoadingItemIds = useCallback(
@@ -210,12 +210,14 @@ const ExceptionsViewerComponent = ({
 
   const handleDeleteException = useCallback(
     ({ id, namespaceType }: ApiProps) => {
+      setLoadingItemIds([{ id, namespaceType }]);
+
       deleteExceptionItem({
         id,
         namespaceType,
         onSuccess: () => {
           setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
-          onFetchList();
+          handleFetchList();
         },
         onError: () => {
           const dispatchToasterError = onDispatchToaster({
@@ -229,7 +231,7 @@ const ExceptionsViewerComponent = ({
         },
       });
     },
-    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, onFetchList, onDispatchToaster]
+    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, handleFetchList, onDispatchToaster]
   );
 
   // Logic for initial render
@@ -277,8 +279,8 @@ const ExceptionsViewerComponent = ({
           supportedListTypes={availableListTypes}
           detectionsListItems={detectionsList != null ? detectionsList.totalItems : 0}
           endpointListItems={endpointList != null ? endpointList.totalItems : 0}
-          onFilterChange={onFiltersChange}
-          onAddExceptionClick={onAddException}
+          onFilterChange={handleFilterChange}
+          onAddExceptionClick={handleAddException}
         />
 
         <EuiSpacer size="l" />
@@ -286,7 +288,7 @@ const ExceptionsViewerComponent = ({
         <ExceptionsViewerUtility
           pagination={pagination}
           filterOptions={filterOptions}
-          onRefreshClick={onFetchList}
+          onRefreshClick={handleFetchList}
           ruleSettingsUrl={ruleSettingsUrl}
         />
 
@@ -300,7 +302,10 @@ const ExceptionsViewerComponent = ({
           onEditExceptionItem={handleEditException}
         />
 
-        <ExceptionsViewerPagination onPaginationChange={onFiltersChange} pagination={pagination} />
+        <ExceptionsViewerPagination
+          onPaginationChange={handleFilterChange}
+          pagination={pagination}
+        />
       </Panel>
     </>
   );

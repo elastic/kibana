@@ -87,6 +87,7 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         return {
           ...returnState,
           loadingLists: list,
+          exceptions: list.length === 0 ? [] : [...state.exceptions],
         };
       } else if (action.filterOptions.showDetectionsList) {
         const list = action.allLists.filter((t) => t.type === 'detection');
@@ -94,6 +95,7 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         return {
           ...returnState,
           loadingLists: list,
+          exceptions: list.length === 0 ? [] : [...state.exceptions],
         };
       } else {
         return {
