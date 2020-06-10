@@ -68,6 +68,16 @@ export function KueryBar({
     updateSearchText(kuery);
   }, [kuery, updateSearchText]);
 
+  useEffect(() => {
+    if (updateDefaultKuery && kuery) {
+      updateDefaultKuery(kuery);
+    } else if (defaultKuery && updateDefaultKuery) {
+      updateDefaultKuery(defaultKuery);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const indexPatternMissing = loading && !indexPattern;
 
   async function onChange(inputValue: string, selectionStart: number) {
