@@ -18,6 +18,13 @@ import { CALCULATE_DURATION_UNTIL } from '../../common/constants';
 import { AlertMessageTokenType } from '../../common/enums';
 import { Legacy } from '../legacy_shims';
 
+// interface Props {
+//   alertMessage: AlertMessage;
+// }
+// export const Tokenize: React.FC<Props> = (props: Props) => {
+
+// }
+
 export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
   if (!alertMessage) {
     return null;
@@ -55,13 +62,14 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     if (!linkPart || linkPart.length < 2) {
       continue;
     }
-
-    // TODO: we assume this is at the end, which works for now but will not always work
-    const nonLinkText = text.replace(linkPart[0], '');
+    const index = text.indexOf(linkPart[0]);
+    const preString = text.substring(0, index);
+    const postString = text.substring(index + linkPart[0].length);
     element = (
       <Fragment>
-        {nonLinkText}
+        {preString}
         <EuiLink href={`#${linkToken.url}`}>{linkPart[1]}</EuiLink>
+        {postString}
       </Fragment>
     );
   }
@@ -73,17 +81,17 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
       continue;
     }
 
-    // TODO: we assume this is at the end, which works for now but will not always work
-    const nonLinkText = text.replace(linkPart[0], '');
     const url = linkToken.partialUrl
       .replace('{elasticWebsiteUrl}', Legacy.shims.docLinks.ELASTIC_WEBSITE_URL)
       .replace('{docLinkVersion}', Legacy.shims.docLinks.DOC_LINK_VERSION);
+    const index = text.indexOf(linkPart[0]);
+    const preString = text.substring(0, index);
+    const postString = text.substring(index + linkPart[0].length);
     element = (
       <Fragment>
-        {nonLinkText}
-        <EuiLink target="_blank" href={`${url}`}>
-          {linkPart[1]}
-        </EuiLink>
+        {preString}
+        <EuiLink href={url}>{linkPart[1]}</EuiLink>
+        {postString}
       </Fragment>
     );
   }

@@ -375,8 +375,12 @@ export function ElasticsearchPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
-              {nodesAlertStatus}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  {setupModeTooltip}
+                  {nodesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
