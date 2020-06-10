@@ -34,7 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/endpoint/metadata when index is not empty', () => {
-      before(async () => await esArchiver.load('endpoint/metadata/api_feature'));
+      before(
+        async () => await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true })
+      );
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
       after(async () => await deleteMetadataStream(getService));

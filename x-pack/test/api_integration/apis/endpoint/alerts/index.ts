@@ -74,8 +74,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(async () => {
-        await esArchiver.load('endpoint/alerts/api_feature');
-        await esArchiver.load('endpoint/alerts/host_api_feature');
+        await esArchiver.load('endpoint/alerts/api_feature', { useCreate: true });
+        await esArchiver.load('endpoint/alerts/host_api_feature', { useCreate: true });
         const res = await es.search({
           index: 'events-endpoint-*',
           body: ES_QUERY_MISSING,
@@ -86,8 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
         // to do it manually
-        await deleteEventsStream(getService);
-        await deleteMetadataStream(getService);
+        await Promise.all([deleteEventsStream(getService), deleteMetadataStream(getService)]);
       });
 
       it('should not support POST requests', async () => {
