@@ -6,11 +6,7 @@
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server';
-import {
-  SignalsStatusRestParams,
-  SignalsQueryRestParams,
-  SignalSearchResponse,
-} from '../../signals/types';
+import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -26,45 +22,11 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   HapiReadableStream,
 } from '../../rules/types';
-import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { RuleAlertParamsRest } from '../../types';
 import { requestMock } from './request';
 import { RuleNotificationAlertType } from '../../notifications/types';
-
-export const mockPrepackagedRule = (): PrepackagedRules => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  output_index: '.siem-signals',
-  risk_score: 50,
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  threat: [
-    {
-      framework: 'fake',
-      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
-    },
-  ],
-  throttle: null,
-  enabled: true,
-  filters: [],
-  immutable: false,
-  references: [],
-  meta: {},
-  tags: [],
-  version: 1,
-  false_positives: [],
-  max_signals: 100,
-  note: '',
-  timeline_id: 'timeline-id',
-  timeline_title: 'timeline-title',
-});
+import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',
@@ -89,25 +51,25 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   ],
 });
 
-export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
-export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
   status: 'closed',
 });
 
@@ -170,14 +132,14 @@ export const getDeleteBulkRequestById = () =>
   requestMock.create({
     method: 'delete',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequestById = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequest = () =>
@@ -448,7 +410,7 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
     version: 1,
-    exceptions_list: [
+    exceptionsList: [
       {
         field: 'source.ip',
         values_operator: 'included',

@@ -197,7 +197,7 @@ export const ConnectorEditFlyout = ({
               )}
             </EuiText>
             <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
               target="_blank"
             >
               <FormattedMessage
