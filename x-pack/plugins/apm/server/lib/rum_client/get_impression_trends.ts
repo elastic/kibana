@@ -49,7 +49,7 @@ export async function getImpressionTrends({
 
   const response = await client.search(params);
 
-  const result = response.aggregations.impressions.buckets ?? [];
+  const result = response.aggregations?.impressions.buckets ?? [];
   return result.map(({ key, trans_count }) => ({
     x: key,
     y: trans_count.value,

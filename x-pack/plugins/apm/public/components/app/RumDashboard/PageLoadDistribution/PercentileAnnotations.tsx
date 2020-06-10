@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import * as React from 'react';
+import {
+  AnnotationDomainTypes,
+  LineAnnotation,
+  LineAnnotationDatum,
+} from '@elastic/charts';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+
+interface Props {
+  percentiles?: Record<string, number>;
+}
+
+function generateAnnotationData(
+  values?: Record<string, number>
+): LineAnnotationDatum[] {
+  return Object.entries(values ?? {}).map((value, index) => ({
+    dataValue: value[1],
+    details: `${(+value[0]).toFixed(0)}`,
+  }));
+}
+
+export const PercentileAnnotations = ({ percentiles }: Props) => {
+  const dataValues = generateAnnotationData(percentiles) ?? [];
+
+  const style = {
+    line: {
+      strokeWidth: 3,
+      stroke: euiLightVars.euiColorLightShade,
+      opacity: 1,
+    },
+    details: {
+      fontSize: 12,
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      fill: 'gray',
+      padding: 0,
+    },
+  };
+
+  return (
+    <>
+      {dataValues.map((annotation, index) => (
+        <LineAnnotation
+          id={index + 'annotation_' + annotation.dataValue}
+          key={index + 'percentile_' + annotation.dataValue}
+          domainType={AnnotationDomainTypes.XDomain}
+          dataValues={[annotation]}
+          style={style}
+          marker={<span>{annotation.details}th</span>}
+        />
+      ))}
+    </>
+  );
+};

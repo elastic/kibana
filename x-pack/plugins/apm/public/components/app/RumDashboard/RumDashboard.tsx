@@ -5,21 +5,17 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
 import { ImpressionTrend } from './ImpressionTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
+import { EndUserExperienceLabel } from './translations';
 
 export function RumDashboard() {
   return (
     <>
       <EuiTitle>
-        <h1>
-          {i18n.translate('xpack.apm.rum.dashboard.title', {
-            defaultMessage: 'End User Experience',
-          })}
-        </h1>
+        <h1>{EndUserExperienceLabel}</h1>
       </EuiTitle>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -29,6 +25,7 @@ export function RumDashboard() {
           <PageLoadDistribution />
           <EuiSpacer size="xxl" />
           <ImpressionTrend />
+          <EuiSpacer size="xxl" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

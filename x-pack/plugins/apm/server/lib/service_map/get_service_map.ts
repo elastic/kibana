@@ -12,7 +12,6 @@ import {
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
-import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   transformServiceMapResponses,

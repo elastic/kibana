@@ -53,9 +53,16 @@ export async function getPageLoadDistribution({
 
   const { client } = setup;
 
-  const { aggregations } = await client.search(params);
+  const {
+    aggregations,
+    hits: { total },
+  } = await client.search(params);
 
-  const minDuration = aggregations?.durationMinMax.value ?? 0 / 1000;
+  if (total.value === 0) {
+    return null;
+  }
+
+  const minDuration = (aggregations?.durationMinMax.value ?? 0) / 1000;
 
   const maxPercentile = aggregations?.durationPercentiles.values['99.0'] ?? 100;
 
@@ -66,7 +73,7 @@ export async function getPageLoadDistribution({
   );
   return {
     pageLoadDistribution: pageDist,
-    percentiles: aggregations?.durationPercentiles,
+    percentiles: aggregations?.durationPercentiles.values,
   };
 }
 

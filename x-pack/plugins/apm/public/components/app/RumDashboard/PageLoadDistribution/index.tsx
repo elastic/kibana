@@ -3,31 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @flow
+
 import * as React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  AnnotationDomainTypes,
-  Axis,
-  Chart,
-  LineAnnotation,
-  LineAnnotationDatum,
-  ScaleType,
-  LineSeries,
-  CurveType,
-} from '@elastic/charts';
+import { Axis, Chart, ScaleType, LineSeries, CurveType } from '@elastic/charts';
 import { Position } from '@elastic/charts/dist/utils/commons';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ChartWrapper } from '../ChartWrapper';
-
-function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
-  return Object.entries(values).map((value, index) => ({
-    dataValue: value[1],
-    details: `detail-${value[0]}`,
-  }));
-}
+import { PercentileAnnotations } from './PercentileAnnotations';
+import {
+  PageLoadDistLabel,
+  PageLoadTimeLabel,
+  PercPageLoadedLabel,
+} from '../translations';
 
 export const PageLoadDistribution = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -36,58 +25,44 @@ export const PageLoadDistribution = () => {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        pathname: '/api/apm/rum-client/page-load-distribution',
-        params: {
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/rum-client/page-load-distribution',
+          params: {
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-        },
-      });
+        });
+      }
     },
     [end, start, uiFilters]
   );
-  const dataValues = generateAnnotationData(data?.percentiles ?? []);
-  const style = {
-    line: {
-      strokeWidth: 3,
-      stroke: euiLightVars.euiColorLightShade,
-      opacity: 1,
-    },
-    details: {
-      fontSize: 12,
-      fontFamily: 'Arial',
-      fontStyle: 'bold',
-      fill: 'gray',
-      padding: 0,
-    },
-  };
+
   return (
-    <div style={{ height: '300px' }}>
+    <div>
       <EuiSpacer size="l" />
       <EuiTitle size="s">
-        <h3>Page load distribution</h3>
+        <h3>{PageLoadDistLabel}</h3>
       </EuiTitle>
-      <ChartWrapper loading={status !== 'success'}>
+      <ChartWrapper loading={status !== 'success'} height="300px">
         <Chart className="story-chart">
-          <LineAnnotation
-            id="annotation_1"
-            domainType={AnnotationDomainTypes.XDomain}
-            dataValues={dataValues}
-            style={style}
-            marker={<span>%</span>}
+          <PercentileAnnotations percentiles={data?.percentiles} />
+          <Axis
+            id="bottom"
+            title={PageLoadTimeLabel}
+            position={Position.Bottom}
           />
-          <Axis id="bottom" title="Page load time" position={Position.Bottom} />
           <Axis
             id="left"
-            title={'Percentages of page loaded'}
+            title={PercPageLoadedLabel}
             position={Position.Left}
-            tickFormat={(d) => Number(d).toFixed(2) + '%'}
+            tickFormat={(d) => Number(d).toFixed(1) + ' %'}
           />
           <LineSeries
-            id={'pageLoadSeries'}
+            id={'PagesPercentage'}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
