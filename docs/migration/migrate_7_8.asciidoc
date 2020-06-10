@@ -20,10 +20,10 @@ your application to Kibana 7.8.
 [[user-facing-changes-78]]
 === Breaking changes for users
 
-[float]
 [[breaking_78_actions_api]]
-==== Actions API endpoint changed
-{pull}65936[#65936]
+.The actions API endpoint changed.
+[%collapsible]
+====
 
 The following action plugin REST APIs changed so that they are consistent with the
 {kib} styleguide.
@@ -36,22 +36,34 @@ The following action plugin REST APIs changed so that they are consistent with t
 * `DELETE /api/action/{id}` -> `DELETE /api/actions/action/{id}`
 * `POST /api/action/{id}/_execute` -> `POST /api/actions/action/{id}/_execute`
 
-[float]
+*via {pull}65936[#65936]*
+
+====
+
 [[breaking_78_bump_less_version]]
-==== The less version in TSVB was bumped
-{pull}65467[#65467]
+.The less version in TSVB was updated.
+
+[%collapsible]
+====
 
 Custom plugins are no longer allowed to use the @plugin statement and inline JavaScript
 in less code used in TSVB Markdown visualizations.
 Using the code does not apply the styles.
 
-[float]
-[[breaking_78_metrics_alerts]]
-==== Metrics alerts no longer expose `context.valueOf`, `context.metricOf`, or `context.thresholdOf` to action messages
-{pull}64365[#64365]
+*via {pull}65467[#65467]*
 
-`context.valueOf`, `context.metricOf`, and `context.thresholdOf` are replaced
-by the variable `context.reason`. This variable explains the reason that the alert
+====
+
+
+[[breaking_78_metrics_alerts]]
+.Action messaging was refactored to report on the no data state.
+
+[%collapsible]
+====
+
+Metrics alerts no longer expose `context.valueOf`, `context.metricOf`, or
+`context.thresholdOf` to action messages. These variables are replaced
+by `context.reason`. This variable explains the reason that the alert
 fired and automatically includes the metric, threshold, and current value of
 all configured conditions.
 
@@ -60,62 +72,72 @@ but their action messages might no longer provide useful information and
 must be reconfigured. The new default action message will show an example
 of how to use `context.reason`.
 
+*via {pull}64365[#64365]*
+
+====
+
 // end::notable-breaking-changes[]
 
 [float]
 [[general-plugin-API-changes-78]]
 === Breaking changes for plugin developers
 
-[float]
 [[breaking_78_canvas]]
-==== Canvas applications run on the new {kib} platform
+.Canvas applications now run on the new {kib} platform.
+[%collapsible]
+====
 
 Any existing user-created plugins that extend
 Canvas functionality must also move to the Kibana Platform to continue extending Canvas.
 
 *via {pull}64831[#64831]*
+====
 
-[float]
 [[breaking-78-filter-expression-function]]
-==== `filter` function uses `filterType` instead of `type`
+.The `filter` function uses `filterType` instead of `type`.
+[%collapsible]
+====
 
- If you used the `type` argument of the `filter` function, you now
- must use `filterType` instead.
+If you used the `type` argument of the `filter` function, you now
+must use `filterType` instead.
 
- Old code:
+Old code:
 
-```
+```ts
 filter type={...} | ...
 ```
 
 New code:
 
-```
+```ts
 filter filterType={...} | ...
 ```
 
 The `type` field is used internally by the expression interpreter to
 discriminate between the different values it passes between functions.
 The `filter` function was the only function that exposed this field to users.
-After this change all expression values will consistently use `type` to determine a type of expression value.
+After this change, all expression values will consistently use `type` to determine a type of expression value.
 
 *via {pull}64215[#64215]*
+====
 
-[float]
 [[breaking_78_redirect-to-full-path]]
-==== Redirect to full path when calling `navigateToApp` to a legacy app
-
-Fixed a bug where calling `core.application.navigateToApp` to a legacy
-application did not retain the `path` specified.
+.Calling `navigateToApp` to a legacy app redirects to full path.
+[%collapsible]
+====
+Calling `core.application.navigateToApp` to a legacy
+application now retains the `path` specified.
 
 *via {pull}65112[#65112]*
+====
 
-[float]
 [[breaking_78_remove_aggs]]
-==== Remove legacy aggs APIs
+.The legacy aggs APIs were removed.
+[%collapsible]
+====
 
-The following legacy aggs APIs from the `data` plugin's `search` service
-have been removed as they are no longer in use:
+The following legacy aggs APIs from the `data` plugin `search` service
+have been removed because they are no longer in use:
 
 ```ts
 data.search.__LEGACY.AggConfig;
@@ -144,12 +166,14 @@ search.aggs.convertIPRangeToString,
 ```
 
 *via {pull}64719[#64719]*
+====
 
-[float]
 [[breaking_78_update_default_path]]
-==== Allow applications to define and update a `defaultPath`
+.Applications are now allowed to define and update a `defaultPath`.
+[%collapsible]
+====
 
-KP applications can now define and update the `defaultPath`
+{kib} platform applications can now define and update the `defaultPath`
 to use when navigating to them from another application or from the navigation bar.
 
 
@@ -174,12 +198,14 @@ appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
 ```
 
 *via {pull}64498[#64498]*
+====
 
-[float]
 [[breaking_78_cache_busting]]
-==== Use cache busting for KP bundles
+.Static assets are now served under a release-specific URL.
+[%collapsible]
+====
 
-Kibana static assets are now served under a release-specific URL
+{kib} static assets are now served under a release-specific URL
 with long-term caching headers `Cache-Control: max-age=31536000`.
 
 Before:
@@ -187,180 +213,81 @@ Before:
 http://localhost:5601/bundles/plugin/dashboard/dashboard.plugin.js
 
 After:
+
 http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
 
 *via {pull}64414[#64414]*
+====
 
-[float]
 [[breaking_78_add_example_plugins]]
-==== Adds ability to add example plugins in X-Pack
+.Example plugins are now allowed in X-Pack.
+[%collapsible]
+====
 
 {kib} developers can now create example plugins in
-X-Pack&mdash;create your plugin in `/x-pack/examples` folder and start {kib} with
+X-Pack&mdash;create your plugin in `/x-pack/examples` folder and start {kib} with:
 
-```
+```ts
 yarn start --run-examples
 ```
 
 *via {pull}63823[#63823]*
+====
 
-[float]
-[[breaking_78_refactor_connectors]]
-==== Refactor connectors
-
-The API changed to support executor actions. The supported action are `pushToService`,
-`handshake`, and `getIncident`. This change implements only the `pushToService` action.
-
-The following response fields have changed:
-* `incidentId` changed to `id`.
-* `number` changed to `title`.
-
-[float]
-===== Create an incident to ServiceNow
-
-When the `incidentId` attribute **is not** in `actionParams`, the executor will **create** the incident.
-
-Endpoint: `api/action/<action_id>/_execute`
-Method: `POST`
-
-**Payload:**
-
-```
-{
-    "params": {
-        "action": "pushToService",
-        "actionParams": {
-	    	"caseId": "d4387ac5-0899-4dc2-bbfa-0dd605c934aa",
-	        "title": "A new incident",
-	        "description": "A description",
-	        "comments": [
-	            {
-	                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
-	                "version": "WzU3LDFd",
-	                "comment": "A comment"
-	            }
-	        ]
-        }
-    }
-}
-```
-
-**Response**
-
-```
-{
-    "status": "ok",
-    "actionId": "f631be57-0a59-4e28-8833-16fc3b309374",
-    "data": {
-        "id": "7d7aad9c072fc0100e48fbbf7c1ed0c2",
-        "title": "INC0010044",
-        "pushedDate": "2020-03-10T13:02:59.000Z",
-        "comments": [
-            {
-                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
-                "pushedDate": "2020-03-10T13:03:00.000Z"
-            }
-        ]
-    }
-}
-```
-
-[float]
-===== Update an incident to ServiceNow
-
-When the `incidentId` attribute **is** in `actionParams`, the executor will update the incident.
-
-Endpoint: `api/action/<action_id>/_execute`
-Method: `POST`
-
-**Payload:**
-
-```
-{
-    "params": {
-        "action": "pushToService",
-	    "actionParmas": {
-			"caseId": "d4387ac5-0899-4dc2-bbfa-0dd605c934aa",
-	        "incidentId": "7d7aad9c072fc0100e48fbbf7c1ed0c2"
-	        "title": "A new incident",
-	        "description": "A description",
-	        "comments": [
-	            {
-	                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
-	                "version": "WzU3LDFd",
-	                "comment": "A comment"
-	            }
-	        ]
-		}
-    }
-}
-```
-
-**Response**
-
-```
-{
-    "status": "ok",
-    "actionId": "f631be57-0a59-4e28-8833-16fc3b309374",
-    "data": {
-        "id": "7d7aad9c072fc0100e48fbbf7c1ed0c2",
-        "title": "INC0010044",
-        "pushedDate": "2020-03-10T13:02:59.000Z",
-        "comments": [
-            {
-                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
-                "pushedDate": "2020-03-10T13:03:00.000Z"
-            }
-        ]
-    }
-}
-```
-
-*via {pull}63450[#63450]*
-
-[float]
-[[breaking_78_improves_drilldows]
-==== Improves action.getHref() for drilldowns
+[[breaking_78_improves_drilldows]]
+.`action.getHref()` has improvements for drilldowns.
+[%collapsible]
+====
 
 `getHref` on `Action` interfaces in the uiActions plugin is now async.
 `getHref` is now used only to support right click behavior.
 `execute()` takes control on regular click.
 
 *via {pull}63228[#63228]*
+====
 
-[float]
 [[breaking_78_scopedhistory]]
-==== Supports `ScopedHistory` for state syncing utils
+.State syncing utils now support `ScopedHistory`.
+[%collapsible]
+====
 
 State syncing utils now seamlessly support the platform's `ScopedHistory`.
 
 *via {pull}62761[#62761]*
 
-[float]
-[[breaking_78_tsvb]]
-==== Removes unused configuration properties from TSVB
+====
 
-The `chartResolution` and `minimumBucketSize` are now marked as deprecated configuration
-properties for TSVB.
+[[breaking_78_tsvb]]
+.Configuration properties were removed from TSVB.
+[%collapsible]
+====
 
 When the TSVB visualization was added to {kib},
 two configuration properties were declared: `chartResolution` and `minimumBucketSize`.
 No one used these properties, and
 an implementation has not been added.
+The `chartResolution` and `minimumBucketSize` are now marked as deprecated configuration
+properties for TSVB.
 
 *via {pull}62543[#62543]*
 
-[float]
+====
+
 [[breaking_fixes_back_button]]
-==== Drilldowns: Fixes back button by removing panels from URL in dashboard
+.Panels were removed from the URL in dashboard view mode.
+[%collapsible]
+====
 
 In dashboard in view mode, `.panels` are no longer synced with the URL.
+This fixes the Back button when navigating between dashboards using drilldowns.
 
 *via {pull}62415[#62415]*
+====
 
-[float]
 [[breaking_add_subservice]]
-==== Adds HTTP resources sub-service
+.The `HttpResources` service is available for responding to requests.
+[%collapsible]
+====
 
 If your server-side plugin needs to respond to an incoming request with the
 HTML page bootstrapping {kib} client app, a custom HTML page, or a custom JS script,
@@ -382,16 +309,19 @@ httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, r
 
 *via {pull}61797[#61797]*
 
-[float]
+====
+
 [[breaking_delete_embeddable_plugin]]
-==== Deletes legacy `embeddable_api` plugin
+.The legacy `embeddable_api` plugin has been removed.
+[%collapsible]
+====
 
 The legacy `embeddable_api` plugin in `src/legacy/core_plugins/embeddable_api`
-has been removed in favor of the `embeddable` plugin in the new {kib} platform.
+has been removed in favor of the `embeddable` plugin in the new {kib} Platform.
 If you used the `embeddable_api` in `7.7`, you already used the new
 `embeddable` plugin API, which was re-exported from the legacy platform as a convenience.
 
-As of 7.8, you will need to update your imports to pull everything from the new location:
+As of 7.8, you must update your imports to pull everything from the new location:
 
 ```diff
 // for types & static imports
@@ -412,7 +342,7 @@ As of 7.8, you will need to update your imports to pull everything from the new 
 + }
 ```
 
-For plugins using the legacy platform, you also need to remove
+For plugins using the legacy platform, you also must remove
 the `embeddable_api` from your list of required plugins in your plugin's `index.ts`:
 
 ```diff
@@ -443,10 +373,12 @@ either a required or optional dependency in your `kibana.json`:
 ```
 
 *via {pull}61767[#61767]*
+====
 
-[float]
 [[breaking_move_to_data_plugin]]
-==== Moves `src/legacy/server/index_patterns` to data plugin
+.`src/legacy/server/index_patterns` has moved to data plugin.
+[%collapsible]
+====
 
 The legacy folder `src/legacy/server/index_patterns` has been deleted.
 The corresponding code was previously moved to the new platform.
@@ -457,12 +389,135 @@ https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-
 in `src/core/MIGRATION.md`.
 
 *via {pull}61618[#61618]*
+====
 
-[float]
 [[breaking_78_static_assets]]
-==== Serves static assets from new platform
+.Static assets are now served from the new platform.
+[%collapsible]
+====
 
-The {kib} platform serves plugin static assets from the
+The {kib} Platform serves plugin static assets from the
 `my_plugin/public/assets` folder. No additional configuration is required.
 
 *via {pull}60490[#60490]*
+====
+
+[[breaking_78_refactor_connectors]]
+.Connectors have been refactored.
+[%collapsible]
+====
+
+The API changed to support executor actions. The supported actions are `pushToService`,
+`handshake`, and `getIncident`. This change implements only the `pushToService` action.
+
+The following response fields have changed:
+
+* `incidentId` changed to `id`.
+* `number` changed to `title`.
+
+*Create an incident to ServiceNow*
+
+When the `incidentId` attribute **is not** in `actionParams`,
+the executor will **create** the incident.
+
+[%hardbreaks]
+Endpoint: `api/action/<action_id>/_execute`
+Method: `POST`
+
+Payload
+
+```ts
+{
+    "params": {
+        "action": "pushToService",
+        "actionParams": {
+	    	"caseId": "d4387ac5-0899-4dc2-bbfa-0dd605c934aa",
+	        "title": "A new incident",
+	        "description": "A description",
+	        "comments": [
+	            {
+	                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+	                "version": "WzU3LDFd",
+	                "comment": "A comment"
+	            }
+	        ]
+        }
+    }
+}
+```
+
+Response
+
+```ts
+{
+    "status": "ok",
+    "actionId": "f631be57-0a59-4e28-8833-16fc3b309374",
+    "data": {
+        "id": "7d7aad9c072fc0100e48fbbf7c1ed0c2",
+        "title": "INC0010044",
+        "pushedDate": "2020-03-10T13:02:59.000Z",
+        "comments": [
+            {
+                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+                "pushedDate": "2020-03-10T13:03:00.000Z"
+            }
+        ]
+    }
+}
+```
+
+
+*Update an incident to ServiceNow*
+
+When the `incidentId` attribute **is** in `actionParams`,
+the executor will update the incident.
+
+[%hardbreaks]
+Endpoint: `api/action/<action_id>/_execute`
+Method: `POST`
+
+Payload
+
+```ts
+{
+    "params": {
+        "action": "pushToService",
+	    "actionParmas": {
+			"caseId": "d4387ac5-0899-4dc2-bbfa-0dd605c934aa",
+	        "incidentId": "7d7aad9c072fc0100e48fbbf7c1ed0c2"
+	        "title": "A new incident",
+	        "description": "A description",
+	        "comments": [
+	            {
+	                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+	                "version": "WzU3LDFd",
+	                "comment": "A comment"
+	            }
+	        ]
+		}
+    }
+}
+```
+
+Response
+
+```ts
+{
+    "status": "ok",
+    "actionId": "f631be57-0a59-4e28-8833-16fc3b309374",
+    "data": {
+        "id": "7d7aad9c072fc0100e48fbbf7c1ed0c2",
+        "title": "INC0010044",
+        "pushedDate": "2020-03-10T13:02:59.000Z",
+        "comments": [
+            {
+                "commentId": "b5b4c4d0-574e-11ea-9e2e-21b90f8a9631",
+                "pushedDate": "2020-03-10T13:03:00.000Z"
+            }
+        ]
+    }
+}
+```
+
+*via {pull}63450[#63450]*
+====
