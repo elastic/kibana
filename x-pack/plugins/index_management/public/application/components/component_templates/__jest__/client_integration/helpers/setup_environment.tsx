@@ -9,7 +9,7 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { HttpSetup } from 'kibana/public';
-import { BASE_PATH, API_BASE_PATH } from '../../../../../../../common/constants';
+import { API_BASE_PATH } from '../../../../../../../common/constants';
 import {
   notificationServiceMock,
   docLinksServiceMock,
