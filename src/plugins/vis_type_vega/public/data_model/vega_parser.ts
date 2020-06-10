@@ -26,7 +26,6 @@ import versionCompare from 'compare-versions';
 import hjson from 'hjson';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { EsQueryParser } from './es_query_parser';
 // @ts-ignore
 import { Utils } from './utils';
