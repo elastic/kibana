@@ -145,6 +145,7 @@ args: ['cypress:open'],
 ```
 This is helpful for debugging specific failed tests from CI without having to run the entire suite.
 
+Note: Please don't commit this change.
 ### Test data
 
 As mentioned above, when running the tests as Jenkins the tests are populated with data ("archives") found in: `x-pack/test/security_solution_cypress/es_archives`.
