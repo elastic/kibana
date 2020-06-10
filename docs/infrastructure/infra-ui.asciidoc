@@ -103,7 +103,7 @@ You can:
 
 * Select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics>>.
 
-* Select *View Logs* to {logs-guide}/logs-event-inspector.html[view the logs] in the *Logs* app.
+* Select *View Logs* to {logs-guide}/inspect-log-events.html[view the logs] in the *Logs* app.
 
 Depending on the features you have installed and configured, you may also be able to:
 
