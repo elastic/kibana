@@ -20,8 +20,8 @@ describe('ExceptionEntries', () => {
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
-          handleDelete={jest.fn()}
-          handleEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -35,8 +35,8 @@ describe('ExceptionEntries', () => {
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock(), getFormattedEntryMock()]}
-          handleDelete={jest.fn()}
-          handleEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -45,39 +45,39 @@ describe('ExceptionEntries', () => {
   });
 
   test('it invokes "handlEdit" when edit button clicked', () => {
-    const mockHandleEdit = jest.fn();
+    const mockOnEdit = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
-          handleDelete={jest.fn()}
-          handleEdit={mockHandleEdit}
+          onDelete={jest.fn()}
+          onEdit={mockOnEdit}
         />
       </ThemeProvider>
     );
     const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
     editBtn.simulate('click');
 
-    expect(mockHandleEdit).toHaveBeenCalledTimes(1);
+    expect(mockOnEdit).toHaveBeenCalledTimes(1);
   });
 
-  test('it invokes "handleDelete" when delete button clicked', () => {
-    const mockHandleDelete = jest.fn();
+  test('it invokes "onDelete" when delete button clicked', () => {
+    const mockOnDelete = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
+          onDelete={mockOnDelete}
+          onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
     const deleteBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
     deleteBtn.simulate('click');
 
-    expect(mockHandleDelete).toHaveBeenCalledTimes(1);
+    expect(mockOnDelete).toHaveBeenCalledTimes(1);
   });
 
   test('it renders nested entry', () => {
@@ -90,8 +90,8 @@ describe('ExceptionEntries', () => {
         <ExceptionEntries
           disableDelete={false}
           entries={[parentEntry, getFormattedEntryMock(true)]}
-          handleDelete={jest.fn()}
-          handleEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -132,8 +132,8 @@ describe('ExceptionEntries', () => {
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
-          handleDelete={jest.fn()}
-          handleEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
