@@ -384,3 +384,7 @@ export const Expressions: React.FC<Props> = (props) => {
     </>
   );
 };
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default Expressions;
