@@ -79,6 +79,13 @@ export const MapsCreateEditView = class extends React.Component {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     this.appSyncUnsubscribe = useAppStateSyncing(this.appStateManager);
 
+    // Check app state in case of refresh
+    const initAppState = this.appStateManager.getAppState();
+    this.onQueryChange(initAppState);
+    if (initAppState.savedQuery) {
+      this.updateStateFromSavedQuery(initAppState.savedQuery);
+    }
+
     // Monitor visibility
     this.visibleSubscription = getCoreChrome()
       .getIsVisible$()
