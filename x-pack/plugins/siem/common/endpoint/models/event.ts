@@ -121,7 +121,8 @@ export function descriptiveName(event: ResolverEvent): string {
   //Extended categories (per ECS 1.5):
   if (ecsCategory === 'registry' && isRecordWithTypeAsKey(event, ecsCategory)){
     if(event?.registry?.key) {
-      return `${event.registry.key}`;
+      const ecsType = event?.event?.type;
+      return `${ecsType ? ecsType + ': ' : ''}${event.registry.key}`;
     }
   }
   if (ecsCategory === 'dns' && isRecordWithTypeAsKey(event, ecsCategory)){

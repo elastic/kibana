@@ -35,7 +35,6 @@ import { RelatedEventDataEntryWithStats } from '../types';
 import { EuiI18nNumber } from '@elastic/eui';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 /**
@@ -101,12 +100,44 @@ const CubeForProcess = memo(function CubeForProcess({processEvent}: {processEven
   </>)
 });
 
-const WaitForRelatedEvents = memo(function({processEvent}: {processEvent: ResolverEvent}) {
+const TableServiceError = memo(function({errorMessage, pushToQueryParams}: {
+  errorMessage: string;
+  pushToQueryParams: (arg0: crumbInfo)=>unknown;
+}){
+  const crumbs = useMemo(()=>{
+    return [
+      {
+        text: i18n.translate('xpack.siem.endpoint.resolver.panel.error.events', {
+          defaultMessage: 'Events',
+        }),
+        onClick: ()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) },
+      },
+      {
+        text: i18n.translate('xpack.siem.endpoint.resolver.panel.error.error', {
+          defaultMessage: 'Error',
+        }),
+        onClick: ()=>{},
+      },
+    ]
+  },[]);
+  return (
+  <>
+    <EuiBreadcrumbs breadcrumbs={crumbs} />
+    <EuiSpacer  size="l" />
+  </>)
+})
+
+/**
+ * Display a waiting message to the user when we can't display what they requested because we don't have related event data yet.
+ * If the related event data has not been requested yet (reflected by `relatedEventsState` being undefined) then issue a request.
+ */
+const WaitForRelatedEvents = memo(function({processEvent, relatedEventsState}: {processEvent: ResolverEvent, relatedEventsState: 'waitingForRelatedEventData' | undefined}) {
   const dispatch = useResolverDispatch();
   useEffect(() => {
     console.log('running effect');
      if(processEvent) {
-      dispatch({
+      //Don't request again if it's already waiting
+      relatedEventsState !== 'waitingForRelatedEventData' && dispatch({
         type: 'userRequestedRelatedEventData',
         payload: processEvent,
       });
@@ -125,7 +156,6 @@ const WaitForRelatedEvents = memo(function({processEvent}: {processEvent: Resolv
   return (
     <>
       <EuiBreadcrumbs breadcrumbs={crumbs} />
-      
       <EuiText textAlign="center">
         <div role="presentation"><EuiLoadingSpinner /></div>
         {
@@ -138,6 +168,15 @@ const WaitForRelatedEvents = memo(function({processEvent}: {processEvent: Resolv
   )
 });
 
+/**
+ * This view presents a list of related events of a given type for a given process.
+ * It will appear like:
+ * 
+ * |                                                        |
+ * | :----------------------------------------------------- |
+ * | **registry deletion** @ *3:32PM..* *HKLM/software...*  |
+ * | **file creation** @ *3:34PM..* *C:/directory/file.exe* |
+ */
 const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByType({processEvent, eventType, relatedEventsState, pushToQueryParams}: {
   processEvent: ResolverEvent;
   pushToQueryParams: (arg0: crumbInfo)=>unknown;
@@ -419,8 +458,6 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
   }
 `;
 
-
-
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, Pid, User/Domain, etc.
@@ -616,7 +653,7 @@ const PanelContent = memo(function PanelContent() {
         //Related event data hasn't been fetched for this process yet:
         //The UI around the menu should dispatch the /events effect for this.
         if(uiSelectedEvent){
-          return console.log('waiting'),<WaitForRelatedEvents processEvent={uiSelectedEvent} />;
+          return console.log('waiting'),<WaitForRelatedEvents relatedEventsState={relatedEventsState} processEvent={uiSelectedEvent} />;
         }
       }
       if(relatedEventsState === 'error'){
@@ -651,7 +688,7 @@ const PanelContent = memo(function PanelContent() {
         //Related event data hasn't been fetched for this process yet:
         //All the components below this one _require_ related event data, so issue a request
         //and display a waiting state. 
-        return console.log('waiting'), <WaitForRelatedEvents processEvent={uiSelectedEvent} />;
+        return console.log('waiting'), <WaitForRelatedEvents relatedEventsState={relatedEventsState} processEvent={uiSelectedEvent} />;
       }
       if(relatedEventsState === 'error'){
         //return as error if there was a service error requesting the /events
