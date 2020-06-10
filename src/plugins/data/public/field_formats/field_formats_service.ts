@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormatsRegistry } from '../../common';
+import { FieldFormatsRegistry, UI_SETTINGS } from '../../common';
 import { deserializeFieldFormat } from './utils/deserialize';
 import { FormatFactory } from '../../common/field_formats/utils';
 import { baseFormattersPublic } from './constants';
@@ -28,7 +28,7 @@ export class FieldFormatsService {
 
   public setup(core: CoreSetup) {
     core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
-      if (key === 'format:defaultTypeMap') {
+      if (key === UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP) {
         this.fieldFormatsRegistry.parseDefaultTypeMap(newValue);
       }
     });

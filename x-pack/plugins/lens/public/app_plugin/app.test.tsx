@@ -13,12 +13,14 @@ import { AppMountParameters } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
+import { createMemoryHistory, History } from 'history';
 import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import {
   esFilters,
   FilterManager,
   IFieldType,
   IIndexPattern,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
@@ -26,6 +28,7 @@ const dataStartMock = dataPluginMock.createStartContract();
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
+import { Observable } from 'rxjs';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
@@ -89,6 +92,8 @@ function createMockTimefilter() {
         return unsubscribe;
       },
     }),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
   };
 }
 
@@ -113,6 +118,7 @@ describe('Lens App', () => {
     ) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
+    history: History;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -133,6 +139,7 @@ describe('Lens App', () => {
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          state$: new Observable(),
         },
         indexPatterns: {
           get: jest.fn((id) => {
@@ -156,6 +163,7 @@ describe('Lens App', () => {
         ) => {}
       ),
       onAppLeave: jest.fn(),
+      history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -172,6 +180,7 @@ describe('Lens App', () => {
       ) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
+      history: History;
     }>;
   }
 
@@ -183,8 +192,10 @@ describe('Lens App', () => {
       jest.fn((type) => {
         if (type === 'timepicker:timeDefaults') {
           return { from: 'now-7d', to: 'now' };
-        } else if (type === 'search:queryLanguage') {
+        } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
+        } else if (type === 'state:storeInSessionStorage') {
+          return false;
         } else {
           return [];
         }

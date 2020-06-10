@@ -7,7 +7,7 @@
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/security_main';
 import { executeTimelineKQL } from '../tasks/timeline';
 
 import { HOSTS_PAGE } from '../urls/navigation';
