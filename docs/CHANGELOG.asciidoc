@@ -10,7 +10,8 @@
 
 This section summarizes the changes in each release.
 
-*<<release-notes-7.7.1>>
+* <<release-notes-7.8.0>>
+* <<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
 * <<release-notes-7.6.1>>
@@ -37,6 +38,266 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.8.0]]
+== {kib} 7.8.0
+
+See <<breaking-changes-7.8.0,breaking changes in 7.8>>.
+
+[float]
+[[enhancement-7.8.0]]
+=== Enhancements
+Alerting::
+* Adds query support to the Event Log {pull}62015[#62015]
+* Removes edit alert button from alerts list {pull}64643[#64643]
+* Implements actions server API for supporting preconfigured connectors {pull}62382[#62382]
+* Adds UI for pre-configured connectors. {pull}63074[#63074]
+APM::
+* Adda new Service map external icons {pull}63844[#63844]
+* Improves the selected node style {pull}64279[#64279]
+* Adds tooltip explaining Group ID {pull}60425[#60425]
+* Uses navigateToApp for infra/metrics/uptime links {pull}65712[#65712]
+* Observability real user monitoring solution layer {pull}64949[#64949]
+* Spans reparenting to support inferred spans {pull}63695[#63695]
+* Marks an Agent configuration as applied without etag attribute {pull}63967[#63967]
+* Agent remote config validation for Java agent configs {pull}63956[#63956]
+* Annotations API {pull}64796[#64796]
+* Adds Error Exception Type Column {pull}59596[#59596]
+* Service map anomaly indicators {pull}64718[#64718]
+Canvas::
+* Adds Top Menu {pull}59982[#59982]
+* Adds refresh and autoplay options to view menu {pull}64375[#64375]
+* Adds edit menu {pull}64738[#64738]
+* Reduces report generation time by re-using headless browser page in background {pull}63301[#63301]
+Dashboard::
+* Adds duplicate panel feature {pull}61367[#61367]
+* Return to dashboard after editing embeddable {pull}62865[#62865]
+* Deangularizes navbar, attempt nr. 2 {pull}61611[#61611]
+Lens and visualizations::
+* Triggers a filter action on click in datatable visualization {pull}63840[#63840]
+* Enables include/exclude in Terms agg for numeric fields {pull}59425[#59425]
+* Allows user to drag and select a subset of the timeline in the chart (aka brush interaction) {pull}62636[#62636]
+* Uses default {kib} palette for split series {pull}62241[#62241]
+* Removes duplicate refresh button from vis editor menu {pull}63633[#63633]
+* Binds all time fields to the time picker {pull}63874[#63874]
+* Uses Top 5 instead of Top 3 for first suggestion {pull}64726[#64726]
+* Adds pie and treemap charts {pull}55477[#55477]
+Machine Learning::
+* Wizards with dynamic model memory estimation {pull}60888[#60888]
+* Shows better file structure finder explanations {pull}62316[#62316]
+* Adds configurable file size to file data visualizer {pull}62752[#62752]
+* Lists global calendars on the job management page {pull}63124[#63124]
+* Improves parsing of large uploaded files {pull}62970[#62970]
+* Changes file data visualizer max upload setting to string {pull}63502[#63502]
+* Adds {kib} setting for file data visualizer max file size {pull}64427[#64427]
+* Enables mml estimation in data recognizer module setup {pull}64900[#64900]
+* Updates memory estimate after adding exclude fields {pull}62850[#62850]
+* Replaces table with data grid {pull}63650[#63650] and {pull}63757[#63757]
+* Fixes feature importance {pull}61761[#61761]
+* Progress including step {pull}65305[#65305]
+Management::
+* Adds Ingest Node Pipelines UI {pull}62321[#62321]
+* Adds Transforms single column wizard {pull}64436[#64436]
+* Edits transform flyout {pull}65033[#65033]
+* Adds docs_per_second to transform edit form {pull}65365[#65365]
+Maps::
+* Separates layer wizards for Clusters and heatmap {pull}60870[#60870]
+* Allows updating requestType for ESGeoGridSource {pull}62365[#62365]
+* Adds date-fields to metrics selection {pull}62629[#62629]
+* Shows create filter button for top-term tooltip property {pull}62461[#62461]
+* Turns on blended layer for geojson upload {pull}63200[#63200]
+* Updates geospatial filters to use geo_shape query for geo_point fields {pull}62966[#62966]
+* Min and max zoom map settings {pull}63714[#63714]
+* Shows spatial filters on map to provide context when for active filters {pull}63406[#63406]
+* Fits geo_shape to bounds {pull}64303[#64303]
+* Disables edit layer button when flyout is open for add layer or map settings {pull}64230[#64230]
+* Do not display EMS or {kib} layer wizards when not configured {pull}64554[#64554]
+* Initial location map settings {pull}64336[#64336]
+* Adds categorical palettes with 20 and 30 categories {pull}64701[#64701]
+* Adds oil rig icon from @elastic/maki {pull}64364[#64364]
+* Highlights selected layer in TOC {pull}61510[#61510]
+* Adds global fit to data {pull}64702[#64702]
+Metrics::
+* View log in context modal {pull}62198[#62198]
+* Refreshes the design for Inventory View, Episode 1 {pull}64026[#64026]
+* Adds Charts to Alert Conditions {pull}64384[#64384]
+* Adds 99th and 95th percentiles to Metric Explorer {pull}64699[#64699]
+* Adds category data quality warning based on ML job stats {pull}60551[#60551]
+* Adds dataset filter to ML module setup screen {pull}64470[#64470]
+* Alerting {pull}62806[#62806]
+* Enhances Alerts management page {pull}64654[#64654]
+* Adds inventory metric threshold alerts {pull}64292[#64292]
+* Adds outside range comparator {pull}63993[#63993]
+Platform::
+* Uses brotli compression for some KP assets {pull}64367[#64367]
+Reporting::
+* Adds a new config flag to encode with BOM for our CSVs {pull}63006[#63006]
+* Adds config flag to escape formula CSV values {pull}63645[#63645]
+Security::
+* Moves jira to a gold license {pull}67178[#67178]
+SIEM::
+* Enhances threat hunting for Filter for/out value, Show top field, Copy to Clipboard, Draggable chart legends {pull}61207[#61207]
+* Adds drag between ANDs in timeline queries / add to timeline {pull}65228[#65228]
+* Creates template timeline {pull}63136[#63136]
+* Adds lists feature flag and list values to the REST interfaces {pull}60171[#60171]
+* Adds an error aggregator by error reason and a way to filter them {pull}63513[#63513]
+* Adds large list support using REST endpoints {pull}62552[#62552]
+* Server cutover to New Platform {pull}63430[#63430]
+* Adds template timeline UI {pull}64439[#64439]
+* Updates list values in REST interfaces {pull}62320[#62320]
+* Updates KQL/Lucene search to include lists exceptions {pull}63264[#63264]
+* Updates rule.lists to be rule.exceptions_list {pull}63717[#63717]
+* Moves All Rules tabs to match other tabs UI {pull}63920[#63920]
+* Minor updates to monitoring table with unit tests {pull}64020[#64020]
+Uptime::
+* Adds cert API request and runtime type checking {pull}63062[#63062]
+* Updates TLS settings {pull}64111[#64111]
+* TLS alerting {pull}63913[#63913]
+* Adds new nav {pull}64018[#64018]
+* Certificate expiration threshold settings {pull}63682[#63682]
+* Certificates page {pull}64059[#64059]
+* Filters in create alert flyout {pull}64753[#64753]
+* Moves status filter to monitor list {pull}65049[#65049]
+
+[float]
+[[bug-7.8.0]]
+=== Bug fixes
+Alerting::
+* TaskManager tasks scheduled without attempting to run {pull}62078[#62078]
+* Only fetching TaskManager's available tasks once per call to fillPool {pull}61991[#61991]
+* Restores migrations of old tasks in TM {pull}65978[#65978]
+* Fixes pre-configured docs link points to the wrong page and functional tests configs {pull}68606[#68606]
+APM::
+* Custom links section inside the Actions menu is showing outside of the menu {pull}65428[#65428]
+* Removes link from active page in the breadcrumb {pull}65473[#65473]
+* Agent configuration: Bug makes it possible to create invalid configurations {pull}65508[#65508]
+* Scope APM alert creation to environment {pull}65681[#65681]
+* Cannot click through to details of an error on the waterfall page if the error is missing `transaction.id` {pull}66386[#66386]
+* Removes service maps badge row and num instances in popover {pull}65492[#65492]
+* Handle ML integration when ML is disabled {pull}66158[#66158]
+* Fixes 'Enable watcher error reports' 400 error {pull}68465[#68465]
+* Updates apm index pattern {pull}65424[#65424]
+* Ensures that `/api/apm/security/indices_privileges` doesn't fail when security is disabled {pull}64627[#64627]
+* Fixes query bar Japanese translation {pull}68037[#68037]
+* Service map fix focused node edges on unselect {pull}63655[#63655]
+* Fixes duplicate index patterns {pull}64883[#64883]
+Canvas::
+* Bug/pagination enabled empty workpad {pull}62050[#62050]
+Dashboard::
+* Improves dashboard loading error handling {pull}66372[#66372]
+Design::
+* Adds max-height to recently viewed links {pull}66297[#66297]
+Discover::
+* match_all query disappears when typed into Lucene query bar {pull}62194[#62194]
+* KQL removes leading zero and breaks query {pull}62748[#62748]
+* Shows doc viewer action buttons on focus {pull}64912[#64912]
+* Fixes renaming of saved search not displayed in breadcrumb {pull}67577[#67577]
+* Replaces EuiTooltip by native title for better performance {pull}68280[#68280]
+* Clicking cancel in saved query save modal doesn't close it {pull}62774[#62774]
+Graph::
+* Changes the copy from blacklist to blocklist {pull}65419[#65419]
+Kibana UI::
+* Updates home link click handler {pull}68132[#68132]
+* Updates Canvas location in nav {pull}65519[#65519]
+* Fixes Recently Viewed links allowing them to close the nav when clicked {pull}66280[#66280]
+Lens and visualizations::
+* Fixes redirect after reload {pull}66328[#66328]
+* Auto interval on date histogram is getting displayed as timestamp per… {pull}59171[#59171]
+* Fixes visualize and lens telemetry {pull}67749[#67749]
+* Removes redundant formatting of percentage column {pull}64948[#64948]
+* Uses correct text color in metric vis on dark background {pull}67481[#67481]
+* Fixes the problem on adding color rules {pull}67763[#67763]
+* Fixes bug where suggestions didn't use filters {pull}63293[#63293]
+* Only show copy on save for previously saved docs {pull}63535[#63535]
+* Fixes escaping of field names {pull}63509[#63509]
+* Makes average the default metric when dragging a field directly {pull}63416[#63416]
+* Fixes bug in field list when _source contained fields with dots {pull}63752[#63752]
+* Allows table to scroll horizontally {pull}63805[#63805]
+* Migrates timelion vis {pull}62819[#62819]
+* TSVB Validation fix color rule validation {pull}67759[#67759]
+Machine Learning::
+* Fixes the limit control on the Anomaly explorer page {pull}65459[#65459]
+* Hides selector helper in Anomaly Explorer swimlane {pull}65522[#65522]
+* Fixes dashboard URLs for auditbeat module {pull}65707[#65707]
+* Fixes vertical overflow on Single Metric Viewer page {pull}66413[#66413]
+* Catches unknown index pattern errors {pull}61935[#61935]
+* Disables data frame anaylics clone button based on permission {pull}64830[#64830]
+* Disables calendar all job switch {pull}65635[#65635]
+* Shows warning when the model memory limit is higher than the memory available in the ML node {pull}65652[#65652]
+* Removes assignment_explanation when cloning job {pull}68226[#68226]
+* DFA: ensure at least one field is included in analysis before job can be created {pull}65320[#65320]
+* Anomaly Explorer: if filter includes wildcard ensure matching swimlanes are not masked {pull}65384[#65384]
+* Fixes reordering in view by swimlane when overall cell selected {pull}65290[#65290]
+* Fixes anomaly charts for rare detectors when model plot is enabled {pull}66075[#66075]
+* Adds job timing stats to anomaly jobs {pull}65696[#65696]
+* Fixes anomaly dot plotted in wrong location in Single Metric Viewer {pull}66071[#66071]
+Management::
+* Fixes error when deleting snapshots behind reverse proxy {pull}66147[#66147]
+* Fixes bug when editing retention of slm policy {pull}67137[#67137]
+* Fixes fetch policies query {pull}67827[#67827]
+* Adds missing time unit labels {pull}68205[#68205]
+* Fixes pagination bugs in CCR and Remote Clusters {pull}65931[#65931]
+* Cleans up doc title when navigating away from Snapshot Restore {pull}67906[#67906]
+* Fixes boolean cell values in analytics table result views and transforms wizard {pull}62618[#62618]
+* Index pattern management - field list - localization functions returning empty strings {pull}64055[#64055]
+Maps::
+* Fixes replaceLayerList to handle case where map is not intialized {pull}62202[#62202]
+* Safely handles empty string and invalid strings from EuiColorPicker {pull}62507[#62507]
+* Do not show circle border when symbol size is zero {pull}62644[#62644]
+* Fixes attribution overflow with exit full screen button {pull}62699[#62699]
+* Creates NOT EXISTS filter for tooltip property with no value {pull}62849[#62849]
+* Fixes bug where toggling Scaling type does not re-fetch data {pull}63326[#63326]
+* Fixes double fetch when filter pill is added {pull}63024[#63024]
+* Fixes term join agg key collision {pull}63324[#63324]
+* Fixes date labels {pull}63909[#63909]
+* Removes SLA percentage metric {pull}65718[#65718]
+* Removes dateline check for geo_shape queries, split geo_bounding_box queries that cross dateline into 2 boxes {pull}64598[#64598]
+* Handles case where fit to bounds does not match any documents {pull}66307[#66307]
+* Returns bounding box for static feature collection without joins {pull}66607[#66607]
+* Fixes legend icon color for custom categorial palettes {pull}67141[#67141]
+Metrics::
+* Disables search bar when live stream is on {pull}65491[#65491]
+* Ensures live stream always gets latest entries {pull}67935[#67935]
+* Fixes time picker layout issues on Inventory View {pull}66094[#66094]
+* Fixes validation for threshold values {pull}66281[#66281]
+* Prevents component errors from breaking the whole UI {pull}65456[#65456]
+* Fixes mistake in container ip field name {pull}66198[#66198]
+* Fixes time state bug {pull}67630[#67630]
+* Require filterQuery to be ES JSON {pull}64937[#64937]
+* Debounce onChange in alert creation UI {pull}65167[#65167]
+* Fixes default metric alert interval for new conditions {pull}66610[#66610]
+Platform::
+* Fixes inconsistent search behaviour in Advanced Settings {pull}64510[#64510]
+* Refactors nav links and header components {pull}66685[#66685]
+* SavedObjects bulkCreate API should return migrationVersion and strip the type &amp; namespace from the id {pull}65150[#65150]
+* Fixes task manager cancel warning {pull}63756[#63756]
+* New Kibana app link order {pull}67991[#67991]
+* Warning and link to support matrix for IE11 {pull}66512[#66512]
+SIEM::
+* Fixes import bug with non existent signals index {pull}65595[#65595]
+* Restricts ML rule modification to ML Admins {pull}65583[#65583]
+* Fixes timeline buildGlobalQuery {pull}68320[#68320]
+Security::
+* Fixes EncryptedSavedObjectsClientWrapper fails on stripEncryptedAttributes for saved object with errors {pull}61385[#61385]
+Uptime::
+* Refreshes index and also show more info to user regarding index/data {pull}62606[#62606]
+* Updates uptime ml job id to limit to 64 char {pull}64394[#64394]
+* Enables deselection of stale filters {pull}65523[#65523]
+* Unmounts uptime app properly {pull}66950[#66950]
+
+[float]
+[[deprecation-7.8.0]]
+=== Deprecation
+Security::
+* Deprecates {kib} user in favor of kibana_system user {pull}63186[#63186]
+
+[float]
+[[breaking-changes-7.8.0]]
+=== Breaking Changes
+Alerting::
+* [Fixes #63130] Changed actions API endpoints urls to follow Kibana STYLEGUIDE {pull}65936[#65936]
+Metrics::
+* Refactors action messaging to report on No Data state {pull}64365[#64365]
+
 [[release-notes-7.7.1]]
 == {kib} 7.7.1
 
