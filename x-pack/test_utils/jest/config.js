@@ -42,6 +42,7 @@ export default {
     'json',
     'ts',
     'tsx',
+    'node',
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',

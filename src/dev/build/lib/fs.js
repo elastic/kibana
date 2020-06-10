@@ -205,6 +205,19 @@ export async function untar(source, destination, extractOptions = {}) {
   ]);
 }
 
+export async function gunzip(source, destination) {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  await mkdirp(dirname(destination));
+
+  await createPromiseFromStreams([
+    fs.createReadStream(source),
+    createGunzip(),
+    fs.createWriteStream(destination),
+  ]);
+}
+
 export async function compress(type, options = {}, source, destination) {
   const output = fs.createWriteStream(destination);
   const archive = archiver(type, options.archiverOptions);

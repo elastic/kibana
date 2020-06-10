@@ -25,7 +25,7 @@ export default new Chainable('label', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'label',
@@ -42,7 +42,7 @@ export default new Chainable('label', {
       help: i18n.translate('timelion.help.functions.label.args.regexHelpText', {
         defaultMessage: 'A regex with capture group support',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.labelHelpText', {
     defaultMessage: 'Change the label of the series. Use %s to reference the existing label',
@@ -51,12 +51,15 @@ export default new Chainable('label', {
     const config = args.byName;
     return alter(args, function (eachSeries) {
       if (config.regex) {
-        eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
+        // not using a standard `import` so that if there's an issue with the re2 native module
+        // that it doesn't prevent Kibana from starting up and we only have an issue using Timelion labels
+        const RE2 = require('re2');
+        eachSeries.label = eachSeries.label.replace(new RE2(config.regex), config.label);
       } else {
         eachSeries.label = config.label;
       }
 
       return eachSeries;
     });
-  }
+  },
 });

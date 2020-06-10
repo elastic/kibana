@@ -32,6 +32,7 @@ export * from './nodejs_modules';
 export * from './notice_file_task';
 export * from './optimize_task';
 export * from './os_packages';
+export * from './patch_native_modules_task';
 export * from './transpile_babel_task';
 export * from './transpile_typescript_task';
 export * from './transpile_scss_task';
