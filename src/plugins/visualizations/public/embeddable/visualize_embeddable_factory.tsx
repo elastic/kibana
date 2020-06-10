@@ -133,14 +133,21 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async create() {
+  public async create(input: VisualizeInput & { hideVisModal: boolean }, parent?: IContainer) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     const originatingAppParam = await this.getCurrentAppId();
-    showNewVisModal({
-      editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
-      outsideVisualizeApp: true,
-    });
-    return undefined;
+    if (input.hideVisModal) {
+      const visState = convertToSerializedVis(input.savedVis);
+      const vis = new Vis(visState.type, visState);
+      await vis.setState(visState);
+      return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
+    } else {
+      showNewVisModal({
+        editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
+        outsideVisualizeApp: true,
+      });
+      return undefined;
+    }
   }
 }

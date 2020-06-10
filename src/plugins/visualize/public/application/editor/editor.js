@@ -30,7 +30,6 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../../embeddable/public';
-
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { unhashUrl, removeQueryParam } from '../../../../kibana_utils/public';
 import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
@@ -79,8 +78,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     setActiveUrl,
     visualizations,
     dashboard,
+    embeddable,
   } = getServices();
-
   const {
     filterManager,
     timefilter: { timefilter },
@@ -244,14 +243,31 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   onTitleDuplicate,
                   returnToOrigin,
                 };
-                //const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
-                return doSave(saveOptions).then((response) => {
-                  // If the save wasn't successful, put the original values back.
-                  if (!response.id || response.error) {
-                    savedVis.title = currentTitle;
-                  }
-                  return response;
-                });
+                const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
+                embeddable
+                  .getEmbeddableFactory('dashboard')
+                  .create(currentDashboardInput)
+                  .then((currentDashboard) => {
+                    if (currentDashboard) {
+                      const input = {
+                        savedVis: { ...savedVis },
+                        hideVisModal: true,
+                      };
+                      currentDashboard.addNewEmbeddable('visualization', input).then(() => {
+                        const dashInput = currentDashboard.getInput();
+                        dashboard.navigateToDashboard(dashInput);
+                      });
+                    } else {
+                      return doSave(saveOptions).then((response) => {
+                        // If the save wasn't successful, put the original values back.
+                        if (!response.id || response.error) {
+                          savedVis.title = currentTitle;
+                        }
+                        return response;
+                      });
+                    }
+                  });
+                return { id: '123' };
               };
 
               const saveModal = (
@@ -413,6 +429,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   };
 
   function init() {
+    console.dir(embeddable);
     if (vis.data.indexPattern) {
       $scope.indexPattern = vis.data.indexPattern;
     } else {
@@ -483,13 +500,15 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
           state.vis
         )
       ) {
-        const { aggs, ...visState } = state.vis;
-        vis.setState({
-          ...visState,
-          data: {
-            aggs,
-          },
-        });
+        if (state.vis) {
+          const { aggs, ...visState } = state.vis;
+          vis.setState({
+            ...visState,
+            data: {
+              aggs,
+            },
+          });
+        }
         embeddableHandler.reload();
         $scope.eventEmitter.emit('updateEditor');
       }

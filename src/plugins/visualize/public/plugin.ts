@@ -43,6 +43,7 @@ import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/publ
 import { DashboardStart } from '../../dashboard/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -52,6 +53,7 @@ export interface VisualizePluginStartDependencies {
   dashboard: DashboardStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
+  embeddable: EmbeddableStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -136,6 +138,7 @@ export class VisualizePlugin
           dashboard: pluginsStart.dashboard,
           scopedHistory: () => this.currentHistory!,
           savedObjects: pluginsStart.savedObjects,
+          embeddable: pluginsStart.embeddable,
         };
         setServices(deps);
 
