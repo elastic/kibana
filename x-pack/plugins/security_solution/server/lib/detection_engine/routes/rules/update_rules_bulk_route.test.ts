@@ -126,16 +126,18 @@ describe('update_rules_bulk', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
-      const request = requestMock.create({
+      const noIdRequest = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         body: [{ ...typicalPayload(), rule_id: undefined }],
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because ["value" must contain at least one of [id, rule_id]]'
-      );
+      const response = await server.inject(noIdRequest, context);
+      expect(response.body).toEqual([
+        {
+          error: { message: 'either "id" or "rule_id" must be set', status_code: 400 },
+          rule_id: '(unknown id)',
+        },
+      ]);
     });
 
     test('allows query rule type', async () => {
@@ -158,7 +160,7 @@ describe('update_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
+        'Invalid value "unknown_type" supplied to "type"'
       );
     });
   });
