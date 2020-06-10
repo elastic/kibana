@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiButton,
   EuiTableFieldDataColumnType,
+  EuiHideFor,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -48,15 +49,15 @@ const AndOrBadgeContainer = styled(EuiFlexItem)`
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
   disableDelete: boolean;
-  handleDelete: () => void;
-  handleEdit: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
 }
 
 const ExceptionEntriesComponent = ({
   entries,
   disableDelete,
-  handleDelete,
-  handleEdit,
+  onDelete,
+  onEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
   const columns = useMemo(
     (): Array<EuiTableFieldDataColumnType<FormattedEntry>> => [
@@ -65,6 +66,7 @@ const ExceptionEntriesComponent = ({
         name: 'Field',
         sortable: false,
         truncateText: true,
+        textOnly: true,
         'data-test-subj': 'exceptionFieldNameCell',
         width: '30%',
         render: (value: string | null, data: FormattedEntry) => {
@@ -121,9 +123,15 @@ const ExceptionEntriesComponent = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="none">
             {entries.length > 1 && (
-              <AndOrBadgeContainer grow={false}>
-                <AndOrBadge type="and" includeAntennas data-test-subj="exceptionsViewerAndBadge" />
-              </AndOrBadgeContainer>
+              <EuiHideFor sizes={['xs', 's']}>
+                <AndOrBadgeContainer grow={false}>
+                  <AndOrBadge
+                    type="and"
+                    includeAntennas
+                    data-test-subj="exceptionsViewerAndBadge"
+                  />
+                </AndOrBadgeContainer>
+              </EuiHideFor>
             )}
             <EuiFlexItem grow={1}>
               <EuiBasicTable
@@ -136,13 +144,13 @@ const ExceptionEntriesComponent = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <StyledEditButton
                 size="s"
                 color="primary"
-                onClick={handleEdit}
+                onClick={onEdit}
                 isDisabled={disableDelete}
                 data-test-subj="exceptionsViewerEditBtn"
               >
@@ -153,7 +161,7 @@ const ExceptionEntriesComponent = ({
               <StyledRemoveButton
                 size="s"
                 color="danger"
-                onClick={handleDelete}
+                onClick={onDelete}
                 isLoading={disableDelete}
                 data-test-subj="exceptionsViewerDeleteBtn"
               >
