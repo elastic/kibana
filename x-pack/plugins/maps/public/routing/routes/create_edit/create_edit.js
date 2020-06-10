@@ -104,8 +104,9 @@ export const MapsCreateEditView = class extends React.Component {
     if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
       updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
     }
+    // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
-    if (!_.isEqual(globalStateSnapshot, globalState)) {
+    if (globalState && !_.isEqual(globalStateSnapshot, globalState)) {
       this.setState({ globalStateSnapshot: globalState });
       this.updateFromGlobalState(globalState);
     }
@@ -304,6 +305,7 @@ export const MapsCreateEditView = class extends React.Component {
 
   initQueryTimeRefresh(savedMap) {
     const { setRefreshConfig } = this.props;
+    // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
     const newState = {
@@ -418,6 +420,7 @@ export const MapsCreateEditView = class extends React.Component {
 
   async initMap(savedMap) {
     const { clearUi } = this.props;
+    // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
     this.initMapAndLayerSettings(savedMap);
     clearUi();
