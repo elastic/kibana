@@ -44,5 +44,6 @@ export {
   PublicLegacyAppInfo,
   ParsedAppUrl,
   // Internal types
+  InternalApplicationSetup,
   InternalApplicationStart,
 } from './types';

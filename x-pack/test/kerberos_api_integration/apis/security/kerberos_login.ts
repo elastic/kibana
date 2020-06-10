@@ -98,7 +98,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('finishing SPNEGO', () => {
-      it('should properly set cookie and authenticate user', async () => {
+      // Skipped: https://github.com/elastic/kibana/issues/68720
+      it.skip('should properly set cookie and authenticate user', async () => {
         const response = await supertest
           .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
