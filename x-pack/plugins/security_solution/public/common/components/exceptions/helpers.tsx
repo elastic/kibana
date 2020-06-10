@@ -56,7 +56,7 @@ export const getExceptionOperatorSelect = (entry: ExceptionEntry): OperatorOptio
   return foundOperator ?? isOperator;
 };
 
-export const determineIfIsNested = (
+export const isEntryNested = (
   tbd: ExceptionEntry | NestedExceptionEntry
 ): tbd is NestedExceptionEntry => {
   if (tbd.type === 'nested') {
@@ -75,7 +75,7 @@ export const getFormattedEntries = (
   entries: Array<ExceptionEntry | NestedExceptionEntry>
 ): FormattedEntry[] => {
   const formattedEntries = entries.map((entry) => {
-    if (determineIfIsNested(entry)) {
+    if (isEntryNested(entry)) {
       const parent = { fieldName: entry.field, operator: null, value: null, isNested: false };
       return entry.entries.reduce<FormattedEntry[]>(
         (acc, nestedEntry) => {
