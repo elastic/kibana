@@ -18,6 +18,7 @@
  */
 
 import { SavedObjectsType } from '../../saved_objects';
+import { migrations790 } from './migrations_790';
 
 export const uiSettingsType: SavedObjectsType = {
   name: 'config',
@@ -46,4 +47,5 @@ export const uiSettingsType: SavedObjectsType = {
       return `Advanced Settings [${obj.id}]`;
     },
   },
+  migrations: migrations790,
 };
