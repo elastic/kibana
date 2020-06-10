@@ -92,7 +92,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
-  private labelNode?: HTMLDivElement;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
@@ -258,10 +257,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
-
-    this.labelNode = document.createElement('div');
-    this.labelNode.className = `embPanel-label`;
-    domNode.appendChild(this.labelNode);
 
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
