@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { isFullLicense } from '../../license';
 

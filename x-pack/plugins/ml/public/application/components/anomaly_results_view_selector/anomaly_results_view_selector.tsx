@@ -57,7 +57,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
       data-test-subj="mlAnomalyResultsViewSelector"
       options={toggleButtonsIcons}
       idSelected={viewId}
-      onChange={(id) => onChangeView(id)}
+      onChange={onChangeView}
       isIconOnly
     />
   );

@@ -47,38 +47,32 @@ export const AnomalyDetectionSettings: FC<Props> = ({
     loadSummaryStats();
   }, []);
 
-  function loadSummaryStats() {
+  async function loadSummaryStats() {
     // Obtain the counts of calendars and filter lists.
     if (canGetCalendars === true) {
-      ml.calendars()
-        .then((calendars) => {
-          setCalendarsCount(calendars.length);
-        })
-        .catch((resp) => {
-          toasts.addDanger(
-            i18n.translate('xpack.ml.settings.anomalyDetection.loadingCalendarsCountErrorMessage', {
-              defaultMessage: 'An error occurred obtaining the count of calendars',
-            })
-          );
-        });
+      try {
+        const calendars = await ml.calendars();
+        setCalendarsCount(calendars.length);
+      } catch (e) {
+        toasts.addDanger(
+          i18n.translate('xpack.ml.settings.anomalyDetection.loadingCalendarsCountErrorMessage', {
+            defaultMessage: 'An error occurred obtaining the count of calendars',
+          })
+        );
+      }
     }
 
     if (canGetFilters === true) {
-      ml.filters
-        .filtersStats()
-        .then((filterLists) => {
-          setFilterListsCount(filterLists.length);
-        })
-        .catch((resp) => {
-          toasts.addDanger(
-            i18n.translate(
-              'xpack.ml.settings.anomalyDetection.loadingFilterListCountErrorMessage',
-              {
-                defaultMessage: 'An error occurred obtaining the count of filter lists',
-              }
-            )
-          );
-        });
+      try {
+        const filterLists = await ml.filters.filtersStats();
+        setFilterListsCount(filterLists.length);
+      } catch (e) {
+        toasts.addDanger(
+          i18n.translate('xpack.ml.settings.anomalyDetection.loadingFilterListCountErrorMessage', {
+            defaultMessage: 'An error occurred obtaining the count of filter lists',
+          })
+        );
+      }
     }
   }
 
