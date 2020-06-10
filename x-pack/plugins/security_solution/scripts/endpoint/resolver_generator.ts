@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as yargs from 'yargs';
+import fetch from 'node-fetch';
 import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../../common/endpoint/generate_data';
 import { default as eventMapping } from './event_mapping.json';
-import { default as alertMapping } from './alert_mapping.json';
-import { default as policyMapping } from './policy_mapping.json';
-import { default as metadataMapping } from './metadata_mapping.json';
 
 main();
 
@@ -41,6 +39,17 @@ async function deleteIndices(indices: string[], client: Client) {
     }
   }
 }
+const doIngestSetup = async (url: string, creds: string) => {
+  const headers = new Headers();
+  headers.set('Authorization', `Basic ${Buffer.from(creds, 'utf8').toString('base64')}`);
+  try {
+    const response = await fetch(url);
+    const json = await response.json();
+    console.log(JSON.stringify(json, null, 2));
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 async function main() {
   const argv = yargs.help().options({
@@ -53,6 +62,12 @@ async function main() {
       alias: 'n',
       describe: 'elasticsearch node url',
       default: 'http://localhost:9200',
+      type: 'string',
+    },
+    kibana: {
+      alias: 'k',
+      describe: 'kibana url',
+      default: 'http://elastic:changeme@localhost:5601',
       type: 'string',
     },
     alertIndex: {
@@ -80,7 +95,8 @@ async function main() {
       type: 'string',
     },
     auth: {
-      describe: 'elasticsearch username and password, separated by a colon',
+      describe: 'elasticsearch/kibana username and password, separated by a colon',
+      default: 'elastic:changeme',
       type: 'string',
     },
     ancestors: {
@@ -163,6 +179,11 @@ async function main() {
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
+
+  if (false) {
+    doIngestSetup(argv.kibana, argv.auth);
+  }
+
   if (argv.auth) {
     const [username, password]: string[] = argv.auth.split(':', 2);
     clientOptions.auth = { username, password };
@@ -205,10 +226,6 @@ async function main() {
     process.exit(1);
   }
 
-  await createIndex(client, argv.alertIndex, alertMapping);
-  await createIndex(client, argv.eventIndex, eventMapping);
-  await createIndex(client, argv.policyIndex, policyMapping);
-  await createIndex(client, argv.metadataIndex, metadataMapping);
   if (argv.setupOnly) {
     // eslint-disable-next-line no-process-exit
     process.exit(0);
@@ -233,12 +250,14 @@ async function main() {
       await client.index({
         index: argv.metadataIndex,
         body: generator.generateHostMetadata(timestamp - timeBetweenDocs * (argv.numDocs - j - 1)),
+        op_type: 'create',
       });
       await client.index({
         index: argv.policyIndex,
         body: generator.generatePolicyResponse(
           timestamp - timeBetweenDocs * (argv.numDocs - j - 1)
         ),
+        op_type: 'create',
       });
     }
 
@@ -264,7 +283,7 @@ async function main() {
       const body = resolverDocs.reduce(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (array: Array<Record<string, any>>, doc) => (
-          array.push({ index: { _index: argv.eventIndex } }, doc), array
+          array.push({ create: { _index: argv.eventIndex } }, doc), array
         ),
         []
       );
@@ -273,24 +292,4 @@ async function main() {
   }
   // eslint-disable-next-line no-console
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function createIndex(client: Client, index: string, mapping: any) {
-  try {
-    await client.indices.create({
-      index,
-      body: mapping,
-    });
-  } catch (err) {
-    if (
-      err instanceof ResponseError &&
-      err.body.error.type !== 'resource_already_exists_exception'
-    ) {
-      // eslint-disable-next-line no-console
-      console.log(err.body);
-      // eslint-disable-next-line no-process-exit
-      process.exit(1);
-    }
-  }
 }
