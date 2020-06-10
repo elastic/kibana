@@ -22,6 +22,8 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
+import { SavedView } from '../../../containers/saved_view/saved_view';
+import { useWaffleViewState } from './hooks/use_waffle_view_state';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -34,7 +36,7 @@ export const SnapshotPage = () => {
   } = useContext(Source.Context);
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
-
+  const { defaultViewState } = useWaffleViewState();
   const tutorialLinkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial_directory/metrics',
@@ -58,7 +60,9 @@ export const SnapshotPage = () => {
         ) : metricIndicesExist ? (
           <>
             <FilterBar />
-            <Layout />
+            <SavedView.Provider viewType={'inventory-view'} defaultViewState={defaultViewState}>
+              <Layout />
+            </SavedView.Provider>
           </>
         ) : hasFailedLoadingSource ? (
           <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />

@@ -19,12 +19,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiBadge } from '@elastic/eui';
 import { SavedView } from '../../hooks/use_saved_view';
 
 interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
   loading: boolean;
+  defaultViewId: string;
   close(): void;
+  makeDefault(id: string): void;
   setView(viewState: ViewState): void;
   deleteView(id: string): void;
 }
@@ -67,7 +70,9 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
 export function SavedViewListFlyout<ViewState>({
   close,
   views,
+  defaultViewId,
   setView,
+  makeDefault,
   deleteView,
   loading,
 }: Props<ViewState>) {
@@ -98,6 +103,32 @@ export function SavedViewListFlyout<ViewState>({
     [deleteView]
   );
 
+  const renderMakeDefaultction = useCallback(
+    (item: SavedView<ViewState>) => {
+      const isDefault = item.id === defaultViewId;
+      return (
+        <>
+          {isDefault && (
+            <EuiBadge>
+              <FormattedMessage
+                defaultMessage="Default"
+                id="xpack.infra.openView.actionNames.default"
+              />
+            </EuiBadge>
+          )}
+
+          {!isDefault && (
+            <EuiButtonEmpty
+              iconType={isDefault ? 'starFilled' : 'starEmpty'}
+              onClick={() => makeDefault(item.id)}
+            />
+          )}
+        </>
+      );
+    },
+    [makeDefault, defaultViewId]
+  );
+
   const columns = [
     {
       field: 'name',
@@ -111,6 +142,10 @@ export function SavedViewListFlyout<ViewState>({
         defaultMessage: 'Actions',
       }),
       actions: [
+        {
+          available: () => true,
+          render: renderMakeDefaultction,
+        },
         {
           available: (item: SavedView<ViewState>) => !item.isDefault,
           render: renderDeleteAction,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useInterval } from 'react-use';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -20,14 +20,17 @@ import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../observability/public';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
-import { SavedViews } from './saved_views';
 import { IntervalLabel } from './waffle/interval_label';
 import { Legend } from './waffle/legend';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
+import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
+import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 
 export const Layout = () => {
   const { sourceId, source } = useSourceContext();
+  const { currentView, loadingDefaultView, loadDefaultView } = useSavedViewContext();
   const {
     metric,
     groupBy,
@@ -78,6 +81,29 @@ export const Layout = () => {
   const bounds = autoBounds ? dataBounds : boundsOverride;
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+  const { viewState, onViewChange } = useWaffleViewState();
+
+  useEffect(() => {
+    if (currentView) {
+      onViewChange(currentView);
+    }
+  }, [currentView, onViewChange]);
+
+  useEffect(() => {
+    loadDefaultView();
+  }, [loadDefaultView]);
+
+  useEffect(() => {
+    // load snapshot data after default view loaded
+    if (loadingDefaultView === false) {
+      reload();
+    }
+  }, [loadingDefaultView, reload]);
+
+  if (loadingDefaultView) {
+    // If we're loading the default view, don't show anything yet because we don't have data.
+    return null;
+  }
 
   return (
     <>
@@ -107,7 +133,7 @@ export const Layout = () => {
           <BottomActionContainer>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <SavedViews />
+                <SavedViewsToolbarControls viewState={viewState} />
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
                 <Legend

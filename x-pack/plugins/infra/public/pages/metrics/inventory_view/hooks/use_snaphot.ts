@@ -63,12 +63,6 @@ export function useSnapshot(
     decodeResponse
   );
 
-  useEffect(() => {
-    (async () => {
-      await makeRequest();
-    })();
-  }, [makeRequest]);
-
   return {
     error: (error && error.message) || null,
     loading,

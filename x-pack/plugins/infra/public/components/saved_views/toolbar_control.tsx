@@ -5,19 +5,16 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useSavedView } from '../../hooks/use_saved_view';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewListFlyout } from './view_list_flyout';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {
-  viewType: string;
   viewState: ViewState;
-  defaultViewState: ViewState;
-  onViewChange(viewState: ViewState): void;
 }
 
 export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
@@ -28,11 +25,14 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     loading,
     deletedId,
     deleteView,
+    defaultViewId,
+    makeDefault,
     find,
     errorOnFind,
     errorOnCreate,
     createdId,
-  } = useSavedView(props.defaultViewState, props.viewType);
+    setCurrentView,
+  } = useContext(SavedView.Context);
   const [modalOpen, setModalOpen] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -109,9 +109,11 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         <SavedViewListFlyout<ViewState>
           loading={loading}
           views={views}
+          defaultViewId={defaultViewId}
+          makeDefault={makeDefault}
           deleteView={deleteView}
           close={closeModal}
-          setView={props.onViewChange}
+          setView={setCurrentView}
         />
       )}
     </>
