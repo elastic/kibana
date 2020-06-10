@@ -12,7 +12,7 @@ import {
 } from '../__fixtures__';
 import { CoreSetup, kibanaResponseFactory, IRouter, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServerMock,
   httpServiceMock,
   coreMock,
@@ -36,7 +36,7 @@ describe('Spaces Public API', () => {
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
     const service = new SpacesService(log);
     const spacesService = await service.setup({

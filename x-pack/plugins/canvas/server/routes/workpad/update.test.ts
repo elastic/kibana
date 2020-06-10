@@ -17,7 +17,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { workpads } from '../../../__tests__/fixtures/workpads';
 import { okResponse } from '../ok_response';
@@ -47,7 +47,7 @@ describe('PUT workpad', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeUpdateWorkpadRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.put.mock.calls[0][1];
@@ -161,7 +161,7 @@ describe('update assets', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeUpdateWorkpadAssetsRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.put.mock.calls[0][1];

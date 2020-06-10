@@ -26,14 +26,14 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest } from './types';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 jest.doMock(
   join('plugin-with-initializer-path', 'server'),
   () => ({ plugin: mockPluginInitializer }),

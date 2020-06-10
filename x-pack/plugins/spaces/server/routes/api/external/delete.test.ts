@@ -19,7 +19,7 @@ import {
   SavedObjectsErrorHelpers,
 } from 'src/core/server';
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
   coreMock,
@@ -41,7 +41,7 @@ describe('Spaces Public API', () => {
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
 

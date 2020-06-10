@@ -24,12 +24,12 @@ import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
-let logger: ReturnType<typeof loggingServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
 
 const contextSetup = contextServiceMock.createSetupContract();
 
@@ -38,7 +38,7 @@ const setupDeps = {
 };
 
 beforeEach(() => {
-  logger = loggingServiceMock.create();
+  logger = loggingSystemMock.create();
   server = createHttpServer({ logger });
 });
 
@@ -167,7 +167,7 @@ describe('OnPreAuth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: reason],
@@ -188,7 +188,7 @@ describe('OnPreAuth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: [object Object].],
@@ -301,7 +301,7 @@ describe('OnPostAuth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: reason],
@@ -321,7 +321,7 @@ describe('OnPostAuth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
@@ -506,7 +506,7 @@ describe('Auth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: reason],
@@ -703,7 +703,7 @@ describe('Auth', () => {
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
     expect(response.header['www-authenticate']).toBe('from auth interceptor');
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "onPreResponseHandler rewrote a response header [www-authenticate].",
@@ -736,7 +736,7 @@ describe('Auth', () => {
     const response = await supertest(innerServer.listener).get('/').expect(400);
 
     expect(response.header['www-authenticate']).toBe('from auth interceptor');
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "onPreResponseHandler rewrote a response header [www-authenticate].",
@@ -798,7 +798,7 @@ describe('Auth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: reason],
@@ -818,7 +818,7 @@ describe('Auth', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
@@ -929,7 +929,7 @@ describe('OnPreResponse', () => {
 
     await supertest(innerServer.listener).get('/').expect(200);
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "onPreResponseHandler rewrote a response header [x-kibana-header].",
@@ -953,7 +953,7 @@ describe('OnPreResponse', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: reason],
@@ -975,7 +975,7 @@ describe('OnPreResponse', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: [object Object].],

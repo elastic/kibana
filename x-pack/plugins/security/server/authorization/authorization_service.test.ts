@@ -25,7 +25,7 @@ import { AuthorizationService } from '.';
 import {
   coreMock,
   elasticsearchServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -71,7 +71,7 @@ it(`#setup returns exposed services`, () => {
     status: mockCoreSetup.status,
     clusterClient: mockClusterClient,
     license: mockLicense,
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
     features: mockFeaturesSetup,
@@ -140,7 +140,7 @@ describe('#start', () => {
       status: mockCoreSetup.status,
       clusterClient: mockClusterClient,
       license: mockLicense,
-      loggers: loggingServiceMock.create(),
+      loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
       features: featuresPluginMock.createSetup(),
@@ -241,7 +241,7 @@ it('#stop unsubscribes from license and ES updates.', () => {
     status: mockCoreSetup.status,
     clusterClient: mockClusterClient,
     license: mockLicense,
-    loggers: loggingServiceMock.create(),
+    loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
     features: featuresPluginMock.createSetup(),

@@ -9,7 +9,7 @@ import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
 import { registerBuiltInActionTypes } from './index';
 import { Logger } from '../../../../../src/core/server';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
 
@@ -19,7 +19,7 @@ export function createActionTypeRegistry(): {
   logger: jest.Mocked<Logger>;
   actionTypeRegistry: ActionTypeRegistry;
 } {
-  const logger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.setup(),
     taskRunnerFactory: new TaskRunnerFactory(

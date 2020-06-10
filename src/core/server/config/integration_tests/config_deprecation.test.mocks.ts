@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { loggingServiceMock } from '../../logging/logging_service.mock';
-export const mockLoggingService = loggingServiceMock.create();
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+export const mockLoggingService = loggingSystemMock.create();
 mockLoggingService.asLoggerFactory.mockImplementation(() => mockLoggingService);
 jest.doMock('../../logging/logging_service', () => ({
   LoggingService: jest.fn(() => mockLoggingService),

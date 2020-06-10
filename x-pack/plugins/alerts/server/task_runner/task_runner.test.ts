@@ -11,7 +11,7 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock } from '../mocks';
@@ -65,7 +65,7 @@ describe('Task Runner', () => {
     getServices: jest.fn().mockReturnValue(services),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient,
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
     eventLogger: eventLoggerMock.create(),

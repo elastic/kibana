@@ -18,12 +18,12 @@
  */
 
 import { duration } from 'moment';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 afterEach(() => jest.clearAllMocks());
 
 test('parses minimally specified config', () => {
@@ -360,7 +360,7 @@ describe('#log', () => {
 
     expect(typeof esLogger.close).toBe('function');
 
-    expect(loggingServiceMock.collect(logger)).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger)).toMatchInlineSnapshot(`
 Object {
   "debug": Array [],
   "error": Array [
@@ -406,7 +406,7 @@ Object {
 
     expect(typeof esLogger.close).toBe('function');
 
-    expect(loggingServiceMock.collect(logger)).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger)).toMatchInlineSnapshot(`
 Object {
   "debug": Array [
     Array [

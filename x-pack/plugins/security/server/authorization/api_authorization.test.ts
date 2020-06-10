@@ -10,7 +10,7 @@ import {
   coreMock,
   httpServerMock,
   httpServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 
@@ -18,7 +18,7 @@ describe('initAPIAuthorization', () => {
   test(`protected route when "mode.useRbacForRequest()" returns false continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create();
-    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
 
@@ -42,7 +42,7 @@ describe('initAPIAuthorization', () => {
   test(`unprotected route when "mode.useRbacForRequest()" returns true continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create();
-    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
 
@@ -66,7 +66,7 @@ describe('initAPIAuthorization', () => {
   test(`protected route when "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
-    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
 
@@ -101,7 +101,7 @@ describe('initAPIAuthorization', () => {
   test(`protected route when "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
-    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
 

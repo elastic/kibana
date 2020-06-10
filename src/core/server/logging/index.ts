@@ -24,4 +24,4 @@ export { LogLevel } from './log_level';
 /** @internal */
 export { config, LoggingConfigType } from './logging_config';
 /** @internal */
-export { LoggingService, ILoggingService } from './logging_service';
+export { LoggingSystem, ILoggingSystem } from './logging_system';

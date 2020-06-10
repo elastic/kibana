@@ -28,11 +28,11 @@ import {
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';
 import { Logger } from '../logging';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { ClusterClient } from './cluster_client';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 afterEach(() => jest.clearAllMocks());
 
 test('#constructor creates client with parsed config', () => {

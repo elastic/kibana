@@ -12,7 +12,7 @@ import { LicensingPlugin } from './plugin';
 import {
   coreMock,
   elasticsearchServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../src/core/server/mocks';
 import { IClusterClient } from '../../../../src/core/server/';
 
@@ -173,7 +173,7 @@ describe('licensing plugin', () => {
 
         await flushPromises();
 
-        const loggedMessages = loggingServiceMock.collect(pluginInitContextMock.logger).debug;
+        const loggedMessages = loggingSystemMock.collect(pluginInitContextMock.logger).debug;
 
         expect(
           loggedMessages.some(([message]) =>

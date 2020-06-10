@@ -37,11 +37,11 @@ import { Env } from './config';
 import { Server } from './server';
 
 import { getEnvOptions } from './config/__mocks__/env';
-import { loggingServiceMock } from './logging/logging_service.mock';
+import { loggingSystemMock } from './logging/logging_system.mock';
 import { rawConfigServiceMock } from './config/raw_config_service.mock';
 
 const env = new Env('.', getEnvOptions());
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
 beforeEach(() => {

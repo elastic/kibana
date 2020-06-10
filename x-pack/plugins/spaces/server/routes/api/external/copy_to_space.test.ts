@@ -16,7 +16,7 @@ import {
 } from '../__fixtures__';
 import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
   coreMock,
@@ -68,7 +68,7 @@ describe('copy to space', () => {
       createResolveSavedObjectsImportErrorsMock()
     );
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
     coreStart.savedObjects = createMockSavedObjectsService(spaces);
