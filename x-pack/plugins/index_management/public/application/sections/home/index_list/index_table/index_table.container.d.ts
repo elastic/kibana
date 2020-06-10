@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export declare function IndexList(match: any): any;
+export declare function IndexTable(props: any): any;
