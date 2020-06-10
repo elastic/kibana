@@ -98,8 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('finishing SPNEGO', () => {
-      // Skipped: https://github.com/elastic/kibana/issues/68720
-      it.skip('should properly set cookie and authenticate user', async () => {
+      it('should properly set cookie and authenticate user', async () => {
         const response = await supertest
           .get('/internal/security/me')
           .set('Authorization', `Negotiate ${spnegoToken}`)
@@ -116,14 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionCookie = request.cookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
-        const isAnonymousAccessEnabled = (config.get(
-          'esTestCluster.serverArgs'
-        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
-
-        // `superuser_anonymous` role is derived from the enabled anonymous access.
-        const expectedUserRoles = isAnonymousAccessEnabled
-          ? ['kibana_admin', 'superuser_anonymous']
-          : ['kibana_admin'];
+        const expectedUserRoles = ['kibana_admin'];
 
         await supertest
           .get('/internal/security/me')
