@@ -24,7 +24,7 @@ export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
   const path = new Set<SavedObject>();
   const sorted = new Set<SavedObject>();
   const objectsByTypeId = new Map(
-    savedObjects.map(object => [`${object.type}:${object.id}`, object] as [string, SavedObject])
+    savedObjects.map((object) => [`${object.type}:${object.id}`, object] as [string, SavedObject])
   );
 
   function includeObjects(objects: SavedObject[]) {
@@ -32,13 +32,13 @@ export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
       if (path.has(object)) {
         throw Boom.badRequest(
           `circular reference: ${[...path, object]
-            .map(obj => `[${obj.type}:${obj.id}]`)
+            .map((obj) => `[${obj.type}:${obj.id}]`)
             .join(' ref-> ')}`
         );
       }
 
       const refdObjects = object.references
-        .map(ref => objectsByTypeId.get(`${ref.type}:${ref.id}`))
+        .map((ref) => objectsByTypeId.get(`${ref.type}:${ref.id}`))
         .filter((ref): ref is SavedObject => !!ref);
 
       if (refdObjects.length) {

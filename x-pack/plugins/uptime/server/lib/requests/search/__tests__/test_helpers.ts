@@ -5,10 +5,7 @@
  */
 
 import { CursorPagination } from '../types';
-import {
-  CursorDirection,
-  SortOrder,
-} from '../../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { QueryContext } from '../query_context';
 
 export const prevPagination = (key: any): CursorPagination => {

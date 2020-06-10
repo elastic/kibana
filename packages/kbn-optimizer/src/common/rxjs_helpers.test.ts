@@ -29,9 +29,9 @@ describe('pipeClosure()', () => {
     let counter = 0;
 
     const foo$ = Rx.of(1, 2, 3).pipe(
-      pipeClosure(source$ => {
+      pipeClosure((source$) => {
         const multiplier = ++counter;
-        return source$.pipe(map(i => i * multiplier));
+        return source$.pipe(map((i) => i * multiplier));
       }),
       toArray()
     );
@@ -71,7 +71,7 @@ describe('maybe()', () => {
 describe('maybeMap()', () => {
   it('calls map fn and filters out undefined values returned', async () => {
     const foo$ = Rx.of(1, 2, 3, 4, 5).pipe(
-      maybeMap(i => (i % 2 ? i : undefined)),
+      maybeMap((i) => (i % 2 ? i : undefined)),
       toArray()
     );
 
@@ -94,7 +94,7 @@ describe('debounceTimeBuffer()', () => {
     foo$
       .pipe(
         debounceTimeBuffer(100),
-        map(items => items.reduce((sum, n) => sum + n))
+        map((items) => items.reduce((sum, n) => sum + n))
       )
       .subscribe(dest);
 
@@ -128,7 +128,7 @@ describe('debounceTimeBuffer()', () => {
     foo$
       .pipe(
         debounceTimeBuffer(100),
-        map(items => items.reduce((sum, n) => sum + n))
+        map((items) => items.reduce((sum, n) => sum + n))
       )
       .subscribe(dest);
 

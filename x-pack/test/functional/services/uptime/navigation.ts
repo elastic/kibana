@@ -25,9 +25,13 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     });
   };
 
+  const refreshApp = async () => {
+    await testSubjects.click('superDatePickerApplyTimeButton', 10000);
+  };
+
   return {
     async refreshApp() {
-      await testSubjects.click('superDatePickerApplyTimeButton');
+      await refreshApp();
     },
 
     async goToUptime() {
@@ -58,6 +62,18 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
           timeout: 30000,
         });
       }
+    },
+
+    goToCertificates: async () => {
+      if (!(await testSubjects.exists('uptimeCertificatesPage', { timeout: 0 }))) {
+        return retry.try(async () => {
+          if (await testSubjects.exists('uptimeCertificatesLink', { timeout: 0 })) {
+            await testSubjects.click('uptimeCertificatesLink', 10000);
+          }
+          await testSubjects.existOrFail('uptimeCertificatesPage');
+        });
+      }
+      return true;
     },
 
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {

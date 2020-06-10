@@ -14,12 +14,13 @@ import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
 } from '../../types';
 
 export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
@@ -39,7 +40,7 @@ export const useGetOneAgentConfig = (agentConfigId: string | undefined) => {
 };
 
 export const useGetOneAgentConfigFull = (agentConfigId: string) => {
-  return useRequest({
+  return useRequest<GetFullAgentConfigResponse>({
     path: agentConfigRouteService.getInfoFullPath(agentConfigId),
     method: 'get',
   });
@@ -75,8 +76,8 @@ export const sendUpdateAgentConfig = (
   });
 };
 
-export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequest['body']) => {
-  return sendRequest<DeleteAgentConfigsResponse>({
+export const sendDeleteAgentConfig = (body: DeleteAgentConfigRequest['body']) => {
+  return sendRequest<DeleteAgentConfigResponse>({
     path: agentConfigRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),

@@ -84,7 +84,7 @@ export class RangeControl extends Control<RangeFilterManager> {
 
     const fieldName = this.filterManager.fieldName;
     const aggs = minMaxAgg(indexPattern.fields.getByName(fieldName));
-    const searchSource = createSearchSource(
+    const searchSource = await createSearchSource(
       this.searchSource,
       null,
       indexPattern,

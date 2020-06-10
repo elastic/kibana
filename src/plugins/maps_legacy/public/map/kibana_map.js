@@ -19,25 +19,26 @@
 
 import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
-import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../common/constants/origin';
 import { getToasts } from '../kibana_services';
+import { L } from '../leaflet';
 
 function makeFitControl(fitContainer, kibanaMap) {
+  // eslint-disable-next-line no-undef
   const FitControl = L.Control.extend({
     options: {
       position: 'topleft',
     },
-    initialize: function(fitContainer, kibanaMap) {
+    initialize: function (fitContainer, kibanaMap) {
       this._fitContainer = fitContainer;
       this._kibanaMap = kibanaMap;
       this._leafletMap = null;
     },
-    onAdd: function(leafletMap) {
+    onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
       const fitDatBoundsLabel = i18n.translate(
         'maps_legacy.kibanaMap.leaflet.fitDataBoundsAriaLabel',
@@ -47,14 +48,14 @@ function makeFitControl(fitContainer, kibanaMap) {
         .html(
           `<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
         )
-        .on('click', e => {
+        .on('click', (e) => {
           e.preventDefault();
           this._kibanaMap.fitToData();
         });
 
       return this._fitContainer;
     },
-    onRemove: function() {
+    onRemove: function () {
       $(this._fitContainer).off('click');
     },
   });
@@ -63,12 +64,13 @@ function makeFitControl(fitContainer, kibanaMap) {
 }
 
 function makeLegendControl(container, kibanaMap, position) {
+  // eslint-disable-next-line no-undef
   const LegendControl = L.Control.extend({
     options: {
       position: 'topright',
     },
 
-    initialize: function(container, kibanaMap, position) {
+    initialize: function (container, kibanaMap, position) {
       this._legendContainer = container;
       this._kibanaMap = kibanaMap;
       this.options.position = position;
@@ -79,16 +81,16 @@ function makeLegendControl(container, kibanaMap, position) {
       const $div = $('<div>').addClass('visMapLegend');
       this._legendContainer.append($div);
       const layers = this._kibanaMap.getLayers();
-      layers.forEach(layer => layer.appendLegendContents($div));
+      layers.forEach((layer) => layer.appendLegendContents($div));
     },
 
-    onAdd: function() {
+    onAdd: function () {
       this._layerUpdateHandle = () => this.updateContents();
       this._kibanaMap.on('layers:update', this._layerUpdateHandle);
       this.updateContents();
       return this._legendContainer.get(0);
     },
-    onRemove: function() {
+    onRemove: function () {
       this._kibanaMap.removeListener('layers:update', this._layerUpdateHandle);
       this._legendContainer.empty();
     },
@@ -123,11 +125,13 @@ export class KibanaMap extends EventEmitter {
       maxZoom: options.maxZoom,
       center: options.center ? options.center : [0, 0],
       zoom: options.zoom ? options.zoom : 2,
+      // eslint-disable-next-line no-undef
       renderer: L.canvas(),
       zoomAnimation: false, // Desaturate map tiles causes animation rendering artifacts
       zoomControl: options.zoomControl === undefined ? true : options.zoomControl,
     };
 
+    // eslint-disable-next-line no-undef
     this._leafletMap = L.map(containerNode, leafletOptions);
     this._leafletMap.attributionControl.setPrefix('');
 
@@ -148,19 +152,19 @@ export class KibanaMap extends EventEmitter {
     this._leafletMap.on('zoomend', () => this._updateExtent());
     this._leafletMap.on('dragend', () => this._updateExtent());
 
-    this._leafletMap.on('mousemove', e =>
-      this._layers.forEach(layer => layer.movePointer('mousemove', e))
+    this._leafletMap.on('mousemove', (e) =>
+      this._layers.forEach((layer) => layer.movePointer('mousemove', e))
     );
-    this._leafletMap.on('mouseout', e =>
-      this._layers.forEach(layer => layer.movePointer('mouseout', e))
+    this._leafletMap.on('mouseout', (e) =>
+      this._layers.forEach((layer) => layer.movePointer('mouseout', e))
     );
-    this._leafletMap.on('mousedown', e =>
-      this._layers.forEach(layer => layer.movePointer('mousedown', e))
+    this._leafletMap.on('mousedown', (e) =>
+      this._layers.forEach((layer) => layer.movePointer('mousedown', e))
     );
-    this._leafletMap.on('mouseup', e =>
-      this._layers.forEach(layer => layer.movePointer('mouseup', e))
+    this._leafletMap.on('mouseup', (e) =>
+      this._layers.forEach((layer) => layer.movePointer('mouseup', e))
     );
-    this._leafletMap.on('draw:created', event => {
+    this._leafletMap.on('draw:created', (event) => {
       const drawType = event.layerType;
       if (drawType === 'rectangle') {
         const bounds = event.layer.getBounds();
@@ -200,7 +204,7 @@ export class KibanaMap extends EventEmitter {
       } else if (drawType === 'polygon') {
         const latLongs = event.layer.getLatLngs()[0];
         this.emit('drawCreated:polygon', {
-          points: latLongs.map(leafletLatLng => {
+          points: latLongs.map((leafletLatLng) => {
             return {
               lat: leafletLatLng.lat,
               lon: leafletLatLng.lng,
@@ -222,16 +226,17 @@ export class KibanaMap extends EventEmitter {
   }
 
   addLayer(kibanaLayer) {
-    const onshowTooltip = event => {
+    const onshowTooltip = (event) => {
       if (!this._showTooltip) {
         return;
       }
 
       if (!this._popup) {
-        this._popup = L.responsivePopup({ autoPan: false });
+        // eslint-disable-next-line no-undef
+        this._popup = new L.ResponsivePopup({ autoPan: false });
         this._popup.setLatLng(event.position);
         this._popup.setContent(event.content);
-        this._popup.openOn(this._leafletMap);
+        this._leafletMap.openPopup(this._popup);
       } else {
         if (!this._popup.getLatLng().equals(event.position)) {
           this._popup.setLatLng(event.position);
@@ -278,14 +283,14 @@ export class KibanaMap extends EventEmitter {
       this._layers.splice(index, 1);
       kibanaLayer.removeFromLeafletMap(this._leafletMap);
     }
-    this._listeners.forEach(listener => {
+    this._listeners.forEach((listener) => {
       if (listener.layer === kibanaLayer) {
         listener.layer.removeListener(listener.name, listener.handle);
       }
     });
 
     //must readd all attributions, because we might have removed dupes
-    this._layers.forEach(layer => this._addAttributions(layer.getAttributions()));
+    this._layers.forEach((layer) => this._addAttributions(layer.getAttributions()));
     if (this._baseLayerSettings) {
       this._addAttributions(this._baseLayerSettings.options.attribution);
     }
@@ -293,7 +298,7 @@ export class KibanaMap extends EventEmitter {
 
   _addAttributions(attribution) {
     const attributions = getAttributionArray(attribution);
-    attributions.forEach(attribution => {
+    attributions.forEach((attribution) => {
       this._leafletMap.attributionControl.removeAttribution(attribution); //this ensures we do not add duplicates
       this._leafletMap.attributionControl.addAttribution(attribution);
     });
@@ -301,7 +306,7 @@ export class KibanaMap extends EventEmitter {
 
   _removeAttributions(attribution) {
     const attributions = getAttributionArray(attribution);
-    attributions.forEach(attribution => {
+    attributions.forEach((attribution) => {
       this._leafletMap.attributionControl.removeAttribution(attribution); //this ensures we do not add duplicates
     });
   }
@@ -324,7 +329,7 @@ export class KibanaMap extends EventEmitter {
     }
     this._leafletMap.remove();
     this._containerNode.innerHTML = '';
-    this._listeners.forEach(listener =>
+    this._listeners.forEach((listener) =>
       listener.layer.removeListener(listener.name, listener.handle)
     );
   }
@@ -335,6 +340,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   setCenter(latitude, longitude) {
+    // eslint-disable-next-line no-undef
     const latLong = L.latLng(latitude, longitude);
     if (latLong.equals && !latLong.equals(this._leafletMap.getCenter())) {
       this._leafletMap.setView(latLong);
@@ -461,6 +467,7 @@ export class KibanaMap extends EventEmitter {
         circlemarker: false,
       },
     };
+    // eslint-disable-next-line no-undef
     this._leafletDrawControl = new L.Control.Draw(drawOptions);
     this._leafletMap.addControl(this._leafletDrawControl);
   }
@@ -470,6 +477,7 @@ export class KibanaMap extends EventEmitter {
       return;
     }
 
+    // eslint-disable-next-line no-undef
     const fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
     this._leafletFitControl = makeFitControl(fitContainer, this);
     this._leafletMap.addControl(this._leafletFitControl);
@@ -482,7 +490,7 @@ export class KibanaMap extends EventEmitter {
     this._updateLegend();
   }
 
-  _addMaxZoomMessage = layer => {
+  _addMaxZoomMessage = (layer) => {
     const zoomWarningMsg = createZoomWarningMsg(
       getToasts(),
       this.getZoomLevel,
@@ -601,13 +609,13 @@ export class KibanaMap extends EventEmitter {
     }
 
     const boundsArray = await Promise.all(
-      this._layers.map(async layer => {
+      this._layers.map(async (layer) => {
         return await layer.getBounds();
       })
     );
 
     let bounds = null;
-    boundsArray.forEach(async b => {
+    boundsArray.forEach(async (b) => {
       if (bounds) {
         bounds.extend(b);
       } else {
@@ -621,6 +629,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   _getTMSBaseLayer(options) {
+    // eslint-disable-next-line no-undef
     return L.tileLayer(options.url, {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
@@ -640,12 +649,13 @@ export class KibanaMap extends EventEmitter {
     };
 
     return typeof options.url === 'string' && options.url.length
-      ? L.tileLayer.wms(options.url, wmsOptions)
+      ? // eslint-disable-next-line no-undef
+        L.tileLayer.wms(options.url, wmsOptions)
       : null;
   }
 
   _updateExtent() {
-    this._layers.forEach(layer => layer.updateExtent());
+    this._layers.forEach((layer) => layer.updateExtent());
   }
 
   _updateDesaturation() {

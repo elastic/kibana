@@ -9,12 +9,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}
@@ -259,12 +254,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}
@@ -523,12 +513,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}
@@ -765,12 +750,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}

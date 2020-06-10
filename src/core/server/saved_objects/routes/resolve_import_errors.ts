@@ -74,7 +74,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
 
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
-        .map(type => type.name);
+        .map((type) => type.name);
 
       const result = await resolveSavedObjectsImportErrors({
         supportedTypes,

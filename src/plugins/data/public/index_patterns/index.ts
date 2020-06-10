@@ -26,10 +26,9 @@ export {
   getFromSavedObject,
   isDefault,
 } from './lib';
-export { getRoutes } from './utils';
 export { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
-export { Field, FieldList } from './fields';
+export { getIndexPatternFieldListCreator, Field, IIndexPatternFieldList } from './fields';
 
 // TODO: figure out how to replace IndexPatterns in get_inner_angular.
 export {

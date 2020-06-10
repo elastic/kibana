@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { keys } from 'lodash';
 import { TimefilterContract } from '../../timefilter';
-import { RangeFilter } from '../../../../common';
+import { RangeFilter, TimeRange } from '../../../../common';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   const key = keys(filter.range)[0];
@@ -29,6 +29,14 @@ export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   return {
     from: moment(values.gt || values.gte),
     to: moment(values.lt || values.lte),
+  };
+}
+
+export function convertRangeFilterToTimeRangeString(filter: RangeFilter): TimeRange {
+  const { from, to } = convertRangeFilterToTimeRange(filter);
+  return {
+    from: from?.toISOString(),
+    to: to?.toISOString(),
   };
 }
 

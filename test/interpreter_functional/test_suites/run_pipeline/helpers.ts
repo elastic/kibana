@@ -21,6 +21,17 @@ import expect from '@kbn/expect';
 import { ExpressionValue } from 'src/plugins/expressions';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
+declare global {
+  interface Window {
+    runPipeline: (
+      expressions: string,
+      context?: ExpressionValue,
+      initialContext?: ExpressionValue
+    ) => any;
+    renderPipelineResponse: (context?: ExpressionValue) => Promise<any>;
+  }
+}
+
 export type ExpressionResult = any;
 
 export type ExpectExpression = (
@@ -165,7 +176,7 @@ export function expectExpressionProvider({
         log.debug('starting to render');
         const result = await browser.executeAsync<any>(
           (_context: ExpressionResult, done: (renderResult: any) => void) =>
-            window.renderPipelineResponse(_context).then(renderResult => {
+            window.renderPipelineResponse(_context).then((renderResult: any) => {
               done(renderResult);
               return renderResult;
             }),

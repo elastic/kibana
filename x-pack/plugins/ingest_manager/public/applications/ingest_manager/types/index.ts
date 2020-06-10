@@ -8,6 +8,7 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
@@ -19,19 +20,24 @@ export {
   DatasourceConfigRecordEntry,
   Output,
   DataStream,
+  // API schema - misc setup, status
+  GetFleetStatusResponse,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  UpdateDatasourceRequest,
+  UpdateDatasourceResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -57,6 +63,8 @@ export {
   GetSettingsResponse,
   PutSettingsRequest,
   PutSettingsResponse,
+  // API schemas - app
+  CheckPermissionsResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -87,4 +95,5 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';

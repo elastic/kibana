@@ -467,7 +467,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(setState).not.toHaveBeenCalled();
     });
 
-    it('should update label on label input changes', () => {
+    it('should update label and custom label flag on label input changes', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
@@ -485,7 +485,106 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...state.layers.first.columns,
               col1: expect.objectContaining({
                 label: 'New Label',
+                customLabel: true,
                 // Other parts of this don't matter for this test
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should not keep the label as long as it is the default label', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    label: 'Max of bytes',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    // Private
+                    operationType: 'max',
+                    sourceField: 'bytes',
+                    params: { format: { id: 'bytes' } },
+                  },
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                label: 'Minimum of bytes',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should keep the label on operation change if it is custom', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={{
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    label: 'Custom label',
+                    customLabel: true,
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    // Private
+                    operationType: 'max',
+                    sourceField: 'bytes',
+                    params: { format: { id: 'bytes' } },
+                  },
+                },
+              },
+            },
+          }}
+        />
+      );
+
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                label: 'Custom label',
+                customLabel: true,
               }),
             },
           },
@@ -751,7 +850,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         indexPatterns: {
           1: {
             ...state.indexPatterns['1'],
-            fields: state.indexPatterns['1'].fields.filter(field => field.name !== 'memory'),
+            fields: state.indexPatterns['1'].fields.filter((field) => field.name !== 'memory'),
           },
         },
       };
@@ -865,7 +964,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(options![0]['data-test-subj']).not.toContain('Incompatible');
 
-      options![1].options!.map(operation =>
+      options![1].options!.map((operation) =>
         expect(operation['data-test-subj']).toContain('Incompatible')
       );
     });
@@ -950,10 +1049,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       );
 
       act(() => {
-        wrapper
-          .find('[data-test-subj="lns-indexPatternDimension-min"]')
-          .first()
-          .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+        wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
+          {} as React.MouseEvent<{}, MouseEvent>
+        );
       });
 
       expect(changeColumn).toHaveBeenCalledWith({
@@ -1377,6 +1475,44 @@ describe('IndexPatternDimensionEditorPanel', () => {
               }),
             }),
           }),
+        },
+      });
+    });
+
+    it('does not set the size of the terms aggregation', () => {
+      const dragging = {
+        field: { type: 'string', name: 'mystring', aggregatable: true },
+        indexPatternId: 'foo',
+      };
+      const testState = dragDropState();
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        columnId: 'col2',
+        filterOperations: (op: OperationMetadata) => op.isBucketed,
+        layerId: 'myLayer',
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...testState.layers.myLayer.columns,
+              col2: expect.objectContaining({
+                operationType: 'terms',
+                params: expect.objectContaining({ size: 3 }),
+              }),
+            },
+          },
         },
       });
     });

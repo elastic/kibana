@@ -28,6 +28,8 @@ export const useWaffleViewState = () => {
     autoBounds,
     accountId,
     region,
+    legend,
+    sort,
     setWaffleOptionsState,
   } = useWaffleOptionsContext();
   const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTimeContext();
@@ -35,6 +37,7 @@ export const useWaffleViewState = () => {
 
   const viewState: WaffleViewState = {
     metric,
+    sort,
     groupBy,
     nodeType,
     view,
@@ -47,6 +50,7 @@ export const useWaffleViewState = () => {
     time: currentTime,
     autoReload: isAutoReloading,
     filterQuery,
+    legend,
   };
 
   const defaultViewState: WaffleViewState = {
@@ -59,6 +63,7 @@ export const useWaffleViewState = () => {
   const onViewChange = useCallback(
     (newState: WaffleViewState) => {
       setWaffleOptionsState({
+        sort: newState.sort,
         metric: newState.metric,
         groupBy: newState.groupBy,
         nodeType: newState.nodeType,
@@ -69,6 +74,7 @@ export const useWaffleViewState = () => {
         autoBounds: newState.autoBounds,
         accountId: newState.accountId,
         region: newState.region,
+        legend: newState.legend,
       });
       if (newState.time) {
         setWaffleTimeState({

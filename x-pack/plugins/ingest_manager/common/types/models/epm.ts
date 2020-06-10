@@ -97,6 +97,7 @@ export interface RegistryStream {
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
+  template?: string;
 }
 
 export type RequirementVersion = string;
@@ -203,6 +204,7 @@ export interface RegistryVarsEntry {
 // internal until we need them
 interface PackageAdditions {
   title: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
 }
 
@@ -273,6 +275,9 @@ export interface IndexTemplate {
     settings: any;
     mappings: object;
     aliases: object;
+  };
+  data_stream: {
+    timestamp_field: string;
   };
 }
 

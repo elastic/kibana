@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -40,7 +41,8 @@ export const LogsSettingsPage = () => {
   } = useLogSourceContext();
 
   const availableFields = useMemo(
-    () => sourceStatus?.logIndexFields.map(field => field.name) ?? [],
+    () => sourceStatus?.logIndexFields.map((field) => field.name) ?? [],
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceStatus]
   );
 
@@ -74,7 +76,7 @@ export const LogsSettingsPage = () => {
   }
 
   return (
-    <>
+    <EuiErrorBoundary>
       <EuiPage>
         <EuiPageBody
           className="eui-displayBlock"
@@ -181,7 +183,7 @@ export const LogsSettingsPage = () => {
           </EuiFlexGroup>
         </EuiPageBody>
       </EuiPage>
-    </>
+    </EuiErrorBoundary>
   );
 };
 

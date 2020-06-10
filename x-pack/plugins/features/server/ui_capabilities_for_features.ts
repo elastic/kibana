@@ -42,14 +42,14 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
   const featurePrivileges = Object.values(feature.privileges ?? {});
   if (feature.subFeatures) {
     featurePrivileges.push(
-      ...feature.subFeatures.map(sf => sf.privilegeGroups.map(pg => pg.privileges)).flat(2)
+      ...feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2)
     );
   }
   if (feature.reserved?.privileges) {
-    featurePrivileges.push(...feature.reserved.privileges.map(rp => rp.privilege));
+    featurePrivileges.push(...feature.reserved.privileges.map((rp) => rp.privilege));
   }
 
-  featurePrivileges.forEach(privilege => {
+  featurePrivileges.forEach((privilege) => {
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
       ...privilege.ui.reduce(
@@ -74,7 +74,7 @@ function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UI
       ...acc,
     };
 
-    ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
+    ELIGIBLE_FLAT_MERGE_KEYS.forEach((key) => {
       mergedFeatureCapabilities[key] = {
         ...mergedFeatureCapabilities[key],
         ...capabilities[key],

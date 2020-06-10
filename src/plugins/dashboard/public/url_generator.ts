@@ -27,6 +27,7 @@ import {
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
+import { SavedObjectLoader } from '../../saved_objects/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -64,20 +65,45 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * whether to hash the data in the url to avoid url length issues.
    */
   useHash?: boolean;
+
+  /**
+   * When `true` filters from saved filters from destination dashboard as merged with applied filters
+   * When `false` applied filters take precedence and override saved filters
+   *
+   * true is default
+   */
+  preserveSavedFilters?: boolean;
 }>;
 
-export const createDirectAccessDashboardLinkGenerator = (
-  getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean }>
+export const createDashboardUrlGenerator = (
+  getStartServices: () => Promise<{
+    appBasePath: string;
+    useHashedUrl: boolean;
+    savedDashboardLoader: SavedObjectLoader;
+  }>
 ): UrlGeneratorsDefinition<typeof DASHBOARD_APP_URL_GENERATOR> => ({
   id: DASHBOARD_APP_URL_GENERATOR,
-  createUrl: async state => {
+  createUrl: async (state) => {
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
-    const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
+    const hash = state.dashboardId ? `view/${state.dashboardId}` : `create`;
+
+    const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
+      if (state.preserveSavedFilters === false) return [];
+      if (!state.dashboardId) return [];
+      try {
+        const dashboard = await startServices.savedDashboardLoader.get(state.dashboardId);
+        return dashboard?.searchSource?.getField('filter') ?? [];
+      } catch (e) {
+        // in case dashboard is missing, built the url without those filters
+        // dashboard app will handle redirect to landing page with toast message
+        return [];
+      }
+    };
 
     const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
-      Object.keys(stateObj).forEach(key => {
+      Object.keys(stateObj).forEach((key) => {
         if (stateObj[key] === undefined) {
           delete stateObj[key];
         }
@@ -85,11 +111,18 @@ export const createDirectAccessDashboardLinkGenerator = (
       return stateObj;
     };
 
+    // leave filters `undefined` if no filters was applied
+    // in this case dashboard will restore saved filters on its own
+    const filters = state.filters && [
+      ...(await getSavedFiltersFromDestinationDashboardIfNeeded()),
+      ...state.filters,
+    ];
+
     const appStateUrl = setStateToKbnUrl(
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
-        filters: state.filters?.filter(f => !esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
       }),
       { useHash },
       `${appBasePath}#/${hash}`
@@ -99,7 +132,7 @@ export const createDirectAccessDashboardLinkGenerator = (
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
-        filters: state.filters?.filter(f => esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
         refreshInterval: state.refreshInterval,
       }),
       { useHash },

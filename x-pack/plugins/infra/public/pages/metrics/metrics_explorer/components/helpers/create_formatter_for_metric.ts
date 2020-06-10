@@ -5,7 +5,7 @@
  */
 
 import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
-import { createFormatter } from '../../../../../utils/formatters';
+import { createFormatter } from '../../../../../../common/formatters';
 import { InfraFormatterType } from '../../../../../lib/lib';
 import { metricToFormat } from './metric_to_format';
 export const createFormatterForMetric = (metric?: MetricsExplorerMetric) => {

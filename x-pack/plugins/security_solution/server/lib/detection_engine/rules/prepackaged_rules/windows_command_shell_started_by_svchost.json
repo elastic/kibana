@@ -1,0 +1,35 @@
+{
+  "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Svchost spawning Cmd",
+  "query": "process.parent.name:svchost.exe and process.name:cmd.exe",
+  "risk_score": 21,
+  "rule_id": "fd7a6052-58fa-4397-93c3-4795249ccfa2",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command-Line Interface",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

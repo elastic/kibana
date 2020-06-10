@@ -7,6 +7,6 @@
 import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
 export const tx = networkTrafficWithInterfaces(
   'tx',
-  'docker.network.out.bytes',
+  'docker.network.outbound.bytes',
   'docker.network.interface'
 );

@@ -5,39 +5,38 @@
  */
 
 import { datasourceService } from './datasource';
+import { PackageInfo } from '../types';
 
-async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
-  if (dataset === 'dataset1') {
-    return [
-      {
-        buffer: Buffer.from(`
+const TEMPLATE = `
 type: log
 metricset: ["dataset1"]
 paths:
 {{#each paths}}
 - {{this}}
 {{/each}}
-`),
-      },
-    ];
-  }
-  return [];
-}
-
-jest.mock('./epm/packages/assets', () => {
-  return {
-    getAssetsDataForPackageKey: mockedGetAssetsData,
-  };
-});
+`;
 
 describe('Datasource service', () => {
   describe('assignPackageStream', () => {
-    it('should work with cofig variables from the stream', async () => {
+    it('should work with config variables from the stream', async () => {
       const inputs = await datasourceService.assignPackageStream(
-        {
-          pkgName: 'package',
-          pkgVersion: '1.0.0',
-        },
+        ({
+          datasources: [
+            {
+              inputs: [
+                {
+                  type: 'log',
+                  streams: [
+                    {
+                      dataset: 'package.dataset1',
+                      template: TEMPLATE,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        } as unknown) as PackageInfo,
         [
           {
             type: 'log',
@@ -85,10 +84,23 @@ describe('Datasource service', () => {
 
     it('should work with config variables at the input level', async () => {
       const inputs = await datasourceService.assignPackageStream(
-        {
-          pkgName: 'package',
-          pkgVersion: '1.0.0',
-        },
+        ({
+          datasources: [
+            {
+              inputs: [
+                {
+                  type: 'log',
+                  streams: [
+                    {
+                      dataset: 'package.dataset1',
+                      template: TEMPLATE,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        } as unknown) as PackageInfo,
         [
           {
             type: 'log',

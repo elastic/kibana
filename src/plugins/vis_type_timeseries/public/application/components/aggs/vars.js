@@ -27,7 +27,7 @@ import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 
-export const newVariable = opts => ({ id: uuid.v1(), name: '', field: '', ...opts });
+export const newVariable = (opts) => ({ id: uuid.v1(), name: '', field: '', ...opts });
 
 export class CalculationVars extends Component {
   constructor(props) {
@@ -36,7 +36,7 @@ export class CalculationVars extends Component {
   }
 
   handleChange(item, name) {
-    return e => {
+    return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));

@@ -13,19 +13,21 @@ import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 import { ConfirmPackageInstall } from './confirm_package_install';
 
 type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
-  disabled: boolean;
+  disabled?: boolean;
+  isUpdate?: boolean;
 };
 export function InstallationButton(props: InstallationButtonProps) {
-  const { assets, name, title, version, disabled = true } = props;
+  const { assets, name, title, version, disabled = true, isUpdate = false } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
-  const installationStatus = getPackageInstallStatus(name);
+  const { status: installationStatus } = getPackageInstallStatus(name);
 
   const isInstalling = installationStatus === InstallStatus.installing;
   const isRemoving = installationStatus === InstallStatus.uninstalling;
   const isInstalled = installationStatus === InstallStatus.installed;
+  const showUninstallButton = isInstalled || isRemoving;
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const toggleModal = useCallback(() => {
     setModalVisible(!isModalVisible);
@@ -35,6 +37,10 @@ export function InstallationButton(props: InstallationButtonProps) {
     installPackage({ name, version, title });
     toggleModal();
   }, [installPackage, name, title, toggleModal, version]);
+
+  const handleClickUpdate = useCallback(() => {
+    installPackage({ name, version, title, fromUpdate: true });
+  }, [installPackage, name, title, version]);
 
   const handleClickUninstall = useCallback(() => {
     uninstallPackage({ name, version, title });
@@ -75,6 +81,15 @@ export function InstallationButton(props: InstallationButtonProps) {
           }}
         />
       )}
+    </EuiButton>
+  );
+
+  const updateButton = (
+    <EuiButton iconType={'refresh'} isLoading={isInstalling} onClick={handleClickUpdate}>
+      <FormattedMessage
+        id="xpack.ingestManager.integrations.updatePackage.updatePackageButtonLabel"
+        defaultMessage="Update to latest version"
+      />
     </EuiButton>
   );
 
@@ -129,7 +144,7 @@ export function InstallationButton(props: InstallationButtonProps) {
 
   return hasWriteCapabilites ? (
     <Fragment>
-      {isInstalled || isRemoving ? uninstallButton : installButton}
+      {isUpdate ? updateButton : showUninstallButton ? uninstallButton : installButton}
       {isModalVisible && (isInstalled ? uninstallModal : installModal)}
     </Fragment>
   ) : null;

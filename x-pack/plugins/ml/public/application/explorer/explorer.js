@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -36,9 +36,8 @@ import {
   ExplorerNoJobsFound,
   ExplorerNoResultsFound,
 } from './components';
-import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
-import { TimeBuckets } from '../util/time_buckets';
+import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
@@ -81,9 +80,11 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
+import { MlTooltipComponent } from '../components/chart_tooltip';
+import { hasMatchingPoints } from './has_matching_points';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
-  return options.map(option => ({
+  return options.map((option) => ({
     value: option,
     text: option,
   }));
@@ -120,6 +121,7 @@ export class Explorer extends React.Component {
   disableDragSelectOnMouseLeave = true;
 
   dragSelect = new DragSelect({
+    selectorClass: 'ml-swimlane-selector',
     selectables: document.getElementsByClassName('sl-cell'),
     callback(elements) {
       if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
@@ -169,16 +171,13 @@ export class Explorer extends React.Component {
   };
 
   componentDidMount() {
-    limit$
-      .pipe(
-        takeUntil(this._unsubscribeAll),
-        map(d => d.val)
-      )
-      .subscribe(explorerService.setSwimlaneLimit);
+    limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', this.resizeHandler);
+
+    this.timeBuckets = getTimeBucketsFromCache();
   }
 
   componentWillUnmount() {
@@ -191,12 +190,12 @@ export class Explorer extends React.Component {
     this.anomaliesTablePreviousArgs = null;
   }
 
-  viewByChangeHandler = e => explorerService.setViewBySwimlaneFieldName(e.target.value);
+  viewByChangeHandler = (e) => explorerService.setViewBySwimlaneFieldName(e.target.value);
 
   isSwimlaneSelectActive = false;
   onSwimlaneEnterHandler = () => this.setSwimlaneSelectActive(true);
   onSwimlaneLeaveHandler = () => this.setSwimlaneSelectActive(false);
-  setSwimlaneSelectActive = active => {
+  setSwimlaneSelectActive = (active) => {
     if (this.isSwimlaneSelectActive && !active && this.disableDragSelectOnMouseLeave) {
       this.dragSelect.stop();
       this.isSwimlaneSelectActive = active;
@@ -211,7 +210,7 @@ export class Explorer extends React.Component {
   };
 
   // Listener for click events in the swimlane to load corresponding anomaly data.
-  swimlaneCellClick = selectedCells => {
+  swimlaneCellClick = (selectedCells) => {
     // If selectedCells is an empty object we clear any existing selection,
     // otherwise we save the new selection in AppState and update the Explorer.
     if (Object.keys(selectedCells).length === 0) {
@@ -277,7 +276,7 @@ export class Explorer extends React.Component {
     }
   };
 
-  updateLanguage = language => this.setState({ language });
+  updateLanguage = (language) => this.setState({ language });
 
   render() {
     const { showCharts, severity } = this.props;
@@ -286,6 +285,7 @@ export class Explorer extends React.Component {
       annotationsData,
       chartsData,
       filterActive,
+      filteredFields,
       filterPlaceHolder,
       indexPattern,
       influencers,
@@ -358,9 +358,6 @@ export class Explorer extends React.Component {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
-          {/* Make sure ChartTooltip is inside wrapping div with 0px left/right padding so positioning can be inferred correctly. */}
-          <ChartTooltip />
-
           {noInfluencersConfigured === false && influencers !== undefined && (
             <div className="mlAnomalyExplorer__filterBar">
               <ExplorerQueryBar
@@ -418,17 +415,23 @@ export class Explorer extends React.Component {
               data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             >
               {showOverallSwimlane && (
-                <ExplorerSwimlane
-                  chartWidth={swimlaneContainerWidth}
-                  filterActive={filterActive}
-                  maskAll={maskAll}
-                  TimeBuckets={TimeBuckets}
-                  swimlaneCellClick={this.swimlaneCellClick}
-                  swimlaneData={overallSwimlaneData}
-                  swimlaneType={SWIMLANE_TYPE.OVERALL}
-                  selection={selectedCells}
-                  swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                />
+                <MlTooltipComponent>
+                  {(tooltipService) => (
+                    <ExplorerSwimlane
+                      chartWidth={swimlaneContainerWidth}
+                      filterActive={filterActive}
+                      filteredFields={filteredFields}
+                      maskAll={maskAll}
+                      timeBuckets={this.timeBuckets}
+                      swimlaneCellClick={this.swimlaneCellClick}
+                      swimlaneData={overallSwimlaneData}
+                      swimlaneType={SWIMLANE_TYPE.OVERALL}
+                      selection={selectedCells}
+                      swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                      tooltipService={tooltipService}
+                    />
+                  )}
+                </MlTooltipComponent>
               )}
             </div>
 
@@ -494,17 +497,28 @@ export class Explorer extends React.Component {
                       onMouseLeave={this.onSwimlaneLeaveHandler}
                       data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                     >
-                      <ExplorerSwimlane
-                        chartWidth={swimlaneContainerWidth}
-                        filterActive={filterActive}
-                        maskAll={maskAll}
-                        TimeBuckets={TimeBuckets}
-                        swimlaneCellClick={this.swimlaneCellClick}
-                        swimlaneData={viewBySwimlaneData}
-                        swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                        selection={selectedCells}
-                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                      />
+                      <MlTooltipComponent>
+                        {(tooltipService) => (
+                          <ExplorerSwimlane
+                            chartWidth={swimlaneContainerWidth}
+                            filterActive={filterActive}
+                            maskAll={
+                              maskAll &&
+                              !hasMatchingPoints({
+                                filteredFields,
+                                swimlaneData: viewBySwimlaneData,
+                              })
+                            }
+                            timeBuckets={this.timeBuckets}
+                            swimlaneCellClick={this.swimlaneCellClick}
+                            swimlaneData={viewBySwimlaneData}
+                            swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+                            selection={selectedCells}
+                            swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                            tooltipService={tooltipService}
+                          />
+                        )}
+                      </MlTooltipComponent>
                     </div>
                   </>
                 )}

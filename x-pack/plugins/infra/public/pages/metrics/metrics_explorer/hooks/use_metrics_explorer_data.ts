@@ -7,6 +7,7 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
+import { HttpHandler } from 'src/core/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../../../common/graphql/types';
 import {
@@ -24,13 +25,15 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
-  source: SourceQuery.Query['source']['configuration'],
+  source: SourceQuery.Query['source']['configuration'] | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
-  afterKey: string | null,
-  signal: any
+  afterKey: string | null | Record<string, string | null>,
+  signal: any,
+  fetch?: HttpHandler
 ) {
-  const fetch = useKibana().services.http?.fetch;
+  const kibana = useKibana();
+  const fetchFn = fetch ? fetch : kibana.services.http?.fetch;
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<MetricsExplorerResponse | null>(null);
@@ -46,17 +49,22 @@ export function useMetricsExplorerData(
         if (!from || !to) {
           throw new Error('Unalble to parse timerange');
         }
-        if (!fetch) {
+        if (!fetchFn) {
           throw new Error('HTTP service is unavailable');
         }
+        if (!source) {
+          throw new Error('Source is unavailable');
+        }
         const response = decodeOrThrow(metricsExplorerResponseRT)(
-          await fetch('/api/infra/metrics_explorer', {
+          await fetchFn('/api/infra/metrics_explorer', {
             method: 'POST',
             body: JSON.stringify({
+              forceInterval: options.forceInterval,
+              dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
               metrics:
                 options.aggregation === 'count'
                   ? [{ aggregation: 'count' }]
-                  : options.metrics.map(metric => ({
+                  : options.metrics.map((metric) => ({
                       aggregation: metric.aggregation,
                       field: metric.field,
                     })),

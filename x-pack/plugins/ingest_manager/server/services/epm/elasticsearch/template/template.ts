@@ -63,7 +63,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
-    fields.forEach(field => {
+    fields.forEach((field) => {
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
 
@@ -71,7 +71,14 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
 
       switch (type) {
         case 'group':
-          fieldProps = generateMappings(field.fields!);
+          fieldProps = { ...generateMappings(field.fields!), ...generateDynamicAndEnabled(field) };
+          break;
+        case 'group-nested':
+          fieldProps = {
+            ...generateMappings(field.fields!),
+            ...generateNestedProps(field),
+            type: 'nested',
+          };
           break;
         case 'integer':
           fieldProps.type = 'long';
@@ -95,13 +102,10 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
           }
           break;
         case 'object':
-          fieldProps.type = 'object';
-          if (field.hasOwnProperty('enabled')) {
-            fieldProps.enabled = field.enabled;
-          }
-          if (field.hasOwnProperty('dynamic')) {
-            fieldProps.dynamic = field.dynamic;
-          }
+          fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
+          break;
+        case 'nested':
+          fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
@@ -126,6 +130,29 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   }
 
   return { properties: props };
+}
+
+function generateDynamicAndEnabled(field: Field) {
+  const props: Properties = {};
+  if (field.hasOwnProperty('enabled')) {
+    props.enabled = field.enabled;
+  }
+  if (field.hasOwnProperty('dynamic')) {
+    props.dynamic = field.dynamic;
+  }
+  return props;
+}
+
+function generateNestedProps(field: Field) {
+  const props = generateDynamicAndEnabled(field);
+
+  if (field.hasOwnProperty('include_in_parent')) {
+    props.include_in_parent = field.include_in_parent;
+  }
+  if (field.hasOwnProperty('include_in_root')) {
+    props.include_in_root = field.include_in_root;
+  }
+  return props;
 }
 
 function generateMultiFields(fields: Fields): MultiFields {
@@ -267,6 +294,9 @@ function getBaseTemplate(
       // To be filled with the aliases that we need
       aliases: {},
     },
+    data_stream: {
+      timestamp_field: '@timestamp',
+    },
   };
 }
 
@@ -284,11 +314,11 @@ const queryIndicesFromTemplates = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
 ): Promise<CurrentIndex[]> => {
-  const indexPromises = templates.map(template => {
+  const indexPromises = templates.map((template) => {
     return getIndices(callCluster, template);
   });
   const indexObjects = await Promise.all(indexPromises);
-  return indexObjects.filter(item => item !== undefined).flat();
+  return indexObjects.filter((item) => item !== undefined).flat();
 };
 
 const getIndices = async (
@@ -299,7 +329,7 @@ const getIndices = async (
   const res = await callCluster('search', getIndexQuery(templateName));
   const indices: any[] = res?.aggregations?.index.buckets;
   if (indices) {
-    return indices.map(index => ({
+    return indices.map((index) => ({
       indexName: index.key,
       indexTemplate,
     }));
@@ -358,12 +388,12 @@ const getIndexQuery = (templateName: string) => ({
         must: [
           {
             exists: {
-              field: 'stream.namespace',
+              field: 'dataset.namespace',
             },
           },
           {
             exists: {
-              field: 'stream.dataset',
+              field: 'dataset.name',
             },
           },
         ],

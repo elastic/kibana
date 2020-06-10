@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import {
   IRouter,
@@ -19,7 +19,7 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-import { workpads } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
+import { workpads } from '../../../__tests__/fixtures/workpads';
 import { okResponse } from '../ok_response';
 
 const mockRouteContext = ({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_authentication_state_page.scss';
+import './authentication_state_page.scss';
 
 import { EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
@@ -14,7 +14,7 @@ interface Props {
   title: React.ReactNode;
 }
 
-export const AuthenticationStatePage: React.FC<Props> = props => (
+export const AuthenticationStatePage: React.FC<Props> = (props) => (
   <div className={`secAuthenticationStatePage ${props.className || ''}`}>
     <header className="secAuthenticationStatePage__header">
       <div className="secAuthenticationStatePage__content eui-textCenter">

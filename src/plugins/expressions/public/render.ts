@@ -32,7 +32,7 @@ export interface ExpressionRenderHandlerParams {
   onRenderError: RenderErrorHandlerFnType;
 }
 
-interface Event {
+export interface ExpressionRendererEvent {
   name: string;
   data: any;
 }
@@ -45,7 +45,7 @@ interface UpdateValue {
 export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
-  events$: Observable<Event>;
+  events$: Observable<ExpressionRendererEvent>;
 
   private element: HTMLElement;
   private destroyFn?: any;
@@ -63,12 +63,12 @@ export class ExpressionRenderHandler {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable() as Observable<Event>;
+    this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject(null as any | null);
-    this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
+    this.render$ = this.renderSubject.asObservable().pipe(filter((_) => _ !== null)) as Observable<
       any
     >;
 
@@ -86,10 +86,10 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      update: params => {
+      update: (params) => {
         this.updateSubject.next(params);
       },
-      event: data => {
+      event: (data) => {
         this.eventsSubject.next(data);
       },
     };

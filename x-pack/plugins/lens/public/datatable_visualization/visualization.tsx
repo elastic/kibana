@@ -41,13 +41,17 @@ export const datatableVisualization: Visualization<
     },
   ],
 
+  getVisualizationTypeId() {
+    return 'lnsDatatable';
+  },
+
   getLayerIds(state) {
-    return state.layers.map(l => l.layerId);
+    return state.layers.map((l) => l.layerId);
   },
 
   clearLayer(state) {
     return {
-      layers: state.layers.map(l => newLayerState(l.layerId)),
+      layers: state.layers.map((l) => newLayerState(l.layerId)),
     };
   },
 
@@ -70,7 +74,7 @@ export const datatableVisualization: Visualization<
     );
   },
 
-  getPersistableState: state => state,
+  getPersistableState: (state) => state,
 
   getSuggestions({
     table,
@@ -97,7 +101,7 @@ export const datatableVisualization: Visualization<
               operations:
                 table.label ||
                 table.columns
-                  .map(col => col.operation.label)
+                  .map((col) => col.operation.label)
                   .join(
                     i18n.translate('xpack.lens.datatable.conjunctionSign', {
                       defaultMessage: ' & ',
@@ -111,25 +115,25 @@ export const datatableVisualization: Visualization<
     return [
       {
         title,
-        // table with >= 10 columns will have a score of 0.6, fewer columns reduce score
-        score: (Math.min(table.columns.length, 10) / 10) * 0.6,
+        // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
+        score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
           layers: [
             {
               layerId: table.layerId,
-              columns: table.columns.map(col => col.columnId),
+              columns: table.columns.map((col) => col.columnId),
             },
           ],
         },
         previewIcon: chartTableSVG,
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced' || !table.isMultiRow,
+        // tables are hidden from suggestion bar, but used for drag & drop and chart switching
+        hide: true,
       },
     ];
   },
 
   getConfiguration({ state, frame, layerId }) {
-    const layer = state.layers.find(l => l.layerId === layerId);
+    const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
       return { groups: [] };
     }
@@ -159,7 +163,7 @@ export const datatableVisualization: Visualization<
   setDimension({ prevState, layerId, columnId }) {
     return {
       ...prevState,
-      layers: prevState.layers.map(l => {
+      layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId || l.columns.includes(columnId)) {
           return l;
         }
@@ -170,11 +174,11 @@ export const datatableVisualization: Visualization<
   removeDimension({ prevState, layerId, columnId }) {
     return {
       ...prevState,
-      layers: prevState.layers.map(l =>
+      layers: prevState.layers.map((l) =>
         l.layerId === layerId
           ? {
               ...l,
-              columns: l.columns.filter(c => c !== columnId),
+              columns: l.columns.filter((c) => c !== columnId),
             }
           : l
       ),
@@ -185,7 +189,7 @@ export const datatableVisualization: Visualization<
     const layer = state.layers[0];
     const datasource = frame.datasourceLayers[layer.layerId];
     const operations = layer.columns
-      .map(columnId => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
+      .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
       .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
     return {
@@ -203,7 +207,7 @@ export const datatableVisualization: Visualization<
                     type: 'function',
                     function: 'lens_datatable_columns',
                     arguments: {
-                      columnIds: operations.map(o => o.columnId),
+                      columnIds: operations.map((o) => o.columnId),
                     },
                   },
                 ],

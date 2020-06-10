@@ -82,9 +82,9 @@ export type Values<T> = T extends any[] ? T[number] : T extends object ? T[keyof
  * type.  This is necessary in the case of distinguishing one collection from
  * another.
  */
-export type UnionToIntersection<U> = (U extends any
-? (k: U) => void
-: never) extends (k: infer I) => void
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
   ? I
   : never;
 

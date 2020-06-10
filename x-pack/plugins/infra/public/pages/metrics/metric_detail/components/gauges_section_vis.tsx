@@ -17,7 +17,7 @@ import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
 
 import { euiStyled } from '../../../../../../observability/public';
-import { createFormatter } from '../../../../utils/formatters';
+import { createFormatter } from '../../../../../common/formatters';
 import { InventoryFormatterType } from '../../../../../common/inventory_models/types';
 import { SeriesOverrides, VisSectionProps } from '../types';
 import { getChartName } from './helpers';
@@ -54,7 +54,7 @@ export const GaugesSectionVis = ({
     <EuiPageContentBody>
       <EuiSpacer size="m" />
       <GroupBox>
-        {metric.series.map(series => {
+        {metric.series.map((series) => {
           const lastDataPoint = last(series.data);
           if (!lastDataPoint) {
             return null;
@@ -67,7 +67,7 @@ export const GaugesSectionVis = ({
           );
           const value = formatterFn(lastDataPoint.value || 0);
           const name = getChartName(seriesOverrides, series.id, series.id);
-          const dataMax = max(series.data.map(d => d.value || 0));
+          const dataMax = max(series.data.map((d) => d.value || 0));
           const gaugeMax = get(seriesOverrides, [series.id, 'gaugeMax'], dataMax);
           return (
             <EuiFlexItem key={`${id}-${series.id}`} style={{ margin: '0.4rem' }}>

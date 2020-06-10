@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { Ping } from '../../../common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -45,7 +45,14 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
         },
       },
       size: 1,
-      _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+      _source: [
+        'url',
+        'monitor',
+        'observer',
+        '@timestamp',
+        'tls.server.x509.not_after',
+        'tls.server.x509.not_before',
+      ],
       sort: {
         '@timestamp': { order: 'desc' },
       },
@@ -54,8 +61,13 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
 
   const result = await callES('search', params);
   const doc = result.hits?.hits?.[0];
-  const source = doc?._source ?? {};
   const docId = doc?._id ?? '';
+  const { tls, ...ping } = doc?._source ?? {};
 
-  return { ...source, docId, timestamp: source['@timestamp'] };
+  return {
+    ...ping,
+    docId,
+    timestamp: ping['@timestamp'],
+    tls: { not_after: tls?.server?.x509?.not_after, not_before: tls?.server?.x509?.not_before },
+  };
 };

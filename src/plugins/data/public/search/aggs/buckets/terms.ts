@@ -26,7 +26,7 @@ import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
-import { AggConfigSerialized, IAggConfigs } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
 
 import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
@@ -63,11 +63,11 @@ export interface TermsBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsTerms {
+export interface AggParamsTerms extends BaseAggParams {
   field: string;
-  order: 'asc' | 'desc';
   orderBy: string;
   orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
   size?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
@@ -76,7 +76,6 @@ export interface AggParamsTerms {
   // advanced
   exclude?: string;
   include?: string;
-  json?: string;
 }
 
 export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDependencies) =>
@@ -256,7 +255,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           displayName: i18n.translate('data.search.aggs.otherBucket.labelForOtherBucketLabel', {
             defaultMessage: 'Label for other bucket',
           }),
-          shouldShow: agg => agg.getParam('otherBucket'),
+          shouldShow: (agg) => agg.getParam('otherBucket'),
           write: noop,
         },
         {
@@ -275,7 +274,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
             defaultMessage: 'Label for missing values',
           }),
-          shouldShow: agg => agg.getParam('missingBucket'),
+          shouldShow: (agg) => agg.getParam('missingBucket'),
           write: noop,
         },
         {

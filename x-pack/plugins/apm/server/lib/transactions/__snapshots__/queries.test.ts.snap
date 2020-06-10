@@ -333,6 +333,9 @@ Object {
           "pct": Object {
             "percentiles": Object {
               "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 2,
+              },
               "percents": Array [
                 95,
                 99,
@@ -425,6 +428,9 @@ Object {
           "pct": Object {
             "percentiles": Object {
               "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 2,
+              },
               "percents": Array [
                 95,
                 99,
@@ -522,6 +528,9 @@ Object {
           "pct": Object {
             "percentiles": Object {
               "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 2,
+              },
               "percents": Array [
                 95,
                 99,

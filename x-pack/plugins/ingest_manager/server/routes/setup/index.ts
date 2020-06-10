@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { IngestManagerConfigType } from '../../../common';
 import {
-  getFleetSetupHandler,
+  getFleetStatusHandler,
   createFleetSetupHandler,
   ingestManagerSetupHandler,
 } from './handlers';
+import { PostFleetSetupRequestSchema } from '../../types';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
   // Ingest manager setup
   router.post(
     {
@@ -23,6 +26,11 @@ export const registerRoutes = (router: IRouter) => {
     },
     ingestManagerSetupHandler
   );
+
+  if (!config.fleet.enabled) {
+    return;
+  }
+
   // Get Fleet setup
   router.get(
     {
@@ -30,14 +38,14 @@ export const registerRoutes = (router: IRouter) => {
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getFleetSetupHandler
+    getFleetStatusHandler
   );
 
   // Create Fleet setup
   router.post(
     {
       path: FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
-      validate: false,
+      validate: PostFleetSetupRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createFleetSetupHandler

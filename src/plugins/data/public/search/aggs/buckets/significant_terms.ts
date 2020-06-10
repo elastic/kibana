@@ -24,6 +24,7 @@ import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exc
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significantTermsTitle', {
   defaultMessage: 'Significant Terms',
@@ -31,6 +32,13 @@ const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significa
 
 export interface SignificantTermsBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsSignificantTerms extends BaseAggParams {
+  field: string;
+  size?: number;
+  exclude?: string;
+  include?: string;
 }
 
 export const getSignificantTermsBucketAgg = ({

@@ -14,6 +14,7 @@ export const DEFAULT_AGENT_CONFIG = {
   status: AgentConfigStatus.Active,
   datasources: [],
   is_default: true,
+  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
 
 export const DEFAULT_AGENT_CONFIGS_PACKAGES = [DefaultPackages.system];

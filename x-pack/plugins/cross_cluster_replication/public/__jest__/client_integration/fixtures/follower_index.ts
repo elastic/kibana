@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Chance from 'chance';
 import { getRandomString } from '../../../../../../test_utils';
 import { FollowerIndex } from '../../../../common/types';
 
-const Chance = require('chance'); // eslint-disable-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
 const chance = new Chance();
 
 interface FollowerIndexMock {

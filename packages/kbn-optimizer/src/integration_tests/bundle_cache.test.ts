@@ -35,7 +35,7 @@ const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer({
   print: () => '<Bundle>',
-  test: v => v instanceof Bundle,
+  test: (v) => v instanceof Bundle,
 });
 expect.addSnapshotSerializer(createAbsolutePathSerializer(MOCK_REPO_DIR));
 
@@ -208,8 +208,8 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
         "diff": "[32m- Expected[39m
     [31m+ Received[39m
 
-    [32m- old[39m
-    [31m+ optimizerCacheKey[39m",
+    [32m- \\"old\\"[39m
+    [31m+ \\"optimizerCacheKey\\"[39m",
         "reason": "optimizer cache key mismatch",
         "type": "bundle not cached",
       },
@@ -291,8 +291,8 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
         "diff": "[32m- Expected[39m
     [31m+ Received[39m
 
-    [32m- old[39m
-    [31m+ new[39m",
+    [32m- \\"old\\"[39m
+    [31m+ \\"new\\"[39m",
         "reason": "cache key mismatch",
         "type": "bundle not cached",
       },

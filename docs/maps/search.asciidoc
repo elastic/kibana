@@ -10,13 +10,13 @@ You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents source
+** Documents
 
-** Grid aggregation source
+** Clusters and grid
 
 ** <<terms-join>>
 
-* <<heatmap-layer>> with Grid aggregation source
+* <<heatmap-layer>>
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]

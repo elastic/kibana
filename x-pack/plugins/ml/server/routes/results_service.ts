@@ -88,6 +88,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
       validate: {
         body: anomaliesTableDataSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -116,6 +119,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
       path: '/api/ml/results/category_definition',
       validate: {
         body: categoryDefinitionSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -146,6 +152,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
       validate: {
         body: maxAnomalyScoreSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -175,6 +184,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
       validate: {
         body: categoryExamplesSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -203,6 +215,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
       path: '/api/ml/results/partition_fields_values',
       validate: {
         body: partitionFieldValuesSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

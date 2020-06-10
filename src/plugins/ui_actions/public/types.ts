@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ActionByType } from './actions/action';
+import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 import { Filter } from '../../data/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
@@ -25,7 +25,7 @@ import { IEmbeddable } from '../../embeddable/public';
 import { RangeSelectTriggerContext, ValueClickTriggerContext } from '../../embeddable/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, ActionByType<any>>;
+export type ActionRegistry = Map<string, ActionInternal>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';

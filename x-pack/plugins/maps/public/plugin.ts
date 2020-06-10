@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
@@ -20,54 +20,72 @@ import {
   setHttp,
   setIndexPatternSelect,
   setIndexPatternService,
-  setInjectedVarFunc,
   setInspector,
+  setIsGoldPlus,
+  setKibanaCommonConfig,
+  setKibanaVersion,
   setLicenseId,
+  setMapAppConfig,
   setMapsCapabilities,
   setNavigation,
   setSavedObjectsClient,
+  setSearchService,
   setTimeFilter,
   setToasts,
   setUiActions,
   setUiSettings,
   setVisualizations,
-  setSearchService,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
-import { registerLayerWizards } from './layers/load_layer_wizards';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { MapEmbeddableFactory } from './embeddable';
+import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
+import { MapsConfigType, MapsXPackConfig } from '../config';
+import { ILicense } from '../../licensing/common/types';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
+  mapsLegacy: { config: unknown };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
 
-export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing } = plugins;
-  const { injectedMetadata, uiSettings, http, notifications } = core;
+export const bindSetupCoreAndPlugins = (
+  core: CoreSetup,
+  plugins: any,
+  config: MapsConfigType,
+  kibanaVersion: string
+) => {
+  const { licensing, mapsLegacy } = plugins;
+  const { uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setHttp(http);
   setToasts(notifications.toasts);
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setVisualizations(plugins.visualizations);
   setUiSettings(uiSettings);
+  setKibanaCommonConfig(mapsLegacy.config);
+  setMapAppConfig(config);
+  setKibanaVersion(kibanaVersion);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { fileUpload, data, inspector } = plugins;
+  const { fileUpload, data, inspector, licensing } = plugins;
+  if (licensing) {
+    licensing.license$.subscribe((license: ILicense) => {
+      const gold = license.check(APP_ID, 'gold');
+      setIsGoldPlus(gold.state === 'valid');
+    });
+  }
+
   setInspector(inspector);
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
@@ -85,7 +103,6 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
-  registerLayerWizards();
 };
 
 /**
@@ -105,14 +122,25 @@ export class MapsPlugin
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
     > {
+  readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
+    this._initializerContext = initializerContext;
+  }
+
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+    const config = this._initializerContext.config.get<MapsConfigType>();
+    const kibanaVersion = this._initializerContext.env.packageInfo.version;
     const { inspector, home, visualizations, embeddable } = plugins;
-    bindSetupCoreAndPlugins(core, plugins);
+    bindSetupCoreAndPlugins(core, plugins, config, kibanaVersion);
 
     inspector.registerView(MapView);
     home.featureCatalogue.register(featureCatalogueEntry);
     visualizations.registerAlias(getMapsVisTypeAlias());
     embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+    return {
+      config,
+    };
   }
 
   public start(core: CoreStart, plugins: any) {

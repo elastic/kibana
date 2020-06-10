@@ -65,6 +65,7 @@ export const EventSchema = schema.maybe(
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({
+              rel: ecsString(),
               namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),

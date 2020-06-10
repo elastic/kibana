@@ -52,6 +52,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/calendars',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetCalendars'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -80,6 +83,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/calendars/{calendarIds}',
       validate: {
         params: calendarIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetCalendars'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -117,6 +123,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: calendarSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateCalendar'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -149,6 +158,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         params: calendarIdSchema,
         body: calendarSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateCalendar'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -179,6 +191,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
         params: calendarIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteCalendar'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

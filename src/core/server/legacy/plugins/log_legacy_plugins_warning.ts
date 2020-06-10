@@ -36,7 +36,7 @@ export const logLegacyThirdPartyPluginDeprecationWarning = ({
 }) => {
   const thirdPartySpecs = specs.filter(isThirdPartyPluginSpec);
   if (thirdPartySpecs.length > 0) {
-    const pluginIds = thirdPartySpecs.map(spec => spec.getId());
+    const pluginIds = thirdPartySpecs.map((spec) => spec.getId());
     log.warn(
       `Some installed third party plugin(s) [${pluginIds.join(
         ', '
@@ -49,5 +49,5 @@ export const logLegacyThirdPartyPluginDeprecationWarning = ({
 
 const isThirdPartyPluginSpec = (spec: LegacyPluginSpec): boolean => {
   const pluginPath = spec.getPack().getPath();
-  return !internalPaths.some(internalPath => pluginPath.indexOf(internalPath) > -1);
+  return !internalPaths.some((internalPath) => pluginPath.indexOf(internalPath) > -1);
 };

@@ -1,0 +1,8 @@
+{
+  "id": "dashboardEnhanced",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "uiActionsEnhanced", "drilldowns", "embeddable", "dashboard", "share"],
+  "configPath": ["xpack", "dashboardEnhanced"]
+}

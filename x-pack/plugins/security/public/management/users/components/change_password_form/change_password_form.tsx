@@ -267,7 +267,7 @@ export class ChangePasswordForm extends Component<Props, State> {
       this.validateConfirmPassword(true),
     ];
 
-    const firstFailure = validation.find(result => result.isInvalid);
+    const firstFailure = validation.find((result) => result.isInvalid);
     if (firstFailure) {
       return firstFailure;
     }

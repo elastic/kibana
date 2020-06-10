@@ -21,7 +21,7 @@ export const ConfigSchema = schema.object({
 
 export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-    map(config => {
+    map((config) => {
       const logger = context.logger.get('config');
 
       let encryptionKey = config.encryptionKey;

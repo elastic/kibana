@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { Trigger } from '../../../../ui_actions/public';
 import { KibanaDatatable } from '../../../../expressions';
+import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface ValueClickTriggerContext {
-  embeddable?: IEmbeddable;
-  timeFieldName?: string;
+export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
   data: {
     data: Array<{
       table: Pick<KibanaDatatable, 'rows' | 'columns'>;
@@ -35,19 +34,28 @@ export interface ValueClickTriggerContext {
       row: number;
       value: any;
     }>;
+    timeFieldName?: string;
     negate?: boolean;
   };
 }
 
-export interface RangeSelectTriggerContext {
-  embeddable?: IEmbeddable;
-  timeFieldName?: string;
+export const isValueClickTriggerContext = (
+  context: ValueClickTriggerContext | RangeSelectTriggerContext
+): context is ValueClickTriggerContext => context.data && 'data' in context.data;
+
+export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
   data: {
     table: KibanaDatatable;
     column: number;
     range: number[];
+    timeFieldName?: string;
   };
 }
+
+export const isRangeSelectTriggerContext = (
+  context: ValueClickTriggerContext | RangeSelectTriggerContext
+): context is RangeSelectTriggerContext => context.data && 'range' in context.data;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
@@ -60,5 +68,12 @@ export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,
   title: 'Panel badges',
-  description: 'Actions appear in title bar when an embeddable loads in a panel',
+  description: 'Actions appear in title bar when an embeddable loads in a panel.',
+};
+
+export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
+export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
+  id: PANEL_NOTIFICATION_TRIGGER,
+  title: 'Panel notifications',
+  description: 'Actions appear in top-right corner of a panel.',
 };

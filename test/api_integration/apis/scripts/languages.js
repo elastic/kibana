@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('Script Languages API', function getLanguages() {
@@ -27,7 +27,7 @@ export default function({ getService }) {
       supertest
         .get('/api/kibana/scripts/languages')
         .expect(200)
-        .then(response => {
+        .then((response) => {
           expect(response.body).to.be.an('array');
         }));
 
@@ -36,7 +36,7 @@ export default function({ getService }) {
       supertest
         .get('/api/kibana/scripts/languages')
         .expect(200)
-        .then(response => {
+        .then((response) => {
           expect(response.body).to.contain('expression');
           expect(response.body).to.contain('painless');
           expect(response.body).to.not.contain('groovy');

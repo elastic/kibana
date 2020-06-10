@@ -1,0 +1,35 @@
+{
+  "description": "Adversaries may attempt to disable the iptables or firewall service in an attempt to affect how a host is allowed to receive or send network traffic.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Attempt to Disable IPTables or Firewall",
+  "query": "event.action:(executed or process_started) and (process.name:service and process.args:stop or process.name:chkconfig and process.args:off) and process.args:(ip6tables or iptables) or process.name:systemctl and process.args:(firewalld and (disable or stop or kill))",
+  "risk_score": 47,
+  "rule_id": "125417b8-d3df-479f-8418-12d7e034fee3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

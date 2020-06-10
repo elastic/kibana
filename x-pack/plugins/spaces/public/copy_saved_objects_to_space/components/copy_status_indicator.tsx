@@ -23,7 +23,7 @@ export const CopyStatusIndicator = (props: Props) => {
   }
 
   const objectResult = summarizedCopyResult.objects.find(
-    o => o.type === props.object!.type && o.id === props.object!.id
+    (o) => o.type === props.object!.type && o.id === props.object!.id
   ) as SummarizedSavedObjectResult;
 
   const successful =

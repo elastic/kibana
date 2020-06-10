@@ -6,11 +6,14 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
+  const retry = getService('retry');
+  const globalNav = getService('globalNav');
 
-  describe('Kibana Home', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/66976
+  describe.skip('Kibana Home', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
@@ -36,6 +39,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('navigating to console app from administration tab meets a11y requirements', async () => {
       await PageObjects.home.clickOnConsole();
+      // wait till dev tools app is loaded (lazy loading the bundle)
+      await retry.waitFor(
+        'switched to dev tools',
+        async () => (await globalNav.getLastBreadcrumb()) === 'Dev Tools'
+      );
       await a11y.testAppSnapshot();
     });
 

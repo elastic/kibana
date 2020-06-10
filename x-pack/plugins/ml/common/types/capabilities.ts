@@ -7,6 +7,7 @@
 import { KibanaRequest } from 'kibana/server';
 
 export const userMlCapabilities = {
+  canAccessML: false,
   // Anomaly Detection
   canGetJobs: false,
   canGetDatafeeds: false,
@@ -14,10 +15,12 @@ export const userMlCapabilities = {
   canGetCalendars: false,
   // File Data Visualizer
   canFindFileStructure: false,
-  // Filters
-  canGetFilters: false,
   // Data Frame Analytics
   canGetDataFrameAnalytics: false,
+  // Annotations
+  canGetAnnotations: false,
+  canCreateAnnotation: false,
+  canDeleteAnnotation: false,
 };
 
 export const adminMlCapabilities = {
@@ -26,11 +29,15 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
-  canForecastJob: false,
-  canStartStopDatafeed: false,
   canUpdateJob: false,
+  canForecastJob: false,
+  canCreateDatafeed: false,
+  canDeleteDatafeed: false,
+  canStartStopDatafeed: false,
   canUpdateDatafeed: false,
   canPreviewDatafeed: false,
+  // Filters
+  canGetFilters: false,
   // Calendars
   canCreateCalendar: false,
   canDeleteCalendar: false,
@@ -38,8 +45,8 @@ export const adminMlCapabilities = {
   canCreateFilter: false,
   canDeleteFilter: false,
   // Data Frame Analytics
-  canDeleteDataFrameAnalytics: false,
   canCreateDataFrameAnalytics: false,
+  canDeleteDataFrameAnalytics: false,
   canStartStopDataFrameAnalytics: false,
 };
 
@@ -47,12 +54,31 @@ export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
 
-export const basicLicenseMlCapabilities = ['canFindFileStructure'] as Array<keyof MlCapabilities>;
+export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
+  keyof MlCapabilities
+>;
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {
     ...userMlCapabilities,
     ...adminMlCapabilities,
+  };
+}
+
+export function getPluginPrivileges() {
+  const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
+  const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
+  const allMlCapabilities = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+
+  return {
+    user: {
+      ui: userMlCapabilitiesKeys,
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+    },
+    admin: {
+      ui: allMlCapabilities,
+      api: allMlCapabilities.map((k) => `ml:${k}`),
+    },
   };
 }
 

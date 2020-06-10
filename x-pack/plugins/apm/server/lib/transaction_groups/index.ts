@@ -7,11 +7,11 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { transactionGroupsFetcher, Options } from './fetcher';
 import { transactionGroupsTransformer } from './transform';
-import { PromiseReturnType } from '../../../typings/common';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 
 export type TransactionGroupListAPIResponse = PromiseReturnType<
   typeof getTransactionGroupList
@@ -25,6 +25,6 @@ export async function getTransactionGroupList(
   return transactionGroupsTransformer({
     response,
     start,
-    end
+    end,
   });
 }

@@ -50,7 +50,7 @@ Unix/Linux based distributions. This module is not available on Windows. \
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-system.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/system.svg',
+    euiIconType: '/plugins/home/assets/logos/system.svg',
     artifacts: {
       dashboards: [
         {
@@ -66,7 +66,7 @@ Unix/Linux based distributions. This module is not available on Windows. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/system_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/system_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

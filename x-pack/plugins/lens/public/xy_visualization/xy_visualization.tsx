@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu } from './xy_config_panel';
-import { Visualization, OperationMetadata } from '../types';
+import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
@@ -24,6 +24,18 @@ const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
+function getVisualizationType(state: State): VisualizationType | 'mixed' {
+  if (!state.layers.length) {
+    return (
+      visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+    );
+  }
+  const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
+  const seriesTypes = _.unique(state.layers.map((l) => l.seriesType));
+
+  return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
+}
+
 function getDescription(state?: State) {
   if (!state) {
     return {
@@ -34,32 +46,31 @@ function getDescription(state?: State) {
     };
   }
 
+  const visualizationType = getVisualizationType(state);
+
   if (!state.layers.length) {
-    const visualizationType = visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    const preferredType = visualizationType as VisualizationType;
     return {
-      icon: visualizationType.largeIcon || visualizationType.icon,
-      label: visualizationType.label,
+      icon: preferredType.largeIcon || preferredType.icon,
+      label: preferredType.label,
     };
   }
 
-  const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType)!;
-  const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
-
   return {
     icon:
-      seriesTypes.length === 1
-        ? visualizationType.largeIcon || visualizationType.icon
-        : chartMixedSVG,
+      visualizationType === 'mixed'
+        ? chartMixedSVG
+        : visualizationType.largeIcon || visualizationType.icon,
     label:
-      seriesTypes.length === 1
-        ? visualizationType.label
-        : isHorizontalChart(state.layers)
-        ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-            defaultMessage: 'Mixed horizontal bar',
-          })
-        : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
-            defaultMessage: 'Mixed XY',
-          }),
+      visualizationType === 'mixed'
+        ? isHorizontalChart(state.layers)
+          ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
+              defaultMessage: 'Mixed horizontal bar',
+            })
+          : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
+              defaultMessage: 'Mixed XY',
+            })
+        : visualizationType.label,
   };
 }
 
@@ -67,20 +78,24 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   id: 'lnsXY',
 
   visualizationTypes,
+  getVisualizationTypeId(state) {
+    const type = getVisualizationType(state);
+    return type === 'mixed' ? type : type.id;
+  },
 
   getLayerIds(state) {
-    return state.layers.map(l => l.layerId);
+    return state.layers.map((l) => l.layerId);
   },
 
   removeLayer(state, layerId) {
     return {
       ...state,
-      layers: state.layers.filter(l => l.layerId !== layerId),
+      layers: state.layers.filter((l) => l.layerId !== layerId),
     };
   },
 
   appendLayer(state, layerId) {
-    const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
+    const usedSeriesTypes = _.uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
       layers: [
@@ -96,7 +111,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   clearLayer(state, layerId) {
     return {
       ...state,
-      layers: state.layers.map(l =>
+      layers: state.layers.map((l) =>
         l.layerId !== layerId ? l : newLayerState(state.preferredSeriesType, layerId)
       ),
     };
@@ -119,7 +134,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     return {
       ...state,
       preferredSeriesType: seriesType as SeriesType,
-      layers: state.layers.map(layer => ({ ...layer, seriesType: seriesType as SeriesType })),
+      layers: state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
     };
   },
 
@@ -144,10 +159,10 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     );
   },
 
-  getPersistableState: state => state,
+  getPersistableState: (state) => state,
 
   getConfiguration(props) {
-    const layer = props.state.layers.find(l => l.layerId === props.layerId)!;
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     return {
       groups: [
         {
@@ -189,7 +204,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
-    const newLayer = prevState.layers.find(l => l.layerId === layerId);
+    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!newLayer) {
       return prevState;
     }
@@ -198,7 +213,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       newLayer.xAccessor = columnId;
     }
     if (groupId === 'y') {
-      newLayer.accessors = [...newLayer.accessors.filter(a => a !== columnId), columnId];
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
     }
     if (groupId === 'breakdown') {
       newLayer.splitAccessor = columnId;
@@ -206,12 +221,12 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
     return {
       ...prevState,
-      layers: prevState.layers.map(l => (l.layerId === layerId ? newLayer : l)),
+      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
 
   removeDimension({ prevState, layerId, columnId }) {
-    const newLayer = prevState.layers.find(l => l.layerId === layerId);
+    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!newLayer) {
       return prevState;
     }
@@ -221,18 +236,18 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     } else if (newLayer.splitAccessor === columnId) {
       delete newLayer.splitAccessor;
     } else if (newLayer.accessors.includes(columnId)) {
-      newLayer.accessors = newLayer.accessors.filter(a => a !== columnId);
+      newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
 
     return {
       ...prevState,
-      layers: prevState.layers.map(l => (l.layerId === layerId ? newLayer : l)),
+      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
 
   getLayerContextMenuIcon({ state, layerId }) {
-    const layer = state.layers.find(l => l.layerId === layerId);
-    return visualizationTypes.find(t => t.id === layer?.seriesType)?.icon;
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
   },
 
   renderLayerContextMenu(domElement, props) {

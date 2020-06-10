@@ -29,7 +29,7 @@ export function systemRoutes(
 
     let count = 0;
     if (typeof resp.nodes === 'object') {
-      Object.keys(resp.nodes).forEach(k => {
+      Object.keys(resp.nodes).forEach((k) => {
         if (resp.nodes[k].attributes !== undefined) {
           const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
           if (maxOpenJobs !== null && maxOpenJobs > 0) {
@@ -53,6 +53,9 @@ export function systemRoutes(
       path: '/api/ml/_has_privileges',
       validate: {
         body: schema.maybe(schema.any()),
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
@@ -110,6 +113,9 @@ export function systemRoutes(
     {
       path: '/api/ml/ml_capabilities',
       validate: false,
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -150,7 +156,11 @@ export function systemRoutes(
     {
       path: '/api/ml/ml_node_count',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
+
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         // check for basic license first for consistency with other
@@ -201,6 +211,9 @@ export function systemRoutes(
     {
       path: '/api/ml/info',
       validate: false,
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -228,6 +241,9 @@ export function systemRoutes(
       path: '/api/ml/es_search',
       validate: {
         body: schema.maybe(schema.any()),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

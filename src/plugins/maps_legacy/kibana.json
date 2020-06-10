@@ -2,5 +2,7 @@
   "id": "mapsLegacy",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "ui": true
+  "configPath": ["map"],
+  "ui": true,
+  "server": true
 }

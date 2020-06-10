@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToAlerts } from './constants';
 import { getCurrentBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
@@ -76,7 +76,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`${BASE_PATH}/${newSection}`);
+    history.push(`/${newSection}`);
   };
 
   // Set breadcrumb and page title
@@ -125,7 +125,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         </EuiPageContentHeader>
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
@@ -167,3 +167,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     </EuiPageBody>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TriggersActionsUIHome as default };

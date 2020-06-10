@@ -6,8 +6,9 @@
 
 import { Readable } from 'stream';
 
+import { APICaller } from 'kibana/server';
+
 import { MetaOrUndefined, Type } from '../../../common/schemas';
-import { DataClient } from '../../types';
 
 import { BufferLines } from './buffer_lines';
 import { getListItemByValues } from './get_list_item_by_values';
@@ -16,7 +17,7 @@ import { createListItemsBulk } from './create_list_items_bulk';
 export interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -26,18 +27,18 @@ export interface ImportListItemsToStreamOptions {
 export const importListItemsToStream = ({
   listId,
   stream,
-  dataClient,
+  callCluster,
   listItemIndex,
   type,
   user,
   meta,
 }: ImportListItemsToStreamOptions): Promise<void> => {
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     const readBuffer = new BufferLines({ input: stream });
     readBuffer.on('lines', async (lines: string[]) => {
       await writeBufferToItems({
         buffer: lines,
-        dataClient,
+        callCluster,
         listId,
         listItemIndex,
         meta,
@@ -54,7 +55,7 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   buffer: string[];
   type: Type;
@@ -69,7 +70,7 @@ export interface LinesResult {
 
 export const writeBufferToItems = async ({
   listId,
-  dataClient,
+  callCluster,
   listItemIndex,
   buffer,
   type,
@@ -77,19 +78,19 @@ export const writeBufferToItems = async ({
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemByValues({
-    dataClient,
+    callCluster,
     listId,
     listItemIndex,
     type,
     value: buffer,
   });
   const duplicatesRemoved = buffer.filter(
-    bufferedValue => !items.some(item => item.value === bufferedValue)
+    (bufferedValue) => !items.some((item) => item.value === bufferedValue)
   );
   const linesProcessed = duplicatesRemoved.length;
   const duplicatesFound = buffer.length - duplicatesRemoved.length;
   await createListItemsBulk({
-    dataClient,
+    callCluster,
     listId,
     listItemIndex,
     meta,

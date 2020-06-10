@@ -95,7 +95,7 @@ export const Node = class extends React.PureComponent<Props, State> {
   }
 
   private togglePopover = () => {
-    this.setState(prevState => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
   };
 
   private closePopover = () => {
@@ -119,7 +119,7 @@ const SquareOuter = euiStyled.div<ColorProps>`
   left: 4px;
   bottom: 4px;
   right: 4px;
-  background-color: ${props => darken(0.1, props.color)};
+  background-color: ${(props) => darken(0.1, props.color)};
   border-radius: 3px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
@@ -132,7 +132,7 @@ const SquareInner = euiStyled.div<ColorProps>`
   bottom: 2px;
   left: 0;
   border-radius: 3px;
-  background-color: ${props => props.color};
+  background-color: ${(props) => props.color};
 `;
 
 const ValueInner = euiStyled.button`
@@ -152,8 +152,8 @@ const ValueInner = euiStyled.button`
   border: none;
   &:focus {
     outline: none !important;
-    border: ${params => params.theme.eui.euiFocusRingSize} solid
-      ${params => params.theme.eui.euiFocusRingColor};
+    border: ${(params) => params.theme.eui.euiFocusRingSize} solid
+      ${(params) => params.theme.eui.euiFocusRingColor};
     box-shadow: none;
   }
 `;
@@ -165,7 +165,7 @@ const SquareTextContent = euiStyled.div<ColorProps>`
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1 0 auto;
-  color: ${props => readableColor(props.color)};
+  color: ${(props) => readableColor(props.color)};
 `;
 
 const Value = euiStyled(SquareTextContent)`

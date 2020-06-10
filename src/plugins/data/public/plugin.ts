@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -24,6 +26,7 @@ import {
   Plugin,
   PackageInfo,
 } from 'src/core/public';
+import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
@@ -83,17 +86,18 @@ declare module '../../ui_actions/public' {
 }
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteService();
+  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService();
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.packageInfo = initializerContext.env.packageInfo;
   }
@@ -126,12 +130,12 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       SELECT_RANGE_TRIGGER,
       selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       VALUE_CLICK_TRIGGER,
       valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
@@ -160,7 +164,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http, fieldFormats);
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
@@ -172,7 +176,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     });
     setSearchService(search);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
+      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+    );
 
     const dataServices = {
       actions: {

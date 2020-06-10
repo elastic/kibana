@@ -46,8 +46,10 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: getCardinalityOfFieldsSchema,
       },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
-
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getCardinalityOfFields(context, request.body);
@@ -78,6 +80,9 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/fields_service/time_field_range',
       validate: {
         body: getTimeFieldRangeSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {

@@ -35,20 +35,21 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/legacy/plugins/apm/**/*',
-  'x-pack/legacy/plugins/canvas/tasks/**/*',
-  'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/tasks/**/*',
+  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
+  'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
 
   // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/legacy/plugins/canvas/.storybook/*',
+  'x-pack/plugins/canvas/.storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -58,6 +59,13 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename required by api-extractor
   'api-documenter.json',
+
+  // TODO fix file names in APM to remove these
+  'x-pack/plugins/apm/public/**/*',
+  'x-pack/plugins/apm/scripts/**/*',
+  'x-pack/plugins/apm/e2e/**/*',
+
+  'x-pack/plugins/maps/server/fonts/**/*',
 ];
 
 /**
@@ -160,18 +168,17 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'webpackShims/ui-bootstrap.js',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
-  'x-pack/legacy/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
-  'x-pack/legacy/plugins/monitoring/public/icons/alert-blue.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-gray.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-green.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-red.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
+  'x-pack/plugins/monitoring/public/icons/health-gray.svg',
+  'x-pack/plugins/monitoring/public/icons/health-green.svg',
+  'x-pack/plugins/monitoring/public/icons/health-red.svg',
+  'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

@@ -8,7 +8,7 @@ This class integrates with the `ciStats.trackBuild {}` Jenkins Pipeline function
 
 To create an instance of the reporter, import the class and call `CiStatsReporter.fromEnv(log)` (passing it a tooling log).
 
-#### `CiStatsReporter#metric(name: string, subName: string, value: number)`
+#### `CiStatsReporter#metrics(metrics: Array<{ group: string, id: string, value: number }>)`
 
 Use this method to record metrics in the Kibana CI Stats service.
 
@@ -19,5 +19,11 @@ import { CiStatsReporter, ToolingLog } from '@kbn/dev-utils';
 
 const log = new ToolingLog(...);
 const reporter = CiStatsReporter.fromEnv(log)
-reporter.metric('Build speed', specificBuildName, timeToRunBuild)
+reporter.metrics([
+  {
+    group: 'Build size',
+    id: specificBuildName,
+    value: sizeOfBuild
+  }
+])
 ```

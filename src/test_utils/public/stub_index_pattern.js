@@ -23,18 +23,18 @@ import sinon from 'sinon';
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 
 import {
-  IndexPatternFieldList,
   IndexPattern,
   indexPatterns,
   KBN_FIELD_TYPES,
+  getIndexPatternFieldListCreator,
 } from '../../plugins/data/public';
 
 import { setFieldFormats } from '../../plugins/data/public/services';
 
 setFieldFormats({
   getDefaultInstance: () => ({
-    getConverterFor: () => value => value,
-    convert: value => JSON.stringify(value),
+    getConverterFor: () => (value) => value,
+    convert: (value) => JSON.stringify(value),
   }),
 });
 
@@ -42,6 +42,16 @@ import { getFieldFormatsRegistry } from './stub_field_formats';
 
 export default function StubIndexPattern(pattern, getConfig, timeField, fields, core) {
   const registeredFieldFormats = getFieldFormatsRegistry(core);
+  const createFieldList = getIndexPatternFieldListCreator({
+    fieldFormats: {
+      getDefaultInstance: () => ({
+        convert: (val) => String(val),
+      }),
+    },
+    toastNotifications: {
+      addDanger: () => {},
+    },
+  });
 
   this.id = pattern;
   this.title = pattern;
@@ -55,7 +65,6 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.getSourceFiltering = sinon.stub();
   this.metaFields = ['_id', '_type', '_source'];
   this.fieldFormatMap = {};
-  this.routes = indexPatterns.getRoutes();
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);
@@ -66,11 +75,11 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
-  this._reindexFields = function() {
-    this.fields = new IndexPatternFieldList(this, this.fields || fields);
+  this._reindexFields = function () {
+    this.fields = createFieldList(this, this.fields || fields, false);
   };
 
-  this.stubSetFieldFormat = function(fieldName, id, params) {
+  this.stubSetFieldFormat = function (fieldName, id, params) {
     const FieldFormat = registeredFieldFormats.getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();

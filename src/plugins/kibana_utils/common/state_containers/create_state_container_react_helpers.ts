@@ -24,15 +24,58 @@ import { Comparator, Connect, StateContainer, UnboxState } from './types';
 
 const { useContext, useLayoutEffect, useRef, createElement: h } = React;
 
+/**
+ * Returns the latest state of a state container.
+ *
+ * @param container State container which state to track.
+ */
+export const useContainerState = <Container extends StateContainer<any, any>>(
+  container: Container
+): UnboxState<Container> => useObservable(container.state$, container.get());
+
+/**
+ * Apply selector to state container to extract only needed information. Will
+ * re-render your component only when the section changes.
+ *
+ * @param container State container which state to track.
+ * @param selector Function used to pick parts of state.
+ * @param comparator Comparator function used to memoize previous result, to not
+ *    re-render React component if state did not change. By default uses
+ *    `fast-deep-equal` package.
+ */
+export const useContainerSelector = <Container extends StateContainer<any, any>, Result>(
+  container: Container,
+  selector: (state: UnboxState<Container>) => Result,
+  comparator: Comparator<Result> = defaultComparator
+): Result => {
+  const { state$, get } = container;
+  const lastValueRef = useRef<Result>(get());
+  const [value, setValue] = React.useState<Result>(() => {
+    const newValue = selector(get());
+    lastValueRef.current = newValue;
+    return newValue;
+  });
+  useLayoutEffect(() => {
+    const subscription = state$.subscribe((currentState: UnboxState<Container>) => {
+      const newValue = selector(currentState);
+      if (!comparator(lastValueRef.current, newValue)) {
+        lastValueRef.current = newValue;
+        setValue(newValue);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [state$, comparator]);
+  return value;
+};
+
 export const createStateContainerReactHelpers = <Container extends StateContainer<any, any>>() => {
   const context = React.createContext<Container>(null as any);
 
   const useContainer = (): Container => useContext(context);
 
   const useState = (): UnboxState<Container> => {
-    const { state$, get } = useContainer();
-    const value = useObservable(state$, get());
-    return value;
+    const container = useContainer();
+    return useContainerState(container);
   };
 
   const useTransitions: () => Container['transitions'] = () => useContainer().transitions;
@@ -41,27 +84,11 @@ export const createStateContainerReactHelpers = <Container extends StateContaine
     selector: (state: UnboxState<Container>) => Result,
     comparator: Comparator<Result> = defaultComparator
   ): Result => {
-    const { state$, get } = useContainer();
-    const lastValueRef = useRef<Result>(get());
-    const [value, setValue] = React.useState<Result>(() => {
-      const newValue = selector(get());
-      lastValueRef.current = newValue;
-      return newValue;
-    });
-    useLayoutEffect(() => {
-      const subscription = state$.subscribe((currentState: UnboxState<Container>) => {
-        const newValue = selector(currentState);
-        if (!comparator(lastValueRef.current, newValue)) {
-          lastValueRef.current = newValue;
-          setValue(newValue);
-        }
-      });
-      return () => subscription.unsubscribe();
-    }, [state$, comparator]);
-    return value;
+    const container = useContainer();
+    return useContainerSelector<Container, Result>(container, selector, comparator);
   };
 
-  const connect: Connect<UnboxState<Container>> = mapStateToProp => component => props =>
+  const connect: Connect<UnboxState<Container>> = (mapStateToProp) => (component) => (props) =>
     h(component, { ...useSelector(mapStateToProp), ...props } as any);
 
   return {

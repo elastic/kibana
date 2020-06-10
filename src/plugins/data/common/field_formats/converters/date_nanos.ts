@@ -88,7 +88,7 @@ export class DateNanosFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     // don't give away our ref to converter so
     // we can hot-swap when config changes
     const pattern = this.param('pattern');

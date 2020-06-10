@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const ace = require('brace');
+import ace from 'brace';
 import { addXJsonToRules } from '../../../../../../es_ui_shared/public';
 
 export function addEOL(tokens, reg, nextIfEOL, normalNext) {

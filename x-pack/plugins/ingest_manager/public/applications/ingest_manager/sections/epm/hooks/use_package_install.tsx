@@ -6,11 +6,12 @@
 
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
-import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
+import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 import { InstallStatus } from '../../../types';
 
 interface PackagesInstall {
@@ -19,31 +20,56 @@ interface PackagesInstall {
 
 interface PackageInstallItem {
   status: InstallStatus;
+  version: string | null;
 }
 
-type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'>;
+type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
+  fromUpdate?: boolean;
+};
+type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
+  const history = useHistory();
+  const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
+    ({ name, status, version }: SetPackageInstallStatusProps) => {
+      const packageProps: PackageInstallItem = {
+        status,
+        version,
+      };
       setPackage((prev: PackagesInstall) => ({
         ...prev,
-        [name]: { status },
+        [name]: packageProps,
       }));
     },
     []
   );
 
+  const getPackageInstallStatus = useCallback(
+    (pkg: string): PackageInstallItem => {
+      return packages[pkg];
+    },
+    [packages]
+  );
+
   const installPackage = useCallback(
-    async ({ name, version, title }: InstallPackageProps) => {
-      setPackageInstallStatus({ name, status: InstallStatus.installing });
+    async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
+      const currStatus = getPackageInstallStatus(name);
+      const newStatus = { ...currStatus, name, status: InstallStatus.installing };
+      setPackageInstallStatus(newStatus);
       const pkgkey = `${name}-${version}`;
 
       const res = await sendInstallPackage(pkgkey);
       if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
+        if (fromUpdate) {
+          // if there is an error during update, set it back to the previous version
+          // as handling of bad update is not implemented yet
+          setPackageInstallStatus({ ...currStatus, name });
+        } else {
+          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+        }
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
@@ -61,8 +87,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           iconType: 'alert',
         });
       } else {
-        setPackageInstallStatus({ name, status: InstallStatus.installed });
-
+        setPackageInstallStatus({ name, status: InstallStatus.installed, version });
+        if (fromUpdate) {
+          const settingsPath = getPath('integration_details', {
+            pkgkey: `${name}-${version}`,
+            panel: 'settings',
+          });
+          history.push(settingsPath);
+        }
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage
@@ -81,24 +113,17 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus]
-  );
-
-  const getPackageInstallStatus = useCallback(
-    (pkg: string): InstallStatus => {
-      return packages[pkg].status;
-    },
-    [packages]
+    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, getPath, history]
   );
 
   const uninstallPackage = useCallback(
     async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
-      setPackageInstallStatus({ name, status: InstallStatus.uninstalling });
+      setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
       const pkgkey = `${name}-${version}`;
 
       const res = await sendRemovePackage(pkgkey);
       if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.installed });
+        setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
@@ -116,7 +141,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           iconType: 'alert',
         });
       } else {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version: null });
 
         notifications.toasts.addSuccess({
           title: toMountPoint(
@@ -156,8 +181,8 @@ export const [
   useUninstallPackage,
 ] = createContainer(
   usePackageInstall,
-  value => value.installPackage,
-  value => value.setPackageInstallStatus,
-  value => value.getPackageInstallStatus,
-  value => value.uninstallPackage
+  (value) => value.installPackage,
+  (value) => value.setPackageInstallStatus,
+  (value) => value.getPackageInstallStatus,
+  (value) => value.uninstallPackage
 );

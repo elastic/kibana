@@ -29,14 +29,17 @@ export const UpdateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
 };
 
-export const DeleteAgentConfigsRequestSchema = {
+export const DeleteAgentConfigRequestSchema = {
   body: schema.object({
-    agentConfigIds: schema.arrayOf(schema.string()),
+    agentConfigId: schema.string(),
   }),
 };
 
 export const GetFullAgentConfigRequestSchema = {
   params: schema.object({
     agentConfigId: schema.string(),
+  }),
+  query: schema.object({
+    download: schema.maybe(schema.boolean()),
   }),
 };

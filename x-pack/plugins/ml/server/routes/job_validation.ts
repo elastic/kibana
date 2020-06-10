@@ -57,13 +57,16 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: estimateBucketSpanSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         let errorResp;
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
+          context.ml!.mlClient.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
@@ -106,6 +109,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: modelMemoryLimitSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -134,6 +140,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       path: '/api/ml/validate/cardinality',
       validate: {
         body: validateCardinalitySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -167,6 +176,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: validateJobSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -175,7 +187,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
           context.ml!.mlClient.callAsCurrentUser,
           request.body,
           version,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
+          context.ml!.mlClient.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         );
 

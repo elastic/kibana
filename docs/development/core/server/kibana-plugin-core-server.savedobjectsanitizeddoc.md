@@ -9,5 +9,5 @@ Describes Saved Object documents that have passed through the migration framewor
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+export declare type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
 ```

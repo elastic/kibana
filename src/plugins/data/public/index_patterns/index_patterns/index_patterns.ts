@@ -32,28 +32,60 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
+import {
+  getIndexPatternFieldListCreator,
+  CreateIndexPatternFieldList,
+  Field,
+  FieldSpec,
+} from '../fields';
+import { FieldFormatsStart } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
 
 type IndexPatternCachedFieldType = 'id' | 'title';
 
+export interface IndexPatternSavedObjectAttrs {
+  title: string;
+}
+
 export class IndexPatternsService {
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
-  private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
+  private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
+  createFieldList: CreateIndexPatternFieldList;
+  createField: (
+    indexPattern: IndexPattern,
+    spec: FieldSpec | Field,
+    shortDotsEnable: boolean
+  ) => Field;
 
-  constructor(core: CoreStart, savedObjectsClient: SavedObjectsClientContract, http: HttpStart) {
+  constructor(
+    core: CoreStart,
+    savedObjectsClient: SavedObjectsClientContract,
+    http: HttpStart,
+    fieldFormats: FieldFormatsStart
+  ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats,
+      toastNotifications: core.notifications.toasts,
+    });
+    this.createField = (indexPattern, spec, shortDotsEnable) => {
+      return new Field(indexPattern, spec, shortDotsEnable, {
+        fieldFormats,
+        toastNotifications: core.notifications.toasts,
+      });
+    };
   }
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (
-      await this.savedObjectsClient.find<Record<string, any>>({
+      await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
         type: 'index-pattern',
         fields: ['title'],
         perPage: 10000,
@@ -68,7 +100,7 @@ export class IndexPatternsService {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => obj?.id);
+    return this.savedObjectsCache.map((obj) => obj?.id);
   };
 
   getTitles = async (refresh: boolean = false): Promise<string[]> => {
@@ -78,7 +110,7 @@ export class IndexPatternsService {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => obj?.attributes?.title);
+    return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
   getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {

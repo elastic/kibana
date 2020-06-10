@@ -8,7 +8,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { EuiIcon, EuiOverlayMask, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
-import { LayerTocActions } from '../../../../../components/layer_toc_actions';
+import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
 
 function escapeLayerName(name) {
@@ -124,6 +124,7 @@ export class TOCEntry extends React.Component {
     return (
       <div className="mapTocEntry__layerIcons">
         <EuiButtonIcon
+          isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
           aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonAriaLabel', {
             defaultMessage: 'Edit layer',
@@ -191,17 +192,7 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLayerHeader() {
-    const {
-      removeLayer,
-      cloneLayer,
-      isReadOnly,
-      layer,
-      zoom,
-      toggleVisible,
-      fitToBounds,
-      isUsingSearch,
-    } = this.props;
-
+    const { layer, zoom } = this.props;
     return (
       <div
         className={
@@ -210,26 +201,12 @@ export class TOCEntry extends React.Component {
             : 'mapTocEntry-notVisible'
         }
       >
-        <LayerTocActions
+        <TOCEntryActionsPopover
           layer={layer}
-          isUsingSearch={isUsingSearch}
-          fitToBounds={() => {
-            fitToBounds(layer.getId());
-          }}
-          zoom={zoom}
-          toggleVisible={() => {
-            toggleVisible(layer.getId());
-          }}
           displayName={this.state.displayName}
           escapedDisplayName={escapeLayerName(this.state.displayName)}
-          cloneLayer={() => {
-            cloneLayer(layer.getId());
-          }}
           editLayer={this._openLayerPanelWithCheck}
-          isReadOnly={isReadOnly}
-          removeLayer={() => {
-            removeLayer(layer.getId());
-          }}
+          isEditButtonDisabled={this.props.isEditButtonDisabled}
         />
 
         {this._renderLayerIcons()}
@@ -262,7 +239,8 @@ export class TOCEntry extends React.Component {
       'mapTocEntry-isDragging': this.props.isDragging,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
       'mapTocEntry-isSelected':
-        this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId(),
+        this.props.layer.isPreviewLayer() ||
+        (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
     });
 
     return (

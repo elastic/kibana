@@ -29,14 +29,14 @@ export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onCha
   return (
     <Fragment>
       {listKeys.map((aggName: AggName, i) => {
-        const otherAggNames = listKeys.filter(k => k !== aggName);
+        const otherAggNames = listKeys.filter((k) => k !== aggName);
         return (
           <Fragment key={aggName}>
-            <EuiPanel paddingSize="s" data-test-subj={`transformAggregationEntry ${i}`}>
+            <EuiPanel paddingSize="s" data-test-subj={`transformAggregationEntry_${i}`}>
               <AggLabelForm
                 deleteHandler={deleteHandler}
                 item={list[aggName]}
-                onChange={item => onChange(aggName, item)}
+                onChange={(item) => onChange(aggName, item)}
                 otherAggNames={otherAggNames}
                 options={options}
               />

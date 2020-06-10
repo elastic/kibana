@@ -77,6 +77,12 @@ export const analysisConfigSchema = schema.object({
   detectors: schema.arrayOf(detectorSchema),
   influencers: schema.arrayOf(schema.maybe(schema.string())),
   categorization_field_name: schema.maybe(schema.string()),
+  per_partition_categorization: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      stop_on_warn: schema.maybe(schema.boolean()),
+    })
+  ),
 });
 
 export const anomalyDetectionJobSchema = {
@@ -112,6 +118,7 @@ export const anomalyDetectionJobSchema = {
   model_snapshot_id: schema.maybe(schema.string()),
   model_snapshot_min_version: schema.maybe(schema.string()),
   model_snapshot_retention_days: schema.maybe(schema.number()),
+  daily_model_snapshot_retention_after_days: schema.maybe(schema.number()),
   renormalization_window_days: schema.maybe(schema.number()),
   results_index_name: schema.maybe(schema.string()),
   results_retention_days: schema.maybe(schema.number()),

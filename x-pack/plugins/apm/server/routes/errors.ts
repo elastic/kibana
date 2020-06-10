@@ -12,20 +12,20 @@ import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
-export const errorsRoute = createRoute(core => ({
+export const errorsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/errors',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.partial({
         sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')])
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -37,9 +37,9 @@ export const errorsRoute = createRoute(core => ({
       serviceName,
       sortField,
       sortDirection,
-      setup
+      setup,
     });
-  }
+  },
 }));
 
 export const errorGroupsRoute = createRoute(() => ({
@@ -47,30 +47,30 @@ export const errorGroupsRoute = createRoute(() => ({
   params: {
     path: t.type({
       serviceName: t.string,
-      groupId: t.string
+      groupId: t.string,
     }),
-    query: t.intersection([uiFiltersRt, rangeRt])
+    query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, groupId } = context.params.path;
     return getErrorGroup({ serviceName, groupId, setup });
-  }
+  },
 }));
 
 export const errorDistributionRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/errors/distribution',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.partial({
-        groupId: t.string
+        groupId: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -78,5 +78,5 @@ export const errorDistributionRoute = createRoute(() => ({
     const { serviceName } = params.path;
     const { groupId } = params.query;
     return getErrorDistribution({ serviceName, groupId, setup });
-  }
+  },
 }));

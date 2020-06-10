@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -31,7 +31,7 @@ export default function({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', function() {
+  describe('Dashboard View Mode', function () {
     this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {
@@ -115,7 +115,11 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('shows only the dashboard app link', async () => {
-        await security.testUser.setRoles(['test_logstash_reader', 'kibana_dashboard_only_user']);
+        await security.testUser.setRoles(
+          ['test_logstash_reader', 'kibana_dashboard_only_user'],
+          false
+        );
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('test_user', 'changeme');
@@ -204,7 +208,7 @@ export default function({ getService, getPageObjects }) {
         ]);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await appsMenu.linkExists('Management')) {
+        if (await appsMenu.linkExists('Stack Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
@@ -213,7 +217,7 @@ export default function({ getService, getPageObjects }) {
         await security.testUser.setRoles(['kibana_dashboard_only_user', 'superuser']);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (!(await appsMenu.linkExists('Management'))) {
+        if (!(await appsMenu.linkExists('Stack Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });

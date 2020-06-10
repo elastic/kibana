@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
   const a11y = getService('a11y');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -31,7 +31,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.home.addSampleDataSet('flights');
     });
 
@@ -161,12 +163,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
       await PageObjects.common.clickConfirmOnModal();
       await listingTable.searchForItemWithName('');
-    });
-
-    // Blocked by https://github.com/elastic/kibana/issues/38980
-    it.skip('Open flight dashboard', async () => {
-      await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
-      await a11y.testAppSnapshot();
     });
   });
 }

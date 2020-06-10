@@ -150,6 +150,35 @@ describe('EventLogger', () => {
     message = await waitForLogMessage(systemLogger);
     expect(message).toMatch(/invalid event logged.*action.*undefined.*/);
   });
+
+  test('logs warnings when writing invalid events', async () => {
+    service.registerProviderActions('provider', ['action-a']);
+    eventLogger = service.getLogger({});
+
+    eventLogger.logEvent(({ event: { PROVIDER: 'provider' } } as unknown) as IEvent);
+    let message = await waitForLogMessage(systemLogger);
+    expect(message).toMatch(/invalid event logged.*provider.*undefined.*/);
+
+    const event: IEvent = {
+      event: {
+        provider: 'provider',
+        action: 'action-a',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            rel: 'ZZZ-primary',
+            namespace: 'default',
+            type: 'event_log_test',
+            id: '123',
+          },
+        ],
+      },
+    };
+    eventLogger.logEvent(event);
+    message = await waitForLogMessage(systemLogger);
+    expect(message).toMatch(/invalid rel property.*ZZZ-primary.*/);
+  });
 });
 
 // return the next logged event; throw if not an event

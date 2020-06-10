@@ -6,17 +6,14 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import {
-  ActionsConnectorsContextProvider,
-  ActionsConnectorsContextValue,
-} from '../../context/actions_connectors_context';
+import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import { ValidationResult } from '../../../types';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let deps: ActionsConnectorsContextValue;
+  let deps: any;
 
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
@@ -37,6 +34,7 @@ describe('connector_add_flyout', () => {
         },
       },
       actionTypeRegistry: actionTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -68,6 +66,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ActionTypeMenu
@@ -117,6 +116,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ActionTypeMenu
@@ -166,6 +166,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ActionTypeMenu

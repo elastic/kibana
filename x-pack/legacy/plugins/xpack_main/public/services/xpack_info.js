@@ -23,7 +23,7 @@ export class XPackInfo {
     return get(xpackInfoValues, path, defaultValue);
   };
 
-  setAll = updatedXPackInfo => {
+  setAll = (updatedXPackInfo) => {
     // The decision to convert kebab-case/snake-case keys to camel-case keys stemmed from an old
     // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
     // objects. See pull #29304 for more info.
@@ -37,7 +37,7 @@ export class XPackInfo {
     sessionStorage.removeItem(XPACK_INFO_KEY);
   };
 
-  refresh = $injector => {
+  refresh = ($injector) => {
     if (this.inProgressRefreshPromise) {
       return this.inProgressRefreshPromise;
     }
@@ -47,14 +47,14 @@ export class XPackInfo {
     const $http = $injector.get('$http');
     this.inProgressRefreshPromise = $http
       .get(chrome.addBasePath('/api/xpack/v1/info'))
-      .catch(err => {
+      .catch((err) => {
         // if we are unable to fetch the updated info, we should
         // prevent reusing stale info
         this.clear();
         xpackInfoSignature.clear();
         throw err;
       })
-      .then(xpackInfoResponse => {
+      .then((xpackInfoResponse) => {
         this.setAll(xpackInfoResponse.data);
         xpackInfoSignature.set(xpackInfoResponse.headers('kbn-xpack-sig'));
       })

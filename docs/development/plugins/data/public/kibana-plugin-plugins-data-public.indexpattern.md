@@ -21,14 +21,13 @@ export declare class IndexPattern implements IIndexPattern
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>any</code> |  |
-|  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IFieldList</code> |  |
+|  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IIndexPatternFieldList</code> |  |
 |  [fieldsFetcher](./kibana-plugin-plugins-data-public.indexpattern.fieldsfetcher.md) |  | <code>any</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>any</code> |  |
 |  [formatField](./kibana-plugin-plugins-data-public.indexpattern.formatfield.md) |  | <code>any</code> |  |
 |  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>any</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
-|  [routes](./kibana-plugin-plugins-data-public.indexpattern.routes.md) |  | <code>{</code><br/><code>        edit: string;</code><br/><code>        addField: string;</code><br/><code>        indexedFields: string;</code><br/><code>        scriptedFields: string;</code><br/><code>        sourceFilters: string;</code><br/><code>    }</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string</code> |  |

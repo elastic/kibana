@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+
 import {
-  LIST_ID,
-  LIST_ITEM_INDEX,
-  getDataClientMock,
   getExportListItemsToStreamOptionsMock,
   getResponseOptionsMock,
   getWriteNextResponseOptions,
   getWriteResponseHitsToStreamOptionsMock,
-} from '../mocks';
-import { getSearchListItemMock } from '../mocks/get_search_list_item_mock';
+} from './write_list_items_to_streams.mock';
 
 import {
   exportListItemsToStream,
@@ -33,11 +33,11 @@ describe('write_list_items_to_stream', () => {
   });
 
   describe('exportListItemsToStream', () => {
-    test('It exports empty list items to the stream as an empty array', done => {
+    test('It exports empty list items to the stream as an empty array', (done) => {
       const options = getExportListItemsToStreamOptionsMock();
       const firstResponse = getSearchListItemMock();
       firstResponse.hits.hits = [];
-      options.dataClient = getDataClientMock(firstResponse);
+      options.callCluster = getCallClusterMock(firstResponse);
       exportListItemsToStream(options);
 
       let chunks: string[] = [];
@@ -51,7 +51,7 @@ describe('write_list_items_to_stream', () => {
       });
     });
 
-    test('It exports single list item to the stream', done => {
+    test('It exports single list item to the stream', (done) => {
       const options = getExportListItemsToStreamOptionsMock();
       exportListItemsToStream(options);
 
@@ -66,12 +66,12 @@ describe('write_list_items_to_stream', () => {
       });
     });
 
-    test('It exports two list items to the stream', done => {
+    test('It exports two list items to the stream', (done) => {
       const options = getExportListItemsToStreamOptionsMock();
       const firstResponse = getSearchListItemMock();
       const secondResponse = getSearchListItemMock();
       firstResponse.hits.hits = [...firstResponse.hits.hits, ...secondResponse.hits.hits];
-      options.dataClient = getDataClientMock(firstResponse);
+      options.callCluster = getCallClusterMock(firstResponse);
       exportListItemsToStream(options);
 
       let chunks: string[] = [];
@@ -85,20 +85,19 @@ describe('write_list_items_to_stream', () => {
       });
     });
 
-    test('It exports two list items to the stream with two separate calls', done => {
+    test('It exports two list items to the stream with two separate calls', (done) => {
       const options = getExportListItemsToStreamOptionsMock();
 
       const firstResponse = getSearchListItemMock();
       firstResponse.hits.hits[0].sort = ['some-sort-value'];
+
       const secondResponse = getSearchListItemMock();
       secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
 
-      const jestCalls = jest.fn().mockResolvedValueOnce(firstResponse);
-      jestCalls.mockResolvedValueOnce(secondResponse);
-
-      const dataClient = getDataClientMock(firstResponse);
-      dataClient.callAsCurrentUser = jestCalls;
-      options.dataClient = dataClient;
+      options.callCluster = jest
+        .fn()
+        .mockResolvedValueOnce(firstResponse)
+        .mockResolvedValueOnce(secondResponse);
 
       exportListItemsToStream(options);
 
@@ -125,7 +124,7 @@ describe('write_list_items_to_stream', () => {
       const listItem = getSearchListItemMock();
       listItem.hits.hits[0].sort = ['sort-value-1'];
       const options = getWriteNextResponseOptions();
-      options.dataClient = getDataClientMock(listItem);
+      options.callCluster = getCallClusterMock(listItem);
       const searchAfter = await writeNextResponse(options);
       expect(searchAfter).toEqual(['sort-value-1']);
     });
@@ -134,7 +133,7 @@ describe('write_list_items_to_stream', () => {
       const listItem = getSearchListItemMock();
       listItem.hits.hits = [];
       const options = getWriteNextResponseOptions();
-      options.dataClient = getDataClientMock(listItem);
+      options.callCluster = getCallClusterMock(listItem);
       const searchAfter = await writeNextResponse(options);
       expect(searchAfter).toEqual(undefined);
     });
@@ -187,7 +186,7 @@ describe('write_list_items_to_stream', () => {
         index: LIST_ITEM_INDEX,
         size: 100,
       };
-      expect(options.dataClient.callAsCurrentUser).toBeCalledWith('search', expected);
+      expect(options.callCluster).toBeCalledWith('search', expected);
     });
 
     test('It returns a simple response with expected values and size changed', async () => {
@@ -205,12 +204,12 @@ describe('write_list_items_to_stream', () => {
         index: LIST_ITEM_INDEX,
         size: 33,
       };
-      expect(options.dataClient.callAsCurrentUser).toBeCalledWith('search', expected);
+      expect(options.callCluster).toBeCalledWith('search', expected);
     });
   });
 
   describe('writeResponseHitsToStream', () => {
-    test('it will push into the stream the mock response', done => {
+    test('it will push into the stream the mock response', (done) => {
       const options = getWriteResponseHitsToStreamOptionsMock();
       writeResponseHitsToStream(options);
 
@@ -225,7 +224,7 @@ describe('write_list_items_to_stream', () => {
       });
     });
 
-    test('it will push into the stream an empty mock response', done => {
+    test('it will push into the stream an empty mock response', (done) => {
       const options = getWriteResponseHitsToStreamOptionsMock();
       options.response.hits.hits = [];
       writeResponseHitsToStream(options);
@@ -242,7 +241,7 @@ describe('write_list_items_to_stream', () => {
       options.stream.end();
     });
 
-    test('it will push into the stream 2 mock responses', done => {
+    test('it will push into the stream 2 mock responses', (done) => {
       const options = getWriteResponseHitsToStreamOptionsMock();
       const secondResponse = getSearchListItemMock();
       options.response.hits.hits = [...options.response.hits.hits, ...secondResponse.hits.hits];
@@ -259,7 +258,7 @@ describe('write_list_items_to_stream', () => {
       });
     });
 
-    test('it will push an additional string given to it such as a new line character', done => {
+    test('it will push an additional string given to it such as a new line character', (done) => {
       const options = getWriteResponseHitsToStreamOptionsMock();
       const secondResponse = getSearchListItemMock();
       options.response.hits.hits = [...options.response.hits.hits, ...secondResponse.hits.hits];

@@ -6,8 +6,10 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
+import { render as renderTestingLibrary, fireEvent, cleanup } from '@testing-library/react/pure';
 import { FlyoutFrame } from '.';
+
+afterEach(cleanup);
 
 describe('<FlyoutFrame>', () => {
   test('renders without crashing', () => {

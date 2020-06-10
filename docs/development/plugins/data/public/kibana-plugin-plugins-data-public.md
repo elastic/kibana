@@ -9,13 +9,10 @@
 |  Class | Description |
 |  --- | --- |
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
-|  [AggTypeFieldFilters](./kibana-plugin-plugins-data-public.aggtypefieldfilters.md) | A registry to store  which are used to filter down available fields for a specific visualization and . |
-|  [AggTypeFilters](./kibana-plugin-plugins-data-public.aggtypefilters.md) | A registry to store  which are used to filter down available aggregations for a specific visualization and . |
-|  [Field](./kibana-plugin-plugins-data-public.field.md) |  |
 |  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
-|  [IndexPatternFieldList](./kibana-plugin-plugins-data-public.indexpatternfieldlist.md) |  |
+|  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
 |  [IndexPatternSelect](./kibana-plugin-plugins-data-public.indexpatternselect.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
@@ -43,7 +40,8 @@
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getQueryLog(uiSettings, storage, appName, language)](./kibana-plugin-plugins-data-public.getquerylog.md) |  |
 |  [getSearchErrorType({ message })](./kibana-plugin-plugins-data-public.getsearcherrortype.md) |  |
-|  [getTime(indexPattern, timeRange, forceNow)](./kibana-plugin-plugins-data-public.gettime.md) |  |
+|  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
+|  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-public.plugin.md) |  |
 
 ## Interfaces
@@ -53,7 +51,6 @@
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) |  |
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) |  |
-|  [DateRangeKey](./kibana-plugin-plugins-data-public.daterangekey.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [FetchOptions](./kibana-plugin-plugins-data-public.fetchoptions.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
@@ -64,18 +61,17 @@
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
 |  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
+|  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Use data plugin interface instead |
 |  [IndexPatternTypeMeta](./kibana-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
 |  [IRequestTypesMap](./kibana-plugin-plugins-data-public.irequesttypesmap.md) |  |
 |  [IResponseTypesMap](./kibana-plugin-plugins-data-public.iresponsetypesmap.md) |  |
-|  [ISearchContext](./kibana-plugin-plugins-data-public.isearchcontext.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-public.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
 |  [ISyncSearchRequest](./kibana-plugin-plugins-data-public.isyncsearchrequest.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
-|  [OptionedParamEditorProps](./kibana-plugin-plugins-data-public.optionedparameditorprops.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
@@ -95,6 +91,7 @@
 
 |  Variable | Description |
 |  --- | --- |
+|  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
@@ -104,21 +101,27 @@
 |  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
+|  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [FilterBar](./kibana-plugin-plugins-data-public.filterbar.md) |  |
+|  [getIndexPatternFieldListCreator](./kibana-plugin-plugins-data-public.getindexpatternfieldlistcreator.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
+|  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
+|  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |
 |  [SYNC\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.sync_search_strategy.md) |  |
 |  [syncQueryStateWithUrl](./kibana-plugin-plugins-data-public.syncquerystatewithurl.md) | Helper to setup syncing of global data with the URL |
+|  [UI\_SETTINGS](./kibana-plugin-plugins-data-public.ui_settings.md) |  |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
 |  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
+|  [AggGroupName](./kibana-plugin-plugins-data-public.agggroupname.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
@@ -127,7 +130,6 @@
 |  [FieldFormatsContentType](./kibana-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-public.fieldformatsgetconfigfn.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
-|  [IAggGroupNames](./kibana-plugin-plugins-data-public.iagggroupnames.md) |  |
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
@@ -136,7 +138,6 @@
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |
-|  [IpRangeKey](./kibana-plugin-plugins-data-public.iprangekey.md) |  |
 |  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
 |  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | \* |
@@ -156,5 +157,4 @@
 |  [TabbedAggRow](./kibana-plugin-plugins-data-public.tabbedaggrow.md) | \* |
 |  [TimefilterContract](./kibana-plugin-plugins-data-public.timefiltercontract.md) |  |
 |  [TimeHistoryContract](./kibana-plugin-plugins-data-public.timehistorycontract.md) |  |
-|  [TSearchStrategyProvider](./kibana-plugin-plugins-data-public.tsearchstrategyprovider.md) | Search strategy provider creates an instance of a search strategy with the request handler context bound to it. This way every search strategy can use whatever information they require from the request context. |
 

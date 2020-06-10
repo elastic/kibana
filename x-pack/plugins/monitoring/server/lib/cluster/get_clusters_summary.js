@@ -10,7 +10,7 @@ import { LOGGING_TAG } from '../../../common/constants';
 import { MonitoringLicenseError } from '../errors/custom_errors';
 
 export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
-  return clusters.map(cluster => {
+  return clusters.map((cluster) => {
     const {
       isSupported,
       cluster_uuid: clusterUuid,

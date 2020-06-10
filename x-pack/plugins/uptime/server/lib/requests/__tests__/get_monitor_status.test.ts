@@ -6,8 +6,8 @@
 
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { ScopedClusterClient } from 'src/core/server';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 interface BucketItemCriteria {
   monitor_id: string;
@@ -58,7 +58,7 @@ const setupMock = (
       aggregations: {
         monitors: {
           after_key,
-          buckets: bucketCriteria.map(item => genBucketItem(item)),
+          buckets: bucketCriteria.map((item) => genBucketItem(item)),
         },
       },
     };

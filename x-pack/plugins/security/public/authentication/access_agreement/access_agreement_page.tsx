@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_index.scss';
+import './access_agreement_page.scss';
 
 import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -38,8 +38,8 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
   useEffect(() => {
     http
       .get<{ accessAgreement: string }>('/internal/security/access_agreement/state')
-      .then(response => setAccessAgreement(response.accessAgreement))
-      .catch(err => fatalErrors.add(err));
+      .then((response) => setAccessAgreement(response.accessAgreement))
+      .catch((err) => fatalErrors.add(err));
   }, [http, fatalErrors]);
 
   const onAcknowledge = useCallback(

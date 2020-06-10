@@ -13,3 +13,4 @@ export { registerRoutes as registerEnrollmentApiKeyRoutes } from './enrollment_a
 export { registerRoutes as registerInstallScriptRoutes } from './install_script';
 export { registerRoutes as registerOutputRoutes } from './output';
 export { registerRoutes as registerSettingsRoutes } from './settings';
+export { registerRoutes as registerAppRoutes } from './app';

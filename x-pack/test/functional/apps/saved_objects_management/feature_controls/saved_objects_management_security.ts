@@ -6,11 +6,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'header']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -52,10 +52,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -111,11 +111,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
         });
@@ -170,10 +171,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_som_read_role'),
           security.user.delete('global_som_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -229,11 +230,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
           await testSubjects.existOrFail('savedObjectsEdit');
@@ -293,33 +295,37 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_visualize_all_role'),
           security.user.delete('global_visualize_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       describe('listing', () => {
         it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/objects', {
+          await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
           });
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
         });
       });
 
       describe('edit visualization', () => {
         it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
+              shouldUseHashForSubUrl: false,
             }
           );
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
         });
       });

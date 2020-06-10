@@ -1,0 +1,20 @@
+{
+  "description": "Elastic Endpoint prevented Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.",
+  "from": "now-15m",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "name": "Credential Dumping - Prevented - Elastic Endpoint",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:prevention and (event.action:cred_theft_event or endgame.event_subtype_full:cred_theft_event)",
+  "risk_score": 47,
+  "rule_id": "db8c33a8-03cd-4988-9e2c-d0a4863adb13",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Endpoint"
+  ],
+  "type": "query",
+  "version": 2
+}

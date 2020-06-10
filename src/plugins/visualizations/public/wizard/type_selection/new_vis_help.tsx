@@ -37,7 +37,7 @@ export function NewVisHelp(props: Props) {
           defaultMessage="Start creating your visualization by selecting a type for that visualization."
         />
       </p>
-      {props.promotedTypes.map(t => (
+      {props.promotedTypes.map((t) => (
         <Fragment key={t.name}>
           <p>
             <strong>{t.promotion!.description}</strong>

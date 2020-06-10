@@ -12,6 +12,7 @@
   // sass-lint:disable-block no-important
   background-color: $euiColorEmptyShade !important;
   pointer-events: all;
+  position: relative;
 
   &:enabled,
   &:enabled:hover,

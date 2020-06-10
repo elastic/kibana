@@ -30,7 +30,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       size: 10000,
       index: INDEX_NAMES.BEATS,
       body: {
-        ids: ids.map(id => `configuration_block:${id}`),
+        ids: ids.map((id) => `configuration_block:${id}`),
       },
     };
 
@@ -88,7 +88,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     ids: string[]
   ): Promise<Array<{ id: string; success: boolean; reason?: string }>> {
     const result = await this.database.bulk(user, {
-      body: ids.map(id => ({ delete: { _id: `configuration_block:${id}` } })),
+      body: ids.map((id) => ({ delete: { _id: `configuration_block:${id}` } })),
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
     });
@@ -136,7 +136,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
 
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
-      configs.map(config => {
+      configs.map((config) => {
         const id = config.id || uuidv4();
         return [
           { index: { _id: `configuration_block:${id}` } },

@@ -46,6 +46,7 @@ export const AGENT_CONFIG_API_ROUTES = {
   UPDATE_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}`,
   DELETE_PATTERN: `${AGENT_CONFIG_API_ROOT}/delete`,
   FULL_INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/full`,
+  FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/download`,
 };
 
 // Output API routes
@@ -59,6 +60,11 @@ export const OUTPUT_API_ROUTES = {
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
   UPDATE_PATTERN: `${API_ROOT}/settings`,
+};
+
+// App API routes
+export const APP_API_ROUTES = {
+  CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
 };
 
 // Agent API routes

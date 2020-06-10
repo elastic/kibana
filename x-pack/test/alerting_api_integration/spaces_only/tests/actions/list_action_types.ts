@@ -15,7 +15,9 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
 
   describe('list_action_types', () => {
     it('should return 200 with list of action types containing defaults', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/actions/list_action_types`
+      );
 
       function createActionTypeMatcher(id: string, name: string) {
         return (actionType: { id: string; name: string }) => {

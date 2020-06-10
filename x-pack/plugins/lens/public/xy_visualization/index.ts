@@ -5,24 +5,19 @@
  */
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { CoreSetup, IUiSettingsClient, CoreStart } from 'kibana/public';
+import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { setExecuteTriggerActions } from './services';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
-}
-
-interface XyVisualizationPluginStartPlugins {
-  uiActions: UiActionsStart;
 }
 
 function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -53,12 +48,10 @@ export class XyVisualization {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
+        histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       })
     );
 
     editorFrame.registerVisualization(xyVisualization);
-  }
-  start(core: CoreStart, { uiActions }: XyVisualizationPluginStartPlugins) {
-    setExecuteTriggerActions(uiActions.executeTriggerActions);
   }
 }

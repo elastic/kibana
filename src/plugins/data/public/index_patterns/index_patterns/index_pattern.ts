@@ -28,17 +28,23 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-
-import { findByTitle, getRoutes } from '../utils';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  IFieldType,
+  UI_SETTINGS,
+} from '../../../common';
+import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { Field, FieldList, IFieldList } from '../fields';
+import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { getNotifications, getFieldFormats } from '../../services';
 import { TypeMeta } from './types';
+import { PatternCache } from './_pattern_cache';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -51,7 +57,7 @@ export class IndexPattern implements IIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IFieldList;
+  public fields: IIndexPatternFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -60,12 +66,13 @@ export class IndexPattern implements IIndexPattern {
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
-  private patternCache: any;
+  private patternCache: PatternCache;
   private getConfig: any;
   private sourceFilters?: [];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
+  private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -80,7 +87,7 @@ export class IndexPattern implements IIndexPattern {
         return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
       },
       _deserialize: (map = '{}') => {
-        return _.mapValues(JSON.parse(map), mapping => {
+        return _.mapValues(JSON.parse(map), (mapping) => {
           return this.deserializeFieldFormatMap(mapping);
         });
       },
@@ -94,7 +101,7 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: PatternCache
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -103,12 +110,22 @@ export class IndexPattern implements IIndexPattern {
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
 
-    this.shortDotsEnable = this.getConfig('shortDots:enable');
-    this.metaFields = this.getConfig('metaFields');
+    this.shortDotsEnable = this.getConfig(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    this.metaFields = this.getConfig(UI_SETTINGS.META_FIELDS);
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
-    this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats: getFieldFormats(),
+      toastNotifications: getNotifications().toasts,
+    });
+
+    this.fields = this.createFieldList(this, [], this.shortDotsEnable);
+    this.apiClient = apiClient;
+    this.fieldsFetcher = createFieldsFetcher(
+      this,
+      apiClient,
+      this.getConfig(UI_SETTINGS.META_FIELDS)
+    );
+    this.flattenHit = flattenHitWrapper(this, this.getConfig(UI_SETTINGS.META_FIELDS));
     this.formatHit = formatHitProvider(
       this,
       getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -131,7 +148,7 @@ export class IndexPattern implements IIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
 
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -139,7 +156,7 @@ export class IndexPattern implements IIndexPattern {
       return true;
     }
 
-    return this.fields.every(field => {
+    return this.fields.every((field) => {
       // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = 'aggregatable' in field && 'searchable' in field;
 
@@ -164,7 +181,7 @@ export class IndexPattern implements IIndexPattern {
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, '#/management/kibana/index_pattern');
+      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
@@ -183,10 +200,6 @@ export class IndexPattern implements IIndexPattern {
     }
 
     return this.indexFields(forceFieldRefresh);
-  }
-
-  public get routes() {
-    return getRoutes();
   }
 
   getComputedFields() {
@@ -214,7 +227,7 @@ export class IndexPattern implements IIndexPattern {
       }
     );
 
-    each(this.getScriptedFields(), function(field) {
+    each(this.getScriptedFields(), function (field) {
       scriptFields[field.name] = {
         script: {
           source: field.script,
@@ -281,7 +294,11 @@ export class IndexPattern implements IIndexPattern {
           filterable: true,
           searchable: true,
         },
-        false
+        false,
+        {
+          fieldFormats: getFieldFormats(),
+          toastNotifications: getNotifications().toasts,
+        }
       )
     );
 
@@ -294,6 +311,13 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async popularizeField(fieldName: string, unit = 1) {
+    /**
+     * This function is just used by Discover and it's high likely to be removed in the near future
+     * It doesn't use the save function to skip the error message that's displayed when
+     * a user adds several columns in a higher frequency that the changes can be persisted to ES
+     * resulting in 409 errors
+     */
+    if (!this.id) return;
     const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
@@ -303,7 +327,15 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-    await this.save();
+
+    try {
+      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
+        version: this.version,
+      });
+      this.version = res._version;
+    } catch (e) {
+      // no need for an error message here
+    }
   }
 
   getNonScriptedFields() {
@@ -367,8 +399,8 @@ export class IndexPattern implements IIndexPattern {
           duplicateId,
           this.getConfig,
           this.savedObjectsClient,
-          this.patternCache,
-          this.fieldsFetcher
+          this.apiClient,
+          this.patternCache
         );
         await duplicatePattern.destroy();
       }
@@ -399,7 +431,7 @@ export class IndexPattern implements IIndexPattern {
     const body = this.prepBody();
     // What keys changed since they last pulled the index pattern
     const originalChangedKeys = Object.keys(body).filter(
-      key => body[key] !== this.originalBody[key]
+      (key) => body[key] !== this.originalBody[key]
     );
     return this.savedObjectsClient
       .update(type, this.id, body, { version: this.version })
@@ -407,7 +439,7 @@ export class IndexPattern implements IIndexPattern {
         this.id = resp.id;
         this.version = resp._version;
       })
-      .catch(err => {
+      .catch((err) => {
         if (
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
@@ -416,8 +448,8 @@ export class IndexPattern implements IIndexPattern {
             this.id,
             this.getConfig,
             this.savedObjectsClient,
-            this.patternCache,
-            this.fieldsFetcher
+            this.apiClient,
+            this.patternCache
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -427,7 +459,7 @@ export class IndexPattern implements IIndexPattern {
             // and ensure we ignore the key if the server response
             // is the same as the original response (since that is expected
             // if we made a change in that key)
-            const serverChangedKeys = Object.keys(updatedBody).filter(key => {
+            const serverChangedKeys = Object.keys(updatedBody).filter((key) => {
               return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
             });
 
@@ -454,13 +486,13 @@ export class IndexPattern implements IIndexPattern {
             }
 
             // Set the updated response on this object
-            serverChangedKeys.forEach(key => {
+            serverChangedKeys.forEach((key) => {
               this[key] = samePattern[key];
             });
             this.version = samePattern.version;
 
             // Clear cache
-            this.patternCache.clear(this.id);
+            this.patternCache.clear(this.id!);
 
             // Try the save again
             return this.save(saveAttempts);
@@ -480,7 +512,7 @@ export class IndexPattern implements IIndexPattern {
   refreshFields() {
     return this._fetchFields()
       .then(() => this.save())
-      .catch(err => {
+      .catch((err) => {
         // https://github.com/elastic/kibana/issues/9224
         // This call will attempt to remap fields from the matching
         // ES index which may not actually exist. In that scenario,
@@ -516,8 +548,8 @@ export class IndexPattern implements IIndexPattern {
   }
 
   destroy() {
-    this.patternCache.clear(this.id);
     if (this.id) {
+      this.patternCache.clear(this.id);
       return this.savedObjectsClient.delete(type, this.id);
     }
   }

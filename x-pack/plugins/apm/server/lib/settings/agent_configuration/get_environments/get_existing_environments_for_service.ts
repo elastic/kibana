@@ -7,13 +7,13 @@
 import { Setup } from '../../../helpers/setup_request';
 import {
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
-  setup
+  setup,
 }: {
   serviceName: string | undefined;
   setup: Setup;
@@ -34,17 +34,17 @@ export async function getExistingEnvironmentsForService({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ALL_OPTION_VALUE,
-            size: 50
-          }
-        }
-      }
-    }
+            size: 50,
+          },
+        },
+      },
+    },
   };
 
   const resp = await internalClient.search(params);
   const existingEnvironments =
     resp.aggregations?.environments.buckets.map(
-      bucket => bucket.key as string
+      (bucket) => bucket.key as string
     ) || [];
   return existingEnvironments;
 }

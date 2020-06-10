@@ -105,7 +105,16 @@ export function ChartSwitch(props: Props) {
     const switchVisType =
       props.visualizationMap[visualizationId].switchVisualizationType ||
       ((_type: string, initialState: unknown) => initialState);
-    if (props.visualizationId === visualizationId) {
+    const layers = Object.entries(props.framePublicAPI.datasourceLayers);
+    const containsData = layers.some(
+      ([_layerId, datasource]) => datasource.getTableSpec().length > 0
+    );
+    // Always show the active visualization as a valid selection
+    if (
+      props.visualizationId === visualizationId &&
+      props.visualizationState &&
+      newVisualization.getVisualizationTypeId(props.visualizationState) === subVisualizationId
+    ) {
       return {
         visualizationId,
         subVisualizationId,
@@ -116,12 +125,12 @@ export function ChartSwitch(props: Props) {
       };
     }
 
-    const layers = Object.entries(props.framePublicAPI.datasourceLayers);
-    const containsData = layers.some(
-      ([_layerId, datasource]) => datasource.getTableSpec().length > 0
+    const topSuggestion = getTopSuggestion(
+      props,
+      visualizationId,
+      newVisualization,
+      subVisualizationId
     );
-
-    const topSuggestion = getTopSuggestion(props, visualizationId, newVisualization);
 
     let dataLoss: VisualizationSelection['dataLoss'];
 
@@ -163,14 +172,14 @@ export function ChartSwitch(props: Props) {
     () =>
       flyoutOpen &&
       flatten(
-        Object.values(props.visualizationMap).map(v =>
-          v.visualizationTypes.map(t => ({
+        Object.values(props.visualizationMap).map((v) =>
+          v.visualizationTypes.map((t) => ({
             visualizationId: v.id,
             ...t,
             icon: t.largeIcon || t.icon,
           }))
         )
-      ).map(visualizationType => ({
+      ).map((visualizationType) => ({
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
@@ -214,7 +223,7 @@ export function ChartSwitch(props: Props) {
         })}
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
-        {(visualizationTypes || []).map(v => (
+        {(visualizationTypes || []).map((v) => (
           <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
@@ -250,7 +259,8 @@ export function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  newVisualization: Visualization<unknown, unknown>
+  newVisualization: Visualization<unknown, unknown>,
+  subVisualizationId?: string
 ): Suggestion | undefined {
   const suggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
@@ -258,18 +268,22 @@ function getTopSuggestion(
     visualizationMap: { [visualizationId]: newVisualization },
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
-  }).filter(suggestion => {
+    subVisualizationId,
+  }).filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
-    return suggestion.changeType !== 'extended';
+    return (
+      suggestion.changeType !== 'extended' &&
+      newVisualization.getVisualizationTypeId(suggestion.visualizationState) === subVisualizationId
+    );
   });
 
   // We prefer unchanged or reduced suggestions when switching
   // charts since that allows you to switch from A to B and back
   // to A with the greatest chance of preserving your original state.
   return (
-    suggestions.find(s => s.changeType === 'unchanged') ||
-    suggestions.find(s => s.changeType === 'reduced') ||
+    suggestions.find((s) => s.changeType === 'unchanged') ||
+    suggestions.find((s) => s.changeType === 'reduced') ||
     suggestions[0]
   );
 }

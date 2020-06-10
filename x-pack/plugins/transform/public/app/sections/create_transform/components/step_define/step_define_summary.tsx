@@ -8,14 +8,7 @@ import React, { Fragment, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
@@ -35,7 +28,7 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import { StepDefineExposedState } from './step_define_form';
+import { StepDefineExposedState } from './common';
 
 interface Props {
   formState: StepDefineExposedState;
@@ -65,85 +58,80 @@ export const StepDefineSummary: FC<Props> = ({
     groupByList
   );
 
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
-        <div data-test-subj="transformStepDefineSummary">
-          <EuiForm>
-            {searchItems.savedSearch === undefined && (
-              <Fragment>
-                <EuiFormRow
-                  label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                    defaultMessage: 'Index pattern',
-                  })}
-                >
-                  <span>{searchItems.indexPattern.title}</span>
-                </EuiFormRow>
-                {typeof searchString === 'string' && (
-                  <EuiFormRow
-                    label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
-                      defaultMessage: 'Query',
-                    })}
-                  >
-                    <span>{searchString}</span>
-                  </EuiFormRow>
-                )}
-                {typeof searchString === 'undefined' &&
-                  !isDefaultQuery(pivotQuery) &&
-                  !isMatchAllQuery(pivotQuery) && (
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.transform.stepDefineSummary.queryCodeBlockLabel',
-                        {
-                          defaultMessage: 'Query',
-                        }
-                      )}
-                    >
-                      <EuiCodeBlock
-                        language="js"
-                        fontSize="s"
-                        paddingSize="s"
-                        color="light"
-                        overflowHeight={300}
-                        isCopyable
-                      >
-                        {JSON.stringify(pivotQuery, null, 2)}
-                      </EuiCodeBlock>
-                    </EuiFormRow>
-                  )}
-              </Fragment>
-            )}
+  const isModifiedQuery =
+    typeof searchString === 'undefined' &&
+    !isDefaultQuery(pivotQuery) &&
+    !isMatchAllQuery(pivotQuery);
 
-            {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
+  return (
+    <div data-test-subj="transformStepDefineSummary">
+      <EuiForm>
+        {searchItems.savedSearch === undefined && (
+          <Fragment>
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
+                defaultMessage: 'Index pattern',
+              })}
+            >
+              <span>{searchItems.indexPattern.title}</span>
+            </EuiFormRow>
+            {typeof searchString === 'string' && (
               <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
-                  defaultMessage: 'Saved search',
+                label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
+                  defaultMessage: 'Query',
                 })}
               >
-                <span>{searchItems.savedSearch.title}</span>
+                <span>{searchString}</span>
               </EuiFormRow>
             )}
+            {isModifiedQuery && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
+                  defaultMessage: 'Query',
+                })}
+              >
+                <EuiCodeBlock
+                  language="js"
+                  fontSize="s"
+                  paddingSize="s"
+                  color="light"
+                  overflowHeight={300}
+                  isCopyable
+                >
+                  {JSON.stringify(pivotQuery, null, 2)}
+                </EuiCodeBlock>
+              </EuiFormRow>
+            )}
+          </Fragment>
+        )}
 
-            <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
-                defaultMessage: 'Group by',
-              })}
-            >
-              <GroupByListSummary list={groupByList} />
-            </EuiFormRow>
+        {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
+              defaultMessage: 'Saved search',
+            })}
+          >
+            <span>{searchItems.savedSearch.title}</span>
+          </EuiFormRow>
+        )}
 
-            <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
-                defaultMessage: 'Aggregations',
-              })}
-            >
-              <AggListSummary list={aggList} />
-            </EuiFormRow>
-          </EuiForm>
-        </div>
-      </EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
+            defaultMessage: 'Group by',
+          })}
+        >
+          <GroupByListSummary list={groupByList} />
+        </EuiFormRow>
 
-      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
+            defaultMessage: 'Aggregations',
+          })}
+        >
+          <AggListSummary list={aggList} />
+        </EuiFormRow>
+
+        <EuiSpacer size="m" />
         <EuiText>
           <DataGrid
             {...pivotPreviewProps}
@@ -161,7 +149,7 @@ export const StepDefineSummary: FC<Props> = ({
             toastNotifications={toastNotifications}
           />
         </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiForm>
+    </div>
   );
 };

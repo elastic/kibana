@@ -14,11 +14,11 @@ export const initUptimeServer = (
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
 ) => {
-  restApiRoutes.forEach(route =>
+  restApiRoutes.forEach((route) =>
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
   );
 
-  uptimeAlertTypeFactories.forEach(alertTypeFactory =>
-    plugins.alerting.registerType(alertTypeFactory(server, libs))
+  uptimeAlertTypeFactories.forEach((alertTypeFactory) =>
+    plugins.alerts.registerType(alertTypeFactory(server, libs))
   );
 };

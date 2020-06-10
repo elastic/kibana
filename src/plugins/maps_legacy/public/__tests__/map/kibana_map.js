@@ -20,9 +20,8 @@
 import expect from '@kbn/expect';
 import { KibanaMap } from '../../map/kibana_map';
 import { KibanaMapLayer } from '../../map/kibana_map_layer';
-import L from 'leaflet';
 
-describe('kibana_map tests', function() {
+describe('kibana_map tests', function () {
   let domNode;
   let kibanaMap;
 
@@ -47,8 +46,8 @@ describe('kibana_map tests', function() {
     document.body.removeChild(domNode);
   }
 
-  describe('KibanaMap - basics', function() {
-    beforeEach(async function() {
+  describe('KibanaMap - basics', function () {
+    beforeEach(async function () {
       setupDOM('512px', '512px');
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
@@ -58,12 +57,12 @@ describe('kibana_map tests', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       kibanaMap.destroy();
       teardownDOM();
     });
 
-    it('should instantiate at zoom level 2', function() {
+    it('should instantiate at zoom level 2', function () {
       const bounds = kibanaMap.getBounds();
       expect(bounds.bottom_right.lon).to.equal(90);
       expect(bounds.top_left.lon).to.equal(-90);
@@ -72,7 +71,7 @@ describe('kibana_map tests', function() {
       expect(kibanaMap.getZoomLevel()).to.equal(2);
     });
 
-    it('should resize to fit container', function() {
+    it('should resize to fit container', function () {
       kibanaMap.setZoomLevel(2);
       expect(kibanaMap.getCenter().lon).to.equal(0);
       expect(kibanaMap.getCenter().lat).to.equal(0);
@@ -86,14 +85,14 @@ describe('kibana_map tests', function() {
     });
   });
 
-  describe('getBounds', function() {
-    afterEach(function() {
+  describe('getBounds', function () {
+    afterEach(function () {
       kibanaMap.destroy();
       teardownDOM();
     });
 
-    describe('extended bounds', function() {
-      beforeEach(async function() {
+    describe('extended bounds', function () {
+      beforeEach(async function () {
         setupDOM('1600px', '1024px');
         kibanaMap = new KibanaMap(domNode, {
           minZoom: 1,
@@ -103,15 +102,15 @@ describe('kibana_map tests', function() {
         });
       });
 
-      it('should get untrimmed map bounds', function() {
+      it('should get untrimmed map bounds', function () {
         const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('281.25');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-281.25');
       });
     });
 
-    describe('no map height (should default to size of 1px for height)', function() {
-      beforeEach(async function() {
+    describe('no map height (should default to size of 1px for height)', function () {
+      beforeEach(async function () {
         setupDOM('386px', '256px');
         const noHeightNode = createDiv('386px', '0px');
         domNode.appendChild(noHeightNode);
@@ -123,7 +122,7 @@ describe('kibana_map tests', function() {
         });
       });
 
-      it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function() {
+      it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
         const bounds = kibanaMap.getBounds();
         expect(bounds).to.have.property('bottom_right');
         expect(round(bounds.bottom_right.lon, 2)).to.equal(0.27);
@@ -138,8 +137,8 @@ describe('kibana_map tests', function() {
       }
     });
 
-    describe('no map width (should default to size of 1px for width)', function() {
-      beforeEach(async function() {
+    describe('no map width (should default to size of 1px for width)', function () {
+      beforeEach(async function () {
         setupDOM('386px', '256px');
         const noWidthNode = createDiv('0px', '256px');
         domNode.appendChild(noWidthNode);
@@ -151,7 +150,7 @@ describe('kibana_map tests', function() {
         });
       });
 
-      it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function() {
+      it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
         const bounds = kibanaMap.getBounds();
         expect(bounds).to.have.property('bottom_right');
         expect(Math.round(bounds.bottom_right.lon)).to.equal(0);
@@ -162,8 +161,8 @@ describe('kibana_map tests', function() {
       });
     });
 
-    describe('wrapping', function() {
-      beforeEach(async function() {
+    describe('wrapping', function () {
+      beforeEach(async function () {
         setupDOM('1600px', '1024px');
         kibanaMap = new KibanaMap(domNode, {
           minZoom: 1,
@@ -173,15 +172,15 @@ describe('kibana_map tests', function() {
         });
       });
 
-      it('coordinates should be corrected to  center the -180,180 range', function() {
+      it('coordinates should be corrected to  center the -180,180 range', function () {
         const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('201.09');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-361.41');
       });
     });
 
-    describe('wrapping - zoomed in', function() {
-      beforeEach(async function() {
+    describe('wrapping - zoomed in', function () {
+      beforeEach(async function () {
         setupDOM('1600px', '1024px');
         kibanaMap = new KibanaMap(domNode, {
           minZoom: 1,
@@ -191,7 +190,7 @@ describe('kibana_map tests', function() {
         });
       });
 
-      it('coordinates should be corrected to fall within the -180,180 range', function() {
+      it('coordinates should be corrected to fall within the -180,180 range', function () {
         const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('-75.61');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-84.40');
@@ -199,8 +198,8 @@ describe('kibana_map tests', function() {
     });
   });
 
-  describe('KibanaMap - attributions', function() {
-    beforeEach(async function() {
+  describe('KibanaMap - attributions', function () {
+    beforeEach(async function () {
       setupDOM('512px', '512px');
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
@@ -210,7 +209,7 @@ describe('kibana_map tests', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       kibanaMap.destroy();
       teardownDOM();
     });
@@ -218,11 +217,12 @@ describe('kibana_map tests', function() {
     function makeMockLayer(attribution) {
       const layer = new KibanaMapLayer();
       layer._attribution = attribution;
+      // eslint-disable-next-line no-undef
       layer._leafletLayer = L.geoJson(null);
       return layer;
     }
 
-    it('should update attributions correctly', function() {
+    it('should update attributions correctly', function () {
       kibanaMap.addLayer(makeMockLayer('foo|bar'));
       expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal(
         'foo, bar'
@@ -246,8 +246,8 @@ describe('kibana_map tests', function() {
     });
   });
 
-  describe('KibanaMap - baseLayer', function() {
-    beforeEach(async function() {
+  describe('KibanaMap - baseLayer', function () {
+    beforeEach(async function () {
       setupDOM('512px', '512px');
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
@@ -257,12 +257,12 @@ describe('kibana_map tests', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       kibanaMap.destroy();
       teardownDOM();
     });
 
-    it('TMS', async function() {
+    it('TMS', async function () {
       const options = {
         url:
           'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
@@ -271,7 +271,7 @@ describe('kibana_map tests', function() {
         attribution: '© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)',
       };
 
-      return new Promise(function(resolve) {
+      return new Promise(function (resolve) {
         kibanaMap.on('baseLayer:loaded', () => {
           resolve();
         });
@@ -282,7 +282,7 @@ describe('kibana_map tests', function() {
       });
     });
 
-    it('WMS - should handle empty settings', async function() {
+    it('WMS - should handle empty settings', async function () {
       const invalidOptions = {
         url: undefined,
         version: undefined,
@@ -303,7 +303,7 @@ describe('kibana_map tests', function() {
       expect(kibanaMap.getLeafletBaseLayer()).to.eql(null);
     });
 
-    it('WMS - should clean attribution', async function() {
+    it('WMS - should clean attribution', async function () {
       const options = {
         url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
         version: '1.1.0',

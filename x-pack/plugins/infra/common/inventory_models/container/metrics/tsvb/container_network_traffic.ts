@@ -20,37 +20,73 @@ export const containerNetworkTraffic: TSVBMetricModelCreator = (
   series: [
     {
       id: 'tx',
-      split_mode: 'everything',
       metrics: [
         {
-          field: 'docker.network.out.bytes',
-          id: 'avg-network-out',
-          type: 'avg',
+          field: 'docker.network.outbound.bytes',
+          id: 'max-net-out',
+          type: 'max',
+        },
+        {
+          field: 'max-net-out',
+          id: 'deriv-max-net-out',
+          type: 'derivative',
+          unit: '1s',
+        },
+        {
+          id: 'posonly-deriv-max-net-out',
+          type: 'calculation',
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-out' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
+        },
+        {
+          function: 'sum',
+          id: 'seriesagg-sum',
+          type: 'series_agg',
         },
       ],
+      split_mode: 'terms',
+      terms_field: 'docker.network.interface',
     },
     {
       id: 'rx',
-      split_mode: 'everything',
       metrics: [
         {
-          field: 'docker.network.in.bytes',
-          id: 'avg-network-in',
-          type: 'avg',
+          field: 'docker.network.inbound.bytes',
+          id: 'max-net-in',
+          type: 'max',
         },
         {
-          id: 'invert-posonly-deriv-max-network-in',
+          field: 'max-net-in',
+          id: 'deriv-max-net-in',
+          type: 'derivative',
+          unit: '1s',
+        },
+        {
+          id: 'posonly-deriv-max-net-in',
+          type: 'calculation',
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-in' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
+        },
+        {
+          id: 'calc-invert-rate',
           script: 'params.rate * -1',
           type: 'calculation',
           variables: [
             {
-              field: 'avg-network-in',
+              field: 'posonly-deriv-max-net-in',
               id: 'var-rate',
               name: 'rate',
             },
           ],
         },
+        {
+          function: 'sum',
+          id: 'seriesagg-sum',
+          type: 'series_agg',
+        },
       ],
+      split_mode: 'terms',
+      terms_field: 'docker.network.interface',
     },
   ],
 });
