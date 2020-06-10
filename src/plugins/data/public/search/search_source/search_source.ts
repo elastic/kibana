@@ -76,12 +76,11 @@ import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../../../common';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
+import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
+import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
@@ -206,13 +205,12 @@ export class SearchSource {
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
     const { search, injectedMetadata, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-    const searchParams = getSearchParams(uiSettings, esShardTimeout);
-    const params = {
-      index: searchRequest.index.title || searchRequest.index,
-      body: searchRequest.body,
-      ...searchParams,
-    };
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      injectedMetadata,
+      uiSettings,
+    });
+
     return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
       map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
     );
@@ -252,7 +250,7 @@ export class SearchSource {
     this.history = [searchRequest];
 
     let response;
-    if (uiSettings.get('courier:batchSearches')) {
+    if (uiSettings.get(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
       response = this.fetch$(searchRequest, options.abortSignal).toPromise();
@@ -366,7 +364,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          uiSettings.get('sort:options')
+          uiSettings.get(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
       default:
@@ -426,7 +424,7 @@ export class SearchSource {
       // exclude source fields for this index pattern specified by the user
       const filter = fieldWildcardFilter(
         body._source.excludes,
-        uiSettings.get(META_FIELDS_SETTING)
+        uiSettings.get(UI_SETTINGS.META_FIELDS)
       );
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
@@ -449,7 +447,7 @@ export class SearchSource {
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, uiSettings.get(DOC_HIGHLIGHT_SETTING));
+      body.highlight = getHighlightRequest(body.query, uiSettings.get(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 

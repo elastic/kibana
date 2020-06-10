@@ -5,8 +5,8 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import pkg from '../../../../../../package.json';
 
 // eslint-disable-next-line import/no-default-export
@@ -225,6 +225,15 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(200);
+
+      // The existance and value of maxModelMemoryLimit depends on ES settings
+      // and may vary between test environments, e.g. cloud vs non-cloud,
+      // so it should not be part of the validation
+      body.forEach((element: any) => {
+        if (element.hasOwnProperty('maxModelMemoryLimit')) {
+          delete element.maxModelMemoryLimit;
+        }
+      });
 
       expect(body).to.eql([
         {

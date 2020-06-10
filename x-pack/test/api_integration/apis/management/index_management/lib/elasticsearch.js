@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { getRandomString } from './random';
 
 /**
@@ -34,6 +35,14 @@ export const initElasticsearchHelpers = (es) => {
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
 
+  const createComponentTemplate = (componentTemplate) => {
+    return es.dataManagement.saveComponentTemplate(componentTemplate);
+  };
+
+  const deleteComponentTemplate = (componentTemplateName) => {
+    return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+  };
+
   return {
     createIndex,
     deleteIndex,
@@ -42,5 +51,7 @@ export const initElasticsearchHelpers = (es) => {
     indexStats,
     cleanUp,
     catTemplate,
+    createComponentTemplate,
+    deleteComponentTemplate,
   };
 };

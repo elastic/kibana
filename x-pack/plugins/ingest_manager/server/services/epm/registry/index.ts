@@ -16,7 +16,7 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { cacheGet, cacheSet } from './cache';
+import { cacheGet, cacheSet, getCacheKey, cacheHas } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
@@ -135,7 +135,7 @@ async function extract(
 
 async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
   // assume .tar.gz for now. add support for .zip if/when we need it
-  const key = `${pkgName}-${pkgVersion}.tar.gz`;
+  const key = getCacheKey(`${pkgName}-${pkgVersion}`);
   let buffer = cacheGet(key);
   if (!buffer) {
     buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
@@ -146,6 +146,13 @@ async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Pro
     return buffer;
   } else {
     throw new Error(`no archive buffer for ${key}`);
+  }
+}
+
+export async function ensureCachedArchiveInfo(name: string, version: string) {
+  const pkgkey = getCacheKey(`${name}-${version}`);
+  if (!cacheHas(pkgkey)) {
+    await getArchiveInfo(name, version);
   }
 }
 

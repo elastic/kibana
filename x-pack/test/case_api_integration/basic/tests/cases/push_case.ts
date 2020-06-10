@@ -16,7 +16,7 @@ import {
   deleteComments,
   deleteConfiguration,
   getConfiguration,
-  getConnector,
+  getServiceNowConnector,
 } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getConnector())
+        .send(getServiceNowConnector())
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getConnector())
+        .send(getServiceNowConnector())
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
