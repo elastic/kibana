@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, memo, useState } from 'react';
 import {
   EuiButtonIcon,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
