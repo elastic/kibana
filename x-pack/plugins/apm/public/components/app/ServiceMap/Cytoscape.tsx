@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cytoscape from 'cytoscape';
 import React, {
   createContext,
   CSSProperties,
@@ -12,9 +11,11 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useContext,
 } from 'react';
+import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
-import { useTheme } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 import {
   getAnimationOptions,
   getCytoscapeOptions,
@@ -75,7 +76,7 @@ function getLayoutOptions(
   selectedRoots: string[],
   height: number,
   width: number,
-  nodeHeight: number,
+  nodeHeight: number
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
@@ -112,7 +113,7 @@ export const Cytoscape = ({
   serviceName,
   style,
 }: CytoscapeProps) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const [ref, cy] = useCytoscape({
     ...getCytoscapeOptions(theme.eui),
     elements,
@@ -246,7 +247,7 @@ export const Cytoscape = ({
       }
       clearTimeout(layoutstopDelayTimeout);
     };
-  }, [cy, height, serviceName, trackApmEvent, width]);
+  }, [cy, height, serviceName, trackApmEvent, width, nodeHeight, theme.eui]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

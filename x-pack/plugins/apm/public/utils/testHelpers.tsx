@@ -19,6 +19,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { APMConfig } from '../../server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
+import { EuiThemeProvider } from '../../../observability/public';
 import {
   ESFilter,
   ESSearchResponse,
@@ -181,3 +182,12 @@ export async function inspectSearchParams(
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+
+export function renderWithTheme(
+  component: React.ReactNode,
+  { darkMode = false }: { darkMode: boolean }
+) {
+  return render(
+    <EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>
+  );
+}

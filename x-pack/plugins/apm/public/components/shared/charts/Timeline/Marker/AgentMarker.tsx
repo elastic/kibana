@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useContext } from 'react';
 import { EuiToolTip } from '@elastic/eui';
-import React from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { px, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { Legend } from '../../Legend';
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export const AgentMarker: React.FC<Props> = ({ mark }) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
 
   return (
     <>

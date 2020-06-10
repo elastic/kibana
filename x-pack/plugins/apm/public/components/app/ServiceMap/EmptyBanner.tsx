@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect, useState } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
 
@@ -23,7 +23,7 @@ const EmptyBannerContainer = styled.div`
 `;
 
 export const EmptyBanner = () => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
 

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useContext, MouseEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,8 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import React, { MouseEvent } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { fontSize, px } from '../../../../style/variables';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
@@ -121,7 +121,9 @@ export const Contents = ({
   label,
   onFocusClick,
   selectedNodeServiceName,
-}: ContentProps) => {
+}: ContentsProps) => {
+  const theme = useContext(ThemeContext);
+
   // Anomaly Detection
   const severity = selectedNodeData.severity;
   const maxScore = selectedNodeData.max_score;
@@ -169,7 +171,9 @@ export const Contents = ({
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <VerticallyCentered>
-                      <EuiHealth color={getSeverityColor(severity, theme.eui)} />
+                      <EuiHealth
+                        color={getSeverityColor(severity, theme.eui)}
+                      />
                       <SubduedText>
                         {ANOMALY_DETECTION_SCORE_METRIC}
                       </SubduedText>

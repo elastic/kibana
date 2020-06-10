@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import styled, { useTheme } from 'styled-components';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {
@@ -71,7 +71,7 @@ export const Legend: React.FC<Props> = ({
   indicator,
   ...rest
 }) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const indicatorColor = color || theme.eui.euiColorVis1;
 
   return (

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect, useState } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
@@ -36,7 +36,11 @@ const Panel = styled(EuiPanel)`
 
 const steps = 5;
 
-function doZoom(cy: cytoscape.Core | undefined, increment: number, duration: number) {
+function doZoom(
+  cy: cytoscape.Core | undefined,
+  increment: number,
+  duration: number
+) {
   if (cy) {
     const level = cy.zoom() + increment;
     // @ts-ignore `.position()` _does_ work on a NodeCollection. It returns the position of the first element in the collection.
@@ -55,7 +59,7 @@ function doZoom(cy: cytoscape.Core | undefined, increment: number, duration: num
 }
 
 export const Controls = () => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
   const currentSearch = urlParams.kuery ?? '';

@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import { VerticalGridLines } from 'react-vis';
-import { useTheme } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 import {
   EuiIcon,
   EuiToolTip,
@@ -26,11 +26,8 @@ interface Props {
   overlay: Maybe<HTMLElement>;
 }
 
-export const AnnotationsPlot = ({
-  plotValues,
-  annotations,
-}: Props) => {
-  const theme = useTheme();
+export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
+  const theme = useContext(ThemeContext);
   const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
   const style = {

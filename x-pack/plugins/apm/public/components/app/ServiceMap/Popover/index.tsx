@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover } from '@elastic/eui';
-import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
   MouseEvent,
@@ -15,7 +13,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTheme } from 'styled-components';
+import { EuiPopover } from '@elastic/eui';
+import cytoscape from 'cytoscape';
+import { ThemeContext } from 'styled-components';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { getAnimationOptions } from '../cytoscapeOptions';
@@ -26,7 +26,7 @@ interface PopoverProps {
 }
 
 export const Popover = ({ focusedServiceName }: PopoverProps) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
@@ -100,10 +100,14 @@ export const Popover = ({ focusedServiceName }: PopoverProps) => {
         });
       }
     },
-    [cy, selectedNodeServiceName]
+    [cy, selectedNodeServiceName, theme.eui]
   );
 
   const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
+
+  const onFocusClick = isAlreadyFocused
+    ? centerSelectedNode
+    : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
   return (
     <EuiPopover
@@ -117,9 +121,7 @@ export const Popover = ({ focusedServiceName }: PopoverProps) => {
       <Contents
         isService={isService}
         label={label}
-        onFocusClick={
-          isAlreadyFocused ? centerSelectedNode : (_event) => deselect()
-        }
+        onFocusClick={onFocusClick}
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
       />

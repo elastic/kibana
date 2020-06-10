@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useContext } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import { useTheme } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 import {
   invalidLicenseMessage,
   isValidPlatinumLicense,
@@ -30,7 +30,7 @@ interface ServiceMapProps {
 }
 
 export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const license = useLicense();
   const { urlParams } = useUrlParams();
 
@@ -68,7 +68,9 @@ export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
 
   return isValidPlatinumLicense(license) ? (
     <div
-      style={{ height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10) }}
+      style={{
+        height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10),
+      }}
       ref={ref}
     >
       <Cytoscape

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { useTheme } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
@@ -38,12 +38,8 @@ interface Props {
   refetch: () => void;
 }
 
-export const AgentConfigurationList = ({
-  status,
-  data,
-  refetch,
-}: Props) => {
-  const theme = useTheme();
+export const AgentConfigurationList = ({ status, data, refetch }: Props) => {
+  const theme = useContext(ThemeContext);
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
   );
@@ -131,7 +127,9 @@ export const AgentConfigurationList = ({
                 )
           }
         >
-          <EuiHealth color={isApplied ? 'success' : theme.eui.euiColorLightShade} />
+          <EuiHealth
+            color={isApplied ? 'success' : theme.eui.euiColorLightShade}
+          />
         </EuiToolTip>
       ),
     },

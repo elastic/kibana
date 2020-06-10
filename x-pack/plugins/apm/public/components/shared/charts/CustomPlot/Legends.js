@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import React from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { Legend } from '../Legend';
 import {
   unit,
@@ -79,7 +79,7 @@ export default function Legends({
   showAnnotations,
   onAnnotationsToggle,
 }) {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
 
   if (noHits && !hasAnnotations) {
     return null;

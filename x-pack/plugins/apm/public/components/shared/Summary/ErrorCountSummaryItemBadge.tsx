@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { EuiBadge } from '@elastic/eui';
 import { px } from '../../../../public/style/variables';
 import { units } from '../../../style/variables';
@@ -19,7 +19,7 @@ const Badge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 
 export const ErrorCountSummaryItemBadge = ({ count }: Props) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
 
   return (
     <Badge color={theme.eui.euiColorDanger}>
@@ -30,4 +30,4 @@ export const ErrorCountSummaryItemBadge = ({ count }: Props) => {
       })}
     </Badge>
   );
-}
+};

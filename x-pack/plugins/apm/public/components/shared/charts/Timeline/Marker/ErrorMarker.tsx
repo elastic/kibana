@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useState, useContext } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -42,7 +42,7 @@ const Button = styled(Legend)`
 `;
 
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 

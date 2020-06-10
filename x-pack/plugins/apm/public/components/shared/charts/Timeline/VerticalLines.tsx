@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { VerticalGridLines, XYPlot } from 'react-vis';
-import { useTheme } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 import { Mark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks';
 import { PlotValues } from './plotUtils';
 
@@ -16,14 +16,18 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export const VerticalLines = ({ topTraceDuration, plotValues, marks = [] }: VerticalLinesProps) => {
+export const VerticalLines = ({
+  topTraceDuration,
+  plotValues,
+  marks = [],
+}: VerticalLinesProps) => {
   const { width, height, margins, xDomain, tickValues } = plotValues;
 
   const markTimes = marks
     .filter((mark) => mark.verticalLine)
     .map(({ offset }) => offset);
 
-  const theme = useTheme();
+  const theme = useContext(ThemeContext);
 
   return (
     <div
