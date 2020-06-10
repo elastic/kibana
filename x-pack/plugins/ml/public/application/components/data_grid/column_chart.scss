@@ -29,3 +29,8 @@
 .mlDataGridChart__legend--numeric {
   text-align: right;
 }
+
+.mlDataGridChart__legendBoolean {
+  width: 100%;
+  td { text-align: center }
+}

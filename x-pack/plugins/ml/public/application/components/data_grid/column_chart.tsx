@@ -22,7 +22,20 @@ import {
 
 export const mlDataGridChartClassName = 'mlDataGridChart';
 
-const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string => {
+const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string | JSX.Element => {
+  if (chartData.type === 'boolean') {
+    return (
+      <table className="mlDataGridChart__legendBoolean">
+        <tbody>
+          <tr>
+            <td>{chartData.data[0].key_as_string}</td>
+            <td>{chartData.data[1].key_as_string}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  }
+
   if (isOrdinalChartData(chartData) && chartData.cardinality === 1) {
     return i18n.translate('xpack.ml.dataGridChart.singleCategoryLegend', {
       defaultMessage: `{cardinality} category`,

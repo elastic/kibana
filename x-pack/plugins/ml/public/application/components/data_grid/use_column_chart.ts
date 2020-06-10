@@ -187,17 +187,20 @@ export const fetchChartData = async (
   if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
     return {
       ...((await fetchChartHistogramData()) as NumericChartData),
+      type: 'numeric',
       id: columnType.id,
     };
   } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
     // TODO query in parallel
     return {
+      type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
       cardinality: await fetchCardinality(),
       data: await fetchChartTermsData(),
       id: columnType.id,
-    } as OrdinalChartData;
+    };
   } else if (fieldType === KBN_FIELD_TYPES.OBJECT || fieldType === undefined) {
     return {
+      type: 'ordinal',
       cardinality: 0,
       data: [],
       id: columnType.id,
@@ -218,6 +221,7 @@ interface NumericChartData {
   id: string;
   interval: number;
   stats: [number, number];
+  type: 'numeric';
 }
 
 export const isNumericChartData = (arg: any): arg is NumericChartData => {
@@ -225,16 +229,19 @@ export const isNumericChartData = (arg: any): arg is NumericChartData => {
     arg.hasOwnProperty('data') &&
     arg.hasOwnProperty('id') &&
     arg.hasOwnProperty('interval') &&
-    arg.hasOwnProperty('stats')
+    arg.hasOwnProperty('stats') &&
+    arg.hasOwnProperty('type')
   );
 };
 
 interface OrdinalDataItem {
   key: string;
+  key_as_string?: string;
   doc_count: number;
 }
 
 interface OrdinalChartData {
+  type: 'ordinal' | 'boolean';
   cardinality: number;
   data: OrdinalDataItem[];
   id: string;
@@ -242,7 +249,10 @@ interface OrdinalChartData {
 
 export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
   return (
-    arg.hasOwnProperty('data') && arg.hasOwnProperty('cardinality') && arg.hasOwnProperty('id')
+    arg.hasOwnProperty('data') &&
+    arg.hasOwnProperty('cardinality') &&
+    arg.hasOwnProperty('id') &&
+    arg.hasOwnProperty('type')
   );
 };
 
