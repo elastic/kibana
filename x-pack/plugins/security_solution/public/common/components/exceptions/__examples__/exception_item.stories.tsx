@@ -8,15 +8,15 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { ExceptionItem } from '../viewer';
+import { ExceptionItem } from '../viewer/exception_item';
 import { Operator } from '../types';
 import { getExceptionItemMock } from '../mocks';
 
-storiesOf('components/exceptions', module)
-  .add('ExceptionItem/with os', () => {
+storiesOf('ExceptionItem', module)
+  .add('with os', () => {
     const payload = getExceptionItemMock();
     payload.description = '';
-    payload.comments = [];
+    payload.comment = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -29,6 +29,7 @@ storiesOf('components/exceptions', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -37,10 +38,10 @@ storiesOf('components/exceptions', module)
       </ThemeProvider>
     );
   })
-  .add('ExceptionItem/with description', () => {
+  .add('with description', () => {
     const payload = getExceptionItemMock();
     payload._tags = [];
-    payload.comments = [];
+    payload.comment = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -53,6 +54,7 @@ storiesOf('components/exceptions', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -61,7 +63,7 @@ storiesOf('components/exceptions', module)
       </ThemeProvider>
     );
   })
-  .add('ExceptionItem/with comments', () => {
+  .add('with comments', () => {
     const payload = getExceptionItemMock();
     payload._tags = [];
     payload.description = '';
@@ -77,6 +79,7 @@ storiesOf('components/exceptions', module)
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -85,15 +88,16 @@ storiesOf('components/exceptions', module)
       </ThemeProvider>
     );
   })
-  .add('ExceptionItem/with nested entries', () => {
+  .add('with nested entries', () => {
     const payload = getExceptionItemMock();
     payload._tags = [];
     payload.description = '';
-    payload.comments = [];
+    payload.comment = [];
 
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
@@ -102,12 +106,13 @@ storiesOf('components/exceptions', module)
       </ThemeProvider>
     );
   })
-  .add('ExceptionItem/with everything', () => {
+  .add('with everything', () => {
     const payload = getExceptionItemMock();
 
     return (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           exceptionItem={payload}
           handleDelete={() => {}}
