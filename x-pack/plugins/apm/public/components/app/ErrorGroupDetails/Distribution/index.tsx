@@ -20,7 +20,7 @@ import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface IBucket {
   key: number;
-  count: number;
+  count: number | undefined;
 }
 
 // TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
@@ -33,7 +33,7 @@ interface IDistribution {
 interface FormattedBucket {
   x0: number;
   x: number;
-  y: number;
+  y: number | undefined;
 }
 
 export function getFormattedBuckets(
@@ -69,10 +69,11 @@ export function ErrorDistribution({ distribution, title }: Props) {
 
   const average = useMemo(() => {
     const averageValue = buckets ? mean(buckets.map((bucket) => bucket.y)) : 0;
+    // 0a abbreviates large whole numbers with metric prefixes like: 1000 = 1k, 32000 = 32k, 1000000 = 1m
     return numeral(averageValue).format('0a');
   }, [buckets]);
 
-  if (!buckets || distribution.noHits) {
+  if (!buckets) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
@@ -117,7 +118,9 @@ export function ErrorDistribution({ distribution, title }: Props) {
           {
             color: theme.euiColorVis1,
             legendValue: average,
-            title: 'Avg.',
+            title: i18n.translate('xpack.apm.errorGroupDetails.avgLabel', {
+              defaultMessage: 'Avg.',
+            }),
             legendClickDisabled: true,
           },
         ]}

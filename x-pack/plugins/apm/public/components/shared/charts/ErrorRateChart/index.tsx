@@ -73,7 +73,9 @@ export const ErrorRateChart = () => {
             data: [],
             legendValue: average,
             legendClickDisabled: true,
-            title: 'Avg.',
+            title: i18n.translate('xpack.apm.errorRateCharrt.avgLabel', {
+              defaultMessage: 'Avg.',
+            }),
             type: 'linemark',
             hideTooltipValue: true,
           },
@@ -82,7 +84,9 @@ export const ErrorRateChart = () => {
             type: 'line',
             color: theme.euiColorVis7,
             hideLegend: true,
-            title: 'Rate',
+            title: i18n.translate('xpack.apm.errorRateCharrt.rateLabel', {
+              defaultMessage: 'Rate',
+            }),
           },
         ]}
         onHover={combinedOnHover}
