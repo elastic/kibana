@@ -13,6 +13,7 @@ import {
   IScopedClusterClient,
 } from 'src/core/server';
 import { SetupPlugins } from '../../plugin';
+import { endpointUserSavedObjectType, EndpointUser } from './saved_object_mappings';
 
 const ENDPOINT_MANAGER_ROLE = 'endpoint_manager_role';
 const ENDPOINT_MANAGER_USERNAME = 'endpoint_admin';
@@ -34,6 +35,7 @@ export function postEndpointSetup(router: IRouter, security: SetupPlugins['secur
         await setupEndpointUser(soClient, security, client);
         return res.ok();
       } catch (err) {
+        console.log(err);
         return res.internalError({ body: err });
       }
     }
@@ -88,8 +90,25 @@ async function setupEndpointUser(
     throw new Error('Missing security plugin');
   }
 
-  const apikey = await security.authc.createAPIKey(request as KibanaRequest, {
+  const apikeyResponse = await security.authc.createAPIKey(request as KibanaRequest, {
     name: 'test-api2',
     role_descriptors: {}, // TODO
   });
+
+  if (apikeyResponse !== null) {
+    const endpointUser: EndpointUser = {
+      username: ENDPOINT_MANAGER_USERNAME,
+      password,
+      apikey: apikeyResponse.api_key,
+      created: Date.now(),
+    };
+    await persistEndpointUser(soClient, endpointUser);
+  } else {
+    throw new Error('Unable to persist endpoint user');
+  }
+}
+
+async function persistEndpointUser(soClient: SavedObjectsClientContract, user: EndpointUser) {
+  const soResponse = await soClient.create(endpointUserSavedObjectType, user, {});
+  console.log(soResponse);
 }
