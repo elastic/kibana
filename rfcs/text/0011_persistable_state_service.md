@@ -78,17 +78,17 @@ We also need to make sure that all the persited state containing references to s
 ```ts
 interface PersistableState extends Serializable {}
 
-interface PersistableStateDefinition {
+interface PersistableStateDefinition<P extends PersistableState = PersistableState> {
   id: string,
   // migrate function receives state and version string and should return latest state version
   // default is identity function
-  migrate: (state: PersistableState, version: string) => PersistableState,
+  migrate: (state: unknown, version: string) => P,
   // inject function receives state and a list of references and should return state with references injected
   // default is identity function
-  inject: (state: PersistableState, references: SavedObjectReference[]) => PersistableState,
+  inject: (state: P, references: SavedObjectReference[]) => P,
   // extract function receives state and should return state with references extracted and array of references
   // default returns same state with empty reference array
-  extract: (state: PersistableState) => { state: PersistableState, references: SavedObjectReference[] }
+  extract: (state: P) => { state: P, references: SavedObjectReference[] }
 }
 
 class PersistableStatePlugin {
@@ -126,7 +126,7 @@ WARNING: If state id is known at compile time we should rather import the correc
 
 ## Handling corrupt state
 
-This is up to the registrator, but we will try to come up with a good recomendation.
+In current proposal handling of corrupt state is up to the implementator of PersistableStateDefinition. State incoming to migrate function could not match with version string provided so author should validate the incoming state first.
 
 ## EnhacedDrilldownEmbeddableInput
 
@@ -212,16 +212,7 @@ First app arch team will add persistable state definitions for saved visualizati
 
 # How we teach this
 
-What names and terminology work best for these concepts and why? How is this
-idea best presented? As a continuation of existing Kibana patterns?
-
-Would the acceptance of this proposal mean the Kibana documentation must be
-re-organized or altered? Does it change how Kibana is taught to new developers
-at any level?
-
-How should this feature be taught to existing Kibana developers?
+If state id is known at compile time we should rather import the correct utilities directly from expression plugin. As using the registry can hide dependencies between plugins when possible plugins should directly depend on plugins providing the state they want to store.
 
 # Unresolved questions
 
-Optional, but suggested for first drafts. What parts of the design are still
-TBD?
