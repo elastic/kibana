@@ -4,28 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiDescriptionList, EuiButtonEmpty } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiDescriptionList,
+  EuiButtonEmpty,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
+import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
-import { transparentize } from 'polished';
 
-import { ExceptionListItemSchema } from '../../types';
+import { DescriptionListItem, ExceptionListItemSchema } from '../../types';
 import { getDescriptionListContent } from '../../helpers';
 import * as i18n from '../../translations';
 
 const StyledExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
-    background-color: ${transparentize(0.95, theme.eui.euiColorPrimary)};
+    background-color: ${theme.eui.euiColorLightestShade};
     padding: ${theme.eui.euiSize};
-
-    .euiDescriptionList__title.listTitle--width {
-      width: 40%;
-    }
-
-    .euiDescriptionList__description.listDescription--width {
-      width: 60%;
-    }
   `}
+`;
+
+const MyDescriptionListTitle = styled(EuiDescriptionListTitle)`
+  width: 40%;
+`;
+
+const MyDescriptionListDescription = styled(EuiDescriptionListDescription)`
+  width: 60%;
 `;
 
 const ExceptionDetailsComponent = ({
@@ -37,7 +43,10 @@ const ExceptionDetailsComponent = ({
   exceptionItem: ExceptionListItemSchema;
   onCommentsClick: () => void;
 }): JSX.Element => {
-  const descriptionList = useMemo(() => getDescriptionListContent(exceptionItem), [exceptionItem]);
+  const descriptionListItems = useMemo(
+    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem),
+    [exceptionItem]
+  );
 
   const commentsSection = useMemo((): JSX.Element => {
     // TODO: return back to exceptionItem.comments once updated
@@ -62,14 +71,14 @@ const ExceptionDetailsComponent = ({
     <StyledExceptionDetails grow={2}>
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem grow={1}>
-          <EuiDescriptionList
-            compressed
-            type="column"
-            listItems={descriptionList}
-            titleProps={{ className: 'listTitle--width' }}
-            descriptionProps={{ className: 'listDescription--width' }}
-            data-test-subj="exceptionsViewerItemDetails"
-          />
+          <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
+            {descriptionListItems.map((item) => (
+              <Fragment key={`${item.title}`}>
+                <MyDescriptionListTitle>{item.title}</MyDescriptionListTitle>
+                <MyDescriptionListDescription>{item.description}</MyDescriptionListDescription>
+              </Fragment>
+            ))}
+          </EuiDescriptionList>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{commentsSection}</EuiFlexItem>
       </EuiFlexGroup>
