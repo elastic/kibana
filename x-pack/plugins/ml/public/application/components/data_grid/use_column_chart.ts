@@ -107,6 +107,13 @@ export const fetchChartData = async (
       });
 
       const stats = [respStats.aggregations.min_max.min, respStats.aggregations.min_max.max];
+      if (stats.includes(null)) {
+        return {
+          data: [],
+          interval: 0,
+          stats: [0, 0],
+        };
+      }
 
       const delta = respStats.aggregations.min_max.max - respStats.aggregations.min_max.min;
 
@@ -176,14 +183,19 @@ export const fetchChartData = async (
       ...((await fetchChartHistogramData()) as NumericChartData),
       id: columnType.id,
     };
-  }
-  if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+  } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
     // TODO query in parallel
     return {
       cardinality: await fetchCardinality(),
       data: await fetchChartTermsData(),
       id: columnType.id,
     } as OrdinalChartData;
+  } else if (fieldType === KBN_FIELD_TYPES.OBJECT) {
+    return {
+      cardinality: 0,
+      data: [],
+      id: columnType.id,
+    };
   }
 
   throw new Error('Invalid fieldType');
