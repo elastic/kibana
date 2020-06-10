@@ -15,7 +15,6 @@ export {
 
 export {
   getErrorMessage,
-  extractErrorMessage,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
