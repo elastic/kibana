@@ -5,21 +5,13 @@
  */
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import {
-  AlertsClient,
-  CreateOptions,
-  ConstructorOptions,
-  // , UpdateOptions, FindOptions
-} from './alerts_client';
+import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './alerts_authorization.mock';
 import { TaskStatus } from '../../task_manager/server';
-import {
-  IntervalSchedule,
-  //  PartialAlert
-} from './types';
+import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock } from '../../actions/server/mocks';
@@ -2114,20 +2106,31 @@ describe('getAlertState()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.getAlertState({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'getAlertState'
+      );
     });
 
-    test('throws when user is not authorised to get this type of alert', async () => {
+    test('throws when user is not authorised to getAlertState this type of alert', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "myType" alert for "myApp"`)
+      // `get` check
+      authorization.ensureAuthorized.mockResolvedValueOnce();
+      // `getAlertState` check
+      authorization.ensureAuthorized.mockRejectedValueOnce(
+        new Error(`Unauthorized to getAlertState a "myType" alert for "myApp"`)
       );
 
       await expect(alertsClient.getAlertState({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to getAlertState a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'getAlertState'
+      );
     });
   });
 });

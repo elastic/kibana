@@ -69,7 +69,7 @@ export interface MuteOptions extends IndexType {
   alertInstanceId: string;
 }
 
-export interface FindOptions extends IndexType {
+interface FindOptions extends IndexType {
   perPage?: number;
   page?: number;
   search?: string;
@@ -115,7 +115,7 @@ export interface CreateOptions {
   };
 }
 
-export interface UpdateOptions {
+interface UpdateOptions {
   id: string;
   data: {
     name: string;
@@ -238,6 +238,7 @@ export class AlertsClient {
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
     const alert = await this.get({ id });
+    await this.authorization.ensureAuthorized(alert.alertTypeId, alert.consumer, 'getAlertState');
     if (alert.scheduledTaskId) {
       const { state } = taskInstanceToAlertTaskInstance(
         await this.taskManager.get(alert.scheduledTaskId),
