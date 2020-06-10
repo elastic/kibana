@@ -195,7 +195,7 @@ const ExceptionsViewerComponent = ({
     [setIsModalOpen]
   );
 
-  const onEditExceptionItem = useCallback(
+  const handleEditException = useCallback(
     (exception: ExceptionListItemSchema): void => {
       // TODO: Added this just for testing. Update
       // modal state logic as needed once ready
@@ -234,7 +234,7 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const onDeleteException = useCallback(
+  const handleDeleteException = useCallback(
     ({ id, namespaceType }: ApiProps) => {
       deleteExceptionItem({
         id,
@@ -395,8 +395,8 @@ const ExceptionsViewerComponent = ({
                     loadingItemIds={loadingItemIds}
                     commentsAccordionId={commentsAccordionId}
                     exceptionItem={exception}
-                    handleDelete={onDeleteException}
-                    handleEdit={onEditExceptionItem}
+                    onDeleteException={handleDeleteException}
+                    onEditException={handleEditException}
                   />
                 </EuiFlexItem>
               ))}
