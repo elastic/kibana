@@ -8,7 +8,7 @@ import { TIMELINE_FLYOUT_HEADER, TIMELINE_NOT_READY_TO_DROP_BUTTON } from '../sc
 
 import { dragFirstHostToTimeline, waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline, openTimelineIfClosed } from '../tasks/siem_main';
+import { openTimeline, openTimelineIfClosed } from '../tasks/security_main';
 import { createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_PAGE } from '../urls/navigation';

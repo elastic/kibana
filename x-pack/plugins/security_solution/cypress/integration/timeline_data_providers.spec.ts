@@ -19,7 +19,7 @@ import {
 } from '../tasks/hosts/all_hosts';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/security_main';
 import { createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_PAGE } from '../urls/navigation';
