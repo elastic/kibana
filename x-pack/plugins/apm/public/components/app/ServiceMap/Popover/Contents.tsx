@@ -10,22 +10,15 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiTitle,
-  EuiIconTip,
-  EuiHealth,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import styled, { ThemeContext } from 'styled-components';
-import { fontSize, px } from '../../../../style/variables';
+import { ThemeContext } from 'styled-components';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
-import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
-import { getSeverityColor } from '../cytoscapeOptions';
-import { asInteger } from '../../../../utils/formatters';
-import { getMetricChangeDescription } from '../../../../../../ml/public';
-
-const popoverMinWidth = 280;
+import { AnomalyDetection } from './anomaly_detection';
+import { ServiceNode } from '../../../../../common/service_map';
+import { popoverMinWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
   isService: boolean;
@@ -34,31 +27,6 @@ interface ContentsProps {
   selectedNodeData: cytoscape.NodeDataDefinition;
   selectedNodeServiceName: string;
 }
-
-const HealthStatusTitle = styled(EuiTitle)`
-  display: inline;
-  text-transform: uppercase;
-`;
-
-const VerticallyCentered = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const SubduedText = styled.span`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-`;
-
-const EnableText = styled.section`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  line-height: 1.4;
-  font-size: ${fontSize};
-  width: ${px(popoverMinWidth)};
-`;
-
-export const ContentLine = styled.section`
-  line-height: 2;
-`;
 
 // IE 11 does not handle flex properties as expected. With browser detection,
 // we can use regular div elements to render contents that are almost identical.
@@ -83,37 +51,6 @@ const FlexColumnGroup = (props: {
 };
 const FlexColumnItem = (props: { children: React.ReactNode }) =>
   isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
-
-const ANOMALY_DETECTION_TITLE = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverTitle',
-  { defaultMessage: 'Anomaly Detection' }
-);
-
-const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverTooltip',
-  {
-    defaultMessage:
-      'Service health indicators are powered by the anomaly detection feature in machine learning',
-  }
-);
-
-const ANOMALY_DETECTION_SCORE_METRIC = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverScoreMetric',
-  { defaultMessage: 'Score (max.)' }
-);
-
-const ANOMALY_DETECTION_LINK = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverLink',
-  { defaultMessage: 'View anomalies' }
-);
-
-const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverDisabled',
-  {
-    defaultMessage:
-      'Display service health indicators by enabling anomaly detection from the Integrations menu in the Service details view.',
-  }
-);
 
 export const Contents = ({
   selectedNodeData,
@@ -155,52 +92,7 @@ export const Contents = ({
       </FlexColumnItem>
       {isService && (
         <FlexColumnItem>
-          {hasAnomalyDetection ? (
-            <>
-              <section>
-                <HealthStatusTitle size="xxs">
-                  <h3>{ANOMALY_DETECTION_TITLE}</h3>
-                </HealthStatusTitle>
-                &nbsp;
-                <EuiIconTip
-                  type="iInCircle"
-                  content={ANOMALY_DETECTION_TOOLTIP}
-                />
-              </section>
-              <ContentLine>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <VerticallyCentered>
-                      <EuiHealth
-                        color={getSeverityColor(severity, theme.eui)}
-                      />
-                      <SubduedText>
-                        {ANOMALY_DETECTION_SCORE_METRIC}
-                      </SubduedText>
-                    </VerticallyCentered>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <div>
-                      {asInteger(maxScore)}
-                      <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
-                    </div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </ContentLine>
-              <ContentLine>
-                <MLJobLink external jobId={jobId}>
-                  {ANOMALY_DETECTION_LINK}
-                </MLJobLink>
-              </ContentLine>
-            </>
-          ) : (
-            <>
-              <HealthStatusTitle size="xxs">
-                <h3>{ANOMALY_DETECTION_TITLE}</h3>
-              </HealthStatusTitle>
-              <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>
-            </>
-          )}
+          <AnomalyDetection serviceNodeData={selectedNodeData as ServiceNode} />
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>
       )}

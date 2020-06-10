@@ -136,7 +136,7 @@ export const ChoroplethMap: React.FC<Props> = (props) => {
   }, [map, items, tooltipState]);
 
   const updateTooltipStateOnMousemoveRef = useRef(
-    (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {}
+    (_event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {}
   );
 
   // initialization side effect, only runs once

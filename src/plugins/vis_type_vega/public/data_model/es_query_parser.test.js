@@ -94,28 +94,36 @@ describe(`EsQueryParser time`, () => {
 });
 
 describe('EsQueryParser.populateData', () => {
-  let searchStub;
+  let searchApiStub;
+  let data;
   let parser;
 
   beforeEach(() => {
-    searchStub = jest.fn(() => Promise.resolve([{}, {}]));
-    parser = new EsQueryParser({}, { search: searchStub }, undefined, undefined);
+    searchApiStub = {
+      search: jest.fn(() => ({
+        toPromise: jest.fn(() => Promise.resolve(data)),
+      })),
+    };
+    parser = new EsQueryParser({}, searchApiStub, undefined, undefined);
   });
 
   test('should set the timeout for each request', async () => {
+    data = [
+      { id: 0, rawResponse: {} },
+      { id: 1, rawResponse: {} },
+    ];
     await parser.populateData([
       { url: { body: {} }, dataObject: {} },
       { url: { body: {} }, dataObject: {} },
     ]);
-    expect(searchStub.mock.calls[0][0][0].body.timeout).toBe.defined;
+
+    expect(searchApiStub.search.mock.calls[0][0][0].body).toBeDefined();
   });
 
   test('should remove possible timeout parameters on a request', async () => {
-    await parser.populateData([
-      { url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} },
-    ]);
-    expect(searchStub.mock.calls[0][0][0].body.timeout).toBe.defined;
-    expect(searchStub.mock.calls[0][0][0].timeout).toBe(undefined);
+    data = [{ id: 0, rawResponse: {} }];
+    await parser.populateData([{ url: { body: { timeout: '500h' } }, dataObject: {} }]);
+    expect(searchApiStub.search.mock.calls[0][0][0].body.timeout).toBeDefined();
   });
 });
 

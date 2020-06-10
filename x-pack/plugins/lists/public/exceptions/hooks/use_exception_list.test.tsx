@@ -10,7 +10,8 @@ import * as api from '../api';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { ExceptionListAndItems, UseExceptionListProps } from '../types';
+import { ExceptionListItemSchema } from '../../../common/schemas';
+import { ExceptionList, UseExceptionListProps } from '../types';
 
 import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
 
@@ -34,15 +35,23 @@ describe('useExceptionList', () => {
       >(() =>
         useExceptionList({
           http: mockKibanaHttpService,
-          id: 'myListId',
-          namespaceType: 'single',
+          lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
         })
       );
       await waitForNextUpdate();
 
-      expect(result.current).toEqual([true, null, result.current[2]]);
-      expect(typeof result.current[2]).toEqual('function');
+      expect(result.current).toEqual([
+        true,
+        [],
+        [],
+        {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        null,
+      ]);
     });
   });
 
@@ -54,27 +63,32 @@ describe('useExceptionList', () => {
       >(() =>
         useExceptionList({
           http: mockKibanaHttpService,
-          id: 'myListId',
-          namespaceType: 'single',
+          lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
         })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      const expectedResult: ExceptionListAndItems = {
-        ...getExceptionListSchemaMock(),
-        exceptionItems: {
-          items: [{ ...getExceptionListItemSchemaMock() }],
-          pagination: {
-            page: 1,
-            perPage: 20,
-            total: 1,
-          },
-        },
-      };
+      const expectedListResult: ExceptionList[] = [
+        { ...getExceptionListSchemaMock(), totalItems: 1 },
+      ];
 
-      expect(result.current).toEqual([false, expectedResult, result.current[2]]);
+      const expectedListItemsResult: ExceptionListItemSchema[] = [
+        { ...getExceptionListItemSchemaMock() },
+      ];
+
+      expect(result.current).toEqual([
+        false,
+        expectedListResult,
+        expectedListItemsResult,
+        {
+          page: 1,
+          perPage: 20,
+          total: 1,
+        },
+        result.current[4],
+      ]);
     });
   });
 
@@ -86,13 +100,12 @@ describe('useExceptionList', () => {
         UseExceptionListProps,
         ReturnExceptionListAndItems
       >(
-        ({ filterOptions, http, id, namespaceType, pagination, onError }) =>
-          useExceptionList({ filterOptions, http, id, namespaceType, onError, pagination }),
+        ({ filterOptions, http, lists, pagination, onError }) =>
+          useExceptionList({ filterOptions, http, lists, onError, pagination }),
         {
           initialProps: {
             http: mockKibanaHttpService,
-            id: 'myListId',
-            namespaceType: 'single',
+            lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
           },
         }
@@ -100,8 +113,7 @@ describe('useExceptionList', () => {
       await waitForNextUpdate();
       rerender({
         http: mockKibanaHttpService,
-        id: 'newListId',
-        namespaceType: 'single',
+        lists: [{ id: 'newListId', namespaceType: 'single' }],
         onError: onErrorMock,
       });
       await waitForNextUpdate();
@@ -121,14 +133,19 @@ describe('useExceptionList', () => {
       >(() =>
         useExceptionList({
           http: mockKibanaHttpService,
-          id: 'myListId',
-          namespaceType: 'single',
+          lists: [{ id: 'myListId', namespaceType: 'single' }],
           onError: onErrorMock,
         })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      result.current[2]();
+
+      expect(typeof result.current[4]).toEqual('function');
+
+      if (result.current[4] != null) {
+        result.current[4]();
+      }
+
       await waitForNextUpdate();
 
       expect(spyOnfetchExceptionListById).toHaveBeenCalledTimes(2);
@@ -147,8 +164,7 @@ describe('useExceptionList', () => {
         () =>
           useExceptionList({
             http: mockKibanaHttpService,
-            id: 'myListId',
-            namespaceType: 'single',
+            lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
           })
       );
@@ -170,8 +186,7 @@ describe('useExceptionList', () => {
         () =>
           useExceptionList({
             http: mockKibanaHttpService,
-            id: 'myListId',
-            namespaceType: 'single',
+            lists: [{ id: 'myListId', namespaceType: 'single' }],
             onError: onErrorMock,
           })
       );
