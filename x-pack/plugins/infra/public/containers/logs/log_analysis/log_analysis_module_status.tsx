@@ -26,7 +26,6 @@ interface StatusReducerState<JobType extends string> {
 
 type StatusReducerAction =
   | { type: 'startedSetup' }
-  | { type: 'hiddenSetup' }
   | {
       type: 'finishedSetup';
       sourceId: string;
@@ -44,7 +43,6 @@ type StatusReducerAction =
       payload: FetchJobStatusResponsePayload;
     }
   | { type: 'failedFetchingJobStatuses' }
-  | { type: 'requestedJobConfigurationInitialization' }
   | { type: 'requestedJobConfigurationUpdate' }
   | { type: 'requestedJobDefinitionUpdate' }
   | { type: 'viewedResults' };
@@ -175,12 +173,6 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         ),
       };
     }
-    case 'requestedJobConfigurationInitialization': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'missing' },
-      };
-    }
     case 'requestedJobConfigurationUpdate': {
       return {
         ...state,
@@ -198,9 +190,6 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         ...state,
         setupStatus: { type: 'skipped', newlyCreated: true },
       };
-    }
-    case 'hiddenSetup': {
-      return { ...state, setupStatus: { type: 'hidden' } };
     }
     default: {
       return state;

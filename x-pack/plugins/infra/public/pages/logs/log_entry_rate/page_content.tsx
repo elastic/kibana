@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -21,7 +21,6 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
-import { LogEntryRateSetupFlyout } from './setup_flyout';
 
 export const LogEntryRatePageContent = () => {
   const {
@@ -38,18 +37,7 @@ export const LogEntryRatePageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, setupStatus, jobStatus, hideSetup } = useLogEntryRateModuleContext();
-
-  const isFlyoutOpen = useMemo<boolean>(() => {
-    switch (setupStatus.type) {
-      case 'required':
-      case 'pending':
-      case 'succeeded':
-        return true;
-      default:
-        return false;
-    }
-  }, [setupStatus]);
+  const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryRateModuleContext();
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
@@ -57,20 +45,16 @@ export const LogEntryRatePageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  let pageContent;
-
   if (isLoading || isUninitialized) {
-    pageContent = <SourceLoadingPage />;
+    return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
-    pageContent = (
-      <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />
-    );
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
   } else if (!hasLogAnalysisCapabilites) {
-    pageContent = <MlUnavailablePrompt />;
+    return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
-    pageContent = <MissingResultsPrivilegesPrompt />;
+    return <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus.type === 'initializing') {
-    pageContent = (
+    return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
           defaultMessage: 'Checking status of analysis jobs...',
@@ -78,19 +62,12 @@ export const LogEntryRatePageContent = () => {
       />
     );
   } else if (setupStatus.type === 'unknown') {
-    pageContent = <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
+    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isJobStatusWithResults(jobStatus['log-entry-rate'])) {
-    pageContent = <LogEntryRateResultsContent />;
+    return <LogEntryRateResultsContent />;
   } else if (!hasLogAnalysisSetupCapabilities) {
-    pageContent = <MissingSetupPrivilegesPrompt />;
+    return <MissingSetupPrivilegesPrompt />;
   } else {
-    pageContent = <LogEntryRateSetupContent />;
+    return <LogEntryRateSetupContent />;
   }
-
-  return (
-    <>
-      <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={hideSetup} />
-      {pageContent}
-    </>
-  );
 };

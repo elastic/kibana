@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -21,7 +21,6 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
-import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
 export const LogEntryCategoriesPageContent = () => {
   const {
@@ -38,23 +37,7 @@ export const LogEntryCategoriesPageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const {
-    fetchJobStatus,
-    setupStatus,
-    jobStatus,
-    hideSetup,
-  } = useLogEntryCategoriesModuleContext();
-
-  const isFlyoutOpen = useMemo<boolean>(() => {
-    switch (setupStatus.type) {
-      case 'required':
-      case 'pending':
-      case 'succeeded':
-        return true;
-      default:
-        return false;
-    }
-  }, [setupStatus]);
+  const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
@@ -62,20 +45,16 @@ export const LogEntryCategoriesPageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  let pageContent;
-
   if (isLoading || isUninitialized) {
-    pageContent = <SourceLoadingPage />;
+    return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
-    pageContent = (
-      <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />
-    );
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
   } else if (!hasLogAnalysisCapabilites) {
-    pageContent = <MlUnavailablePrompt />;
+    return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
-    pageContent = <MissingResultsPrivilegesPrompt />;
+    return <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus.type === 'initializing') {
-    pageContent = (
+    return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
           defaultMessage: 'Checking status of categorization jobs...',
@@ -83,19 +62,12 @@ export const LogEntryCategoriesPageContent = () => {
       />
     );
   } else if (setupStatus.type === 'unknown') {
-    pageContent = <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
+    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
-    pageContent = <LogEntryCategoriesResultsContent />;
+    return <LogEntryCategoriesResultsContent />;
   } else if (!hasLogAnalysisSetupCapabilities) {
-    pageContent = <MissingSetupPrivilegesPrompt />;
+    return <MissingSetupPrivilegesPrompt />;
   } else {
-    pageContent = <LogEntryCategoriesSetupContent />;
+    return <LogEntryCategoriesSetupContent />;
   }
-
-  return (
-    <>
-      <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={hideSetup} />
-      {pageContent}
-    </>
-  );
 };

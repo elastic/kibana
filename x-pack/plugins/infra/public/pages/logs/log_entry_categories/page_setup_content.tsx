@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
@@ -14,16 +14,19 @@ import {
   LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
 import { useTrackPageview } from '../../../../../observability/public';
-import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
+import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
 export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 
-  const { viewSetupForInitialization } = useLogEntryCategoriesModuleContext();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(true);
+  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   return (
     <>
+      <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
       <LogAnalysisSetupPage>
         <LogAnalysisSetupPageHeader>
           <FormattedMessage
@@ -41,7 +44,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiButton fill onClick={viewSetupForInitialization}>
+          <EuiButton fill onClick={openFlyout}>
             <FormattedMessage
               id="xpack.infra.logs.logEntryCategories.setupCta"
               defaultMessage="FIXME: Placeholder CTA"

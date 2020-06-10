@@ -22,7 +22,6 @@ export type SetupStatusRequiredReason =
 export type SetupStatus =
   | { type: 'initializing' } // acquiring job statuses to determine setup status
   | { type: 'unknown' } // job status could not be acquired (failed request etc)
-  | { type: 'hidden' } // Setup might be available but UI is not visible
   | {
       type: 'required';
       reason: SetupStatusRequiredReason;
