@@ -6,7 +6,18 @@
 
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 
-export type TimelineId = 'hosts-page-events' | 'hosts-page-external-alerts';
+export type HOST_PAGE_EVENTS_TIMELINE_ID = 'hosts-page-events';
+export type HOST_PAGE_EXTERNAL_EVENTS_TIMELINE_ID = 'hosts-page-external-alerts';
+export type ALERTS_PAGE_SINGLE_RULE_TIMELINE_ID = 'alerts-page-single-rule';
+export type ALERTS_PAGE_TIMELINE_ID = 'alerts-page';
+export type NETWORK_PAGE_EXTERNAL_EVENTS_TIMELINE_ID = 'network-page-external-alerts';
+
+export type TimelineId =
+  | HOST_PAGE_EVENTS_TIMELINE_ID
+  | HOST_PAGE_EXTERNAL_EVENTS_TIMELINE_ID
+  | ALERTS_PAGE_SINGLE_RULE_TIMELINE_ID
+  | ALERTS_PAGE_TIMELINE_ID
+  | NETWORK_PAGE_EXTERNAL_EVENTS_TIMELINE_ID;
 export interface TimelinesStorage {
   getAllTimelines: () => Record<TimelineId, TimelineModel> | null;
   getTimelineById: (id: TimelineId) => TimelineModel | null;

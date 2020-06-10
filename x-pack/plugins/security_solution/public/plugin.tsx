@@ -70,14 +70,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const endpointAlertsSubPlugin = new (await import('./endpoint_alerts')).EndpointAlerts();
       const managementSubPlugin = new (await import('./management')).Management();
 
-      const alertsStart = alertsSubPlugin.start();
+      const alertsStart = alertsSubPlugin.start(storage);
       const casesStart = casesSubPlugin.start();
       const hostsStart = hostsSubPlugin.start(storage);
-      const networkStart = networkSubPlugin.start();
+      const networkStart = networkSubPlugin.start(storage);
       const overviewStart = overviewSubPlugin.start();
       const timelinesStart = timelinesSubPlugin.start();
       const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
+
+      const timelineInitialState = {
+        timeline: {
+          ...timelinesStart.store.initialState.timeline!,
+          timelineById: {
+            ...timelinesStart.store.initialState.timeline!.timelineById,
+            ...alertsStart.storageTimelines!.timelineById,
+            ...hostsStart.storageTimelines!.timelineById,
+            ...networkStart.storageTimelines!.timelineById,
+          },
+        },
+      };
 
       return renderApp(services, params, {
         routes: [
@@ -94,7 +106,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           initialState: {
             ...hostsStart.store.initialState,
             ...networkStart.store.initialState,
-            ...timelinesStart.store.initialState,
+            ...timelineInitialState,
             ...endpointAlertsStart.store.initialState,
             ...managementSubPluginStart.store.initialState,
           },

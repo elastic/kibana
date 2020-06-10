@@ -8,9 +8,8 @@ import React from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../common/components/alerts_viewer';
+import { NETWORK_PAGE_EXTERNAL_EVENTS_TIMELINE_ID } from '../../constants';
 import { NetworkComponentQueryProps } from './types';
-
-const ALERTS_TABLE_ID = 'network-page-external-alerts';
 
 export const filterNetworkData: Filter[] = [
   {
@@ -64,7 +63,11 @@ export const filterNetworkData: Filter[] = [
 ];
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
-  <AlertsView timelineId={ALERTS_TABLE_ID} {...alertsProps} pageFilters={filterNetworkData} />
+  <AlertsView
+    timelineId={NETWORK_PAGE_EXTERNAL_EVENTS_TIMELINE_ID}
+    {...alertsProps}
+    pageFilters={filterNetworkData}
+  />
 ));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

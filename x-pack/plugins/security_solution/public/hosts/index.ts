@@ -6,12 +6,13 @@
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { SecuritySubPluginWithStore } from '../app/types';
+import { getTimelineInStorageById } from '../timelines/containers/local_storage';
+import { TimelineId } from '../timelines/containers/local_storage/types';
 import { getHostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
-import { TimelineId } from '../timelines/containers/local_storage/types';
-import { getTimelineInStorageById } from '../timelines/containers/local_storage';
+import { EVENTS_TIMELINE_ID, EXTERNAL_ALERTS_TIMELINE_ID } from './constants';
 
-const HOST_TIMELINE_IDS: TimelineId[] = ['hosts-page-events', 'hosts-page-external-alerts'];
+const HOST_TIMELINE_IDS: TimelineId[] = [EVENTS_TIMELINE_ID, EXTERNAL_ALERTS_TIMELINE_ID];
 
 export class Hosts {
   public setup() {}
@@ -20,6 +21,12 @@ export class Hosts {
     const hostTimelines = HOST_TIMELINE_IDS.reduce(
       (acc, timelineId) => {
         const timelineModel = getTimelineInStorageById(storage, timelineId);
+        if (!timelineModel) {
+          return {
+            ...acc,
+          };
+        }
+
         return {
           ...acc,
           timelineById: {

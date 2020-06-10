@@ -70,7 +70,7 @@ import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
-import { SINGLE_RULE_ALERTS_TABLE_ID } from '../../constants';
+import { SINGLE_RULE_ALERTS_TABLE_ID } from '../../../../constants';
 
 enum RuleDetailTabs {
   alerts = 'alerts',

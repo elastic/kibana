@@ -30,7 +30,7 @@ import { timelineActions } from '../../timelines/store/timeline';
 import {
   ALERTS_TABLE_ID as DETECTION_ENGINE_TIMELINE_ID,
   SINGLE_RULE_ALERTS_TABLE_ID as DETECTION_ENGINE_RULES_TIMELINE_ID,
-} from '../../alerts/pages/detection_engine/constants';
+} from '../../alerts/constants';
 
 const timelineIds = [DETECTION_ENGINE_TIMELINE_ID, DETECTION_ENGINE_RULES_TIMELINE_ID];
 
