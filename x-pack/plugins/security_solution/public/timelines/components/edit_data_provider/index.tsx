@@ -114,15 +114,18 @@ export const StatefulEditDataProvider = React.memo<Props>(
       }
     };
 
-    const onFieldSelected = useCallback((selectedField: EuiComboBoxOptionOption[]) => {
-      setUpdatedField(selectedField);
+    const onFieldSelected = useCallback(
+      (selectedField: EuiComboBoxOptionOption[]) => {
+        setUpdatedField(selectedField);
 
-      if (type === DataProviderType.template) {
-        setUpdatedValue(`{${selectedField[0].label}}`);
-      }
+        if (type === DataProviderType.template) {
+          setUpdatedValue(`{${selectedField[0].label}}`);
+        }
 
-      focusInput();
-    }, []);
+        focusInput();
+      },
+      [type]
+    );
 
     const onOperatorSelected = useCallback((operatorSelected: EuiComboBoxOptionOption[]) => {
       setUpdatedOperator(operatorSelected);
