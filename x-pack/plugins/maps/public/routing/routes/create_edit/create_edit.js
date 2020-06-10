@@ -322,7 +322,14 @@ export const MapsCreateEditView = class extends React.Component {
       }),
     };
     this.setState(newState);
-    updateGlobalState({ ...newState, refreshInterval: newState.refreshConfig });
+    updateGlobalState({
+      query: newState.query,
+      time: newState.time,
+      refreshInterval: {
+        value: newState.refreshConfig.interval,
+        pause: newState.refreshConfig.isPaused,
+      },
+    });
     setRefreshConfig(newState.refreshConfig);
   }
 
@@ -349,14 +356,12 @@ export const MapsCreateEditView = class extends React.Component {
 
   onRefreshChange = ({ isPaused, refreshInterval }) => {
     const { refreshConfig } = this.state;
-    this.setState({
-      refreshConfig: {
-        isPaused,
-        interval: refreshInterval ? refreshInterval : refreshConfig.interval,
-      },
-    });
-    this.syncAppAndGlobalState();
-    this.props.setRefreshConfig(refreshConfig);
+    const newRefreshConfig = {
+      isPaused,
+      interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+    };
+    this.setState({ refreshConfig: newRefreshConfig }, this.syncAppAndGlobalState);
+    this.props.setRefreshConfig(newRefreshConfig);
   };
 
   updateStateFromSavedQuery(savedQuery) {

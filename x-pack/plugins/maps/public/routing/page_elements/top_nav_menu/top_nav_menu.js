@@ -90,14 +90,14 @@ export function MapsTopNavMenu({
   };
 
   const onRefreshChange = function ({ isPaused, refreshInterval }) {
-    setRefreshConfig(
-      {
-        isPaused,
-        interval: refreshInterval ? refreshInterval : refreshConfig.interval,
-      },
-      () => setRefreshStoreConfig(refreshConfig)
-    );
-    syncAppAndGlobalState();
+    const newRefreshConfig = {
+      isPaused,
+      interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+    };
+    setRefreshConfig(newRefreshConfig, () => {
+      setRefreshStoreConfig(newRefreshConfig);
+      syncAppAndGlobalState();
+    });
   };
 
   return isVisible ? (
