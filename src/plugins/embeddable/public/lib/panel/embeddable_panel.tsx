@@ -224,9 +224,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             headerId={headerId}
           />
         )}
-        <div>
-          <EmbeddableErrorLabel error={this.state.error} />
-        </div>
+        <EmbeddableErrorLabel error={this.state.error} />
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
       </EuiPanel>
     );
