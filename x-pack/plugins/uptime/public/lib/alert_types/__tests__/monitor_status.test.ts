@@ -33,6 +33,24 @@ describe('monitor status alert type', () => {
       `);
     });
 
+    it('accepts original alert params', () => {
+      expect(
+        validate({
+          locations: ['fairbanks'],
+          numTimes: 3,
+          timerange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+          filters: '{foo: "bar"}',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "errors": Object {},
+        }
+      `);
+    });
+
     describe('timerange', () => {
       it('has invalid timerangeCount value', () => {
         expect(validate({ ...params, timerangeCount: 0 })).toMatchInlineSnapshot(`
@@ -96,7 +114,22 @@ describe('monitor status alert type', () => {
   });
 
   describe('initMonitorStatusAlertType', () => {
-    expect(initMonitorStatusAlertType({ autocomplete: {} })).toMatchInlineSnapshot(`
+    expect(
+      initMonitorStatusAlertType({
+        store: {
+          dispatch: jest.fn(),
+          getState: jest.fn(),
+          replaceReducer: jest.fn(),
+          subscribe: jest.fn(),
+          [Symbol.observable]: jest.fn(),
+        },
+        // @ts-ignore we don't need to test this functionality here because
+        // it's not used by the code this file tests
+        core: {},
+        // @ts-ignore
+        plugins: {},
+      })
+    ).toMatchInlineSnapshot(`
       Object {
         "alertParamsExpression": [Function],
         "defaultActionMessage": "{{context.message}}
@@ -104,8 +137,20 @@ describe('monitor status alert type', () => {
       {{context.downMonitorsWithGeo}}",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
-        "name": <MonitorStatusTitle />,
-        "requiresAppContext": true,
+        "name": <Provider
+          store={
+            Object {
+              "dispatch": [Function],
+              "getState": [Function],
+              "replaceReducer": [Function],
+              "subscribe": [Function],
+              Symbol(observable): [Function],
+            }
+          }
+        >
+          <MonitorStatusTitle />
+        </Provider>,
+        "requiresAppContext": false,
         "validate": [Function],
       }
     `);
