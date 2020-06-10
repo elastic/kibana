@@ -9,12 +9,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('endpoint', function () {
     this.tags('ciGroup7');
 
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./landing_page'));
-    loadTestFile(require.resolve('./header_nav'));
-    loadTestFile(require.resolve('./host_list'));
+    loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_list'));
-    loadTestFile(require.resolve('./alerts'));
-    loadTestFile(require.resolve('./resolver'));
+    loadTestFile(require.resolve('./policy_details'));
+
+    // loadTestFile(require.resolve('./alerts'));
+    // loadTestFile(require.resolve('./resolver'));
   });
 }
