@@ -38,7 +38,7 @@ describe('ExpressionChart', () => {
       toastNotifications: mocks.notifications.toasts,
       actionTypeRegistry: actionTypeRegistryMock.create() as any,
       alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: mocks.docLinks,
+      docLinks: {} as any,
       capabilities: {
         ...capabilities,
         actions: {
