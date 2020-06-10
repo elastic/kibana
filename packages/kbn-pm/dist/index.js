@@ -29702,7 +29702,7 @@ function startProc(name, options, log) {
             throw errors_1.createCliError(`[${name}] exited with code ${code}`);
         }
         return code;
-    })),
+    })), 
     // observe first error event
     Rx.fromEvent(childProcess, 'error').pipe(operators_1.take(1), operators_1.mergeMap((err) => Rx.throwError(err)))).pipe(operators_1.share());
     const lines$ = Rx.merge(observe_lines_1.observeLines(childProcess.stdout), observe_lines_1.observeLines(childProcess.stderr)).pipe(operators_1.tap((line) => log.write(` ${chalk_1.default.gray('proc')} [${chalk_1.default.gray(name)}] ${line}`)), operators_1.share());
@@ -34600,16 +34600,16 @@ function observeLines(readable) {
             buffer = buffer.slice(match.index + match[0].length);
         }
         return { buffer, lines };
-    }, { buffer: '' }),
+    }, { buffer: '' }), 
     // stop if done completes or errors
     operators_1.takeUntil(done$.pipe(operators_1.materialize())), operators_1.share());
     return Rx.merge(
     // use done$ to provide completion/errors
-    done$,
+    done$, 
     // merge in the "lines" from each step
-    scan$.pipe(operators_1.mergeMap(({ lines }) => lines || [])),
+    scan$.pipe(operators_1.mergeMap(({ lines }) => lines || [])), 
     // inject the "unsplit" data at the end
-    scan$.pipe(operators_1.last(), operators_1.mergeMap(({ buffer }) => (buffer ? [buffer] : [])),
+    scan$.pipe(operators_1.last(), operators_1.mergeMap(({ buffer }) => (buffer ? [buffer] : [])), 
     // if there were no lines, last() will error, so catch and complete
     operators_1.catchError(() => Rx.empty())));
 }
@@ -43544,18 +43544,18 @@ function mkdirP (p, opts, f, made) {
     else if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
     if (!made) made = null;
-
+    
     var cb = f || function () {};
     p = path.resolve(p);
-
+    
     xfs.mkdir(p, mode, function (er) {
         if (!er) {
             made = made || p;
@@ -43589,10 +43589,10 @@ mkdirP.sync = function sync (p, opts, made) {
     if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
@@ -43725,7 +43725,7 @@ function ncp (source, dest, options, callback) {
   limit = (limit < 1) ? 1 : (limit > 512) ? 512 : limit;
 
   startCopy(currentPath);
-
+  
   function startCopy(source) {
     started++;
     if (filter) {
@@ -43808,10 +43808,10 @@ function ncp (source, dest, options, callback) {
   function copyFile(file, target) {
     var readStream = fs.createReadStream(file.name),
         writeStream = fs.createWriteStream(target, { mode: file.mode });
-
+    
     readStream.on('error', onError);
     writeStream.on('error', onError);
-
+    
     if(transform) {
       transform(readStream, writeStream, file);
     } else {
@@ -43936,7 +43936,7 @@ function ncp (source, dest, options, callback) {
     if (typeof errs.write === 'undefined') {
       errs.push(err);
     }
-    else {
+    else { 
       errs.write(err.stack + '\n\n');
     }
     return cb();
@@ -54739,7 +54739,7 @@ function legacy (fs) {
     // @return {number} The 32-bit hash
     MurmurHash3.prototype.result = function() {
         var k1, h1;
-
+        
         k1 = this.k1;
         h1 = this.h1;
 
@@ -55904,7 +55904,7 @@ function usage($0, p) {
 
 module.exports = function (args, opts) {
     if (!opts) opts = {};
-
+    
     var flags = { bools : {}, strings : {}, unknownFn: null };
 
     if (typeof opts['unknown'] === 'function') {
@@ -55918,7 +55918,7 @@ module.exports = function (args, opts) {
           flags.bools[key] = true;
       });
     }
-
+    
     var aliases = {};
     Object.keys(opts.alias || {}).forEach(function (key) {
         aliases[key] = [].concat(opts.alias[key]);
@@ -55937,12 +55937,12 @@ module.exports = function (args, opts) {
      });
 
     var defaults = opts['default'] || {};
-
+    
     var argv = { _ : [] };
     Object.keys(flags.bools).forEach(function (key) {
         setArg(key, defaults[key] === undefined ? false : defaults[key]);
     });
-
+    
     var notFlags = [];
 
     if (args.indexOf('--') !== -1) {
@@ -55964,7 +55964,7 @@ module.exports = function (args, opts) {
             ? Number(val) : val
         ;
         setKey(argv, key.split('.'), value);
-
+        
         (aliases[key] || []).forEach(function (x) {
             setKey(argv, x.split('.'), value);
         });
@@ -55988,7 +55988,7 @@ module.exports = function (args, opts) {
             o[key] = [ o[key], value ];
         }
     }
-
+    
     function aliasIsBoolean(key) {
       return aliases[key].some(function (x) {
           return flags.bools[x];
@@ -55997,7 +55997,7 @@ module.exports = function (args, opts) {
 
     for (var i = 0; i < args.length; i++) {
         var arg = args[i];
-
+        
         if (/^--.+=/.test(arg)) {
             // Using [\s\S] instead of . because js doesn't support the
             // 'dotall' regex modifier. See:
@@ -56034,29 +56034,29 @@ module.exports = function (args, opts) {
         }
         else if (/^-[^-]+/.test(arg)) {
             var letters = arg.slice(1,-1).split('');
-
+            
             var broken = false;
             for (var j = 0; j < letters.length; j++) {
                 var next = arg.slice(j+2);
-
+                
                 if (next === '-') {
                     setArg(letters[j], next, arg)
                     continue;
                 }
-
+                
                 if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
                     setArg(letters[j], next.split('=')[1], arg);
                     broken = true;
                     break;
                 }
-
+                
                 if (/[A-Za-z]/.test(letters[j])
                 && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
                     setArg(letters[j], next, arg);
                     broken = true;
                     break;
                 }
-
+                
                 if (letters[j+1] && letters[j+1].match(/\W/)) {
                     setArg(letters[j], arg.slice(j+2), arg);
                     broken = true;
@@ -56066,7 +56066,7 @@ module.exports = function (args, opts) {
                     setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg);
                 }
             }
-
+            
             var key = arg.slice(-1)[0];
             if (!broken && key !== '-') {
                 if (args[i+1] && !/^(-|--)[^-]/.test(args[i+1])
@@ -56096,17 +56096,17 @@ module.exports = function (args, opts) {
             }
         }
     }
-
+    
     Object.keys(defaults).forEach(function (key) {
         if (!hasKey(argv, key.split('.'))) {
             setKey(argv, key.split('.'), defaults[key]);
-
+            
             (aliases[key] || []).forEach(function (x) {
                 setKey(argv, x.split('.'), defaults[key]);
             });
         }
     });
-
+    
     if (opts['--']) {
         argv['--'] = new Array();
         notFlags.forEach(function(key) {
@@ -62963,18 +62963,18 @@ function mkdirP (p, opts, f, made) {
     else if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
     if (!made) made = null;
-
+    
     var cb = f || function () {};
     p = path.resolve(p);
-
+    
     xfs.mkdir(p, mode, function (er) {
         if (!er) {
             made = made || p;
@@ -63007,10 +63007,10 @@ mkdirP.sync = function sync (p, opts, made) {
     if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
@@ -83474,7 +83474,7 @@ module.exports = function kindOf(val) {
   if (type === '[object Symbol]') {
     return 'symbol';
   }
-
+  
   if (type === '[object Map Iterator]') {
     return 'mapiterator';
   }
@@ -83487,7 +83487,7 @@ module.exports = function kindOf(val) {
   if (type === '[object Array Iterator]') {
     return 'arrayiterator';
   }
-
+  
   // typed arrays
   if (type === '[object Int8Array]') {
     return 'int8array';
@@ -91173,7 +91173,7 @@ module.exports = function kindOf(val) {
   if (type === '[object Symbol]') {
     return 'symbol';
   }
-
+  
   if (type === '[object Map Iterator]') {
     return 'mapiterator';
   }
@@ -91186,7 +91186,7 @@ module.exports = function kindOf(val) {
   if (type === '[object Array Iterator]') {
     return 'arrayiterator';
   }
-
+  
   // typed arrays
   if (type === '[object Int8Array]') {
     return 'int8array';
@@ -97780,13 +97780,13 @@ var types = parse.types;
 module.exports = function (re, opts) {
     if (!opts) opts = {};
     var replimit = opts.limit === undefined ? 25 : opts.limit;
-
+    
     if (isRegExp(re)) re = re.source;
     else if (typeof re !== 'string') re = String(re);
-
+    
     try { re = parse(re) }
     catch (err) { return false }
-
+    
     var reps = 0;
     return (function walk (node, starHeight) {
         if (node.type === types.REPETITION) {
@@ -97795,7 +97795,7 @@ module.exports = function (re, opts) {
             if (starHeight > 1) return false;
             if (reps > replimit) return false;
         }
-
+        
         if (node.options) {
             for (var i = 0, len = node.options.length; i < len; i++) {
                 var ok = walk({ stack: node.options[i] }, starHeight);
@@ -97804,12 +97804,12 @@ module.exports = function (re, opts) {
         }
         var stack = node.stack || (node.value && node.value.stack);
         if (!stack) return true;
-
+        
         for (var i = 0; i < stack.length; i++) {
             var ok = walk(stack[i], starHeight);
             if (!ok) return false;
         }
-
+        
         return true;
     })(re, 0);
 };
