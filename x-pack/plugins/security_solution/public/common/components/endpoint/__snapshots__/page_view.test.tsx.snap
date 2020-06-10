@@ -6,7 +6,7 @@ exports[`PageView component should display body header custom element 1`] = `
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -101,7 +101,7 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -199,7 +199,7 @@ exports[`PageView component should display header left and right 1`] = `
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -312,7 +312,7 @@ exports[`PageView component should display only body if not header props used 1`
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -384,7 +384,7 @@ exports[`PageView component should display only header left 1`] = `
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -486,7 +486,7 @@ exports[`PageView component should display only header right but include an empt
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -585,7 +585,7 @@ exports[`PageView component should pass through EuiPage props 1`] = `
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
@@ -674,7 +674,7 @@ exports[`PageView component should use custom element for header left and not wr
 }
 
 .c0.endpoint--isListView .endpoint-header {
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 0;
 }
 
