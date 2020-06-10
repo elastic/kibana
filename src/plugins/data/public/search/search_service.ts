@@ -39,6 +39,7 @@ import {
 import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { esdsl, esRawResponse } from './expressions';
 
 interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
@@ -90,6 +91,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     // register expression functions for each agg type
     const aggFunctions = getAggTypesFunctions();
     aggFunctions.forEach((fn) => expressions.registerFunction(fn));
+
+    expressions.registerFunction(esdsl);
+    expressions.registerType(esRawResponse);
 
     return {
       aggs: {
