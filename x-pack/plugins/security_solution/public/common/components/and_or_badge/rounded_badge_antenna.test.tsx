@@ -9,13 +9,13 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { AndOrBadge } from './';
+import { RoundedBadgeAntenna } from './rounded_badge_antenna';
 
-describe('AndOrBadge', () => {
-  test('it renders top and bottom antenna bars when "includeAntennas" is true', () => {
+describe('RoundedBadgeAntenna', () => {
+  test('it renders top and bottom antenna bars', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AndOrBadge includeAntennas type="and" />
+        <RoundedBadgeAntenna type="and" />
       </ThemeProvider>
     );
 
@@ -24,22 +24,10 @@ describe('AndOrBadge', () => {
     expect(wrapper.find('[data-test-subj="andOrBadgeBarBottom"]').exists()).toBeTruthy();
   });
 
-  test('it does not render top and bottom antenna bars when "includeAntennas" is false', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AndOrBadge type="or" />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('OR');
-    expect(wrapper.find('[data-test-subj="andOrBadgeBarTop"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="andOrBadgeBarBottom"]').exists()).toBeFalsy();
-  });
-
   test('it renders "and" when "type" is "and"', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AndOrBadge type="and" />
+        <RoundedBadgeAntenna type="and" />
       </ThemeProvider>
     );
 
@@ -49,7 +37,7 @@ describe('AndOrBadge', () => {
   test('it renders "or" when "type" is "or"', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AndOrBadge type="or" />
+        <RoundedBadgeAntenna type="or" />
       </ThemeProvider>
     );
 
