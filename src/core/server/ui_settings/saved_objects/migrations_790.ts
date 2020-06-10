@@ -20,24 +20,21 @@
 import { SavedObjectSanitizedUiSettings, SavedObjectUnsanitizedUiSettings } from './types';
 
 export const migrations790 = {
-  '7.9.0': (doc: SavedObjectUnsanitizedUiSettings<any>): SavedObjectSanitizedUiSettings<any> => {
-    const newAttributes = Object.keys(doc.attributes).reduce((acc, key) => {
-      if (key.indexOf('siem') > -1) {
-        const newKey = key.replace('siem', 'securitySolution');
-        return {
-          ...acc,
-          [newKey]: doc.attributes[key],
-        };
-      }
-      return {
-        ...acc,
-        [key]: doc.attributes[key],
-      };
-    }, {});
-    return {
-      ...doc,
-      attributes: newAttributes,
-      references: doc.references || [],
-    };
-  },
+  '7.9.0': (doc: SavedObjectUnsanitizedUiSettings<any>): SavedObjectSanitizedUiSettings<any> => ({
+    ...doc,
+    attributes: Object.keys(doc.attributes).reduce(
+      (acc, key) =>
+        key.indexOf('siem') > -1
+          ? {
+              ...acc,
+              [key.replace('siem', 'securitySolution')]: doc.attributes[key],
+            }
+          : {
+              ...acc,
+              [key]: doc.attributes[key],
+            },
+      {}
+    ),
+    references: doc.references || [],
+  }),
 };
