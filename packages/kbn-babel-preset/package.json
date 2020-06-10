@@ -9,7 +9,7 @@
     "@babel/plugin-proposal-optional-chaining": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.9.1",
-    "@babel/preset-typescript": "^7.9.0",
+    "@babel/preset-typescript": "^7.10.1",
     "babel-plugin-add-module-exports": "^1.0.2",
     "babel-plugin-filter-imports": "^3.0.0",
     "babel-plugin-styled-components": "^1.10.7",

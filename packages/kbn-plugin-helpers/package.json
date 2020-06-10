@@ -37,7 +37,7 @@
     "@types/through2": "^2.0.35",
     "@types/through2-map": "^3.0.0",
     "@types/vinyl": "^2.0.4",
-    "typescript": "3.7.2"
+    "typescript": "3.9.5"
   },
   "peerDependencies": {
     "@kbn/babel-preset": "1.0.0"
