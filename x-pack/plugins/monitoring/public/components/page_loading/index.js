@@ -23,7 +23,7 @@ export function PageLoading() {
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
-          className="noData__content"
+          className="monNoData__content"
         >
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>

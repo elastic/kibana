@@ -1,11 +1,3 @@
-.monPipelineViewer__statement {
-  padding-left: $euiSizeM;
-}
-
-.monPipelineViewer__plugin {
-  margin-left: $euiSizeXS;
-}
-
 .monPipelineViewer__spaceContainer {
   background-color: $euiColorEmptyShade;
   align-self: stretch;
@@ -31,23 +23,6 @@
   }
 }
 
-.monPipelineViewer__metric {
-  text-align: right;
-
-  &--cpuTime {
-    width: $euiSizeXXL;
-  }
-
-  &--events,
-  &--eventsEmitted {
-    width: $euiSizeXXL * 4;
-  }
-
-  &--eventMillis {
-    width: $euiSizeXXL * 2;
-  }
-}
-
 .monPipelineViewer__list {
   .monPipelineViewer__listItem {
     display: flex;
@@ -66,18 +41,7 @@
 }
 
 @include euiBreakpoint('m') {
-  .monPipelineViewer {
-    .monPipelineViewer__spacer {
-      border: none;
-    }
-
-    .monPipelineViewer__metricFlexItem {
-      margin-bottom: $euiSizeXS !important; // sass-lint:disable-line no-important
-    }
-
-    .monPipelineViewer__metric {
-      text-align: left;
-      padding-left: $euiSizeXL;
-    }
+  .monPipelineViewer__spacer {
+    border: none;
   }
 }

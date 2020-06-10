@@ -14,12 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import './summary_status.scss';
 
 const wrapChild = ({ label, value, ...props }, index) => (
-  <EuiFlexItem
-    className="monSummaryStatusNoWrap__flexItem"
-    key={`summary-status-item-${index}`}
-    grow={false}
-    {...props}
-  >
+  <EuiFlexItem key={`summary-status-item-${index}`} grow={false} {...props}>
     <EuiStat title={value} titleSize="xs" textAlign="left" description={label ? `${label}` : ''} />
   </EuiFlexItem>
 );
@@ -80,7 +75,7 @@ export function SummaryStatus({
 }) {
   return (
     <div {...props} className="monSummaryStatusNoWrap">
-      <EuiFlexGroup className="monSummaryStatusNoWrap__flexGroup" justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
         <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
         {metrics.map(wrapChild)}
       </EuiFlexGroup>
