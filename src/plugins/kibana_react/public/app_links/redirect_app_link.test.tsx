@@ -30,7 +30,6 @@ describe('RedirectAppLinks', () => {
 
   beforeEach(() => {
     application = applicationServiceMock.createStartContract();
-    application.parseAppUrl.mockReturnValue({ app: 'targetApp' });
     application.currentAppId$ = new BehaviorSubject<string>('currentApp');
   });
 

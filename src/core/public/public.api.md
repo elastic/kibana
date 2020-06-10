@@ -121,7 +121,6 @@ export interface ApplicationStart {
         state?: any;
     }): Promise<void>;
     navigateToUrl(url: string): Promise<void>;
-    parseAppUrl(url: string): ParsedAppUrl | undefined;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -978,14 +977,6 @@ export interface PackageInfo {
     dist: boolean;
     // (undocumented)
     version: string;
-}
-
-// @public
-export interface ParsedAppUrl {
-    // (undocumented)
-    app: string;
-    // (undocumented)
-    path?: string;
 }
 
 // @public

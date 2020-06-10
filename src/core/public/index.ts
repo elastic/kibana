@@ -122,7 +122,6 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
-  ParsedAppUrl,
   ScopedHistory,
   LegacyApp,
   PublicLegacyAppInfo,

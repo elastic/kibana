@@ -42,7 +42,6 @@ export {
   LegacyApp,
   PublicAppInfo,
   PublicLegacyAppInfo,
-  ParsedAppUrl,
   // Internal types
   InternalApplicationSetup,
   InternalApplicationStart,
