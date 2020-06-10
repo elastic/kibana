@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, Fragment, useRef } from 'react';
+import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -87,6 +87,16 @@ export function SavedQueryManagementComponent({
       fetchCountAndSavedQueries();
     }
   }, [isOpen, activePage, savedQueryService]);
+
+  const handleSave = useCallback(() => {
+    onSave();
+    setIsOpen(false);
+  }, [onSave]);
+
+  const handleSaveAsNew = useCallback(() => {
+    onSaveAsNew();
+    setIsOpen(false);
+  }, [onSaveAsNew]);
 
   const goToPage = (pageNumber: number) => {
     setActivePage(pageNumber);
@@ -234,7 +244,7 @@ export function SavedQueryManagementComponent({
                     <EuiButton
                       size="s"
                       fill
-                      onClick={() => onSave()}
+                      onClick={handleSave}
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
                         {
@@ -255,7 +265,7 @@ export function SavedQueryManagementComponent({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       size="s"
-                      onClick={() => onSaveAsNew()}
+                      onClick={handleSaveAsNew}
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
                         {
@@ -279,7 +289,7 @@ export function SavedQueryManagementComponent({
                   <EuiButton
                     size="s"
                     fill
-                    onClick={() => onSave()}
+                    onClick={handleSave}
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
                       { defaultMessage: 'Save a new saved query' }
