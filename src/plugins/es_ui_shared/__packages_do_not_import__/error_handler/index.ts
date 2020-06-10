@@ -18,3 +18,5 @@
  */
 
 export { isEsError } from './is_es_error';
+
+export { handleErrors } from './error_handler';

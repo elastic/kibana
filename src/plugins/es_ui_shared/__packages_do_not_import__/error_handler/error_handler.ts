@@ -16,5 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { KibanaResponseFactory, IKibanaResponse } from 'kibana/server';
 
-export { isEsError, handleErrors } from '../../__packages_do_not_import__/error_handler';
+import { isEsError } from './is_es_error';
+
+export const handleErrors = async (
+  response: KibanaResponseFactory,
+  requestHandler: () => IKibanaResponse<any> | Promise<IKibanaResponse<any>>,
+  customErrorHandler?: (e: any) => IKibanaResponse<any> | undefined
+) => {
+  try {
+    return await requestHandler();
+  } catch (e) {
+    const customErrorResponse = customErrorHandler ? customErrorHandler(e) : undefined;
+    if (customErrorResponse) {
+      return customErrorResponse;
+    }
+
+    // Case: Error from Elasticsearch JS client
+    if (isEsError(e)) {
+      return response.customError({ statusCode: e.statusCode, body: e });
+    }
+
+    // Case: default
+    return response.internalError({ body: e });
+  }
+};
