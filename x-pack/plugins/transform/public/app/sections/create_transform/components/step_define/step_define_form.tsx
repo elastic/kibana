@@ -43,7 +43,6 @@ import { useIndexData } from '../../../../hooks/use_index_data';
 import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
-import { useApi } from '../../../../hooks/use_api';
 
 import { AdvancedPivotEditor } from '../advanced_pivot_editor';
 import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
@@ -65,8 +64,6 @@ export interface StepDefineFormProps {
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { indexPattern } = searchItems;
-
-  const api = useApi();
 
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
@@ -296,9 +293,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            {/* TODO move mini charts data fetching to outer hook
-            // @ts-ignore */}
-            <DataGrid {...indexPreviewProps} api={api} indexPatternTitle={indexPattern.title} />
+            <DataGrid {...indexPreviewProps} />
           </>
         </EuiFormRow>
       </EuiForm>
