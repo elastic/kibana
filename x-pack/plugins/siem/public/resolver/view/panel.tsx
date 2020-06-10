@@ -9,10 +9,8 @@ import {
   EuiBadge,
   EuiBasicTableColumn,
   EuiTitle,
-  EuiHorizontalRule,
   EuiInMemoryTable,
 } from '@elastic/eui';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from './side_effect_context';
@@ -36,6 +34,9 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { RelatedEventDataEntryWithStats } from '../types';
 import { EuiI18nNumber } from '@elastic/eui';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 /**
  * The two query parameters we read/write on
@@ -45,9 +46,6 @@ interface crumbInfo {
   readonly crumbEvent: string;
 }
 
-//To control "just-once" behavior of the node selection layout effect:
-let lockNodeSelectionByParam = false;
-
 const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
   month: '2-digit',
@@ -56,6 +54,22 @@ const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   minute: '2-digit',
   second: '2-digit',
 });
+
+function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {  
+  const date = new Date(timestamp);
+  if (isFinite(date.getTime())) {
+    return formatter.format(date)
+  }
+  else {
+    return 'Invalid Date';
+  }
+}
+
+const BoldCode = styled(EuiCode)`
+  &.euiCodeBlock code.euiCodeBlock__code {
+    font-weight: 900;
+  }
+`
 
 /**
  * During user testing, one user indicated they wanted to see stronger visual relationships between
@@ -124,6 +138,71 @@ const WaitForRelatedEvents = memo(function({processEvent}: {processEvent: Resolv
   )
 });
 
+const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByType({processEvent, eventType, relatedEventsState, pushToQueryParams}: {
+  processEvent: ResolverEvent;
+  pushToQueryParams: (arg0: crumbInfo)=>unknown;
+  eventType: string;
+  relatedEventsState: RelatedEventDataEntryWithStats;
+}){
+  const processName = processEvent && event.eventName(processEvent);
+  const processEntityId = event.entityId(processEvent);
+  const totalCount = Object.values(relatedEventsState.stats).reduce((a,v)=>{ return a + v }, 0);
+  const eventsString = i18n.translate('xpack.siem.endpoint.resolver.panel.processEventListByType.events', {
+    defaultMessage: 'Events',
+  });
+  const matchingEvents = useMemo(() =>{
+      return relatedEventsState.relatedEvents.reduce((a: ResolverEvent[] ,{relatedEvent, relatedEventType})=>{
+        relatedEventType === eventType && a.push(relatedEvent)
+        return a
+      },[]).map((resolverEvent)=>{
+        const eventTime = event.eventTimestamp(resolverEvent);
+        const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime); 
+        return {
+          formattedDate,
+          eventType: eventType + ' ' + event.ecsEventType(resolverEvent),
+          name: event.eventId(resolverEvent),
+        }
+      })
+    },
+  [relatedEventsState, eventType]);
+  const crumbs = useMemo(()=>{
+    return [
+      {
+        text: eventsString,
+        onClick: ()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) },
+      },
+      {
+        text: processName,
+        onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: ''}) }
+      },
+      {
+        text: <><EuiI18nNumber value={totalCount} />{/*Non-breaking space->*/` ${eventsString}`}</>,
+        onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: 'all'}) }
+      },
+      {
+        text: <><EuiI18nNumber value={matchingEvents.length} />{/*Non-breaking space->*/` ${eventType}`}</>,
+        onClick: ()=>{}
+      }
+    ]
+  },[]);
+  return (<>
+    <EuiBreadcrumbs breadcrumbs={crumbs} />
+    <EuiSpacer  size="l" />
+    <>
+      {matchingEvents.map((eventView, index)=>{
+        return (
+          <>
+            <EuiText><BoldCode>{eventView.eventType}</BoldCode>{' @ '}{eventView.formattedDate}</EuiText>
+            <EuiSpacer  size="xs" />
+            <EuiButtonEmpty onClick={()=>{}}>{eventView.name}</EuiButtonEmpty>
+            {index === matchingEvents.length - 1 ? null : (<EuiHorizontalRule margin="m" />)}
+          </>
+        )
+      })}
+    </>
+  </>)
+});
+
 /**
  * This view gives counts for all the related events of a process grouped by related event type.
  * It should look something like:
@@ -140,6 +219,11 @@ const EventCountsForProcess = memo(function EventCountsForProcess({processEvent,
   pushToQueryParams: (arg0: crumbInfo)=>unknown;
   relatedEventsState: RelatedEventDataEntryWithStats;
 }) {
+  interface EventCountsTableView {
+    name: string;
+    count: number;
+  }
+  
   const processName = processEvent && event.eventName(processEvent);
   const processEntityId = event.entityId(processEvent);
   const totalCount = Object.values(relatedEventsState.stats).reduce((a,v)=>{ return a + v }, 0);
@@ -157,18 +241,53 @@ const EventCountsForProcess = memo(function EventCountsForProcess({processEvent,
         onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: ''}) }
       },
       {
-        text: <><EuiI18nNumber value={totalCount} />{` ${eventsString}`}</>,
+        text: <><EuiI18nNumber value={totalCount} />{/*Non-breaking space->*/` ${eventsString}`}</>,
         onClick: ()=>{ pushToQueryParams({crumbId: processEntityId, crumbEvent: ''}) }
       }
     ]
-  },[])
+  },[]);
+  const rows = useMemo(()=>{
+    return Object.entries(relatedEventsState.stats).map(([eventType, count]): EventCountsTableView => { 
+      return {
+        name: eventType,
+        count,
+      }
+    });
+  },[relatedEventsState]);
+  const columns = useMemo<Array<EuiBasicTableColumn<EventCountsTableView>>>(
+    () => [
+      {
+        field: 'count',
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.count', {
+          defaultMessage: 'Count',
+        }),
+        width: '20%',
+        sortable: true,
+      },
+      {
+        field: 'name',
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.eventType', {
+          defaultMessage: 'Event Type',
+        }),
+        width: '80%',
+        sortable: true,
+        render(name: string) {
+          return (<EuiButtonEmpty onClick={()=>{ 
+            pushToQueryParams({crumbId: event.entityId(processEvent), crumbEvent: name});
+          }}>{name}</EuiButtonEmpty>)
+        },
+      }]
+  ,[])
   return (
     <>
       <EuiBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
+      <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />
     </>
-  )
-});
+   )
+  });
+  
+
 
 const ProcessListWithCounts = memo(function ProcessListWithCounts({pushToQueryParams}: {
   pushToQueryParams: (arg0: crumbInfo)=>unknown
@@ -300,6 +419,12 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
   }
 `;
 
+
+
+/**
+ * A description list view of all the Metadata that goes with a particular process event, like:
+ * Created, Pid, User/Domain, etc.
+ */
 const ProcessDetails = memo(function ProcessListWithCounts({processEvent, pushToQueryParams} : {
   processEvent: ResolverEvent;
   pushToQueryParams: (arg0: crumbInfo)=>unknown
@@ -490,7 +615,9 @@ const PanelContent = memo(function PanelContent() {
       if(!relatedEventsState || relatedEventsState === 'waitingForRelatedEventData'){
         //Related event data hasn't been fetched for this process yet:
         //The UI around the menu should dispatch the /events effect for this.
-        return console.log('waiting'),'waiting';
+        if(uiSelectedEvent){
+          return console.log('waiting'),<WaitForRelatedEvents processEvent={uiSelectedEvent} />;
+        }
       }
       if(relatedEventsState === 'error'){
         //return as error if there was a service error requesting the /events
@@ -537,7 +664,7 @@ const PanelContent = memo(function PanelContent() {
       }
       if(crumbEvent in displayNameRecord){
         //If crumbEvent is one of the known event types, it's for a related event view narrowed by that type
-        return console.log('processEventListNarrowedByType'),'processEventListNarrowedByType';
+        return console.log('processEventListNarrowedByType'),<ProcessEventListNarrowedByType processEvent={uiSelectedEvent} pushToQueryParams={pushToQueryParams} relatedEventsState={relatedEventsState} eventType={crumbEvent} />;
       }
     }
     //The default 'Event List' / 'List of all processes' view

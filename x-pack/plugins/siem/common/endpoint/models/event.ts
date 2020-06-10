@@ -65,3 +65,15 @@ export function eventType(event: ResolverEvent): string {
   }
   return eventCategoryToReturn;
 }
+
+/**
+ * ECS category will be things like 'creation', 'deletion', 'access', etc. 
+ * see: https://www.elastic.co/guide/en/ecs/current/ecs-event.html
+ * @param event The ResolverEvent to get the ecs type for
+ */
+export function ecsEventType(event: ResolverEvent): string {
+  if (isLegacyEvent(event)) {
+    return event.endgame.event_subtype_full || '';
+  }
+  return typeof event.event.type === 'string' ? event.event.type : event.event.type.join('/');
+}
