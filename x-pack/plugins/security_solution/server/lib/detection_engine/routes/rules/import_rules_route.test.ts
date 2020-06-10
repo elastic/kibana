@@ -250,14 +250,16 @@ describe('import_rules_route', () => {
         errors: [
           {
             error: {
-              message: 'child "rule_id" fails because ["rule_id" is required]',
+              // TODO: Change the formatter to do better than output [object Object]
+              message: '[object Object],[object Object]',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
           {
             error: {
-              message: 'child "rule_id" fails because ["rule_id" is required]',
+              // TODO: Change the formatter to do better than output [object Object]
+              message: '[object Object],[object Object]',
               status_code: 400,
             },
             rule_id: '(unknown id)',

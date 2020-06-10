@@ -13,7 +13,6 @@ import {
   list_values_operator as listOperator,
 } from '../common/schemas';
 
-export type ListsDefaultArrayC = t.Type<List[], List[], unknown>;
 export type List = t.TypeOf<typeof listAnd>;
 export type ListValues = t.TypeOf<typeof listValues>;
 export type ListOperator = t.TypeOf<typeof listOperator>;
@@ -22,12 +21,14 @@ export type ListOperator = t.TypeOf<typeof listOperator>;
  * Types the ListsDefaultArray as:
  *   - If null or undefined, then a default array will be set for the list
  */
-export const ListsDefaultArray: ListsDefaultArrayC = new t.Type<List[], List[], unknown>(
+export const ListsDefaultArray = new t.Type<List[], List[], unknown>(
   'listsWithDefaultArray',
   t.array(listAnd).is,
   (input): Either<t.Errors, List[]> =>
     input == null ? t.success([]) : t.array(listAnd).decode(input),
   t.identity
 );
+
+export type ListsDefaultArrayC = typeof ListsDefaultArray;
 
 export type ListsDefaultArraySchema = t.TypeOf<typeof ListsDefaultArray>;

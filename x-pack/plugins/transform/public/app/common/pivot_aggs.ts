@@ -79,17 +79,32 @@ export type PivotAggDict = {
   [key in AggName]: PivotAgg;
 };
 
+/**
+ * The maximum level of sub-aggregations
+ */
+export const MAX_NESTING_SUB_AGGS = 10;
+
 // The internal representation of an aggregation definition.
 export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;
   aggName: AggName;
   dropDownName: string;
+  /** Indicates if aggregation supports sub-aggregations */
+  isSubAggsSupported?: boolean;
+  /** Dictionary of the sub-aggregations */
+  subAggs?: PivotAggsConfigDict;
+  /** Reference to the parent aggregation */
+  parentAgg?: PivotAggsConfig;
 }
 
 /**
  * Resolves agg UI config from provided ES agg definition
  */
-export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggName: string) {
+export function getAggConfigFromEsAgg(
+  esAggDefinition: Record<string, any>,
+  aggName: string,
+  parentRef?: PivotAggsConfig
+) {
   const aggKeys = Object.keys(esAggDefinition);
 
   // Find the main aggregation key
@@ -108,12 +123,21 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
   const config = getAggFormConfig(agg, commonConfig);
 
+  if (parentRef) {
+    config.parentAgg = parentRef;
+  }
+
   if (isPivotAggsWithExtendedForm(config)) {
     config.setUiConfigFromEs(esAggDefinition[agg]);
   }
 
   if (aggKeys.includes('aggs')) {
-    // TODO process sub-aggregation
+    config.subAggs = {};
+    for (const [subAggName, subAggConfigs] of Object.entries(
+      esAggDefinition.aggs as Record<string, object>
+    )) {
+      config.subAggs[subAggName] = getAggConfigFromEsAgg(subAggConfigs, subAggName, config);
+    }
   }
 
   return config;
@@ -199,6 +223,7 @@ export function getEsAggFromAggConfig(
   delete esAgg.agg;
   delete esAgg.aggName;
   delete esAgg.dropDownName;
+  delete esAgg.parentAgg;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
     esAgg = pivotAggsConfig.getEsAggConfig();
@@ -208,7 +233,20 @@ export function getEsAggFromAggConfig(
     }
   }
 
-  return {
+  const result = {
     [pivotAggsConfig.agg]: esAgg,
   };
+
+  if (
+    isPivotAggsConfigWithUiSupport(pivotAggsConfig) &&
+    pivotAggsConfig.subAggs !== undefined &&
+    Object.keys(pivotAggsConfig.subAggs).length > 0
+  ) {
+    result.aggs = {};
+    for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig);
+    }
+  }
+
+  return result;
 }

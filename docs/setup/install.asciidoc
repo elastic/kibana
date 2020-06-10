@@ -1,13 +1,13 @@
 [[install]]
-== Installing Kibana
+== Install {kib}
 
 [float]
-=== Hosted Kibana
+=== Hosted {kib}
 
 If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
 
 [float]
-=== Installing Kibana Yourself
+=== Install {kib} yourself
 
 NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
 
@@ -59,10 +59,12 @@ additional setup instructions.
 
 include::install/targz.asciidoc[]
 
+include::install/windows.asciidoc[]
+
 include::install/deb.asciidoc[]
 
 include::install/rpm.asciidoc[]
 
-include::install/windows.asciidoc[]
+include::{kib-repo-dir}/setup/docker.asciidoc[]
 
 include::install/brew.asciidoc[]
