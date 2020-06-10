@@ -6,6 +6,8 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
@@ -16,6 +18,12 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
+import { AllCasesModal } from '../../../../cases/components/all_cases_modal';
+import { SiemPageName } from '../../../../app/types';
+import * as i18n from './translations';
+import { State } from '../../../../common/store';
+import { timelineSelectors } from '../../../store/timeline';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -78,6 +86,7 @@ export const Properties = React.memo<Props>(
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);
+    const dispatch = useDispatch();
 
     const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
     const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
@@ -89,6 +98,30 @@ export const Properties = React.memo<Props>(
       setShowTimelineModal(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    const [showCaseModal, setShowCaseModal] = useState(false);
+    const onCloseCaseModal = useCallback(() => setShowCaseModal(false), []);
+    const onOpenCaseModal = useCallback(() => setShowCaseModal(true), []);
+    const history = useHistory();
+    const currentTimeline = useSelector((state: State) =>
+      timelineSelectors.selectTimeline(state, timelineId)
+    );
+
+    const onRowClick = useCallback(
+      (id: string) => {
+        onCloseCaseModal();
+        history.push({
+          pathname: `/${SiemPageName.case}/${id}`,
+        });
+        dispatch(
+          setInsertTimeline({
+            timelineId,
+            timelineSavedObjectId: currentTimeline.savedObjectId,
+            timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
+          })
+        );
+      },
+      [onCloseCaseModal, currentTimeline, dispatch, history, timelineId, title]
+    );
 
     const datePickerWidth = useMemo(
       () =>
@@ -136,6 +169,7 @@ export const Properties = React.memo<Props>(
           onButtonClick={onButtonClick}
           onClosePopover={onClosePopover}
           onCloseTimelineModal={onCloseTimelineModal}
+          onOpenCaseModal={onOpenCaseModal}
           onOpenTimelineModal={onOpenTimelineModal}
           onToggleShowNotes={onToggleShowNotes}
           showActions={showActions}
@@ -150,6 +184,11 @@ export const Properties = React.memo<Props>(
           updateDescription={updateDescription}
           updateNote={updateNote}
           usersViewing={usersViewing}
+        />
+        <AllCasesModal
+          onCloseCaseModal={onCloseCaseModal}
+          showCaseModal={showCaseModal}
+          onRowClick={onRowClick}
         />
       </TimelineProperties>
     );

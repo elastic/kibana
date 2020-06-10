@@ -6,14 +6,17 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addTimeline,
   addHistory,
   addNote,
   addNoteToEvent,
   addProvider,
+  addTimeline,
   applyDeltaToColumnWidth,
   applyDeltaToWidth,
   applyKqlFilterQuery,
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
   createTimeline,
   dataProviderEdited,
   endTimelineSaving,
@@ -21,12 +24,12 @@ import {
   removeColumn,
   removeProvider,
   setEventsDeleted,
-  clearEventsDeleted,
   setEventsLoading,
-  clearEventsLoading,
+  setFilters,
+  setInsertTimeline,
   setKqlFilterQueryDraft,
+  setSavedQueryId,
   setSelected,
-  clearSelected,
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
@@ -38,9 +41,11 @@ import {
   updateDataProviderKqlQuery,
   updateDataProviderType,
   updateDescription,
+  updateEventType,
   updateHighlightedDropAndProviderId,
   updateIsFavorite,
   updateIsLive,
+  updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
@@ -51,10 +56,6 @@ import {
   updateTimeline,
   updateTitle,
   upsertColumn,
-  updateIsLoading,
-  setSavedQueryId,
-  setFilters,
-  updateEventType,
 } from './actions';
 import {
   addNewTimeline,
@@ -109,6 +110,7 @@ export const initialTimelineState: TimelineState = {
     newTimelineModel: null,
   },
   showCallOutUnauthorizedMsg: false,
+  insertTimeline: null,
 };
 
 /** The reducer for all timeline actions  */
@@ -495,5 +497,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       filters,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
   }))
   .build();

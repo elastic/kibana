@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
+import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
 
 import { TimelineStatus } from '../../../../../common/types/timeline';
 
@@ -26,7 +27,6 @@ import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 
 import * as i18n from './translations';
-import { Description, NotesButton, NewCase, NewTimeline } from './helpers';
 // import { NewTemplateTimeline } from './new_template_timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
@@ -63,54 +63,56 @@ Avatar.displayName = 'Avatar';
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 export type UpdateNote = (note: Note) => void;
 
-export interface PropertiesRightComponentProps {
+interface PropertiesRightComponentProps {
+  associateNote: AssociateNote;
+  description: string;
+  getNotesByIds: (noteIds: string[]) => Note[];
+  isDataInTimeline: boolean;
+  noteIds: string[];
   onButtonClick: () => void;
   onClosePopover: () => void;
+  onCloseTimelineModal: () => void;
+  onOpenCaseModal: () => void;
+  onOpenTimelineModal: () => void;
+  onToggleShowNotes: () => void;
   showActions: boolean;
-  timelineId: string;
-  isDataInTimeline: boolean;
+  showDescription: boolean;
   showNotes: boolean;
   showNotesFromWidth: boolean;
-  showDescription: boolean;
-  showUsersView: boolean;
-  usersViewing: string[];
-  description: string;
-  updateDescription: UpdateDescription;
-  associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  noteIds: string[];
-  onToggleShowNotes: () => void;
-  onCloseTimelineModal: () => void;
-  onOpenTimelineModal: () => void;
   showTimelineModal: boolean;
+  showUsersView: boolean;
   status: TimelineStatus;
+  timelineId: string;
   title: string;
+  updateDescription: UpdateDescription;
   updateNote: UpdateNote;
+  usersViewing: string[];
 }
 
 const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
-  onButtonClick,
-  showActions,
-  onClosePopover,
-  timelineId,
-  isDataInTimeline,
-  showNotesFromWidth,
-  showNotes,
-  showDescription,
-  showUsersView,
-  usersViewing,
-  description,
-  updateDescription,
   associateNote,
+  description,
   getNotesByIds,
+  isDataInTimeline,
   noteIds,
-  onToggleShowNotes,
-  updateNote,
-  showTimelineModal,
-  status,
+  onButtonClick,
+  onClosePopover,
   onCloseTimelineModal,
+  onOpenCaseModal,
   onOpenTimelineModal,
+  onToggleShowNotes,
+  showActions,
+  showDescription,
+  showNotes,
+  showNotesFromWidth,
+  showTimelineModal,
+  showUsersView,
+  status,
+  timelineId,
   title,
+  updateDescription,
+  updateNote,
+  usersViewing,
 }) => {
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
@@ -160,6 +162,13 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                   onClosePopover={onClosePopover}
                   timelineId={timelineId}
                   timelineTitle={title}
+                  timelineStatus={status}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ExistingCase
+                  onClosePopover={onClosePopover}
+                  onOpenCaseModal={onOpenCaseModal}
                   timelineStatus={status}
                 />
               </EuiFlexItem>
