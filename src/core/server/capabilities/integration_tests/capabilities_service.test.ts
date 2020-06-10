@@ -20,7 +20,7 @@
 import supertest from 'supertest';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { Env } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { CapabilitiesService, CapabilitiesSetup } from '..';
@@ -44,7 +44,7 @@ describe('CapabilitiesService', () => {
     service = new CapabilitiesService({
       coreId,
       env,
-      logger: loggingServiceMock.create(),
+      logger: loggingSystemMock.create(),
       configService: {} as any,
     });
     serviceSetup = await service.setup({ http: httpSetup });

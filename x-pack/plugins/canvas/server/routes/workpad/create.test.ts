@@ -9,7 +9,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeCreateWorkpadRoute } from './create';
@@ -46,7 +46,7 @@ describe('POST workpad', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeCreateWorkpadRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.post.mock.calls[0][1];

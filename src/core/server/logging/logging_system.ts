@@ -24,12 +24,12 @@ import { LoggerAdapter } from './logger_adapter';
 import { LoggerFactory } from './logger_factory';
 import { LoggingConfigType, LoggerConfigType, LoggingConfig } from './logging_config';
 
-export type ILoggingService = PublicMethodsOf<LoggingService>;
+export type ILoggingSystem = PublicMethodsOf<LoggingSystem>;
 /**
- * Service that is responsible for maintaining loggers and logger appenders.
+ * System that is responsible for maintaining loggers and logger appenders.
  * @internal
  */
-export class LoggingService implements LoggerFactory {
+export class LoggingSystem implements LoggerFactory {
   private config?: LoggingConfig;
   private readonly appenders: Map<string, DisposableAppender> = new Map();
   private readonly bufferAppender = new BufferAppender();

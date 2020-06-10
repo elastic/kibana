@@ -12,7 +12,7 @@ jest.mock('./authenticator');
 import Boom from 'boom';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
@@ -66,12 +66,12 @@ describe('setupAuthentication()', () => {
           secureCookies: true,
           cookieName: 'my-sid-cookie',
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: false }
       ),
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
-      loggers: loggingServiceMock.create(),
+      loggers: loggingSystemMock.create(),
       getFeatureUsageService: jest
         .fn()
         .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
@@ -221,7 +221,7 @@ describe('setupAuthentication()', () => {
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-      expect(loggingServiceMock.collect(mockSetupAuthenticationParams.loggers).error)
+      expect(loggingSystemMock.collect(mockSetupAuthenticationParams.loggers).error)
         .toMatchInlineSnapshot(`
         Array [
           Array [

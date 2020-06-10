@@ -14,7 +14,7 @@ import {
 import {
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   elasticsearchServiceMock,
 } from 'src/core/server/mocks';
 
@@ -34,7 +34,7 @@ describe('Retrieve ES Fields', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeESFieldsRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

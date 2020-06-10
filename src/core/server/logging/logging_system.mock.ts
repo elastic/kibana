@@ -18,11 +18,11 @@
  */
 
 // Test helpers to simplify mocking logs and collecting all their outputs
-import { ILoggingService } from './logging_service';
+import { ILoggingSystem } from './logging_system';
 import { LoggerFactory } from './logger_factory';
 import { loggerMock, MockedLogger } from './logger.mock';
 
-const createLoggingServiceMock = () => {
+const createLoggingSystemMock = () => {
   const mockLog = loggerMock.create();
 
   mockLog.get.mockImplementation((...context) => ({
@@ -30,7 +30,7 @@ const createLoggingServiceMock = () => {
     context,
   }));
 
-  const mocked: jest.Mocked<ILoggingService> = {
+  const mocked: jest.Mocked<ILoggingSystem> = {
     get: jest.fn(),
     asLoggerFactory: jest.fn(),
     upgrade: jest.fn(),
@@ -45,7 +45,7 @@ const createLoggingServiceMock = () => {
   return mocked;
 };
 
-const collectLoggingServiceMock = (loggerFactory: LoggerFactory) => {
+const collectLoggingSystemMock = (loggerFactory: LoggerFactory) => {
   const mockLog = loggerFactory.get() as MockedLogger;
   return {
     debug: mockLog.debug.mock.calls,
@@ -58,8 +58,8 @@ const collectLoggingServiceMock = (loggerFactory: LoggerFactory) => {
   };
 };
 
-const clearLoggingServiceMock = (loggerFactory: LoggerFactory) => {
-  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<ILoggingService>;
+const clearLoggingSystemMock = (loggerFactory: LoggerFactory) => {
+  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<ILoggingSystem>;
   mockedLoggerFactory.get.mockClear();
   mockedLoggerFactory.asLoggerFactory.mockClear();
   mockedLoggerFactory.upgrade.mockClear();
@@ -75,9 +75,9 @@ const clearLoggingServiceMock = (loggerFactory: LoggerFactory) => {
   mockLog.log.mockClear();
 };
 
-export const loggingServiceMock = {
-  create: createLoggingServiceMock,
-  collect: collectLoggingServiceMock,
-  clear: clearLoggingServiceMock,
+export const loggingSystemMock = {
+  create: createLoggingSystemMock,
+  collect: collectLoggingSystemMock,
+  clear: clearLoggingSystemMock,
   createLogger: loggerMock.create,
 };

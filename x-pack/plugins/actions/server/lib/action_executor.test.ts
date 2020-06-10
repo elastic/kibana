@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { loggingServiceMock, savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
@@ -31,7 +31,7 @@ const executeParams = {
 
 const spacesMock = spacesServiceMock.createSetupContract();
 actionExecutor.initialize({
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   spaces: spacesMock,
   getServices: () => services,
   getScopedSavedObjectsClient: () => savedObjectsClientWithHidden,
@@ -266,7 +266,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
 test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
   const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
   customActionExecutor.initialize({
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
     getScopedSavedObjectsClient: () => savedObjectsClientWithHidden,
     getServices: () => services,

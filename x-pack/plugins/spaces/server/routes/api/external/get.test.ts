@@ -13,7 +13,7 @@ import {
 import { initGetSpaceApi } from './get';
 import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
   coreMock,
@@ -36,7 +36,7 @@ describe('GET space', () => {
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
     const service = new SpacesService(log);
     const spacesService = await service.setup({

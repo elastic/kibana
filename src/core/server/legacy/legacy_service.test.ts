@@ -38,7 +38,7 @@ import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
 
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
@@ -64,7 +64,7 @@ let setupDeps: LegacyServiceSetupDeps;
 
 let startDeps: LegacyServiceStartDeps;
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
 let uuidSetup: ReturnType<typeof uuidServiceMock.createSetupContract>;
 
@@ -281,7 +281,7 @@ describe('once LegacyService is set up with connection info', () => {
 
     const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(loggingServiceMock.collect(logger).error).toEqual([]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     mockKbnServer.applyLoggingConfiguration.mockImplementation(() => {
@@ -290,7 +290,7 @@ describe('once LegacyService is set up with connection info', () => {
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
 
-    expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([[configError]]);
   });
 
   test('logs error if config service fails.', async () => {
@@ -306,13 +306,13 @@ describe('once LegacyService is set up with connection info', () => {
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(loggingServiceMock.collect(logger).error).toEqual([]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     config$.error(configError);
 
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
+    expect(loggingSystemMock.collect(logger).error).toEqual([[configError]]);
   });
 });
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { httpServerMock, loggingServiceMock } from '../../../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { MetadataIndexPattern } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -18,7 +18,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          logFactory: loggingServiceMock.create(),
+          logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
@@ -70,7 +70,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          logFactory: loggingServiceMock.create(),
+          logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },

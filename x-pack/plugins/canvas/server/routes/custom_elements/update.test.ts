@@ -18,7 +18,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { okResponse } from '../ok_response';
 
@@ -60,7 +60,7 @@ describe('PUT custom element', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeUpdateCustomElementRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.put.mock.calls[0][1];

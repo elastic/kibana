@@ -16,7 +16,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 
 const mockRouteContext = ({
@@ -35,7 +35,7 @@ describe('DELETE workpad', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeDeleteWorkpadRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.delete.mock.calls[0][1];
