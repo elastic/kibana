@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as yargs from 'yargs';
+import * as url from 'url';
 import fetch from 'node-fetch';
 import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../../common/endpoint/generate_data';
-import { default as eventMapping } from './event_mapping.json';
 
 main();
 
@@ -31,25 +31,33 @@ async function deleteIndices(indices: string[], client: Client) {
     } catch (err) {
       handleErr(err);
     }
-
-    try {
-      await client.indices.delete({ index });
-    } catch (err) {
-      handleErr(err);
-    }
   }
 }
-const doIngestSetup = async (url: string, creds: string) => {
-  const headers = new Headers();
-  headers.set('Authorization', `Basic ${Buffer.from(creds, 'utf8').toString('base64')}`);
+
+async function doIngestSetup(kibanaURL: string) {
   try {
-    const response = await fetch(url);
-    const json = await response.json();
-    console.log(JSON.stringify(json, null, 2));
+    const response = await fetch(new url.URL('/api/ingest_manager/setup', kibanaURL).toString(), {
+      method: 'POST',
+      headers: {
+        'kbn-xsrf': 'blah',
+      },
+    });
+    const setupResponse = await response.json();
+    // eslint-disable-next-line no-console
+    console.log('Ingest setup response ', JSON.stringify(setupResponse, null, 2));
+    if (!setupResponse?.isInitialized) {
+      // eslint-disable-next-line no-console
+      console.log('Initializing the ingest manager failed, existing');
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
+    }
   } catch (error) {
-    console.log(error);
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(error, null, 2));
+    // eslint-disable-next-line no-process-exit
+    process.exit(1);
   }
-};
+}
 
 async function main() {
   const argv = yargs.help().options({
@@ -61,19 +69,13 @@ async function main() {
     node: {
       alias: 'n',
       describe: 'elasticsearch node url',
-      default: 'http://localhost:9200',
+      default: 'http://elastic:changeme@localhost:9200',
       type: 'string',
     },
     kibana: {
       alias: 'k',
       describe: 'kibana url',
       default: 'http://elastic:changeme@localhost:5601',
-      type: 'string',
-    },
-    alertIndex: {
-      alias: 'ai',
-      describe: 'index to store alerts in',
-      default: 'events-endpoint-1',
       type: 'string',
     },
     eventIndex: {
@@ -92,11 +94,6 @@ async function main() {
       alias: 'pi',
       describe: 'index to store host policy in',
       default: 'metrics-endpoint.policy-default-1',
-      type: 'string',
-    },
-    auth: {
-      describe: 'elasticsearch/kibana username and password, separated by a colon',
-      default: 'elastic:changeme',
       type: 'string',
     },
     ancestors: {
@@ -174,56 +171,15 @@ async function main() {
       default: false,
     },
   }).argv;
-  const pipelineName = 'endpoint-event-pipeline';
-  eventMapping.settings.index.default_pipeline = pipelineName;
+  await doIngestSetup(argv.kibana);
+
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
 
-  if (false) {
-    doIngestSetup(argv.kibana, argv.auth);
-  }
-
-  if (argv.auth) {
-    const [username, password]: string[] = argv.auth.split(':', 2);
-    clientOptions.auth = { username, password };
-  }
   const client = new Client(clientOptions);
   if (argv.delete) {
-    await deleteIndices(
-      [argv.eventIndex, argv.metadataIndex, argv.alertIndex, argv.policyIndex],
-      client
-    );
-  }
-
-  const pipeline = {
-    description: 'redirects alerts to their own index',
-    processors: [
-      {
-        set: {
-          field: '_index',
-          value: argv.alertIndex,
-          if: "ctx.event.kind == 'alert'",
-        },
-      },
-      {
-        set: {
-          field: 'mutable_state.triage_status',
-          value: 'open',
-        },
-      },
-    ],
-  };
-  try {
-    await client.ingest.putPipeline({
-      id: pipelineName,
-      body: pipeline,
-    });
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
-    // eslint-disable-next-line no-process-exit
-    process.exit(1);
+    await deleteIndices([argv.eventIndex, argv.metadataIndex, argv.policyIndex], client);
   }
 
   if (argv.setupOnly) {
@@ -287,7 +243,7 @@ async function main() {
         ),
         []
       );
-      await client.bulk({ body });
+      await client.bulk({ body, refresh: 'true' });
     }
   }
   // eslint-disable-next-line no-console
