@@ -346,7 +346,7 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
         },
       },
     ];
-    return <Cytoscape elements={elements} height={300} width={1340} />;
+    return <Cytoscape elements={elements} height={600} width={1340} />;
   },
   {
     info: { propTables: false, source: false },
