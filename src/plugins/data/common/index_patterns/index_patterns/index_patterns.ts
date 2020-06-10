@@ -25,9 +25,9 @@ import {
   CoreStart,
 } from 'src/core/public';
 
-import { createIndexPatternCache } from './_pattern_cache';
+import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
+import { IndexPatternsApiClient, GetFieldsOptions } from '.';
 import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
@@ -38,7 +38,8 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { FieldFormatsStart } from '../../field_formats';
+import { OnNotification, OnError } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -53,6 +54,9 @@ export class IndexPatternsService {
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
+  private fieldFormats: FieldFormatsStartCommon;
+  private onNotification: OnNotification;
+  private onError: OnError;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
   createFieldList: CreateIndexPatternFieldList;
   createField: (
@@ -62,23 +66,32 @@ export class IndexPatternsService {
   ) => Field;
 
   constructor(
-    core: CoreStart,
+    uiSettings: CoreStart['uiSettings'],
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpStart,
-    fieldFormats: FieldFormatsStart
+    fieldFormats: FieldFormatsStartCommon,
+    onNotification: OnNotification,
+    onError: OnError,
+    onRedirectNoIndexPattern: () => void
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-    this.config = core.uiSettings;
+    this.config = uiSettings;
     this.savedObjectsClient = savedObjectsClient;
-    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
+    this.fieldFormats = fieldFormats;
+    this.onNotification = onNotification;
+    this.onError = onError;
+    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
+      uiSettings,
+      onRedirectNoIndexPattern
+    );
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats,
-      toastNotifications: core.notifications.toasts,
+      onNotification,
     });
     this.createField = (indexPattern, spec, shortDotsEnable) => {
       return new Field(indexPattern, spec, shortDotsEnable, {
         fieldFormats,
-        toastNotifications: core.notifications.toasts,
+        onNotification,
       });
     };
   }
@@ -178,7 +191,10 @@ export class IndexPatternsService {
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache
+      indexPatternCache,
+      this.fieldFormats,
+      this.onNotification,
+      this.onError
     );
 
     return indexPattern.init();
