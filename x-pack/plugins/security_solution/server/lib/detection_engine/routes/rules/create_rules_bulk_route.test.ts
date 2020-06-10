@@ -8,7 +8,6 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
-  typicalPayload,
   getReadBulkRequest,
   getEmptyIndex,
   getNonEmptyIndex,
@@ -20,6 +19,7 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -98,8 +98,7 @@ describe('create_rules_bulk', () => {
       expect(response.body).toEqual([
         {
           error: {
-            message:
-              'To create a rule, the index must exist first. Index .siem-signals does not exist',
+            message: 'To create a rule, the index must exist first. Index undefined does not exist',
             status_code: 400,
           },
           rule_id: 'rule-1',
@@ -143,7 +142,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [typicalPayload(), typicalPayload()],
+        body: [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()],
       });
       const response = await server.inject(request, context);
 
@@ -164,7 +163,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [{ ...typicalPayload(), type: 'query' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
 
@@ -175,12 +174,12 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [{ ...typicalPayload(), type: 'unexpected_type' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'unexpected_type' }],
       });
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
+        'Invalid value "unexpected_type" supplied to "type"'
       );
     });
   });
