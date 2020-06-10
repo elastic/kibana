@@ -144,7 +144,7 @@ const TableServiceError = memo(function({errorMessage, pushToQueryParams}: {
     <EuiSpacer  size="l" />
     <EuiText textAlign="center">{errorMessage}</EuiText>
     <EuiSpacer  size="l" />
-    <EuiButtonEmpty>{
+    <EuiButtonEmpty onClick={()=>{ pushToQueryParams({crumbId: '', crumbEvent: ''}) }}>{
       i18n.translate('xpack.siem.endpoint.resolver.panel.error.goBack', {
         defaultMessage: 'Click this link to return to the list of all processes.',
       })
@@ -260,7 +260,7 @@ const RelatedEventDetail = memo(function RelatedEventDetail({relatedEvent, pushT
   },[]);
   return (
   <>
-    <EuiBreadcrumbs breadcrumbs={crumbs} />
+    <EuiBreadcrumbs truncate={false} breadcrumbs={crumbs} />
     <EuiSpacer  size="l" />
     <EuiText textAlign="center"><BoldCode>{eventType + ' ' + event.ecsEventType(relatedEvent)}</BoldCode></EuiText>
     <EuiText textAlign="center">{event.descriptiveName(relatedEvent)}</EuiText>
@@ -300,12 +300,14 @@ const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByT
         return a
       },[]).map((resolverEvent)=>{
         const eventTime = event.eventTimestamp(resolverEvent);
-        const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime); 
+        const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
+        const entityId = event.eventId(resolverEvent); 
         return {
           formattedDate,
           eventType: eventType + ' ' + event.ecsEventType(resolverEvent),
           name: event.descriptiveName(resolverEvent),
-          entityId: event.entityId(resolverEvent),
+          entityId,
+          setQueryParams: ()=>{ pushToQueryParams({crumbId: entityId, crumbEvent: processEntityId}) }
         }
       })
     },
@@ -339,7 +341,7 @@ const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByT
           <>
             <EuiText><BoldCode>{eventView.eventType}</BoldCode>{' @ '}{eventView.formattedDate}</EuiText>
             <EuiSpacer  size="xs" />
-            <EuiButtonEmpty onClick={()=>{ pushToQueryParams({crumbId: eventView.entityId, crumbEvent: processEntityId}) }}>{eventView.name}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
             {index === matchingEvents.length - 1 ? null : (<EuiHorizontalRule margin="m" />)}
           </>
         )
@@ -672,7 +674,7 @@ const ProcessDetails = memo(function ProcessListWithCounts({processEvent, pushTo
    * | process detail         | entity_id of process       | null                     |
    * | relateds count by type | entity_id of process       | 'all'                    |
    * | relateds list 1 type   | entity_id of process       | valid related event type |
-   * | related event detail   | entity_id of related event | entity_id of process     |
+   * | related event detail   | event_id of related event  | entity_id of process     |
    * 
    * This component implements the strategy laid out above by determining the "right" view and doing some other housekeeping e.g. effects to keep the UI-selected node in line with what's indicated by the URL parameters.
    */
@@ -776,7 +778,7 @@ const PanelContent = memo(function PanelContent() {
       if(typeof relatedEventsState === 'object'){
         const eventFromCrumbId = relatedEventsState.relatedEvents.find(
           ({relatedEvent})=>{
-            return event.entityId(relatedEvent) === crumbId 
+            return event.eventId(relatedEvent) === crumbId 
           }
         )
         if(!eventFromCrumbId){
