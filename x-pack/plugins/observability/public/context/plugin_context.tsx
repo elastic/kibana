@@ -6,11 +6,11 @@
 
 import { createContext } from 'react';
 import { AppMountContext } from 'kibana/public';
-import { ChartDataFetcher } from '../../typings/chart';
+import { ObservabilityDataAccessService } from '../data_access_service';
 
 export interface PluginContextValue {
   core: AppMountContext['core'];
-  registryHandlers: Map<string, ChartDataFetcher>;
+  observabilityData: ObservabilityDataAccessService;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

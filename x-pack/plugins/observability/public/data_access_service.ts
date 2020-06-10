@@ -8,7 +8,7 @@ import { Setup, DataAccessHandlerProvider } from './typings/data_access_service'
 import { ChartDataFetcher } from '../typings/chart';
 
 export class ObservabilityDataAccessService implements Plugin<Setup, void> {
-  private handlers = new Map<string, ChartDataFetcher>();
+  private dataProviders = new Map<string, ChartDataFetcher>();
   private contextContainer?: IContextContainer<DataAccessHandlerProvider>;
 
   public setup(core: CoreSetup): Setup {
@@ -19,7 +19,10 @@ export class ObservabilityDataAccessService implements Plugin<Setup, void> {
         if (!this.contextContainer) {
           throw new Error("Context container wasn't defined");
         }
-        this.handlers.set(dataType, this.contextContainer.createHandler(pluginOpaqueId, handler));
+        this.dataProviders.set(
+          dataType,
+          this.contextContainer.createHandler(pluginOpaqueId, handler)
+        );
       },
       registerContext: this.contextContainer!.registerContext,
     };
@@ -27,8 +30,8 @@ export class ObservabilityDataAccessService implements Plugin<Setup, void> {
     return api;
   }
 
-  public getHandlers() {
-    return this.handlers;
+  public getDataProvider(dataType: string) {
+    return this.dataProviders.get(dataType);
   }
 
   public start() {}

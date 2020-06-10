@@ -9,7 +9,7 @@ import { DataAccessHandlerProvider } from '../../../../observability/public/typi
 
 export const getObservabilityChartData: DataAccessHandlerProvider = (
   context,
-  { start, end }
+  { startTime, endTime }
 ) => {
   return new Promise((resolve) => {
     setTimeout(() => {

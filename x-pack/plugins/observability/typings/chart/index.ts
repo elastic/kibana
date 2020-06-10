@@ -11,8 +11,12 @@ export interface ChartData {
 }
 
 export interface SearchParams {
-  start: number;
-  end: number;
+  // The start timestamp in milliseconds of the queried time interval
+  startTime: number;
+  // The end timestamp in milliseconds of the queried time interval
+  endTime: number;
+  // The aggregation bucket size in milliseconds if applicable to the data source
+  bucketSize: number;
 }
 
 export type ChartDataFetcher = (searchParams: SearchParams) => Promise<ChartData[]>;

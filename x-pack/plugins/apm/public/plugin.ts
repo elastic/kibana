@@ -75,7 +75,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
     if (plugins.observability) {
-      plugins.observability.chartDataFetcher.registerProvider(
+      plugins.observability.dataAccess.registerProvider(
         this.initializerContext.opaqueId,
         'apm',
         getObservabilityChartData
