@@ -23,7 +23,6 @@ const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const appDependencies = {
   httpClient: (mockHttpClient as unknown) as HttpSetup,
   apiBasePath: API_BASE_PATH,
-  appBasePath: BASE_PATH,
   trackMetric: () => {},
   docLinks: docLinksServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
