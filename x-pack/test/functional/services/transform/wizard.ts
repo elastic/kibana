@@ -242,14 +242,20 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertGroupByEntryExists(index, expectedLabel, expectedIntervalLabel);
     },
 
-    async assertAggregationInputExists() {
-      await testSubjects.existOrFail('transformAggregationSelection > comboBoxInput');
+    getAggComboBoxInputSelector(parentSelector = ''): string {
+      return `${parentSelector && `${parentSelector} > `}${
+        parentSelector ? 'transformSubAggregationSelection' : 'transformAggregationSelection'
+      } > comboBoxInput`;
     },
 
-    async assertAggregationInputValue(expectedIdentifier: string[]) {
+    async assertAggregationInputExists(parentSelector?: string) {
+      await testSubjects.existOrFail(this.getAggComboBoxInputSelector(parentSelector));
+    },
+
+    async assertAggregationInputValue(expectedIdentifier: string[], parentSelector?: string) {
       await retry.tryForTime(2000, async () => {
         const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-          'transformAggregationSelection > comboBoxInput'
+          this.getAggComboBoxInputSelector(parentSelector)
         );
         expect(comboBoxSelectedOptions).to.eql(
           expectedIdentifier,
@@ -258,11 +264,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertAggregationEntryExists(index: number, expectedLabel: string) {
-      await testSubjects.existOrFail(`transformAggregationEntry ${index}`);
+    async assertAggregationEntryExists(index: number, expectedLabel: string, parentSelector = '') {
+      const aggEntryPanelSelector = `${
+        parentSelector && `${parentSelector} > `
+      }transformAggregationEntry_${index}`;
+      await testSubjects.existOrFail(aggEntryPanelSelector);
 
       const actualLabel = await testSubjects.getVisibleText(
-        `transformAggregationEntry ${index} > transformAggregationEntryLabel`
+        `${aggEntryPanelSelector} > transformAggregationEntryLabel`
       );
       expect(actualLabel).to.eql(
         expectedLabel,
@@ -270,15 +279,31 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async addAggregationEntries(aggregationEntries: any[], parentSelector?: string) {
+      for (const [index, agg] of aggregationEntries.entries()) {
+        await this.assertAggregationInputExists(parentSelector);
+        await this.assertAggregationInputValue([], parentSelector);
+        await this.addAggregationEntry(index, agg.identifier, agg.label, agg.form, parentSelector);
+
+        if (agg.subAggs) {
+          await this.addAggregationEntries(
+            agg.subAggs,
+            `${parentSelector ? `${parentSelector} > ` : ''}transformAggregationEntry_${index}`
+          );
+        }
+      }
+    },
+
     async addAggregationEntry(
       index: number,
       identifier: string,
       expectedLabel: string,
-      formData?: Record<string, any>
+      formData?: Record<string, any>,
+      parentSelector = ''
     ) {
-      await comboBox.set('transformAggregationSelection > comboBoxInput', identifier);
-      await this.assertAggregationInputValue([]);
-      await this.assertAggregationEntryExists(index, expectedLabel);
+      await comboBox.set(this.getAggComboBoxInputSelector(parentSelector), identifier);
+      await this.assertAggregationInputValue([], parentSelector);
+      await this.assertAggregationEntryExists(index, expectedLabel, parentSelector);
 
       if (formData !== undefined) {
         await this.fillPopoverForm(identifier, expectedLabel, formData);
