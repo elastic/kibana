@@ -4,14 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RulesSchema } from '../rules_schema';
-import { RulesBulkSchema } from '../rules_bulk_schema';
-import { ErrorSchema } from '../error_schema';
-import { FindRulesSchema } from '../find_rules_schema';
+import { RulesSchema } from './rules_schema';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesSchema => ({
+export const getPartialRulesSchemaMock = (): Partial<RulesSchema> => ({
+  created_by: 'elastic',
+  description: 'Detecting root and admin users',
+  enabled: true,
+  false_positives: [],
+  from: 'now-6m',
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  immutable: false,
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  risk_score: 50,
+  rule_id: 'rule-1',
+  language: 'kuery',
+  max_signals: 100,
+  name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  query: 'user.name: root or user.name: admin',
+  references: ['http://www.example.com', 'https://ww.example.com'],
+  severity: 'high',
+  updated_by: 'elastic',
+  tags: ['some fake tag 1', 'some fake tag 2'],
+  to: 'now',
+  type: 'query',
+  note: '',
+});
+
+export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => ({
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),
   updated_at: new Date(anchorDate).toISOString(),
@@ -75,10 +98,8 @@ export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesS
   ],
 });
 
-export const getRulesBulkPayload = (): RulesBulkSchema => [getBaseResponsePayload()];
-
-export const getMlRuleResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
-  const basePayload = getBaseResponsePayload(anchorDate);
+export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+  const basePayload = getRulesSchemaMock(anchorDate);
   const { filters, index, query, language, ...rest } = basePayload;
 
   return {
@@ -88,20 +109,3 @@ export const getMlRuleResponsePayload = (anchorDate: string = ANCHOR_DATE): Rule
     machine_learning_job_id: 'some_machine_learning_job_id',
   };
 };
-
-export const getErrorPayload = (
-  id: string = '819eded6-e9c8-445b-a647-519aea39e063'
-): ErrorSchema => ({
-  id,
-  error: {
-    status_code: 404,
-    message: 'id: "819eded6-e9c8-445b-a647-519aea39e063" not found',
-  },
-});
-
-export const getFindResponseSingle = (): FindRulesSchema => ({
-  page: 1,
-  perPage: 1,
-  total: 1,
-  data: [getBaseResponsePayload()],
-});
