@@ -11,7 +11,7 @@ import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@e
 import { TemplateDeserialized } from '../../../../common';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
+import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 
@@ -26,7 +26,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
+  const decodedTemplateName = decodePathFromReactRouter(name);
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

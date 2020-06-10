@@ -11,7 +11,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
+import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 
@@ -26,7 +26,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
+  const decodedTemplateName = decodePathFromReactRouter(name);
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
