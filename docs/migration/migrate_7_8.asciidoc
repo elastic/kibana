@@ -20,10 +20,9 @@ your application to Kibana 7.8.
 [[user-facing-changes-78]]
 === Breaking changes for users
 
+[float]
 [[breaking_78_actions_api]]
-.The actions API endpoint changed.
-[%collapsible]
-====
+==== The actions API endpoint changed
 
 The following action plugin REST APIs changed so that they are consistent with the
 {kib} styleguide.
@@ -38,43 +37,23 @@ The following action plugin REST APIs changed so that they are consistent with t
 
 *via {pull}65936[#65936]*
 
-====
-
-[[breaking_78_bump_less_version]]
-.The less version in TSVB was updated.
-
-[%collapsible]
-====
-
-Custom plugins are no longer allowed to use the @plugin statement and inline JavaScript
-in less code used in TSVB Markdown visualizations.
-Using the code does not apply the styles.
-
-*via {pull}65467[#65467]*
-
-====
-
-
+[float]
 [[breaking_78_metrics_alerts]]
-.Action messaging was refactored to report on the no data state.
-
-[%collapsible]
-====
-
+==== Metrics alerts action messaging was refactored to report on the no data state
+*Details* +
 Metrics alerts no longer expose `context.valueOf`, `context.metricOf`, or
 `context.thresholdOf` to action messages. These variables are replaced
 by `context.reason`. This variable explains the reason that the alert
 fired and automatically includes the metric, threshold, and current value of
 all configured conditions.
 
+*Impact* +
 Alerts configured in 7.7 still function as normal,
 but their action messages might no longer provide useful information and
 must be reconfigured. The new default action message will show an example
 of how to use `context.reason`.
 
 *via {pull}64365[#64365]*
-
-====
 
 // end::notable-breaking-changes[]
 
