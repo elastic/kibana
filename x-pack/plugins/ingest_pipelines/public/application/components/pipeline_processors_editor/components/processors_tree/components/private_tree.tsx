@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 
 import { DropSpecialLocations } from '../../../constants';
@@ -63,6 +63,10 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
  * Note: this tree should start at level 1. It is the only level at
  * which we render the optimised virtual component. This gives a
  * massive performance boost to this component which can get very tall.
+ *
+ * The first level list also contains the outside click listener which
+ * enables users to click outside of the tree and cancel moving a
+ * processor.
  */
 export const PrivateTree: FunctionComponent<PrivateProps> = ({
   processors,
@@ -143,51 +147,58 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
       <WindowScroller ref={windowScrollerRef} scrollElement={window}>
         {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
           return (
-            <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
-              <AutoSizer disableHeight>
-                {({ width }) => {
-                  return (
-                    <div ref={registerChild}>
-                      <List
-                        ref={listRef}
-                        autoHeight
-                        height={height}
-                        width={width}
-                        overScanRowCount={5}
-                        isScrolling={isScrolling}
-                        onChildScroll={onChildScroll}
-                        scrollTop={scrollTop}
-                        rowCount={processors.length}
-                        rowHeight={({ index }) => {
-                          return calculateItemHeight({
-                            processor: processors[index],
-                            isFirstInArray: index === 0,
-                          });
-                        }}
-                        rowRenderer={({ index: idx, style }) => {
-                          const processor = processors[idx];
-                          const above = processors[idx - 1];
-                          const below = processors[idx + 1];
-                          const info: ProcessorInfo = {
-                            id: processor.id,
-                            selector: selector.concat(String(idx)),
-                            aboveId: above?.id,
-                            belowId: below?.id,
-                          };
+            <EuiOutsideClickDetector
+              isDisabled={!selectedProcessorInfo}
+              onOutsideClick={() => {
+                privateOnAction({ type: 'cancelMove' });
+              }}
+            >
+              <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
+                <AutoSizer disableHeight>
+                  {({ width }) => {
+                    return (
+                      <div ref={registerChild}>
+                        <List
+                          ref={listRef}
+                          autoHeight
+                          height={height}
+                          width={width}
+                          overScanRowCount={5}
+                          isScrolling={isScrolling}
+                          onChildScroll={onChildScroll}
+                          scrollTop={scrollTop}
+                          rowCount={processors.length}
+                          rowHeight={({ index }) => {
+                            return calculateItemHeight({
+                              processor: processors[index],
+                              isFirstInArray: index === 0,
+                            });
+                          }}
+                          rowRenderer={({ index: idx, style }) => {
+                            const processor = processors[idx];
+                            const above = processors[idx - 1];
+                            const below = processors[idx + 1];
+                            const info: ProcessorInfo = {
+                              id: processor.id,
+                              selector: selector.concat(String(idx)),
+                              aboveId: above?.id,
+                              belowId: below?.id,
+                            };
 
-                          return (
-                            <div style={style} key={processor.id}>
-                              {renderRow({ processor, info, idx })}
-                            </div>
-                          );
-                        }}
-                        processors={processors}
-                      />
-                    </div>
-                  );
-                }}
-              </AutoSizer>
-            </EuiFlexGroup>
+                            return (
+                              <div style={style} key={processor.id}>
+                                {renderRow({ processor, info, idx })}
+                              </div>
+                            );
+                          }}
+                          processors={processors}
+                        />
+                      </div>
+                    );
+                  }}
+                </AutoSizer>
+              </EuiFlexGroup>
+            </EuiOutsideClickDetector>
           );
         }}
       </WindowScroller>
