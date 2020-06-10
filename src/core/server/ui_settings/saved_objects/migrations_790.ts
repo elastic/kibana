@@ -22,19 +22,22 @@ import { SavedObjectSanitizedUiSettings, SavedObjectUnsanitizedUiSettings } from
 export const migrations790 = {
   '7.9.0': (doc: SavedObjectUnsanitizedUiSettings<any>): SavedObjectSanitizedUiSettings<any> => ({
     ...doc,
-    attributes: Object.keys(doc.attributes).reduce(
-      (acc, key) =>
-        key.indexOf('siem') > -1
-          ? {
-              ...acc,
-              [key.replace('siem', 'securitySolution')]: doc.attributes[key],
-            }
-          : {
-              ...acc,
-              [key]: doc.attributes[key],
-            },
-      {}
-    ),
+    ...(doc &&
+      doc.attributes && {
+        attributes: Object.keys(doc.attributes).reduce(
+          (acc, key) =>
+            key.indexOf('siem') > -1
+              ? {
+                  ...acc,
+                  [key.replace('siem', 'securitySolution')]: doc.attributes[key],
+                }
+              : {
+                  ...acc,
+                  [key]: doc.attributes[key],
+                },
+          {}
+        ),
+      }),
     references: doc.references || [],
   }),
 };
