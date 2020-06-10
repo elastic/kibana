@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { isSetupStatusWithResults } from '../../../../common/log_analysis';
+import React, { useEffect, useMemo } from 'react';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
@@ -21,6 +21,7 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
+import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
 export const LogEntryCategoriesPageContent = () => {
   const {
@@ -37,7 +38,23 @@ export const LogEntryCategoriesPageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, setupStatus } = useLogEntryCategoriesModuleContext();
+  const {
+    fetchJobStatus,
+    setupStatus,
+    jobStatus,
+    hideSetup,
+  } = useLogEntryCategoriesModuleContext();
+
+  const isFlyoutOpen = useMemo<boolean>(() => {
+    switch (setupStatus.type) {
+      case 'required':
+      case 'pending':
+      case 'succeeded':
+        return true;
+      default:
+        return false;
+    }
+  }, [setupStatus]);
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
@@ -45,16 +62,20 @@ export const LogEntryCategoriesPageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
+  let pageContent;
+
   if (isLoading || isUninitialized) {
-    return <SourceLoadingPage />;
+    pageContent = <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+    pageContent = (
+      <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />
+    );
   } else if (!hasLogAnalysisCapabilites) {
-    return <MlUnavailablePrompt />;
+    pageContent = <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
-    return <MissingResultsPrivilegesPrompt />;
+    pageContent = <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus.type === 'initializing') {
-    return (
+    pageContent = (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
           defaultMessage: 'Checking status of categorization jobs...',
@@ -62,12 +83,19 @@ export const LogEntryCategoriesPageContent = () => {
       />
     );
   } else if (setupStatus.type === 'unknown') {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
-  } else if (isSetupStatusWithResults(setupStatus)) {
-    return <LogEntryCategoriesResultsContent />;
+    pageContent = <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
+  } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
+    pageContent = <LogEntryCategoriesResultsContent />;
   } else if (!hasLogAnalysisSetupCapabilities) {
-    return <MissingSetupPrivilegesPrompt />;
+    pageContent = <MissingSetupPrivilegesPrompt />;
   } else {
-    return <LogEntryCategoriesSetupContent />;
+    pageContent = <LogEntryCategoriesSetupContent />;
   }
+
+  return (
+    <>
+      <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={hideSetup} />
+      {pageContent}
+    </>
+  );
 };

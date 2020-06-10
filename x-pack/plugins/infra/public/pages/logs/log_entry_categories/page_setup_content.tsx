@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
@@ -14,27 +14,22 @@ import {
   LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
 import { useTrackPageview } from '../../../../../observability/public';
-
-import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
+import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
 export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 
-  const [isOpen, setIsOpen] = useState<boolean>(true);
-  const openFlyout = useCallback(() => setIsOpen(true), []);
-  const closeFlyout = useCallback(() => setIsOpen(false), []);
+  const { viewSetupForInitialization } = useLogEntryCategoriesModuleContext();
 
   return (
     <>
       <LogAnalysisSetupPage>
         <LogAnalysisSetupPageHeader>
-          <h3>
-            <FormattedMessage
-              id="xpack.infra.logs.logEntryCategories.setupTitle"
-              defaultMessage="FIXME: Placeholder title"
-            />
-          </h3>
+          <FormattedMessage
+            id="xpack.infra.logs.logEntryCategories.setupTitle"
+            defaultMessage="FIXME: Placeholder title"
+          />
         </LogAnalysisSetupPageHeader>
         <LogAnalysisSetupPageContent>
           <EuiText size="s">
@@ -46,7 +41,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiButton fill onClick={openFlyout}>
+          <EuiButton fill onClick={viewSetupForInitialization}>
             <FormattedMessage
               id="xpack.infra.logs.logEntryCategories.setupCta"
               defaultMessage="FIXME: Placeholder CTA"
@@ -54,8 +49,6 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
           </EuiButton>
         </LogAnalysisSetupPageContent>
       </LogAnalysisSetupPage>
-
-      <LogEntryCategoriesSetupFlyout isOpen={isOpen} onClose={closeFlyout} />
     </>
   );
 };
