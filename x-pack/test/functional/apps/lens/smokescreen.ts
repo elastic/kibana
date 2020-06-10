@@ -59,13 +59,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   async function clickOnBarHistogram() {
+    await find.existsByDisplayedByCssSelector('.echLegendItem');
     const el = await elasticChart.getCanvas();
+    // await PageObjects.common.sleep(1000);
+    // const { width, height, x, y } = await el._webElement.getRect();
+    // const centerX = x + width / 2;
+    // const centerY = y + height / 2;
+
+    // await browser
+    //   .getActions()
+    //   .move({ x: centerX, y: centerY, origin: Origin.VIEWPORT })
+    //   .click()
+    //   .perform();
+    // await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
 
     await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/67838
-  describe.skip('lens smokescreen tests', () => {
+  describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
