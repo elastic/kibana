@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await supertest
           .get('/api/np-context-in-legacy')
           .expect(200)
-          .expect(JSON.stringify({ contexts: ['core', 'search', 'pluginA'] }));
+          .expect(JSON.stringify({ contexts: ['core', 'pluginA'] }));
       });
     });
 
