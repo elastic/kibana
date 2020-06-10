@@ -266,6 +266,7 @@ export const FooterComponent = ({
     if (updatedAt === null || !isLoading) {
       setUpdatedAt(getUpdatedAt());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
   if (isLoading && !paginationLoading) {
