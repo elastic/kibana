@@ -178,14 +178,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             });
             break;
           case 'remove':
-            if (action.payload.processor.onFailure?.length) {
-              setProcessorToDeleteSelector(action.payload.selector);
-            } else {
-              processorsDispatch({
-                type: 'removeProcessor',
-                payload: { selector: action.payload.selector },
-              });
-            }
+            setProcessorToDeleteSelector(action.payload.selector);
             break;
           case 'addOnFailure':
             setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: action.payload.target });

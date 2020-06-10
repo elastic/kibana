@@ -22,7 +22,7 @@ export const ProcessorRemoveModal = ({ processor, onResult }: Props) => {
         title={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.removeProcessorModal.titleText"
-            defaultMessage="Remove {type} processor and on-failure handlers"
+            defaultMessage="Delete {type} processor"
             values={{ type: processor.type }}
           />
         }
@@ -37,14 +37,14 @@ export const ProcessorRemoveModal = ({ processor, onResult }: Props) => {
         confirmButtonText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.removeProcessorModal.confirmationButtonLabel"
-            defaultMessage="Remove processor"
+            defaultMessage="Delete processor"
           />
         }
       >
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.deleteModal.deleteDescription"
-            defaultMessage="You are about to delete a processor with on-failure handlers."
+            defaultMessage="Delete this processor and its on-failure handlers."
           />
         </p>
       </EuiConfirmModal>
