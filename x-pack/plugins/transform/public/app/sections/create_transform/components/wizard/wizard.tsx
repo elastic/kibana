@@ -163,6 +163,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         transformConfig={transformConfig}
         onChange={setStepCreateState}
         overrides={stepCreateState}
+        timeFieldName={stepDetailsState.indexPatternDateField}
       />
     ) : (
       <StepCreateSummary />
