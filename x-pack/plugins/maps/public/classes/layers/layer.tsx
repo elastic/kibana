@@ -331,6 +331,7 @@ export class AbstractLayer implements ILayer {
 
   _removeStaleMbSourcesAndLayers(mbMap: unknown) {
     if (this._requiresPrevSourceCleanup(mbMap)) {
+      console.log('requresprevsourcelcan');
       // @ts-ignore
       const mbStyle = mbMap.getStyle();
       // @ts-ignore
@@ -346,6 +347,7 @@ export class AbstractLayer implements ILayer {
         // @ts-ignore
         if (this.ownsMbSourceId(mbSourceId)) {
           // @ts-ignore
+          console.log('remnove source', mbSourceId);
           mbMap.removeSource(mbSourceId);
         }
       });

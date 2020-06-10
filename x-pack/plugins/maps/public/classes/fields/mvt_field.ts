@@ -7,7 +7,7 @@
 import { AbstractField, IField } from './field';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ITiledSingleLayerVectorSource, IVectorSource } from '../sources/vector_source';
-import { MVTFieldType } from '../../../common/descriptor_types';
+import { MVTFieldDescriptor, MVTFieldType } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {
   private readonly _source: ITiledSingleLayerVectorSource;
@@ -26,6 +26,13 @@ export class MVTField extends AbstractField implements IField {
     super({ fieldName, origin });
     this._source = source;
     this._type = type;
+  }
+
+  getMVTFieldDescriptor(): MVTFieldDescriptor {
+    return {
+      type: this._type,
+      name: this.getName(),
+    };
   }
 
   getSource(): IVectorSource {

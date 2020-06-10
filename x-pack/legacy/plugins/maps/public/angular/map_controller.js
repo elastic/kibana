@@ -385,6 +385,7 @@ app.controller(
       });
 
       // sync store with savedMap mapState
+      console.log('ms', savedMap, savedMap.mapStateJSON);
       let savedObjectFilters = [];
       if (savedMap.mapStateJSON) {
         const mapState = JSON.parse(savedMap.mapStateJSON);

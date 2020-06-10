@@ -69,6 +69,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   renderSourceSettingsEditor({ onChange }) {
+    console.log('render source settings editor', onChange);
     return (
       <UpdateSourceEditor onChange={onChange} tooltipFields={this._tooltipFields} source={this} />
     );
@@ -119,6 +120,10 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     });
   }
 
+  getLayerName():string {
+    return this._descriptor.layerName;
+  }
+
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
@@ -151,10 +156,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   async getDisplayName(): Promise<string> {
-    return this._descriptor.layerName;
+    return this.getLayerName();
   }
 
   async getUrlTemplateWithMeta() {
+    console.log('geturltemplate withmeta');
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,

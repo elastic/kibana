@@ -12,6 +12,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { MVTField } from '../../fields/mvt_field';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
+import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
+import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
+import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 export interface Props {
   tooltipFields: MVTFields[];
@@ -51,14 +54,71 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  render() {
+  _handleLayerNameInputChange = (layerName: string) => {
+    console.log('ln', layerName);
+    this.props.onChange({ propName: 'layerName', value: layerName });
+  };
+
+  _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
+    console.log('f', fields);
+    this.props.onChange({ propName: 'fields', value: fields });
+  };
+
+  _handleZoomRangeChange = ({
+    minSourceZoom,
+    maxSourceZoom,
+  }: {
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }) => {
+    console.log('zr', minSourceZoom, maxSourceZoom);
+    this.props.onChange({ propName: 'minSourceZoom', value: minSourceZoom });
+    this.props.onChange({ propName: 'maxSourceZoom', value: maxSourceZoom });
+  };
+
+  _renderSourceSettingsCard() {
+    console.log(this.props.source);
+
+    const fields: MVTFieldDescriptor[] = (this.state.fields || []).map((field: MVTField) => {
+      return field.getMVTFieldDescriptor();
+    });
+
     return (
       <Fragment>
         <EuiPanel>
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.maps.emsSource.tooltipsTitle"
+                id="xpack.maps.mvtSource.sourceSettings"
+                defaultMessage="Source settings"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <MVTSingleLayerSourceSettings
+            handleLayerNameInputChange={this._handleLayerNameInputChange}
+            handleFieldChange={this._handleFieldChange}
+            handleZoomRangeChange={this._handleZoomRangeChange}
+            layerName={this.props.source.getLayerName() || ''}
+            fields={fields}
+            minSourceZoom={this.props.source.getMinZoom()}
+            maxSourceZoom={this.props.source.getMaxZoom()}
+          />
+        </EuiPanel>
+
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+
+  _renderTooltipSelectionCard() {
+    return (
+      <Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.maps.mvtSource.tooltipsTitle"
                 defaultMessage="Tooltip fields"
               />
             </h5>
@@ -74,6 +134,15 @@ export class UpdateSourceEditor extends Component<Props, State> {
         </EuiPanel>
 
         <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderSourceSettingsCard()}
+        {this._renderTooltipSelectionCard()}
       </Fragment>
     );
   }
