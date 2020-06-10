@@ -89,7 +89,7 @@ export class AlertsAuthorization {
 
   public async getFindAuthorizationFilter(): Promise<{
     filter?: string;
-    ensureAlertTypeIsAuthorized: (alertTypeId: string) => void;
+    ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
   }> {
     if (this.authorization) {
       const authorizedAlertTypes = await this.checkAlertTypeAuthorization(
@@ -101,18 +101,26 @@ export class AlertsAuthorization {
         throw Boom.forbidden(`Unauthorized to find a any alert types`);
       }
 
-      const authorizedAlertTypeIds = new Set(pluck([...authorizedAlertTypes], 'id'));
+      const authorizedAlertTypeIdsToConsumers = new Set<string>(
+        [...authorizedAlertTypes].reduce<string[]>((alertTypeIdConsumerPairs, alertType) => {
+          for (const consumer of alertType.authorizedConsumers) {
+            alertTypeIdConsumerPairs.push(`${alertType.id}/${consumer}`);
+          }
+          return alertTypeIdConsumerPairs;
+        }, [])
+      );
+
       return {
         filter: `(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`,
-        ensureAlertTypeIsAuthorized: (alertTypeId: string) => {
-          if (!authorizedAlertTypeIds.has(alertTypeId)) {
-            throw Boom.forbidden(`Unauthorized to find "${alertTypeId}" alerts`);
+        ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {
+          if (!authorizedAlertTypeIdsToConsumers.has(`${alertTypeId}/${consumer}`)) {
+            throw Boom.forbidden(`Unauthorized to find "${alertTypeId}" alerts under ${consumer}`);
           }
         },
       };
     }
     return {
-      ensureAlertTypeIsAuthorized: (alertTypeId: string) => {},
+      ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {},
     };
   }
 

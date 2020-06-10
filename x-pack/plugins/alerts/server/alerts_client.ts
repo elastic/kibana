@@ -274,7 +274,7 @@ export class AlertsClient {
       perPage,
       total,
       data: data.map(({ id, attributes, updated_at, references }) => {
-        ensureAlertTypeIsAuthorized(attributes.alertTypeId);
+        ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
         return this.getAlertFromRaw(id, attributes, updated_at, references);
       }),
     };
