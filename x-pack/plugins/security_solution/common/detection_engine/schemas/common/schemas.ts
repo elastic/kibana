@@ -12,7 +12,6 @@ import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
-import { SavedObjectAttributesRuntimeType } from '../../../types/saved_objects';
 
 export const description = t.string;
 export type Description = t.TypeOf<typeof description>;
@@ -42,7 +41,7 @@ export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
  * TODO: Right now the filters is an "unknown", when it could more than likely
  * become the actual ESFilter as a type.
  */
-export const filters = t.array(t.record(t.string, t.unknown)); // Filters are not easily type-able yet
+export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-able yet
 
 /**
@@ -52,12 +51,13 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 export const action_group = t.string;
 export const action_id = t.string;
 export const action_action_type_id = t.string;
+export const action_params = t.object;
 export const action = t.exact(
   t.type({
     group: action_group,
     id: action_id,
     action_type_id: action_action_type_id,
-    params: SavedObjectAttributesRuntimeType,
+    params: action_params,
   })
 );
 
@@ -162,7 +162,7 @@ export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJob
  * TODO: Strip away extra information and possibly even "freeze" this object
  * so we have tighter control over 3rd party data structures.
  */
-export const meta = t.record(t.string, t.union([t.string, t.object]));
+export const meta = t.object;
 export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;

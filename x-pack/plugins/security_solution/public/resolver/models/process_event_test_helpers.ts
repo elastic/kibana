@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep } from 'lodash/fp';
+import { defaults } from 'lodash/fp';
 import { LegacyEndpointEvent } from '../../../common/endpoint/types';
 
 type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
@@ -15,7 +15,7 @@ type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
  * The other fields are populated by the function unless provided in 'parts'
  */
 export function mockProcessEvent(parts: DeepPartial<LegacyEndpointEvent>): LegacyEndpointEvent {
-  return defaultsDeep(
+  return defaults(
     {
       endgame: {
         event_timestamp: 1,
@@ -38,5 +38,5 @@ export function mockProcessEvent(parts: DeepPartial<LegacyEndpointEvent>): Legac
       },
     },
     parts
-  );
+  ) as LegacyEndpointEvent;
 }

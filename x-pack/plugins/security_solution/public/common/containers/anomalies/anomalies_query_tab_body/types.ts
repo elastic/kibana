@@ -5,11 +5,7 @@
  */
 
 import { ESTermQuery } from '../../../../../common/typed_json';
-import {
-  AnomaliesHostTableProps,
-  AnomaliesNetworkTableProps,
-  NarrowDateRange,
-} from '../../../components/ml/types';
+import { NarrowDateRange } from '../../../components/ml/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 import { SetQuery } from '../../../../hosts/pages/navigation/types';
 import { FlowTarget } from '../../../../graphql/types';
@@ -23,14 +19,8 @@ interface QueryTabBodyProps {
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   anomaliesFilterQuery?: object;
-  AnomaliesTableComponent: React.NamedExoticComponent<
-    | (AnomaliesHostTableProps & {
-        type: HostsType & NetworkType;
-      })
-    | (AnomaliesNetworkTableProps & {
-        type: HostsType & NetworkType;
-      })
-  >;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  AnomaliesTableComponent: React.NamedExoticComponent<any>;
   deleteQuery?: ({ id }: { id: string }) => void;
   endDate: number;
   flowTarget?: FlowTarget;
