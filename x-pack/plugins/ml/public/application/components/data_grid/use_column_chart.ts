@@ -13,6 +13,8 @@ import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
+import { stringHash } from '../../../../common/util/string_utils';
+
 import { NON_AGGREGATABLE } from './common';
 
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
@@ -63,65 +65,46 @@ const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYPES | un
   return fieldType;
 };
 
-export const fetchChartData = async (
+export const fetchChartsData = async (
   indexPatternTitle: string,
   api: any,
   query: any,
-  columnType: EuiDataGridColumn
-): Promise<ChartData> => {
-  const fieldType = getFieldType(columnType.schema);
+  columnTypes: EuiDataGridColumn[]
+): Promise<ChartData[]> => {
+  const numericColumns = columnTypes.filter((cT) => {
+    const fieldType = getFieldType(cT.schema);
+    return fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE;
+  });
 
-  const fetchCardinality = async () => {
-    try {
-      const resp: any = await api.esSearch({
-        index: indexPatternTitle,
+  const minMaxAggs = numericColumns.reduce((aggs, c) => {
+    const id = stringHash(c.id);
+    aggs[id] = {
+      stats: {
+        field: c.id,
+      },
+    };
+    return aggs;
+  }, {} as Record<string, object>);
+
+  let respStats: any;
+  try {
+    respStats = await api.esSearch({
+      index: indexPatternTitle,
+      size: 0,
+      body: {
+        query,
+        aggs: minMaxAggs,
         size: 0,
-        body: {
-          query,
-          aggs: {
-            categories: {
-              cardinality: {
-                field: columnType.id,
-              },
-            },
-          },
-          size: 0,
-        },
-      });
-      return resp.aggregations.categories.value;
-    } catch (e) {
-      throw new Error(e);
-    }
-  };
+      },
+    });
+  } catch (e) {
+    throw new Error(e);
+  }
 
-  const fetchChartHistogramData = async () => {
-    try {
-      const respStats: any = await api.esSearch({
-        index: indexPatternTitle,
-        size: 0,
-        body: {
-          query,
-          aggs: {
-            min_max: {
-              stats: {
-                field: columnType.id,
-              },
-            },
-          },
-          size: 0,
-        },
-      });
-
-      const stats = [respStats.aggregations.min_max.min, respStats.aggregations.min_max.max];
-      if (stats.includes(null)) {
-        return {
-          data: [],
-          interval: 0,
-          stats: [0, 0],
-        };
-      }
-
-      const delta = respStats.aggregations.min_max.max - respStats.aggregations.min_max.min;
+  const aggIntervals = Object.keys(respStats.aggregations).reduce((p, aggName) => {
+    const stats = [respStats.aggregations[aggName].min, respStats.aggregations[aggName].max];
+    if (!stats.includes(null)) {
+      const delta = respStats.aggregations[aggName].max - respStats.aggregations[aggName].min;
 
       let aggInterval = 1;
 
@@ -133,81 +116,104 @@ export const fetchChartData = async (
         aggInterval = delta / MAX_CHART_COLUMNS;
       }
 
-      const resp: any = await api.esSearch({
-        index: indexPatternTitle,
-        size: 0,
-        body: {
-          query,
-          aggs: {
-            chart: {
-              histogram: {
-                field: columnType.id,
-                interval: aggInterval,
-              },
-            },
-          },
-          size: 0,
-        },
-      });
+      p[aggName] = aggInterval;
+    }
 
-      return {
-        data: resp.aggregations.chart.buckets,
-        interval: aggInterval,
-        stats,
+    return p;
+  }, {} as Record<string, number>);
+
+  const chartDataAggs = columnTypes.reduce((aggs, c) => {
+    const fieldType = getFieldType(c.schema);
+    const id = stringHash(c.id);
+    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+      if (aggIntervals[id] !== undefined) {
+        aggs[`${id}_histogram`] = {
+          histogram: {
+            field: c.id,
+            interval: aggIntervals[id],
+          },
+        };
+      }
+    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+      if (fieldType === KBN_FIELD_TYPES.STRING) {
+        aggs[`${id}_cardinality`] = {
+          cardinality: {
+            field: c.id,
+          },
+        };
+      }
+      aggs[`${id}_terms`] = {
+        terms: {
+          field: c.id,
+          size: MAX_CHART_COLUMNS,
+        },
       };
-    } catch (e) {
-      throw new Error(e);
     }
-  };
+    return aggs;
+  }, {} as Record<string, object>);
 
-  const fetchChartTermsData = async () => {
-    try {
-      const resp: any = await api.esSearch({
-        index: indexPatternTitle,
+  let respChartsData: any;
+  try {
+    respChartsData = await api.esSearch({
+      index: indexPatternTitle,
+      size: 0,
+      body: {
+        query,
+        aggs: chartDataAggs,
         size: 0,
-        body: {
-          query,
-          aggs: {
-            chart: {
-              terms: {
-                field: columnType.id,
-                size: MAX_CHART_COLUMNS,
-              },
-            },
-          },
-          size: 0,
-        },
-      });
-      return resp.aggregations.chart.buckets;
-    } catch (e) {
-      throw new Error(e);
-    }
-  };
-
-  if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-    return {
-      ...((await fetchChartHistogramData()) as NumericChartData),
-      type: 'numeric',
-      id: columnType.id,
-    };
-  } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
-    // TODO query in parallel
-    return {
-      type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
-      cardinality: await fetchCardinality(),
-      data: await fetchChartTermsData(),
-      id: columnType.id,
-    };
-  } else if (fieldType === KBN_FIELD_TYPES.OBJECT || fieldType === undefined) {
-    return {
-      type: 'ordinal',
-      cardinality: 0,
-      data: [],
-      id: columnType.id,
-    };
+      },
+    });
+  } catch (e) {
+    throw new Error(e);
   }
 
-  throw new Error('Invalid fieldType');
+  const chartsData: ChartData[] = columnTypes.map(
+    (c): ChartData => {
+      const fieldType = getFieldType(c.schema);
+      const id = stringHash(c.id);
+
+      if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+        if (aggIntervals[id] === undefined) {
+          return {
+            type: 'numeric',
+            data: [],
+            interval: 0,
+            stats: [0, 0],
+            id: c.id,
+          };
+        }
+
+        return {
+          data: respChartsData.aggregations[`${id}_histogram`].buckets,
+          interval: aggIntervals[id],
+          stats: [respStats.aggregations[id].min, respStats.aggregations[id].max],
+          type: 'numeric',
+          id: c.id,
+        };
+      } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+        return {
+          type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
+          cardinality:
+            fieldType === KBN_FIELD_TYPES.STRING
+              ? respChartsData.aggregations[`${id}_cardinality`].value
+              : 2,
+          data: respChartsData.aggregations[`${id}_terms`].buckets,
+          id: c.id,
+        };
+      } else if (fieldType === KBN_FIELD_TYPES.OBJECT || fieldType === undefined) {
+        return {
+          type: 'ordinal',
+          cardinality: 0,
+          data: [],
+          id: c.id,
+        };
+      }
+
+      throw new Error('Invalid fieldType');
+    }
+  );
+
+  return chartsData;
 };
 
 interface NumericDataItem {

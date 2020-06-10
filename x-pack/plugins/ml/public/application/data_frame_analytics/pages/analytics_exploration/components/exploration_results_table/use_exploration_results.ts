@@ -11,11 +11,10 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
-  fetchChartData,
+  fetchChartsData,
   getDataGridSchemasFromFieldTypes,
   useDataGrid,
   useRenderCellValue,
-  ChartData,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
@@ -70,17 +69,15 @@ export const useExplorationResults = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const fetchColumnChartsData = async function () {
-    const fetchers = dataGrid.visibleColumns.map((vc) => {
-      const columnType = columns.find((c) => c.id === vc);
-
-      if (columnType === undefined || jobConfig === undefined) {
-        return Promise.resolve(undefined);
-      }
-      return fetchChartData(jobConfig.dest.index, ml, { match_all: {} }, columnType);
-    });
-
-    const data = (await Promise.all(fetchers)) as ChartData[];
-    dataGrid.setColumnCharts(data.filter((d) => d !== undefined));
+    if (jobConfig !== undefined) {
+      const columnChartsData = await fetchChartsData(
+        jobConfig.dest.index,
+        ml,
+        { match_all: {} },
+        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      );
+      dataGrid.setColumnCharts(columnChartsData);
+    }
   };
 
   useEffect(() => {

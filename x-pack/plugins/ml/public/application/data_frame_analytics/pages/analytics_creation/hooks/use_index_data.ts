@@ -10,12 +10,11 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import {
-  fetchChartData,
+  fetchChartsData,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   useDataGrid,
   useRenderCellValue,
-  ChartData,
   EsSorting,
   SearchResponse7,
   UseIndexDataReturnType,
@@ -98,17 +97,13 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
 
   const fetchColumnChartsData = async function () {
-    const fetchers = dataGrid.visibleColumns.map((vc) => {
-      const columnType = columns.find((c) => c.id === vc);
-
-      if (columnType === undefined) {
-        return Promise.resolve(undefined);
-      }
-      return fetchChartData(indexPattern.title, ml, query, columnType);
-    });
-
-    const data = (await Promise.all(fetchers)) as ChartData[];
-    dataGrid.setColumnCharts(data.filter((d) => d !== undefined));
+    const columnChartsData = await fetchChartsData(
+      indexPattern.title,
+      ml,
+      query,
+      columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+    );
+    dataGrid.setColumnCharts(columnChartsData);
   };
 
   useEffect(() => {
