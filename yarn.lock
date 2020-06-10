@@ -2101,10 +2101,10 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@7.8.0":
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.8.0.tgz#8cc309bc8128c03a78e876b43bf04f4d2b4789c5"
-  integrity sha512-+6WjxZy/mhVWXTdSYjHd+ArsvH1s7GEummaGq9DlnCW6CyGIYkYxOISKpuytReeYhhMk7F06f/GKw+8ivi2zPQ==
+"@elastic/ems-client@7.9.3":
+  version "7.9.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.9.3.tgz#71b79914f76e347f050ead8474ad65d761e94a8a"
+  integrity sha512-aun5rW9TQgWLVH77xBLLhempT3P+6AeQIEyK/CWYuVfCDpHfDxzMKWgQ076a7rSUqF059ayDGZbyOxf7l0M2Sw==
   dependencies:
     lodash "^4.17.15"
     semver "^6.3.0"
