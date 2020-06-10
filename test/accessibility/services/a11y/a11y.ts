@@ -94,6 +94,9 @@ export function A11yProvider({ getService }: FtrProviderContext) {
           'color-contrast': {
             enabled: false,
           },
+          'aria-roles': {
+            matches: '*:not([role="graphics-document"][aria-roledescription="visualization"])',
+          },
         },
       };
 
