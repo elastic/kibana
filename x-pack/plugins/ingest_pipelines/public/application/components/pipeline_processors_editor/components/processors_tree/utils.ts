@@ -7,12 +7,12 @@
 import { ProcessorInternal } from '../../types';
 
 // These values are tied to the style and heights following components:
-// - ./tree_node.tsx
-// - ./drop_zone_button.tsx
-// - ../pipeline_processors_editor_item.tsx
+// - ./components/tree_node.tsx
+// - ./components/drop_zone_button.tsx
+// - ./components/pipeline_processors_editor_item.tsx
 const ITEM_HEIGHTS_PX = {
   withoutNestedItems: 59,
-  withNestedItems: 95,
+  withNestedItems: 137,
   padding: 16,
 };
 

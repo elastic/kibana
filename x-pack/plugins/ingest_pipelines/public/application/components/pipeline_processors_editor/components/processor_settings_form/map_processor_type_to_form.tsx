@@ -6,8 +6,8 @@
 
 import { FunctionComponent } from 'react';
 
-import { SetProcessor } from './processors/set';
-import { Gsub } from './processors/gsub';
+// import { SetProcessor } from './processors/set';
+// import { Gsub } from './processors/gsub';
 
 const mapProcessorTypeToForm = {
   append: undefined, // TODO: Implement
@@ -25,7 +25,7 @@ const mapProcessorTypeToForm = {
   foreach: undefined, // TODO: Implement
   geoip: undefined, // TODO: Implement
   grok: undefined, // TODO: Implement
-  gsub: Gsub,
+  gsub: undefined,
   html_strip: undefined, // TODO: Implement
   inference: undefined, // TODO: Implement
   join: undefined, // TODO: Implement
@@ -36,7 +36,7 @@ const mapProcessorTypeToForm = {
   remove: undefined, // TODO: Implement
   rename: undefined, // TODO: Implement
   script: undefined, // TODO: Implement
-  set: SetProcessor,
+  set: undefined,
   set_security_user: undefined, // TODO: Implement
   split: undefined, // TODO: Implement
   sort: undefined, // TODO: Implement

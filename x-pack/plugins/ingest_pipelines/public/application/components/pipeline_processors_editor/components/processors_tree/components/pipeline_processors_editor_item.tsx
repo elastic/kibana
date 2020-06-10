@@ -238,9 +238,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
   (prev, current) => {
     return (
       prev.handlers === current.handlers &&
-      prev.processor.id === current.processor.id &&
-      prev.processor.type === current.processor.type &&
-      prev.processor.onFailure === current.processor.onFailure &&
+      prev.processor === current.processor &&
       prev.description === current.description &&
       prev.selected === current.selected
     );

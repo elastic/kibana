@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../../types';
 
-import { PipelineProcessorsEditorItem, Handlers } from '.';
+import { PipelineProcessorsEditorItem, Handlers, AddProcessorButton } from '.';
 
 import { ProcessorInfo } from '../processors_tree';
 import { PrivateTree, PrivateOnActionHandler } from './private_tree';
@@ -58,7 +58,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         privateOnAction({ type: 'addProcessor', payload: { target: processorInfo.selector } });
       },
     };
-  }, [privateOnAction, stringSelector, processor.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [privateOnAction, stringSelector, processor]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selected = selectedProcessorInfo?.id === processor.id;
 
@@ -95,6 +95,14 @@ export const TreeNode: FunctionComponent<Props> = ({
             privateOnAction={privateOnAction}
             selector={processorInfo.selector.concat('onFailure')}
             processors={processor.onFailure}
+          />
+          <AddProcessorButton
+            onClick={() =>
+              privateOnAction({
+                type: 'addProcessor',
+                payload: { target: processorInfo.selector.concat('onFailure') },
+              })
+            }
           />
         </div>
       ) : undefined}

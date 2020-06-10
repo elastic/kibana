@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, useCallback, memo, useState, useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import './pipeline_processors_editor.scss';
 
@@ -200,48 +199,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              responsive={false}
-              className="pipelineProcessorsEditor__editorContainer"
-            >
-              <EuiFlexItem grow={false}>
-                <ProcessorsTree
-                  baseSelector={PROCESSOR_STATE_SCOPE}
-                  processors={processors}
-                  onAction={onTreeAction}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  justifyContent="flexStart"
-                  alignItems="center"
-                  gutterSize="l"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconSide="left"
-                      iconType="plusInCircle"
-                      onClick={() =>
-                        setSettingsFormMode({
-                          id: 'creatingProcessor',
-                          arg: PROCESSOR_STATE_SCOPE,
-                        })
-                      }
-                    >
-                      {i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
-                        {
-                          defaultMessage: 'Add a processor',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ProcessorsTree
+              baseSelector={PROCESSOR_STATE_SCOPE}
+              processors={processors}
+              onAction={onTreeAction}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiSpacer size="m" />
@@ -264,48 +226,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
           </EuiFlexItem>
           {showGlobalOnFailure ? (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="none"
-                responsive={false}
-                className="pipelineProcessorsEditor__editorContainer"
-              >
-                <EuiFlexItem grow={false}>
-                  <ProcessorsTree
-                    baseSelector={ON_FAILURE_STATE_SCOPE}
-                    processors={onFailureProcessors}
-                    onAction={onTreeAction}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup
-                    justifyContent="flexStart"
-                    alignItems="center"
-                    gutterSize="l"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        iconSide="left"
-                        iconType="plusInCircle"
-                        onClick={() =>
-                          setSettingsFormMode({
-                            id: 'creatingProcessor',
-                            arg: ON_FAILURE_STATE_SCOPE,
-                          })
-                        }
-                      >
-                        {i18n.translate(
-                          'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
-                          {
-                            defaultMessage: 'Add a processor',
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <ProcessorsTree
+                baseSelector={ON_FAILURE_STATE_SCOPE}
+                processors={onFailureProcessors}
+                onAction={onTreeAction}
+              />
             </EuiFlexItem>
           ) : undefined}
         </EuiFlexGroup>

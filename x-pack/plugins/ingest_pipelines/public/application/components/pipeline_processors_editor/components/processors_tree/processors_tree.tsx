@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent, useState, memo, useCallback, useRef, useEffect } from 'react';
-import { keyCodes } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, keyCodes } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
-import './tree.scss';
+import './processors_tree.scss';
 
-import { PrivateOnActionHandler, PrivateTree } from './components';
+import { PrivateOnActionHandler, PrivateTree, AddProcessorButton } from './components';
 
 export interface ProcessorInfo {
   id: string;
@@ -90,16 +90,36 @@ export const ProcessorsTree: FunctionComponent<Props> = memo(
       [onAction, setSelectedProcessorInfo]
     );
     return (
-      <PrivateTree
-        windowScrollerRef={windowScrollerRef}
-        listRef={listRef}
-        onHeightChange={() => windowScrollerRef.current?.updatePosition()}
-        level={1}
-        privateOnAction={privateOnAction}
-        selectedProcessorInfo={selectedProcessorInfo}
-        processors={processors}
-        selector={baseSelector}
-      />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        className="pipelineProcessorsEditor__tree__container"
+      >
+        <EuiFlexItem grow={false}>
+          <PrivateTree
+            windowScrollerRef={windowScrollerRef}
+            listRef={listRef}
+            onHeightChange={() => windowScrollerRef.current?.updatePosition()}
+            level={1}
+            privateOnAction={privateOnAction}
+            selectedProcessorInfo={selectedProcessorInfo}
+            processors={processors}
+            selector={baseSelector}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} justifyContent="flexStart" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <AddProcessorButton
+                onClick={() => {
+                  privateOnAction({ type: 'addProcessor', payload: { target: baseSelector } });
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

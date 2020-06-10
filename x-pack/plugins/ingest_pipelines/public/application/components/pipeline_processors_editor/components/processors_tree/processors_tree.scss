@@ -1,6 +1,12 @@
 @import '@elastic/eui/src/global_styling/variables/size';
 
 .pipelineProcessorsEditor__tree {
+
+  &__container {
+    background-color: $euiColorLightestShade;
+    padding: $euiSizeS;
+  }
+
   &__dropZoneContainer {
     margin: 2px;
     visibility: hidden;
@@ -36,6 +42,11 @@
       }
     }
   }
+
+  &__onFailureHandlerLabel {
+    margin-top: 10px;
+  }
+
 
   &__onFailureHandlerContainer {
     margin-top: $euiSizeS;
