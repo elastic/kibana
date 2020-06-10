@@ -18,15 +18,8 @@ export type State = Omit<DeserializeResult, 'onFailure'> & {
 
 export type Action =
   | {
-      type: 'addTopLevelProcessor';
-      payload: { processor: ProcessorInternal; selector: ProcessorSelector };
-    }
-  | {
-      type: 'addOnFailureProcessor';
-      payload: {
-        onFailureProcessor: ProcessorInternal;
-        targetSelector: ProcessorSelector;
-      };
+      type: 'addProcessor';
+      payload: { processor: ProcessorInternal; targetSelector: ProcessorSelector };
     }
   | {
       type: 'updateProcessor';
@@ -76,24 +69,28 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     return setValue(processorsSelector, state, [...processors]);
   }
 
-  if (action.type === 'addTopLevelProcessor') {
-    const { processor, selector } = action.payload;
-    return setValue(selector, state, getValue(selector, state).concat(processor));
-  }
-
-  if (action.type === 'addOnFailureProcessor') {
-    const { onFailureProcessor, targetSelector } = action.payload;
+  if (action.type === 'addProcessor') {
+    const { processor, targetSelector } = action.payload;
     if (!targetSelector.length) {
       throw new Error('Expected target selector to contain a path, but received an empty array.');
     }
-    const targetProcessor = getValue<ProcessorInternal>(targetSelector, state);
+    const targetProcessor = getValue<ProcessorInternal | ProcessorInternal[]>(
+      targetSelector,
+      state
+    );
     if (!targetProcessor) {
-      throw new Error(`Could not find processor at ${targetSelector.join('.')}`);
+      throw new Error(
+        `Could not find processor or processors array at ${targetSelector.join('.')}`
+      );
     }
-    targetProcessor.onFailure = targetProcessor.onFailure
-      ? targetProcessor.onFailure.concat(onFailureProcessor)
-      : [onFailureProcessor];
-    return setValue(targetSelector, state, targetProcessor);
+    if (Array.isArray(targetProcessor)) {
+      return setValue(targetSelector, state, targetProcessor.concat(processor));
+    } else {
+      targetProcessor.onFailure = targetProcessor.onFailure
+        ? targetProcessor.onFailure.concat(processor)
+        : [processor];
+      return setValue(targetSelector, state, targetProcessor);
+    }
   }
 
   if (action.type === 'updateProcessor') {

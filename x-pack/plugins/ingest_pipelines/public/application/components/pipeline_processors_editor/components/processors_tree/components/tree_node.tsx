@@ -55,7 +55,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         });
       },
       onAddOnFailure: () => {
-        privateOnAction({ type: 'addOnFailure', payload: { target: processorInfo.selector } });
+        privateOnAction({ type: 'addProcessor', payload: { target: processorInfo.selector } });
       },
     };
   }, [privateOnAction, stringSelector, processor.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -71,6 +71,7 @@ export const TreeNode: FunctionComponent<Props> = ({
       <PipelineProcessorsEditorItem
         processor={processor}
         handlers={handlers}
+        // TODO: Replace with processor.options.description when it is available
         description={processor.options.tag}
         selected={Boolean(selectedProcessorInfo?.id === processor.id)}
       />

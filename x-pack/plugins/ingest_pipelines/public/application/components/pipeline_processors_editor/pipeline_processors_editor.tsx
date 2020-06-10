@@ -40,8 +40,7 @@ import { getValue } from './utils';
  * which will be used to update the in-memory processors data structure.
  */
 export type SettingsFormMode =
-  | { id: 'creatingTopLevelProcessor'; arg: ProcessorSelector }
-  | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
+  | { id: 'creatingProcessor'; arg: ProcessorSelector }
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'closed' };
 
@@ -119,23 +118,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     const onSubmit = useCallback<OnSubmitHandler>(
       (processorTypeAndOptions) => {
         switch (settingsFormMode.id) {
-          case 'creatingTopLevelProcessor':
+          case 'creatingProcessor':
             processorsDispatch({
-              type: 'addTopLevelProcessor',
+              type: 'addProcessor',
               payload: {
                 processor: { id: services.idGenerator.getId(), ...processorTypeAndOptions },
-                selector: settingsFormMode.arg,
-              },
-            });
-            break;
-          case 'creatingOnFailureProcessor':
-            processorsDispatch({
-              type: 'addOnFailureProcessor',
-              payload: {
-                onFailureProcessor: {
-                  id: services.idGenerator.getId(),
-                  ...processorTypeAndOptions,
-                },
                 targetSelector: settingsFormMode.arg,
               },
             });
@@ -180,8 +167,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
           case 'remove':
             setProcessorToDeleteSelector(action.payload.selector);
             break;
-          case 'addOnFailure':
-            setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: action.payload.target });
+          case 'addProcessor':
+            setSettingsFormMode({ id: 'creatingProcessor', arg: action.payload.target });
             break;
           case 'move':
             processorsDispatch({
@@ -239,7 +226,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                       iconType="plusInCircle"
                       onClick={() =>
                         setSettingsFormMode({
-                          id: 'creatingTopLevelProcessor',
+                          id: 'creatingProcessor',
                           arg: PROCESSOR_STATE_SCOPE,
                         })
                       }
@@ -303,7 +290,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                         iconType="plusInCircle"
                         onClick={() =>
                           setSettingsFormMode({
-                            id: 'creatingTopLevelProcessor',
+                            id: 'creatingProcessor',
                             arg: ON_FAILURE_STATE_SCOPE,
                           })
                         }

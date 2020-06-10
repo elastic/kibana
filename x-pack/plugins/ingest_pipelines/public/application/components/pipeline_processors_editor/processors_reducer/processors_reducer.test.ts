@@ -22,16 +22,16 @@ describe('Processors reducer', () => {
     const processor3 = { id: expect.any(String), type: 'test3', options: {} };
 
     const s1 = reducer(initialState, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor1, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor1, targetSelector: ['processors'] },
     });
     const s2 = reducer(s1, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor2, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor2, targetSelector: ['processors'] },
     });
     const s3 = reducer(s2, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor3, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor3, targetSelector: ['processors'] },
     });
 
     expect(s3.processors).toEqual([processor1, processor2, processor3]);
@@ -55,23 +55,23 @@ describe('Processors reducer', () => {
     const processor4 = { id: expect.any(String), type: 'test4', options: {} };
 
     const s1 = reducer(initialState, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor1, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor1, targetSelector: ['processors'] },
     });
     const s2 = reducer(s1, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor2, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor2, targetSelector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
-      type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+      type: 'addProcessor',
+      payload: { processor: processor3, targetSelector: ['processors', '1'] },
     });
 
     const s4 = reducer(s3, {
-      type: 'addOnFailureProcessor',
+      type: 'addProcessor',
       payload: {
-        onFailureProcessor: processor4,
+        processor: processor4,
         targetSelector: ['processors', '1', 'onFailure', '0'],
       },
     });
@@ -105,23 +105,23 @@ describe('Processors reducer', () => {
     const processor4 = { id: expect.any(String), type: 'test4', options: {} };
 
     const s1 = reducer(initialState, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor1, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor1, targetSelector: ['processors'] },
     });
     const s2 = reducer(s1, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor2, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor2, targetSelector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
-      type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+      type: 'addProcessor',
+      payload: { processor: processor3, targetSelector: ['processors', '1'] },
     });
 
     const s4 = reducer(s3, {
-      type: 'addOnFailureProcessor',
+      type: 'addProcessor',
       payload: {
-        onFailureProcessor: processor4,
+        processor: processor4,
         targetSelector: ['processors', '1', 'onFailure', '0'],
       },
     });
@@ -154,18 +154,18 @@ describe('Processors reducer', () => {
     const processor3 = { id: expect.any(String), type: 'test3', options: {} };
 
     const s1 = reducer(initialState, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor1, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor1, targetSelector: ['processors'] },
     });
 
     const s2 = reducer(s1, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor2, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor2, targetSelector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor3, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor3, targetSelector: ['processors'] },
     });
 
     // Move the parent into a child list
@@ -186,13 +186,13 @@ describe('Processors reducer', () => {
     const processor2 = { id: expect.any(String), type: 'test2', options: {} };
 
     const s1 = reducer(initialState, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor1, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor1, targetSelector: ['processors'] },
     });
 
     const s2 = reducer(s1, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor2, selector: ['onFailure'] },
+      type: 'addProcessor',
+      payload: { processor: processor2, targetSelector: ['onFailure'] },
     });
 
     // Move the parent into a child list
@@ -224,23 +224,23 @@ describe('Processors reducer', () => {
     };
 
     const s1 = reducer(initialState, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor1, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor1, targetSelector: ['processors'] },
     });
     const s2 = reducer(s1, {
-      type: 'addTopLevelProcessor',
-      payload: { processor: processor2, selector: ['processors'] },
+      type: 'addProcessor',
+      payload: { processor: processor2, targetSelector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
-      type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+      type: 'addProcessor',
+      payload: { processor: processor3, targetSelector: ['processors', '1'] },
     });
 
     const s4 = reducer(s3, {
-      type: 'addOnFailureProcessor',
+      type: 'addProcessor',
       payload: {
-        onFailureProcessor: processor4,
+        processor: processor4,
         targetSelector: ['processors', '1', 'onFailure', '0'],
       },
     });
@@ -289,24 +289,24 @@ describe('Processors reducer', () => {
       const processor4 = { id: expect.any(String), type: 'test4', options: {} };
 
       const s1 = reducer(initialState, {
-        type: 'addTopLevelProcessor',
-        payload: { processor: processor1, selector: ['processors'] },
+        type: 'addProcessor',
+        payload: { processor: processor1, targetSelector: ['processors'] },
       });
 
       const s2 = reducer(s1, {
-        type: 'addTopLevelProcessor',
-        payload: { processor: processor2, selector: ['processors'] },
+        type: 'addProcessor',
+        payload: { processor: processor2, targetSelector: ['processors'] },
       });
 
       const s3 = reducer(s2, {
-        type: 'addOnFailureProcessor',
-        payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+        type: 'addProcessor',
+        payload: { processor: processor3, targetSelector: ['processors', '1'] },
       });
 
       const s4 = reducer(s3, {
-        type: 'addOnFailureProcessor',
+        type: 'addProcessor',
         payload: {
-          onFailureProcessor: processor4,
+          processor: processor4,
           targetSelector: ['processors', '1', 'onFailure', '0'],
         },
       });
@@ -334,8 +334,8 @@ describe('Processors reducer', () => {
     it('does not remove top level processor and onFailure arrays if they are emptied', () => {
       const processor1 = { id: expect.any(String), type: 'test1', options: {} };
       const s1 = reducer(initialState, {
-        type: 'addTopLevelProcessor',
-        payload: { processor: processor1, selector: ['processors'] },
+        type: 'addProcessor',
+        payload: { processor: processor1, targetSelector: ['processors'] },
       });
       const s2 = reducer(s1, {
         type: 'removeProcessor',
@@ -349,16 +349,14 @@ describe('Processors reducer', () => {
       const processor2 = { id: expect.any(String), type: 'test2', options: {} };
 
       const s1 = reducer(initialState, {
-        type: 'addTopLevelProcessor',
-        payload: { processor: processor1, selector: ['processors'] },
+        type: 'addProcessor',
+        payload: { processor: processor1, targetSelector: ['processors'] },
       });
 
       const s2 = reducer(s1, {
-        type: 'addTopLevelProcessor',
-        payload: { processor: processor2, selector: ['onFailure'] },
+        type: 'addProcessor',
+        payload: { processor: processor2, targetSelector: ['onFailure'] },
       });
-
-      // Move the parent into a child list
 
       const s3 = reducer(s2, {
         type: 'moveProcessor',

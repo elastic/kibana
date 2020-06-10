@@ -23,7 +23,7 @@ export type Action =
   | { type: 'move'; payload: { source: ProcessorSelector; destination: ProcessorSelector } }
   | { type: 'edit'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } }
   | { type: 'duplicate'; payload: { source: ProcessorSelector } }
-  | { type: 'addOnFailure'; payload: { target: ProcessorSelector } }
+  | { type: 'addProcessor'; payload: { target: ProcessorSelector } }
   | { type: 'remove'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } };
 
 export type OnActionHandler = (action: Action) => void;
@@ -79,7 +79,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo(
           action.type === 'move' ||
           action.type === 'edit' ||
           action.type === 'remove' ||
-          action.type === 'addOnFailure' ||
+          action.type === 'addProcessor' ||
           action.type === 'duplicate'
         ) {
           onAction(action);
