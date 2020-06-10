@@ -110,45 +110,48 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
       };
     }, []);
 
-    const addSwimlaneToDashboardCallback = useCallback(async (item: DashboardItem) => {
-      setAddedDashboards({ ...addedDashboards, [item.id]: 'pending' });
+    const addSwimlaneToDashboardCallback = useCallback(
+      async (item: DashboardItem) => {
+        setAddedDashboards({ ...addedDashboards, [item.id]: 'pending' });
 
-      const { attributes } = item;
-      const panelData = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
-      const panelIndex = htmlIdGenerator()();
+        const { attributes } = item;
+        const panelData = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
+        const panelIndex = htmlIdGenerator()();
 
-      const maxPanel = panelData.reduce((prev, current) =>
-        prev.gridData.y > current.gridData.y ? prev : current
-      );
-      const version = kibanaVersion;
+        const maxPanel = panelData.reduce((prev, current) =>
+          prev.gridData.y > current.gridData.y ? prev : current
+        );
+        const version = kibanaVersion;
 
-      panelData.push({
-        panelIndex,
-        embeddableConfig,
-        title: 'Panel test!',
-        type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-        version,
-        gridData: {
-          h: 15,
-          i: panelIndex,
-          w: 24,
-          x: 0,
-          y: maxPanel.gridData.y + maxPanel.gridData.h + 10,
-        },
-      });
-
-      try {
-        await savedObjectClient.update('dashboard', item.id, {
-          ...attributes,
-          panelsJSON: JSON.stringify(panelData),
+        panelData.push({
+          panelIndex,
+          embeddableConfig,
+          title: 'Panel test!',
+          type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+          version,
+          gridData: {
+            h: 15,
+            i: panelIndex,
+            w: 24,
+            x: 0,
+            y: maxPanel.gridData.y + maxPanel.gridData.h + 10,
+          },
         });
-        setAddedDashboards({ ...addedDashboards, [item.id]: 'success' });
-      } catch (e) {
-        toasts.danger({
-          body: e,
-        });
-      }
-    }, []);
+
+        try {
+          await savedObjectClient.update('dashboard', item.id, {
+            ...attributes,
+            panelsJSON: JSON.stringify(panelData),
+          });
+          setAddedDashboards({ ...addedDashboards, [item.id]: 'success' });
+        } catch (e) {
+          toasts.danger({
+            body: e,
+          });
+        }
+      },
+      [addedDashboards]
+    );
 
     const columns: EuiTableProps['columns'] = useMemo(
       () => [
