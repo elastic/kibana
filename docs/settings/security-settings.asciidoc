@@ -56,7 +56,9 @@ You can configure the following settings in the `kibana.yml` file.
   routing requests through a load balancer or proxy).
 
 | `xpack.security.sameSiteCookies`
-  | Sets the `SameSite` attribute of `Set-Cookie` HTTP header. It allows you to declare whether your cookie should be restricted to a first-party or same-site context. *Not set* by default. Which makes modern browsers treat it as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Note, that `None` usage requires Secure context `xpack.security.secureCookies: true`. Some old versions of IE11 do not support `SameSite: None`, so you shouldn't specify `xpack.security.sameSiteCookies` at all.
+  | Sets the `SameSite` attribute of `Set-Cookie` HTTP header. It allows you to declare whether your cookie should be restricted to a first-party or same-site context.
+  Valid values are `Strict`, `Lax`, `None`.
+  This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Note, that `None` usage requires Secure context `xpack.security.secureCookies: true`.
 
 | `xpack.security.session.idleTimeout`
   | Sets the session duration. By default, sessions stay active until the

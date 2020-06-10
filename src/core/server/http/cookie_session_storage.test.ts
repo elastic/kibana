@@ -440,7 +440,7 @@ describe('Cookie based SessionStorage', () => {
         );
       });
 
-      for (const sameSite of ['Strict', 'Lax', 'None'] as ['Strict', 'Lax', 'None']) {
+      for (const sameSite of ['Strict', 'Lax', 'None'] as const) {
         it(`sets and parses SameSite = ${sameSite} correctly`, async () => {
           const { server: innerServer, createRouter } = await server.setup(setupDeps);
           const router = createRouter('');
