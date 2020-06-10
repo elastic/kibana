@@ -17,28 +17,10 @@
  * under the License.
  */
 
-export {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  validateIndexPattern,
-  getFromSavedObject,
-  isDefault,
-} from '../../common/index_patterns/lib';
-export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
+export { IndexPatternMissingIndices } from './errors';
+export { getTitle } from './get_title';
+export { getFromSavedObject } from './get_from_saved_object';
+export { isDefault } from './is_default';
 
-export {
-  getIndexPatternFieldListCreator,
-  Field,
-  IIndexPatternFieldList,
-} from '../../common/index_patterns';
-
-// TODO: figure out how to replace IndexPatterns in get_inner_angular.
-export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  IndexPattern,
-  TypeMeta,
-  AggregationRestrictions,
-} from './index_patterns';
+export * from './types';
+export { validateIndexPattern } from './validate_index_pattern';

@@ -24,18 +24,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { SavedObjectsClientContract } from 'src/core/public';
-<<<<<<< HEAD:src/plugins/data/public/index_patterns/index_patterns/index_pattern.tsx
-import {
-  DuplicateField,
-  SavedObjectNotFound,
-  expandShorthand,
-  FieldMappingSpec,
-  MappingObject,
-} from '../../../../kibana_utils/public';
-import { toMountPoint } from '../../../../kibana_react/public';
-=======
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
->>>>>>> 40d2cfc4db6... Index pattern public api => common (#68289):src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts
 
 import {
   ES_FIELD_TYPES,
@@ -50,16 +39,10 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-<<<<<<< HEAD:src/plugins/data/public/index_patterns/index_patterns/index_pattern.tsx
-import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats, getHttp } from '../../services';
-import { TypeMeta } from './types';
-=======
 import { IIndexPatternsApiClient } from '.';
 import { TypeMeta } from '.';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
->>>>>>> 40d2cfc4db6... Index pattern public api => common (#68289):src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 

@@ -15,6 +15,7 @@ import { CoreSetup } from 'src/core/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
+import { ErrorToastOptions } from 'src/core/public/notifications';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -53,6 +54,7 @@ import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SimpleSavedObject } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { Toast } from 'kibana/public';
+import { ToastInputFields } from 'src/core/public/notifications';
 import { ToastsStart } from 'kibana/public';
 import { TypeOf } from '@kbn/config-schema';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
@@ -421,6 +423,11 @@ export type ExistsFilter = Filter & {
     exists?: FilterExistsProperty;
 };
 
+// Warning: (ae-forgotten-export) The symbol "ShorthandFieldMapObject" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => Record<string, FieldMappingSpec>;
+
 // Warning: (ae-forgotten-export) The symbol "SavedObjectReference" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "extractReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -547,6 +554,16 @@ export type FieldFormatsContentType = 'html' | 'text';
 // @public (undocumented)
 export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 
+// @public (undocumented)
+export interface FieldMappingSpec {
+    // (undocumented)
+    _deserialize?: (mapping: string) => any | undefined;
+    // (undocumented)
+    _serialize?: (mapping: any) => string | undefined;
+    // (undocumented)
+    type: ES_FIELD_TYPES;
+}
+
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -624,7 +641,7 @@ export function getEsPreference(uiSettings: IUiSettingsClient_2, sessionId?: str
 // Warning: (ae-missing-release-tag) "getIndexPatternFieldListCreator" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const getIndexPatternFieldListCreator: ({ fieldFormats, toastNotifications, }: FieldListDependencies) => CreateIndexPatternFieldList;
+export const getIndexPatternFieldListCreator: ({ fieldFormats, onNotification, }: FieldListDependencies) => CreateIndexPatternFieldList;
 
 // Warning: (ae-missing-release-tag) "getKbnTypeNames" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -863,7 +880,10 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternsApiClient" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "PatternCache" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: PatternCache);
+    // Warning: (ae-forgotten-export) The symbol "FieldFormatsStartCommon" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "OnError" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: PatternCache, fieldFormats: FieldFormatsStartCommon, onNotification: OnNotification, onError: OnError);
     // (undocumented)
     [key: string]: any;
     // (undocumented)
@@ -999,7 +1019,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     $$spec: FieldSpec;
     // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, toastNotifications }: FieldDependencies);
+    constructor(indexPattern: IIndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
@@ -1015,7 +1035,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     format: any;
     // (undocumented)
-    indexPattern?: IndexPattern;
+    indexPattern?: IIndexPattern;
     // (undocumented)
     lang?: string;
     // (undocumented)
@@ -1223,6 +1243,9 @@ export interface KueryNode {
     // (undocumented)
     type: keyof NodeTypes;
 }
+
+// @public (undocumented)
+export type MappingObject = Record<string, FieldMappingSpec>;
 
 // Warning: (ae-missing-release-tag) "MatchAllFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

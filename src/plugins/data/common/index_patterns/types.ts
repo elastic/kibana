@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 import { IFieldType } from './fields';
 
 export interface IIndexPattern {
@@ -48,3 +49,6 @@ export interface IndexPatternAttributes {
   typeMeta: string;
   timeFieldName?: string;
 }
+
+export type OnNotification = (toastInputFields: ToastInputFields) => void;
+export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;

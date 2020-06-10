@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export * from './field_list';
-export * from './field';
+export * from './index_patterns_api_client';
+export * from './types';
+export * from './_pattern_cache';
+export * from './flatten_hit';
+export * from './format_hit';
+export * from './index_pattern';
+export * from './index_patterns';
