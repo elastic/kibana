@@ -24,9 +24,16 @@ import { useDocumentationLinks } from '../../../../hooks/use_documentation_links
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 
-import { isTransformIdValid, TransformPivotConfig } from '../../../../common';
+import {
+  getPivotQuery,
+  getPreviewRequestBody,
+  isTransformIdValid,
+  TransformPivotConfig,
+} from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 import { delayValidator } from '../../../../common/validators';
+import { StepDefineExposedState } from '../step_define/common';
+import { dictionaryToArray } from '../../../../../../common/types/common';
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
@@ -38,6 +45,7 @@ export interface StepDetailsExposedState {
   transformId: TransformId;
   transformDescription: string;
   valid: boolean;
+  indexPatternDateField?: string | undefined;
 }
 
 export function getDefaultStepDetailsState(): StepDetailsExposedState {
@@ -51,6 +59,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     destinationIndex: '',
     touched: false,
     valid: false,
+    indexPatternDateField: undefined,
   };
 }
 
@@ -70,14 +79,33 @@ export function applyTransformConfigToDetailsState(
   return state;
 }
 
+const noTimeFieldLabel = i18n.translate(
+  'indexPatternManagement.createIndexPattern.stepTime.noTimeFieldOptionLabel',
+  {
+    defaultMessage: "I don't want to use the Time Filter",
+  }
+);
+
+const noTimeFieldOption = {
+  text: noTimeFieldLabel,
+  value: undefined,
+};
+
+const disabledDividerOption = {
+  disabled: true,
+  text: '───',
+  value: '',
+};
+
 interface Props {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
   searchItems: SearchItems;
+  stepDefineState: StepDefineExposedState;
 }
 
 export const StepDetailsForm: FC<Props> = React.memo(
-  ({ overrides = {}, onChange, searchItems }) => {
+  ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const deps = useAppDependencies();
     const toastNotifications = useToastNotifications();
     const { esIndicesCreateIndex } = useDocumentationLinks();
@@ -93,8 +121,14 @@ export const StepDetailsForm: FC<Props> = React.memo(
     );
     const [transformIds, setTransformIds] = useState<TransformId[]>([]);
     const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
+
+    // Index pattern state
     const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
     const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
+    const [previewDateColumns, setPreviewDateColumns] = useState<string[]>([]);
+    const [indexPatternDateField, setIndexPatternDateField] = useState<string | undefined>(
+      undefined
+    );
 
     // Continuous mode state
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
@@ -107,6 +141,41 @@ export const StepDetailsForm: FC<Props> = React.memo(
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
+        try {
+          const { searchQuery, groupByList, aggList } = stepDefineState;
+          const pivotAggsArr = dictionaryToArray(aggList);
+          const pivotGroupByArr = dictionaryToArray(groupByList);
+          const pivotQuery = getPivotQuery(searchQuery);
+          const previewRequest = getPreviewRequestBody(
+            searchItems.indexPattern.title,
+            pivotQuery,
+            pivotGroupByArr,
+            pivotAggsArr
+          );
+
+          const transformPreview = await api.getTransformsPreview(previewRequest);
+          const properties = transformPreview.generated_dest_index.mappings.properties;
+          const datetimeColumns: string[] = [];
+
+          Object.keys(properties).forEach((col) => {
+            if (properties[col].type === 'date') {
+              datetimeColumns.push(col);
+            }
+          });
+
+          setPreviewDateColumns(datetimeColumns);
+          setIndexPatternDateField(datetimeColumns[0]);
+        } catch (e) {
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
+              defaultMessage: 'An error occurred getting transform preview',
+            }),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
+          });
+        }
+
         try {
           setTransformIds(
             (await api.getTransforms()).transforms.map(
@@ -198,6 +267,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
         destinationIndex,
         touched: true,
         valid,
+        indexPatternDateField,
       });
       // custom comparison
       /* eslint-disable react-hooks/exhaustive-deps */
@@ -210,6 +280,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
       transformDescription,
       destinationIndex,
       valid,
+      indexPatternDateField,
       /* eslint-enable react-hooks/exhaustive-deps */
     ]);
 
@@ -318,6 +389,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
               data-test-subj="transformDestinationIndexInput"
             />
           </EuiFormRow>
+
           <EuiFormRow
             isInvalid={createIndexPattern && indexPatternTitleExists}
             error={
@@ -339,6 +411,28 @@ export const StepDetailsForm: FC<Props> = React.memo(
               data-test-subj="transformCreateIndexPatternSwitch"
             />
           </EuiFormRow>
+          {createIndexPattern && !indexPatternTitleExists && previewDateColumns.length > 0 && (
+            <EuiFormRow
+              helpText={i18n.translate(
+                'xpack.transform.stepDetailsForm.indexPatternTimeFilterLabel',
+                {
+                  defaultMessage:
+                    'The Time Filter will use this field to filter your data by time. You can choose not to have a time field, but you will not be able to narrow down your data by a time range.',
+                }
+              )}
+            >
+              <EuiSelect
+                options={[
+                  ...previewDateColumns.map((text) => ({ text })),
+                  disabledDividerOption,
+                  noTimeFieldOption,
+                ]}
+                value={indexPatternDateField}
+                onChange={(e) => setIndexPatternDateField(e.target.value)}
+                data-test-subj="transformIndexPatternDateFieldSelect"
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow
             helpText={
               isContinuousModeAvailable === false
