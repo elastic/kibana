@@ -75,7 +75,7 @@ export const ChangeToMapView = i18n.translate(
 );
 
 export const ChangeToListView = i18n.translate(
-  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.listToMap',
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.MapToList',
   {
     defaultMessage: 'Change to list view to check availability by location.',
   }
