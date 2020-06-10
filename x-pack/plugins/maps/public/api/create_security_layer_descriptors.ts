@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayerDescriptor } from '../../../../../common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export async function createSecurityLayerDescriptors(
   indexPatternId: string,
   indexPatternTitle: string
-): LayerDescriptor[] {
+): Promise<LayerDescriptor[]> {
   const mapModules = await lazyLoadMapModules();
   return mapModules.createSecurityLayerDescriptors(indexPatternId, indexPatternTitle);
 }
