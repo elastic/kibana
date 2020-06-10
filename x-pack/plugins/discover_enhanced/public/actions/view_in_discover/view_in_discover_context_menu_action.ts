@@ -73,8 +73,22 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
     const { core } = this.params.start();
     const path = await this.getPath(embeddable);
 
-    await core.application.navigateToApp('discover', {
-      path,
+    // TODO: Replace this logic with KibanaURL once it is available.
+    // https://github.com/elastic/kibana/issues/64497
+    const match = path.match(/^.*\/app\/([^\/\/#]+)(.+)$/);
+
+    if (!match) {
+      throw new Error('Unexpected Discover URL path.');
+    }
+
+    const [, appName, appPath] = match;
+
+    if (!appName || !appPath) {
+      throw new Error('Could not parse Discover URL path.');
+    }
+
+    await core.application.navigateToApp(appName, {
+      path: appPath,
     });
   }
 
@@ -83,9 +97,7 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
       throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
-    const path = await this.getPath(embeddable);
-
-    return `discover${path}`;
+    return await this.getPath(embeddable);
   }
 
   private async getPath(embeddable: VisualizeEmbeddableContract): Promise<string> {
