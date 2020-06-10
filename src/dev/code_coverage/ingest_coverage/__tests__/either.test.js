@@ -41,10 +41,7 @@ describe(`either datatype functions`, () => {
     });
   });
   describe('tryCatch', () => {
-    let sut;
-    before(() => {
-      sut = undefined;
-    });
+    let sut = undefined;
     it(`should return a 'Left' on error`, () => {
       sut = tryCatch(() => {
         throw new Error('blah');
