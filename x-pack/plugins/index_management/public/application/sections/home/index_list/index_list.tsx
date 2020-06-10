@@ -5,14 +5,16 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
-export function IndexList() {
+export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   return (
     <div className="im-snapshotTestSubject" data-test-subj="indicesList">
-      <IndexTable />
+      <IndexTable history={history} />
       <DetailPanel />
     </div>
   );
-}
+};

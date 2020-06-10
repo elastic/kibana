@@ -11,7 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
-import { getExceptionItemMock } from '../mocks';
+import { getExceptionItemMock } from '../../mocks';
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders no comments button if no comments exist', () => {
     const exceptionItem = getExceptionItemMock();
-    exceptionItem.comments = [];
+    exceptionItem.comment = [];
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -77,7 +77,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders comments plural if more than one', () => {
     const exceptionItem = getExceptionItemMock();
-    exceptionItem.comments = [
+    exceptionItem.comment = [
       {
         user: 'user_1',
         timestamp: '2020-04-23T00:19:13.289Z',
