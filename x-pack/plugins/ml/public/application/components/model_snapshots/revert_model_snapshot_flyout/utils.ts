@@ -37,10 +37,20 @@ export async function loadEventRateForJob(
     throw resp.error;
   }
 
-  return Object.entries(resp.results).map(([time, value]) => ({
+  const events = Object.entries(resp.results).map(([time, value]) => ({
     time: +time,
     value: value as number,
   }));
+
+  if (events.length) {
+    // add one extra bucket with a value of 0
+    // so that an extra blank bar gets drawn at the end of the chart
+    // this solves an issue with elastic charts where the rect annotation
+    // never covers the last bar.
+    events.push({ time: events[events.length - 1].time + intervalMs, value: 0 });
+  }
+
+  return events;
 }
 
 export async function loadAnomalyDataForJob(

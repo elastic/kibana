@@ -36,6 +36,7 @@ import {
 
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import { useCurrentEuiTheme } from '../../../components/color_range_legend';
 
 export interface CalendarEvent {
   start: moment.Moment | null;
@@ -65,6 +66,8 @@ export const CreateCalendar: FC<Props> = ({
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
+  const { euiTheme } = useCurrentEuiTheme();
+
   function onBrushEnd({ x }: XYBrushArea) {
     if (x && x.length === 2) {
       const end = x[1] < minSelectableTimeStamp ? null : x[1];
@@ -76,7 +79,7 @@ export const CreateCalendar: FC<Props> = ({
           {
             start: moment(start),
             end: moment(end),
-            description: `Auto created ${calendarEvents.length}`,
+            description: `Auto created ${calendarEvents.length + 1}`,
           },
         ]);
       }
@@ -154,7 +157,14 @@ export const CreateCalendar: FC<Props> = ({
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow label="From">
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.ml.revertModelSnapshotFlyout.createCalendar.fromLabel',
+                        {
+                          defaultMessage: 'From',
+                        }
+                      )}
+                    >
                       <EuiDatePicker
                         showTimeSelect
                         selected={c.start}
@@ -165,7 +175,14 @@ export const CreateCalendar: FC<Props> = ({
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFormRow label="To">
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.ml.revertModelSnapshotFlyout.createCalendar.toLabel',
+                        {
+                          defaultMessage: 'To',
+                        }
+                      )}
+                    >
                       <EuiDatePicker
                         showTimeSelect
                         selected={c.end}
@@ -179,13 +196,19 @@ export const CreateCalendar: FC<Props> = ({
                 <EuiSpacer size="s" />
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow fullWidth label="Description">
+                    <EuiFormRow
+                      fullWidth
+                      label={i18n.translate(
+                        'xpack.ml.revertModelSnapshotFlyout.createCalendar.descriptionLabel',
+                        {
+                          defaultMessage: 'Description',
+                        }
+                      )}
+                    >
                       <EuiFieldText
-                        // placeholder={c.description}
                         style={{ width: '100%', maxWidth: 'inherit' }}
                         value={c.description}
                         onChange={(e) => setDescription(e.target.value, i)}
-                        aria-label="CHANGE ME"
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
@@ -193,7 +216,10 @@ export const CreateCalendar: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
-                style={{ borderLeft: '1px solid #ddd', marginRight: '0px' }}
+                style={{
+                  borderLeft: `1px solid ${euiTheme.euiColorLightShade}`,
+                  marginRight: '0px',
+                }}
               />
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
@@ -201,7 +227,12 @@ export const CreateCalendar: FC<Props> = ({
                   color={'danger'}
                   onClick={() => removeCalendarEvent(i)}
                   iconType="trash"
-                  aria-label="replace me"
+                  aria-label={i18n.translate(
+                    'xpack.ml.revertModelSnapshotFlyout.createCalendar.deleteLabel',
+                    {
+                      defaultMessage: 'Delete event',
+                    }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

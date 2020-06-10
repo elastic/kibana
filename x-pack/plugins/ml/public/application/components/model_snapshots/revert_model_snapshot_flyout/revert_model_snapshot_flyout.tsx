@@ -67,6 +67,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [runInRealTime, setRunInRealTime] = useState(false);
   const [createCalendar, setCreateCalendar] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarEventsValid, setCalendarEventsValid] = useState(true);
 
   const [eventRateData, setEventRateData] = useState<LineChartPoint[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
@@ -77,6 +78,11 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   }, [currentSnapshot]);
 
   useEffect(() => {
+    const invalid = calendarEvents.some(
+      (c) => c.description === '' || c.end === null || c.start === null
+    );
+    setCalendarEventsValid(invalid === false);
+
     // a bug in elastic charts selection can
     // cause duplicate selected areas to be added
     // dedupe the calendars based on start and end times
@@ -85,7 +91,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     );
     const dedupedCalendarEvents = [...calMap.values()];
 
-    if (calendarEvents.length !== dedupedCalendarEvents.length) {
+    if (dedupedCalendarEvents.length < calendarEvents.length) {
       // deduped list is shorter, we must have removed something.
       setCalendarEvents(dedupedCalendarEvents);
     }
@@ -336,10 +342,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={showRevertModal}
-                disabled={
-                  createCalendar === true &&
-                  calendarEvents.some((c) => c.start === null || c.end === null)
-                }
+                disabled={createCalendar === true && calendarEventsValid === false}
                 fill
               >
                 <FormattedMessage

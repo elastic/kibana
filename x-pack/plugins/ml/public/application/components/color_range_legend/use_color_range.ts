@@ -150,7 +150,7 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const euiTheme = useUiSettings().get('theme:darkMode') ? euiThemeDark : euiThemeLight;
+  const { euiTheme } = useCurrentEuiTheme();
 
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
@@ -186,3 +186,7 @@ export const useColorRange = (
 
   return scaleTypes[colorRangeScale];
 };
+
+export function useCurrentEuiTheme() {
+  return { euiTheme: useUiSettings().get('theme:darkMode') ? euiThemeDark : euiThemeLight };
+}
