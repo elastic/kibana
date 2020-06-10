@@ -26,19 +26,18 @@ export {
   getFromSavedObject,
   isDefault,
 } from '../../common/index_patterns/lib';
-export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
+export { onRedirectNoIndexPattern } from './index_patterns';
 
+export { flattenHitWrapper, formatHitProvider } from '../../common/index_patterns/index_patterns';
+
+// TODO: figure out how to replace IndexPatterns in get_inner_angular.
 export {
   getIndexPatternFieldListCreator,
   Field,
   IIndexPatternFieldList,
-} from '../../common/index_patterns';
-
-// TODO: figure out how to replace IndexPatterns in get_inner_angular.
-export {
   IndexPatternsService,
   IndexPatternsContract,
   IndexPattern,
   TypeMeta,
   AggregationRestrictions,
-} from './index_patterns';
+} from '../../common/index_patterns';

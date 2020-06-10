@@ -27,7 +27,7 @@ import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './legacy';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search';
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../index_patterns';
 import { QuerySetup } from '../query';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
