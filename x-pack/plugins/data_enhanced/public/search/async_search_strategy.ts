@@ -57,7 +57,7 @@ export function asyncSearchStrategyProvider(
         return (syncSearch.search(request, options) as Observable<IAsyncSearchResponse>).pipe(
           expand((response) => {
             // If the response indicates of an error, stop polling and complete the observable
-            if (Math.random() > 0.7 || !response || (response.is_partial && !response.is_running)) {
+            if (!response || (response.is_partial && !response.is_running)) {
               return throwError(new AbortError());
             }
 
