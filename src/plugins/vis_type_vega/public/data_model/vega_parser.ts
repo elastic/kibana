@@ -27,7 +27,6 @@ import hjson from 'hjson';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EsQueryParser } from './es_query_parser';
-// @ts-ignore
 import { Utils } from './utils';
 // @ts-ignore
 import { EmsFileParser } from './ems_file_parser';
@@ -664,7 +663,7 @@ export class VegaParser {
    * Add a warning to the warnings array
    * @private
    */
-  _onWarning(...args: string[]) {
+  _onWarning(...args: any[]) {
     if (!this.hideWarnings) {
       this.warnings.push(Utils.formatWarningToStr(args));
       return Utils.formatWarningToStr(args);
