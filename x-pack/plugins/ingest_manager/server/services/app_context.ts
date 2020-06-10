@@ -12,6 +12,10 @@ import { IngestManagerConfigType } from '../../common';
 import { IngestManagerAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
+interface InitializationState {
+  status: 'not_started' | 'success' | 'error';
+  error?: Error;
+}
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private security: SecurityPluginSetup | undefined;
@@ -23,7 +27,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
-  private isInitialized?: Promise<boolean>;
+  private initializationState?: InitializationState;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
@@ -34,6 +38,7 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.httpSetup = appContext.httpSetup;
+    this.initializationState = { status: 'not_started' };
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -86,11 +91,11 @@ class AppContextService {
   }
 
   public getIsInitialized() {
-    return this.isInitialized;
+    return this.initializationState;
   }
 
-  public setIsInitialized(value: boolean) {
-    this.isInitialized = Promise.resolve(value);
+  public setIsInitialized(vals: InitializationState) {
+    this.initializationState = vals;
   }
 
   public getIsProductionMode() {

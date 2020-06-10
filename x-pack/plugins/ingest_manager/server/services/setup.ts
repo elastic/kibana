@@ -36,7 +36,7 @@ export async function setupIngestManager(
 ) {
   // eslint-disable-next-line no-console
   console.log('setupIngestManager()');
-  if (appContextService.getIsInitialized()) {
+  if (appContextService.getIsInitialized()?.status === 'success') {
     // eslint-disable-next-line no-console
     console.log('setupIngestManager early exit');
     return;
@@ -106,7 +106,7 @@ export async function setupIngestManager(
   }
   // eslint-disable-next-line no-console
   console.log('setupIngestManager WORKED');
-  appContextService.setIsInitialized(true);
+  appContextService.setIsInitialized({ status: 'success' });
   return;
 }
 

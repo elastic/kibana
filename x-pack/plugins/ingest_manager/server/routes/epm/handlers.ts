@@ -28,6 +28,8 @@ import {
   removeInstallation,
 } from '../../services/epm/packages';
 
+import { appContextService } from '../../services';
+
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
   try {
     const res = await getCategories();
@@ -125,6 +127,20 @@ export const installPackageHandler: RequestHandler<TypeOf<
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+
+    if (appContextService.getIsInitialized()?.status === 'not_started') {
+      return response.customError({
+        statusCode: 503,
+        body: 'Ingest Manager is not initialized',
+      });
+    }
+
+    if (appContextService.getIsInitialized()?.status === 'error') {
+      return response.customError({
+        statusCode: 500,
+        body: 'There was an error setting up Ingest Manager',
+      });
+    }
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
