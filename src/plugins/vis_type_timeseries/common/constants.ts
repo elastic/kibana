@@ -18,3 +18,35 @@
  */
 
 export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
+
+// Tests Constants
+export const UI_RESTRICTIONS = { '*': true };
+export const INDEX_PATTERN = 'some-pattern';
+export const FIELDS = {
+  [INDEX_PATTERN]: [
+    {
+      type: 'date',
+      name: '@timestamp',
+    },
+    {
+      type: 'number',
+      name: 'system.cpu.user.pct',
+    },
+    {
+      type: 'histogram',
+      name: 'histogram_value',
+    },
+  ],
+};
+export const METRIC = {
+  type: 'avg',
+  field: 'system.cpu.user.pct',
+};
+export const SERIES = {
+  metrics: [METRIC],
+};
+export const PANEL = {
+  type: 'timeseries',
+  index_pattern: INDEX_PATTERN,
+  series: SERIES,
+};

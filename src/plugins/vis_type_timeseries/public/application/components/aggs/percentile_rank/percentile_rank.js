@@ -38,7 +38,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
+const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
 export const PercentileRankAgg = (props) => {
   const { series, panel, fields } = props;

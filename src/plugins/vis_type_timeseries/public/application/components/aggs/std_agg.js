@@ -36,12 +36,23 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
+function getSupportedFieldsByMetricType(type) {
+  switch (type) {
+    case METRIC_TYPES.CARDINALITY:
+      return Object.values(KBN_FIELD_TYPES).filter((type) => type !== KBN_FIELD_TYPES.HISTOGRAM);
+    case METRIC_TYPES.VALUE_COUNT:
+    case METRIC_TYPES.AVERAGE:
+      return [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
+    default:
+      return [KBN_FIELD_TYPES.NUMBER];
+  }
+}
+
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [KBN_FIELD_TYPES.NUMBER];
-
+  const restrictFields = getSupportedFieldsByMetricType(model.type);
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
