@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent, useState, memo, useCallback, useRef } from 'react';
+import React, { FunctionComponent, useState, memo, useCallback, useRef, useEffect } from 'react';
+import { keyCodes } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import './tree.scss';
 
 import { PrivateOnActionHandler, PrivateTree } from './components';
-
-export type TreeMode = 'copy' | 'move' | 'idle';
 
 export interface ProcessorInfo {
   id: string;
@@ -41,20 +40,37 @@ export interface Props {
  */
 export const ProcessorsTree: FunctionComponent<Props> = memo(
   ({ processors, baseSelector, onAction }) => {
+    // These refs are created here so they can be shared with all
+    // recursively rendered trees. Their values should come from react-virtualized
+    // List component and WindowScroller component.
     const windowScrollerRef = useRef<any>();
     const listRef = useRef<any>();
-    const [treeMode, setTreeMode] = useState<TreeMode>('idle');
+
     const [selectedProcessorInfo, setSelectedProcessorInfo] = useState<ProcessorInfo | undefined>();
+
+    useEffect(() => {
+      const cancelMoveListener = (event: KeyboardEvent) => {
+        // x-browser support per https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+        if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
+          setSelectedProcessorInfo(undefined);
+        }
+      };
+      if (selectedProcessorInfo) {
+        window.addEventListener('keyup', cancelMoveListener);
+      } else {
+        window.removeEventListener('keyup', cancelMoveListener);
+      }
+      return () => window.removeEventListener('keyup', cancelMoveListener);
+    }, [selectedProcessorInfo]);
+
     const privateOnAction = useCallback<PrivateOnActionHandler>(
       (action) => {
         if (action.type === 'selectToMove') {
-          setTreeMode('move');
           setSelectedProcessorInfo(action.payload);
           return;
         }
 
         if (action.type === 'cancelMove') {
-          setTreeMode('idle');
           setSelectedProcessorInfo(undefined);
           return;
         }
@@ -66,13 +82,12 @@ export const ProcessorsTree: FunctionComponent<Props> = memo(
           action.type === 'addOnFailure' ||
           action.type === 'duplicate'
         ) {
-          setTreeMode('idle');
           onAction(action);
           setSelectedProcessorInfo(undefined);
           return;
         }
       },
-      [onAction, setSelectedProcessorInfo, setTreeMode]
+      [onAction, setSelectedProcessorInfo]
     );
     return (
       <PrivateTree
@@ -84,7 +99,6 @@ export const ProcessorsTree: FunctionComponent<Props> = memo(
         selectedProcessorInfo={selectedProcessorInfo}
         processors={processors}
         selector={baseSelector}
-        mode={treeMode}
       />
     );
   }

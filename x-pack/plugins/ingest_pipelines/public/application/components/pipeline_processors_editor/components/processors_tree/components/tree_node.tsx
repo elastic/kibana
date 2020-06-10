@@ -12,14 +12,13 @@ import { ProcessorInternal } from '../../../types';
 
 import { PipelineProcessorsEditorItem, Handlers } from '.';
 
-import { TreeMode, ProcessorInfo } from '../processors_tree';
+import { ProcessorInfo } from '../processors_tree';
 import { PrivateTree, PrivateOnActionHandler } from './private_tree';
 
 export interface Props {
   processor: ProcessorInternal;
   processorInfo: ProcessorInfo;
   privateOnAction: PrivateOnActionHandler;
-  mode: TreeMode;
   level: number;
   selectedProcessorInfo?: ProcessorInfo;
 }
@@ -28,7 +27,6 @@ export const TreeNode: FunctionComponent<Props> = ({
   processor,
   processorInfo,
   privateOnAction,
-  mode,
   selectedProcessorInfo,
   level,
 }) => {
@@ -96,7 +94,6 @@ export const TreeNode: FunctionComponent<Props> = ({
             privateOnAction={privateOnAction}
             selector={processorInfo.selector.concat('onFailure')}
             processors={processor.onFailure}
-            mode={mode}
           />
         </div>
       ) : undefined}

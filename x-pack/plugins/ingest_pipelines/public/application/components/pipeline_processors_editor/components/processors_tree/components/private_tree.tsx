@@ -15,7 +15,7 @@ import { isChildPath } from '../../../processors_reducer';
 import { DropZoneButton } from '.';
 import { TreeNode } from '.';
 import { calculateItemHeight } from '../utils';
-import { TreeMode, Action, ProcessorInfo } from '../processors_tree';
+import { Action, ProcessorInfo } from '../processors_tree';
 
 export type PrivateAction =
   | Action
@@ -33,7 +33,6 @@ export interface PrivateProps {
   processors: ProcessorInternal[];
   selector: ProcessorSelector;
   privateOnAction: PrivateOnActionHandler;
-  mode: TreeMode;
   selectedProcessorInfo?: ProcessorInfo;
   level: number;
   // Only passed into the top level list
@@ -61,7 +60,7 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
 /**
  * Recursively rendering tree component for ingest pipeline processors.
  *
- * Note: this tree should start at level 1 and it is the only level at
+ * Note: this tree should start at level 1. It is the only level at
  * which we render the optimised virtual component. This gives a
  * massive performance boost to this component which can get very tall.
  */
@@ -70,7 +69,6 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   selector,
   selectedProcessorInfo,
   privateOnAction,
-  mode,
   level,
   windowScrollerRef,
   listRef,
@@ -98,13 +96,14 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                 },
               });
             }}
-            isDisabled={mode !== 'move' || isDropZoneAboveDisabled(info, selectedProcessorInfo!)}
+            isDisabled={Boolean(
+              !selectedProcessorInfo || isDropZoneAboveDisabled(info, selectedProcessorInfo!)
+            )}
           />
         ) : undefined}
         <EuiFlexItem>
           <TreeNode
             level={level}
-            mode={mode}
             processor={processor}
             processorInfo={info}
             privateOnAction={privateOnAction}
@@ -112,7 +111,9 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
           />
         </EuiFlexItem>
         <DropZoneButton
-          isDisabled={mode !== 'move' || isDropZoneBelowDisabled(info, selectedProcessorInfo!)}
+          isDisabled={Boolean(
+            !selectedProcessorInfo || isDropZoneBelowDisabled(info, selectedProcessorInfo!)
+          )}
           onClick={() => {
             privateOnAction({
               type: 'move',
