@@ -32,7 +32,7 @@ export const UpdateAgentConfigRequestSchema = {
 export const CopyAgentConfigRequestSchema = {
   ...GetOneAgentConfigRequestSchema,
   body: schema.object({
-    name: schema.string(),
+    name: schema.string({ minLength: 1 }),
     description: schema.maybe(schema.string()),
   }),
 };

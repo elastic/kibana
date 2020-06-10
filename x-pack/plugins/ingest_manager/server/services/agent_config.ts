@@ -209,13 +209,15 @@ class AgentConfigService {
     );
 
     // Copy all datasources
-    const newDatasources = (baseAgentConfig.datasources as Datasource[]).map(
-      (datasource: Datasource) => {
-        const { id: datasourceId, ...newDatasource } = datasource;
-        return newDatasource;
-      }
-    );
-    await datasourceService.bulkCreate(soClient, newDatasources, newAgentConfig.id, options);
+    if (baseAgentConfig.datasources.length) {
+      const newDatasources = (baseAgentConfig.datasources as Datasource[]).map(
+        (datasource: Datasource) => {
+          const { id: datasourceId, ...newDatasource } = datasource;
+          return newDatasource;
+        }
+      );
+      await datasourceService.bulkCreate(soClient, newDatasources, newAgentConfig.id, options);
+    }
 
     // Get updated config
     const updatedAgentConfig = await this.get(soClient, newAgentConfig.id, true);
