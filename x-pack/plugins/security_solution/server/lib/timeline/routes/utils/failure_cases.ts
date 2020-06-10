@@ -33,10 +33,7 @@ const isUpdatingStatus = (
 ) => {
   const obj = isHandlingTemplateTimeline ? existTemplateTimeline : existTimeline;
 
-  return (obj?.status != null && status !== obj?.status) ||
-    (obj?.status == null && status !== TimelineStatus.active && status != null)
-    ? UPDATE_STATUS_ERROR_MESSAGE
-    : null;
+  return obj?.status === TimelineStatus.immutiable ? UPDATE_STATUS_ERROR_MESSAGE : null;
 };
 
 const isGivenTitleExists = (title: string | null | undefined) => {
@@ -56,7 +53,7 @@ export const commonFailureChecker = (title: string | null | undefined) => {
     : null;
 };
 
-export const checkIsUpdateViaImportFailureCases = (
+const commonUpdateCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
   version: string | null,
@@ -65,55 +62,13 @@ export const checkIsUpdateViaImportFailureCases = (
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
-  const error = checkIsUpdateFailureCases(
-    isHandlingTemplateTimeline,
-    status,
-    version,
-    templateTimelineVersion,
-    templateTimelineId,
-    existTimeline,
-    existTemplateTimeline
-  );
-  if (error) {
-    return error;
-  }
-  if (
-    templateTimelineVersion != null &&
-    existTemplateTimeline != null &&
-    existTemplateTimeline.templateTimelineVersion != null &&
-    existTemplateTimeline.templateTimelineVersion >= templateTimelineVersion
-  ) {
-    // Throw error you can not update a template timeline version with an old version
-    return {
-      body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
-      statusCode: 409,
-    };
-  }
-};
-
-export const checkIsUpdateFailureCases = (
-  isHandlingTemplateTimeline: boolean,
-  status: TimelineStatus | null | undefined,
-  version: string | null,
-  templateTimelineVersion: number | null,
-  templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
-) => {
-  const error = isUpdatingStatus(
-    isHandlingTemplateTimeline,
-    status,
-    existTimeline,
-    existTemplateTimeline
-  );
-  if (error) {
-    return {
-      body: error,
-      statusCode: 409,
-    };
-  }
-
   if (isHandlingTemplateTimeline) {
+    if (templateTimelineId == null) {
+      return {
+        body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
+        statusCode: 403,
+      };
+    }
     if (existTemplateTimeline == null && templateTimelineVersion != null) {
       // template timeline !exists
       // Throw error to create template timeline in patch
@@ -167,6 +122,73 @@ export const checkIsUpdateFailureCases = (
 
     return null;
   }
+};
+
+export const checkIsUpdateViaImportFailureCases = (
+  isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
+  version: string | null,
+  templateTimelineVersion: number | null,
+  templateTimelineId: string | null | undefined,
+  existTimeline: TimelineSavedObject | null,
+  existTemplateTimeline: TimelineSavedObject | null
+) => {
+  const error = commonUpdateCases(
+    isHandlingTemplateTimeline,
+    status,
+    version,
+    templateTimelineVersion,
+    templateTimelineId,
+    existTimeline,
+    existTemplateTimeline
+  );
+  if (error) {
+    return error;
+  }
+  if (
+    templateTimelineVersion != null &&
+    existTemplateTimeline != null &&
+    existTemplateTimeline.templateTimelineVersion != null &&
+    existTemplateTimeline.templateTimelineVersion >= templateTimelineVersion
+  ) {
+    // Throw error you can not update a template timeline version with an old version
+    return {
+      body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+      statusCode: 409,
+    };
+  }
+};
+
+export const checkIsUpdateFailureCases = (
+  isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
+  version: string | null,
+  templateTimelineVersion: number | null,
+  templateTimelineId: string | null | undefined,
+  existTimeline: TimelineSavedObject | null,
+  existTemplateTimeline: TimelineSavedObject | null
+) => {
+  const error = isUpdatingStatus(
+    isHandlingTemplateTimeline,
+    status,
+    existTimeline,
+    existTemplateTimeline
+  );
+  if (error) {
+    return {
+      body: error,
+      statusCode: 403,
+    };
+  }
+  return commonUpdateCases(
+    isHandlingTemplateTimeline,
+    status,
+    version,
+    templateTimelineVersion,
+    templateTimelineId,
+    existTimeline,
+    existTemplateTimeline
+  );
 };
 
 export const checkIsCreateFailureCases = (

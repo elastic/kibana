@@ -31,7 +31,9 @@ export const pickSavedTimeline = (
     savedTimeline.status = !isEmpty(savedTimeline.title)
       ? TimelineStatus.active
       : TimelineStatus.draft;
-  } else if (savedTimeline.timelineType === TimelineType.default) {
+  }
+
+  if (savedTimeline.timelineType === TimelineType.default) {
     savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;

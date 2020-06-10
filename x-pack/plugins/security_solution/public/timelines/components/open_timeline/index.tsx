@@ -132,28 +132,34 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,
     });
-    const refetch = useCallback(() => {
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
+    const refetch = useCallback(
+      () => {
+        fetchAllTimeline({
+          pageInfo: {
+            pageIndex: pageIndex + 1,
+            pageSize,
+          },
+          search,
+          sort: {
+            sortField: sortField as SortFieldTimeline,
+            sortOrder: sortDirection as Direction,
+          },
+          onlyUserFavorite: onlyFavorites,
+          timelineType,
+          status: timelineStatus,
+        });
+      }, // eslint-disable-next-line react-hooks/exhaustive-deps
+      [
+        pageIndex,
+        pageSize,
         search,
-        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
-        onlyUserFavorite: onlyFavorites,
+        sortField,
+        sortDirection,
         timelineType,
-        status: timelineStatus,
-      });
-    }, [
-      pageIndex,
-      pageSize,
-      search,
-      sortField,
-      sortDirection,
-      timelineType,
-      onlyFavorites,
-      timelineStatus,
-    ]);
+        onlyFavorites,
+        timelineStatus,
+      ]
+    );
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {

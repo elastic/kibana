@@ -90,7 +90,6 @@ export class CompareTimelinesStatus {
 
   public get isUpdatable() {
     return (
-      !this.isUpdatingImmutiableTimeline &&
       !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isUpdatable && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isUpdatable && this.isHandlingTemplateTimeline))
@@ -99,7 +98,6 @@ export class CompareTimelinesStatus {
 
   public get isUpdatableViaImport() {
     return (
-      !this.isUpdatingImmutiableTimeline &&
       !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isUpdatableViaImport &&
@@ -162,21 +160,20 @@ export class CompareTimelinesStatus {
     return this.timelineType === TimelineType.template;
   }
 
-  private get isUpdatingImmutiableTimeline() {
-    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    /*
-     * Do not allow
-     * 1. Existing timeline is immutiable
-     * 2. Converting existing timeline's status
-     */
-    return (
-      (obj.isExists && obj.getData?.status != null && this.status !== obj.getData?.status) ||
-      (obj.isExists &&
-        obj.getData?.status == null &&
-        this.status !== TimelineStatus.active &&
-        this.status != null)
-    );
-  }
+  // private get isUpdatingImmutiableTimeline() {
+  //   const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+  //   /*
+  //    * Do not allow
+  //    * 1. Existing timeline is immutiable
+  //    * 2. Converting existing timeline's status
+  //    */
+  //   return (
+  //     obj.isExists &&
+  //     obj.getData?.status == null &&
+  //     this.status !== TimelineStatus.active &&
+  //     this.status != null
+  //   );
+  // }
 
   private get isSavedObjectVersionConflict() {
     const version = this.timelineObject?.getVersion;

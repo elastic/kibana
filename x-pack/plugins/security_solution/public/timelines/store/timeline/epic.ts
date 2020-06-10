@@ -26,6 +26,7 @@ import {
   concatMap,
   delay,
   takeUntil,
+  catchError,
 } from 'rxjs/operators';
 
 import {
@@ -224,6 +225,21 @@ export const createTimelineEpic = <State>(): Epic<
               timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
             })
           ).pipe(
+            // catchError((err) => {
+            //   console.log('err-----', err.body);
+
+            //   const callOutMsg = [showCallOutUnauthorizedMsg()];
+            //   return [
+            //     {
+            //       data: {
+            //         persistTimeline: {
+            //           message: err.body.message,
+            //           code: /* err.body.status_code*/ 409,
+            //         },
+            //       },
+            //     },
+            //   ];
+            // }),
             withLatestFrom(timeline$, allTimelineQuery$),
             mergeMap(([result, recentTimeline, allTimelineQuery]) => {
               const savedTimeline = recentTimeline[action.payload.id];
@@ -233,7 +249,6 @@ export const createTimelineEpic = <State>(): Epic<
               if (allTimelineQuery.refetch != null) {
                 (allTimelineQuery.refetch as inputsModel.Refetch)();
               }
-
               return [
                 response.code === 409
                   ? updateAutoSaveMsg({

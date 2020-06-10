@@ -77,7 +77,7 @@ export class TimelineObject {
   }
 
   public get isUpdatableViaImport() {
-    return this.type === TimelineType.template && this.isUpdatable;
+    return this.type === TimelineType.template && this.isExists;
   }
 
   public get getVersion() {

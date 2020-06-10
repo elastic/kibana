@@ -169,12 +169,7 @@ export const defaultTimelineToTimelineModel = (
         )
       : {},
     id: duplicate ? '' : timeline.savedObjectId,
-    status:
-      timeline.title == null
-        ? TimelineStatus.draft
-        : timeline.status === TimelineStatus.immutiable
-        ? TimelineStatus.active
-        : TimelineStatus.draft,
+    status: TimelineStatus.draft,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
