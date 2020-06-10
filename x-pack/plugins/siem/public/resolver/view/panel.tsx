@@ -38,7 +38,7 @@ import { EuiCode } from '@elastic/eui';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 /**
- * The two query parameters we read/write on
+ * The two query parameters we read/write on to control which view the table presents:
  */
 interface crumbInfo {
   readonly crumbId: string;
@@ -124,6 +124,13 @@ const TableServiceError = memo(function({errorMessage, pushToQueryParams}: {
   <>
     <EuiBreadcrumbs breadcrumbs={crumbs} />
     <EuiSpacer  size="l" />
+    <EuiText textAlign="center">{errorMessage}</EuiText>
+    <EuiSpacer  size="l" />
+    <EuiButtonEmpty>{
+      i18n.translate('xpack.siem.endpoint.resolver.panel.error.goBack', {
+        defaultMessage: 'Click this link to return to the list of all processes.',
+      })
+      }</EuiButtonEmpty>
   </>)
 })
 
@@ -648,6 +655,10 @@ const PanelContent = memo(function PanelContent() {
     const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
     const relatedEventsState =  uiSelectedEvent && relatedEvents.get(uiSelectedEvent);
     console.log({crumbId, crumbEvent});
+    const fetchingErrorMessage = i18n.translate('xpack.siem.endpoint.resolver.panel.fetchError', {
+      defaultMessage: 'Error: Fetching requested related event data failed',
+    });
+
     if(graphableProcessEntityIds.has(crumbEvent)){
       if(!relatedEventsState || relatedEventsState === 'waitingForRelatedEventData'){
         //Related event data hasn't been fetched for this process yet:
@@ -658,7 +669,7 @@ const PanelContent = memo(function PanelContent() {
       }
       if(relatedEventsState === 'error'){
         //return as error if there was a service error requesting the /events
-        return console.log('serviceError'),'serviceError';
+        return console.log('serviceError'),<TableServiceError errorMessage={fetchingErrorMessage} pushToQueryParams={pushToQueryParams} />;
       }
       if(typeof relatedEventsState === 'object'){
         const eventFromCrumbId = relatedEventsState.relatedEvents.find(
@@ -692,7 +703,7 @@ const PanelContent = memo(function PanelContent() {
       }
       if(relatedEventsState === 'error'){
         //return as error if there was a service error requesting the /events
-        return console.log('serviceError'),'serviceError';
+        return console.log('serviceError'), <TableServiceError errorMessage={fetchingErrorMessage} pushToQueryParams={pushToQueryParams} />;
       }
       if(crumbEvent === 'all' && relatedEventsState){
         //If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
