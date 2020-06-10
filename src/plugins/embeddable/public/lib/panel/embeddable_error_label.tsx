@@ -38,7 +38,7 @@ export function EmbeddableErrorLabel(props: Props) {
         });
 
   return (
-    <div className="embPanel-label">
+    <div className="embPanel__label">
       <EuiToolTip content={props.error.message}>
         <EuiBadge color="danger">{labelText}</EuiBadge>
       </EuiToolTip>
