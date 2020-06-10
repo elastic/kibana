@@ -63,7 +63,6 @@ exports[`Header renders 1`] = `
       },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
-      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -698,7 +697,6 @@ exports[`Header renders 2`] = `
       },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
-      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -4802,7 +4800,6 @@ exports[`Header renders 3`] = `
       },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
-      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -9975,7 +9972,6 @@ exports[`Header renders 4`] = `
       },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
-      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
