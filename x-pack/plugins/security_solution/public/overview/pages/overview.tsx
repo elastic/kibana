@@ -28,6 +28,7 @@ import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../app/types';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -120,7 +121,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
       }
     </WithSource>
 
-    <SpyRoute />
+    <SpyRoute pageName={SecurityPageName.overview} />
   </>
 );
 

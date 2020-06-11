@@ -8,10 +8,9 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { Overview } from './pages';
-import { SecurityPageName } from '../app/types';
 
 export const OverviewRoutes = () => (
   <Switch>
-    <Route path={`/:pageName(${SecurityPageName.overview})`} render={() => <Overview />} />
+    <Route path="/" render={() => <Overview />} />
   </Switch>
 );
