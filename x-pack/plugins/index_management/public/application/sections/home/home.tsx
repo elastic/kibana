@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
+import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { ComponentTemplateList } from '../../components/component_templates';
@@ -26,11 +27,17 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 
 export enum Section {
   Indices = 'indices',
+  DataStreams = 'data_streams',
   IndexTemplates = 'templates',
   ComponentTemplates = 'component_templates',
 }
 
-export const homeSections = [Section.Indices, Section.IndexTemplates, Section.ComponentTemplates];
+export const homeSections = [
+  Section.Indices,
+  Section.DataStreams,
+  Section.IndexTemplates,
+  Section.ComponentTemplates,
+];
 
 interface MatchParams {
   section: Section;
@@ -46,6 +53,15 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     {
       id: Section.Indices,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
+    },
+    {
+      id: Section.DataStreams,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.dataStreamsTabTitle"
+          defaultMessage="Data Streams"
+        />
+      ),
     },
     {
       id: Section.IndexTemplates,
@@ -122,6 +138,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
+          <Route
+            exact
+            path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
+            component={DataStreamList}
+          />
           <Route exact path={`/${Section.Indices}`} component={IndexList} />
           <Route exact path={`/${Section.Indices}/filter/:filter?`} component={IndexList} />
           <Route
