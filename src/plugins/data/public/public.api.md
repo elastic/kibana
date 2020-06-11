@@ -883,7 +883,8 @@ export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "FieldFormatsStartCommon" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "OnError" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: PatternCache, fieldFormats: FieldFormatsStartCommon, onNotification: OnNotification, onError: OnError);
+    // Warning: (ae-forgotten-export) The symbol "OnUnsupportedTimePattern" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: PatternCache, fieldFormats: FieldFormatsStartCommon, onNotification: OnNotification, onError: OnError, onUnsupportedTimePattern: OnUnsupportedTimePattern);
     // (undocumented)
     [key: string]: any;
     // (undocumented)
