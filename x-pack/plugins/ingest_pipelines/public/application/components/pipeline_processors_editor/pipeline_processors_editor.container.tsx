@@ -28,12 +28,17 @@ export interface Props {
   onTestPipelineClick: () => void;
   learnMoreAboutProcessorsUrl: string;
   learnMoreAboutOnFailureProcessorsUrl: string;
+  /**
+   * Give users a why to react to this component opening a flyout
+   */
+  onFlyoutOpen: () => void;
 }
 
 export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
+  onFlyoutOpen,
   onUpdate,
   isTestButtonDisabled,
   learnMoreAboutOnFailureProcessorsUrl,
@@ -59,6 +64,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
       links={{ learnMoreAboutOnFailureProcessorsUrl, learnMoreAboutProcessorsUrl }}
     >
       <PipelineProcessorsEditorUI
+        onFlyoutOpen={onFlyoutOpen}
         onUpdate={onUpdate}
         processors={processors}
         onFailureProcessors={onFailure}

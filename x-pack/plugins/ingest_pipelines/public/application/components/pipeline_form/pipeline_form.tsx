@@ -80,6 +80,10 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     onSubmit: handleSave,
   });
 
+  const onEditorFlyoutOpen = useCallback(() => {
+    setIsRequestVisible(false);
+  }, [setIsRequestVisible]);
+
   const saveButtonLabel = isSaving ? (
     <FormattedMessage
       id="xpack.ingestPipelines.form.savingButtonLabel"
@@ -115,6 +119,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
         {/* All form fields */}
         <PipelineFormFields
+          onEditorFlyoutOpen={onEditorFlyoutOpen}
           initialProcessors={defaultValue.processors}
           initialOnFailureProcessors={defaultValue.on_failure}
           onProcessorsUpdate={onProcessorsChangeHandler}

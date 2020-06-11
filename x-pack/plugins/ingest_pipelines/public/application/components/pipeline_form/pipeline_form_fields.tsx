@@ -21,6 +21,7 @@ interface Props {
   hasVersion: boolean;
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
+  onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
 }
 
@@ -35,6 +36,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   hasVersion,
   isTestButtonDisabled,
   onTestPipelineClick,
+  onEditorFlyoutOpen,
 }) => {
   const { services } = useKibana();
 
@@ -125,6 +127,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
           return (
             <PipelineProcessorsEditor
+              onFlyoutOpen={onEditorFlyoutOpen}
               learnMoreAboutProcessorsUrl={services.documentation.getProcessorsUrl()}
               learnMoreAboutOnFailureProcessorsUrl={services.documentation.getHandlingFailureUrl()}
               isTestButtonDisabled={isTestButtonDisabled}

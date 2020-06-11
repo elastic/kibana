@@ -6,7 +6,7 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import React, { FunctionComponent, memo } from 'react';
+import React, { FunctionComponent, memo, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -22,11 +22,18 @@ export interface Props {
   processor: ProcessorInternal | undefined;
   onFormUpdate: (form: OnFormUpdateArg<any>) => void;
   onSubmit: OnSubmitHandler;
+  onOpen: () => void;
   onClose: () => void;
 }
 
 export const SettingsFormFlyout: FunctionComponent<Props> = memo(
-  ({ onClose, processor, onSubmit, onFormUpdate }) => {
+  ({ onClose, processor, onSubmit, onFormUpdate, onOpen }) => {
+    useEffect(
+      () => {
+        onOpen();
+      },
+      [] /* eslint-disable-line react-hooks/exhaustive-deps */
+    );
     return (
       <EuiFlyout onClose={onClose}>
         <EuiFlyoutHeader>

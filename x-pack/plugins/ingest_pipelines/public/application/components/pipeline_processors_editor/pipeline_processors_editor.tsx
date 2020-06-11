@@ -38,6 +38,7 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
+  onFlyoutOpen: () => void;
 }
 
 const PROCESSOR_STATE_SCOPE: ProcessorSelector = ['processors'];
@@ -50,6 +51,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     onTestPipelineClick,
     isTestButtonDisabled,
     onUpdate,
+    onFlyoutOpen,
   }) {
     const {
       state: { editor, processorsDispatch },
@@ -205,6 +207,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
         </EuiFlexGroup>
         {editorMode.id === 'editingProcessor' || editorMode.id === 'creatingProcessor' ? (
           <SettingsFormFlyout
+            onOpen={onFlyoutOpen}
             onFormUpdate={onFormUpdate}
             onSubmit={onSubmit}
             processor={editorMode.id === 'editingProcessor' ? editorMode.arg.processor : undefined}
