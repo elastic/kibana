@@ -5,7 +5,7 @@
  */
 
 import { Store } from 'redux';
-
+import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
 import { ResolverEvent } from '../../common/endpoint/types';
@@ -130,6 +130,25 @@ export type CameraState = {
       readonly panning: undefined;
     }
 );
+
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+
+/**
+ * The entity stored in rbush for resolver edge lines.
+ */
+export interface IndexedEdgeLineSegment extends BBox {
+  type: 'edgeLine';
+  entity: EdgeLineSegment;
+}
+
+/**
+ * The entity store in rbush for resolver process nodes.
+ */
+export interface IndexedProcessNode extends BBox {
+  type: 'processNode';
+  entity: ResolverEvent;
+  position: Vector2;
+}
 
 /**
  * This represents all the raw data (sans statistics, metadata, etc.)

@@ -249,6 +249,8 @@ const ProcessEventDotComponents = React.memo(
     projectionMatrix,
     adjacentNodeMap,
     relatedEvents,
+    isProcessTerminated,
+    isProcessOrigin,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -270,6 +272,14 @@ const ProcessEventDotComponents = React.memo(
      * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
      */
     adjacentNodeMap: AdjacentProcessMap;
+    /**
+     * Whether or not to show the process as terminated.
+     */
+    isProcessTerminated: boolean;
+    /**
+     * Whether or not to show the process as the originating event.
+     */
+    isProcessOrigin: boolean;
     /**
      * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
      * to provide the user some visibility regarding the contents thereof.
@@ -340,7 +350,9 @@ const ProcessEventDotComponents = React.memo(
           })
         | null;
     } = React.createRef();
-    const { cubeSymbol, labelBackground, descriptionText } = nodeAssets[nodeType(event)];
+    const { cubeSymbol, labelBackground, descriptionText } = nodeAssets[
+      nodeType(isProcessTerminated, isProcessOrigin)
+    ];
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -649,11 +661,12 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
   unknownEvent: 'runningProcessCube',
 };
 
-function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
-  const processType = processModel.eventType(processEvent);
-
-  if (processType in processTypeToCube) {
-    return processTypeToCube[processType];
+function nodeType(isProcessTerminated: boolean, isProcessOrigin: boolean): keyof typeof nodeAssets {
+  if (isProcessTerminated) {
+    return processTypeToCube.processTerminated;
+  } else if (isProcessOrigin) {
+    return processTypeToCube.processCausedAlert;
+  } else {
+    return processTypeToCube.processRan;
   }
-  return 'runningProcessCube';
 }

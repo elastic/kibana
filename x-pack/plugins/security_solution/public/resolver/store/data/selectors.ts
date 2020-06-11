@@ -15,13 +15,15 @@ import {
   Matrix3,
   AdjacentProcessMap,
   Vector2,
-  RelatedEventData,
-  RelatedEventDataEntryWithStats,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-
+import * as event from '../../../../common/endpoint/models/event';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
+import {
+  isGraphableProcess,
+  isTerminatedProcess,
+  uniquePidForProcess,
+} from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
@@ -60,7 +62,7 @@ export function hasError(state: DataState) {
  * We can multiply both of these matrices to get the final transformation below.
  */
 /* prettier-ignore */
-const isometricTransformMatrix: Matrix3 = [
+export const isometricTransformMatrix: Matrix3 = [
   Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
   Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
   0,                  0,                    1,
@@ -78,6 +80,24 @@ export const graphableProcesses = createSelector(
   ({ results }: DataState) => results,
   function (results: DataState['results']) {
     return results.filter(isGraphableProcess);
+  }
+);
+
+/**
+ * Process events that will be displayed as terminated.
+ */
+export const terminatedProcesses = createSelector(
+  ({ results }: DataState) => results,
+  function (results: DataState['results']) {
+    return new Set(
+      results.filter(isTerminatedProcess).map((terminatedEvent) => {
+        if (event.isLegacyEvent(terminatedEvent)) {
+          return terminatedEvent.endgame.unique_pid;
+        } else {
+          return terminatedEvent.process?.entity_id;
+        }
+      })
+    );
   }
 );
 
@@ -119,7 +139,7 @@ export const graphableProcesses = createSelector(
  *                   H
  *
  */
-function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
+export function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
   const widths = new Map<ResolverEvent, number>();
 
   if (size(indexedProcessTree) === 0) {
@@ -150,7 +170,7 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
   return widths;
 }
 
-function processEdgeLineSegments(
+export function processEdgeLineSegments(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths,
   positions: ProcessPositions
@@ -318,7 +338,7 @@ function* levelOrderWithWidths(
   }
 }
 
-function processPositions(
+export function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
@@ -408,87 +428,6 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 ) {
   return indexedProcessTreeFactory(graphableProcesses);
 });
-
-/**
- * Process events that will be graphed.
- */
-export const relatedEventResults = function (data: DataState) {
-  return data.resultsEnrichedWithRelatedEventInfo;
-};
-
-/**
- * This selector compiles the related event data attached in `relatedEventResults`
- * into a `RelatedEventData` map of ResolverEvents to statistics about their related events
- */
-export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
-  /* eslint-disable no-shadow */
-  relatedEventResults
-  /* eslint-enable no-shadow */
-) {
-  /* eslint-disable no-shadow */
-  const relatedEventStats: RelatedEventData = new Map();
-  /* eslint-enable no-shadow */
-  if (!relatedEventResults) {
-    return relatedEventStats;
-  }
-
-  for (const updatedEvent of relatedEventResults.keys()) {
-    const newStatsEntry = relatedEventResults.get(updatedEvent);
-    if (newStatsEntry === 'error') {
-      // If the entry is an error, return it as is
-      relatedEventStats.set(updatedEvent, newStatsEntry);
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    if (typeof newStatsEntry === 'object') {
-      /**
-       * Otherwise, it should be a valid stats entry.
-       * Do the work to compile the stats.
-       * Folowing reduction, this will be a record like
-       * {DNS: 10, File: 2} etc.
-       */
-      const statsForEntry = newStatsEntry?.relatedEvents.reduce(
-        (compiledStats: Record<string, number>, relatedEvent: { relatedEventType: string }) => {
-          compiledStats[relatedEvent.relatedEventType] =
-            (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
-          return compiledStats;
-        },
-        {}
-      );
-
-      const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(newStatsEntry, {
-        stats: statsForEntry,
-      });
-      relatedEventStats.set(updatedEvent, newRelatedEventStats);
-    }
-  }
-  return relatedEventStats;
-});
-
-/**
- * This selects `RelatedEventData` maps specifically for graphable processes
- */
-export const relatedEvents = createSelector(
-  graphableProcesses,
-  relatedEventStats,
-  function getRelatedEvents(
-    /* eslint-disable no-shadow */
-    graphableProcesses,
-    relatedEventStats
-    /* eslint-enable no-shadow */
-  ) {
-    const eventsRelatedByProcess: RelatedEventData = new Map();
-    /* eslint-disable no-shadow */
-    return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
-      /* eslint-enable no-shadow */
-      const relatedEventDataEntry = relatedEventStats?.get(graphableProcess);
-      if (relatedEventDataEntry) {
-        relatedEvents.set(graphableProcess, relatedEventDataEntry);
-      }
-      return relatedEvents;
-    }, eventsRelatedByProcess);
-  }
-);
 
 export const processAdjacencies = createSelector(
   indexedProcessTree,
