@@ -45,7 +45,7 @@ import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
-import { EndpointOverview } from '../../../overview/components/endpoint_overview';
+import { EndpointOverview } from '../../components/endpoint_overview';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);

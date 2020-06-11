@@ -10,7 +10,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
+import { DEFAULT_DARK_MODE } from '../../../management/common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
