@@ -15,10 +15,14 @@ export class ObservabilityDataAccessService implements Plugin<Setup, void> {
     this.contextContainer = core.context.createContextContainer();
 
     const api: Setup = {
-      registerProvider: (pluginOpaqueId, dataType, handler) => {
+      registerProvider: ({ pluginOpaqueId, dataType, handler, providedContext }) => {
         if (!this.contextContainer) {
           throw new Error("Context container wasn't defined");
         }
+        if (providedContext) {
+          this.contextContainer!.registerContext(pluginOpaqueId, dataType, () => providedContext);
+        }
+
         this.dataProviders.set(
           dataType,
           this.contextContainer.createHandler(pluginOpaqueId, handler)

@@ -75,11 +75,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
     if (plugins.observability) {
-      plugins.observability.dataAccess.registerProvider(
-        this.initializerContext.opaqueId,
-        'apm',
-        getObservabilityChartData
-      );
+      plugins.observability.dataAccess.registerProvider({
+        pluginOpaqueId: this.initializerContext.opaqueId,
+        dataType: 'apm',
+        handler: getObservabilityChartData,
+        providedContext: {
+          licensing: plugins.licensing,
+          home: plugins.home,
+        },
+      });
     }
 
     core.application.register({

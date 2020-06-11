@@ -13,11 +13,17 @@ export type DataAccessHandlerProvider = (
 ) => ReturnType<ChartDataFetcher>;
 
 export interface Setup {
-  registerProvider: (
-    pluginOpaqueId: symbol,
-    dataType: string,
-    handler: DataAccessHandlerProvider
-  ) => void;
+  registerProvider: ({
+    pluginOpaqueId,
+    dataType,
+    handler,
+    providedContext,
+  }: {
+    pluginOpaqueId: symbol;
+    dataType: string;
+    handler: DataAccessHandlerProvider;
+    providedContext?: Record<string, unknown>;
+  }) => void;
   registerContext: (
     pluginOpaqueId: symbol,
     contextDataType: string,
