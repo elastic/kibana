@@ -6,7 +6,7 @@
 
 import { MouseEventHandler, useCallback } from 'react';
 import { ApplicationStart } from 'kibana/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../lib/kibana';
 
 type NavigateToAppHandlerProps = Parameters<ApplicationStart['navigateToApp']>;
 type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
