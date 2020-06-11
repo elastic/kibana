@@ -61,16 +61,19 @@ const surfacePrimitives = function* (
  */
 export const RelatedEventDetail = memo(function RelatedEventDetail({
   relatedEvent,
+  parentEvent,
   pushToQueryParams,
   relatedEventsState,
   eventType,
 }: {
   relatedEvent: ResolverEvent;
+  parentEvent?: ResolverEvent;
   pushToQueryParams: (arg0: CrumbInfo) => unknown;
   relatedEventsState: RelatedEventDataEntryWithStats;
   eventType: string;
 }) {
-  const processName = relatedEvent && event.eventName(relatedEvent);
+  
+  const processName = (parentEvent && event.eventName(parentEvent)) || '*';
   const processEntityId = event.entityId(relatedEvent);
   const totalCount = Object.values(relatedEventsState.stats).reduce((a, v) => {
     return a + v;
@@ -111,7 +114,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       return { sectionTitle, entries: [...surfacePrimitives(val)] };
     });
     return sectionData;
-  }, []);
+  }, [relatedEvent]);
 
   const crumbs = useMemo(() => {
     return [
@@ -154,7 +157,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         onClick: () => {},
       },
     ];
-  }, []);
+  }, [processName, processEntityId, matchingEvents]);
 
   return (
     <>

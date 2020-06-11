@@ -333,20 +333,7 @@ const ProcessEventDotComponents = React.memo(
       });
     }, [dispatch, nodeId]);
 
-    const handleClick = useCallback(() => {
-      if (animationTarget.current !== null) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (animationTarget.current as any).beginElement();
-      }
-      dispatch({
-        type: 'userSelectedResolverNode',
-        payload: {
-          nodeId,
-          selectedProcessId: selfId,
-        },
-      });
-    }, [animationTarget, dispatch, nodeId]);
-
+    
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
@@ -392,6 +379,21 @@ const ProcessEventDotComponents = React.memo(
       },
       [history, queryParams]
     );
+
+    const handleClick = useCallback(() => {
+      if (animationTarget.current !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (animationTarget.current as any).beginElement();
+      }
+      dispatch({
+        type: 'userSelectedResolverNode',
+        payload: {
+          nodeId,
+          selectedProcessId: selfId,
+        },
+      });
+      pushToQueryParams({ crumbId: selfEntityId, crumbEvent: 'all' });
+    }, [animationTarget, dispatch, nodeId, selfEntityId, queryParams]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -467,7 +469,7 @@ const ProcessEventDotComponents = React.memo(
           aria-selected={isSelectedDescendant ? 'true' : undefined}
           style={nodeViewportStyle}
           id={nodeId}
-          onClick={handleClick}
+          
           onFocus={handleFocus}
           tabIndex={-1}
         >
@@ -553,6 +555,7 @@ const ProcessEventDotComponents = React.memo(
               className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
               data-test-subject="nodeLabel"
               id={labelId}
+              onClick={handleClick}
               style={{
                 backgroundColor: labelBackground,
                 padding: '.15rem 0',

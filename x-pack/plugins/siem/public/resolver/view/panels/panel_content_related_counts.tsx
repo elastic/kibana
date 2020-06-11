@@ -81,7 +81,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
         },
       },
     ];
-  }, []);
+  }, [processName, totalCount, processEntityId]);
   const rows = useMemo(() => {
     return Object.entries(relatedEventsState.stats).map(
       ([eventType, count]): EventCountsTableView => {
@@ -122,7 +122,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
         },
       },
     ],
-    []
+    [relatedEventsState, pushToQueryParams]
   );
   return (
     <>

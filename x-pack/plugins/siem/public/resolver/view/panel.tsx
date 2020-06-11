@@ -105,9 +105,10 @@ const PanelContent = memo(function PanelContent() {
    * This is to cover cases where users e.g. share links to reconstitute a Resolver state and it _should never run otherwise_ under the assumption that the query parameters are updated along with the selection in state
    */
   useLayoutEffect(() => {
-    // Check state to ensure we don't dispatch this in a way that causes cascading re-renders:
+    
     if (
       paramsSelectedEvent &&
+      // Check state to ensure we don't dispatch this in a way that causes unnecessary re-renders, or disrupts animation:
       paramsSelectedEvent !== lastUpdatedProcess &&
       paramsSelectedEvent !== uiSelectedEvent
     ) {
@@ -204,6 +205,7 @@ const PanelContent = memo(function PanelContent() {
         return (
           <RelatedEventDetail
             relatedEvent={eventFromCrumbId.relatedEvent}
+            parentEvent={uiSelectedEvent}
             pushToQueryParams={pushToQueryParams}
             relatedEventsState={relatedEventsState}
             eventType={event.eventType(eventFromCrumbId.relatedEvent)}
