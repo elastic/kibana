@@ -405,18 +405,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           ExceptionListType.ENDPOINT,
                         ]}
                         commentsAccordionId={'ruleDetailsTabExceptions'}
-                        exceptionListsMeta={[
-                          {
-                            id: 'f7acace0-ab9f-11ea-a7a8-e3dd545644b3',
-                            type: 'endpoint',
-                            namespaceType: 'single',
-                          },
-                          {
-                            id: 'e93fe550-ab9f-11ea-a7a8-e3dd545644b3',
-                            type: 'detection',
-                            namespaceType: 'single',
-                          },
-                        ]}
+                        exceptionListsMeta={[]}
                       />
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
