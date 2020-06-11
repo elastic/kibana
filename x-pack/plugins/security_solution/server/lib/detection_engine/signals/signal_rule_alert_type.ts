@@ -79,7 +79,7 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
-        exceptions_list: exceptionsList,
+        exceptionsList,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -275,7 +275,7 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: meta?.kibana_siem_app_url,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string }).kibana_siem_app_url,
             });
 
             logger.info(
