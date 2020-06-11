@@ -106,7 +106,7 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private mountContext?: IContextContainer<AppMountDeprecated>;
-  private navigate?: (url: string, state: any, replace: boolean) => void;
+  private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private redirectTo?: (url: string) => void;
 
   public setup({

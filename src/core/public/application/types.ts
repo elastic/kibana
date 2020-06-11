@@ -673,7 +673,7 @@ export interface NavigateToAppOptions {
   /**
    * optional state to forward to the application
    */
-  state?: any;
+  state?: unknown;
   /**
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
    *

@@ -1038,7 +1038,7 @@ export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => Un
 export interface NavigateToAppOptions {
     path?: string;
     replace?: boolean;
-    state?: any;
+    state?: unknown;
 }
 
 // Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

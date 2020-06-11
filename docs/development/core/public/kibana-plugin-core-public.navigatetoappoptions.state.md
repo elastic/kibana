@@ -9,5 +9,5 @@ optional state to forward to the application
 <b>Signature:</b>
 
 ```typescript
-state?: any;
+state?: unknown;
 ```

@@ -18,5 +18,5 @@ export interface NavigateToAppOptions
 |  --- | --- | --- |
 |  [path](./kibana-plugin-core-public.navigatetoappoptions.path.md) | <code>string</code> | optional path inside application to deep link to. If undefined, will use [the app's default path](./kibana-plugin-core-public.appbase.defaultpath.md)<!-- -->\` as default. |
 |  [replace](./kibana-plugin-core-public.navigatetoappoptions.replace.md) | <code>boolean</code> | if true, will not create a new history entry when navigating (using <code>replace</code> instead of <code>push</code>) |
-|  [state](./kibana-plugin-core-public.navigatetoappoptions.state.md) | <code>any</code> | optional state to forward to the application |
+|  [state](./kibana-plugin-core-public.navigatetoappoptions.state.md) | <code>unknown</code> | optional state to forward to the application |
 
