@@ -87,7 +87,6 @@ Machine Learning::
 * Adds configurable file size to file data visualizer {pull}62752[#62752], {pull}63502[#63502], {pull}64427[#64427]
 * Lists global calendars on the job management page {pull}63124[#63124]
 * Improves parsing of large uploaded files {pull}62970[#62970]
-* Changes file data visualizer max upload setting to string {pull}63502[#63502]
 * Adds {kib} setting for file data visualizer max file size {pull}64427[#64427]
 * Enables mml estimation in data recognizer module setup {pull}64900[#64900]
 * Updates memory estimate after adding exclude fields {pull}62850[#62850]
