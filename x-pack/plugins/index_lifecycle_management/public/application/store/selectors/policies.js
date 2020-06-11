@@ -31,6 +31,7 @@ import {
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
   PHASE_ROLLOVER_MAX_DOCUMENTS,
+  PHASE_WAIT_FOR_SNAPSHOT_POLICY,
 } from '../../constants';
 
 import { filterItems, sortTable } from '../../services';
@@ -194,6 +195,9 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     if (actions.set_priority) {
       policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
     }
+    if (actions.wait_for_snapshot) {
+      policy[PHASE_WAIT_FOR_SNAPSHOT_POLICY] = actions.wait_for_snapshot.policy;
+    }
   }
   return policy;
 };
@@ -307,6 +311,14 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.set_priority = {
       priority: phase[PHASE_INDEX_PRIORITY],
     };
+  }
+
+  if (phase[PHASE_WAIT_FOR_SNAPSHOT_POLICY]) {
+    esPhase.actions.wait_for_snapshot = {
+      policy: phase[PHASE_WAIT_FOR_SNAPSHOT_POLICY],
+    };
+  } else {
+    delete esPhase.actions.wait_for_snapshot;
   }
   return esPhase;
 };
