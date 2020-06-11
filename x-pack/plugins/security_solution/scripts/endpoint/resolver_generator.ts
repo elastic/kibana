@@ -178,13 +178,6 @@ async function main() {
       type: 'boolean',
       default: false,
     },
-    setupOnly: {
-      alias: 'so',
-      describe:
-        'Run only the index and pipeline creation then exit. This is intended to be used to set up the Endpoint App for use with the real Elastic Endpoint.',
-      type: 'boolean',
-      default: false,
-    },
   }).argv;
   await doIngestSetup(argv.kibana);
 
@@ -195,11 +188,6 @@ async function main() {
   const client = new Client(clientOptions);
   if (argv.delete) {
     await deleteIndices([argv.eventIndex, argv.metadataIndex, argv.policyIndex], client);
-  }
-
-  if (argv.setupOnly) {
-    // eslint-disable-next-line no-process-exit
-    process.exit(0);
   }
 
   let seed = argv.seed;

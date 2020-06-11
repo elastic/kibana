@@ -13,7 +13,7 @@ Example command sequence to get ES and kibana running with sample data after ins
 
 `yarn es snapshot` -> starts ES
 
-`npx yarn start --xpack.securitySolution.endpoint.enabled=true --no-base-path` -> starts kibana
+`npx yarn start --xpack.securitySolution.enabled=true --no-base-path` -> starts kibana
 
 `cd ~/path/to/kibana/x-pack/plugins/endpoint`
 
@@ -59,8 +59,4 @@ Options:
                                                            [number] [default: 1]
   --delete, -d                   delete indices and remake them
                                                       [boolean] [default: false]
-  --setupOnly, --so              Run only the index and pipeline creation then
-                                 exit. This is intended to be used to set up the
-                                 Endpoint App for use with the real Elastic
-                                 Endpoint.            [boolean] [default: false]
 ```
