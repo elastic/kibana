@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
           await ml.testResources.deleteIndexPattern(destinationIndex);
         });
 
-        it('should delete job, target index, and index pattern by id', async () => {
+        it('deletes job, target index, and index pattern by id', async () => {
           const { body } = await supertest
             .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndex: true, deleteDestIndexPattern: true })
