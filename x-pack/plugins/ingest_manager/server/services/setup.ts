@@ -135,6 +135,8 @@ export async function setupFleet(
     },
   });
 
+  await outputService.invalidateCache();
+
   // save fleet admin user
   const defaultOutputId = await outputService.getDefaultOutputId(soClient);
   if (!defaultOutputId) {
