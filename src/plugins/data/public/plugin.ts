@@ -40,7 +40,7 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
+import { IndexPatternsService, onRedirectNoIndexPattern } from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -154,7 +154,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
@@ -164,7 +164,17 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http, fieldFormats);
+    const indexPatterns = new IndexPatternsService(
+      uiSettings,
+      savedObjects.client,
+      http,
+      fieldFormats,
+      (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      notifications.toasts.addError,
+      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
+    );
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
