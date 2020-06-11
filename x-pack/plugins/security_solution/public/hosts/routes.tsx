@@ -8,13 +8,9 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { HostsContainer } from './pages';
-import { SecurityPageName } from '../app/types';
 
 export const HostsRoutes = () => (
   <Switch>
-    <Route
-      path={`/:pageName(${SecurityPageName.hosts})`}
-      render={({ match }) => <HostsContainer url={match.url} />}
-    />
+    <Route path="/" render={({ match }) => <HostsContainer url={match.url} />} />
   </Switch>
 );
