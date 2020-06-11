@@ -17,46 +17,21 @@
  * under the License.
  */
 
-/* eslint new-cap: 0 */
-/* eslint no-unused-vars: 0 */
+import expect from '@kbn/expect';
+import { maybeTeamAssign } from '../ingest';
+import { COVERAGE_INDEX, TOTALS_INDEX } from '../constants';
 
-export const Right = (x) => ({
-  chain: (f) => f(x),
-  map: (f) => Right(f(x)),
-  fold: (leftFn, rightFn) => rightFn(x),
-  inspect: () => `Right(${x})`,
+describe(`Ingest fns`, () => {
+  describe(`maybeTeamAssign fn`, () => {
+    describe(`against the coverage index`, () => {
+      it(`should have the pipeline prop`, () => {
+        expect(maybeTeamAssign(COVERAGE_INDEX, {})).to.have.property('pipeline');
+      });
+    });
+    describe(`against the totals index`, () => {
+      it(`should not have the pipeline prop`, () => {
+        expect(maybeTeamAssign(TOTALS_INDEX, {})).not.to.have.property('pipeline');
+      });
+    });
+  });
 });
-
-Right.of = function of(x) {
-  return Right(x);
-};
-
-export function right(x) {
-  return Right.of(x);
-}
-
-export const Left = (x) => ({
-  chain: (f) => Left(x),
-  map: (f) => Left(x),
-  fold: (leftFn, rightFn) => leftFn(x),
-  inspect: () => `Left(${x})`,
-});
-
-Left.of = function of(x) {
-  return Left(x);
-};
-
-export function left(x) {
-  return Left.of(x);
-}
-
-export const fromNullable = (x) =>
-  x !== null && x !== undefined && x !== false && x !== 'undefined' ? Right(x) : Left(null);
-
-export const tryCatch = (f) => {
-  try {
-    return Right(f());
-  } catch (e) {
-    return Left(e);
-  }
-};
