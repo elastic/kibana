@@ -50,7 +50,7 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
             path: '/_security/user/_has_privileges',
             method: 'POST',
             body: {
-              cluster: ['manage_index_templates'], // todo fix
+              cluster: ['manage_index_templates'],
             },
           }
         );
