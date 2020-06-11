@@ -28,6 +28,9 @@ export class Assigned extends React.Component {
   createChild = (data) => {
     const key = data.id;
     const initialClasses = ['monChild'];
+    if (data.type === 'index') {
+      initialClasses.push('monChild--index');
+    }
     const shardStats = get(this.props.shardStats.indices, key);
     if (shardStats) {
       switch (shardStats.status) {

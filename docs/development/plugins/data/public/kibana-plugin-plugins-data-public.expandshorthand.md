@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => Record<string, FieldMappingSpec>
+expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => MappingObject
 ```
