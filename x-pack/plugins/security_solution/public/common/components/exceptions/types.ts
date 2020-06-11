@@ -57,8 +57,8 @@ export interface DescriptionListItem {
 }
 
 export interface Comment {
-  user: string;
-  timestamp: string;
+  created_by: string;
+  created_at: string;
   comment: string;
 }
 
@@ -106,7 +106,7 @@ export interface ExceptionsPagination {
 // TODO: Delete once types are updated
 export interface ExceptionListItemSchema {
   _tags: string[];
-  comment: Comment[];
+  comments: Comment[];
   created_at: string;
   created_by: string;
   description?: string;
