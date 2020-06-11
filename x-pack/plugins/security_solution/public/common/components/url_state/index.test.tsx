@@ -193,7 +193,7 @@ describe('UrlStateContainer', () => {
         wrapper.update();
         await wait();
 
-        if (CONSTANTS.detectionsPage === page) {
+        if (CONSTANTS.alertsPage === page) {
           expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
             from: 11223344556677,
             fromStr: 'now-1d/d',

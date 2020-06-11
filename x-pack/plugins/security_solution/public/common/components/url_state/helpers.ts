@@ -90,8 +90,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SecurityPageName.detections) {
-    return 'detections';
+  } else if (pageName === SecurityPageName.alerts) {
+    return 'alerts';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {
@@ -114,19 +114,20 @@ export const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
-  const getTimelines = timelineSelectors.getTimelines();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const timeline = Object.entries(getTimelines(state)).reduce(
-      (obj, [timelineId, timelineObj]) => ({
-        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
-        isOpen: timelineObj.show,
-      }),
-      { id: '', isOpen: false }
-    );
+    const flyoutTimeline = getTimeline(state, 'timeline-1');
+    const timeline =
+      flyoutTimeline != null
+        ? {
+            id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
+            isOpen: flyoutTimeline.show,
+          }
+        : { id: '', isOpen: false };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;

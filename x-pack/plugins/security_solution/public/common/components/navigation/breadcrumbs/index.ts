@@ -22,7 +22,7 @@ import {
   NetworkRouteSpyState,
   TimelineRouteSpyState,
 } from '../../../utils/route/types';
-import { getOverviewUrl } from '../../link_to';
+import { getAppOverviewUrl } from '../../link_to';
 
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
@@ -41,7 +41,7 @@ export const setBreadcrumbs = (
 export const siemRootBreadcrumb: ChromeBreadcrumb[] = [
   {
     text: APP_NAME,
-    href: getOverviewUrl(),
+    href: getAppOverviewUrl(),
   },
 ];
 
@@ -57,8 +57,8 @@ const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSp
 const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.case;
 
-const isDetectionsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SecurityPageName.detections;
+const isAlertsRoutes = (spyState: RouteSpyState) =>
+  spyState != null && spyState.pageName === SecurityPageName.alerts;
 
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps
@@ -98,8 +98,8 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
-  if (isDetectionsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
+  if (isAlertsRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'alerts', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];

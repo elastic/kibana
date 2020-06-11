@@ -6,30 +6,49 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 
+import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
+import { useKibana } from '../../../lib/kibana';
+import { SecurityPageName } from '../../../../app/types';
+import { useFormatUrl } from '../../link_to';
 
 const TabNavigationItemComponent = ({
+  disabled,
   href,
   hrefWithSearch,
   id,
-  disabled,
   name,
   isSelected,
+  pageId,
+  urlSearch,
 }: TabNavigationItemProps) => {
-  const handleClick = useCallback(() => {
-    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
-  }, [id]);
-
+  const history = useHistory();
+  const { navigateToApp } = useKibana().services.application;
+  const { formatUrl } = useFormatUrl(((pageId ?? id) as unknown) as SecurityPageName);
+  const handleClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      if (id in SecurityPageName) {
+        navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
+      } else {
+        history.push(hrefWithSearch);
+      }
+      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
+    },
+    [history, hrefWithSearch, id, navigateToApp, urlSearch]
+  );
+  const appHref = formatUrl(pageId != null ? href : '');
   return (
     <EuiTab
-      data-href={href}
+      data-href={appHref}
       data-test-subj={`navigation-${id}`}
       disabled={disabled}
-      href={hrefWithSearch}
       isSelected={isSelected}
+      href={appHref}
       onClick={handleClick}
     >
       {name}
@@ -67,6 +86,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
       Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
         const { query, filters, savedQuery, timerange, timeline } = props;
+        const search = getSearch(tab, { query, filters, savedQuery, timerange, timeline });
         const hrefWithSearch =
           tab.href + getSearch(tab, { query, filters, savedQuery, timerange, timeline });
 
@@ -75,10 +95,12 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
             key={`navigation-${tab.id}`}
             id={tab.id}
             href={tab.href}
+            hrefWithSearch={hrefWithSearch}
             name={tab.name}
             disabled={tab.disabled}
-            hrefWithSearch={hrefWithSearch}
+            pageId={tab.pageId}
             isSelected={isSelected}
+            urlSearch={search}
           />
         );
       }),
