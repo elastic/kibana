@@ -244,6 +244,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.abortController) {
       this.abortController.abort();
     }
+    this.domNode.setAttribute(
+      'data-rendering-count',
+      this.domNode.getAttribute('data-rendering-count') + 1
+    );
     this.domNode.setAttribute('data-render-complete', 'false');
     this.updateOutput({ loading: false, error });
   };
