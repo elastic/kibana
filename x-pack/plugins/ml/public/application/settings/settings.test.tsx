@@ -7,6 +7,7 @@
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
+import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { Settings } from './settings';
 
 jest.mock('../components/navigation_menu', () => ({
@@ -33,12 +34,11 @@ describe('Settings', () => {
     isCalendarCreateDisabled: boolean
   ) {
     const wrapper = mountWithIntl(
-      <Settings
-        canGetFilters={canGetFilters}
-        canCreateFilter={canCreateFilter}
-        canGetCalendars={canGetCalendars}
-        canCreateCalendar={canCreateCalendar}
-      />
+      <AnomalyDetectionSettingsContext.Provider
+        value={{ canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar }}
+      >
+        <Settings />
+      </AnomalyDetectionSettingsContext.Provider>
     );
 
     const filterMngButton = wrapper
