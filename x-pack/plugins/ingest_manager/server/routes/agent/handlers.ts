@@ -6,6 +6,8 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+// @ts-ignore not typed
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import {
   GetAgentsResponse,
   GetOneAgentResponse,
@@ -172,11 +174,17 @@ export const postAgentCheckinHandler: RequestHandler<
     const soClient = appContextService.getInternalUserSOClient(request);
     const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      abortController.abort();
+    });
+    const signal = abortController.signal;
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
       request.body.events || [],
-      request.body.local_metadata
+      request.body.local_metadata,
+      { signal }
     );
     const body: PostAgentCheckinResponse = {
       action: 'checkin',

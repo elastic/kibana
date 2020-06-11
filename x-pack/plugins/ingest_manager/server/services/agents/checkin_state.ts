@@ -38,11 +38,13 @@ function createAgentConfigObservable(configId: string) {
   const internalSOClient = appContextService.getInternalUserSOClient(fakeRequest);
   return timer(0, 3000).pipe(
     switchMap(() =>
-      from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>)
+      from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>).pipe(
+        tap(() => appContextService.getLogger().info(`Fetch agent config ${configId}`))
+      )
     ),
     distinctUntilKeyChanged('revision'),
     switchMap((data) => from(agentConfigService.getFullConfig(internalSOClient, configId))),
-    shareReplay(1)
+    shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
 
@@ -52,13 +54,13 @@ function createNewActionsObservable() {
       const internalSOClient = appContextService.getInternalUserSOClient(fakeRequest);
 
       return from(getNewActionsSince(internalSOClient, new Date().toISOString())).pipe(
-        tap(() => appContextService.getLogger().debug(`Fetch new actions`))
+        tap(() => appContextService.getLogger().info(`Fetch new actions`))
       );
     }),
     switchMap((data) => {
       return data;
     }),
-    shareReplay(1)
+    shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
 
@@ -113,7 +115,8 @@ function agentCheckinStateFactory() {
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
-    agent: Agent
+    agent: Agent,
+    options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
     if (!agent.config_id) {
       throw new Error('Agent do not have a config');
@@ -179,6 +182,12 @@ function agentCheckinStateFactory() {
             reject(err);
           }
         );
+        if (options?.signal) {
+          options.signal.addEventListener('abort', () => {
+            subscription.unsubscribe();
+            reject(new Error('Request aborted'));
+          });
+        }
       });
       connectedAgentsIds.delete(agent.id);
 

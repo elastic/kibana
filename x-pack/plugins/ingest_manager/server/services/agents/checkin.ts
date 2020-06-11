@@ -21,7 +21,8 @@ export async function agentCheckin(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   events: NewAgentEvent[],
-  localMetadata?: any
+  localMetadata?: any,
+  options?: { signal: AbortSignal }
 ) {
   const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, events);
   if (updatedErrorEvents) {
@@ -37,7 +38,7 @@ export async function agentCheckin(
   }
 
   // Wait for new actions
-  actions = await agentCheckinState.subscribeToNewActions(soClient, agent);
+  actions = await agentCheckinState.subscribeToNewActions(soClient, agent, options);
 
   return { actions };
 }
