@@ -7,7 +7,9 @@
 import { RouteDependencies } from '../../../types';
 
 import { registerGetAllRoute } from './register_get_route';
+import { registerDeleteRoute } from './register_delete_route';
 
 export function registerDataStreamRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
+  registerDeleteRoute(dependencies);
 }

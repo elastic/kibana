@@ -61,6 +61,14 @@ export function useLoadDataStream(name: string) {
   });
 }
 
+export async function deleteDataStreams(dataStreams: string[]) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/delete_data_streams`,
+    method: 'post',
+    body: { dataStreams },
+  });
+}
+
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
   return response.data ? response.data : response;

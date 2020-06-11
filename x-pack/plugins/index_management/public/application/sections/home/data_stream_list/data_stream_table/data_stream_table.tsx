@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
@@ -13,6 +13,7 @@ import { ScopedHistory } from 'kibana/public';
 import { DataStream } from '../../../../../../common/types';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { encodePathForReactRouter } from '../../../../services/routing';
+import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 
 interface Props {
   dataStreams?: DataStream[];
@@ -27,6 +28,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   history,
   filters,
 }) => {
+  const [selection, setSelection] = useState<DataStream[]>([]);
+  const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
+
   const columns: Array<EuiBasicTableColumn<DataStream>> = [
     {
       field: 'name',
@@ -74,6 +78,28 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
     },
+    {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteText', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDecription', {
+            defaultMessage: 'Delete this data stream',
+          }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: ({ name }: DataStream) => {
+            setDataStreamsToDelete([name]);
+          },
+          isPrimary: true,
+        },
+      ],
+    },
   ];
 
   const pagination = {
@@ -88,12 +114,29 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
+  const selectionConfig = {
+    onSelectionChange: setSelection,
+  };
+
   const searchConfig = {
     query: filters,
     box: {
       incremental: true,
     },
-    toolsLeft: undefined /* TODO: Actions menu */,
+    toolsLeft:
+      selection.length > 0 ? (
+        <EuiButton
+          data-test-subj="deletDataStreamsButton"
+          onClick={() => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name))}
+          color="danger"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel"
+            defaultMessage="Delete {count, plural, one {data stream} other {data streams} }"
+            values={{ count: selection.length }}
+          />
+        </EuiButton>
+      ) : undefined,
     toolsRight: [
       <EuiButton
         color="secondary"
@@ -112,6 +155,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   return (
     <>
+      {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
+        <DeleteDataStreamConfirmationModal
+          callback={(data) => {
+            if (data && data.hasDeletedDataStreams) {
+              reload();
+            } else {
+              setDataStreamsToDelete([]);
+            }
+          }}
+          dataStreams={dataStreamsToDelete}
+        />
+      ) : null}
       <EuiInMemoryTable
         items={dataStreams || []}
         itemId="name"
@@ -119,6 +174,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         search={searchConfig}
         sorting={sorting}
         isSelectable={true}
+        selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({
           'data-test-subj': 'row',
