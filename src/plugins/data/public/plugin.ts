@@ -40,7 +40,11 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService, onRedirectNoIndexPattern } from './index_patterns';
+import {
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  onUnsupportedTimePattern,
+} from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -173,7 +177,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         notifications.toasts.add(toastInputFields);
       },
       notifications.toasts.addError,
-      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
+      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays),
+      onUnsupportedTimePattern(notifications.toasts, application.navigateToApp)
     );
     setIndexPatterns(indexPatterns);
 

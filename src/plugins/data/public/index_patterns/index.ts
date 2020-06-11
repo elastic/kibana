@@ -26,7 +26,12 @@ export {
   getFromSavedObject,
   isDefault,
 } from '../../common/index_patterns/lib';
-export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
+export {
+  flattenHitWrapper,
+  formatHitProvider,
+  onRedirectNoIndexPattern,
+  onUnsupportedTimePattern,
+} from './index_patterns';
 
 export {
   getIndexPatternFieldListCreator,

@@ -105,6 +105,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     patternCache,
     ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
     () => {},
+    () => {},
     () => {}
   );
 
@@ -371,6 +372,7 @@ describe('IndexPattern', () => {
       patternCache,
       ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
       () => {},
+      () => {},
       () => {}
     );
     await pattern.init();
@@ -385,6 +387,7 @@ describe('IndexPattern', () => {
       apiClient,
       patternCache,
       ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
+      () => {},
       () => {},
       () => {}
     );

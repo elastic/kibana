@@ -38,7 +38,7 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { OnNotification, OnError } from '../types';
+import { OnNotification, OnError, OnUnsupportedTimePattern } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
@@ -57,6 +57,7 @@ export class IndexPatternsService {
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
+  private onUnsupportedTimePattern: OnUnsupportedTimePattern;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
   createFieldList: CreateIndexPatternFieldList;
   createField: (
@@ -72,7 +73,8 @@ export class IndexPatternsService {
     fieldFormats: FieldFormatsStartCommon,
     onNotification: OnNotification,
     onError: OnError,
-    onRedirectNoIndexPattern: () => void
+    onRedirectNoIndexPattern: () => void,
+    onUnsupportedTimePattern: OnUnsupportedTimePattern
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = uiSettings;
@@ -80,6 +82,7 @@ export class IndexPatternsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
+    this.onUnsupportedTimePattern = onUnsupportedTimePattern;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
       onRedirectNoIndexPattern
@@ -194,7 +197,8 @@ export class IndexPatternsService {
       indexPatternCache,
       this.fieldFormats,
       this.onNotification,
-      this.onError
+      this.onError,
+      this.onUnsupportedTimePattern
     );
 
     return indexPattern.init();

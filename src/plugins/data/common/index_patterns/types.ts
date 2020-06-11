@@ -52,3 +52,12 @@ export interface IndexPatternAttributes {
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
 export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+export type OnUnsupportedTimePattern = ({
+  id,
+  title,
+  index,
+}: {
+  id: string;
+  title: string;
+  index: string;
+}) => void;

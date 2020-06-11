@@ -19,9 +19,6 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
 
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
@@ -41,7 +38,7 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from '.';
 import { TypeMeta } from '.';
-import { OnNotification, OnError } from '../types';
+import { OnNotification, OnError, OnUnsupportedTimePattern } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
@@ -76,6 +73,7 @@ export class IndexPattern implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
+  private onUnsupportedTimePattern: OnUnsupportedTimePattern;
   private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
@@ -108,7 +106,8 @@ export class IndexPattern implements IIndexPattern {
     patternCache: PatternCache,
     fieldFormats: FieldFormatsStartCommon,
     onNotification: OnNotification,
-    onError: OnError
+    onError: OnError,
+    onUnsupportedTimePattern: OnUnsupportedTimePattern
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -119,6 +118,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
+    this.onUnsupportedTimePattern = onUnsupportedTimePattern;
 
     this.shortDotsEnable = this.getConfig(UI_SETTINGS.SHORT_DOTS_ENABLE);
     this.metaFields = this.getConfig(UI_SETTINGS.META_FIELDS);
@@ -210,48 +210,10 @@ export class IndexPattern implements IIndexPattern {
     }
 
     if (this.isUnsupportedTimePattern()) {
-      const warningTitle = i18n.translate('data.indexPatterns.warningTitle', {
-        defaultMessage: 'Support for time interval index patterns removed',
-      });
-
-      const warningText = i18n.translate('data.indexPatterns.warningText', {
-        defaultMessage:
-          'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
-        values: {
-          title: this.title,
-          index: this.getIndex(),
-        },
-      });
-
-      // kbnUrl was added to this service in #35262 before it was de-angularized, and merged in a PR
-      // directly against the 7.x branch. Index patterns were de-angularized in #39247, and in order
-      // to preserve the functionality from #35262 we need to get the injector here just for kbnUrl.
-      // This has all been removed as of 8.0.
-
-      // 2019-12-01 The usage of kbnUrl had to be removed due to the transition to NP.
-      // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
-      // Once kbnUrl is migrated to NP, this can be updated.
-      const editUrl = `/app/kibana#/management/kibana/index_patterns/${this.id! || ''}`;
-
-      const { toasts } = getNotifications();
-
-      toasts.addWarning({
-        title: warningTitle,
-        text: toMountPoint(
-          <div>
-            <p>{warningText}</p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={getHttp().basePath.prepend(editUrl)}>
-                  <FormattedMessage
-                    id="data.indexPatterns.editIndexPattern"
-                    defaultMessage="Edit index pattern"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ),
+      this.onUnsupportedTimePattern({
+        id: this.id as string,
+        title: this.title,
+        index: this.getIndex(),
       });
     }
 
@@ -495,7 +457,8 @@ export class IndexPattern implements IIndexPattern {
           this.patternCache,
           this.fieldFormats,
           this.onNotification,
-          this.onError
+          this.onError,
+          this.onUnsupportedTimePattern
         );
 
         await duplicatePattern.destroy();
@@ -548,7 +511,8 @@ export class IndexPattern implements IIndexPattern {
             this.patternCache,
             this.fieldFormats,
             this.onNotification,
-            this.onError
+            this.onError,
+            this.onUnsupportedTimePattern
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
