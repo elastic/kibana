@@ -180,6 +180,33 @@ describe('processImportResponse()', () => {
     expect(result.status).toBe('idle');
   });
 
+  test('missing references get added to unmatchedReferences, but are not duplicated', () => {
+    const response = {
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          type: 'a',
+          id: '1',
+          error: {
+            type: 'missing_references',
+            references: [
+              { type: 'index-pattern', id: '2' },
+              { type: 'index-pattern', id: '3' },
+              { type: 'index-pattern', id: '2' }, // duplicate that should not show in the result's unmatchedReferences
+            ],
+          } as SavedObjectsImportMissingReferencesError,
+          meta: {},
+        },
+      ],
+    };
+    const result = processImportResponse(response);
+    expect(result.unmatchedReferences).toEqual([
+      expect.objectContaining({ existingIndexPatternId: '2' }),
+      expect.objectContaining({ existingIndexPatternId: '3' }),
+    ]);
+  });
+
   test('success results get added to successfulImports and result in success status', () => {
     const response = {
       success: true,

@@ -38,14 +38,16 @@ export interface FailedImport {
     | SavedObjectsImportUnknownError;
 }
 
+interface UnmatchedReference {
+  existingIndexPatternId: string;
+  list: Array<Omit<SavedObjectsImportError, 'error'>>;
+  newIndexPatternId?: string;
+}
+
 export interface ProcessedImportResponse {
   failedImports: FailedImport[];
   successfulImports: SavedObjectsImportSuccess[];
-  unmatchedReferences: Array<{
-    existingIndexPatternId: string;
-    list: Array<Record<string, any>>;
-    newIndexPatternId: string | undefined;
-  }>;
+  unmatchedReferences: UnmatchedReference[];
   status: 'success' | 'idle';
   importCount: number;
   conflictedSavedObjectsLinkedToSavedSearches: undefined;
@@ -60,7 +62,7 @@ export function processImportResponse(
 ): ProcessedImportResponse {
   // Go through the failures and split between unmatchedReferences and failedImports
   const failedImports = [];
-  const unmatchedReferences = new Map();
+  const unmatchedReferences = new Map<string, UnmatchedReference>();
   for (const { error, ...obj } of response.errors || []) {
     failedImports.push({ obj, error });
     if (error.type !== 'missing_references') {
@@ -76,8 +78,10 @@ export function processImportResponse(
         list: [],
         newIndexPatternId: undefined,
       };
-      conflict.list.push(obj);
-      unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
+      if (!conflict.list.some(({ type, id }) => type === obj.type && id === obj.id)) {
+        conflict.list.push(obj);
+        unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
+      }
     }
   }
 
