@@ -7,26 +7,23 @@
 import { uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
-  // @ts-ignore
-  EuiHighlight,
   EuiFlexGroup,
   EuiFlexItem,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
   EuiPopover,
-  EuiPopoverTitle,
-  EuiButton,
+  EuiText,
   EuiCallOut,
   EuiFormControlLayout,
   EuiNotificationBadge,
   EuiSpacer,
-  EuiFormLabel,
   EuiAccordion,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
@@ -293,7 +290,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         direction="column"
         responsive={false}
       >
-        <EuiFlexItem grow={null}>
+        <EuiFlexItem grow={false}>
           <div className="lnsInnerIndexPatternDataPanel__header">
             <ChangeIndexPattern
               data-test-subj="indexPattern-switcher"
@@ -312,44 +309,70 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <div className="lnsInnerIndexPatternDataPanel__filtersWrapper">
+        <EuiFlexItem grow={false}>
+          <EuiFormControlLayout
+            icon="search"
+            fullWidth
+            clear={{
+              title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
+                defaultMessage: 'Clear name and type filters',
+              }),
+              'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
+                defaultMessage: 'Clear name and type filters',
+              }),
+              onClick: () => {
+                trackUiEvent('indexpattern_filters_cleared');
+                clearLocalState();
+              },
+            }}
+          >
+            <input
+              className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
+              data-test-subj="lnsIndexPatternFieldSearch"
+              placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
+                defaultMessage: 'Search field names',
+                description: 'Search the list of fields in the index pattern for the provided text',
+              })}
+              value={localState.nameFilter}
+              onChange={(e) => {
+                setLocalState({ ...localState, nameFilter: e.target.value });
+              }}
+              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
+                defaultMessage: 'Search fields',
+              })}
+            />
+          </EuiFormControlLayout>
+
+          <EuiSpacer size="xs" />
+
+          <EuiFilterGroup>
             <EuiPopover
               id="dataPanelTypeFilter"
               panelClassName="euiFilterGroup__popoverPanel"
               panelPaddingSize="none"
-              anchorPosition="rightDown"
+              anchorPosition="rightUp"
               display="block"
               isOpen={localState.isTypeFilterOpen}
               closePopover={() => setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))}
               button={
-                <EuiFlexItem grow={true}>
-                  <EuiButton
-                    data-test-subj="lnsIndexPatternFiltersToggle"
-                    size="s"
-                    onClick={() => {
-                      setLocalState((s) => ({
-                        ...s,
-                        isTypeFilterOpen: !localState.isTypeFilterOpen,
-                      }));
-                    }}
-                  >
-                    {localState.typeFilter.length ? (
-                      <>
-                        {fieldFiltersLabel}{' '}
-                        <EuiNotificationBadge size="m">
-                          {localState.typeFilter.length}
-                        </EuiNotificationBadge>
-                      </>
-                    ) : (
-                      fieldFiltersLabel
-                    )}
-                  </EuiButton>
-                  <EuiSpacer size="xs" />
-                </EuiFlexItem>
+                <EuiFilterButton
+                  iconType="arrowDown"
+                  isSelected={localState.isTypeFilterOpen}
+                  numFilters={localState.typeFilter.length}
+                  hasActiveFilters={localState.typeFilter.length ? true : false}
+                  numActiveFilters={localState.typeFilter.length}
+                  data-test-subj="lnsIndexPatternFiltersToggle"
+                  onClick={() => {
+                    setLocalState((s) => ({
+                      ...s,
+                      isTypeFilterOpen: !localState.isTypeFilterOpen,
+                    }));
+                  }}
+                >
+                  {fieldFiltersLabel}
+                </EuiFilterButton>
               }
             >
-              <EuiPopoverTitle>{fieldFiltersLabel}</EuiPopoverTitle>
               <FixedEuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
@@ -376,43 +399,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 ))}
               />
             </EuiPopover>
-          </div>
-
-          <div className="lnsInnerIndexPatternDataPanel__filterWrapper">
-            <EuiFormControlLayout
-              icon="search"
-              fullWidth
-              clear={{
-                title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                  defaultMessage: 'Clear name and type filters',
-                }),
-                'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                  defaultMessage: 'Clear name and type filters',
-                }),
-                onClick: () => {
-                  trackUiEvent('indexpattern_filters_cleared');
-                  clearLocalState();
-                },
-              }}
-            >
-              <input
-                className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-                data-test-subj="lnsIndexPatternFieldSearch"
-                placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search field names',
-                  description:
-                    'Search the list of fields in the index pattern for the provided text',
-                })}
-                value={localState.nameFilter}
-                onChange={(e) => {
-                  setLocalState({ ...localState, nameFilter: e.target.value });
-                }}
-                aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
-                  defaultMessage: 'Search fields',
-                })}
-              />
-            </EuiFormControlLayout>
-          </div>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <div
             className="lnsInnerIndexPatternDataPanel__listWrapper"
             ref={(el) => {
@@ -445,11 +434,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 initialIsOpen={true}
                 id="availableFieldsLabel"
                 buttonContent={
-                  <EuiFormLabel>
-                    {i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
-                      defaultMessage: 'Available fields',
-                    })}
-                  </EuiFormLabel>
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
+                        defaultMessage: 'Available fields',
+                      })}
+                    </strong>
+                  </EuiText>
                 }
                 extraAction={
                   <EuiNotificationBadge
@@ -530,7 +521,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                               {i18n.translate(
                                 'xpack.lens.indexPatterns.noFields.fieldTypeFilterBullet',
                                 {
-                                  defaultMessage: 'Changing the field type filters',
+                                  defaultMessage: 'Changing the field filters',
                                 }
                               )}
                             </li>
@@ -556,11 +547,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 initialIsOpen={false}
                 id="emptyFieldsLabel"
                 buttonContent={
-                  <EuiFormLabel>
-                    {i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
-                      defaultMessage: 'Empty fields',
-                    })}
-                  </EuiFormLabel>
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
+                        defaultMessage: 'Empty fields',
+                      })}
+                    </strong>
+                  </EuiText>
                 }
                 extraAction={
                   <EuiNotificationBadge
@@ -593,8 +586,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   );
                 })}
               </EuiAccordion>
-
-              <EuiSpacer size="l" />
             </div>
           </div>
         </EuiFlexItem>
