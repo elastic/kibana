@@ -145,12 +145,9 @@ export const displayNameRecord = {
   socket: i18n.translate('xpack.siem.endpoint.resolver.socketEventTypeDisplayName', {
     defaultMessage: 'Socket',
   }),
-  vulnerability: i18n.translate(
-    'xpack.siem.endpoint.resolver.vulnerabilityEventTypeDisplayName',
-    {
-      defaultMessage: 'Vulnerability',
-    }
-  ),
+  vulnerability: i18n.translate('xpack.siem.endpoint.resolver.vulnerabilityEventTypeDisplayName', {
+    defaultMessage: 'Vulnerability',
+  }),
   web: i18n.translate('xpack.siem.endpoint.resolver.webEventTypeDisplayName', {
     defaultMessage: 'Web',
   }),
@@ -183,18 +180,22 @@ export const displayNameRecord = {
   }),
 } as const;
 
-const unknownEventTypeMessage = i18n.translate('xpack.siem.endpoint.resolver.userEventTypeDisplayUnknown', {
-  defaultMessage: 'Unknown',
-});
+const unknownEventTypeMessage = i18n.translate(
+  'xpack.siem.endpoint.resolver.userEventTypeDisplayUnknown',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
 
-type EventDisplayName = typeof displayNameRecord[keyof typeof displayNameRecord] & typeof unknownEventTypeMessage;
+type EventDisplayName = typeof displayNameRecord[keyof typeof displayNameRecord] &
+  typeof unknownEventTypeMessage;
 /**
  * Take a gross `schemaName` and return a beautiful translated one.
  */
-const getDisplayName: (schemaName: string) => ( EventDisplayName ) = function nameInSchemaToDisplayName(
+const getDisplayName: (schemaName: string) => EventDisplayName = function nameInSchemaToDisplayName(
   schemaName
 ) {
-  if(schemaName in displayNameRecord){
+  if (schemaName in displayNameRecord) {
     return displayNameRecord[schemaName as keyof typeof displayNameRecord];
   }
   return unknownEventTypeMessage;
@@ -614,15 +615,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
 
 function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
-  //dd
-  const nm = eventModel.eventName(processEvent);
-  if (nm.match(/iex/)){
-    return 'runningTriggerCube'
-  }
-  if (nm.match(/notepad/)){
-    return 'terminatedProcessCube'
-  }
-  //dd
+
   if (processType in processTypeToCube) {
     return processTypeToCube[processType];
   }
@@ -634,5 +627,5 @@ function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
  * @param processEvent : The process event to fetch node assets for
  */
 export function cubeAssetsForNode(processEvent: ResolverEvent) {
-  return nodeAssets[nodeType(processEvent)]
+  return nodeAssets[nodeType(processEvent)];
 }
