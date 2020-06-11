@@ -436,7 +436,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   };
 
   function init() {
-    console.dir(embeddable);
     if (vis.data.indexPattern) {
       $scope.indexPattern = vis.data.indexPattern;
     } else {
