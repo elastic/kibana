@@ -142,14 +142,16 @@ export class SearchService {
       aborted$,
     };
 
-    const processResult = (result: GlobalSearchProviderResult) =>
-      processProviderResult(result, this.basePath!);
+    const processResult = (
+      result: GlobalSearchProviderResult,
+      provider: GlobalSearchResultProvider
+    ) => processProviderResult(result, provider, this.basePath!);
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
       provider.find(term, providerOptions, context).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
-        map((results) => results.map((r) => processResult(r)))
+        map((results) => results.map((r) => processResult(r, provider)))
       )
     );
 

@@ -21,6 +21,8 @@ const createResult = (parts: Partial<GlobalSearchProviderResult>): GlobalSearchP
   ...parts,
 });
 
+const provider = { id: 'provider' };
+
 describe('processProviderResult', () => {
   let basePath: jest.Mocked<IBasePath>;
 
@@ -43,9 +45,10 @@ describe('processProviderResult', () => {
       meta: { hello: 'dolly' },
     });
 
-    expect(processProviderResult(r1, basePath)).toEqual({
+    expect(processProviderResult(r1, provider, basePath)).toEqual({
       ...r1,
       url: expect.any(String),
+      provider: expect.any(String),
     });
   });
 
@@ -58,16 +61,24 @@ describe('processProviderResult', () => {
 
     expect(convertResultUrlMock).not.toHaveBeenCalled();
 
-    const g1 = processProviderResult(r1, basePath);
+    const g1 = processProviderResult(r1, provider, basePath);
 
     expect(g1.url).toEqual('/url-A');
     expect(convertResultUrlMock).toHaveBeenCalledTimes(1);
     expect(convertResultUrlMock).toHaveBeenCalledWith(r1.url, basePath);
 
-    const g2 = processProviderResult(r2, basePath);
+    const g2 = processProviderResult(r2, provider, basePath);
 
     expect(g2.url).toEqual('/url-B');
     expect(convertResultUrlMock).toHaveBeenCalledTimes(2);
     expect(convertResultUrlMock).toHaveBeenCalledWith(r2.url, basePath);
+  });
+
+  it('adds the `provider` field to the result', () => {
+    const g1 = processProviderResult(createResult({}), { id: 'providerA' }, basePath);
+    const g2 = processProviderResult(createResult({}), { id: 'providerB' }, basePath);
+
+    expect(g1.provider).toEqual('providerA');
+    expect(g2.provider).toEqual('providerB');
   });
 });

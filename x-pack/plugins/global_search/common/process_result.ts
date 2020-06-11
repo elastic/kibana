@@ -13,10 +13,12 @@ import { convertResultUrl, IBasePath } from './utils';
  */
 export const processProviderResult = (
   result: GlobalSearchProviderResult,
+  provider: { id: string },
   basePath: IBasePath
 ): GlobalSearchResult => {
   return {
     ...result,
+    provider: provider.id,
     url: convertResultUrl(result.url, basePath),
   };
 };

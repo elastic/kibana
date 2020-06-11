@@ -283,10 +283,12 @@ describe('SearchService', () => {
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
           ...resultA,
+          provider: 'A',
           url: '/base-path/foo/bar',
         });
         expect(batch.results[1]).toEqual({
           ...resultB,
+          provider: 'A',
           url: '/foo',
         });
       });

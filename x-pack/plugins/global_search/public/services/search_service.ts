@@ -139,8 +139,10 @@ export class SearchService {
       aborted$,
     };
 
-    const processResult = (result: GlobalSearchProviderResult) =>
-      processProviderResult(result, this.http!.basePath);
+    const processResult = (
+      result: GlobalSearchProviderResult,
+      provider: GlobalSearchResultProvider
+    ) => processProviderResult(result, provider, this.http!.basePath);
 
     const serverResults$ = fetchServerResults(this.http!, term, {
       preference,
@@ -151,7 +153,7 @@ export class SearchService {
       provider.find(term, providerOptions).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
-        map((results) => results.map((r) => processResult(r)))
+        map((results) => results.map((r) => processResult(r, provider)))
       )
     );
 

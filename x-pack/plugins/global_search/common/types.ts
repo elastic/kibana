@@ -74,6 +74,10 @@ export type GlobalSearchResult = Omit<GlobalSearchProviderResult, 'url'> & {
    * This can be either an absolute url, or a relative path including the basePath
    */
   url: string;
+  /**
+   * The id of the provider this result originated from.
+   */
+  provider: string;
 };
 
 /**
