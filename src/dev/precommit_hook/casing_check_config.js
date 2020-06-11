@@ -47,6 +47,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
+  '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/plugins/canvas/.storybook/*',
@@ -64,6 +65,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
   'x-pack/plugins/apm/e2e/**/*',
+
+  'x-pack/plugins/maps/server/fonts/**/*',
 ];
 
 /**
@@ -171,12 +174,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

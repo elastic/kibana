@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { BASE_PATH } from '../../../../common/constants';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,6 +23,8 @@ import {
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 export class UploadLicense extends React.PureComponent {
   state = {
@@ -124,7 +125,7 @@ export class UploadLicense extends React.PureComponent {
     }
   };
   render() {
-    const { currentLicenseType, applying, telemetry } = this.props;
+    const { currentLicenseType, applying, telemetry, history } = this.props;
 
     return (
       <Fragment>
@@ -189,7 +190,7 @@ export class UploadLicense extends React.PureComponent {
               <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty href={`#${BASE_PATH}home`}>
+                  <EuiButtonEmpty {...reactRouterNavigate(history, '/home')}>
                     <FormattedMessage
                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                       defaultMessage="Cancel"

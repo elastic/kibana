@@ -38,7 +38,6 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
-  clearTransientLayerStateAndCloseFlyout,
   setMapSettings,
   enableFullScreen,
   updateFlyout,
@@ -535,7 +534,6 @@ app.controller(
     addHelpMenuToAppChrome();
 
     async function doSave(saveOptions) {
-      await store.dispatch(clearTransientLayerStateAndCloseFlyout());
       savedMap.syncWithStore(store.getState());
       let id;
 

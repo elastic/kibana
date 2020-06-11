@@ -9,20 +9,25 @@
 import * as t from 'io-ts';
 
 import {
+  NamespaceType,
   Tags,
   _Tags,
   _tags,
-  comment,
   description,
   exceptionListItemType,
   id,
   meta,
   name,
+  namespace_type,
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { DefaultEntryArray } from '../types';
-import { EntriesArray } from '../types/entries';
+import {
+  CommentsPartialArray,
+  DefaultCommentsPartialArray,
+  DefaultEntryArray,
+  EntriesArray,
+} from '../types';
 
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(
@@ -35,11 +40,12 @@ export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      comment, // defaults to empty array if not set during decode
+      comments: DefaultCommentsPartialArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
       meta, // defaults to undefined if not set during decode
+      namespace_type, // defaults to 'single' if not set during decode
       tags, // defaults to empty array if not set during decode
     })
   ),
@@ -52,12 +58,16 @@ export type UpdateExceptionListItemSchema = RequiredKeepUndefined<
   t.TypeOf<typeof updateExceptionListItemSchema>
 >;
 
-// This type is used after a decode since the arrays turn into defaults of empty arrays
-// and if a item_id is not specified it turns into a default GUID
+// This type is used after a decode since some things are defaults after a decode.
 export type UpdateExceptionListItemSchemaDecoded = Identity<
-  Omit<UpdateExceptionListItemSchema, '_tags' | 'tags' | 'entries'> & {
+  Omit<
+    UpdateExceptionListItemSchema,
+    '_tags' | 'tags' | 'entries' | 'namespace_type' | 'comments'
+  > & {
     _tags: _Tags;
+    comments: CommentsPartialArray;
     tags: Tags;
     entries: EntriesArray;
+    namespace_type: NamespaceType;
   }
 >;

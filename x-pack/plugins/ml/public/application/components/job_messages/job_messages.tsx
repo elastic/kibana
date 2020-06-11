@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
@@ -21,16 +21,33 @@ interface JobMessagesProps {
   messages: JobMessage[];
   loading: boolean;
   error: string;
+  refreshMessage?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 /**
  * Component for rendering job messages for anomaly detection
  * and data frame analytics jobs.
  */
-export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) => {
+export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, refreshMessage }) => {
   const columns = [
     {
-      name: '',
+      name: refreshMessage ? (
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.jobMessages.refreshLabel', {
+            defaultMessage: 'Refresh',
+          })}
+        >
+          <EuiButtonIcon
+            onClick={refreshMessage}
+            iconType="refresh"
+            aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
+              defaultMessage: 'Refresh',
+            })}
+          />
+        </EuiToolTip>
+      ) : (
+        ''
+      ),
       render: (message: JobMessage) => <JobIcon message={message} />,
       width: `${theme.euiSizeL}`,
     },

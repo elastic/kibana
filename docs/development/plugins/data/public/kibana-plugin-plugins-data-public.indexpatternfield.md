@@ -14,7 +14,7 @@ export declare class Field implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, spec, shortDotsEnable, { fieldFormats, toastNotifications })](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
+|  [(constructor)(indexPattern, spec, shortDotsEnable, { fieldFormats, onNotification })](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
 
 ## Properties
 
@@ -28,9 +28,10 @@ export declare class Field implements IFieldType
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
 |  [format](./kibana-plugin-plugins-data-public.indexpatternfield.format.md) |  | <code>any</code> |  |
-|  [indexPattern](./kibana-plugin-plugins-data-public.indexpatternfield.indexpattern.md) |  | <code>IndexPattern</code> |  |
+|  [indexPattern](./kibana-plugin-plugins-data-public.indexpatternfield.indexpattern.md) |  | <code>IIndexPattern</code> |  |
 |  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-public.indexpatternfield.name.md) |  | <code>string</code> |  |
+|  [readFromDocValues](./kibana-plugin-plugins-data-public.indexpatternfield.readfromdocvalues.md) |  | <code>boolean</code> |  |
 |  [script](./kibana-plugin-plugins-data-public.indexpatternfield.script.md) |  | <code>string</code> |  |
 |  [scripted](./kibana-plugin-plugins-data-public.indexpatternfield.scripted.md) |  | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |

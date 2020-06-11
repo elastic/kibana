@@ -3,8 +3,12 @@
 
 def label(size) {
   switch(size) {
+    case 'flyweight':
+      return 'flyweight'
     case 's':
       return 'linux && immutable'
+    case 's-highmem':
+      return 'tests-s'
     case 'l':
       return 'tests-l'
     case 'xl':
@@ -114,7 +118,7 @@ def ci(Map params, Closure closure) {
 // Worker for running the current intake jobs. Just runs a single script after bootstrap.
 def intake(jobName, String script) {
   return {
-    ci(name: jobName, size: 's', ramDisk: false) {
+    ci(name: jobName, size: 's-highmem', ramDisk: true) {
       withEnv(["JOB=${jobName}"]) {
         runbld(script, "Execute ${jobName}")
       }
