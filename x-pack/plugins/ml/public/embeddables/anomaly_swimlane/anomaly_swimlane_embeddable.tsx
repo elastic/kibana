@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import {
   Embeddable,
@@ -27,6 +28,12 @@ import {
 } from '../../../../../../src/plugins/data/common';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
+
+export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+  i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
+    defaultMessage: 'ML anomaly swimlane for {jobIds}',
+    values: { jobIds: jobIds.join(', ') },
+  });
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];

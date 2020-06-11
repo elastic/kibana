@@ -31,6 +31,7 @@ import {
 import {
   AnomalySwimlaneEmbeddableCustomOutput,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  getDefaultPanelTitle,
 } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 
 export interface DashboardItem {
@@ -126,7 +127,7 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
         panelData.push({
           panelIndex,
           embeddableConfig,
-          title: 'Panel test!',
+          title: getDefaultPanelTitle(embeddableConfig.jobIds),
           type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
           version,
           gridData: {
