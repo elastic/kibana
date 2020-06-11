@@ -10,7 +10,6 @@
 }
 
 .lnsIndexPatternDimensionEditor__left {
-  padding-top: 0;
   background-color: $euiPageBackgroundColor;
 }
 
@@ -18,21 +17,7 @@
   width: $euiSize * 20;
 }
 
-.lnsIndexPatternDimensionEditor__operation {
-  @include euiFontSizeS;
-  color: $euiColorPrimary;
-
-  // TODO: Fix in EUI or don't use EuiSideNav
-  .euiSideNavItemButton__label {
-    color: inherit;
-  }
-}
-
-.lnsIndexPatternDimensionEditor__operation--selected {
-  font-weight: bold;
-  color: $euiTextColor;
-}
-
-.lnsIndexPatternDimensionEditor__operation--incompatible {
-  color: $euiColorMediumShade;
+.lnsIndexPatternDimensionEditor__operation > button {
+  padding-top: 0;
+  padding-bottom: 0;
 }
