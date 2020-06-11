@@ -7,7 +7,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
     <UptimeFilterButton
       isSelected={true}
       numActiveFilters={2}
-      numFilters={4}
+      numFilters={0}
       onClick={[Function]}
       title="bar"
     />
@@ -26,7 +26,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
   <EuiPopoverTitle>
     <EuiFieldSearch
       compressed={false}
-      disabled={false}
+      disabled={true}
       fullWidth={false}
       incremental={true}
       isClearable={true}
@@ -45,7 +45,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
     <UptimeFilterButton
       isSelected={true}
       numActiveFilters={2}
-      numFilters={4}
+      numFilters={0}
       onClick={[Function]}
       title="bar"
     />
@@ -64,7 +64,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
   <EuiPopoverTitle>
     <EuiFieldSearch
       compressed={false}
-      disabled={false}
+      disabled={true}
       fullWidth={false}
       incremental={true}
       isClearable={true}
@@ -116,10 +116,10 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
               bar
             </span>
             <span
-              aria-label="3 active filters"
+              aria-label="1 active filters"
               class="euiNotificationBadge euiNotificationBadge--medium euiFilterButton__notification"
             >
-              3
+              1
             </span>
           </span>
         </span>

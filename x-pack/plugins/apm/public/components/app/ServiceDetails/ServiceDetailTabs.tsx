@@ -42,26 +42,26 @@ export function ServiceDetailTabs({ tab }: Props) {
     link: (
       <TransactionOverviewLink serviceName={serviceName}>
         {i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
-          defaultMessage: 'Transactions'
+          defaultMessage: 'Transactions',
         })}
       </TransactionOverviewLink>
     ),
     render: () => <TransactionOverview />,
-    name: 'transactions'
+    name: 'transactions',
   };
 
   const errorsTab = {
     link: (
       <ErrorOverviewLink serviceName={serviceName}>
         {i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
-          defaultMessage: 'Errors'
+          defaultMessage: 'Errors',
         })}
       </ErrorOverviewLink>
     ),
     render: () => {
       return <ErrorGroupOverview />;
     },
-    name: 'errors'
+    name: 'errors',
   };
 
   const tabs = [transactionsTab, errorsTab];
@@ -71,12 +71,12 @@ export function ServiceDetailTabs({ tab }: Props) {
       link: (
         <ServiceNodeOverviewLink serviceName={serviceName}>
           {i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-            defaultMessage: 'JVMs'
+            defaultMessage: 'JVMs',
           })}
         </ServiceNodeOverviewLink>
       ),
       render: () => <ServiceNodeOverview />,
-      name: 'nodes'
+      name: 'nodes',
     };
     tabs.push(nodesListTab);
   } else if (agentName && !isRumAgentName(agentName)) {
@@ -84,12 +84,12 @@ export function ServiceDetailTabs({ tab }: Props) {
       link: (
         <MetricOverviewLink serviceName={serviceName}>
           {i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
-            defaultMessage: 'Metrics'
+            defaultMessage: 'Metrics',
           })}
         </MetricOverviewLink>
       ),
       render: () => <ServiceMetrics agentName={agentName} />,
-      name: 'metrics'
+      name: 'metrics',
     };
     tabs.push(metricsTab);
   }
@@ -98,24 +98,24 @@ export function ServiceDetailTabs({ tab }: Props) {
     link: (
       <ServiceMapLink serviceName={serviceName}>
         {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-          defaultMessage: 'Service Map'
+          defaultMessage: 'Service Map',
         })}
       </ServiceMapLink>
     ),
     render: () => <ServiceMap serviceName={serviceName} />,
-    name: 'service-map'
+    name: 'service-map',
   };
 
   if (serviceMapEnabled) {
     tabs.push(serviceMapTab);
   }
 
-  const selectedTab = tabs.find(serviceTab => serviceTab.name === tab);
+  const selectedTab = tabs.find((serviceTab) => serviceTab.name === tab);
 
   return (
     <>
       <EuiTabs>
-        {tabs.map(serviceTab => (
+        {tabs.map((serviceTab) => (
           <EuiTabLink
             isSelected={serviceTab.name === tab}
             key={serviceTab.name}

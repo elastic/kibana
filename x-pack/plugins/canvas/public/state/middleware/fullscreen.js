@@ -9,7 +9,7 @@ import { setFullscreen as setAppStateFullscreen } from '../../lib/app_state';
 import { setFullscreen as setFullscreenAction } from '../actions/transient';
 import { getFullscreen } from '../selectors/app';
 
-export const fullscreen = ({ getState }) => next => action => {
+export const fullscreen = ({ getState }) => (next) => (action) => {
   // execute the default action
   next(action);
 

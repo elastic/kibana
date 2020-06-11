@@ -96,7 +96,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
   const { defaultValue, getModelValue, modelNames, onChangeFn, validateClass } = config;
   const [models, setModels] = useState(() =>
     list.map(
-      item =>
+      (item) =>
         ({
           id: generateId(),
           ...getModelValue(item),
@@ -133,7 +133,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
     [models, updateValues, validateClass]
   );
   const onDelete = useCallback(
-    (id: string) => updateValues(models.filter(model => model.id !== id)),
+    (id: string) => updateValues(models.filter((model) => model.id !== id)),
     [models, updateValues]
   );
   const onAdd = useCallback(
@@ -178,7 +178,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
     ) {
       setModels(
         list.map(
-          item =>
+          (item) =>
             ({
               id: generateId(),
               ...getModelValue(item),

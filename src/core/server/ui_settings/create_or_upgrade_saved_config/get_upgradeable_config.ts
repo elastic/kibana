@@ -43,5 +43,5 @@ export async function getUpgradeableConfig({
   });
 
   // try to find a config that we can upgrade
-  return savedConfigs.find(savedConfig => isConfigVersionUpgradeable(savedConfig.id, version));
+  return savedConfigs.find((savedConfig) => isConfigVersionUpgradeable(savedConfig.id, version));
 }

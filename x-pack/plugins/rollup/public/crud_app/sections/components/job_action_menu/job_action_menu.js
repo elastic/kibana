@@ -130,7 +130,7 @@ class JobActionMenuUi extends Component {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -151,12 +151,12 @@ class JobActionMenuUi extends Component {
 
   canStartJobs() {
     const { jobs } = this.props;
-    return jobs.some(job => job.status === 'stopped');
+    return jobs.some((job) => job.status === 'stopped');
   }
 
   canStopJobs() {
     const { jobs } = this.props;
-    return jobs.some(job => job.status === 'started');
+    return jobs.some((job) => job.status === 'started');
   }
 
   canCloneJob() {
@@ -166,7 +166,7 @@ class JobActionMenuUi extends Component {
 
   canDeleteJobs() {
     const { jobs } = this.props;
-    const areAllJobsStopped = jobs.findIndex(job => job.status === 'started') === -1;
+    const areAllJobsStopped = jobs.findIndex((job) => job.status === 'started') === -1;
     return areAllJobsStopped;
   }
 

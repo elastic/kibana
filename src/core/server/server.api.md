@@ -91,7 +91,6 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { Logger as Logger_2 } from 'src/core/server/logging';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -481,11 +480,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
+    get: (request: KibanaRequest | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -824,16 +823,15 @@ export class ElasticsearchErrorHelpers {
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // @deprecated (undocumented)
-    readonly adminClient: IClusterClient;
-    // @deprecated (undocumented)
-    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-    // @deprecated (undocumented)
-    readonly dataClient: IClusterClient;
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
-    // (undocumented)
+    // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
         readonly client: IClusterClient;
@@ -1577,8 +1575,9 @@ export interface RequestHandlerContext {
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
-            dataClient: IScopedClusterClient;
-            adminClient: IScopedClusterClient;
+            legacy: {
+                client: IScopedClusterClient;
+            };
         };
         uiSettings: {
             client: IUiSettingsClient;
@@ -1841,8 +1840,9 @@ export class SavedObjectsClient {
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public
-export type SavedObjectsClientFactory = ({ request, }: {
+export type SavedObjectsClientFactory = ({ request, includedHiddenTypes, }: {
     request: KibanaRequest;
+    includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
 // @public
@@ -1852,6 +1852,8 @@ export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjects
 export interface SavedObjectsClientProviderOptions {
     // (undocumented)
     excludedWrappers?: string[];
+    // (undocumented)
+    includedHiddenTypes?: string[];
 }
 
 // @public
@@ -1885,6 +1887,7 @@ export interface SavedObjectsCoreFieldMapping {
     fields?: {
         [subfield: string]: {
             type: string;
+            ignore_above?: number;
         };
     };
     // (undocumented)
@@ -2016,6 +2019,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    preference?: string;
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -2169,6 +2173,8 @@ export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
     // (undocumented)
+    error: (msg: string, meta: LogMeta) => void;
+    // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
     warn: (msg: string) => void;
@@ -2211,12 +2217,12 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, preference, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
         id: string;
@@ -2231,8 +2237,8 @@ export class SavedObjectsRepository {
 
 // @public
 export interface SavedObjectsRepositoryFactory {
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 }
 
 // @public
@@ -2283,8 +2289,8 @@ export interface SavedObjectsServiceSetup {
 
 // @public
 export interface SavedObjectsServiceStart {
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
     getTypeRegistry: () => ISavedObjectTypeRegistry;

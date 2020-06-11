@@ -71,7 +71,7 @@ export class HorizontalLegend extends React.Component {
         <EuiFlexItem grow={false}>
           <button
             className={classes.join(' ')}
-            onClick={event => this.props.onToggle(event, row.id)}
+            onClick={(event) => this.props.onToggle(event, row.id)}
           >
             <span className="monRhythmChart__legendLabel">
               <EuiIcon

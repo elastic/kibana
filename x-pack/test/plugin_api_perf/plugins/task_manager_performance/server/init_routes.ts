@@ -38,7 +38,7 @@ export function initRoutes(
         }),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -50,9 +50,9 @@ export function initRoutes(
       const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = req.body;
       const startAt = millisecondsFromNow(5000).getTime();
       await chunk(range(tasksToSpawn), 200)
-        .map(chunkOfTasksToSpawn => () =>
+        .map((chunkOfTasksToSpawn) => () =>
           Promise.all(
-            chunkOfTasksToSpawn.map(async taskIndex =>
+            chunkOfTasksToSpawn.map(async (taskIndex) =>
               taskManager.schedule(
                 {
                   taskType: 'performanceTestTask',
@@ -75,7 +75,7 @@ export function initRoutes(
         }, Promise.resolve<ConcreteTaskInstance[] | undefined>(undefined));
 
       return res.ok({
-        body: await new Promise(resolve => {
+        body: await new Promise((resolve) => {
           setTimeout(() => {
             performanceApi.endCapture().then((perf: PerfResult) => resolve(perf));
           }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);

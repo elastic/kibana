@@ -101,7 +101,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -194,6 +194,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
                 description="Manage the index patterns that help retrieve your data from Elasticsearch."
                 iconType="indexPatternApp"
                 isBeta={false}
+                onClick={[Function]}
                 title="Index Patterns"
                 url="base_path/index_management_landing_page"
               />
@@ -229,7 +230,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -299,6 +300,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
                 description="Display and share a collection of visualizations and saved searches."
                 iconType="dashboardApp"
                 isBeta={false}
+                onClick={[Function]}
                 title="Dashboard"
                 url="base_path/dashboard_landing_page"
               />
@@ -357,7 +359,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -472,7 +474,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -587,7 +589,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -702,7 +704,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -817,7 +819,7 @@ exports[`home should render home component 1`] = `
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -932,7 +934,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -1047,7 +1049,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
@@ -1169,7 +1171,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         />
         <EuiButton
           data-test-subj="allPlugins"
-          href="#/home/feature_directory"
+          href="#/feature_directory"
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"

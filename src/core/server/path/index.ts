@@ -28,7 +28,6 @@ const CONFIG_PATHS = [
   process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'),
   process.env.CONFIG_PATH, // deprecated
   fromRoot('config/kibana.yml'),
-  '/etc/kibana/kibana.yml',
 ].filter(isString);
 
 const DATA_PATHS = [
@@ -38,7 +37,7 @@ const DATA_PATHS = [
 ].filter(isString);
 
 function findFile(paths: string[]) {
-  const availablePath = paths.find(configPath => {
+  const availablePath = paths.find((configPath) => {
     try {
       accessSync(configPath, constants.R_OK);
       return true;

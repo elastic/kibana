@@ -6,12 +6,16 @@
 
 import * as t from 'io-ts';
 
-export const JobStatType = t.type({
-  id: t.string,
-  earliestTimestampMs: t.number,
-  latestTimestampMs: t.number,
-  latestResultsTimestampMs: t.number,
-});
+export const JobStatType = t.intersection([
+  t.type({
+    id: t.string,
+    earliestTimestampMs: t.number,
+    latestTimestampMs: t.number,
+  }),
+  t.partial({
+    latestResultsTimestampMs: t.number,
+  }),
+]);
 
 export type JobStat = t.TypeOf<typeof JobStatType>;
 

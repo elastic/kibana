@@ -20,6 +20,7 @@ const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
       return { errors: {} };
     },
     alertParamsExpression: ExpressionComponent,
+    requiresAppContext: false,
   };
 };
 

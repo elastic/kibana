@@ -17,10 +17,10 @@
  * under the License.
  */
 
-const pluginId = pluginSpec => (pluginSpec.id ? pluginSpec.id() : pluginSpec.getId());
+const pluginId = (pluginSpec) => (pluginSpec.id ? pluginSpec.id() : pluginSpec.getId());
 
-export const uniqueKeys = sourceType => next => (acc, spec, type, pluginSpec) => {
-  const duplicates = Object.keys(spec).filter(key => acc[type] && acc[type].hasOwnProperty(key));
+export const uniqueKeys = (sourceType) => (next) => (acc, spec, type, pluginSpec) => {
+  const duplicates = Object.keys(spec).filter((key) => acc[type] && acc[type].hasOwnProperty(key));
 
   if (duplicates.length) {
     throw new Error(

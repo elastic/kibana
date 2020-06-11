@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ConfigSchema } from '../config';
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
@@ -27,6 +28,7 @@ import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { getUiSettings } from './ui_settings';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
@@ -50,7 +52,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
@@ -63,6 +65,8 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
+
+    core.uiSettings.register(getUiSettings());
 
     return {
       fieldFormats: this.fieldFormats.setup(),

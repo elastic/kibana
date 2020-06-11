@@ -60,10 +60,10 @@ export function LayerControl({
   isFlyoutOpen,
 }) {
   if (!isLayerTOCOpen) {
-    const hasErrors = layerList.some(layer => {
+    const hasErrors = layerList.some((layer) => {
       return layer.hasErrors();
     });
-    const isLoading = layerList.some(layer => {
+    const isLoading = layerList.some((layer) => {
       return layer.isLayerLoading();
     });
 

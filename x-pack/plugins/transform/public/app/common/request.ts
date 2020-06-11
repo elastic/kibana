@@ -85,7 +85,7 @@ export function getPreviewRequestBody(
     request.source.query = query;
   }
 
-  groupBy.forEach(g => {
+  groupBy.forEach((g) => {
     if (isGroupByTerms(g)) {
       const termsAgg: TermsAgg = {
         terms: {
@@ -114,8 +114,12 @@ export function getPreviewRequestBody(
     }
   });
 
-  aggs.forEach(agg => {
-    request.pivot.aggregations[agg.aggName] = getEsAggFromAggConfig(agg);
+  aggs.forEach((agg) => {
+    const result = getEsAggFromAggConfig(agg);
+    if (result === null) {
+      return;
+    }
+    request.pivot.aggregations[agg.aggName] = result;
   });
 
   return request;

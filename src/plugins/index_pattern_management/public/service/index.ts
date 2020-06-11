@@ -18,5 +18,5 @@
  */
 
 export * from './index_pattern_management_service';
-export { IndexPatternCreationConfig } from './creation';
+export { IndexPatternCreationConfig, IndexPatternCreationOption } from './creation';
 export { IndexPatternListConfig } from './list';

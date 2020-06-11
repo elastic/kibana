@@ -48,11 +48,11 @@ export class ItemsGridPagination extends Component {
     });
   };
 
-  onPageClick = pageNumber => {
+  onPageClick = (pageNumber) => {
     this.props.setActivePage(pageNumber);
   };
 
-  onChangeItemsPerPage = pageSize => {
+  onChangeItemsPerPage = (pageSize) => {
     this.closePopover();
     this.props.setItemsPerPage(pageSize);
   };
@@ -78,7 +78,7 @@ export class ItemsGridPagination extends Component {
 
     const pageCount = Math.ceil(itemCount / itemsPerPage);
 
-    const items = itemsPerPageOptions.map(pageSize => {
+    const items = itemsPerPageOptions.map((pageSize) => {
       return (
         <EuiContextMenuItem
           key={`${pageSize} items`}

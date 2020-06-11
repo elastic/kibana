@@ -34,7 +34,7 @@ export function NoServicesMessage({ historicalDataFound, status }: Props) {
         title={
           <div>
             {i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
-              defaultMessage: 'No services found'
+              defaultMessage: 'No services found',
             })}
           </div>
         }
@@ -48,7 +48,7 @@ export function NoServicesMessage({ historicalDataFound, status }: Props) {
       title={
         <div>
           {i18n.translate('xpack.apm.servicesTable.noServicesLabel', {
-            defaultMessage: `Looks like you don't have any APM services installed. Let's add some!`
+            defaultMessage: `Looks like you don't have any APM services installed. Let's add some!`,
           })}
         </div>
       }
@@ -58,18 +58,18 @@ export function NoServicesMessage({ historicalDataFound, status }: Props) {
           <p>
             {i18n.translate('xpack.apm.servicesTable.7xUpgradeServerMessage', {
               defaultMessage: `Upgrading from a pre-7.x version? Make sure you've also upgraded
-              your APM Server instance(s) to at least 7.0.`
+              your APM Server instance(s) to at least 7.0.`,
             })}
           </p>
           <p>
             {i18n.translate('xpack.apm.servicesTable.7xOldDataMessage', {
               defaultMessage:
-                'You may also have old data that needs to be migrated.'
+                'You may also have old data that needs to be migrated.',
             })}{' '}
-            <KibanaLink path="/management/elasticsearch/upgrade_assistant">
+            <KibanaLink path="/management/stack/upgrade_assistant">
               {i18n.translate('xpack.apm.servicesTable.UpgradeAssistantLink', {
                 defaultMessage:
-                  'Learn more by visiting the Kibana Upgrade Assistant'
+                  'Learn more by visiting the Kibana Upgrade Assistant',
               })}
             </KibanaLink>
             .

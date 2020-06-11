@@ -66,10 +66,10 @@ function DefaultEditorSideBar({
   ]);
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
-    () => responseAggs.filter(agg => metricSchemas.includes(get(agg, 'schema'))),
+    () => responseAggs.filter((agg) => metricSchemas.includes(get(agg, 'schema'))),
     [responseAggs, metricSchemas]
   );
-  const hasHistogramAgg = useMemo(() => responseAggs.some(agg => agg.type.name === 'histogram'), [
+  const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [
     responseAggs,
   ]);
 
@@ -100,7 +100,9 @@ function DefaultEditorSideBar({
     vis.setState({
       ...vis.serialize(),
       params: state.params,
-      data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
+      data: {
+        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
+      },
     });
     eventEmitter.emit('updateVis');
     eventEmitter.emit('dirtyStateChange', {
@@ -110,7 +112,7 @@ function DefaultEditorSideBar({
   }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
-    event => {
+    (event) => {
       if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
         event.preventDefault();
         event.stopPropagation();
@@ -177,7 +179,7 @@ function DefaultEditorSideBar({
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem className="visEditorSidebar__formWrapper">
           <form
             className="visEditorSidebar__form"
             name="visualizeEditor"

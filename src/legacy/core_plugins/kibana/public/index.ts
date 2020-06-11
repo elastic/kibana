@@ -20,4 +20,4 @@
 export {
   ProcessedImportResponse,
   processImportResponse,
-} from '../../../../plugins/saved_objects_management/public/lib';
+} from '../../../../plugins/saved_objects_management/public/lib'; // eslint-disable-line @kbn/eslint/no-restricted-paths

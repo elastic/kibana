@@ -54,7 +54,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     visualization,
     editorConfig: {
-      optionsTemplate: props => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: (props) => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
@@ -96,7 +96,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         },
       ]),
     },
-    setup: async vis => {
+    setup: async (vis) => {
       const tmsLayers = await serviceSettings.getTMSServices();
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
@@ -113,11 +113,11 @@ provided base maps, or add your own. Darker colors represent higher values.',
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
           .filter(
-            layer => !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+            (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
           );
 
         // backfill v1 manifest for now
-        newLayers.forEach(layer => {
+        newLayers.forEach((layer) => {
           if (layer.format === 'geojson') {
             layer.format = {
               type: 'geojson',

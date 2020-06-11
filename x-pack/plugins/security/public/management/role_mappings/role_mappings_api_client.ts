@@ -47,11 +47,11 @@ export class RoleMappingsAPIClient {
 
   public async deleteRoleMappings(names: string[]): Promise<DeleteRoleMappingsResponse> {
     return Promise.all(
-      names.map(name =>
+      names.map((name) =>
         this.http
           .delete(`/internal/security/role_mapping/${encodeURIComponent(name)}`)
           .then(() => ({ success: true, name }))
-          .catch(error => ({ success: false, name, error }))
+          .catch((error) => ({ success: false, name, error }))
       )
     );
   }

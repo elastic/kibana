@@ -120,7 +120,7 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result.filter(actionType => actionTypeRegistry.has(actionType.id)));
+        setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -250,7 +250,7 @@ export const AlertsList: React.FunctionComponent = () => {
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
       options={Object.values(alertTypesState.data)
-        .map(alertType => ({
+        .map((alertType) => ({
           value: alertType.id,
           name: alertType.name,
         }))
@@ -305,8 +305,8 @@ export const AlertsList: React.FunctionComponent = () => {
             fullWidth
             data-test-subj="alertSearchField"
             prepend={<EuiIcon type="search" />}
-            onChange={e => setInputText(e.target.value)}
-            onKeyUp={e => {
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
                 setSearchText(inputText);
               }
@@ -358,7 +358,7 @@ export const AlertsList: React.FunctionComponent = () => {
           canDelete
             ? {
                 onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                  setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
                 },
               }
             : undefined
@@ -384,7 +384,7 @@ export const AlertsList: React.FunctionComponent = () => {
         onDeleted={(deleted: string[]) => {
           if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
             const updatedAlerts = alertsState.data.filter(
-              alert => alert.id && !alertsToDelete.includes(alert.id)
+              (alert) => alert.id && !alertsToDelete.includes(alert.id)
             );
             setAlertsState({
               isLoading: false,
@@ -439,7 +439,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       >
         <AlertAdd
-          consumer={'alerting'}
+          consumer={'alerts'}
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />
@@ -449,11 +449,11 @@ export const AlertsList: React.FunctionComponent = () => {
 };
 
 function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
-  return alerts.filter(alert => ids.includes(alert.id));
+  return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
-  return alerts.map(alert => ({
+  return alerts.map((alert) => ({
     ...alert,
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),

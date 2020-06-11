@@ -60,7 +60,7 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
 
       try {
         await updateIndexTemplate(
-          context.core.elasticsearch.dataClient.callAsCurrentUser,
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
           templateName,
           policyName,
           aliasName

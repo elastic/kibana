@@ -35,7 +35,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
       }),
       icon: 'searchProfilerApp',
-      path: '/app/kibana#/dev_tools/searchprofiler',
+      path: '/app/dev_tools#/searchprofiler',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
@@ -65,7 +65,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       },
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {

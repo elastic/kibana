@@ -18,7 +18,7 @@ function getBucket(
     x: bucket.key,
     anomalyScore: bucket.anomaly_score.value,
     lower: bucket.lower.value,
-    upper: bucket.upper.value
+    upper: bucket.upper.value,
   };
 }
 
@@ -42,7 +42,7 @@ export function anomalySeriesTransform(
       timeSeriesDates,
       bucketSizeInMillis
     ),
-    anomalyBoundaries: getAnomalyBoundaryDataPoints(buckets, timeSeriesDates)
+    anomalyBoundaries: getAnomalyBoundaryDataPoints(buckets, timeSeriesDates),
   };
 }
 
@@ -57,14 +57,14 @@ export function getAnomalyScoreDataPoints(
 
   return buckets
     .filter(
-      bucket =>
+      (bucket) =>
         bucket.anomalyScore !== null && bucket.anomalyScore > ANOMALY_THRESHOLD
     )
     .filter(isInDateRange(firstDate, lastDate))
-    .map(bucket => {
+    .map((bucket) => {
       return {
         x0: bucket.x,
-        x: Math.min(bucket.x + bucketSizeInMillis, lastDate) // don't go beyond last date
+        x: Math.min(bucket.x + bucketSizeInMillis, lastDate), // don't go beyond last date
       };
     });
 }
@@ -74,12 +74,12 @@ export function getAnomalyBoundaryDataPoints(
   timeSeriesDates: number[]
 ): Coordinate[] {
   return replaceFirstAndLastBucket(buckets, timeSeriesDates)
-    .filter(bucket => bucket.lower !== null)
-    .map(bucket => {
+    .filter((bucket) => bucket.lower !== null)
+    .map((bucket) => {
       return {
         x: bucket.x,
         y0: bucket.lower,
-        y: bucket.upper
+        y: bucket.upper,
       };
     });
 }
@@ -92,9 +92,9 @@ export function replaceFirstAndLastBucket(
   const lastDate = last(timeSeriesDates);
 
   const preBucketWithValue = buckets
-    .filter(p => p.x <= firstDate)
+    .filter((p) => p.x <= firstDate)
     .reverse()
-    .find(p => p.lower !== null);
+    .find((p) => p.lower !== null);
 
   const bucketsInRange = buckets.filter(isInDateRange(firstDate, lastDate));
 
@@ -107,7 +107,7 @@ export function replaceFirstAndLastBucket(
 
   const lastBucketWithValue = [...buckets]
     .reverse()
-    .find(p => p.lower !== null);
+    .find((p) => p.lower !== null);
 
   // replace last bucket if it is null
   const lastBucket = last(bucketsInRange);

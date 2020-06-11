@@ -112,7 +112,7 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
      * @return {Platform}
      */
     getLinuxPlatform() {
-      return platforms.find(p => p.isLinux());
+      return platforms.find((p) => p.isLinux());
     }
 
     /**
@@ -120,7 +120,7 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
      * @return {Platform}
      */
     getWindowsPlatform() {
-      return platforms.find(p => p.isWindows());
+      return platforms.find((p) => p.isWindows());
     }
 
     /**
@@ -128,7 +128,7 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
      * @return {Platform}
      */
     getMacPlatform() {
-      return platforms.find(p => p.isMac());
+      return platforms.find((p) => p.isMac());
     }
 
     /**

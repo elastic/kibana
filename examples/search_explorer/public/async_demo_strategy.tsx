@@ -73,7 +73,7 @@ export class AsyncDemoStrategy extends React.Component<Props, State> {
             <EuiFormRow label="How many Fibonacci numbers to generate?">
               <EuiFieldNumber
                 value={this.state.fibonacciNumbers}
-                onChange={e => this.setState({ fibonacciNumbers: parseFloat(e.target.value) })}
+                onChange={(e) => this.setState({ fibonacciNumbers: parseFloat(e.target.value) })}
               />
             </EuiFormRow>
           </EuiFlexItem>

@@ -27,7 +27,7 @@ import { MlStartDependencies } from '../../plugin';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery } from '../../../../../../src/plugins/data/public';
+import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
@@ -42,7 +42,7 @@ function getJobsObservable(
   return embeddableInput.pipe(
     pluck('jobIds'),
     distinctUntilChanged(isEqual),
-    switchMap(jobsIds => anomalyDetectorService.getJobs$(jobsIds))
+    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds))
   );
 }
 
@@ -51,19 +51,19 @@ export function useSwimlaneInputResolver(
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number
-) {
+): [string | undefined, OverallSwimlaneData | undefined, TimeBuckets, Error | null | undefined] {
   const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<string>();
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
-      'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-      'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
@@ -74,7 +74,7 @@ export function useSwimlaneInputResolver(
       getJobsObservable(embeddableInput, anomalyDetectorService),
       embeddableInput,
       chartWidth$.pipe(
-        skipWhile(v => !v),
+        skipWhile((v) => !v),
         distinctUntilChanged((prev, curr) => {
           // emit only if the width has been changed significantly
           return Math.abs(curr - prev) < RESIZE_IGNORED_DIFF_PX;
@@ -100,7 +100,7 @@ export function useSwimlaneInputResolver(
             setSwimlaneType(swimlaneTypeInput);
           }
 
-          const explorerJobs: ExplorerJob[] = jobs.map(job => {
+          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
             const bucketSpan = parseInterval(job.analysis_config.bucket_span);
             return {
               id: job.job_id,
@@ -119,7 +119,7 @@ export function useSwimlaneInputResolver(
           }
 
           return from(explorerService.loadOverallData(explorerJobs, swimlaneContainerWidth)).pipe(
-            switchMap(overallSwimlaneData => {
+            switchMap((overallSwimlaneData) => {
               const { earliest, latest } = overallSwimlaneData;
 
               if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
@@ -134,7 +134,7 @@ export function useSwimlaneInputResolver(
                     appliedFilters
                   )
                 ).pipe(
-                  map(viewBySwimlaneData => {
+                  map((viewBySwimlaneData) => {
                     return {
                       ...viewBySwimlaneData!,
                       earliest,
@@ -147,12 +147,12 @@ export function useSwimlaneInputResolver(
             })
           );
         }),
-        catchError(e => {
+        catchError((e) => {
           setError(e.body);
           return of(undefined);
         })
       )
-      .subscribe(data => {
+      .subscribe((data) => {
         if (data !== undefined) {
           setError(null);
           setSwimlaneData(data);

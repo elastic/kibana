@@ -5,7 +5,7 @@
  */
 import { HttpSetup, DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
-import { ActionGroup } from '../../alerting/common';
+import { ActionGroup } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -14,7 +14,7 @@ import {
   AlertTaskState,
   RawAlertInstance,
   AlertingFrameworkHealth,
-} from '../../../plugins/alerting/common';
+} from '../../alerts/common';
 export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFrameworkHealth };
 export { ActionType };
 
@@ -99,6 +99,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
+  producer: string;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
@@ -110,12 +111,29 @@ export interface AlertTableItem extends Alert {
   tagsText: string;
 }
 
-export interface AlertTypeModel {
+export interface AlertTypeParamsExpressionProps<
+  AlertParamsType = unknown,
+  AlertsContextValue = unknown
+> {
+  alertParams: AlertParamsType;
+  alertInterval: string;
+  setAlertParams: (property: string, value: any) => void;
+  setAlertProperty: (key: string, value: any) => void;
+  errors: IErrorObject;
+  alertsContext: AlertsContextValue;
+}
+
+export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
   iconClass: string;
-  validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.FunctionComponent<any>;
+  validate: (alertParams: AlertParamsType) => ValidationResult;
+  alertParamsExpression:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+      >;
+  requiresAppContext: boolean;
   defaultActionMessage?: string;
 }
 

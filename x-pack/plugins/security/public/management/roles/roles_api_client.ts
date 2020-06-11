@@ -34,18 +34,18 @@ export class RolesAPIClient {
     const isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) =>
       indexPrivilege.names.length === 0;
     role.elasticsearch.indices = role.elasticsearch.indices.filter(
-      indexPrivilege => !isPlaceholderPrivilege(indexPrivilege)
+      (indexPrivilege) => !isPlaceholderPrivilege(indexPrivilege)
     );
 
     // Remove any placeholder query entries
-    role.elasticsearch.indices.forEach(index => index.query || delete index.query);
+    role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
 
     // If spaces are disabled, then do not persist any space privileges
     if (!spacesEnabled) {
       role.kibana = role.kibana.filter(isGlobalPrivilegeDefinition);
     }
 
-    role.kibana.forEach(kibanaPrivilege => {
+    role.kibana.forEach((kibanaPrivilege) => {
       // If a base privilege is defined, then do not persist feature privileges
       if (kibanaPrivilege.base.length > 0) {
         kibanaPrivilege.feature = {};

@@ -55,6 +55,37 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     }
   );
 
+  const timestampActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.timestampDescription',
+    {
+      defaultMessage: 'A timestamp of when the alert was detected.',
+    }
+  );
+
+  const valueActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
+    {
+      defaultMessage:
+        'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
+    }
+  );
+
+  const metricActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
+    {
+      defaultMessage:
+        'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
+    }
+  );
+
+  const thresholdActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
+    {
+      defaultMessage:
+        'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+    }
+  );
+
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
@@ -62,7 +93,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
       params: schema.object(
         {
           criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-          groupBy: schema.maybe(schema.string()),
+          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filterQuery: schema.maybe(
             schema.string({
               validate: validateIsStringElasticsearchJSONFilter,
@@ -82,7 +113,12 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
+        { name: 'timestamp', description: timestampActionVariableDescription },
+        { name: 'value', description: valueActionVariableDescription },
+        { name: 'metric', description: metricActionVariableDescription },
+        { name: 'threshold', description: thresholdActionVariableDescription },
       ],
     },
+    producer: 'metrics',
   };
 }

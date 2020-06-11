@@ -9,7 +9,7 @@ import { render, act, fireEvent } from '@testing-library/react';
 import { ManageCustomLink } from './ManageCustomLink';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
 
 describe('ManageCustomLink', () => {

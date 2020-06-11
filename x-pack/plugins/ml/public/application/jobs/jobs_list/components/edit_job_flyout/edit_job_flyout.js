@@ -108,17 +108,17 @@ export class EditJobFlyoutUI extends Component {
     );
   }
 
-  showFlyout = jobLite => {
+  showFlyout = (jobLite) => {
     const hasDatafeed = jobLite.hasDatafeed;
     loadFullJob(jobLite.id)
-      .then(job => {
+      .then((job) => {
         this.extractJob(job, hasDatafeed);
         this.setState({
           job,
           isFlyoutVisible: true,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -147,7 +147,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroups: job.groups !== undefined ? job.groups : [],
       jobModelMemoryLimit: mml,
       jobDetectors: detectors,
-      jobDetectorDescriptions: detectors.map(d => d.detector_description),
+      jobDetectorDescriptions: detectors.map((d) => d.detector_description),
       jobBucketSpan: bucketSpan,
       jobCustomUrls: customUrls,
       datafeedQuery: hasDatafeed ? JSON.stringify(datafeedConfig.query, null, 2) : '',
@@ -171,7 +171,7 @@ export class EditJobFlyoutUI extends Component {
     });
   }
 
-  setJobDetails = jobDetails => {
+  setJobDetails = (jobDetails) => {
     let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
 
     if (jobDetails.jobModelMemoryLimit !== undefined) {
@@ -180,7 +180,7 @@ export class EditJobFlyoutUI extends Component {
     }
 
     if (jobDetails.jobGroups !== undefined) {
-      if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
+      if (jobDetails.jobGroups.some((j) => this.props.allJobIds.includes(j))) {
         jobGroupsValidationError = i18n.translate(
           'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
           {
@@ -204,19 +204,19 @@ export class EditJobFlyoutUI extends Component {
     });
   };
 
-  setDetectorDescriptions = jobDetectorDescriptions => {
+  setDetectorDescriptions = (jobDetectorDescriptions) => {
     this.setState({
       ...jobDetectorDescriptions,
     });
   };
 
-  setDatafeed = datafeed => {
+  setDatafeed = (datafeed) => {
     this.setState({
       ...datafeed,
     });
   };
 
-  setCustomUrls = jobCustomUrls => {
+  setCustomUrls = (jobCustomUrls) => {
     const isValidJobCustomUrls = isValidCustomUrls(jobCustomUrls);
     this.setState({
       jobCustomUrls,
@@ -251,7 +251,7 @@ export class EditJobFlyoutUI extends Component {
         this.refreshJobs();
         this.closeFlyout(true);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
         toasts.addDanger(
           i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {

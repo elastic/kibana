@@ -10,16 +10,17 @@ import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
-import { useUrlParams } from '../../../hooks';
+import { useSearchText, useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
   DataPublicPluginSetup,
 } from '../../../../../../../src/plugins/data/public';
+import { useIndexPattern } from './use_index_pattern';
 
 const Container = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 `;
 
 interface State {
@@ -35,25 +36,22 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
+  defaultKuery?: string;
   'data-test-subj': string;
-  loadIndexPattern: () => void;
-  indexPattern: IIndexPattern | null;
-  loading: boolean;
+  shouldUpdateUrl?: boolean;
+  updateDefaultKuery?: (value: string) => void;
 }
 
-export function KueryBarComponent({
+export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
+  defaultKuery,
   'data-test-subj': dataTestSubj,
-  loadIndexPattern,
-  indexPattern,
-  loading,
+  shouldUpdateUrl,
+  updateDefaultKuery,
 }: Props) {
-  useEffect(() => {
-    if (!indexPattern) {
-      loadIndexPattern();
-    }
-  }, [indexPattern, loadIndexPattern]);
+  const { loading, index_pattern: indexPattern } = useIndexPattern();
+  const { updateSearchText } = useSearchText();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -64,6 +62,10 @@ export function KueryBarComponent({
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
+
+  useEffect(() => {
+    updateSearchText(kuery);
+  }, [kuery, updateSearchText]);
 
   const indexPatternMissing = loading && !indexPattern;
 
@@ -88,7 +90,7 @@ export function KueryBarComponent({
           selectionEnd: selectionStart,
         })) || []
       )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {
@@ -114,7 +116,13 @@ export function KueryBarComponent({
         return;
       }
 
-      updateUrlParams({ search: inputValue.trim() });
+      if (shouldUpdateUrl !== false) {
+        updateUrlParams({ search: inputValue.trim() });
+      }
+      updateSearchText(inputValue);
+      if (updateDefaultKuery) {
+        updateDefaultKuery(inputValue);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
@@ -127,14 +135,14 @@ export function KueryBarComponent({
         data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={kuery}
+        initialValue={defaultKuery || kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
         queryExample=""
       />
 
-      {indexPatternMissing && (
+      {indexPatternMissing && !loading && (
         <EuiCallOut
           style={{ display: 'inline-block', marginTop: '10px' }}
           title={

@@ -4,55 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
-import { overviewFiltersSelector } from '../../../../state/selectors';
-import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
+import { FilterExpressionsSelectProps } from './filters_expression_select_container';
+import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
 
-interface Props {
-  newFilters: string[];
-  onRemoveFilter: (val: string) => void;
-  setAlertParams: (key: string, value: any) => void;
+type FilterFieldUpdate = (updateTarget: { fieldName: string; values: string[] }) => void;
+
+interface OwnProps {
+  setUpdatedFieldValues: FilterFieldUpdate;
 }
 
+type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'> & OwnProps;
+
 export const FiltersExpressionsSelect: React.FC<Props> = ({
-  setAlertParams,
+  alertParams,
+  filters: overviewFilters,
   newFilters,
   onRemoveFilter,
+  setAlertParams,
+  setUpdatedFieldValues,
 }) => {
-  const { tags, ports, schemes, locations } = useSelector(overviewFiltersSelector);
-
-  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
-    fieldName: string;
-    values: string[];
-  }>({ fieldName: '', values: [] });
-
-  const currentFilters = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
-
-  useEffect(() => {
-    if (updatedFieldValues.fieldName === 'observer.geo.name') {
-      setAlertParams('locations', updatedFieldValues.values);
-    }
-  }, [setAlertParams, updatedFieldValues]);
-
-  useEffect(() => {
-    setAlertParams('locations', []);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const selectedTags = currentFilters.get('tags');
-  const selectedPorts = currentFilters.get('url.port');
-  const selectedScheme = currentFilters.get('monitor.type');
-  const selectedLocation = currentFilters.get('observer.geo.name');
-
-  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
+  const { tags, ports, schemes, locations } = overviewFilters;
+  const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
+  const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
+  const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
+  const selectedTags = alertParams?.filters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
+    // the `filters` field is no longer a string
+    if (alertParams.filters && typeof alertParams.filters !== 'string') {
+      setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
+    } else {
+      setAlertParams(
+        'filters',
+        Object.assign(
+          {},
+          {
+            tags: [],
+            'url.port': [],
+            'observer.geo.name': [],
+            'monitor.type': [],
+          },
+          { [fieldName]: values }
+        )
+      );
+    }
     setUpdatedFieldValues({ fieldName, values });
   };
 
@@ -64,10 +64,11 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       id: 'filter_port',
       disabled: ports?.length === 0,
       items: ports?.map((p: number) => p.toString()) ?? [],
-      selectedItems: getSelectedItems('url.port'),
+      selectedItems: selectedPorts,
       title: filterLabels.PORT,
-      description: selectedPorts ? alertFilterLabels.USING_PORT : alertFilterLabels.USING,
-      value: selectedPorts?.join(',') ?? alertFilterLabels.ANY_PORT,
+      description:
+        selectedPorts.length === 0 ? alertFilterLabels.USING : alertFilterLabels.USING_PORT,
+      value: selectedPorts.length === 0 ? alertFilterLabels.ANY_PORT : selectedPorts?.join(','),
     },
     {
       onFilterFieldChange,
@@ -76,10 +77,10 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       id: 'filter_tags',
       disabled: tags?.length === 0,
       items: tags ?? [],
-      selectedItems: getSelectedItems('tags'),
+      selectedItems: selectedTags,
       title: filterLabels.TAGS,
-      description: selectedTags ? alertFilterLabels.WITH_TAG : alertFilterLabels.WITH,
-      value: selectedTags?.join(',') ?? alertFilterLabels.ANY_TAG,
+      description: selectedTags.length === 0 ? alertFilterLabels.WITH : alertFilterLabels.WITH_TAG,
+      value: selectedTags.length === 0 ? alertFilterLabels.ANY_TAG : selectedTags?.join(','),
     },
     {
       onFilterFieldChange,
@@ -88,10 +89,10 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       id: 'filter_scheme',
       disabled: schemes?.length === 0,
       items: schemes ?? [],
-      selectedItems: getSelectedItems('monitor.type'),
+      selectedItems: selectedSchemes,
       title: filterLabels.SCHEME,
-      description: selectedScheme ? alertFilterLabels.OF_TYPE : alertFilterLabels.OF,
-      value: selectedScheme?.join(',') ?? alertFilterLabels.ANY_TYPE,
+      description: selectedSchemes.length === 0 ? alertFilterLabels.OF : alertFilterLabels.OF_TYPE,
+      value: selectedSchemes.length === 0 ? alertFilterLabels.ANY_TYPE : selectedSchemes?.join(','),
     },
     {
       onFilterFieldChange,
@@ -100,10 +101,14 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       id: 'filter_location',
       disabled: locations?.length === 0,
       items: locations ?? [],
-      selectedItems: getSelectedItems('observer.geo.name'),
+      selectedItems: selectedLocations,
       title: filterLabels.SCHEME,
-      description: selectedLocation ? alertFilterLabels.FROM_LOCATION : alertFilterLabels.FROM,
-      value: selectedLocation?.join(',') ?? alertFilterLabels.ANY_LOCATION,
+      description:
+        selectedLocations.length === 0 ? alertFilterLabels.FROM : alertFilterLabels.FROM_LOCATION,
+      value:
+        selectedLocations.length === 0
+          ? alertFilterLabels.ANY_LOCATION
+          : selectedLocations?.join(','),
     },
   ];
 
@@ -115,7 +120,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   });
 
   const filtersToDisplay = monitorFilters.filter(
-    curr => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
+    (curr) => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
   );
 
   return (

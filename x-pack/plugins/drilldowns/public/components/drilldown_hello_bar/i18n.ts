@@ -10,7 +10,7 @@ export const txtHelpText = i18n.translate(
   'xpack.drilldowns.components.DrilldownHelloBar.helpText',
   {
     defaultMessage:
-      'Drilldowns provide the ability to define a new behavior when interacting with a panel. You can add multiple options or simply override the default filtering behavior.',
+      'Drilldowns enable you to define new behaviors for interacting with panels. You can add multiple actions and override the default filter.',
   }
 );
 

@@ -26,12 +26,12 @@ export class ValidationError extends SchemaError {
     let message = error.message;
     if (error instanceof SchemaTypesError) {
       const indentLevel = level || 0;
-      const childErrorMessages = error.errors.map(childError =>
+      const childErrorMessages = error.errors.map((childError) =>
         ValidationError.extractMessage(childError, namespace, indentLevel + 1)
       );
 
       message = `${message}\n${childErrorMessages
-        .map(childErrorMessage => `${' '.repeat(indentLevel)}- ${childErrorMessage}`)
+        .map((childErrorMessage) => `${' '.repeat(indentLevel)}- ${childErrorMessage}`)
         .join('\n')}`;
     }
 

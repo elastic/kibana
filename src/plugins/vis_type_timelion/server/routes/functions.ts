@@ -28,7 +28,7 @@ export function functionsRoute(router: IRouter, { functions }: { functions: Load
       validate: false,
     },
     async (context, request, response) => {
-      const functionArray = _.map(functions, function(val, key) {
+      const functionArray = _.map(functions, function (val, key) {
         // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
         return _.extend({}, val, { name: key });
       });

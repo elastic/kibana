@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import { EuiThemeProvider } from '../../../observability/public';
 import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
 import { ApmPluginSetupDeps } from '../plugin';
 import { ApmPluginContext } from '../context/ApmPluginContext';
@@ -18,13 +19,16 @@ import { LocationProvider } from '../context/LocationContext';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  useUiSetting$,
+} from '../../../../../src/plugins/kibana_react/public';
 import { px, unit, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
-import { history } from '../utils/history';
+import { history, resetHistory } from '../utils/history';
 import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
@@ -35,18 +39,22 @@ const MainContainer = styled.div`
 `;
 
 const App = () => {
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   return (
-    <MainContainer data-test-subj="apmMainContainer" role="main">
-      <UpdateBreadcrumbs routes={routes} />
-      <Route component={ScrollToTopOnPathChange} />
-      <APMIndicesPermission>
-        <Switch>
-          {routes.map((route, i) => (
-            <ApmRoute key={i} {...route} />
-          ))}
-        </Switch>
-      </APMIndicesPermission>
-    </MainContainer>
+    <EuiThemeProvider darkMode={darkMode}>
+      <MainContainer data-test-subj="apmMainContainer" role="main">
+        <UpdateBreadcrumbs routes={routes} />
+        <Route component={ScrollToTopOnPathChange} />
+        <APMIndicesPermission>
+          <Switch>
+            {routes.map((route, i) => (
+              <ApmRoute key={i} {...route} />
+            ))}
+          </Switch>
+        </APMIndicesPermission>
+      </MainContainer>
+    </EuiThemeProvider>
   );
 };
 
@@ -54,7 +62,7 @@ const ApmAppRoot = ({
   core,
   deps,
   routerHistory,
-  config
+  config,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
@@ -66,7 +74,7 @@ const ApmAppRoot = ({
   const apmPluginContextValue = {
     config,
     core,
-    plugins
+    plugins,
   };
   return (
     <ApmPluginContext.Provider value={apmPluginContextValue}>
@@ -77,7 +85,7 @@ const ApmAppRoot = ({
           capabilities: core.application.capabilities,
           toastNotifications: core.notifications.toasts,
           actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
+          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
         }}
       >
         <KibanaContextProvider services={{ ...core, ...plugins }}>
@@ -111,6 +119,7 @@ export const renderApp = (
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
+  resetHistory();
   ReactDOM.render(
     <ApmAppRoot
       core={core}
@@ -120,5 +129,7 @@ export const renderApp = (
     />,
     element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };

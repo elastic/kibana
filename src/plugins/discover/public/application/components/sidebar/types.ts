@@ -27,7 +27,10 @@ export interface FieldDetails {
   exists: number;
   total: boolean;
   buckets: Bucket[];
-  visualizeUrl: string;
+  visualizeUrl: {
+    app: string;
+    path: string;
+  };
 }
 
 export interface Bucket {

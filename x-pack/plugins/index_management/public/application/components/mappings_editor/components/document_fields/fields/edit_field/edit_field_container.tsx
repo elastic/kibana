@@ -27,7 +27,7 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
   });
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
+    const subscription = form.subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 

@@ -21,16 +21,14 @@ import { PluginInitializerContext } from 'kibana/public';
 import { ManagementPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ManagementPlugin();
+  return new ManagementPlugin(initializerContext);
 }
 
+export { RegisterManagementAppArgs, ManagementSection, ManagementApp } from './utils';
+
 export {
+  ManagementSectionId,
+  ManagementAppMountParams,
   ManagementSetup,
   ManagementStart,
-  RegisterManagementApp,
-  RegisterManagementAppArgs,
-  ManagementAppMountParams,
 } from './types';
-export { ManagementApp } from './management_app';
-export { ManagementSection } from './management_section';
-export { ManagementSidebarNav } from './components'; // for use in legacy management apps

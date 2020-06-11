@@ -7,7 +7,7 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
 import { Decoder } from 'io-ts';
-import { HttpFetchQuery, HttpSetup } from '../../../../../../target/types/core/public';
+import { HttpFetchQuery, HttpSetup } from 'src/core/public';
 
 class ApiService {
   private static instance: ApiService;

@@ -13,12 +13,12 @@ import { ComponentStrings } from '../../../i18n';
 const { PagePreviewPageControls: strings } = ComponentStrings;
 
 export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
-  const handleDuplicate = ev => {
+  const handleDuplicate = (ev) => {
     ev.preventDefault();
     onDuplicate(pageId);
   };
 
-  const handleDelete = ev => {
+  const handleDelete = (ev) => {
     ev.preventDefault();
     onDelete(pageId);
   };

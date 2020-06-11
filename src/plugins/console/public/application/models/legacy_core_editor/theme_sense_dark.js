@@ -20,7 +20,7 @@
 /* eslint import/no-unresolved: 0 */
 import ace from 'brace';
 
-ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'], function(require, exports) {
+ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'], function (require, exports) {
   exports.isDark = true;
   exports.cssClass = 'ace-sense-dark';
   exports.cssText =

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { JobId, JobSummary } from '../../index.d';
+import { JobId, JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
 import { ReportLink } from './report_link';
 

@@ -38,7 +38,7 @@ const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
  * license is basic, IsClusterSupported makes the status col hidden
  * completely
  */
-const IsAlertsSupported = props => {
+const IsAlertsSupported = (props) => {
   const { alertsMeta = { enabled: true }, clusterMeta = { enabled: true } } = props.cluster.alerts;
   if (alertsMeta.enabled && clusterMeta.enabled) {
     return <span>{props.children}</span>;
@@ -288,7 +288,7 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
 };
 
 const handleClickInvalidLicense = (scope, clusterName) => {
-  const licensingPath = `${Legacy.shims.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
+  const licensingPath = `${Legacy.shims.getBasePath()}/app/management/stack/license_management/home`;
 
   licenseWarning(scope, {
     title: toMountPoint(
@@ -407,7 +407,7 @@ export class Listing extends Component {
     const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
     const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
     const hasStandaloneCluster = !!clusters.find(
-      cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
+      (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
     );
 
     return (
@@ -426,7 +426,7 @@ export class Listing extends Component {
                 _handleClickIncompatibleLicense,
                 _handleClickInvalidLicense
               )}
-              rowProps={item => {
+              rowProps={(item) => {
                 return {
                   'data-test-subj': `clusterRow_${item.cluster_uuid}`,
                 };

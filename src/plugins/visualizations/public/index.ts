@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
@@ -53,3 +51,4 @@ export {
   VisSavedObject,
   VisResponseValue,
 } from './types';
+export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

@@ -111,7 +111,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
     });
 
     describe('std metric', () => {
-      ['avg', 'max', 'min', 'sum', 'cardinality', 'value_count'].forEach(type => {
+      ['avg', 'max', 'min', 'sum', 'cardinality', 'value_count'].forEach((type) => {
         test(`returns ${type} agg`, () => {
           const metric = { id: 'test', type: type, field: 'cpu.pct' };
           const fn = bucketTransform[type];
@@ -133,7 +133,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
     });
 
     describe('extended stats', () => {
-      ['std_deviation', 'variance', 'sum_of_squares'].forEach(type => {
+      ['std_deviation', 'variance', 'sum_of_squares'].forEach((type) => {
         test(`returns ${type} agg`, () => {
           const fn = bucketTransform[type];
           const metric = { id: 'test', type: type, field: 'cpu.pct' };

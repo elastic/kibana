@@ -58,7 +58,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     const image = new Image();
     image.addEventListener(
       'load',
-      function() {
+      function () {
         const MAX_IMAGE_SIZE = 64;
         const imgDimx = image.width;
         const imgDimy = image.height;

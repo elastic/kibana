@@ -20,12 +20,15 @@
 import { SavedObjectMigrationContext } from './types';
 import { SavedObjectsMigrationLogger } from './core';
 
-const createLoggerMock = (): jest.Mocked<SavedObjectsMigrationLogger> => {
+export const createSavedObjectsMigrationLoggerMock = (): jest.Mocked<
+  SavedObjectsMigrationLogger
+> => {
   const mock = {
     debug: jest.fn(),
     info: jest.fn(),
     warning: jest.fn(),
     warn: jest.fn(),
+    error: jest.fn(),
   };
 
   return mock;
@@ -33,7 +36,7 @@ const createLoggerMock = (): jest.Mocked<SavedObjectsMigrationLogger> => {
 
 const createContextMock = (): jest.Mocked<SavedObjectMigrationContext> => {
   const mock = {
-    log: createLoggerMock(),
+    log: createSavedObjectsMigrationLoggerMock(),
   };
   return mock;
 };

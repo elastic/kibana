@@ -13,6 +13,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  ICustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
@@ -31,10 +32,17 @@ export interface SnapshotRestoreContext {
   client: IScopedClusterClient;
 }
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('snapshotRestore', esClientConfig);
+}
+
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
+  private snapshotRestoreESClient?: ICustomClusterClient;
 
   constructor(private context: PluginInitializerContext) {
     const { logger } = this.context;
@@ -44,7 +52,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
   }
 
   public async setup(
-    { http, elasticsearch }: CoreSetup,
+    { http, getStartServices }: CoreSetup,
     { licensing, security, cloud }: Dependencies
   ): Promise<void> {
     const pluginConfig = await this.context.config
@@ -72,11 +80,11 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       }
     );
 
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const snapshotRestoreESClient = elasticsearch.createClient('snapshotRestore', esClientConfig);
-    http.registerRouteHandlerContext('snapshotRestore', (ctx, request) => {
+    http.registerRouteHandlerContext('snapshotRestore', async (ctx, request) => {
+      this.snapshotRestoreESClient =
+        this.snapshotRestoreESClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: snapshotRestoreESClient.asScoped(request),
+        client: this.snapshotRestoreESClient.asScoped(request),
       };
     });
 
@@ -84,7 +92,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       router,
       license: this.license,
       config: {
-        isSecurityEnabled: security !== undefined,
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
         isCloudEnabled: cloud !== undefined && cloud.isCloudEnabled,
         isSlmEnabled: pluginConfig.slm_ui.enabled,
       },
@@ -95,11 +103,11 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     });
   }
 
-  public start() {
-    this.logger.debug('Starting plugin');
-  }
+  public start() {}
 
   public stop() {
-    this.logger.debug('Stopping plugin');
+    if (this.snapshotRestoreESClient) {
+      this.snapshotRestoreESClient.close();
+    }
   }
 }

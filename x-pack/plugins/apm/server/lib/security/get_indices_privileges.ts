@@ -8,7 +8,7 @@ import { IndexPrivileges } from '../helpers/es_client';
 
 export async function getIndicesPrivileges({
   setup,
-  isSecurityPluginEnabled
+  isSecurityPluginEnabled,
 }: {
   setup: Setup;
   isSecurityPluginEnabled: boolean;
@@ -26,11 +26,11 @@ export async function getIndicesPrivileges({
           indices['apm_oss.errorIndices'],
           indices['apm_oss.metricsIndices'],
           indices['apm_oss.transactionIndices'],
-          indices['apm_oss.spanIndices']
+          indices['apm_oss.spanIndices'],
         ],
-        privileges: ['read']
-      }
-    ]
+        privileges: ['read'],
+      },
+    ],
   });
   return response;
 }

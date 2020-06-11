@@ -26,7 +26,7 @@ import { ExecutionContext } from '../../../execution/types';
  * overriding with any provided args.
  */
 export const functionWrapper = (spec: AnyExpressionFunctionDefinition) => {
-  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
+  const defaultArgs = mapValues(spec.args, (argSpec) => argSpec.default);
   return (
     context: object | null,
     args: Record<string, any> = {},

@@ -112,7 +112,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <EuiFieldText
           defaultValue={repository.name}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             updateRepository({
               name: e.target.value,
             });
@@ -306,7 +306,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             />
           }
           checked={repository.type === REPOSITORY_TYPES.source}
-          onChange={e => {
+          onChange={(e) => {
             if (e.target.checked) {
               updateRepository({
                 type: REPOSITORY_TYPES.source,

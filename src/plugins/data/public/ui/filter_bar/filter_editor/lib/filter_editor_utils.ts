@@ -29,11 +29,11 @@ import {
 } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
-  return indexPattern.fields.find(field => field.name === filter.meta.key);
+  return indexPattern.fields.find((field) => field.name === filter.meta.key);
 }
 
 export function getOperatorFromFilter(filter: Filter) {
-  return FILTER_OPERATORS.find(operator => {
+  return FILTER_OPERATORS.find((operator) => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }
@@ -43,7 +43,7 @@ export function getFilterableFields(indexPattern: IIndexPattern) {
 }
 
 export function getOperatorOptions(field: IFieldType) {
-  return FILTER_OPERATORS.filter(operator => {
+  return FILTER_OPERATORS.filter((operator) => {
     return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
   });
 }
@@ -80,7 +80,7 @@ export function isFilterValid(
       if (!Array.isArray(params) || !params.length) {
         return false;
       }
-      return params.every(phrase => validateParams(phrase, field.type));
+      return params.every((phrase) => validateParams(phrase, field.type));
     case 'range':
       if (typeof params !== 'object') {
         return false;

@@ -83,7 +83,7 @@ export class GlobalState {
     const initialStateFromUrl = this.stateStorage.get(GLOBAL_STATE_KEY) as MonitoringAppState;
 
     this.stateContainer = createStateContainer(initialStateFromUrl, {
-      set: state => (prop, value) => ({ ...state, [prop]: value }),
+      set: (state) => (prop, value) => ({ ...state, [prop]: value }),
     });
 
     this.stateSyncRef = syncState({

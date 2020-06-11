@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
-import { Plugin, ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { ClientSetup, ClientStart, Plugin } from './plugin';
+import { ClientPluginsSetup, ClientPluginsStart } from './types';
 
 export const plugin: PluginInitializer<
   ClientSetup,

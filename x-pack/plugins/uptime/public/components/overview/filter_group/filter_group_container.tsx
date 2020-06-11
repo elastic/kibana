@@ -11,7 +11,7 @@ import { parseFiltersMap } from './parse_filter_map';
 import { fetchOverviewFilters } from '../../../state/actions';
 import { FilterGroupComponent } from './index';
 import { UptimeRefreshContext } from '../../../contexts';
-import { filterGroupDataSelector } from '../../../state/selectors';
+import { esKuerySelector, overviewFiltersSelector } from '../../../state/selectors';
 
 interface Props {
   esFilters?: string;
@@ -20,7 +20,8 @@ interface Props {
 export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const { esKuery, filters: overviewFilters, loading } = useSelector(filterGroupDataSelector);
+  const { filters: overviewFilters, loading } = useSelector(overviewFiltersSelector);
+  const esKuery = useSelector(esKuerySelector);
 
   const { dateRangeStart, dateRangeEnd, statusFilter, filters: urlFilters } = useGetUrlParams();
 
