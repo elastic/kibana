@@ -152,6 +152,18 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  renderIndices(indices) {
+    // indices.join(' ')
+    // const 
+    indices.map((s: string, index: number) => {
+      return (
+        <p key={index}>
+          {s}
+        </p>
+      );
+    });
+  }
+
   const indexPopover = (
     <Fragment>
       <EuiSpacer />
@@ -275,67 +287,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
       }),
       children: (
         <>
-          <EuiFlexGroup wrap>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                id="indexPopover"
-                button={
-                  <EuiExpression
-                    data-test-subj="selectIndexExpression"
-                    description={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
-                      {
-                        defaultMessage: 'index',
-                      }
-                    )}
-                    value={index && index.length > 0 ? index.join(' ') : firstFieldOption.text}
-                    isActive={indexPopoverOpen}
-                    onClick={() => {
-                      setIndexPopoverOpen(true);
-                    }}
-                    color={index && index.length > 0 && timeField !== '' ? 'secondary' : 'danger'}
-                  />
-                }
-                isOpen={indexPopoverOpen}
-                closePopover={closeIndexPopover}
-                ownFocus
-                withTitle
-                anchorPosition="downLeft"
-                zIndex={8000}
-              >
-                <div style={{ width: '450px' }}>
-                  <EuiPopoverTitle>
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem>
-                        {i18n.translate(
-                          'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
-                          {
-                            defaultMessage: 'index',
-                          }
-                        )}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj="closePopover"
-                          iconType="cross"
-                          color="danger"
-                          aria-label={i18n.translate(
-                            'xpack.triggersActionsUI.sections.alertAdd.threshold.closeIndexPopoverLabel',
-                            {
-                              defaultMessage: 'Close',
-                            }
-                          )}
-                          onClick={closeIndexPopover}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPopoverTitle>
-
-                  {indexPopover}
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <WhenExpression
@@ -434,6 +385,65 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
       ) : null}
       <EuiSpacer size="l" />
       <EuiSteps className="actAddAlertSteps" steps={firstSetOfSteps} />
+      <EuiPopover
+        id="indexPopover"
+        button={
+          <EuiExpression
+            display="columns"
+            data-test-subj="selectIndexExpression"
+            description={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
+              {
+                defaultMessage: 'index',
+              }
+            )}
+            value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
+            isActive={indexPopoverOpen}
+            onClick={() => {
+              setIndexPopoverOpen(true);
+            }}
+            color={index && index.length > 0 && timeField !== '' ? 'secondary' : 'danger'}
+          />
+        }
+        isOpen={indexPopoverOpen}
+        closePopover={closeIndexPopover}
+        ownFocus
+        withTitle
+        anchorPosition="downLeft"
+        zIndex={8000}
+        display="block"
+      >
+        <div style={{ width: '450px' }}>
+          <EuiPopoverTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
+                  {
+                    defaultMessage: 'index',
+                  }
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  data-test-subj="closePopover"
+                  iconType="cross"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertAdd.threshold.closeIndexPopoverLabel',
+                    {
+                      defaultMessage: 'Close',
+                    }
+                  )}
+                  onClick={closeIndexPopover}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverTitle>
+
+          {indexPopover}
+        </div>
+      </EuiPopover>
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
           <Fragment>
