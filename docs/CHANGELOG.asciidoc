@@ -84,7 +84,7 @@ Lens and visualizations::
 Machine Learning::
 * Wizards with dynamic model memory estimation {pull}60888[#60888]
 * Shows better file structure finder explanations {pull}62316[#62316]
-* Adds configurable file size to file data visualizer {pull}62752[#62752]
+* Adds configurable file size to file data visualizer {pull}62752[#62752], {pull}63502[#63502], {pull}64427[#64427]
 * Lists global calendars on the job management page {pull}63124[#63124]
 * Improves parsing of large uploaded files {pull}62970[#62970]
 * Changes file data visualizer max upload setting to string {pull}63502[#63502]
