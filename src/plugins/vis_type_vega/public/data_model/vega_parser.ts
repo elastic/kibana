@@ -34,6 +34,8 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchCache } from './search_cache';
 import { TimeCache } from './time_cache';
+import { IServiceSettings } from '../../../maps_legacy/public';
+import { Bool, Data, VegaSpec } from './types';
 
 // Set default single color to match other Kibana visualizations
 const defaultColor: string = VISUALIZATION_COLORS[0];
@@ -51,7 +53,7 @@ const locToDirMap: any = {
 const DEFAULT_PARSER: string = 'elasticsearch';
 
 export class VegaParser {
-  spec: any;
+  spec: VegaSpec | string;
   hideWarnings: boolean;
   error?: string;
   warnings: string[];
@@ -74,8 +76,8 @@ export class VegaParser {
     spec: string,
     searchCache: SearchCache,
     timeCache: TimeCache,
-    filters: any,
-    serviceSettings: any
+    filters: Bool,
+    serviceSettings: IServiceSettings
   ) {
     this.spec = spec;
     this.hideWarnings = false;
@@ -127,9 +129,9 @@ export class VegaParser {
     this._parseControlPlacement();
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
-    } else if (this.spec.autosize === undefined) {
+    } else if ((this.spec as VegaSpec).autosize === undefined) {
       // Default autosize should be fit, unless it's a map (leaflet-vega handles that)
-      this.spec.autosize = { type: 'fit', contains: 'padding' };
+      (this.spec as VegaSpec).autosize = { type: 'fit', contains: 'padding' };
     }
 
     await this._resolveDataUrls();
@@ -161,9 +163,9 @@ export class VegaParser {
       if (this.vlspec.config === undefined || (hasConfig && !this.vlspec.config.projection)) {
         // Assume VL generates spec.projections = an array of exactly one object named 'projection'
         if (
-          !Array.isArray(this.spec.projections) ||
-          this.spec.projections.length !== 1 ||
-          this.spec.projections[0].name !== 'projection'
+          !Array.isArray((this.spec as VegaSpec).projections) ||
+          (this.spec as VegaSpec).projections.length !== 1 ||
+          (this.spec as VegaSpec).projections[0].name !== 'projection'
         ) {
           throw new Error(
             i18n.translate(
@@ -175,23 +177,23 @@ export class VegaParser {
             )
           );
         }
-        delete this.spec.projections;
+        delete (this.spec as VegaSpec).projections;
       }
 
       // todo: sizing cleanup might need to be rethought and consolidated
-      if (!this.vlspec.width) delete this.spec.width;
-      if (!this.vlspec.height) delete this.spec.height;
+      if (!this.vlspec.width) delete (this.spec as VegaSpec).width;
+      if (!this.vlspec.height) delete (this.spec as VegaSpec).height;
       if (
         !this.vlspec.padding &&
         (this.vlspec.config === undefined || (hasConfig && !this.vlspec.config.padding))
       ) {
-        delete this.spec.padding;
+        delete (this.spec as VegaSpec).padding;
       }
       if (
         !this.vlspec.autosize &&
         (this.vlspec.config === undefined || (hasConfig && !this.vlspec.config.autosize))
       ) {
-        delete this.spec.autosize;
+        delete (this.spec as VegaSpec).autosize;
       }
     }
   }
@@ -207,8 +209,11 @@ export class VegaParser {
       // and will be automatically updated on resize events.
       // We delete width & height if the autosize is set to "fit"
       // We also set useResize=true in case autosize=none, and width & height are not set
-      const autosize = this.spec.autosize.type || this.spec.autosize;
-      if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
+      const autosize = (this.spec as VegaSpec).autosize.type || (this.spec as VegaSpec).autosize;
+      if (
+        autosize === 'fit' ||
+        (autosize === 'none' && !(this.spec as VegaSpec).width && !(this.spec as VegaSpec).height)
+      ) {
         this.useResize = true;
       }
     }
@@ -216,20 +221,28 @@ export class VegaParser {
     // Padding is not included in the width/height by default
     this.paddingWidth = 0;
     this.paddingHeight = 0;
-    if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
-      if (typeof this.spec.padding === 'object') {
-        this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
-        this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
+    if (
+      this.useResize &&
+      (this.spec as VegaSpec).padding &&
+      (this.spec as VegaSpec).autosize.contains !== 'padding'
+    ) {
+      if (typeof (this.spec as VegaSpec).padding === 'object') {
+        this.paddingWidth +=
+          (+(this.spec as VegaSpec).padding.left || 0) +
+          (+(this.spec as VegaSpec).padding.right || 0);
+        this.paddingHeight +=
+          (+(this.spec as VegaSpec).padding.top || 0) +
+          (+(this.spec as VegaSpec).padding.bottom || 0);
       } else {
-        this.paddingWidth += 2 * (+this.spec.padding || 0);
-        this.paddingHeight += 2 * (+this.spec.padding || 0);
+        this.paddingWidth += 2 * (+(this.spec as VegaSpec).padding || 0);
+        this.paddingHeight += 2 * (+(this.spec as VegaSpec).padding || 0);
       }
     }
 
-    if (this.useResize && (this.spec.width || this.spec.height)) {
+    if (this.useResize && ((this.spec as VegaSpec).width || (this.spec as VegaSpec).height)) {
       if (this.isVegaLite) {
-        delete this.spec.width;
-        delete this.spec.height;
+        delete (this.spec as VegaSpec).width;
+        delete (this.spec as VegaSpec).height;
       } else {
         this._onWarning(
           i18n.translate(
@@ -292,9 +305,9 @@ export class VegaParser {
    */
   _parseConfig(): object {
     let result;
-    if (this.spec._hostConfig !== undefined) {
-      result = this.spec._hostConfig;
-      delete this.spec._hostConfig;
+    if ((this.spec as VegaSpec)._hostConfig !== undefined) {
+      result = (this.spec as VegaSpec)._hostConfig;
+      delete (this.spec as VegaSpec)._hostConfig;
       if (!_.isPlainObject(result)) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.hostConfigValueTypeErrorMessage', {
@@ -314,9 +327,12 @@ export class VegaParser {
         })
       );
     }
-    if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
-      result = this.spec.config.kibana;
-      delete this.spec.config.kibana;
+    if (
+      _.isPlainObject((this.spec as VegaSpec).config) &&
+      (this.spec as VegaSpec).config.kibana !== undefined
+    ) {
+      result = (this.spec as VegaSpec).config.kibana;
+      delete (this.spec as VegaSpec).config.kibana;
       if (!_.isPlainObject(result)) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage', {
@@ -484,7 +500,7 @@ export class VegaParser {
    * @private
    */
   _parseSchema() {
-    if (!this.spec.$schema) {
+    if (!(this.spec as VegaSpec).$schema) {
       this._onWarning(
         i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
           defaultMessage:
@@ -492,10 +508,10 @@ export class VegaParser {
           values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
         })
       );
-      this.spec.$schema = DEFAULT_SCHEMA;
+      (this.spec as VegaSpec).$schema = DEFAULT_SCHEMA;
     }
 
-    const schema = schemaParser(this.spec.$schema);
+    const schema = schemaParser((this.spec as VegaSpec).$schema);
     const isVegaLite = schema.library === 'vega-lite';
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
@@ -524,11 +540,11 @@ export class VegaParser {
   async _resolveDataUrls() {
     const pending: { [key: string]: any } = {};
 
-    this._findObjectDataUrls(this.spec, (obj: any) => {
+    this._findObjectDataUrls(this.spec, (obj: Data) => {
       const url = obj.url;
       delete obj.url;
-      let type: string = url['%type%'];
-      delete url['%type%'];
+      let type = url!['%type%'];
+      delete url!['%type%'];
       if (type === undefined) {
         type = DEFAULT_PARSER;
       }
@@ -569,7 +585,7 @@ export class VegaParser {
    * @param {string} [key] field name of the current object
    * @private
    */
-  _findObjectDataUrls(obj: any, onFind: any, key?: any) {
+  _findObjectDataUrls(obj: any, onFind: (data: Data) => void, key?: any) {
     if (Array.isArray(obj)) {
       for (const elem of obj) {
         this._findObjectDataUrls(elem, onFind, key);
@@ -618,8 +634,9 @@ export class VegaParser {
       // https://github.com/vega/vega/issues/1083
       // Don't set defaults if spec.config.mark.color or fill are set
       if (
-        !this.spec.config.mark ||
-        (this.spec.config.mark.color === undefined && this.spec.config.mark.fill === undefined)
+        !(this.spec as VegaSpec).config.mark ||
+        ((this.spec as VegaSpec).config.mark.color === undefined &&
+          (this.spec as VegaSpec).config.mark.fill === undefined)
       ) {
         this._setDefaultValue(defaultColor, 'config', 'arc', 'fill');
         this._setDefaultValue(defaultColor, 'config', 'area', 'fill');
@@ -645,17 +662,17 @@ export class VegaParser {
     let o = this.spec;
     for (let i = 0; i < fields.length - 1; i++) {
       const field = fields[i];
-      const subObj = o[field];
+      const subObj = (o as VegaSpec)[field];
       if (subObj === undefined) {
-        o[field] = {};
+        (o as VegaSpec)[field] = {};
       } else if (!_.isPlainObject(subObj)) {
         return;
       }
-      o = o[field];
+      o = (o as VegaSpec)[field];
     }
     const lastField = fields[fields.length - 1];
-    if (o[lastField] === undefined) {
-      o[lastField] = value;
+    if ((o as VegaSpec)[lastField] === undefined) {
+      (o as VegaSpec)[lastField] = value;
     }
   }
 
