@@ -32,6 +32,7 @@ describe('Pipeline Editor', () => {
       value: {
         ...testProcessors,
       },
+      onFlyoutOpen: jest.fn(),
       onUpdate,
       isTestButtonDisabled: false,
       onTestPipelineClick: jest.fn(),
@@ -51,6 +52,7 @@ describe('Pipeline Editor', () => {
       value: {
         ...testProcessors,
       },
+      onFlyoutOpen: jest.fn(),
       onUpdate: jest.fn(),
       isTestButtonDisabled: false,
       onTestPipelineClick: jest.fn(),
