@@ -28,6 +28,6 @@ describe('AlertsUtilityBar', () => {
       />
     );
 
-    expect(wrapper.find('[dataTestSubj="openCloseAlert"]')).toBeTruthy();
+    expect(wrapper.find('[dataTestSubj="alertActionPopover"]')).toBeTruthy();
   });
 });

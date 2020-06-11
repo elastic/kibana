@@ -8,7 +8,7 @@
 
 import ApolloClient from 'apollo-client';
 
-import { AlertStateStatus } from '../../../../common/detection_engine/types';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
   TimelineRowAction,
@@ -32,7 +32,7 @@ import {
   UpdateTimelineLoading,
 } from './types';
 
-export const buildAlertStatusFilter = (status: AlertStateStatus): Filter[] => [
+export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
     meta: {
       alias: null,
@@ -184,11 +184,11 @@ export const getAlertActions = ({
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
   hasIndexWrite: boolean;
-  onAlertStatusUpdateFailure: (status: AlertStateStatus, error: Error) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: AlertStateStatus) => void;
+  onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
+  onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
-  status: AlertStateStatus;
+  status: Status;
   updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
@@ -196,7 +196,6 @@ export const getAlertActions = ({
     content: i18n.ACTION_OPEN_ALERT,
     dataTestSubj: 'open-alert-status',
     displayType: 'contextMenu',
-    iconType: 'securitySignalDetected',
     id: FILTER_OPEN,
     isActionDisabled: !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>
@@ -217,7 +216,6 @@ export const getAlertActions = ({
     content: i18n.ACTION_CLOSE_ALERT,
     dataTestSubj: 'close-alert-status',
     displayType: 'contextMenu',
-    iconType: 'securitySignalResolved',
     id: FILTER_CLOSED,
     isActionDisabled: !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>
@@ -238,7 +236,6 @@ export const getAlertActions = ({
     content: i18n.ACTION_IN_PROGRESS_ALERT,
     dataTestSubj: 'in-progress-alert-status',
     displayType: 'contextMenu',
-    iconType: 'alert',
     id: FILTER_IN_PROGRESS,
     isActionDisabled: !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>

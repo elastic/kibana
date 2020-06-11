@@ -210,7 +210,7 @@ describe('Detections', () => {
       loginAndWaitForPage(DETECTIONS);
     });
 
-    it('Open one alert when more than one closed alerts are selected', () => {
+    it('Mark one alert in progress when more than one open alerts are selected', () => {
       waitForAlerts();
       waitForAlertsToBeLoaded();
 

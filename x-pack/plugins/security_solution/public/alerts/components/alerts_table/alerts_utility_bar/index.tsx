@@ -9,8 +9,8 @@ import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertStateStatus } from '../../../../../common/detection_engine/types';
-import { LinkIcon } from '../../../../common/components/link_icon';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Link } from '../../../../common/components/link_icon';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import {
   UtilityBar,
@@ -30,7 +30,7 @@ interface AlertsUtilityBarProps {
   hasIndexWrite: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
-  currentFilter: AlertStateStatus;
+  currentFilter: Status;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showClearSelection: boolean;
@@ -53,7 +53,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const handleUpdateStatus = useCallback(
-    async (selectedStatus: AlertStateStatus) => {
+    async (selectedStatus: Status) => {
       await updateAlertsStatus({
         alertIds: Object.keys(selectedEventIds),
         status: currentFilter,
@@ -72,43 +72,37 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     <EuiFlexGroup style={{ minWidth: 175 }} direction="column">
       {currentFilter !== FILTER_OPEN && (
         <EuiFlexItem>
-          <LinkIcon
-            iconType={'securitySignalDetected'}
-            iconSize="m"
-            ariaLabel="openSelectedAlerts"
+          <Link
+            aria-label="openSelectedAlerts"
             onClick={() => handleUpdateStatus('open')}
-            dataTestSubj="openSelectedAlertsButton"
+            data-test-subj="openSelectedAlertsButton"
           >
             {i18n.BATCH_ACTION_OPEN_SELECTED}
-          </LinkIcon>
+          </Link>
         </EuiFlexItem>
       )}
 
       {currentFilter !== FILTER_CLOSED && (
         <EuiFlexItem>
-          <LinkIcon
-            iconType={'securitySignalResolved'}
-            iconSize="m"
-            ariaLabel="closeSelectedAlerts"
+          <Link
+            aria-label="closeSelectedAlerts"
             onClick={() => handleUpdateStatus('closed')}
-            dataTestSubj="closeSelectedAlertsButton"
+            data-test-subj="closeSelectedAlertsButton"
           >
             {i18n.BATCH_ACTION_CLOSE_SELECTED}
-          </LinkIcon>
+          </Link>
         </EuiFlexItem>
       )}
 
       {currentFilter !== FILTER_IN_PROGRESS && (
         <EuiFlexItem>
-          <LinkIcon
-            iconType={'alert'}
-            iconSize="m"
-            ariaLabel="markSelectedAlertsInProgress"
+          <Link
+            aria-label="markSelectedAlertsInProgress"
             onClick={() => handleUpdateStatus('in-progress')}
-            dataTestSubj="markSelectedAlertsInProgressButton"
+            data-test-subj="markSelectedAlertsInProgressButton"
           >
             {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
-          </LinkIcon>
+          </Link>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

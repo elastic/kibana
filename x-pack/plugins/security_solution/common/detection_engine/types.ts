@@ -17,5 +17,3 @@ export const RuleTypeSchema = t.keyof({
   machine_learning: null,
 });
 export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
-
-export type AlertStateStatus = 'open' | 'closed' | 'in-progress';

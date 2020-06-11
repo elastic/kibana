@@ -25,7 +25,7 @@ export interface TimelineRowAction {
   ariaLabel?: string;
   dataTestSubj?: string;
   displayType: 'icon' | 'contextMenu';
-  iconType: string;
+  iconType?: string;
   id: string;
   isActionDisabled?: boolean;
   onClick: ({ eventId, ecsData }: TimelineRowActionOnClick) => void;

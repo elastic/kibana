@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { AlertStateStatus } from '../../../../common/detection_engine/types';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -152,14 +152,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, status: AlertStateStatus) => {
+    (count: number, status: Status) => {
       let title;
-      if (status === 'closed') {
-        title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
-      } else if (status === 'open') {
-        title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
-      } else {
-        title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+      switch (status) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
+        case 'open':
+          title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+        case 'in-progress':
+          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
       }
       displaySuccessToast(title, dispatchToaster);
     },
@@ -167,14 +168,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const onAlertStatusUpdateFailure = useCallback(
-    (status: AlertStateStatus, error: Error) => {
+    (status: Status, error: Error) => {
       let title;
-      if (status === 'closed') {
-        title = i18n.CLOSED_ALERT_FAILED_TOAST;
-      } else if (status === 'open') {
-        title = i18n.OPENED_ALERT_FAILED_TOAST;
-      } else {
-        title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+      switch (status) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_FAILED_TOAST;
+        case 'open':
+          title = i18n.OPENED_ALERT_FAILED_TOAST;
+        case 'in-progress':
+          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
