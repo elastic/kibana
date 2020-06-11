@@ -10,11 +10,12 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiSwitch,
+  EuiSwitchEvent,
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
@@ -42,37 +43,32 @@ function getSavedObjectLabel(type: string) {
 }
 
 export const SpaceCopyResultDetails = (props: Props) => {
-  const onOverwriteClick = (object: { type: string; id: string }) => {
-    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
-
-    props.onRetriesChange([
-      ...props.retries.filter((r) => r !== retry),
-      {
-        type: object.type,
-        id: object.id,
-        overwrite: retry ? !retry.overwrite : true,
-      },
-    ]);
-  };
-
-  const hasPendingOverwrite = (object: { type: string; id: string }) => {
-    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
-
-    return Boolean(retry && retry.overwrite);
-  };
-
   const { objects } = props.summarizedCopyResult;
 
   return (
     <div className="spcCopyToSpaceResultDetails">
       {objects.map((object, index) => {
-        const objectOverwritePending = hasPendingOverwrite(object);
+        const { type, id, name, icon, conflict } = object;
+        const objectOverwritePending = Boolean(
+          props.retries.find((r) => r.type === type && r.id === id)?.overwrite
+        );
+        const switchProps = {
+          show: conflict && !props.conflictResolutionInProgress,
+          label: i18n.translate('xpack.spaces.management.copyToSpace.copyDetail.overwriteSwitch', {
+            defaultMessage: 'Overwrite?',
+          }),
+          onChange: ({ target: { checked } }: EuiSwitchEvent) => {
+            const filtered = props.retries.filter((r) => r.type !== type || r.id !== id);
 
-        const showOverwriteButton =
-          object.conflict && !objectOverwritePending && !props.conflictResolutionInProgress;
-
-        const showSkipButton =
-          !showOverwriteButton && objectOverwritePending && !props.conflictResolutionInProgress;
+            if (!checked) {
+              props.onRetriesChange(filtered);
+            } else {
+              const idToOverwrite = conflict!.error.destinationId;
+              const retry = { type, id, overwrite: true, ...(idToOverwrite && { idToOverwrite }) };
+              props.onRetriesChange([...filtered, retry]);
+            }
+          },
+        };
 
         return (
           <EuiFlexGroup
@@ -83,59 +79,34 @@ export const SpaceCopyResultDetails = (props: Props) => {
             className="spcCopyToSpaceResultDetails__row"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={getSavedObjectLabel(object.type)}>
-                <EuiIcon
-                  aria-label={getSavedObjectLabel(object.type)}
-                  type={object.icon}
-                  size="s"
-                />
+              <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+                <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
               <EuiText size="s">
-                <p className="eui-textTruncate" title={object.name}>
-                  {object.name}
+                <p className="eui-textTruncate" title={name}>
+                  {name}
                 </p>
               </EuiText>
             </EuiFlexItem>
-            {showOverwriteButton && (
-              <EuiFlexItem grow={1}>
-                <EuiText size="s">
-                  <EuiButtonEmpty
-                    onClick={() => onOverwriteClick(object)}
-                    size="xs"
-                    data-test-subj={`cts-overwrite-conflict-${object.id}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.spaces.management.copyToSpace.copyDetail.overwriteButton"
-                      defaultMessage="Overwrite"
-                    />
-                  </EuiButtonEmpty>
-                </EuiText>
+            {switchProps.show && (
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={switchProps.label}
+                  compressed={true}
+                  checked={objectOverwritePending}
+                  onChange={switchProps.onChange}
+                  data-test-subj={`cts-overwrite-conflict-${type}:${id}`}
+                />
               </EuiFlexItem>
             )}
-            {showSkipButton && (
-              <EuiFlexItem grow={1}>
-                <EuiText size="s">
-                  <EuiButtonEmpty
-                    onClick={() => onOverwriteClick(object)}
-                    size="xs"
-                    data-test-subj={`cts-skip-conflict-${object.id}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.spaces.management.copyToSpace.copyDetail.skipOverwriteButton"
-                      defaultMessage="Skip"
-                    />
-                  </EuiButtonEmpty>
-                </EuiText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem className="spcCopyToSpaceResultDetails__statusIndicator" grow={1}>
+            <EuiFlexItem className="spcCopyToSpaceResultDetails__statusIndicator" grow={false}>
               <div className="eui-textRight">
                 <CopyStatusIndicator
                   summarizedCopyResult={props.summarizedCopyResult}
                   object={object}
-                  overwritePending={hasPendingOverwrite(object)}
+                  overwritePending={objectOverwritePending}
                   conflictResolutionInProgress={
                     props.conflictResolutionInProgress && objectOverwritePending
                   }

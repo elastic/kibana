@@ -225,8 +225,12 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
-    overwriteButton.simulate('click');
+    const overwriteSwitch = findTestSubject(
+      wrapper,
+      `cts-overwrite-conflict-index-pattern:conflicting-ip`
+    );
+    expect(overwriteSwitch.props()['aria-checked']).toEqual(false);
+    overwriteSwitch.simulate('click');
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
 
@@ -362,8 +366,12 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
-    overwriteButton.simulate('click');
+    const overwriteSwitch = findTestSubject(
+      wrapper,
+      `cts-overwrite-conflict-index-pattern:conflicting-ip`
+    );
+    expect(overwriteSwitch.props()['aria-checked']).toEqual(false);
+    overwriteSwitch.simulate('click');
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
 

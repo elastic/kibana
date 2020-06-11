@@ -37,7 +37,7 @@ export const CopyStatusIndicator = (props: Props) => {
     const message = props.overwritePending ? (
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.pendingOverwriteMessage"
-        defaultMessage="Saved object will be overwritten. Click 'Skip' to cancel this operation."
+        defaultMessage="Saved object will be overwritten. Disable 'Overwrite' to cancel this operation."
       />
     ) : (
       <FormattedMessage
@@ -81,7 +81,7 @@ export const CopyStatusIndicator = (props: Props) => {
             <p>
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpace.copyStatus.conflictsOverwriteMessage"
-                defaultMessage="Click 'Overwrite' to replace this version with the copied one."
+                defaultMessage="Enable 'Overwrite' to replace this version with the copied one."
               />
             </p>
           </EuiText>
