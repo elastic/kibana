@@ -55,7 +55,7 @@ export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
 /**
  * The team decided to use this determinant to express how we comport state in the UI with the values of the two query params:
  *
- * | Crumb&Table            | &crumbId                   | &crumbEvent              |
+ * | Crumb/Table            | &crumbId                   | &crumbEvent              |
  * | :--------------------- | :------------------------- | :----------------------  |
  * | all processes/default  | null                       | null                     |
  * | process detail         | entity_id of process       | null                     |
@@ -64,6 +64,7 @@ export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
  * | related event detail   | event_id of related event  | entity_id of process     |
  *
  * This component implements the strategy laid out above by determining the "right" view and doing some other housekeeping e.g. effects to keep the UI-selected node in line with what's indicated by the URL parameters.
+ *
  */
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();

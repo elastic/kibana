@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useEffect, useMemo } from '@elastic/eui/node_modules/@types/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiBreadcrumbs, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { useResolverDispatch } from '../use_resolver_dispatch';
-import { ResolverEvent } from '..\..\..\..\common\endpoint\types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 
 /**
  * Display a waiting message to the user when we can't display what they requested because we don't have related event data yet.

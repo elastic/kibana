@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useMemo } from '@elastic/eui/node_modules/@types/react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumbs, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { CrumbInfo } from '../panel';
 
 export const TableServiceError = memo(function ({

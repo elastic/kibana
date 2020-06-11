@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useMemo } from '@elastic/eui/node_modules/@types/react';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { cubeAssetsForNode } from '../process_event_dot';
-import { ResolverEvent } from '..\..\..\..\common\endpoint\types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 
 /**
  * During user testing, one user indicated they wanted to see stronger visual relationships between
