@@ -103,7 +103,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               type: 'addProcessor',
               payload: {
                 processor: { ...processorTypeAndOptions },
-                targetSelector: editorMode.arg,
+                targetSelector: editorMode.arg.selector,
               },
             });
             break;
@@ -135,7 +135,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       (action) => {
         switch (action.type) {
           case 'addProcessor':
-            setEditorMode({ id: 'creatingProcessor', arg: action.payload.target });
+            setEditorMode({ id: 'creatingProcessor', arg: { selector: action.payload.target } });
             break;
           case 'move':
             setEditorMode({ id: 'idle' });
@@ -207,10 +207,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
         </EuiFlexGroup>
         {editorMode.id === 'editingProcessor' || editorMode.id === 'creatingProcessor' ? (
           <SettingsFormFlyout
+            isOnFailureProcessor={editorMode.arg.selector.length > 1}
+            processor={editorMode.id === 'editingProcessor' ? editorMode.arg.processor : undefined}
             onOpen={onFlyoutOpen}
             onFormUpdate={onFormUpdate}
             onSubmit={onSubmit}
-            processor={editorMode.id === 'editingProcessor' ? editorMode.arg.processor : undefined}
             onClose={onCloseSettingsForm}
           />
         ) : undefined}

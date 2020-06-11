@@ -44,7 +44,7 @@ export interface OnUpdateHandlerArg extends FormValidityState {
  * which will be used to update the in-memory processors data structure.
  */
 export type EditorMode =
-  | { id: 'creatingProcessor'; arg: ProcessorSelector }
+  | { id: 'creatingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'movingProcessor'; arg: ProcessorInfo }
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }

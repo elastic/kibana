@@ -22,28 +22,36 @@ export interface Props {
   processor: ProcessorInternal | undefined;
   onFormUpdate: (form: OnFormUpdateArg<any>) => void;
   onSubmit: OnSubmitHandler;
+  isOnFailureProcessor: boolean;
   onOpen: () => void;
   onClose: () => void;
 }
 
 export const SettingsFormFlyout: FunctionComponent<Props> = memo(
-  ({ onClose, processor, onSubmit, onFormUpdate, onOpen }) => {
+  ({ onClose, processor, onSubmit, onFormUpdate, onOpen, isOnFailureProcessor }) => {
     useEffect(
       () => {
         onOpen();
       },
       [] /* eslint-disable-line react-hooks/exhaustive-deps */
     );
+    const flyoutTitleContent = isOnFailureProcessor ? (
+      <FormattedMessage
+        id="xpack.ingestPipelines.settingsFormOnFailureFlyout.title"
+        defaultMessage="Configure on-failure processor"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.ingestPipelines.settingsFormFlyout.title"
+        defaultMessage="Configure processor"
+      />
+    );
+
     return (
       <EuiFlyout onClose={onClose}>
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestPipelines.settingsFormFlyout.title"
-                defaultMessage="Configure processor"
-              />
-            </h2>
+            <h2>{flyoutTitleContent}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

@@ -72,7 +72,7 @@ export const TreeNode: FunctionComponent<Props> = ({
             color="subdued"
           >
             {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
-              defaultMessage: 'Failure Handlers',
+              defaultMessage: 'Failure handlers',
             })}
           </EuiText>
           <PrivateTree

@@ -73,7 +73,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           icon="indexClose"
           onClick={() => {
             setIsContextMenuOpen(false);
-            editor.setMode({ id: 'creatingProcessor', arg: selector });
+            editor.setMode({ id: 'creatingProcessor', arg: { selector } });
           }}
         >
           {i18n.translate(
