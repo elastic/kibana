@@ -54,4 +54,5 @@ export {
   // Used in data plugin only
   FieldFormatInstanceType,
   IFieldFormat,
+  FieldFormatsStartCommon,
 } from './types';
