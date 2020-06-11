@@ -13,7 +13,8 @@ import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 export function getGeoTileAggNotSupportedReason(field: IFieldType): string | null {
   if (!field.aggregatable) {
     return i18n.translate('xpack.maps.geoTileAgg.disabled.docValues', {
-      defaultMessage: 'Clustering requires doc_values.',
+      defaultMessage:
+        'Clustering requires aggregations. Enable aggregations by setting doc_values to true.',
     });
   }
 
