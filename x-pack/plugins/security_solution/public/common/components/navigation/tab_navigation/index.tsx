@@ -32,14 +32,14 @@ const TabNavigationItemComponent = ({
   const handleClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      if (id in SecurityPageName) {
+      if (id in SecurityPageName && pageId == null) {
         navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
       } else {
         history.push(hrefWithSearch);
       }
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
     },
-    [history, hrefWithSearch, id, navigateToApp, urlSearch]
+    [history, hrefWithSearch, id, navigateToApp, pageId, urlSearch]
   );
   const appHref = formatUrl(pageId != null ? href : '');
   return (

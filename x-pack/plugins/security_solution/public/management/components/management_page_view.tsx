@@ -15,23 +15,23 @@ import { getEndpointPath, getPoliciesPath } from '../common/routing';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
   const history = useHistory();
-  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
 
   const goToEndpoint = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getEndpointPath());
+      history.push(getEndpointPath(search));
     },
-    [history]
+    [history, search]
   );
 
   const goToPolicies = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getPoliciesPath());
+      history.push(getPoliciesPath(search));
     },
-    [history]
+    [history, search]
   );
 
   const tabs = useMemo((): PageViewProps['tabs'] | undefined => {

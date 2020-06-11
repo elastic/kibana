@@ -5,19 +5,10 @@
  */
 
 import { useCallback } from 'react';
-import { useBasePath } from '../../lib/kibana';
+import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../app/types';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
-import {
-  APP_ALERTS_PATH,
-  APP_CASES_PATH,
-  APP_HOSTS_PATH,
-  APP_MANAGEMENT_PATH,
-  APP_NETWORK_PATH,
-  APP_OVERVIEW_PATH,
-  APP_TIMELINES_PATH,
-} from '../../../../common/constants';
 
 export { getDetectionEngineUrl } from './redirect_to_detection_engine';
 export { getAppOverviewUrl } from './redirect_to_overview';
@@ -31,43 +22,17 @@ export {
   getConfigureCasesUrl,
 } from './redirect_to_case';
 
-const getSubAppPath = (page: string) => {
-  switch (page) {
-    case SecurityPageName.alerts: {
-      return APP_ALERTS_PATH;
-    }
-    case SecurityPageName.case: {
-      return APP_CASES_PATH;
-    }
-    case SecurityPageName.hosts: {
-      return APP_HOSTS_PATH;
-    }
-    case SecurityPageName.management: {
-      return APP_MANAGEMENT_PATH;
-    }
-    case SecurityPageName.network: {
-      return APP_NETWORK_PATH;
-    }
-    case SecurityPageName.overview: {
-      return APP_OVERVIEW_PATH;
-    }
-    case SecurityPageName.timelines: {
-      return APP_TIMELINES_PATH;
-    }
-    default:
-      return APP_OVERVIEW_PATH;
-  }
-};
-
 export const useFormatUrl = (page: SecurityPageName) => {
-  const basePath = useBasePath();
+  const history = useHistory();
   const search = useGetUrlSearch(navTabs[page]);
   const formatUrl = useCallback(
     (path: string) => {
-      const hasSearch = path.includes('?');
-      return `${basePath}${getSubAppPath(page)}${path}${!hasSearch ? search : ''}`;
+      return history.createHref({
+        pathname: path.includes('?') ? path.substring(0, path.indexOf('?')) : path,
+        search,
+      });
     },
-    [basePath, page, search]
+    [history, search]
   );
   return { formatUrl, search };
 };
