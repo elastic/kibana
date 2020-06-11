@@ -24,7 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { useUpdateEffect } from 'react-use';
 import { useMlKibana } from '../contexts/kibana';
 import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public';
-import { AnomalySwimlaneEmbeddableCustomOutput } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalySwimlaneEmbeddableCustomOutput,
+  getDefaultPanelTitle,
+} from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useDashboardService } from '../services/dashboard_service';
 
 export interface DashboardItem {
@@ -102,7 +106,11 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
         setAddedDashboards({ ...addedDashboards, [item.id]: 'pending' });
 
         try {
-          await dashboardService.attachPanel(item.id, item.attributes, embeddableConfig);
+          await dashboardService.attachPanel(item.id, item.attributes, {
+            embeddableConfig: embeddableConfig as { [key: string]: any },
+            type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+            title: getDefaultPanelTitle(embeddableConfig.jobIds),
+          });
           setAddedDashboards({ ...addedDashboards, [item.id]: 'success' });
         } catch (e) {
           toasts.danger({

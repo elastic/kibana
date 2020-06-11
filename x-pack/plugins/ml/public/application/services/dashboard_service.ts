@@ -11,10 +11,6 @@ import {
   SavedDashboardPanel,
   SavedObjectDashboard,
 } from '../../../../../../src/plugins/dashboard/public';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  getDefaultPanelTitle,
-} from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useMlKibana } from '../contexts/kibana';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
@@ -23,6 +19,7 @@ export function dashboardServiceProvider(
   savedObjectClient: SavedObjectsClientContract,
   kibanaVersion: string
 ) {
+  const generateId = htmlIdGenerator();
   return {
     /**
      * Fetches dashboards
@@ -41,34 +38,33 @@ export function dashboardServiceProvider(
     async attachPanel(
       dashboardId: string,
       dashboardAttributes: SavedObjectDashboard,
-      embeddableConfig: { [key: string]: any }
+      panelData: Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>
     ) {
-      const panelData = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];
-      const panelIndex = htmlIdGenerator()();
-
-      const maxPanel = panelData.reduce((prev, current) =>
+      const panels = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];
+      const panelIndex = generateId();
+      const maxPanel = panels.reduce((prev, current) =>
         prev.gridData.y > current.gridData.y ? prev : current
       );
       const version = kibanaVersion;
 
-      panelData.push({
+      panels.push({
         panelIndex,
-        embeddableConfig: embeddableConfig as { [key: string]: any },
-        title: getDefaultPanelTitle(embeddableConfig.jobIds),
-        type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+        embeddableConfig: panelData.embeddableConfig as { [key: string]: any },
+        title: panelData.title,
+        type: panelData.type,
         version,
         gridData: {
           h: 15,
           i: panelIndex,
           w: 24,
           x: 0,
-          y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h + 10 : 0,
+          y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h : 0,
         },
       });
 
       await savedObjectClient.update('dashboard', dashboardId, {
         ...dashboardAttributes,
-        panelsJSON: JSON.stringify(panelData),
+        panelsJSON: JSON.stringify(panels),
       });
     },
   };
