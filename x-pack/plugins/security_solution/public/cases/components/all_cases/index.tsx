@@ -5,9 +5,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
-  EuiButton,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -27,7 +27,6 @@ import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../alerts/pages/detection_engine/rules/types';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { Panel } from '../../../common/components/panel';
 import {
   UtilityBar,
@@ -36,13 +35,11 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
-import { getCreateCaseUrl } from '../../../common/components/link_to';
+import { getCreateCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { OpenClosedStats } from '../open_closed_stats';
-import { navTabs } from '../../../app/home/home_navigations';
-
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
@@ -51,6 +48,8 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
+import { LinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -86,7 +85,9 @@ interface AllCasesProps {
   userCanCrud: boolean;
 }
 export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
-  const urlSearch = useGetUrlSearch(navTabs.case);
+  const history = useHistory();
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
+
   const { actionLicense } = useGetActionLicense();
   const {
     countClosedCases,
@@ -229,6 +230,14 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     [dispatchUpdateCaseProperty, fetchCasesStatus]
   );
 
+  const goToCreateCase = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getCreateCaseUrl(urlSearch));
+    },
+    [history, urlSearch]
+  );
+
   const actions = useMemo(
     () =>
       getActions({
@@ -338,15 +347,16 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <LinkButton
               isDisabled={!userCanCrud}
               fill
-              href={getCreateCaseUrl(urlSearch)}
+              onClick={goToCreateCase}
+              href={formatUrl(getCreateCaseUrl(urlSearch))}
               iconType="plusInCircle"
               data-test-subj="createNewCaseBtn"
             >
               {i18n.CREATE_TITLE}
-            </EuiButton>
+            </LinkButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
@@ -411,15 +421,16 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
                   titleSize="xs"
                   body={i18n.NO_CASES_BODY}
                   actions={
-                    <EuiButton
+                    <LinkButton
                       isDisabled={!userCanCrud}
                       fill
                       size="s"
-                      href={getCreateCaseUrl(urlSearch)}
+                      onClick={goToCreateCase}
+                      href={formatUrl(getCreateCaseUrl(urlSearch))}
                       iconType="plusInCircle"
                     >
                       {i18n.ADD_NEW_CASE}
-                    </EuiButton>
+                    </LinkButton>
                   }
                 />
               }

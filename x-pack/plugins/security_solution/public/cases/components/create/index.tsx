@@ -13,7 +13,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { isEqual } from 'lodash/fp';
 import { CasePostRequest } from '../../../../../case/common/api';
@@ -30,9 +30,9 @@ import { schema } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import * as i18n from '../../translations';
-import { SecurityPageName } from '../../../app/types';
 import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
 import { useGetTags } from '../../containers/use_get_tags';
+import { getCaseDetailsUrl } from '../../../common/components/link_to';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -61,6 +61,7 @@ const initialCaseValue: CasePostRequest = {
 };
 
 export const Create = React.memo(() => {
+  const history = useHistory();
   const { caseData, isLoading, postCase } = usePostCase();
   const [isCancel, setIsCancel] = useState(false);
   const { form } = useForm<CasePostRequest>({
@@ -100,11 +101,13 @@ export const Create = React.memo(() => {
   }, []);
 
   if (caseData != null && caseData.id) {
-    return <Redirect to={`/${SecurityPageName.case}/${caseData.id}`} />;
+    history.push(getCaseDetailsUrl({ id: caseData.id }));
+    return null;
   }
 
   if (isCancel) {
-    return <Redirect to={`/${SecurityPageName.case}`} />;
+    history.push('/');
+    return null;
   }
 
   return (
