@@ -59,7 +59,7 @@ interface Props {
   transformId: string;
   transformConfig: any;
   overrides: StepDetailsExposedState;
-  timeFieldName: string | undefined;
+  timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
 }
 
