@@ -12,7 +12,7 @@ import { EventHandlers } from '../reducers/non_serializable_instances';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsService } from '../../../../../src/plugins/data/public/index_patterns/index_patterns/index_patterns';
+import { IndexPatternsService } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
