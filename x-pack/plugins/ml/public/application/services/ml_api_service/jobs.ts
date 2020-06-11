@@ -275,9 +275,9 @@ export const jobs = {
     snapshotId: string,
     replay: boolean,
     end?: number,
-    skip?: Array<{ start: number; end: number; description: string }>
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
   ) {
-    const body = JSON.stringify({ jobId, snapshotId, replay, end, skip });
+    const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
     return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
       path: `${basePath()}/jobs/revert_model_snapshot`,
       method: 'POST',

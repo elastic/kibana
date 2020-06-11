@@ -128,11 +128,13 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     const end =
       replay && runInRealTime === false ? job.data_counts.latest_record_timestamp : undefined;
     try {
-      const events = calendarEvents.filter(filterIncompleteEvents).map((c) => ({
-        start: c.start!.valueOf(),
-        end: c.end!.valueOf(),
-        description: c.description,
-      }));
+      const events = replay
+        ? calendarEvents.filter(filterIncompleteEvents).map((c) => ({
+            start: c.start!.valueOf(),
+            end: c.end!.valueOf(),
+            description: c.description,
+          }))
+        : undefined;
 
       await ml.jobs.revertModelSnapshot(
         job.job_id,

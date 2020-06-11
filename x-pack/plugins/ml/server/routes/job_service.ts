@@ -751,14 +751,21 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { revertModelSnapshot } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
-        const { jobId, snapshotId, replay, end, deleteInterveningResults, skip } = request.body;
+        const {
+          jobId,
+          snapshotId,
+          replay,
+          end,
+          deleteInterveningResults,
+          calendarEvents,
+        } = request.body;
         const resp = await revertModelSnapshot(
           jobId,
           snapshotId,
           replay,
           end,
           deleteInterveningResults,
-          skip
+          calendarEvents
         );
 
         return response.ok({

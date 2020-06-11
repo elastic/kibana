@@ -6,7 +6,6 @@
 
 import React, { FC } from 'react';
 import {
-  BarSeries,
   HistogramBarSeries,
   Chart,
   ScaleType,

@@ -4,22 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
 import Boom from 'boom';
 import { APICaller } from 'kibana/server';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
-import {
-  MlSummaryJob,
-  AuditMessage,
-  Job,
-  JobStats,
-  DatafeedWithStats,
-  CombinedJobWithStats,
-  ModelSnapshot,
-} from '../../../common/types/anomaly_detection_jobs';
-import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
-import { jobsProvider, MlJobsResponse, MlJobsStatsResponse } from './jobs';
+import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
+import { datafeedsProvider, MlDatafeedsResponse } from './datafeeds';
+import { MlJobsResponse } from './jobs';
 import { FormCalendar, CalendarManager } from '../calendar';
 
 export interface ModelSnapshotsResponse {
@@ -32,7 +21,6 @@ export interface RevertModelSnapshotResponse {
 
 export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
   const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
-  // const { MlJobsResponse } = jobsProvider(callAsCurrentUser);
 
   async function revertModelSnapshot(
     jobId: string,
@@ -40,51 +28,64 @@ export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
     replay: boolean,
     end: number,
     deleteInterveningResults: boolean = true,
-    skip?: [{ start: number; end: number; description: string }]
+    calendarEvents?: [{ start: number; end: number; description: string }]
   ) {
-    const job = await callAsCurrentUser<MlJobsResponse>('ml.jobs', { jobId: [jobId] });
-    const jobStats = await callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats', {
-      jobId: [jobId],
-    });
+    let datafeedId = `datafeed-${jobId}`;
+    // ensure job exists
+    await callAsCurrentUser<MlJobsResponse>('ml.jobs', { jobId: [jobId] });
 
-    const datafeedIds = await getDatafeedIdsByJobId();
-    const datafeedId = datafeedIds[jobId];
-    if (datafeedId === undefined) {
-      throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
-    }
-    const datafeed = await callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds', {
-      datafeedId: [datafeedId],
-    });
-
-    if (skip !== undefined && skip.length) {
-      const calendar: FormCalendar = {
-        calendarId: String(Date.now()),
-        job_ids: [jobId],
-        description: 'auto created',
-        events: skip.map((s) => ({
-          description: s.description,
-          start_time: s.start,
-          end_time: s.end,
-        })),
-      };
-      const cm = new CalendarManager(callAsCurrentUser);
-      await cm.newCalendar(calendar);
+    try {
+      // ensure the datafeed exists
+      // the datafeed is probably called datafeed-<jobId>
+      await callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds', {
+        datafeedId: [datafeedId],
+      });
+    } catch (e) {
+      // if the datafeed isn't called datafeed-<jobId>
+      // check all datafeeds to see if one exists that is matched to this job id
+      const datafeedIds = await getDatafeedIdsByJobId();
+      datafeedId = datafeedIds[jobId];
+      if (datafeedId === undefined) {
+        throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
+      }
     }
 
+    // ensure the snapshot exists
     const snapshot = await callAsCurrentUser<ModelSnapshotsResponse>('ml.modelSnapshots', {
       jobId,
       snapshotId,
     });
 
-    const resp = await callAsCurrentUser<RevertModelSnapshotResponse>('ml.revertModelSnapshot', {
-      jobId,
-      snapshotId,
-      body: {
-        delete_intervening_results: deleteInterveningResults,
-      },
-    });
+    // apply the snapshot revert
+    const { model } = await callAsCurrentUser<RevertModelSnapshotResponse>(
+      'ml.revertModelSnapshot',
+      {
+        jobId,
+        snapshotId,
+        body: {
+          delete_intervening_results: deleteInterveningResults,
+        },
+      }
+    );
 
-    if (replay && snapshot && snapshot.model_snapshots.length) {
+    // create calendar (if specified) and replay datafeed
+    if (replay && model.snapshot_id === snapshotId && snapshot.model_snapshots.length) {
+      // create calendar before starting restarting the datafeed
+      if (calendarEvents !== undefined && calendarEvents.length) {
+        const calendar: FormCalendar = {
+          calendarId: String(Date.now()),
+          job_ids: [jobId],
+          description: 'auto created',
+          events: calendarEvents.map((s) => ({
+            description: s.description,
+            start_time: s.start,
+            end_time: s.end,
+          })),
+        };
+        const cm = new CalendarManager(callAsCurrentUser);
+        await cm.newCalendar(calendar);
+      }
+
       forceStartDatafeeds([datafeedId], snapshot.model_snapshots[0].latest_record_time_stamp, end);
     }
 
