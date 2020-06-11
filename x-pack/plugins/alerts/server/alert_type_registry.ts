@@ -25,6 +25,13 @@ export interface RegistryAlertType
   id: string;
 }
 
+/**
+ * AlertType IDs are used as part of the authorization strings used to
+ * grant users privileged operations. There is a limited range of characters
+ * we can use in these auth strings, so we apply these same limitations to
+ * the AlertType Ids.
+ * If you wish to change this, please confer with the Kibana security team.
+ */
 const alertIdSchema = schema.string({
   validate(value: string): string | void {
     if (typeof value !== 'string') {
