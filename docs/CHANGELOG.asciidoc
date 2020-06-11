@@ -91,6 +91,7 @@ Machine Learning::
 * Updates memory estimate after adding exclude fields {pull}62850[#62850]
 * Replaces table with data grid {pull}63650[#63650] and {pull}63757[#63757]
 * Fixes feature importance {pull}61761[#61761]
+* Adds embeddable anomaly swimlane {pull}65180[#65180]
 * Improves progress reporting for analytics jobs {pull}65305[#65305]
 Management::
 * Adds Ingest Node Pipelines UI {pull}62321[#62321]
