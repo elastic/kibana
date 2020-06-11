@@ -265,8 +265,9 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
     return setupStatus;
   }, previousSetupStatus);
 
-const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
-  value.error != null;
+const hasError = <Value extends { error?: any }>(
+  value: Value
+): value is MandatoryProperty<Value, 'error'> => value.error != null;
 
 export const useModuleStatus = <JobType extends string>(jobTypes: JobType[]) => {
   return useReducer(createStatusReducer(jobTypes), { jobTypes }, createInitialState);

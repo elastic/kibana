@@ -143,6 +143,9 @@ export type Throttle = t.TypeOf<typeof throttle>;
 export const throttleOrNull = t.union([throttle, t.null]);
 export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
 
+export const throttleOrNullOrUndefined = t.union([throttle, t.null, t.undefined]);
+export type ThrottleOrUndefinedOrNull = t.TypeOf<typeof throttleOrNullOrUndefined>;
+
 export const anomaly_threshold = PositiveInteger;
 export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 
@@ -156,11 +159,8 @@ export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id,
 export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
 
 /**
- * Note that this is a plain unknown object because we allow the UI
- * to send us extra additional information as "meta" which can be anything.
- *
- * TODO: Strip away extra information and possibly even "freeze" this object
- * so we have tighter control over 3rd party data structures.
+ * Note that this is a non-exact io-ts type as we allow extra meta information
+ * to be added to the meta object
  */
 export const meta = t.object;
 export type Meta = t.TypeOf<typeof meta>;
@@ -192,8 +192,10 @@ export const severityOrUndefined = t.union([severity, t.undefined]);
 export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
 
 export const status = t.keyof({ open: null, closed: null });
+export type Status = t.TypeOf<typeof status>;
 
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
+export type JobStatus = t.TypeOf<typeof job_status>;
 
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
@@ -307,10 +309,20 @@ export const versionOrUndefined = t.union([version, t.undefined]);
 export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
 
 export const last_success_at = IsoDateString;
+export type LastSuccessAt = t.TypeOf<typeof IsoDateString>;
+
 export const last_success_message = t.string;
+export type LastSuccessMessage = t.TypeOf<typeof last_success_message>;
+
 export const last_failure_at = IsoDateString;
+export type LastFailureAt = t.TypeOf<typeof last_failure_at>;
+
 export const last_failure_message = t.string;
+export type LastFailureMessage = t.TypeOf<typeof last_failure_message>;
+
 export const status_date = IsoDateString;
+export type StatusDate = t.TypeOf<typeof status_date>;
+
 export const rules_installed = PositiveInteger;
 export const rules_updated = PositiveInteger;
 export const status_code = PositiveInteger;
