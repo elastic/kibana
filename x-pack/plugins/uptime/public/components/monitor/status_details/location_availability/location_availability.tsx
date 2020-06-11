@@ -32,12 +32,12 @@ export const LocationAvailability = ({ monitorLocations }: LocationMapProps) => 
   const upPoints: LocationPoint[] = [];
   const downPoints: LocationPoint[] = [];
 
-  let isGeoInfoMissing = false;
+  let isAnyGeoInfoMissing = false;
 
   if (monitorLocations?.locations) {
     monitorLocations.locations.forEach(({ geo, summary }: MonitorLocation) => {
       if (geo?.name === UNNAMED_LOCATION || !geo?.location) {
-        isGeoInfoMissing = true;
+        isAnyGeoInfoMissing = true;
       } else if (!!geo.location.lat && !!geo.location.lon) {
         if (summary?.down === 0) {
           upPoints.push(geo as LocationPoint);
@@ -62,7 +62,7 @@ export const LocationAvailability = ({ monitorLocations }: LocationMapProps) => 
           </EuiFlexItem>
         )}
         {selectedView === 'map' && (
-          <EuiFlexItem>{isGeoInfoMissing && <LocationMissingWarning />}</EuiFlexItem>
+          <EuiFlexItem>{isAnyGeoInfoMissing && <LocationMissingWarning />}</EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
           <ToggleViewBtn

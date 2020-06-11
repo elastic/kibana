@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Tls } from '../../../../../common/runtime_types';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants';
 import { MonListDescription, MonListTitle } from './status_bar';
@@ -24,9 +24,10 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
   return tls?.not_after ? (
     <>
       <MonListTitle>
-        {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificate.title', {
-          defaultMessage: 'TLS Certificate',
-        })}
+        <FormattedMessage
+          id="xpack.uptime.monitorStatusBar.sslCertificate.title"
+          defaultMessage="TLS Certificate"
+        />
       </MonListTitle>
 
       <EuiSpacer size="s" />

@@ -81,7 +81,6 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       zoom: 0,
     },
     disableInteractive: true,
-    // disableTooltipControl: true,
     hideToolbarOverlay: true,
     hideLayerControl: true,
     hideViewControl: true,

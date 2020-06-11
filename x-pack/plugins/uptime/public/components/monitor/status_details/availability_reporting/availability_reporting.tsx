@@ -9,6 +9,7 @@ import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { Pagination } from '@elastic/eui/src/components/basic_table/pagination_bar';
 import { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
+import { AvailabilityLabel, LastCheckLabel, LocationLabel } from '../translations';
 
 interface Props {
   allLocations: StatusTag[];
@@ -20,7 +21,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
   const cols = [
     {
       field: 'label',
-      name: 'Location',
+      name: LocationLabel,
       truncateText: true,
       render: (val: string, item: StatusTag) => {
         return <TagLabel color={item.color} label={item.label} />;
@@ -28,45 +29,43 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
     },
     {
       field: 'availability',
-      name: 'Availability',
+      name: AvailabilityLabel,
       align: 'right' as const,
       render: (val: number) => {
         return <span>{val.toFixed(2)}%</span>;
       },
     },
     {
-      name: 'Last check',
+      name: LastCheckLabel,
       field: 'timestamp',
       align: 'right' as const,
     },
   ];
+  const pageSize = 5;
 
-  const pagination: Pagination | undefined =
-    allLocations.length > 4
-      ? {
-          pageIndex,
-          pageSize: 4,
-          totalItemCount: allLocations.length,
-          hidePerPageOptions: true,
-        }
-      : undefined;
+  const pagination: Pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: allLocations.length,
+    hidePerPageOptions: true,
+  };
 
   const onTableChange = ({ page }: any) => {
     setPageIndex(page.index);
   };
 
+  const paginationProps = allLocations.length > pageSize ? { pagination } : {};
+
   return (
     <>
       <EuiSpacer size="s" />
-      {/*
-        // @ts-ignore */}
       <EuiBasicTable
         responsive={false}
         compressed={true}
         columns={cols}
-        items={allLocations.slice(pageIndex * 4, pageIndex * 4 + 4)}
-        pagination={pagination}
+        items={allLocations.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}
         onChange={onTableChange}
+        {...paginationProps}
       />
     </>
   );

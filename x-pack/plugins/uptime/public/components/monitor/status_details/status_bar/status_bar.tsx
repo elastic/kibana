@@ -15,7 +15,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { MonitorSSLCertificate } from './ssl_certificate';
-import * as labels from './translations';
+import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
 import { useStatusBar } from './use_status_bar';
 import { MonitorIDLabel, OverallAvailability } from '../translations';

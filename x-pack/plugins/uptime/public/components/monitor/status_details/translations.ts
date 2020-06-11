@@ -80,3 +80,24 @@ export const ChangeToListView = i18n.translate(
     defaultMessage: 'Change to list view to check availability by location.',
   }
 );
+
+export const LocationLabel = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.availabilityReport.location',
+  {
+    defaultMessage: 'Location.',
+  }
+);
+
+export const AvailabilityLabel = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.availabilityReport.availability',
+  {
+    defaultMessage: 'availability',
+  }
+);
+
+export const LastCheckLabel = i18n.translate(
+  'xpack.uptime.monitorStatusBar.monitor.availabilityReport.lastCheck',
+  {
+    defaultMessage: 'Last check',
+  }
+);
