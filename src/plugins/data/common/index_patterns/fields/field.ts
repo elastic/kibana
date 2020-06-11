@@ -18,10 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-import { IndexPattern } from '../index_patterns';
+import { IIndexPattern } from '../../types';
 import {
   IFieldType,
   getKbnFieldType,
@@ -29,13 +28,14 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
+import { OnNotification } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
-  fieldFormats: FieldFormatsStart;
-  toastNotifications: ToastsStart;
+  fieldFormats: FieldFormatsStartCommon;
+  onNotification: OnNotification;
 }
 
 export class Field implements IFieldType {
@@ -55,17 +55,17 @@ export class Field implements IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
-  indexPattern?: IndexPattern;
+  indexPattern?: IIndexPattern;
   readFromDocValues?: boolean;
   format: any;
   $$spec: FieldSpec;
   conflictDescriptions?: Record<string, string[]>;
 
   constructor(
-    indexPattern: IndexPattern,
+    indexPattern: IIndexPattern,
     spec: FieldSpec | Field,
     shortDotsEnable: boolean,
-    { fieldFormats, toastNotifications }: FieldDependencies
+    { fieldFormats, onNotification }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -90,11 +90,7 @@ export class Field implements IFieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
-
-      toastNotifications.addDanger({
-        title,
-        text,
-      });
+      onNotification({ title, text, color: 'danger', iconType: 'alert' });
     }
 
     if (!type) type = getKbnFieldType('unknown');
@@ -103,7 +99,7 @@ export class Field implements IFieldType {
 
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       format =
-        indexPattern.fieldFormatMap[spec.name] ||
+        (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[spec.name]) ||
         fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
     }
 

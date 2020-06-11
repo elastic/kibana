@@ -19,19 +19,9 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
 
 import { SavedObjectsClientContract } from 'src/core/public';
-import {
-  DuplicateField,
-  SavedObjectNotFound,
-  expandShorthand,
-  FieldMappingSpec,
-  MappingObject,
-} from '../../../../kibana_utils/public';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 import {
   ES_FIELD_TYPES,
@@ -46,10 +36,12 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats, getHttp } from '../../services';
-import { TypeMeta } from './types';
+import { IIndexPatternsApiClient } from '.';
+import { TypeMeta } from '.';
+import { OnNotification, OnError, OnUnsupportedTimePattern } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
+import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -78,6 +70,10 @@ export class IndexPattern implements IIndexPattern {
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
+  private fieldFormats: FieldFormatsStartCommon;
+  private onNotification: OnNotification;
+  private onError: OnError;
+  private onUnsupportedTimePattern: OnUnsupportedTimePattern;
   private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
@@ -107,7 +103,11 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: PatternCache
+    patternCache: PatternCache,
+    fieldFormats: FieldFormatsStartCommon,
+    onNotification: OnNotification,
+    onError: OnError,
+    onUnsupportedTimePattern: OnUnsupportedTimePattern
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -115,13 +115,17 @@ export class IndexPattern implements IIndexPattern {
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
+    this.fieldFormats = fieldFormats;
+    this.onNotification = onNotification;
+    this.onError = onError;
+    this.onUnsupportedTimePattern = onUnsupportedTimePattern;
 
     this.shortDotsEnable = this.getConfig(UI_SETTINGS.SHORT_DOTS_ENABLE);
     this.metaFields = this.getConfig(UI_SETTINGS.META_FIELDS);
 
     this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats: getFieldFormats(),
-      toastNotifications: getNotifications().toasts,
+      fieldFormats,
+      onNotification,
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
@@ -134,7 +138,7 @@ export class IndexPattern implements IIndexPattern {
     this.flattenHit = flattenHitWrapper(this, this.getConfig(UI_SETTINGS.META_FIELDS));
     this.formatHit = formatHitProvider(
       this,
-      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
     );
     this.formatField = this.formatHit.formatField;
   }
@@ -146,7 +150,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = getFieldFormats().getType(mapping.id);
+    const FieldFormat = this.fieldFormats.getType(mapping.id);
 
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
@@ -206,48 +210,10 @@ export class IndexPattern implements IIndexPattern {
     }
 
     if (this.isUnsupportedTimePattern()) {
-      const warningTitle = i18n.translate('data.indexPatterns.warningTitle', {
-        defaultMessage: 'Support for time interval index patterns removed',
-      });
-
-      const warningText = i18n.translate('data.indexPatterns.warningText', {
-        defaultMessage:
-          'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
-        values: {
-          title: this.title,
-          index: this.getIndex(),
-        },
-      });
-
-      // kbnUrl was added to this service in #35262 before it was de-angularized, and merged in a PR
-      // directly against the 7.x branch. Index patterns were de-angularized in #39247, and in order
-      // to preserve the functionality from #35262 we need to get the injector here just for kbnUrl.
-      // This has all been removed as of 8.0.
-
-      // 2019-12-01 The usage of kbnUrl had to be removed due to the transition to NP.
-      // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
-      // Once kbnUrl is migrated to NP, this can be updated.
-      const editUrl = `/app/kibana#/management/kibana/index_patterns/${this.id! || ''}`;
-
-      const { toasts } = getNotifications();
-
-      toasts.addWarning({
-        title: warningTitle,
-        text: toMountPoint(
-          <div>
-            <p>{warningText}</p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={getHttp().basePath.prepend(editUrl)}>
-                  <FormattedMessage
-                    id="data.indexPatterns.editIndexPattern"
-                    defaultMessage="Edit index pattern"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ),
+      this.onUnsupportedTimePattern({
+        id: this.id as string,
+        title: this.title,
+        index: this.getIndex(),
       });
     }
 
@@ -361,8 +327,8 @@ export class IndexPattern implements IIndexPattern {
         },
         false,
         {
-          fieldFormats: getFieldFormats(),
-          toastNotifications: getNotifications().toasts,
+          fieldFormats: this.fieldFormats,
+          onNotification: this.onNotification,
         }
       )
     );
@@ -488,8 +454,13 @@ export class IndexPattern implements IIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.apiClient,
-          this.patternCache
+          this.patternCache,
+          this.fieldFormats,
+          this.onNotification,
+          this.onError,
+          this.onUnsupportedTimePattern
         );
+
         await duplicatePattern.destroy();
       }
 
@@ -537,7 +508,11 @@ export class IndexPattern implements IIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.apiClient,
-            this.patternCache
+            this.patternCache,
+            this.fieldFormats,
+            this.onNotification,
+            this.onError,
+            this.onUnsupportedTimePattern
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -562,14 +537,12 @@ export class IndexPattern implements IIndexPattern {
             }
 
             if (unresolvedCollision) {
-              const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
+              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
                 defaultMessage:
                   'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
               });
-              const { toasts } = getNotifications();
 
-              toasts.addDanger(message);
-
+              this.onNotification({ title, color: 'danger' });
               throw err;
             }
 
@@ -607,15 +580,13 @@ export class IndexPattern implements IIndexPattern {
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
-        const { toasts } = getNotifications();
 
         if (err instanceof IndexPatternMissingIndices) {
-          toasts.addDanger((err as any).message);
-
+          this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
           return [];
         }
 
-        toasts.addError(err, {
+        this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
             values: {

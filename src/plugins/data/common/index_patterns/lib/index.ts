@@ -17,7 +17,10 @@
  * under the License.
  */
 
+export { IndexPatternMissingIndices } from './errors';
+export { getTitle } from './get_title';
+export { getFromSavedObject } from './get_from_saved_object';
+export { isDefault } from './is_default';
+
 export * from './types';
-export { isFilterable, isNestedField } from './utils';
-export * from './field_list';
-export * from './field';
+export { validateIndexPattern } from './validate_index_pattern';

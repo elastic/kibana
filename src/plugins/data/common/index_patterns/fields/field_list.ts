@@ -18,17 +18,17 @@
  */
 
 import { findIndex } from 'lodash';
-import { ToastsStart } from 'kibana/public';
-import { IndexPattern } from '../index_patterns';
+import { IIndexPattern } from '../../types';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
-import { FieldFormatsStart } from '../../field_formats';
+import { OnNotification } from '../types';
+import { FieldFormatsStartCommon } from '../../field_formats';
 
 type FieldMap = Map<Field['name'], Field>;
 
 interface FieldListDependencies {
-  fieldFormats: FieldFormatsStart;
-  toastNotifications: ToastsStart;
+  fieldFormats: FieldFormatsStartCommon;
+  onNotification: OnNotification;
 }
 
 export interface IIndexPatternFieldList extends Array<Field> {
@@ -40,19 +40,19 @@ export interface IIndexPatternFieldList extends Array<Field> {
 }
 
 export type CreateIndexPatternFieldList = (
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   specs?: FieldSpec[],
   shortDotsEnable?: boolean
 ) => IIndexPatternFieldList;
 
 export const getIndexPatternFieldListCreator = ({
   fieldFormats,
-  toastNotifications,
+  onNotification,
 }: FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
   class FieldList extends Array<Field> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<Field['type'], FieldMap> = new Map();
-    private indexPattern: IndexPattern;
+    private indexPattern: IIndexPattern;
     private shortDotsEnable: boolean;
     private setByName = (field: Field) => this.byName.set(field.name, field);
     private setByGroup = (field: Field) => {
@@ -63,7 +63,7 @@ export const getIndexPatternFieldListCreator = ({
     };
     private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
 
-    constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
+    constructor(indexPattern: IIndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
       super();
       this.indexPattern = indexPattern;
       this.shortDotsEnable = shortDotsEnable;
@@ -76,7 +76,7 @@ export const getIndexPatternFieldListCreator = ({
     add = (field: FieldSpec) => {
       const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
         fieldFormats,
-        toastNotifications,
+        onNotification,
       });
       this.push(newField);
       this.setByName(newField);
@@ -94,7 +94,7 @@ export const getIndexPatternFieldListCreator = ({
     update = (field: FieldSpec) => {
       const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
         fieldFormats,
-        toastNotifications,
+        onNotification,
       });
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
