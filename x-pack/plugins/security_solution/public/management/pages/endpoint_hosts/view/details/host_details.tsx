@@ -142,8 +142,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     details.endpoint.policy.applied.id,
     details.host.hostname,
     details.host.ip,
-    details.host.hostname,
-    details.agent.version,
     policyStatus,
     policyResponseUri,
     policyStatusClickHandler,
