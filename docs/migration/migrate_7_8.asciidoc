@@ -21,25 +21,8 @@ your application to Kibana 7.8.
 === Breaking changes for users
 
 [float]
-[[breaking_78_actions_api]]
-==== The actions API endpoint changed
-
-The following action plugin REST APIs changed so that they are consistent with the
-{kib} styleguide.
-
-* `GET /api/action/_getAll` -> `GET /api/actions`
-* `GET /api/action/types` -> `GET /api/actions/list_action_types`
-* `POST /api/action` -> `POST /api/actions/action`
-* `GET /api/action/{id}` -> `GET /api/actions/action/{id}`
-* `PUT /api/action/{id}` -> `PUT /api/actions/action/{id}`
-* `DELETE /api/action/{id}` -> `DELETE /api/actions/action/{id}`
-* `POST /api/action/{id}/_execute` -> `POST /api/actions/action/{id}/_execute`
-
-*via {pull}65936[#65936]*
-
-[float]
 [[breaking_78_metrics_alerts]]
-==== Metrics alerts action messaging was refactored to report on the no data state
+==== Metrics alerts action messaging refactored to report on the no data state
 *Details* +
 Metrics alerts no longer expose `context.valueOf`, `context.metricOf`, or
 `context.thresholdOf` to action messages. These variables are replaced
@@ -55,14 +38,51 @@ of how to use `context.reason`.
 
 *via {pull}64365[#64365]*
 
+[float]
+[[breaking_fixes_back_button]]
+==== Panels removed from the URL in dashboard view mode
+
+====
+*Details* +
+In dashboard in view mode, `.panels` are no longer synced with the URL.
+
+*Impact* +
+This fixes the Back button when navigating between dashboards using drilldowns.
+
+*via {pull}62415[#62415]*
+====
+
+
 // end::notable-breaking-changes[]
+
 
 [float]
 [[general-plugin-API-changes-78]]
 === Breaking changes for plugin developers
 
+[[breaking_78_actions_api]]
+.The actions API endpoint changed
+[%collapsible]
+====
+
+The following action plugin REST APIs changed so that they are consistent with the
+{kib} styleguide.
+
+* `GET /api/action/_getAll` -> `GET /api/actions`
+* `GET /api/action/types` -> `GET /api/actions/list_action_types`
+* `POST /api/action` -> `POST /api/actions/action`
+* `GET /api/action/{id}` -> `GET /api/actions/action/{id}`
+* `PUT /api/action/{id}` -> `PUT /api/actions/action/{id}`
+* `DELETE /api/action/{id}` -> `DELETE /api/actions/action/{id}`
+* `POST /api/action/{id}/_execute` -> `POST /api/actions/action/{id}/_execute`
+
+*via {pull}65936[#65936]*
+
+====
+
+
 [[breaking_78_canvas]]
-.Canvas applications now run on the new {kib} platform.
+.Canvas applications now run on the new {kib} platform
 [%collapsible]
 ====
 
@@ -73,7 +93,7 @@ Canvas functionality must also move to the Kibana Platform to continue extending
 ====
 
 [[breaking-78-filter-expression-function]]
-.The `filter` function uses `filterType` instead of `type`.
+.The `filter` function uses `filterType` instead of `type`
 [%collapsible]
 ====
 
@@ -101,7 +121,7 @@ After this change, all expression values will consistently use `type` to determi
 ====
 
 [[breaking_78_redirect-to-full-path]]
-.Calling `navigateToApp` to a legacy app redirects to full path.
+.Calling `navigateToApp` to a legacy app redirects to full path
 [%collapsible]
 ====
 Calling `core.application.navigateToApp` to a legacy
@@ -111,7 +131,7 @@ application now retains the `path` specified.
 ====
 
 [[breaking_78_remove_aggs]]
-.The legacy aggs APIs were removed.
+.The legacy aggs APIs were removed
 [%collapsible]
 ====
 
@@ -148,7 +168,7 @@ search.aggs.convertIPRangeToString,
 ====
 
 [[breaking_78_update_default_path]]
-.Applications are now allowed to define and update a `defaultPath`.
+.Applications are now allowed to define and update a `defaultPath`
 [%collapsible]
 ====
 
@@ -180,7 +200,7 @@ appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
 ====
 
 [[breaking_78_cache_busting]]
-.Static assets are now served under a release-specific URL.
+.Static assets are now served under a release-specific URL
 [%collapsible]
 ====
 
@@ -199,7 +219,7 @@ http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
 ====
 
 [[breaking_78_add_example_plugins]]
-.Example plugins are now allowed in X-Pack.
+.Example plugins are now allowed in X-Pack
 [%collapsible]
 ====
 
@@ -214,7 +234,7 @@ yarn start --run-examples
 ====
 
 [[breaking_78_improves_drilldows]]
-.`action.getHref()` has improvements for drilldowns.
+.`action.getHref()` has improvements for drilldowns
 [%collapsible]
 ====
 
@@ -226,7 +246,7 @@ yarn start --run-examples
 ====
 
 [[breaking_78_scopedhistory]]
-.State syncing utils now support `ScopedHistory`.
+.State syncing utils now support `ScopedHistory`
 [%collapsible]
 ====
 
@@ -237,7 +257,7 @@ State syncing utils now seamlessly support the platform's `ScopedHistory`.
 ====
 
 [[breaking_78_tsvb]]
-.Configuration properties were removed from TSVB.
+.Configuration properties were removed from TSVB
 [%collapsible]
 ====
 
@@ -252,19 +272,8 @@ properties for TSVB.
 
 ====
 
-[[breaking_fixes_back_button]]
-.Panels were removed from the URL in dashboard view mode.
-[%collapsible]
-====
-
-In dashboard in view mode, `.panels` are no longer synced with the URL.
-This fixes the Back button when navigating between dashboards using drilldowns.
-
-*via {pull}62415[#62415]*
-====
-
 [[breaking_add_subservice]]
-.The `HttpResources` service is available for responding to requests.
+.The `HttpResources` service is available for responding to requests
 [%collapsible]
 ====
 
@@ -291,7 +300,7 @@ httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, r
 ====
 
 [[breaking_delete_embeddable_plugin]]
-.The legacy `embeddable_api` plugin has been removed.
+.The legacy `embeddable_api` plugin has been removed
 [%collapsible]
 ====
 
@@ -355,7 +364,7 @@ either a required or optional dependency in your `kibana.json`:
 ====
 
 [[breaking_move_to_data_plugin]]
-.`src/legacy/server/index_patterns` has moved to data plugin.
+.`src/legacy/server/index_patterns` has moved to data plugin
 [%collapsible]
 ====
 
@@ -371,7 +380,7 @@ in `src/core/MIGRATION.md`.
 ====
 
 [[breaking_78_static_assets]]
-.Static assets are now served from the new platform.
+.Static assets are now served from the new platform
 [%collapsible]
 ====
 
@@ -382,7 +391,7 @@ The {kib} Platform serves plugin static assets from the
 ====
 
 [[breaking_78_refactor_connectors]]
-.Connectors have been refactored.
+.Connectors have been refactored
 [%collapsible]
 ====
 
