@@ -39,6 +39,7 @@ import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
+import { SecurityPageName } from '../../../../app/types';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -119,7 +120,7 @@ export const PolicyDetails = React.memo(() => {
             {policyApiError?.message}
           </EuiCallOut>
         ) : null}
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.management} />
       </ManagementPageView>
     );
   }
@@ -224,7 +225,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
       </ManagementPageView>
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.management} />
     </>
   );
 });

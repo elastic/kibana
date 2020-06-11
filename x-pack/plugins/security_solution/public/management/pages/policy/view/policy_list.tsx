@@ -35,6 +35,7 @@ import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
+import { SecurityPageName } from '../../../../app/types';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -285,7 +286,7 @@ export const PolicyList = React.memo(() => {
         data-test-subj="policyTable"
         hasActions={false}
       />
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.management} />
     </ManagementPageView>
   );
 });

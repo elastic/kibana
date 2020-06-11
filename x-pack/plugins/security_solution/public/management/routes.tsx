@@ -7,13 +7,12 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { ManagementContainer } from './pages';
-import { MANAGEMENT_ROUTING_ROOT_PATH } from './common/constants';
 
 /**
  * Returns the React Router Routes for the management area
  */
 export const ManagementRoutes = () => (
   <Switch>
-    <Route path={MANAGEMENT_ROUTING_ROOT_PATH} component={ManagementContainer} />
+    <Route path="/" component={ManagementContainer} />
   </Switch>
 );
