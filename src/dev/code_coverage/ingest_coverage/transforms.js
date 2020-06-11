@@ -101,7 +101,13 @@ export const ciRunUrl = (obj) =>
 
 const size = 50;
 const truncateMsg = (msg) => (msg.length > size ? `${msg.slice(0, 50)}...` : msg);
-
+const comparePrefix = () => 'https://github.com/elastic/kibana/compare';
+export const prokPrevious = (comparePrefixF) => (currentSha) => {
+  return fromNullable(process.env.FETCHED_PREVIOUS).fold(
+    noop,
+    (previousSha) => `${comparePrefixF()}/${previousSha}...${currentSha}`
+  );
+};
 export const itemizeVcs = (vcsInfo) => (obj) => {
   const [branch, sha, author, commitMsg] = vcsInfo;
 
@@ -110,13 +116,23 @@ export const itemizeVcs = (vcsInfo) => (obj) => {
     sha,
     author,
     vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
+    commitMsg: truncateMsg(commitMsg),
   };
-  const res = fromNullable(commitMsg).fold(always({ ...obj, vcs }), (msg) => ({
-    ...obj,
-    vcs: { ...vcs, commitMsg: truncateMsg(msg) },
-  }));
 
-  return res;
+  // const previous = prokPrevious();
+  const vcsCompareUrl = process.env.FETCHED_PREVIOUS
+    ? `${comparePrefix()}/${process.env.FETCHED_PREVIOUS}...${sha}`
+    : 'PREVIOUS SHA NOT PROVIDED';
+
+  // const withoutPreviousL = always({ ...obj, vcs });
+  const withPreviousR = () => ({
+    ...obj,
+    vcs: {
+      ...vcs,
+      vcsCompareUrl,
+    },
+  });
+  return withPreviousR();
 };
 export const testRunner = (obj) => {
   const { jsonSummaryPath } = obj;

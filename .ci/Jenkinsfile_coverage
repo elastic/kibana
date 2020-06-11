@@ -23,6 +23,7 @@ kibanaPipeline(timeoutMinutes: 240) {
 }
 
 def handleIngestion(timestamp) {
+  handleVcsData()
   kibanaPipeline.downloadCoverageArtifacts()
   kibanaCoverage.prokLinks("### Process HTML Links")
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
@@ -42,3 +43,8 @@ def handleFail() {
   }
 }
 
+def handleVcsData() {
+  kibanaCoverage.downloadPrevious('### Download OLD Previous')
+  kibanaCoverage.collectVcsInfo('### Collect NEW VCS Info')
+  kibanaCoverage.uploadPrevious('### Upload NEW Previous')
+}

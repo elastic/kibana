@@ -17,6 +17,9 @@ export ES_HOST
 STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
 export STATIC_SITE_URL_BASE
 
+FETCHED_PREVIOUS=$(cat ../../../../downloaded_previous.txt)
+export FETCHED_PREVIOUS
+
 for x in jest functional mocha; do
   echo "### Ingesting coverage for ${x}"
 

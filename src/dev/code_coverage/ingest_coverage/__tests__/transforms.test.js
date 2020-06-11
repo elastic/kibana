@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ciRunUrl, coveredFilePath, itemizeVcs } from '../transforms';
+import { ciRunUrl, coveredFilePath, itemizeVcs, prokPrevious } from '../transforms';
 
 describe(`Transform fn`, () => {
   describe(`ciRunUrl`, () => {
@@ -43,6 +43,14 @@ describe(`Transform fn`, () => {
         'coveredFilePath',
         'x-pack/plugins/reporting/server/browsers/extract/unzip.js'
       );
+    });
+  });
+  describe(`prokPrevious`, () => {
+    const comparePrefixF = () => 'https://github.com/elastic/kibana/compare';
+    process.env.FETCHED_PREVIOUS = 'A';
+    it(`should return a previous compare url`, () => {
+      const actual = prokPrevious(comparePrefixF)('B');
+      expect(actual).to.be(`https://github.com/elastic/kibana/compare/A...B`);
     });
   });
   describe(`itemizeVcs`, () => {
