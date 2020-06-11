@@ -17,33 +17,21 @@
  * under the License.
  */
 
-export { ApplicationService } from './application_service';
-export { Capabilities } from './capabilities';
-export { ScopedHistory } from './scoped_history';
-export {
-  App,
-  AppBase,
-  AppMount,
-  AppMountDeprecated,
-  AppUnmount,
-  AppMountContext,
-  AppMountParameters,
-  AppStatus,
-  AppNavLinkStatus,
-  AppUpdatableFields,
-  AppUpdater,
-  ApplicationSetup,
-  ApplicationStart,
-  AppLeaveHandler,
-  AppLeaveActionType,
-  AppLeaveAction,
-  AppLeaveDefaultAction,
-  AppLeaveConfirmAction,
-  LegacyApp,
-  NavigateToAppOptions,
-  PublicAppInfo,
-  PublicLegacyAppInfo,
-  // Internal types
-  InternalApplicationSetup,
-  InternalApplicationStart,
-} from './types';
+import expect from '@kbn/expect';
+import { maybeTeamAssign } from '../ingest';
+import { COVERAGE_INDEX, TOTALS_INDEX } from '../constants';
+
+describe(`Ingest fns`, () => {
+  describe(`maybeTeamAssign fn`, () => {
+    describe(`against the coverage index`, () => {
+      it(`should have the pipeline prop`, () => {
+        expect(maybeTeamAssign(COVERAGE_INDEX, {})).to.have.property('pipeline');
+      });
+    });
+    describe(`against the totals index`, () => {
+      it(`should not have the pipeline prop`, () => {
+        expect(maybeTeamAssign(TOTALS_INDEX, {})).not.to.have.property('pipeline');
+      });
+    });
+  });
+});
