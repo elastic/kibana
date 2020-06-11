@@ -6,13 +6,15 @@
 
 const alwaysImportedTests = [
   require.resolve('../test/functional/config.js'),
+  require.resolve('../test/functional_endpoint/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/functional/config_security_trial.ts'),
 ];
 const onlyNotInCoverageTests = [
-  require.resolve('../test/api_integration/config_security_basic.js'),
-  require.resolve('../test/api_integration/config.js'),
+  require.resolve('../test/api_integration/config_security_basic.ts'),
+  require.resolve('../test/api_integration/config_security_trial.ts'),
+  require.resolve('../test/api_integration/config.ts'),
   require.resolve('../test/alerting_api_integration/basic/config.ts'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),

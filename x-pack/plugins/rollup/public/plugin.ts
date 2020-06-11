@@ -16,8 +16,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-// @ts-ignore
-import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
@@ -71,7 +69,7 @@ export class RollupPlugin implements Plugin {
             'Summarize and store historical data in a smaller index for future analysis.',
         }),
         icon: 'indexRollupApp',
-        path: `#${CRUD_APP_BASE_PATH}/job_list`,
+        path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       });

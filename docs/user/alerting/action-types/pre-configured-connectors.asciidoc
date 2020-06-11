@@ -28,7 +28,7 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
     my-slack1:                  <1>
       actionTypeId: .slack      <2>
       name: 'Slack #xyz'        <3>
-      config:                   <4>
+      secrets:                   <4>
         webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
     webhook-service:
       actionTypeId: .webhook

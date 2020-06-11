@@ -14,6 +14,7 @@ const numberOfHostsInFixture = 3;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  // SKIPPED as it is failing on ES PROMOTION: https://github.com/elastic/kibana/issues/68584
   describe.skip('test metadata api', () => {
     describe('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {

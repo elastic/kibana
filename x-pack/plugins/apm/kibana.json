@@ -15,9 +15,10 @@
     "usageCollection",
     "taskManager",
     "actions",
-    "alerting",
+    "alerts",
     "observability",
-    "security"
+    "security",
+    "ml"
   ],
   "server": true,
   "ui": true,
