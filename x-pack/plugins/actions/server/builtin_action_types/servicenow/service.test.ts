@@ -212,7 +212,7 @@ describe('ServiceNow service', () => {
         title: 'INC011',
         id: '11',
         pushedDate: '2020-03-10T12:24:20.000Z',
-        url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=1',
+        url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=11',
       });
     });
   });

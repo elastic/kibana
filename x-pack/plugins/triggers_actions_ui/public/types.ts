@@ -75,6 +75,7 @@ export interface ActionConnector {
   referencedByCount?: number;
   config: Record<string, any>;
   isPreconfigured: boolean;
+  consumer: string;
 }
 
 export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;

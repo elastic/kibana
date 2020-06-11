@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// to remove
+import { CaseField, ThirdPartyField, ActionType } from '../../../../../../case/common/api';
+
 import { ActionConnector } from '../../../../types';
 
 export interface ServiceNowActionConnector extends ActionConnector {
@@ -25,12 +28,23 @@ export interface ServiceNowActionParams {
   // };
 }
 
+interface IncidentConfiguration {
+  mapping: CasesConfigurationMapping[];
+}
+
 interface ServiceNowConfig {
   apiUrl: string;
-  incidentConfiguration: Record<string, string>;
+  incidentConfiguration?: IncidentConfiguration;
 }
 
 interface ServiceNowSecrets {
   username: string;
   password: string;
+}
+
+// to remove
+export interface CasesConfigurationMapping {
+  source: CaseField;
+  target: ThirdPartyField;
+  actionType: ActionType;
 }

@@ -65,6 +65,7 @@ describe('create()', () => {
         name: 'my name',
         actionTypeId: 'my-action-type',
         config: {},
+        consumer: 'alerts',
       },
       references: [],
     };
@@ -80,6 +81,7 @@ describe('create()', () => {
         name: 'my name',
         actionTypeId: 'my-action-type',
         config: {},
+        consumer: 'alerts',
         secrets: {},
       },
     });
@@ -89,6 +91,7 @@ describe('create()', () => {
       name: 'my name',
       actionTypeId: 'my-action-type',
       config: {},
+      consumer: 'alerts',
     });
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -97,6 +100,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "consumer": "alerts",
           "name": "my name",
           "secrets": Object {},
         },
@@ -123,6 +127,7 @@ describe('create()', () => {
           actionTypeId: 'my-action-type',
           config: {},
           secrets: {},
+          consumer: 'alerts',
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -138,6 +143,7 @@ describe('create()', () => {
           actionTypeId: 'unregistered-action-type',
           config: {},
           secrets: {},
+          consumer: 'alerts',
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -164,6 +170,7 @@ describe('create()', () => {
           c: true,
         },
         secrets: {},
+        consumer: 'alerts',
       },
       references: [],
     });
@@ -177,6 +184,7 @@ describe('create()', () => {
           c: true,
         },
         secrets: {},
+        consumer: 'alerts',
       },
     });
     expect(result).toEqual({
@@ -189,6 +197,7 @@ describe('create()', () => {
         b: true,
         c: true,
       },
+      consumer: 'alerts',
     });
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -201,6 +210,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "consumer": "alerts",
           "name": "my name",
           "secrets": Object {},
         },
@@ -259,6 +269,7 @@ describe('create()', () => {
           actionTypeId: 'my-action-type',
           config: {},
           secrets: {},
+          consumer: 'alerts',
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -294,6 +305,7 @@ describe('create()', () => {
           actionTypeId: 'my-action-type',
           config: {},
           secrets: {},
+          consumer: 'alerts',
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -340,6 +352,7 @@ describe('get()', () => {
           config: {
             foo: 'bar',
           },
+          consumer: 'alerts',
         },
       ],
     });
@@ -350,6 +363,7 @@ describe('get()', () => {
       actionTypeId: '.slack',
       isPreconfigured: true,
       name: 'test',
+      consumer: 'alerts',
     });
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -370,6 +384,7 @@ describe('getAll()', () => {
             config: {
               foo: 'bar',
             },
+            consumer: 'alerts',
           },
           references: [],
         },
@@ -398,6 +413,7 @@ describe('getAll()', () => {
           config: {
             foo: 'bar',
           },
+          consumer: 'alerts',
         },
       ],
     });
@@ -411,6 +427,7 @@ describe('getAll()', () => {
           foo: 'bar',
         },
         referencedByCount: 6,
+        consumer: 'alerts',
       },
       {
         id: 'testPreconfigured',
@@ -418,6 +435,7 @@ describe('getAll()', () => {
         isPreconfigured: true,
         name: 'test',
         referencedByCount: 2,
+        consumer: 'alerts',
       },
     ]);
   });
@@ -436,6 +454,7 @@ describe('getBulk()', () => {
             config: {
               foo: 'bar',
             },
+            consumer: 'alerts',
           },
           references: [],
         },
@@ -463,6 +482,7 @@ describe('getBulk()', () => {
           config: {
             foo: 'bar',
           },
+          consumer: 'alerts',
         },
       ],
     });
@@ -477,6 +497,7 @@ describe('getBulk()', () => {
         isPreconfigured: true,
         name: 'test',
         secrets: {},
+        consumer: 'alerts',
       },
       {
         actionTypeId: 'test',
@@ -486,6 +507,7 @@ describe('getBulk()', () => {
         id: '1',
         isPreconfigured: false,
         name: 'test',
+        consumer: 'alerts',
       },
     ]);
   });
@@ -540,6 +562,7 @@ describe('update()', () => {
         name: 'my name',
         config: {},
         secrets: {},
+        consumer: 'alerts',
       },
     });
     expect(result).toEqual({
@@ -598,6 +621,7 @@ describe('update()', () => {
           name: 'my name',
           config: {},
           secrets: {},
+          consumer: 'alerts',
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -617,6 +641,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        consumer: 'alerts',
       },
       references: [],
     });
@@ -657,6 +682,7 @@ describe('update()', () => {
         b: true,
         c: true,
       },
+      consumer: 'alerts',
     });
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`

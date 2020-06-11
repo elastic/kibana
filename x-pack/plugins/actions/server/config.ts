@@ -12,6 +12,7 @@ const preconfiguredActionSchema = schema.object({
   actionTypeId: schema.string({ minLength: 1 }),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  consumer: schema.string({ minLength: 1 }),
 });
 
 export const configSchema = schema.object({

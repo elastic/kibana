@@ -124,6 +124,7 @@ describe('action_form', () => {
           name: 'Test connector',
           config: {},
           isPreconfigured: false,
+          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -132,6 +133,7 @@ describe('action_form', () => {
           name: 'Test connector 2',
           config: {},
           isPreconfigured: true,
+          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -140,6 +142,7 @@ describe('action_form', () => {
           name: 'Preconfigured Only',
           config: {},
           isPreconfigured: true,
+          consumer: 'alerts',
         },
         {
           secrets: {},
@@ -148,6 +151,16 @@ describe('action_form', () => {
           name: 'Regular connector',
           config: {},
           isPreconfigured: false,
+          consumer: 'alerts',
+        },
+        {
+          secrets: {},
+          id: 'test5',
+          actionTypeId: actionType.id,
+          name: 'Non consumer connector',
+          config: {},
+          isPreconfigured: false,
+          consumer: 'case',
         },
       ]);
       const mocks = coreMock.createSetup();
@@ -272,6 +285,7 @@ describe('action_form', () => {
           toastNotifications={deps!.toastNotifications}
           docLinks={deps.docLinks}
           capabilities={deps.capabilities}
+          consumer={'alerts'}
         />
       );
 

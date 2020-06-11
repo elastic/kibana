@@ -40,6 +40,7 @@ interface ConnectorAddModalProps {
   >;
   capabilities: ApplicationStart['capabilities'];
   docLinks: DocLinksStart;
+  consumer: string;
 }
 
 export const ConnectorAddModal = ({
@@ -52,12 +53,14 @@ export const ConnectorAddModal = ({
   actionTypeRegistry,
   capabilities,
   docLinks,
+  consumer,
 }: ConnectorAddModalProps) => {
   let hasErrors = false;
   const initialConnector = {
     actionTypeId: actionType.id,
     config: {},
     secrets: {},
+    consumer,
   } as ActionConnector;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);

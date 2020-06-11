@@ -36,6 +36,7 @@ beforeEach(() => {
         name: 'Slack #xyz',
         secrets: {},
         isPreconfigured: true,
+        consumer: 'alerts',
       },
     ],
   };

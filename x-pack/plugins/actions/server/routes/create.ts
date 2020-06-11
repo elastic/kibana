@@ -21,6 +21,7 @@ export const bodySchema = schema.object({
   actionTypeId: schema.string(),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  consumer: schema.string(),
 });
 
 export const createActionRoute = (router: IRouter, licenseState: ILicenseState) => {

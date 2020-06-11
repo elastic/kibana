@@ -12,7 +12,7 @@ import {
   ActionTypeModel,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../types';
-import { connector } from './config';
+import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { ServiceNowActionConnector, ServiceNowActionParams } from './types';
 import * as i18n from './translations';
@@ -50,10 +50,10 @@ export function getActionType(): ActionTypeModel<
   ServiceNowActionParams
 > {
   return {
-    id: connector.id,
+    id: connectorConfiguration.id,
     iconClass: logo,
     selectMessage: i18n.SERVICENOW_DESC,
-    actionTypeTitle: connector.name,
+    actionTypeTitle: connectorConfiguration.name,
     // minimumLicenseRequired: 'platinum',
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),

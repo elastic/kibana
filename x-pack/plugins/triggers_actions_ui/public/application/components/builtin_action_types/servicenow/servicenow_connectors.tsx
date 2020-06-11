@@ -14,11 +14,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { isEmpty, get } from 'lodash';
+import { isEmpty } from 'lodash';
+
+// TODO: remove FieldMapping, createDefaultMapping later
+// when Case ServiceNow will move their fields to the level of action execution
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FieldMapping } from '../../../../../../security_solution/public/cases/components/configure_cases/field_mapping';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createDefaultMapping } from '../../../../../../security_solution/public/common/lib/connectors/utils';
+
 import { IErrorObject, ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
-import { ServiceNowActionConnector } from './types';
-import { connector } from './config';
+import { ServiceNowActionConnector, CasesConfigurationMapping } from './types';
+import { connectorConfiguration } from './config';
 
 export interface ConnectorFlyoutFormProps<T> {
   errors: IErrorObject;
@@ -32,14 +40,9 @@ export interface ConnectorFlyoutFormProps<T> {
 const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionSecrets, editActionConfig, errors }) => {
-  const secretKeys = ['username', 'password'];
-  const configKeysWithDefault = ['apiUrl'];
-
-  /* We do not provide defaults values to the fields (like empty string for apiUrl) intentionally.
-   * If we do, errors will be shown the first time the flyout is open even though the user did not
-   * interact with the form. Also, we would like to show errors for empty fields provided by the user.
-  /*/
+  // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration } = action.config;
+  const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
 
@@ -48,18 +51,15 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
   const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
 
+  // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+  if (action.consumer === 'case' && isEmpty(mapping)) {
+    editActionConfig('incidentConfiguration', {
+      mapping: createDefaultMapping(connectorConfiguration.fields as any),
+    });
+  }
+
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const handleOnBlurActionConfig = useCallback(
-    (key: string) => {
-      if (!get(key, action.config)) {
-        editActionConfig(key, '');
-      }
-    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -70,14 +70,14 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
     []
   );
 
-  const handleOnBlurSecretConfig = useCallback(
-    (key: string) => {
-      if (!get(key, action.secrets)) {
-        editActionSecrets(key, '');
-      }
-    },
+  const handleOnChangeMappingConfig = useCallback(
+    (newMapping: CasesConfigurationMapping[]) =>
+      editActionConfig('incidentConfiguration', {
+        ...action.config.incidentConfiguration,
+        mapping: newMapping,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [action.config]
   );
 
   return (
@@ -160,6 +160,21 @@ const ServiceNowConnectorFlyout: React.FC<ActionConnectorFieldsProps<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {incidentConfiguration && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <FieldMapping
+                disabled={true}
+                connectorActionTypeId={connectorConfiguration.id}
+                mapping={mapping as CasesConfigurationMapping[]}
+                onChangeMapping={handleOnChangeMappingConfig}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };

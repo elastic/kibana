@@ -7,7 +7,7 @@
 import * as i18n from './translations';
 import logo from './logo.svg';
 
-export const connector = {
+export const connectorConfiguration = {
   id: '.servicenow',
   name: i18n.SERVICENOW_TITLE,
   logo,

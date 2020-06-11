@@ -42,6 +42,7 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      consumer: 'alerts',
     };
 
     const actionsClient = actionsClientMock.create();
@@ -98,6 +99,7 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      consumer: 'alerts',
     });
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
@@ -126,6 +128,7 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      consumer: 'alerts',
     });
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {});

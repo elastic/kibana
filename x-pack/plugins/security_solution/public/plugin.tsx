@@ -17,7 +17,7 @@ import {
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
+import { jiraActionType } from './common/lib/connectors';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
 import { APP_ID, APP_NAME, APP_ICON, APP_PATH } from '../common/constants';
 import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
@@ -46,7 +46,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: FeatureCatalogueCategory.DATA,
     });
 
-    // plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     const mountSecurityApp = async (params: AppMountParameters) => {

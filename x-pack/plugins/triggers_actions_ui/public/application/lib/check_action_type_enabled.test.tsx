@@ -102,6 +102,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       name: 'test',
       secrets: {},
       referencedByCount: 0,
+      consumer: 'alerts',
     },
     {
       actionTypeId: '2',
@@ -111,6 +112,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       name: 'test',
       secrets: {},
       referencedByCount: 0,
+      consumer: 'alerts',
     },
   ];
 
