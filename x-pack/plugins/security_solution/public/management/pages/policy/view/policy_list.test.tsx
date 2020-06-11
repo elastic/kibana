@@ -63,49 +63,14 @@ describe('when on the policies page', () => {
       expect(policyNameLink).not.toBeNull();
       expect(policyNameLink.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
     });
-    it('should display policy actions when button is clicked', async () => {
-      const renderResult = render();
-      const policyActionsButton = (await renderResult.findAllByTestId('policyActionsButton'))[0];
-      expect(policyActionsButton).not.toBeNull();
-
-      reactTestingLibrary.fireEvent.click(policyActionsButton);
-      renderResult.findByTestId('agentConfigLink').then((agentConfigLink) => {
-        expect(agentConfigLink).not.toBeNull();
-      });
-      renderResult.findByTestId('policyDeleteButton').then((policyDeleteButton) => {
-        expect(policyDeleteButton).not.toBeNull();
-      });
-    });
-    it('should display agent config action as link', async () => {
-      const renderResult = render();
-      const policyActionsButton = (await renderResult.findAllByTestId('policyActionsButton'))[0];
-      expect(policyActionsButton).not.toBeNull();
-
-      reactTestingLibrary.fireEvent.click(policyActionsButton);
-      renderResult.findByTestId('agentConfigLink').then((agentConfigLink) => {
-        expect(agentConfigLink).not.toBeNull();
-      });
-      renderResult.findByTestId('policyDeleteButton').then((policyDeleteButton) => {
-        expect(policyDeleteButton).not.toBeNull();
-      });
-    });
     it('should display agent config action as a link', async () => {
       const renderResult = render();
       const policyActionsButton = (await renderResult.findAllByTestId('policyActionsButton'))[0];
-      reactTestingLibrary.fireEvent.click(policyActionsButton);
-      renderResult.findByTestId('agentConfigLink').then((agentConfigLink) => {
-        expect(agentConfigLink.getAttribute('href')).toContain(`configs/${firstAgentConfigID}`);
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(policyActionsButton);
       });
-    });
-    it('should display delete modal when delete action is clicked', async () => {
-      const renderResult = render();
-      const policyActionsButton = (await renderResult.findAllByTestId('policyActionsButton'))[0];
-      reactTestingLibrary.fireEvent.click(policyActionsButton);
-      renderResult.findByTestId('policyDeleteButton').then((policyDeleteButton) => {
-        reactTestingLibrary.fireEvent.click(policyDeleteButton);
-        renderResult.findByTestId('policyListDeleteModal').then((policyListDeleteModal) => {
-          expect(policyListDeleteModal).not.toBeNull();
-        });
+      return renderResult.findByTestId('agentConfigLink').then((agentConfigLink) => {
+        expect(agentConfigLink.getAttribute('href')).toContain(`configs/${firstAgentConfigID}`);
       });
     });
   });
