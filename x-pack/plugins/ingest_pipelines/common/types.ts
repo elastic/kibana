@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ESCommonProcessorOptions {
+export interface ESProcessorConfig {
   on_failure?: Processor[];
   ignore_failure?: boolean;
   if?: string;
   tag?: string;
+  [key: string]: any;
 }
 
-export interface Processor<Extend = { [key: string]: any }> {
-  [type: string]: ESCommonProcessorOptions & Extend;
+export interface Processor {
+  [typeName: string]: ESProcessorConfig;
 }
 
 export interface Pipeline {

@@ -188,12 +188,13 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               }
               checked={showGlobalOnFailure}
               onChange={(e) => setShowGlobalOnFailure(e.target.checked)}
-              data-test-subj="onFailureToggle"
+              data-test-subj="pipelineEditorOnFailureToggle"
             />
           </EuiFlexItem>
           {showGlobalOnFailure ? (
             <EuiFlexItem grow={false}>
               <ProcessorsTree
+                data-test-subj="pipelineEditorOnFailureTree"
                 baseSelector={ON_FAILURE_STATE_SCOPE}
                 processors={onFailureProcessors}
                 onAction={onTreeAction}

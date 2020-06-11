@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setup } from './pipeline_processors_editor_helpers';
+import { setup } from './pipeline_processors_editor.helpers';
+import { Pipeline } from '../../../../../common/types';
 
-const testProcessors = {
+const testProcessors: Pick<Pipeline, 'processors'> = {
   processors: [
     {
       script: {
@@ -29,7 +30,7 @@ describe('Pipeline Editor', () => {
 
     await setup({
       value: {
-        ...(testProcessors as any),
+        ...testProcessors,
       },
       onUpdate,
       isTestButtonDisabled: false,
@@ -43,5 +44,22 @@ describe('Pipeline Editor', () => {
     } = onUpdate.mock;
 
     expect(arg.getData()).toEqual(testProcessors);
+  });
+
+  it('toggles the on-failure processors', async () => {
+    const { actions, exists } = await setup({
+      value: {
+        ...testProcessors,
+      },
+      onUpdate: jest.fn(),
+      isTestButtonDisabled: false,
+      onTestPipelineClick: jest.fn(),
+      learnMoreAboutProcessorsUrl: 'test',
+      learnMoreAboutOnFailureProcessorsUrl: 'test',
+    });
+
+    expect(exists('pipelineEditorOnFailureTree')).toBe(false);
+    actions.toggleOnFailure();
+    expect(exists('pipelineEditorOnFailureTree')).toBe(true);
   });
 });

@@ -32,78 +32,79 @@ export interface Props {
   baseSelector: ProcessorSelector;
   onAction: OnActionHandler;
   movingProcessor?: ProcessorInfo;
+  'data-test-subj'?: string;
 }
 
 /**
  * This component is the public interface to our optimised tree rendering private components and
  * also contains top-level state concerns for an instance of the component
  */
-export const ProcessorsTree: FunctionComponent<Props> = memo(
-  ({ processors, baseSelector, onAction, movingProcessor }) => {
-    // These refs are created here so they can be shared with all
-    // recursively rendered trees. Their values should come from react-virtualized
-    // List component and WindowScroller component.
-    const windowScrollerRef = useRef<any>();
-    const listRef = useRef<any>();
+export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
+  const { processors, baseSelector, onAction, movingProcessor } = props;
+  // These refs are created here so they can be shared with all
+  // recursively rendered trees. Their values should come from react-virtualized
+  // List component and WindowScroller component.
+  const windowScrollerRef = useRef<any>();
+  const listRef = useRef<any>();
 
-    useEffect(() => {
-      const cancelMoveKbListener = (event: KeyboardEvent) => {
-        // x-browser support per https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
-        if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
-          onAction({ type: 'cancelMove' });
-        }
-      };
-      const cancelMoveClickListener = (ev: any) => {
+  useEffect(() => {
+    const cancelMoveKbListener = (event: KeyboardEvent) => {
+      // x-browser support per https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+      if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
         onAction({ type: 'cancelMove' });
-      };
-      // Give the browser a chance to flush any click events including the click
-      // event that triggered any state transition into selecting a processor to move
-      setTimeout(() => {
-        if (movingProcessor) {
-          window.addEventListener('keyup', cancelMoveKbListener);
-          window.addEventListener('click', cancelMoveClickListener);
-        } else {
-          window.removeEventListener('keyup', cancelMoveKbListener);
-          window.removeEventListener('click', cancelMoveClickListener);
-        }
-      });
-      return () => {
+      }
+    };
+    const cancelMoveClickListener = (ev: any) => {
+      onAction({ type: 'cancelMove' });
+    };
+    // Give the browser a chance to flush any click events including the click
+    // event that triggered any state transition into selecting a processor to move
+    setTimeout(() => {
+      if (movingProcessor) {
+        window.addEventListener('keyup', cancelMoveKbListener);
+        window.addEventListener('click', cancelMoveClickListener);
+      } else {
         window.removeEventListener('keyup', cancelMoveKbListener);
         window.removeEventListener('click', cancelMoveClickListener);
-      };
-    }, [movingProcessor, onAction]);
+      }
+    });
+    return () => {
+      window.removeEventListener('keyup', cancelMoveKbListener);
+      window.removeEventListener('click', cancelMoveClickListener);
+    };
+  }, [movingProcessor, onAction]);
 
-    return (
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        responsive={false}
-        className="pipelineProcessorsEditor__tree__container"
-      >
-        <EuiFlexItem grow={false}>
-          <PrivateTree
-            windowScrollerRef={windowScrollerRef}
-            listRef={listRef}
-            onHeightChange={() => windowScrollerRef.current?.updatePosition()}
-            level={1}
-            onAction={onAction}
-            movingProcessor={movingProcessor}
-            processors={processors}
-            selector={baseSelector}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} justifyContent="flexStart" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <AddProcessorButton
-                onClick={() => {
-                  onAction({ type: 'addProcessor', payload: { target: baseSelector } });
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+  return (
+    <EuiFlexGroup
+      data-test-subj={props['data-test-subj']}
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      className="pipelineProcessorsEditor__tree__container"
+    >
+      <EuiFlexItem grow={false}>
+        <PrivateTree
+          windowScrollerRef={windowScrollerRef}
+          listRef={listRef}
+          onHeightChange={() => windowScrollerRef.current?.updatePosition()}
+          level={1}
+          onAction={onAction}
+          movingProcessor={movingProcessor}
+          processors={processors}
+          selector={baseSelector}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup responsive={false} justifyContent="flexStart" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <AddProcessorButton
+              onClick={() => {
+                onAction({ type: 'addProcessor', payload: { target: baseSelector } });
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
