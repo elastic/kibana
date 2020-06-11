@@ -1,17 +1,10 @@
 [[whats-new]]
-== What's new
+== What's new in 8.0
 
 This section summarizes the most important changes in each release. For the 
 full list, see <<release-notes>> and <<breaking-changes>>. 
 
-[discrete]
-[[release-highlights-8.0.0]]
-=== 8.0.0 release highlights
-
 coming[8.0.0]
-
-See also <<breaking-changes-8.0,breaking changes>> and <<release-notes>>.
-
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
