@@ -42,7 +42,7 @@ export const MonitorStatusBar: React.FC = () => {
 
   const full = monitorStatus?.url?.full ?? '';
 
-  const availability = ups === 0 && downs === 0 ? 0 : (ups / (ups + downs)) * 100;
+  const availability = (ups === 0 && downs === 0) || !ups ? 0 : (ups / (ups + downs)) * 100;
 
   return (
     <>
@@ -58,7 +58,7 @@ export const MonitorStatusBar: React.FC = () => {
       >
         <MonListTitle>{OverallAvailability}</MonListTitle>
         <MonListDescription data-test-subj="uptimeOverallAvailability">
-          {availability.toFixed(2)}%
+          {availability?.toFixed(2)} %
         </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
         <MonListDescription>

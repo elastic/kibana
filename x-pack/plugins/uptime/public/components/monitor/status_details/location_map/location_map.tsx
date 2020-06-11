@@ -13,13 +13,10 @@ import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
-  @media (min-width: 1300px) {
-    margin-right: 20px;
-  }
+  margin-right: 65px;
   @media (max-width: 574px) {
     height: 250px;
     width: 100%;
-    margin-right: 0;
   }
 `;
 

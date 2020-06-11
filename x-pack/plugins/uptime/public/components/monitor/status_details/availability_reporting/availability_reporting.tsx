@@ -32,7 +32,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
       name: AvailabilityLabel,
       align: 'right' as const,
       render: (val: number) => {
-        return <span>{val.toFixed(2)}%</span>;
+        return <span>{val.toFixed(2)} %</span>;
       },
     },
     {
