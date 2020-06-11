@@ -9,12 +9,12 @@
   color: $euiTextColor;
 }
 
-.monTableCell__clusterCellLiscense {
-  font-size: 16px;
+.monTableCell__clusterCellLicense {
+  font-size: $euiFontSize;
 }
+
 .monTableCell__clusterCellExpiration {
   color: $euiColorDarkShade;
-  @include euiFontSizeS;
 }
 
 .monTableCell__name,
@@ -28,8 +28,8 @@
 }
 
 .monTableCell__transportAddress {
-  color: $euiColorDarkShade;
   @include euiFontSizeS;
+  color: $euiColorDarkShade;
 }
 
 .monTableCell__number {
@@ -38,9 +38,4 @@
 
 .monTableCell__splitNumber {
   @include euiFontSizeM;
-}
-
-.monElasticsearchIndicesTable__status {
-  display: flex;
-  align-items: center;
 }
