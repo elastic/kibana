@@ -18,7 +18,7 @@ const createSetupMock = () => {
   return mock;
 };
 
-const createStartMock = (): LicensingPluginStart => {
+const createStartMock = () => {
   const license = licenseMock.createLicense();
   const mock: jest.Mocked<LicensingPluginStart> = {
     license$: new BehaviorSubject(license),

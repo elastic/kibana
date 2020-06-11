@@ -10,11 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiKeyPadMenuItem,
   EuiSpacer,
   EuiText,
-  EuiKeyPadMenuItem,
+  EuiToolTip,
 } from '@elastic/eui';
-import { doesNotMeetLicenseRequirements, txtChangeButton } from './i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory } from '../../dynamic_actions';
 
@@ -185,28 +187,28 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
         .sort((f1, f2) => f2.order - f1.order)
         .map((actionFactory) => (
           <EuiFlexItem grow={false} key={actionFactory.id}>
-            <EuiKeyPadMenuItem
-              className="auaActionWizard__actionFactoryItem"
-              label={actionFactory.getDisplayName(context)}
-              data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
-              onClick={() => onActionFactorySelected(actionFactory)}
-              disabled={!actionFactory.isCompatibleLicence()}
-              betaBadgeIconType={!actionFactory.isCompatibleLicence() ? 'lock' : undefined}
-              betaBadgeLabel={
-                !actionFactory.isCompatibleLicence()
-                  ? doesNotMeetLicenseRequirements.header
-                  : undefined
-              }
-              betaBadgeTooltipContent={
-                !actionFactory.isCompatibleLicence()
-                  ? doesNotMeetLicenseRequirements.content
-                  : undefined
+            <EuiToolTip
+              content={
+                !actionFactory.isCompatibleLicence() && (
+                  <FormattedMessage
+                    defaultMessage="Upgrade your license to get access to this action"
+                    id="xpack.uiActionsEnhanced.components.actionWizard.upgradeYourLicenseTooltip"
+                  />
+                )
               }
             >
-              {actionFactory.getIconType(context) && (
-                <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
-              )}
-            </EuiKeyPadMenuItem>
+              <EuiKeyPadMenuItem
+                className="auaActionWizard__actionFactoryItem"
+                label={actionFactory.getDisplayName(context)}
+                data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
+                onClick={() => onActionFactorySelected(actionFactory)}
+                disabled={!actionFactory.isCompatibleLicence()}
+              >
+                {actionFactory.getIconType(context) && (
+                  <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+                )}
+              </EuiKeyPadMenuItem>
+            </EuiToolTip>
           </EuiFlexItem>
         ))}
     </EuiFlexGroup>
