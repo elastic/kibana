@@ -6,6 +6,8 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import typeDetect from 'type-detect';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import { AlertType } from './types';
@@ -22,6 +24,19 @@ export interface RegistryAlertType
   > {
   id: string;
 }
+
+const alertIdSchema = schema.string({
+  validate(value: string): string | void {
+    if (typeof value !== 'string') {
+      return `expected AlertType Id of type [string] but got [${typeDetect(value)}]`;
+    } else if (!value.match(/^[a-zA-Z0-9_\-\.]*$/)) {
+      const invalid = value.match(/[^a-zA-Z0-9_\-\.]+/g)!;
+      return `expected AlertType Id not to include invalid character${
+        invalid.length > 1 ? `s` : ``
+      }: ${invalid?.join(`, `)}`;
+    }
+  },
+});
 
 export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
@@ -49,7 +64,7 @@ export class AlertTypeRegistry {
       );
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
-    this.alertTypes.set(alertType.id, { ...alertType });
+    this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType });
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,

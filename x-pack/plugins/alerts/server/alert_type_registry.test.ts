@@ -43,6 +43,38 @@ describe('has()', () => {
 });
 
 describe('register()', () => {
+  test('throws if AlertType Id contains invalid characters', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerting',
+    };
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    const invalidCharacters = [' ', ':', '*', '*', '/'];
+    for (const char of invalidCharacters) {
+      expect(() => registry.register({ ...alertType, id: `${alertType.id}${char}` })).toThrowError(
+        new Error(`expected AlertType Id not to include invalid character: ${char}`)
+      );
+    }
+
+    const [first, second] = invalidCharacters;
+    expect(() =>
+      registry.register({ ...alertType, id: `${first}${alertType.id}${second}` })
+    ).toThrowError(
+      new Error(`expected AlertType Id not to include invalid characters: ${first}, ${second}`)
+    );
+  });
+
   test('registers the executor with the task manager', () => {
     const alertType = {
       id: 'test',
