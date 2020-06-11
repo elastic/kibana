@@ -49,7 +49,7 @@ export const StepDetailsTimeField: FC<Props> = ({
       helpText={
         <FormattedMessage
           id="xpack.transform.stepDetailsForm.indexPatternTimeFilterHelpText"
-          defaultMessage="'The Time Filter will use this field to filter your data by time. You can choose not to have a time field, but you will not be able to narrow down your data by a time range.'"
+          defaultMessage="The Time Filter will use this field to filter your data by time. You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
         />
       }
     >
