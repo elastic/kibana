@@ -110,8 +110,6 @@ describe('action_status', () => {
       describe(`correctly calculates ACTION_STATES.ERROR`, () => {
         it('lastExecutionSuccessful is equal to false and it is the most recent execution', () => {
           upstreamJson.actionStatusJson.last_execution.successful = false;
-          upstreamJson.actionStatusJson.last_execution.timestamp =
-            upstreamJson.actionStatusJson.last_execution.timestamp;
           const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
           expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
         });
