@@ -105,10 +105,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   ) {
     super(
       {
-        panels: {},
-        isFullScreenMode: false,
-        filters: [],
-        useMargins: true,
         ...initialInput,
       },
       { embeddableLoaded: {} },
