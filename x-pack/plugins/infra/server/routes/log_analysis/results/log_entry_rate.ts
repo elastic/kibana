@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
@@ -17,41 +11,39 @@ import {
   getLogEntryRateSuccessReponsePayloadRT,
   GetLogEntryRateSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
-import { throwErrors } from '../../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
+import { createValidationFunction } from '../../../../common/runtime_types';
+import { NoLogAnalysisResultsIndexError, getLogEntryRateBuckets } from '../../../lib/log_analysis';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-const anyObject = schema.object({}, { unknowns: 'allow' });
-
-export const initGetLogEntryRateRoute = ({ framework, logEntryRateAnalysis }: InfraBackendLibs) => {
+export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
       path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
       validate: {
-        // short-circuit forced @kbn/config-schema validation so we can do io-ts validation
-        body: anyObject,
+        body: createValidationFunction(getLogEntryRateRequestPayloadRT),
       },
     },
-    async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          getLogEntryRateRequestPayloadRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+      const {
+        data: { sourceId, timeRange, bucketDuration },
+      } = request.body;
 
-        const logEntryRateBuckets = await logEntryRateAnalysis.getLogEntryRateBuckets(
+      try {
+        assertHasInfraMlPlugins(requestContext);
+
+        const logEntryRateBuckets = await getLogEntryRateBuckets(
           requestContext,
-          request,
-          payload.data.sourceId,
-          payload.data.timeRange.startTime,
-          payload.data.timeRange.endTime,
-          payload.data.bucketDuration
+          sourceId,
+          timeRange.startTime,
+          timeRange.endTime,
+          bucketDuration
         );
 
         return response.ok({
           body: getLogEntryRateSuccessReponsePayloadRT.encode({
             data: {
-              bucketDuration: payload.data.bucketDuration,
+              bucketDuration,
               histogramBuckets: logEntryRateBuckets,
               totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
             },
@@ -67,7 +59,7 @@ export const initGetLogEntryRateRoute = ({ framework, logEntryRateAnalysis }: In
           body: { message },
         });
       }
-    }
+    })
   );
 };
 

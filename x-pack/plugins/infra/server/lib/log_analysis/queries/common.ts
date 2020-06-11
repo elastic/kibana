@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
-
-export const getMlResultIndex = (jobId: string) => `${ML_ANOMALY_INDEX_PREFIX}${jobId}`;
-
 export const defaultRequestParameters = {
   allowNoIndices: true,
   ignoreUnavailable: true,
   trackScores: false,
   trackTotalHits: false,
 };
+
+export const createJobIdFilters = (jobId: string) => [
+  {
+    term: {
+      job_id: {
+        value: jobId,
+      },
+    },
+  },
+];
 
 export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   {
@@ -26,12 +32,10 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   },
 ];
 
-export const createResultTypeFilters = (resultType: 'model_plot' | 'record') => [
+export const createResultTypeFilters = (resultTypes: Array<'model_plot' | 'record'>) => [
   {
-    term: {
-      result_type: {
-        value: resultType,
-      },
+    terms: {
+      result_type: resultTypes,
     },
   },
 ];
