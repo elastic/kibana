@@ -5,24 +5,146 @@
 ```ts
 
 import { Action } from 'history';
+import Boom from 'boom';
 import { Breadcrumb } from '@elastic/eui';
+import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { CatAliasesParams } from 'elasticsearch';
+import { CatAllocationParams } from 'elasticsearch';
+import { CatCommonParams } from 'elasticsearch';
+import { CatFielddataParams } from 'elasticsearch';
+import { CatHealthParams } from 'elasticsearch';
+import { CatHelpParams } from 'elasticsearch';
+import { CatIndicesParams } from 'elasticsearch';
+import { CatRecoveryParams } from 'elasticsearch';
+import { CatSegmentsParams } from 'elasticsearch';
+import { CatShardsParams } from 'elasticsearch';
+import { CatSnapshotsParams } from 'elasticsearch';
+import { CatTasksParams } from 'elasticsearch';
+import { CatThreadPoolParams } from 'elasticsearch';
+import { ClearScrollParams } from 'elasticsearch';
+import { Client } from 'elasticsearch';
+import { ClusterAllocationExplainParams } from 'elasticsearch';
+import { ClusterGetSettingsParams } from 'elasticsearch';
+import { ClusterHealthParams } from 'elasticsearch';
+import { ClusterPendingTasksParams } from 'elasticsearch';
+import { ClusterPutSettingsParams } from 'elasticsearch';
+import { ClusterRerouteParams } from 'elasticsearch';
+import { ClusterStateParams } from 'elasticsearch';
+import { ClusterStatsParams } from 'elasticsearch';
+import { CountParams } from 'elasticsearch';
+import { CreateDocumentParams } from 'elasticsearch';
+import { DeleteDocumentByQueryParams } from 'elasticsearch';
+import { DeleteDocumentParams } from 'elasticsearch';
+import { DeleteScriptParams } from 'elasticsearch';
+import { DeleteTemplateParams } from 'elasticsearch';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
+import { ExistsParams } from 'elasticsearch';
+import { ExplainParams } from 'elasticsearch';
+import { FieldStatsParams } from 'elasticsearch';
+import { GenericParams } from 'elasticsearch';
+import { GetParams } from 'elasticsearch';
+import { GetResponse } from 'elasticsearch';
+import { GetScriptParams } from 'elasticsearch';
+import { GetSourceParams } from 'elasticsearch';
+import { GetTemplateParams } from 'elasticsearch';
 import { History } from 'history';
+import { Href } from 'history';
 import { IconType } from '@elastic/eui';
+import { IndexDocumentParams } from 'elasticsearch';
+import { IndicesAnalyzeParams } from 'elasticsearch';
+import { IndicesClearCacheParams } from 'elasticsearch';
+import { IndicesCloseParams } from 'elasticsearch';
+import { IndicesCreateParams } from 'elasticsearch';
+import { IndicesDeleteAliasParams } from 'elasticsearch';
+import { IndicesDeleteParams } from 'elasticsearch';
+import { IndicesDeleteTemplateParams } from 'elasticsearch';
+import { IndicesExistsAliasParams } from 'elasticsearch';
+import { IndicesExistsParams } from 'elasticsearch';
+import { IndicesExistsTemplateParams } from 'elasticsearch';
+import { IndicesExistsTypeParams } from 'elasticsearch';
+import { IndicesFlushParams } from 'elasticsearch';
+import { IndicesFlushSyncedParams } from 'elasticsearch';
+import { IndicesForcemergeParams } from 'elasticsearch';
+import { IndicesGetAliasParams } from 'elasticsearch';
+import { IndicesGetFieldMappingParams } from 'elasticsearch';
+import { IndicesGetMappingParams } from 'elasticsearch';
+import { IndicesGetParams } from 'elasticsearch';
+import { IndicesGetSettingsParams } from 'elasticsearch';
+import { IndicesGetTemplateParams } from 'elasticsearch';
+import { IndicesGetUpgradeParams } from 'elasticsearch';
+import { IndicesOpenParams } from 'elasticsearch';
+import { IndicesPutAliasParams } from 'elasticsearch';
+import { IndicesPutMappingParams } from 'elasticsearch';
+import { IndicesPutSettingsParams } from 'elasticsearch';
+import { IndicesPutTemplateParams } from 'elasticsearch';
+import { IndicesRecoveryParams } from 'elasticsearch';
+import { IndicesRefreshParams } from 'elasticsearch';
+import { IndicesRolloverParams } from 'elasticsearch';
+import { IndicesSegmentsParams } from 'elasticsearch';
+import { IndicesShardStoresParams } from 'elasticsearch';
+import { IndicesShrinkParams } from 'elasticsearch';
+import { IndicesStatsParams } from 'elasticsearch';
+import { IndicesUpdateAliasesParams } from 'elasticsearch';
+import { IndicesUpgradeParams } from 'elasticsearch';
+import { IndicesValidateQueryParams } from 'elasticsearch';
+import { InfoParams } from 'elasticsearch';
+import { IngestDeletePipelineParams } from 'elasticsearch';
+import { IngestGetPipelineParams } from 'elasticsearch';
+import { IngestPutPipelineParams } from 'elasticsearch';
+import { IngestSimulateParams } from 'elasticsearch';
+import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
+import { MGetParams } from 'elasticsearch';
+import { MGetResponse } from 'elasticsearch';
+import { MSearchParams } from 'elasticsearch';
+import { MSearchResponse } from 'elasticsearch';
+import { MSearchTemplateParams } from 'elasticsearch';
+import { MTermVectorsParams } from 'elasticsearch';
+import { NodesHotThreadsParams } from 'elasticsearch';
+import { NodesInfoParams } from 'elasticsearch';
+import { NodesStatsParams } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ParsedQuery } from 'query-string';
+import { Path } from 'history';
+import { PingParams } from 'elasticsearch';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
+import { PutScriptParams } from 'elasticsearch';
+import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
+import { ReindexParams } from 'elasticsearch';
+import { ReindexRethrottleParams } from 'elasticsearch';
+import { RenderSearchTemplateParams } from 'elasticsearch';
 import * as Rx from 'rxjs';
+import { ScrollParams } from 'elasticsearch';
+import { SearchParams } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { SearchShardsParams } from 'elasticsearch';
+import { SearchTemplateParams } from 'elasticsearch';
 import { ShallowPromise } from '@kbn/utility-types';
+import { SnapshotCreateParams } from 'elasticsearch';
+import { SnapshotCreateRepositoryParams } from 'elasticsearch';
+import { SnapshotDeleteParams } from 'elasticsearch';
+import { SnapshotDeleteRepositoryParams } from 'elasticsearch';
+import { SnapshotGetParams } from 'elasticsearch';
+import { SnapshotGetRepositoryParams } from 'elasticsearch';
+import { SnapshotRestoreParams } from 'elasticsearch';
+import { SnapshotStatusParams } from 'elasticsearch';
+import { SnapshotVerifyRepositoryParams } from 'elasticsearch';
+import { SuggestParams } from 'elasticsearch';
+import { TasksCancelParams } from 'elasticsearch';
+import { TasksGetParams } from 'elasticsearch';
+import { TasksListParams } from 'elasticsearch';
+import { TermvectorsParams } from 'elasticsearch';
 import { Type } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import { UnregisterCallback } from 'history';
+import { UpdateDocumentByQueryParams } from 'elasticsearch';
+import { UpdateDocumentParams } from 'elasticsearch';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
@@ -1118,15 +1240,17 @@ export interface SavedObjectsBulkUpdateOptions {
 export class SavedObjectsClient {
     // @internal
     constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkGet: (objects?: {
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkGet: (objects?: Array<{
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
+    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
-    delete: (type: string, id: string) => Promise<{}>;
-    find: <T = unknown>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
+    delete: (type: string, id: string) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
+    find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -1159,6 +1283,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    preference?: string;
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -1283,7 +1408,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
-    }) => string;
+    }) => Href;
     createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
@@ -1291,8 +1416,8 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     get length(): number;
     listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
     get location(): Location<HistoryLocationState>;
-    push: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
-    replace: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
     }
 
 // @public
@@ -1423,6 +1548,9 @@ export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'sel
 
 // @public
 export type UnmountCallback = () => void;
+
+// @public
+export const URL_MAX_LENGTH: number;
 
 // @public
 export interface URLMeaningfulParts {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const { resolve } = require('path');
+const { parse, resolve } = require('path');
 const webpack = require('webpack');
 const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -92,6 +92,27 @@ module.exports = async ({ config }) => {
         options: {
           config: {
             path: resolve(REPO_ROOT, 'src/optimize/'),
+          },
+        },
+      },
+      {
+        loader: 'resolve-url-loader',
+        options: {
+          // If you don't have arguments (_, __) to the join function, the
+          // resolve-url-loader fails with a loader misconfiguration error.
+          //
+          // eslint-disable-next-line no-unused-vars
+          join: (_, __) => (uri, base) => {
+            if (!base || !parse(base).dir.includes('legacy')) {
+              return null;
+            }
+
+            // URIs on mixins in src/legacy/public/styles need to be resolved.
+            if (uri.startsWith('ui/assets')) {
+              return resolve(REPO_ROOT, 'src/core/server/core_app/', uri.replace('ui/', ''));
+            }
+
+            return null;
           },
         },
       },

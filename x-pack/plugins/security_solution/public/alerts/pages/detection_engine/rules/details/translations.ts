@@ -89,3 +89,10 @@ export const TYPE_FAILED = i18n.translate(
     defaultMessage: 'Failed',
   }
 );
+
+export const EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
+  {
+    defaultMessage: 'Exceptions',
+  }
+);
