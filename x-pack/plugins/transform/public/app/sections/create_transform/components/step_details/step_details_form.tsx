@@ -23,7 +23,7 @@ import { ToastNotificationText } from '../../../../components';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
-
+import { StepDetailsTimeField } from './step_details_time_field';
 import {
   getPivotQuery,
   getPreviewRequestBody,
@@ -79,21 +79,6 @@ export function applyTransformConfigToDetailsState(
   return state;
 }
 
-const noTimeFieldLabel = i18n.translate('xpack.transform.stepDetailsForm.noTimeFieldOptionLabel', {
-  defaultMessage: "I don't want to use the Time Filter",
-});
-
-const noTimeFieldOption = {
-  text: noTimeFieldLabel,
-  value: undefined,
-};
-
-const disabledDividerOption = {
-  disabled: true,
-  text: '───',
-  value: '',
-};
-
 interface Props {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
@@ -123,9 +108,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
     const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
     const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
     const [previewDateColumns, setPreviewDateColumns] = useState<string[]>([]);
-    const [indexPatternDateField, setIndexPatternDateField] = useState<string | undefined>(
-      undefined
-    );
+    const [indexPatternDateField, setIndexPatternDateField] = useState<string | undefined>();
 
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -138,11 +121,11 @@ export const StepDetailsForm: FC<Props> = React.memo(
         // this is to account for undefined when user chooses not to use a date field
         const timeField = previewDateColumns.find((col) => col === value);
 
-        const selectedTimeField = timeField ? timeField : undefined;
-        setIndexPatternDateField(selectedTimeField);
+        setIndexPatternDateField(timeField);
       },
       [setIndexPatternDateField, previewDateColumns]
     );
+
     // Continuous mode state
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
       defaults.isContinuousModeEnabled
@@ -168,13 +151,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
 
           const transformPreview = await api.getTransformsPreview(previewRequest);
           const properties = transformPreview.generated_dest_index.mappings.properties;
-          const datetimeColumns: string[] = [];
-
-          Object.keys(properties).forEach((col) => {
-            if (properties[col].type === 'date') {
-              datetimeColumns.push(col);
-            }
-          });
+          const datetimeColumns: string[] = Object.keys(properties).filter(
+            (col) => properties[col].type === 'date'
+          );
 
           setPreviewDateColumns(datetimeColumns);
           setIndexPatternDateField(datetimeColumns[0]);
@@ -425,26 +404,11 @@ export const StepDetailsForm: FC<Props> = React.memo(
             />
           </EuiFormRow>
           {createIndexPattern && !indexPatternTitleExists && previewDateColumns.length > 0 && (
-            <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.transform.stepDetailsForm.indexPatternTimeFilterLabel',
-                {
-                  defaultMessage:
-                    'The Time Filter will use this field to filter your data by time. You can choose not to have a time field, but you will not be able to narrow down your data by a time range.',
-                }
-              )}
-            >
-              <EuiSelect
-                options={[
-                  ...previewDateColumns.map((text) => ({ text })),
-                  disabledDividerOption,
-                  noTimeFieldOption,
-                ]}
-                value={indexPatternDateField}
-                onChange={onTimeFieldChanged}
-                data-test-subj="transformIndexPatternDateFieldSelect"
-              />
-            </EuiFormRow>
+            <StepDetailsTimeField
+              previewDateColumns={previewDateColumns}
+              indexPatternDateField={indexPatternDateField}
+              onTimeFieldChanged={onTimeFieldChanged}
+            />
           )}
           <EuiFormRow
             helpText={
@@ -485,7 +449,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text) => ({ text }))}
+                  options={dateFieldNames.map((text: string) => ({ text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
