@@ -33,6 +33,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('Can create a new child', async () => {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
+
+      // this seem like an overkill, but clicking this button which opens context menu was flaky
+      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
+      await testSubjects.waitForEnabled('createNew');
+
       await testSubjects.click('createNew');
       await testSubjects.click('createNew-TODO_EMBEDDABLE');
       await testSubjects.setValue('taskInputField', 'new task');
@@ -44,6 +49,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('Can add a child backed off a saved object', async () => {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
+      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
       await testSubjects.click('savedObjectTitleGarbage');
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
       await flyout.ensureClosed('dashboardAddPanel');
