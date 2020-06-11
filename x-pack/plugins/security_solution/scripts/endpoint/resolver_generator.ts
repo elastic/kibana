@@ -5,7 +5,7 @@
  */
 /* eslint-disable no-console */
 import * as path from 'path';
-import * as yargs from 'yargs';
+import yargs from 'yargs';
 import * as url from 'url';
 import fetch from 'node-fetch';
 import seedrandom from 'seedrandom';
