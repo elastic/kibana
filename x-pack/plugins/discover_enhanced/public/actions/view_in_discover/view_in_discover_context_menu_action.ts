@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
@@ -19,6 +21,32 @@ import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../../../../../../src/plugins/visualizations/public';
+
+// TODO: Replace this logic with KibanaURL once it is available.
+// https://github.com/elastic/kibana/issues/64497
+class KibanaURL {
+  public readonly path: string;
+  public readonly appName: string;
+  public readonly appPath: string;
+
+  constructor(path: string) {
+    const match = path.match(/^.*\/app\/([^\/\/#]+)(.+)$/);
+
+    if (!match) {
+      throw new Error('Unexpected Discover URL path.');
+    }
+
+    const [, appName, appPath] = match;
+
+    if (!appName || !appPath) {
+      throw new Error('Could not parse Discover URL path.');
+    }
+
+    this.path = path;
+    this.appName = appName;
+    this.appPath = appPath;
+  }
+}
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
@@ -71,21 +99,7 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
     if (!isVisualizeEmbeddable(embeddable)) return;
 
     const { core } = this.params.start();
-    const path = await this.getPath(embeddable);
-
-    // TODO: Replace this logic with KibanaURL once it is available.
-    // https://github.com/elastic/kibana/issues/64497
-    const match = path.match(/^.*\/app\/([^\/\/#]+)(.+)$/);
-
-    if (!match) {
-      throw new Error('Unexpected Discover URL path.');
-    }
-
-    const [, appName, appPath] = match;
-
-    if (!appName || !appPath) {
-      throw new Error('Could not parse Discover URL path.');
-    }
+    const { appName, appPath } = await this.getUrl(embeddable);
 
     await core.application.navigateToApp(appName, {
       path: appPath,
@@ -97,10 +111,12 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
       throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
-    return await this.getPath(embeddable);
+    const { path } = await this.getUrl(embeddable);
+
+    return path;
   }
 
-  private async getPath(embeddable: VisualizeEmbeddableContract): Promise<string> {
+  private async getUrl(embeddable: VisualizeEmbeddableContract): Promise<KibanaURL> {
     const { plugins } = this.params.start();
 
     const { timeRange, query, filters } = embeddable.getInput();
@@ -115,7 +131,7 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
         timeRange,
       });
 
-    return path;
+    return new KibanaURL(path);
   }
 
   /**
