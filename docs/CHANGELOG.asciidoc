@@ -133,7 +133,9 @@ Reporting::
 * Adds a new config flag to encode with BOM for our CSVs {pull}63006[#63006]
 * Adds config flag to escape formula CSV values {pull}63645[#63645]
 Security::
-* Moves jira to a gold license {pull}67178[#67178]
+* Every provider can now be configured with the access agreement message (markdown syntax) that will be presented to the 
+users after login. Users won't be able to use Kibana until they acknowledge this agreement {pull}63563[#63563]
+* Login Selector UI was refined and can now offer much more customization options {pull}64142[#64142]
 SIEM::
 * Enhances threat hunting for Filter for/out value, Show top field, Copy to Clipboard, Draggable chart legends {pull}61207[#61207]
 * Adds drag between ANDs in timeline queries / add to timeline {pull}65228[#65228]
@@ -148,6 +150,7 @@ SIEM::
 * Updates rule.lists to be rule.exceptions_list {pull}63717[#63717]
 * Moves All Rules tabs to match other tabs UI {pull}63920[#63920]
 * Minor updates to monitoring table with unit tests {pull}64020[#64020]
+* Moves jira to a gold license {pull}67178[#67178]
 Uptime::
 * Adds cert API request and runtime type checking {pull}63062[#63062]
 * Updates TLS settings {pull}64111[#64111]
@@ -272,6 +275,12 @@ Platform::
 * Fixes task manager cancel warning {pull}63756[#63756]
 * New Kibana app link order {pull}67991[#67991]
 * Warning and link to support matrix for IE11 {pull}66512[#66512]
+Security::
+* Fix authentication loop when upgrading Kibana from 6.8 to 7.7+ {pull}67687[#67687]
+* Previously, users couldn't log in with SAML Identity Provider Initiated flow (e.g. from Okta Dashboard) if they already had 
+an existing, but expired session. Now it should be possible {pull}59686[#59686]
+* Fixes EncryptedSavedObjectsClientWrapper fails on stripEncryptedAttributes for saved object with errors {pull}61385[#61385]
+* Adds username/password validation to login form {pull}60681[#60681]
 SIEM::
 * Fixes import bug with non existent signals index {pull}65595[#65595]
 * Restricts ML rule modification to ML Admins {pull}65583[#65583]
