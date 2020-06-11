@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
@@ -16,6 +17,7 @@ import { monitorLocationsSelector } from '../../../../../state/selectors';
 import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
+import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
@@ -70,7 +72,11 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
           </TimestampText>
         </EuiPopoverTitle>
         <EuiStat
-          title={availability.toFixed(2) + ' %'}
+          title={i18n.translate('xpack.uptime.mapToolTip.AvailabilityStat.title', {
+            defaultMessage: '{value} %',
+            values: { value: formatAvailabilityValue(availability) },
+            description: 'A percentage value like 23.5%',
+          })}
           description="Availability"
           textAlign="left"
           titleSize="s"

@@ -14,6 +14,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
@@ -21,6 +22,7 @@ import { useStatusBar } from './use_status_bar';
 import { MonitorIDLabel, OverallAvailability } from '../translations';
 import { URL_LABEL } from '../../../common/translations';
 import { MonitorLocations } from '../../../../../common/runtime_types/monitor';
+import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
@@ -58,7 +60,12 @@ export const MonitorStatusBar: React.FC = () => {
       >
         <MonListTitle>{OverallAvailability}</MonListTitle>
         <MonListDescription data-test-subj="uptimeOverallAvailability">
-          {availability?.toFixed(2)} %
+          <FormattedMessage
+            id="xpack.uptime.availabilityLabelText"
+            defaultMessage="{value} %"
+            values={{ value: formatAvailabilityValue(availability) }}
+            description="A percentage value, like 23.5 %"
+          />
         </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
         <MonListDescription>

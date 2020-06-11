@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Pagination } from '@elastic/eui/src/components/basic_table/pagination_bar';
 import { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
@@ -14,6 +15,10 @@ import { AvailabilityLabel, LastCheckLabel, LocationLabel } from '../translation
 interface Props {
   allLocations: StatusTag[];
 }
+
+export const formatAvailabilityValue = (val: number) => {
+  return Math.floor(val * 100) / 100;
+};
 
 export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -32,7 +37,16 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
       name: AvailabilityLabel,
       align: 'right' as const,
       render: (val: number) => {
-        return <span>{val.toFixed(2)} %</span>;
+        return (
+          <span>
+            <FormattedMessage
+              id="xpack.uptime.availabilityLabelText"
+              defaultMessage="{value} %"
+              values={{ value: formatAvailabilityValue(val) }}
+              description="A percentage value, like 23.5%"
+            />
+          </span>
+        );
       },
     },
     {
