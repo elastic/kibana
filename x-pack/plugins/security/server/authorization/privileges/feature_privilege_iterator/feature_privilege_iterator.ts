@@ -72,6 +72,14 @@ function mergeWithSubFeatures(
       mergedConfig.savedObject.read,
       subFeaturePrivilege.savedObject.read
     );
+
+    mergedConfig.alerting = {
+      all: mergeArrays(mergedConfig.alerting?.all ?? [], subFeaturePrivilege.alerting?.all ?? []),
+      read: mergeArrays(
+        mergedConfig.alerting?.read ?? [],
+        subFeaturePrivilege.alerting?.read ?? []
+      ),
+    };
   }
   return mergedConfig;
 }

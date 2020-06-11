@@ -12,7 +12,7 @@ import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AlertsAuthorizationAuditLogger, ScopeType, AuthorizationResult } from './audit_logger';
+import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
