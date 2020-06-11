@@ -31,7 +31,13 @@ export const PageLoadDistribution = () => {
 
   const { start, end } = urlParams;
 
-  const [percentileRange, setPercentileRange] = useState({ min: 0, max: 99 });
+  const [percentileRange, setPercentileRange] = useState<{
+    min: string | null;
+    max: string | null;
+  }>({
+    min: null,
+    max: null,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -43,8 +49,12 @@ export const PageLoadDistribution = () => {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              minPercentile: percentileRange.min,
-              maxPercentile: percentileRange.max,
+              ...(percentileRange.min && percentileRange.max
+                ? {
+                    minPercentile: percentileRange.min,
+                    maxPercentile: percentileRange.max,
+                  }
+                : {}),
             },
           },
         });
@@ -58,6 +68,7 @@ export const PageLoadDistribution = () => {
       return;
     }
     const [minX, maxX] = x;
+    setPercentileRange({ min: String(minX), max: String(maxX) });
   };
 
   return (

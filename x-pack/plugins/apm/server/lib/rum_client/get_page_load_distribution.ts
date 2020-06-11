@@ -14,8 +14,12 @@ import {
 
 export async function getPageLoadDistribution({
   setup,
+  minPercentile,
+  maxPercentile,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  minPercentile: string;
+  maxPercentile: string;
 }) {
   const projection = getRumOverviewProjection({
     setup,
@@ -64,13 +68,14 @@ export async function getPageLoadDistribution({
 
   const minDuration = (aggregations?.durationMinMax.value ?? 0) / 1000;
 
-  const maxPercentile = aggregations?.durationPercentiles.values['99.0'] ?? 100;
+  const minPerc = +minPercentile || minDuration;
 
-  const pageDist = await getPercentilesDistribution(
-    setup,
-    minDuration,
-    maxPercentile
-  );
+  const maxPercentileQuery =
+    aggregations?.durationPercentiles.values['99.0'] ?? 100;
+
+  const maxPerc = +maxPercentile || maxPercentileQuery;
+
+  const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
   return {
     pageLoadDistribution: pageDist,
     percentiles: aggregations?.durationPercentiles.values,

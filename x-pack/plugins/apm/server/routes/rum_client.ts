@@ -12,7 +12,7 @@ import { rangeRt, uiFiltersRt } from './default_api_types';
 import { getImpressionTrends } from '../lib/rum_client/get_impression_trends';
 import { getPageLoadDistribution } from '../lib/rum_client/get_page_load_distribution';
 
-export const percentileRangeRt = t.type({
+export const percentileRangeRt = t.partial({
   minPercentile: t.string,
   maxPercentile: t.string,
 });
@@ -37,7 +37,9 @@ export const rumPageLoadDistributionRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    return getPageLoadDistribution({ setup });
+    const { minPercentile, maxPercentile } = request.query;
+
+    return getPageLoadDistribution({ setup, minPercentile, maxPercentile });
   },
 }));
 
