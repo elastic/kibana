@@ -2036,9 +2036,14 @@ export interface SavedObjectsFindResponse<T = unknown> {
     // (undocumented)
     per_page: number;
     // (undocumented)
-    saved_objects: Array<SavedObject<T>>;
+    saved_objects: Array<SavedObjectsFindResult<T>>;
     // (undocumented)
     total: number;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+    score: number;
 }
 
 // @public
