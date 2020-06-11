@@ -45,6 +45,7 @@ const pushToServiceHandler = async ({
   }
 
   let incident = {};
+  // TODO: should be removed later but currently keep it for the Case implementation support
   if (mapping) {
     const fields = prepareFieldsForTransformation({
       params,
@@ -57,8 +58,9 @@ const pushToServiceHandler = async ({
       fields,
       currentIncident,
     });
+  } else {
+    incident = { ...params, short_description: params.title };
   }
-  incident = params;
 
   if (updateIncident) {
     res = await externalService.updateIncident({
@@ -69,7 +71,6 @@ const pushToServiceHandler = async ({
     res = await externalService.createIncident({
       incident: {
         ...incident,
-        short_description: params.title,
         caller_id: secrets.username,
       },
     });

@@ -12,6 +12,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { AddMessageVariables } from '../../add_message_variables';
 import { ServiceNowActionParams } from './types';
@@ -19,7 +20,7 @@ import { ServiceNowActionParams } from './types';
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
 >> = ({ actionParams, editAction, index, errors, messageVariables }) => {
-  const { title, description, comments, severity, urgency, impact } =
+  const { title, description, comments, severity, urgency, impact, savedObjectId } =
     actionParams.subActionParams || {};
   const selectOptions = [
     {
@@ -57,8 +58,10 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   };
 
   useEffect(() => {
-    editAction('subAction', 'pushToService', index);
-    if (messageVariables?.find((variable) => variable === 'alertId')) {
+    if (!actionParams.subAction) {
+      editAction('subAction', 'pushToService', index);
+    }
+    if (!savedObjectId && messageVariables?.find((variable) => variable === 'alertId')) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     if (!urgency) {
@@ -71,7 +74,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       editSubActionProperty('severity', '3');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [title, description, comments, severity, impact, urgency]);
 
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
     editSubActionProperty(
@@ -82,6 +85,10 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
 
   return (
     <Fragment>
+      <EuiTitle size="s">
+        <h3>Incident</h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
         label={i18n.translate(
