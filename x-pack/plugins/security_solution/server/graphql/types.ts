@@ -347,7 +347,7 @@ export enum TlsFields {
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
-  immutiable = 'immutiable',
+  immutable = 'immutable',
 }
 
 export enum TimelineType {
@@ -360,6 +360,11 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -2260,6 +2265,8 @@ export interface GetAllTimelineQueryArgs {
 
   timelineType?: Maybe<TimelineType>;
 
+  templateTimelineType?: Maybe<TemplateTimelineType>;
+
   status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
@@ -2719,6 +2726,8 @@ export namespace QueryResolvers {
     onlyUserFavorite?: Maybe<boolean>;
 
     timelineType?: Maybe<TimelineType>;
+
+    templateTimelineType?: Maybe<TemplateTimelineType>;
 
     status?: Maybe<TimelineStatus>;
   }

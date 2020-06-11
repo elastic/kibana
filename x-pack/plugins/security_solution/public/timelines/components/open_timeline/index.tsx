@@ -127,7 +127,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const { timelineStatus, templateTimelineFilter } = useTimelineStatus({
+    const { timelineStatus, templateTimelineType, templateTimelineFilter } = useTimelineStatus({
       timelineType,
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,
@@ -146,6 +146,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           },
           onlyUserFavorite: onlyFavorites,
           timelineType,
+          templateTimelineType,
           status: timelineStatus,
         });
       }, // eslint-disable-next-line react-hooks/exhaustive-deps

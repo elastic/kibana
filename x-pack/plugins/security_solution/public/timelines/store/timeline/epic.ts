@@ -26,7 +26,6 @@ import {
   concatMap,
   delay,
   takeUntil,
-  catchError,
 } from 'rxjs/operators';
 
 import {
@@ -175,7 +174,7 @@ export const createTimelineEpic = <State>(): Epic<
           isItAtimelineAction(timelineId) &&
           timelineObj != null &&
           timelineObj.status != null &&
-          TimelineStatus.immutiable === timelineObj.status
+          TimelineStatus.immutable === timelineObj.status
         ) {
           return true;
         }

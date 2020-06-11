@@ -17,6 +17,7 @@ import {
 
 import * as i18n from './translations';
 import { TimelineTabsStyle, TemplateTimelineFilter } from './types';
+import { disableTemplate } from '../../../../common/constants';
 
 export const useTimelineStatus = ({
   timelineType,
@@ -28,13 +29,16 @@ export const useTimelineStatus = ({
   customTemplateTimelineCount?: number | null;
 }): {
   timelineStatus: TimelineStatusLiteralWithNull;
+  templateTimelineType: TemplateTimelineTypeLiteralWithNull;
   templateTimelineFilter: JSX.Element[] | null;
 } => {
   const isTemplateFilterEnabled = timelineType === TimelineType.template;
 
   const [templateTimelineType, setTemplateTimelineType] = useState<
     TemplateTimelineTypeLiteralWithNull
-  >(null);
+  >(
+    disableTemplate || timelineType !== TimelineType.template ? null : TemplateTimelineType.elastic
+  );
 
   const filters = useMemo(
     () => [
@@ -61,10 +65,7 @@ export const useTimelineStatus = ({
       if (templateTimelineType === tabId) {
         setTemplateTimelineType(null);
       } else {
-        if (
-          timelineStatus !== TimelineStatus.immutiable &&
-          tabId !== TemplateTimelineType.elastic
-        ) {
+        if (timelineStatus !== TimelineStatus.immutable && tabId !== TemplateTimelineType.elastic) {
           setTemplateTimelineType(TemplateTimelineType.custom);
         } else {
           setTemplateTimelineType(tabId);
@@ -89,15 +90,16 @@ export const useTimelineStatus = ({
           </EuiFilterButton>
         ))
       : null;
-  }, [templateTimelineType, filters]);
+  }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
   return {
     timelineStatus:
       templateTimelineType == null
         ? null
         : templateTimelineType === TemplateTimelineType.elastic
-        ? TimelineStatus.immutiable
+        ? TimelineStatus.immutable
         : TimelineStatus.active,
+    templateTimelineType,
     templateTimelineFilter,
   };
 };

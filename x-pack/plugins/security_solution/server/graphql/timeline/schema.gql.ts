@@ -133,7 +133,12 @@ export const timelineSchema = gql`
   enum TimelineStatus {
     active
     draft
-    immutiable
+    immutable
+  }
+
+  enum TemplateTimelineType {
+    elastic
+    custom
   }
 
   input TimelineInput {
@@ -291,7 +296,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, status: TimelineStatus): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {

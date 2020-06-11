@@ -56,7 +56,7 @@ export const getActionsColumns = ({
       if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);
     },
     enabled: (timeline: OpenTimelineResult) => {
-      return timeline.savedObjectId != null && timeline.status !== TimelineStatus.immutiable;
+      return timeline.savedObjectId != null && timeline.status !== TimelineStatus.immutable;
     },
     description: i18n.EXPORT_SELECTED,
     'data-test-subj': 'export-timeline',

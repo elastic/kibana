@@ -612,7 +612,7 @@ describe('CompareTimelinesStatus', () => {
             type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
-          status: TimelineStatus.immutiable,
+          status: TimelineStatus.immutable,
           timelineType: TimelineType.template,
           title: 'mock title',
           templateTimelineInput: {

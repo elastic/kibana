@@ -21,6 +21,10 @@ import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
+import {
+  TimelineStatus,
+  TimelineStatusLiteralWithNull,
+} from '../../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
@@ -34,6 +38,7 @@ interface Props {
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
+  timelineStatus: TimelineStatusLiteralWithNull;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
@@ -48,6 +53,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   onToggleDataProviderExcluded,
   show,
   showCallOutUnauthorizedMsg,
+  timelineStatus,
 }) => (
   <>
     {showCallOutUnauthorizedMsg && (
@@ -59,13 +65,15 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    <EuiCallOut
-      data-test-subj="timelineImmutableCallOut"
-      title={'the timeline is immutable'}
-      color="primary"
-      iconType="info"
-      size="s"
-    />
+    {timelineStatus === TimelineStatus.immutable && (
+      <EuiCallOut
+        data-test-subj="timelineImmutableCallOut"
+        title={i18n.CALL_OUT_IMMUTIABLE}
+        color="primary"
+        iconType="info"
+        size="s"
+      />
+    )}
     {show && (
       <DataProviders
         browserFields={browserFields}

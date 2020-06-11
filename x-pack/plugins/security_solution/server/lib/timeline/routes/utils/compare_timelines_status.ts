@@ -89,6 +89,13 @@ export class CompareTimelinesStatus {
     );
   }
 
+  private get isStatusValid() {
+    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+    return obj.isExists
+      ? this.status === obj.getData?.status && this.status !== TimelineStatus.draft
+      : this.status !== TimelineStatus.draft;
+  }
+
   public get isUpdatable() {
     return (
       !this.isSavedObjectVersionConflict &&
@@ -97,9 +104,13 @@ export class CompareTimelinesStatus {
     );
   }
 
+  private get isTimelineTypeValid() {
+    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+    return obj.isExists ? this.timelineType === obj.getData?.timelineType : true;
+  }
+
   public get isUpdatableViaImport() {
     return (
-      this.isStatusValid &&
       this.isTimelineTypeValid &&
       !this.isSavedObjectVersionConflict &&
       (this.timelineObject.isUpdatableViaImport ||
@@ -163,11 +174,6 @@ export class CompareTimelinesStatus {
     return this.timelineType === TimelineType.template;
   }
 
-  private get isStatusValid() {
-    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    return this.status === obj.getData?.status && this.status !== TimelineStatus.draft;
-  }
-
   private get isSavedObjectVersionConflict() {
     const version = this.timelineObject?.getVersion;
     const existingVersion = this.timelineObject?.data?.version;
@@ -212,14 +218,6 @@ export class CompareTimelinesStatus {
       ? this.templateTimelineInput.data?.version ?? this.timelineInput.getVersion
       : this.timelineInput.data?.version ?? this.timelineInput.getVersion;
     return version != null ? version.toString() : null;
-  }
-
-  public get isTimelineTypeValid() {
-    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    const timelineType = this.isHandlingTemplateTimeline
-      ? TimelineType.template
-      : TimelineType.default;
-    return obj.getData?.timelineType === timelineType;
   }
 
   public async init() {

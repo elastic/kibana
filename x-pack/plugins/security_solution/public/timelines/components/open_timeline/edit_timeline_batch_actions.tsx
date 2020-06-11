@@ -68,7 +68,7 @@ export const useEditTimelineBatchActions = ({
     (closePopover: () => void) => {
       const isDisabled =
         isEmpty(selectedItems) ||
-        selectedItems?.some((item) => item.status === TimelineStatus.immutiable);
+        selectedItems?.some((item) => item.status === TimelineStatus.immutable);
       return (
         <>
           <EditTimelineActions

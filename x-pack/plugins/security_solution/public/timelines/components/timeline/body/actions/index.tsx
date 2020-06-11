@@ -163,10 +163,11 @@ export const Actions = React.memo<Props>(
                   noteIds={noteIds || emptyNotes}
                   showNotes={showNotes}
                   size="s"
+                  timelineStatus={timeline.status}
+                  timelineType={timeline.timelineType}
                   toggleShowNotes={toggleShowNotes}
                   toolTip={i18n.NOTES_TOOLTIP}
                   updateNote={updateNote}
-                  timelineType={timeline.timelineType}
                 />
               </EventsTdContent>
             </EventsTd>

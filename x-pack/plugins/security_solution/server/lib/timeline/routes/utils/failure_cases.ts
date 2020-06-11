@@ -22,9 +22,12 @@ export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
 export const CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE =
   'Create template timeline without a template timeline ID is not allowed';
 export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
-export const UPDATE_STATUS_ERROR_MESSAGE = 'Update an immutiable timeline is is not allowed';
+export const UPDATE_STATUS_ERROR_MESSAGE = 'Update an immutable timeline is is not allowed';
 export const CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE =
   'Create template timeline without a valid templateTimelineVersion is not allowed. Please start from 1 to create a new template timeline';
+export const CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE = 'Cannot create a draft timeline';
+export const NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE = 'Update status is not allowed';
+
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
@@ -32,8 +35,7 @@ const isUpdatingStatus = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   const obj = isHandlingTemplateTimeline ? existTemplateTimeline : existTimeline;
-
-  return obj?.status === TimelineStatus.immutiable ? UPDATE_STATUS_ERROR_MESSAGE : null;
+  return obj?.status === TimelineStatus.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
 };
 
 const isGivenTitleExists = (title: string | null | undefined) => {
@@ -249,6 +251,16 @@ export const checkIsCreateViaImportFailureCases = (
   } else if (isHandlingTemplateTimeline && templateTimelineId == null) {
     return {
       body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  } else if (existTimeline == null && status === TimelineStatus.draft) {
+    return {
+      body: CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  } else if (existTimeline != null && status !== existTimeline.status) {
+    return {
+      body: NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
       statusCode: 405,
     };
   } else {

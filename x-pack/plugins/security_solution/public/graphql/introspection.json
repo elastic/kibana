@@ -257,6 +257,12 @@
                 "defaultValue": null
               },
               {
+                "name": "templateTimelineType",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TemplateTimelineType", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "status",
                 "description": "",
                 "type": { "kind": "ENUM", "name": "TimelineStatus", "ofType": null },
@@ -10378,7 +10384,7 @@
           { "name": "active", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
-            "name": "immutiable",
+            "name": "immutable",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -10503,6 +10509,24 @@
             "deprecationReason": null
           },
           { "name": "created", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "TemplateTimelineType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "elastic",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

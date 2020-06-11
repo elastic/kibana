@@ -56,8 +56,8 @@ export class TimelineObject {
     return this.data;
   }
 
-  public get isImmutiable() {
-    return this.data?.status === TimelineStatus.immutiable;
+  public get isimmutable() {
+    return this.data?.status === TimelineStatus.immutable;
   }
 
   public get isExists() {
@@ -65,7 +65,7 @@ export class TimelineObject {
   }
 
   public get isUpdatable() {
-    return this.isExists && !this.isImmutiable;
+    return this.isExists && !this.isimmutable;
   }
 
   public get isCreatable() {
