@@ -43,7 +43,7 @@ const valueConfig: FieldConfig = {
     {
       validator: emptyField(
         i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError', {
-          defaultMessage: 'A set value is required.',
+          defaultMessage: 'A value to set is required.',
         })
       ),
     },

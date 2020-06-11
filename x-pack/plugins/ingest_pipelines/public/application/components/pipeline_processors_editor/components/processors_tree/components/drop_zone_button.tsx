@@ -14,7 +14,7 @@ export interface Props {
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-const MOVE_HERE_COPY = i18n.translate('xpack.ingestPipelines.pipelineEditor.moveTargetLabel', {
+const MOVE_HERE_LABEL = i18n.translate('xpack.ingestPipelines.pipelineEditor.moveTargetLabel', {
   defaultMessage: 'Move here',
 });
 
@@ -32,7 +32,7 @@ export const DropZoneButton: FunctionComponent<Props> = ({ onClick, isDisabled }
     >
       <EuiButtonIcon
         className={`pipelineProcessorsEditor__tree__dropZoneButton ${buttonClasses}`}
-        aria-label={MOVE_HERE_COPY}
+        aria-label={MOVE_HERE_LABEL}
         disabled={isDisabled}
         onClick={onClick}
         iconType="empty"

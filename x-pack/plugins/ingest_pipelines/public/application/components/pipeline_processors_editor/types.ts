@@ -40,7 +40,7 @@ export interface OnUpdateHandlerArg extends FormValidityState {
 
 /**
  * The editor can be in different modes. This enables us to hold
- * a reference to data dispatch to * the reducer (like the {@link ProcessorSelector}
+ * a reference to data dispatch to the reducer (like the {@link ProcessorSelector}
  * which will be used to update the in-memory processors data structure.
  */
 export type EditorMode =

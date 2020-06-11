@@ -25,7 +25,6 @@ const mapProcessorTypeToForm = {
   foreach: undefined, // TODO: Implement
   geoip: undefined, // TODO: Implement
   grok: undefined, // TODO: Implement
-  gsub: undefined,
   html_strip: undefined, // TODO: Implement
   inference: undefined, // TODO: Implement
   join: undefined, // TODO: Implement
@@ -36,7 +35,6 @@ const mapProcessorTypeToForm = {
   remove: undefined, // TODO: Implement
   rename: undefined, // TODO: Implement
   script: undefined, // TODO: Implement
-  set: undefined,
   set_security_user: undefined, // TODO: Implement
   split: undefined, // TODO: Implement
   sort: undefined, // TODO: Implement
@@ -44,12 +42,15 @@ const mapProcessorTypeToForm = {
   uppercase: undefined, // TODO: Implement
   urldecode: undefined, // TODO: Implement
   user_agent: undefined, // TODO: Implement
+
+  gsub: undefined,
+  set: undefined,
 };
 
 export const types = Object.keys(mapProcessorTypeToForm);
 
 export type ProcessorType = keyof typeof mapProcessorTypeToForm;
 
-export const getProcessorForm = (type: string): FunctionComponent | undefined => {
+export const getProcessorForm = (type: ProcessorType | string): FunctionComponent | undefined => {
   return mapProcessorTypeToForm[type as ProcessorType];
 };

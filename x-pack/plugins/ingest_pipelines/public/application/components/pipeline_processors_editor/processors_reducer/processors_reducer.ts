@@ -102,7 +102,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const processorsSelector = selector.slice(0, -1);
     const idx = parseInt(selector[selector.length - 1], 10);
 
-    if (idx !== idx) {
+    if (isNaN(idx)) {
       throw new Error(`Expected numeric value, received ${idx}`);
     }
 

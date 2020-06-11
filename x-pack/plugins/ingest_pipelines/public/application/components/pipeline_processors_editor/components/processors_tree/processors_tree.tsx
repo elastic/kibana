@@ -5,6 +5,7 @@
  */
 import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keyCodes } from '@elastic/eui';
+import { List, WindowScroller } from 'react-virtualized';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
@@ -44,8 +45,8 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized
   // List component and WindowScroller component.
-  const windowScrollerRef = useRef<any>();
-  const listRef = useRef<any>();
+  const windowScrollerRef = useRef<WindowScroller>();
+  const listRef = useRef<List>();
 
   useEffect(() => {
     const cancelMoveKbListener = (event: KeyboardEvent) => {

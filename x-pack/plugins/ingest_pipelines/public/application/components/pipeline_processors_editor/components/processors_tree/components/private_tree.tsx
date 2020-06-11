@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, MutableRefObject, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 
@@ -25,8 +25,8 @@ export interface PrivateProps {
   level: number;
   // Only passed into the top level list
   onHeightChange?: () => void;
-  windowScrollerRef?: any;
-  listRef?: any;
+  windowScrollerRef?: MutableRefObject<WindowScroller>;
+  listRef?: MutableRefObject<List>;
 }
 
 const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {

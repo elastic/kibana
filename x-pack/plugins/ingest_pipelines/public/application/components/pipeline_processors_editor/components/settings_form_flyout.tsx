@@ -42,7 +42,7 @@ export const SettingsFormFlyout: FunctionComponent<Props> = memo(
         <EuiFlyoutBody>
           <ProcessorSettingsForm
             onFormUpdate={onFormUpdate}
-            processor={processor as any}
+            processor={processor}
             onSubmit={onSubmit}
           />
         </EuiFlyoutBody>

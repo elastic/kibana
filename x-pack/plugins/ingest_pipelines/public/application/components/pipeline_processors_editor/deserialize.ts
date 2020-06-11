@@ -18,6 +18,10 @@ export interface DeserializeResult {
 }
 
 const getProcessorType = (processor: Processor): string => {
+  /**
+   * See the definition of {@link ProcessorInternal} for why this works to extract the
+   * processor type.
+   */
   return Object.keys(processor)[0]!;
 };
 

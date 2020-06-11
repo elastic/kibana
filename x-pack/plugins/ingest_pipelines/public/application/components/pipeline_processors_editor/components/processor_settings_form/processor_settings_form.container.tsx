@@ -6,7 +6,7 @@
 
 import React, { FunctionComponent, useCallback, useEffect } from 'react';
 
-import { useForm, OnFormUpdateArg } from '../../../../../shared_imports';
+import { useForm, OnFormUpdateArg, FormData } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
 import { ProcessorSettingsForm as ViewComponent } from './processor_settings_form';
@@ -25,7 +25,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   onSubmit,
 }) => {
   const handleSubmit = useCallback(
-    async (data: any, isValid: boolean) => {
+    async (data: FormData, isValid: boolean) => {
       if (isValid) {
         const { type, customOptions, ...options } = data;
         onSubmit({

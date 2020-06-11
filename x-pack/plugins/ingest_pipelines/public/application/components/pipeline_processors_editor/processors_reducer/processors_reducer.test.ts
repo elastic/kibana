@@ -267,15 +267,16 @@ describe('Processors reducer', () => {
   });
 
   describe('Error conditions', () => {
-    /* eslint-disable no-console */
     let originalErrorLogger: any;
     beforeEach(() => {
       // eslint-disable-next-line no-console
       originalErrorLogger = console.error;
+      // eslint-disable-next-line no-console
       console.error = jest.fn();
     });
 
     afterEach(() => {
+      // eslint-disable-next-line no-console
       console.error = originalErrorLogger;
     });
 
@@ -322,6 +323,7 @@ describe('Processors reducer', () => {
         },
       });
 
+      // eslint-disable-next-line no-console
       expect(console.error).toHaveBeenCalledWith(new Error(PARENT_CHILD_NEST_ERROR));
 
       // Assert nothing changed
@@ -363,6 +365,7 @@ describe('Processors reducer', () => {
         },
       });
 
+      // eslint-disable-next-line no-console
       expect(console.error).toHaveBeenCalledWith(
         new Error('Expected number but received "processors"')
       );
