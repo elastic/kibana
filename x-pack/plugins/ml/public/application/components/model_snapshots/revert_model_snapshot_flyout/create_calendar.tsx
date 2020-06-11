@@ -16,9 +16,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -37,6 +36,7 @@ import {
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { useCurrentEuiTheme } from '../../../components/color_range_legend';
+import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export interface CalendarEvent {
   start: moment.Moment | null;
@@ -49,7 +49,7 @@ interface Props {
   setCalendarEvents: (calendars: CalendarEvent[]) => void;
   minSelectableTimeStamp: number;
   maxSelectableTimeStamp: number;
-  eventRateData: any[];
+  eventRateData: LineChartPoint[];
   anomalies: Anomaly[];
   chartReady: boolean;
 }
@@ -79,7 +79,7 @@ export const CreateCalendar: FC<Props> = ({
           {
             start: moment(start),
             end: moment(end),
-            description: `Auto created ${calendarEvents.length + 1}`,
+            description: createDefaultEventDescription(calendarEvents.length + 1),
           },
         ]);
       }
@@ -91,7 +91,7 @@ export const CreateCalendar: FC<Props> = ({
     if (event === undefined) {
       setCalendarEvents([
         ...calendarEvents,
-        { start, end: null, description: `Auto created ${index}` },
+        { start, end: null, description: createDefaultEventDescription(index) },
       ]);
     } else {
       event.start = start;
@@ -104,7 +104,7 @@ export const CreateCalendar: FC<Props> = ({
     if (event === undefined) {
       setCalendarEvents([
         ...calendarEvents,
-        { start: null, end, description: `Auto created ${index}` },
+        { start: null, end, description: createDefaultEventDescription(index) },
       ]);
     } else {
       event.end = end;
@@ -112,13 +112,13 @@ export const CreateCalendar: FC<Props> = ({
     }
   }
 
-  function setDescription(description: string, index: number) {
+  const setDescription = (description: string, index: number) => {
     const event = calendarEvents[index];
     if (event !== undefined) {
       event.description = description;
       setCalendarEvents([...calendarEvents]);
     }
-  }
+  };
 
   function removeCalendarEvent(index: number) {
     if (calendarEvents[index] !== undefined) {
@@ -133,18 +133,13 @@ export const CreateCalendar: FC<Props> = ({
       <EuiSpacer size="l" />
       <div>Select time range for calendar event.</div>
       <EuiSpacer size="m" />
-      <EventRateChart
-        eventRateChartData={eventRateData}
-        anomalyData={anomalies}
+      <Chart
+        eventRateData={eventRateData}
+        anomalies={anomalies}
         loading={chartReady === false}
-        height={'100px'}
-        width={'100%'}
-        fadeChart={true}
         overlayRanges={calendarEvents.filter(filterIncompleteEvents).map((c) => ({
           start: c.start!.valueOf(),
           end: c.end!.valueOf(),
-          color: '#0000ff',
-          showMarker: false,
         }))}
         onBrushEnd={onBrushEnd}
       />
@@ -244,6 +239,45 @@ export const CreateCalendar: FC<Props> = ({
   );
 };
 
+interface ChartProps {
+  eventRateData: LineChartPoint[];
+  anomalies: Anomaly[];
+  loading: boolean;
+  onBrushEnd(area: XYBrushArea): void;
+  overlayRanges: Array<{ start: number; end: number }>;
+}
+
+const Chart: FC<ChartProps> = memo(
+  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges }) => (
+    <EventRateChart
+      eventRateChartData={eventRateData}
+      anomalyData={anomalies}
+      loading={loading}
+      height={'100px'}
+      width={'100%'}
+      fadeChart={true}
+      overlayRanges={overlayRanges.map((c) => ({
+        start: c.start,
+        end: c.end,
+        color: '#0000ff',
+        showMarker: false,
+      }))}
+      onBrushEnd={onBrushEnd}
+    />
+  ),
+  (prev: ChartProps, next: ChartProps) => {
+    // only redraw if the calendar ranges have changes
+    return (
+      prev.overlayRanges.length === next.overlayRanges.length &&
+      JSON.stringify(prev.overlayRanges) === JSON.stringify(next.overlayRanges)
+    );
+  }
+);
+
 function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {
   return event.start !== null && event.end !== null;
+}
+
+function createDefaultEventDescription(index: number) {
+  return `Auto created event ${index}`;
 }

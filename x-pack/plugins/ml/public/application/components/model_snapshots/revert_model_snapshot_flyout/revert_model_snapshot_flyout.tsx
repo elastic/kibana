@@ -33,7 +33,7 @@ import {
   EuiOverlayMask,
   EuiCallOut,
   EuiHorizontalRule,
-  // EuiSuperSelect,
+  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 
@@ -150,12 +150,12 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     }
   }
 
-  // function onSnapshotChange(ssId: string) {
-  //   const ss = snapshots.find((s) => s.snapshot_id === ssId);
-  //   if (ss !== undefined) {
-  //     setCurrentSnapshot(ss);
-  //   }
-  // }
+  function onSnapshotChange(ssId: string) {
+    const ss = snapshots.find((s) => s.snapshot_id === ssId);
+    if (ss !== undefined) {
+      setCurrentSnapshot(ss);
+    }
+  }
 
   return (
     <>
@@ -176,43 +176,44 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {/* <>
-            <EuiSpacer size="s" />
+          {false && (
+            <>
+              <EuiSpacer size="s" />
 
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
-                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
-                {
-                  defaultMessage: 'Change snapshot',
-                }
-              )}
-            >
-              <EuiSuperSelect
-                options={snapshots
-                  .map((s) => ({
-                    value: s.snapshot_id,
-                    inputDisplay: s.snapshot_id,
-                    dropdownDisplay: (
-                      <>
-                        <strong>{s.snapshot_id}</strong>
-                        <EuiText size="s" color="subdued">
-                          <p className="euiTextColor--subdued">{s.description}</p>
-                        </EuiText>
-                      </>
-                    ),
-                  }))
-                  .reverse()}
-                valueOfSelected={currentSnapshot.snapshot_id}
-                onChange={onSnapshotChange}
-                itemLayoutAlign="top"
-                hasDividers
-              />
-            </EuiFormRow>
-          </> */}
-
-          {/* <EuiHorizontalRule margin="m" /> */}
-          {/* <EuiSpacer size="l" /> */}
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
+                  {
+                    defaultMessage: 'Change snapshot',
+                  }
+                )}
+              >
+                <EuiSuperSelect
+                  options={snapshots
+                    .map((s) => ({
+                      value: s.snapshot_id,
+                      inputDisplay: s.snapshot_id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{s.snapshot_id}</strong>
+                          <EuiText size="s" color="subdued">
+                            <p className="euiTextColor--subdued">{s.description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                    }))
+                    .reverse()}
+                  valueOfSelected={currentSnapshot.snapshot_id}
+                  onChange={onSnapshotChange}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+              <EuiHorizontalRule margin="m" />
+              <EuiSpacer size="l" />
+            </>
+          )}
 
           <EventRateChart
             eventRateChartData={eventRateData}
