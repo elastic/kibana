@@ -183,6 +183,10 @@ interface DataPanelState {
   isTypeFilterOpen: boolean;
 }
 
+const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
+  defaultMessage: 'Field filters',
+});
+
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
@@ -213,7 +217,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
-  const fieldByName = indexBy(allFields, 'name');
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
 
   const lazyScroll = () => {
@@ -240,7 +243,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     (type) => type in fieldTypeNames
   );
 
-  const displayedFields = allFields.filter((field) => {
+  const filteredFields = allFields.filter((field) => {
     if (!supportedFieldTypes.has(field.type)) {
       return false;
     }
@@ -255,27 +258,32 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     if (localState.typeFilter.length > 0) {
       return localState.typeFilter.includes(field.type as DataType);
     }
-
     return true;
   });
 
-  const specialFields = displayedFields.filter((f) => f.type === 'document');
-  const paginatedFields = displayedFields
-    .filter((f) => f.type !== 'document')
-    .sort(sortFields)
-    .slice(0, pageSize);
-  const hilight = localState.nameFilter.toLowerCase();
-
-  const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
-    defaultMessage: 'Field filters',
-  });
-
-  const [availableFields, emptyFields] = _.partition(paginatedFields, (field) => {
+  const containsData = (field: IndexPatternField) => {
+    const fieldByName = indexBy(allFields, 'name');
     const overallField = fieldByName[field.name];
     return (
       overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
     );
-  });
+  };
+
+  const [specialFields, documentFields] = _.partition(filteredFields, (f) => f.type === 'document');
+
+  const [availableFields, emptyFields] = _.partition(documentFields, containsData);
+
+  const paginatedFields = [
+    ...availableFields.sort(sortFields),
+    ...emptyFields.sort(sortFields),
+  ].slice(0, pageSize);
+
+  const [paginatedAvailableFields, paginatedEmptyFields] = _.partition(
+    paginatedFields,
+    containsData
+  );
+
+  const hilight = localState.nameFilter.toLowerCase();
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -457,7 +465,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-                {availableFields.map((field) => {
+                {paginatedAvailableFields.map((field) => {
                   return (
                     <FieldItem
                       core={core}
@@ -474,7 +482,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   );
                 })}
 
-                {availableFields.length === 0 && (
+                {paginatedAvailableFields.length === 0 && (
                   <EuiCallOut
                     size="s"
                     color="warning"
@@ -483,7 +491,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
                             defaultMessage: 'No fields match the current filters.',
                           })
-                        : emptyFields
+                        : paginatedEmptyFields
                         ? i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
                             defaultMessage: `Looks like you don't have any fields with data`,
                           })
@@ -494,7 +502,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   >
                     {(localState.typeFilter.length ||
                       localState.nameFilter.length ||
-                      emptyFields.length) && (
+                      paginatedEmptyFields.length) && (
                       <>
                         <strong>
                           {i18n.translate('xpack.lens.indexPatterns.noFields.tryText', {
@@ -568,7 +576,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-                {emptyFields.map((field) => {
+                {paginatedEmptyFields.map((field) => {
                   return (
                     <FieldItem
                       core={core}
