@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  describe('Kerberos authentication', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/68836
+  describe.skip('Kerberos authentication', () => {
     before(async () => {
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
