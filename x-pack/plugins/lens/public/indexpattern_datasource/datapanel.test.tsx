@@ -21,7 +21,6 @@ const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
   existingFields: {},
   currentIndexPatternId: '1',
-  showEmptyFields: false,
   layers: {
     first: {
       indexPatternId: '1',
@@ -229,8 +228,6 @@ describe('IndexPattern Data Panel', () => {
       },
       query: { query: '', language: 'lucene' },
       filters: [],
-      showEmptyFields: false,
-      onToggleEmptyFields: jest.fn(),
     };
   });
 
@@ -303,7 +300,6 @@ describe('IndexPattern Data Panel', () => {
         state: {
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
             a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },
@@ -536,9 +532,7 @@ describe('IndexPattern Data Panel', () => {
 
   describe('while showing empty fields', () => {
     it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const wrapper = shallowWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
+      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
 
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
@@ -551,9 +545,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by name', () => {
-      const wrapper = shallowWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
+      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
 
       act(() => {
         wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
@@ -567,9 +559,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by type', () => {
-      const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
 
       wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
@@ -582,9 +572,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should toggle type if clicked again', () => {
-      const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
 
       wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
 
@@ -602,9 +590,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by type and by name', () => {
-      const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
 
       act(() => {
         wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
@@ -638,7 +624,6 @@ describe('IndexPattern Data Panel', () => {
             })),
           },
         },
-        onToggleEmptyFields: jest.fn(),
       };
     });
 
@@ -662,9 +647,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by name', () => {
-      const wrapper = shallowWithIntl(
-        <InnerIndexPatternDataPanel {...emptyFieldsTestProps} showEmptyFields={true} />
-      );
+      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
 
       act(() => {
         wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
@@ -685,8 +668,7 @@ describe('IndexPattern Data Panel', () => {
       wrapper.find('[data-test-subj="lnsEmptyFilter"]').first().prop('onChange')!(
         {} as ChangeEvent
       );
-
-      expect(emptyFieldsTestProps.onToggleEmptyFields).toHaveBeenCalled();
+      // TO DO
     });
   });
 });

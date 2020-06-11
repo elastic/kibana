@@ -1266,7 +1266,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',

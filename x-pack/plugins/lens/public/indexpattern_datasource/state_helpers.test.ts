@@ -42,7 +42,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -96,7 +95,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -147,7 +145,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -188,7 +185,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -222,7 +218,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -284,7 +279,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -337,7 +331,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -417,7 +410,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           first: {
             indexPatternId: '1',

@@ -283,7 +283,6 @@ describe('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
       });
     });
 
@@ -303,7 +302,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
       });
     });
 
@@ -351,7 +349,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: savedState.layers,
-        showEmptyFields: false,
       });
     });
   });
@@ -365,7 +362,6 @@ describe('loader', () => {
         indexPatterns: {},
         existingFields: {},
         layers: {},
-        showEmptyFields: true,
       };
 
       await changeIndexPattern({
@@ -395,7 +391,6 @@ describe('loader', () => {
         existingFields: {},
         indexPatterns: {},
         layers: {},
-        showEmptyFields: true,
       };
 
       await changeIndexPattern({
@@ -449,7 +444,6 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
       };
 
       await changeLayerIndexPattern({
@@ -512,7 +506,6 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
       };
 
       await changeLayerIndexPattern({
