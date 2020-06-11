@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { isEsError, handleErrors } from '../../__packages_do_not_import__/error_handler';
+export { isEsError } from '../../__packages_do_not_import__/error_handler';
