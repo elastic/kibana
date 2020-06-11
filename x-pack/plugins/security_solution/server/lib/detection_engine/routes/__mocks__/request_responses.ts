@@ -22,34 +22,11 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   HapiReadableStream,
 } from '../../rules/types';
-import { RuleAlertParamsRest } from '../../types';
 import { requestMock } from './request';
 import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-
-export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  output_index: '.siem-signals',
-  risk_score: 50,
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  threat: [
-    {
-      framework: 'fake',
-      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
-    },
-  ],
-});
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -77,14 +54,14 @@ export const getUpdateRequest = () =>
   requestMock.create({
     method: 'put',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalPayload(),
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getPatchRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalPayload(),
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getReadRequest = () =>
@@ -104,21 +81,21 @@ export const getReadBulkRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-    body: [typicalPayload()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getUpdateBulkRequest = () =>
   requestMock.create({
     method: 'put',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    body: [typicalPayload()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
     method: 'patch',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    body: [typicalPayload()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getDeleteBulkRequest = () =>
@@ -254,11 +231,12 @@ export const getCreateRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalPayload(),
+    body: getCreateRulesSchemaMock(),
   });
 
+// TODO: Replace this with the mocks version from the mocks file
 export const typicalMlRulePayload = () => {
-  const { query, language, index, ...mlParams } = typicalPayload();
+  const { query, language, index, ...mlParams } = getCreateRulesSchemaMock();
 
   return {
     ...mlParams,
@@ -284,8 +262,9 @@ export const createBulkMlRuleRequest = () => {
   });
 };
 
+// TODO: Replace this with a mocks file version
 export const createRuleWithActionsRequest = () => {
-  const payload = typicalPayload();
+  const payload = getCreateRulesSchemaMock();
 
   return requestMock.create({
     method: 'post',
@@ -369,6 +348,7 @@ export const getResult = (): RuleAlertType => ({
     falsePositives: [],
     from: 'now-6m',
     immutable: false,
+    savedId: undefined,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     machineLearningJobId: undefined,
@@ -560,9 +540,9 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<
         alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
         statusDate: '2020-02-18T15:26:49.783Z',
         status: 'succeeded',
-        lastFailureAt: null,
+        lastFailureAt: undefined,
         lastSuccessAt: '2020-02-18T15:26:49.783Z',
-        lastFailureMessage: null,
+        lastFailureMessage: undefined,
         lastSuccessMessage: 'succeeded',
         lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
         gap: '500.32',
