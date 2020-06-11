@@ -243,6 +243,16 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   onTitleDuplicate,
                   returnToOrigin,
                 };
+                return doSave(saveOptions).then((response) => {
+                  // If the save wasn't successful, put the original values back.
+                  if (!response.id || response.error) {
+                    savedVis.title = currentTitle;
+                  }
+                  return response;
+                });
+              };
+
+              const createVisReference = () => {
                 const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
                 embeddable
                   .getEmbeddableFactory('dashboard')
@@ -257,17 +267,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                         const dashInput = currentDashboard.getInput();
                         dashboard.navigateToDashboard(dashInput);
                       });
-                    } else {
-                      return doSave(saveOptions).then((response) => {
-                        // If the save wasn't successful, put the original values back.
-                        if (!response.id || response.error) {
-                          savedVis.title = currentTitle;
-                        }
-                        return response;
-                      });
                     }
                   });
-                return { id: '123' };
               };
 
               const saveModal = (
@@ -279,7 +280,12 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   originatingApp={$scope.getOriginatingApp()}
                 />
               );
-              showSaveModal(saveModal, I18nContext);
+              const lastAppType = $scope.getOriginatingApp();
+              if (lastAppType !== 'dashboards') {
+                showSaveModal(saveModal, I18nContext);
+              } else {
+                createVisReference();
+              }
             },
           },
         ]
@@ -676,9 +682,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.toJSON());
     $appStatus.dirty = false;
-
-    const currentDashboardInput = dashboard.getLastLoadedDashboardAppDashboardInput();
-    console.dir(currentDashboardInput);
 
     return savedVis.save(saveOptions).then(
       function (id) {

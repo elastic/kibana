@@ -37,6 +37,7 @@ import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { DashboardStart } from '../../dashboard/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { ConfigSchema } from '../config';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -60,6 +61,7 @@ export interface VisualizeKibanaServices {
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
   embeddable: EmbeddableStart;
+  featureFlagConfig: ConfigSchema;
 }
 
 let services: VisualizeKibanaServices | null = null;
