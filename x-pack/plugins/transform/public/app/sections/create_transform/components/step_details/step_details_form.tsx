@@ -79,12 +79,9 @@ export function applyTransformConfigToDetailsState(
   return state;
 }
 
-const noTimeFieldLabel = i18n.translate(
-  'indexPatternManagement.createIndexPattern.stepTime.noTimeFieldOptionLabel',
-  {
-    defaultMessage: "I don't want to use the Time Filter",
-  }
-);
+const noTimeFieldLabel = i18n.translate('xpack.transform.stepDetailsForm.noTimeFieldOptionLabel', {
+  defaultMessage: "I don't want to use the Time Filter",
+});
 
 const noTimeFieldOption = {
   text: noTimeFieldLabel,
@@ -130,6 +127,22 @@ export const StepDetailsForm: FC<Props> = React.memo(
       undefined
     );
 
+    const onTimeFieldChanged = React.useCallback(
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        // If the value is an empty string, it's not a valid selection
+        if (value === '') {
+          return;
+        }
+        // Find the time field based on the selected value
+        // this is to account for undefined when user chooses not to use a date field
+        const timeField = previewDateColumns.find((col) => col === value);
+
+        const selectedTimeField = timeField ? timeField : undefined;
+        setIndexPatternDateField(selectedTimeField);
+      },
+      [setIndexPatternDateField, previewDateColumns]
+    );
     // Continuous mode state
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
       defaults.isContinuousModeEnabled
@@ -428,7 +441,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                   noTimeFieldOption,
                 ]}
                 value={indexPatternDateField}
-                onChange={(e) => setIndexPatternDateField(e.target.value)}
+                onChange={onTimeFieldChanged}
                 data-test-subj="transformIndexPatternDateFieldSelect"
               />
             </EuiFormRow>
