@@ -12,6 +12,7 @@ import { type as timelineType } from './lib/timeline/saved_object_mappings';
 import { type as ruleStatusType } from './lib/detection_engine/rules/saved_object_mappings';
 import { type as ruleActionsType } from './lib/detection_engine/rule_actions/saved_object_mappings';
 import { type as exceptionsArtifactType } from './lib/exceptions/saved_object_mappings';
+import { type as endpointUserType } from './lib/setup/saved_object_mappings';
 
 const types = [
   noteType,
@@ -20,6 +21,7 @@ const types = [
   ruleStatusType,
   timelineType,
   exceptionsArtifactType,
+  endpointUserType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
