@@ -35,8 +35,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   defaultValue = {
     name: '',
     description: '',
-    processors: '',
-    on_failure: '',
+    processors: [],
+    on_failure: [],
     version: '',
   },
   onSave,

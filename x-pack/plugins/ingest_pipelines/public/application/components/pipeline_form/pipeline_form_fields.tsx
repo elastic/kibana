@@ -8,15 +8,15 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
+import { Processor } from '../../../../common/types';
 import { FormDataProvider } from '../../../shared_imports';
 import { PipelineProcessorsEditor, OnUpdateHandler } from '../pipeline_processors_editor';
 
 import { getUseField, getFormRow, Field, useKibana } from '../../../shared_imports';
 
 interface Props {
-  // TODO: Fix processors type anno
-  initialProcessors: any;
-  initialOnFailureProcessors: any;
+  initialProcessors: Processor[];
+  initialOnFailureProcessors?: Processor[];
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
   isTestButtonDisabled: boolean;
