@@ -41,7 +41,7 @@ export const CLOSED_ALERTS = i18n.translate(
 export const IN_PROGRESS_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
   {
-    defaultMessage: 'In-progress alerts',
+    defaultMessage: 'In progress alerts',
   }
 );
 
@@ -142,7 +142,7 @@ export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
     {
       values: { totalAlerts },
       defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in-progress.',
+        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
     }
   );
 
@@ -163,6 +163,6 @@ export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
 export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
   {
-    defaultMessage: 'Failed to mark alert(s) as in-progress',
+    defaultMessage: 'Failed to mark alert(s) as in progress',
   }
 );
