@@ -175,16 +175,23 @@ export const hasSelectedAlert: (state: Immutable<AlertListState>) => boolean = c
 );
 
 let lastSelectedAlert: string | null = null;
-export const selectedAlertHasChanged: (state: Immutable<AlertListState>) => boolean = createSelector(
-  uiQueryParams,
-  function hasChanged({ selected_alert: selectedAlert }) {
-    if(typeof selectedAlert !== 'string'){
-      return false;
-    }
-    if(selectedAlert === lastSelectedAlert){
-      return false;
-    }
-    lastSelectedAlert = selectedAlert;
-    return true;
+/**
+ * @returns <boolean> true once per change of `selectedAlert` in query params.
+ *
+ * As opposed to `hasSelectedAlert` which always returns true if the alert is present
+ * query params, which can cause unnecessary requests and re-renders in some cases.
+ */
+export const selectedAlertHasChanged: (
+  state: Immutable<AlertListState>
+) => boolean = createSelector(uiQueryParams, function hasChanged({
+  selected_alert: selectedAlert,
+}) {
+  if (typeof selectedAlert !== 'string') {
+    return false;
   }
-);
+  if (selectedAlert === lastSelectedAlert) {
+    return false;
+  }
+  lastSelectedAlert = selectedAlert;
+  return true;
+});
