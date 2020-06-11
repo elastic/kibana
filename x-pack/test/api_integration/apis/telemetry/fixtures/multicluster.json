@@ -162,7 +162,7 @@
       }
     },
     "stack_stats": {
-      "data": {},
+      "data": [],
       "xpack": {
         "security": {
           "available": false,
@@ -450,7 +450,7 @@
       }
     },
     "stack_stats": {
-      "data": {},
+      "data": [],
       "xpack": {
         "security": {
           "available": true,
@@ -752,7 +752,7 @@
       }
     },
     "stack_stats": {
-      "data": {},
+      "data": [],
       "xpack": {
         "security": {
           "available": true,

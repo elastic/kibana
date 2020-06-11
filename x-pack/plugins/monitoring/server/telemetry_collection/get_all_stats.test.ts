@@ -154,7 +154,7 @@ describe('get_all_stats', () => {
               },
               cloud: undefined,
             },
-            data: {},
+            data: [],
           },
         },
       ];

@@ -69,9 +69,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     stats.forEach((entry) => {
       expect(entry).toMatchSnapshot({
         timestamp: expect.any(String),
-        stack_stats: {
-          data: expect.any(Object), // Don't want to test it here. It comes from OSS and already tested there
-        },
       });
     });
   });
@@ -108,9 +105,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     stats.forEach((entry) => {
       expect(entry).toMatchSnapshot({
         timestamp: expect.any(String),
-        stack_stats: {
-          data: expect.any(Object), // Don't want to test it here. It comes from OSS and already tested there
-        },
       });
     });
   });

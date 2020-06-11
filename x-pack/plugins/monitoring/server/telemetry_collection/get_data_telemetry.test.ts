@@ -28,7 +28,7 @@ describe('get_ingest_solutions', () => {
   test('it returns the base document because no docs found', async () => {
     await expect(
       getDataTelemetry(mockCallCluster(), ['cluster-1', 'cluster-2'], Date.now(), Date.now(), 10)
-    ).resolves.toStrictEqual({ 'cluster-1': {}, 'cluster-2': {} });
+    ).resolves.toStrictEqual({ 'cluster-1': [], 'cluster-2': [] });
   });
 
   test('it counts 4 "logs.count" providers but 1 logs.total_providers', async () => {
@@ -43,11 +43,15 @@ describe('get_ingest_solutions', () => {
     await expect(
       getDataTelemetry(mockCallCluster(indices), ['cluster-1'], Date.now(), Date.now(), 10)
     ).resolves.toStrictEqual({
-      'cluster-1': {
-        shippers: {
-          logs: { index_count: 4, doc_count: 400, size_in_bytes: 40 },
+      'cluster-1': [
+        {
+          dataset: { name: 'third-party-logs', type: 'logs' },
+          shipper: 'unknown',
+          index_count: 4,
+          doc_count: 400,
+          size_in_bytes: 40,
         },
-      },
+      ],
     });
   });
 });

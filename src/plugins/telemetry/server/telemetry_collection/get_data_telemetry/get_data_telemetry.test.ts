@@ -18,100 +18,221 @@
  */
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
+import { DATA_SHIPPER_TO_TYPE_MAPPING } from './constants';
 
 describe('get_data_telemetry', () => {
   describe('buildIngestSolutionsPayload', () => {
     test('return the base object when no indices provided', () => {
-      expect(buildDataTelemetryPayload([])).toStrictEqual({});
+      expect(buildDataTelemetryPayload([])).toStrictEqual([]);
     });
 
     test('return the base object when no matching indices provided', () => {
       expect(
         buildDataTelemetryPayload([
-          { name: 'no-way-this-can_match_anything', sizeInBytes: 10 },
+          { name: 'no__way__this__can_match_anything', sizeInBytes: 10 },
           { name: '.kibana-event-log-8.0.0' },
         ])
-      ).toStrictEqual({});
+      ).toStrictEqual([]);
     });
 
     test('matches some indices and puts them in their own category', () => {
       expect(
         buildDataTelemetryPayload([
-          { name: 'apm-1234' },
-          { name: 'apm-5677' },
+          // APM Indices have known shipper (so we can infer the datasetType from mapping constant)
+          { name: 'apm-7.7.0-error-000001', shipper: 'apm', isECS: true },
+          { name: 'apm-7.7.0-metric-000001', shipper: 'apm', isECS: true },
+          { name: 'apm-7.7.0-onboarding-2020.05.17', shipper: 'apm', isECS: true },
+          { name: 'apm-7.7.0-profile-000001', shipper: 'apm', isECS: true },
+          { name: 'apm-7.7.0-span-000001', shipper: 'apm', isECS: true },
+          { name: 'apm-7.7.0-transaction-000001', shipper: 'apm', isECS: true },
+          // Packetbeat indices with known shipper (we can infer datasetType from mapping constant)
+          { name: 'packetbeat-7.7.0-2020.06.11-000001', shipper: 'packetbeat', isECS: true },
+          // Matching patterns from the list => known datasetName but the rest is unknown
           { name: 'filebeat-12314', docCount: 100, sizeInBytes: 10 },
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
+          { name: '.app-search-1234', docCount: 0 },
+          // Matching pattern with datasetName and datasetType set but shipper unknown
           { name: 'my_logs_custom', docCount: 1000, sizeInBytes: 10 },
           { name: 'my_logs', docCount: 100, sizeInBytes: 10, isECS: true },
           { name: 'logs_custom' },
-          { name: '.app-search-1234', docCount: 0 },
+          { name: 'logs-custom-index-1234' },
+          // New Indexing strategy: everything can be inferred from the constant_keyword values
+          {
+            name: 'logs-nginx.access-default-000001',
+            datasetName: 'nginx.access',
+            datasetType: 'logs',
+            shipper: 'filebeat',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 1000,
+          },
+          {
+            name: 'logs-nginx.access-default-000002',
+            datasetName: 'nginx.access',
+            datasetType: 'logs',
+            shipper: 'filebeat',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
         ])
-      ).toStrictEqual({
-        shippers: {
-          apm: { index_count: 2 },
-          filebeat: { index_count: 1, doc_count: 100, size_in_bytes: 10 },
-          metricbeat: { index_count: 1, ecs_index_count: 0, doc_count: 100, size_in_bytes: 10 },
-          logs: { index_count: 3, ecs_index_count: 1, doc_count: 1100, size_in_bytes: 20 },
-          'app-search': { index_count: 1, doc_count: 0 },
+      ).toStrictEqual([
+        {
+          dataset: { name: 'apm', type: DATA_SHIPPER_TO_TYPE_MAPPING.apm },
+          shipper: 'apm',
+          index_count: 6,
+          ecs_index_count: 6,
         },
-      });
+        {
+          dataset: { name: 'packetbeat', type: DATA_SHIPPER_TO_TYPE_MAPPING.packetbeat },
+          shipper: 'packetbeat',
+          index_count: 1,
+          ecs_index_count: 1,
+        },
+        {
+          dataset: { name: 'filebeat', type: 'unknown' },
+          shipper: 'unknown',
+          index_count: 1,
+          doc_count: 100,
+          size_in_bytes: 10,
+        },
+        {
+          dataset: { name: 'metricbeat', type: 'unknown' },
+          shipper: 'unknown',
+          index_count: 1,
+          ecs_index_count: 0,
+          doc_count: 100,
+          size_in_bytes: 10,
+        },
+        {
+          dataset: { name: 'app-search', type: 'unknown' },
+          shipper: 'unknown',
+          index_count: 1,
+          doc_count: 0,
+        },
+        {
+          dataset: { name: 'third-party-logs', type: 'logs' },
+          shipper: 'unknown',
+          index_count: 4,
+          ecs_index_count: 1,
+          doc_count: 1100,
+          size_in_bytes: 20,
+        },
+        {
+          dataset: { name: 'nginx.access', type: 'logs' },
+          shipper: 'filebeat',
+          index_count: 2,
+          ecs_index_count: 2,
+          doc_count: 2000,
+          size_in_bytes: 1060,
+        },
+      ]);
     });
   });
 
   describe('getIngestSolutions', () => {
     test('it returns the base payload (all 0s) because no indices are found', async () => {
       const callCluster = mockCallCluster();
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual({});
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([]);
     });
 
-    test('can only see the index in the state, but not the stats', async () => {
+    test('can only see the index mappings, but not the stats', async () => {
       const callCluster = mockCallCluster(['filebeat-12314']);
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual({
-        shippers: {
-          filebeat: { index_count: 1, ecs_index_count: 0 },
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
+        {
+          dataset: { name: 'filebeat', type: 'unknown' },
+          shipper: 'unknown',
+          index_count: 1,
+          ecs_index_count: 0,
         },
-      });
+      ]);
     });
 
-    test('can see the state and the stats', async () => {
-      const callCluster = mockCallCluster(['filebeat-12314'], true, {
-        indices: {
-          'filebeat-12314': { total: { docs: { count: 100 }, store: { size_in_bytes: 10 } } },
+    test('can see the mappings and the stats', async () => {
+      const callCluster = mockCallCluster(
+        ['filebeat-12314'],
+        { isECS: true },
+        {
+          indices: {
+            'filebeat-12314': { total: { docs: { count: 100 }, store: { size_in_bytes: 10 } } },
+          },
+        }
+      );
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
+        {
+          dataset: { name: 'filebeat', type: 'unknown' },
+          shipper: 'unknown',
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 100,
+          size_in_bytes: 10,
         },
-      });
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual({
-        shippers: {
-          filebeat: { index_count: 1, ecs_index_count: 1, doc_count: 100, size_in_bytes: 10 },
+      ]);
+    });
+
+    test('find an index that does not match any index pattern but has mappings metadata', async () => {
+      const callCluster = mockCallCluster(
+        ['cannot_match_anything'],
+        { isECS: true, datasetType: 'events', shipper: 'my-beat' },
+        {
+          indices: {
+            cannot_match_anything: {
+              total: { docs: { count: 100 }, store: { size_in_bytes: 10 } },
+            },
+          },
+        }
+      );
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
+        {
+          dataset: { name: 'unknown', type: 'events' },
+          shipper: 'my-beat',
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 100,
+          size_in_bytes: 10,
         },
-      });
+      ]);
+    });
+
+    test('return empty array when there is an error', async () => {
+      const callCluster = jest.fn().mockRejectedValue(new Error('Something went terribly wrong'));
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([]);
     });
   });
 });
 
-function mockCallCluster(stateIndices: string[] = [], isECS = false, indexStats: any = {}) {
+function mockCallCluster(
+  indicesMappings: string[] = [],
+  { isECS = false, datasetName = '', datasetType = '', shipper = '' } = {},
+  indexStats: any = {}
+) {
   return jest.fn().mockImplementation(async (method: string, opts: any) => {
-    if (method === 'cluster.state') {
-      return {
-        metadata: {
-          indices: Object.fromEntries(
-            stateIndices.map((index, version) => [
-              index,
-              {
-                version,
-                ...(isECS
-                  ? {
-                      mappings: {
-                        _doc: {
-                          properties: { ecs: { properties: { version: { type: 'keyword' } } } },
-                        },
-                      },
-                    }
-                  : {}),
+    if (method === 'indices.getMapping') {
+      return Object.fromEntries(
+        indicesMappings.map((index) => [
+          index,
+          {
+            mappings: {
+              ...(shipper && { _meta: { beat: shipper } }),
+              properties: {
+                ...(isECS && { ecs: { properties: { version: { type: 'keyword' } } } }),
+                ...((datasetType || datasetName) && {
+                  dataset: {
+                    properties: {
+                      ...(datasetName && {
+                        name: { type: 'constant_keyword', value: datasetName },
+                      }),
+                      ...(datasetType && {
+                        type: { type: 'constant_keyword', value: datasetType },
+                      }),
+                    },
+                  },
+                }),
               },
-            ])
-          ),
-        },
-      };
+            },
+          },
+        ])
+      );
     }
     return indexStats;
   });

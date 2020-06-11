@@ -18,25 +18,34 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { DATA_SHIPPERS } from './constants';
+import {
+  DATA_DATASETS_INDEX_PATTERNS,
+  DATA_SHIPPER_TO_TYPE_MAPPING,
+  DataTelemetryType,
+} from './constants';
 
-type DataShippersName = typeof DATA_SHIPPERS[number]['name'];
-
-export interface DataTelemetryShipperPayload {
+export interface DataTelemetryBasePayload {
   index_count: number;
   ecs_index_count?: number;
   doc_count?: number;
   size_in_bytes?: number;
 }
 
-export interface DataTelemetryPayload {
-  shippers: {
-    [key in DataShippersName]?: DataTelemetryShipperPayload;
+export interface DataTelemetryDocument extends DataTelemetryBasePayload {
+  dataset: {
+    name: string;
+    type: DataTelemetryType | 'unknown' | string; // The union of types is to help autocompletion with some known `dataset.type`s
   };
+  shipper: string;
 }
+
+export type DataTelemetryPayload = DataTelemetryDocument[];
 
 export interface DataTelemetryIndex {
   name: string;
+  datasetName?: string; // To be obtained from `mappings.dataset.name` if it's a constant keyword
+  datasetType?: string; // To be obtained from `mappings.dataset.type` if it's a constant keyword
+  shipper?: string; // To be obtained from `_meta.beat` if it's set
   isECS?: boolean; // Optional because it can't be obtained via Monitoring.
 
   // The fields below are optional because we might not be able to obtain them if the user does not
@@ -45,18 +54,34 @@ export interface DataTelemetryIndex {
   sizeInBytes?: number;
 }
 
-function findMatchingShipper(indexName: string) {
-  return DATA_SHIPPERS.find(({ pattern }) => {
-    if (!pattern.startsWith('.') && indexName.startsWith('.')) {
-      // avoid system indices caught by very fuzzy index patters (i.e.: *log* would catch `.kibana-log-...`)
+type DataDescriptor = Partial<Pick<DataTelemetryIndex, 'datasetName' | 'datasetType' | 'shipper'>>;
+
+function findMatchingDescriptors({
+  name,
+  shipper,
+  datasetName,
+  datasetType,
+}: DataTelemetryIndex): DataDescriptor | undefined {
+  const found = DATA_DATASETS_INDEX_PATTERNS.find(({ pattern }) => {
+    if (!pattern.startsWith('.') && name.startsWith('.')) {
+      // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.kibana-log-...`)
       return false;
     }
-    return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(indexName);
+    return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(name);
   });
+
+  if ([found, shipper, datasetName, datasetType].some(Boolean)) {
+    return {
+      ...found,
+      ...(shipper && { shipper, datasetType: DATA_SHIPPER_TO_TYPE_MAPPING[shipper] }),
+      ...(datasetName && { datasetName }),
+      ...(datasetType && { datasetType }),
+    };
+  }
 }
 
 function increaseCounters(
-  previousValue: DataTelemetryShipperPayload = { index_count: 0 },
+  previousValue: DataTelemetryBasePayload = { index_count: 0 },
   { isECS, docCount, sizeInBytes }: DataTelemetryIndex
 ) {
   return {
@@ -77,7 +102,7 @@ function increaseCounters(
 }
 
 export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTelemetryPayload {
-  const startingDotPatternsUntilTheFirstAsterisk = DATA_SHIPPERS.map(({ pattern }) =>
+  const startingDotPatternsUntilTheFirstAsterisk = DATA_DATASETS_INDEX_PATTERNS.map(({ pattern }) =>
     pattern.replace(/^\.(.+)\*.*$/g, '.$1')
   ).filter(Boolean);
 
@@ -90,22 +115,26 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
       )
   );
 
-  return indexCandidates.reduce((acc, indexCandidate) => {
-    const matchingShipper = findMatchingShipper(indexCandidate.name);
+  const acc = new Map<string, DataTelemetryDocument>();
 
-    if (!matchingShipper) {
-      return acc;
+  for (const indexCandidate of indexCandidates) {
+    const matchingDescriptors = findMatchingDescriptors(indexCandidate);
+    if (matchingDescriptors) {
+      const {
+        datasetName = 'unknown',
+        datasetType = 'unknown',
+        shipper = 'unknown',
+      } = matchingDescriptors;
+      const key = `${datasetName}-${datasetType}-${shipper}`;
+      acc.set(key, {
+        dataset: { name: datasetName, type: datasetType },
+        shipper,
+        ...increaseCounters(acc.get(key), indexCandidate),
+      });
     }
-    const { name } = matchingShipper;
-    const dataShippers = acc.shippers || {};
-    return {
-      ...acc,
-      shippers: {
-        ...dataShippers,
-        [name]: increaseCounters(dataShippers[name], indexCandidate),
-      },
-    };
-  }, {} as DataTelemetryPayload);
+  }
+
+  return [...acc.values()];
 }
 
 interface IndexStats {
@@ -124,24 +153,31 @@ interface IndexStats {
   };
 }
 
-interface ClusterState {
-  metadata: {
-    indices: {
-      [indexName: string]: {
-        version: number;
-        mappings: {
-          _doc?: {
-            properties: {
-              ecs?: {
-                properties: {
-                  version?: {
-                    type: string;
-                  };
-                };
-              };
+interface IndexMappings {
+  [indexName: string]: {
+    mappings: {
+      _meta?: {
+        beat?: string;
+      };
+      properties: {
+        dataset?: {
+          properties: {
+            name?: {
+              type: string;
+              value?: string;
+            };
+            type?: {
+              type: string;
+              value?: string;
             };
           };
-          [_type: string]: object | undefined;
+        };
+        ecs?: {
+          properties: {
+            version?: {
+              type: string;
+            };
+          };
         };
       };
     };
@@ -150,17 +186,23 @@ interface ClusterState {
 
 export async function getDataTelemetry(callCluster: APICaller) {
   try {
-    const index = DATA_SHIPPERS.map(({ pattern }) => pattern);
-    const [state, indexStats]: [ClusterState, IndexStats] = await Promise.all([
-      // GET _cluster/state/metadata/<index>?filter_path=metadata.indices.*.version
-      callCluster<ClusterState>('cluster.state', {
-        index,
-        metric: 'metadata',
+    const index = [
+      ...DATA_DATASETS_INDEX_PATTERNS.map(({ pattern }) => pattern),
+      '*-*-*-*', // Include new indexing strategy indices {type}-{dataset}-{namespace}-{rollover_counter}
+    ];
+    const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
+      // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
+      callCluster('indices.getMapping', {
+        index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
         filterPath: [
-          // The payload is huge and we are only after the name (no other useful stuff so far)
-          'metadata.indices.*.version',
-          // Does it have `ecs.version` in the mappings?
-          'metadata.indices.*.mappings._doc.properties.ecs.properties.version.type',
+          // _meta.beat tells the shipper
+          '*.mappings._meta.beat',
+          // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
+          '*.mappings.properties.ecs.properties.version.type',
+          // If `dataset.type` is a `constant_keyword`, it can be reported as a type
+          '*.mappings.properties.dataset.properties.type.value',
+          // If `dataset.name` is a `constant_keyword`, it can be reported as the dataset
+          '*.mappings.properties.dataset.properties.name.value',
         ],
       }),
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
@@ -172,24 +214,29 @@ export async function getDataTelemetry(callCluster: APICaller) {
       }),
     ]);
 
-    const stateIndices = state?.metadata?.indices || {};
-    const indexNames = Object.keys(stateIndices);
+    const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
     const indices = indexNames.map((name) => {
-      const isECS = !!stateIndices[name]?.mappings?._doc?.properties.ecs?.properties.version?.type;
+      const isECS = !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type;
+      const shipper = indexMappings[name]?.mappings?._meta?.beat;
+      const datasetName = indexMappings[name]?.mappings?.properties.dataset?.properties.name?.value;
+      const datasetType = indexMappings[name]?.mappings?.properties.dataset?.properties.type?.value;
 
       const stats = (indexStats?.indices || {})[name];
       if (stats) {
         return {
           name,
+          datasetName,
+          datasetType,
+          shipper,
           isECS,
           docCount: stats.total?.docs?.count,
           sizeInBytes: stats.total?.store?.size_in_bytes,
         };
       }
-      return { name, isECS };
+      return { name, datasetName, datasetType, shipper, isECS };
     });
     return buildDataTelemetryPayload(indices);
   } catch (e) {
-    return {};
+    return [];
   }
 }

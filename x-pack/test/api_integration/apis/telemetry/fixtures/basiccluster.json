@@ -174,11 +174,15 @@
       "apm": {
         "found": true
       },
-      "data": {
-        "shippers": {
-          "apm": { "doc_count": 1, "index_count": 1, "size_in_bytes": 5136 }
+      "data": [
+        {
+          "dataset": { "name": "apm", "type": "unknown" },
+          "shipper": "unknown",
+          "doc_count": 1,
+          "index_count": 1,
+          "size_in_bytes": 5136
         }
-      },
+      ],
       "kibana": {
         "count": 1,
         "dashboard": {

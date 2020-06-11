@@ -40,11 +40,11 @@ export default function ({ getService }) {
   const es = getService('es');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
-    before('create some tracked indices', async () => {
+    before('create some telemetry-data tracked indices', async () => {
       return es.indices.create({ index: 'telemetry_tests_logs' });
     });
 
-    after('cleanup tracked indices', () => {
+    after('cleanup telemetry-data tracked indices', () => {
       return es.indices.delete({ index: 'telemetry_tests_logs' });
     });
 
@@ -81,14 +81,17 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
 
-      // Testing data.shippers this to make sure Cluster State API doesn't change its response
+      // Testing stack_stats.data
       expect(stats.stack_stats.data).to.be.an('object');
-      expect(stats.stack_stats.data.shippers).to.be.an('object');
-      expect(stats.stack_stats.data.shippers.logs).to.be.an('object');
-      expect(stats.stack_stats.data.shippers.logs.index_count).to.be(1);
-      expect(stats.stack_stats.data.shippers.logs.doc_count).to.be(0);
-      expect(stats.stack_stats.data.shippers.logs.ecs_index_count).to.be(0);
-      expect(stats.stack_stats.data.shippers.logs.size_in_bytes).to.be.greaterThan(0);
+      expect(stats.stack_stats.data).to.be.an('array');
+      expect(stats.stack_stats.data[0]).to.be.an('object');
+      expect(stats.stack_stats.data[0].dataset.name).to.be('third-party-logs');
+      expect(stats.stack_stats.data[0].dataset.type).to.be('logs');
+      expect(stats.stack_stats.data[0].shipper).to.be('unknown');
+      expect(stats.stack_stats.data[0].index_count).to.be(1);
+      expect(stats.stack_stats.data[0].doc_count).to.be(0);
+      expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
+      expect(stats.stack_stats.data[0].size_in_bytes).to.be.greaterThan(0);
     });
 
     it('should pull local stats and validate fields', async () => {
