@@ -6,23 +6,40 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { applyMatrix3, distance, angle } from '../lib/vector2';
 import { Vector2, Matrix3, EdgeLineMetadata } from '../types';
 import { useResolverTheme, calculateResolverFontSize } from './assets';
 
-interface ElapsedTimeProps {
+interface StyledEdgeLine {
+  readonly resolverEdgeColor: string;
+  readonly magFactorX: number;
+}
+
+const StyledEdgeLine = styled.div<StyledEdgeLine>`
+  position: absolute;
+  height: ${(props) => {
+    return `${calculateResolverFontSize(props.magFactorX, 12, 8.5)}px`;
+  }};
+  background-color: ${(props) => props.resolverEdgeColor};
+`;
+
+interface StyledElapsedTime {
   readonly backgroundColor: string;
   readonly leftPct: number;
   readonly scaledTypeSize: number;
   readonly textColor: string;
 }
 
-const StyledElapsedTime = styled.div<ElapsedTimeProps>`
+const StyledElapsedTime = styled.div<StyledElapsedTime>`
   background-color: ${(props) => props.backgroundColor};
   color: ${(props) => props.textColor};
   font-size: ${(props) => `${props.scaledTypeSize}px`};
   font-weight: bold;
+  max-width: 75%;
+  overflow: hidden;
   position: absolute;
+  text-overflow: ellipsis;
   top: 50%;
   white-space: nowrap;
   left: ${(props) => `${props.leftPct}%`};
@@ -106,7 +123,13 @@ const EdgeLineComponent = React.memo(
     }
 
     return (
-      <div role="presentation" className={className} style={style}>
+      <StyledEdgeLine
+        role="presentation"
+        className={className}
+        style={style}
+        resolverEdgeColor={colorMap.resolverEdge}
+        magFactorX={magFactorX}
+      >
         {elapsedTime && (
           <StyledElapsedTime
             backgroundColor={colorMap.resolverEdge}
@@ -114,20 +137,21 @@ const EdgeLineComponent = React.memo(
             scaledTypeSize={scaledTypeSize}
             textColor={colorMap.resolverEdgeText}
           >
-            {elapsedTime}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.edgeLineElapsedTime"
+              defaultMessage="{duration} {durationType}"
+              values={{
+                duration: elapsedTime.duration,
+                durationType: elapsedTime.durationType,
+              }}
+            />
           </StyledElapsedTime>
         )}
-      </div>
+      </StyledEdgeLine>
     );
   }
 );
 
 EdgeLineComponent.displayName = 'EdgeLine';
 
-export const EdgeLine = styled(EdgeLineComponent)`
-  position: absolute;
-  height: ${({ projectionMatrix: [magFactorX] }) => {
-    return `${calculateResolverFontSize(magFactorX, 12, 8.5)}px`;
-  }};
-  background-color: ${() => useResolverTheme().colorMap.resolverEdge};
-`;
+export const EdgeLine = EdgeLineComponent;

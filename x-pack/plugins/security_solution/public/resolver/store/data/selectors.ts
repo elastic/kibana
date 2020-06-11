@@ -30,7 +30,7 @@ import {
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';
-import { getRelativeTimeDifference } from '../../lib/date';
+import { getFriendlyElapsedTime } from '../../lib/date';
 
 const unit = 140;
 const distanceBetweenNodesInUnits = 2;
@@ -181,7 +181,8 @@ function processEdgeLineSegments(
     const parentTime = eventTimestamp(parent);
     const processTime = eventTimestamp(process);
     if (parentTime && processTime) {
-      edgeLineMetadata.elapsedTime = getRelativeTimeDifference(parentTime, processTime);
+      const elapsedTime = getFriendlyElapsedTime(parentTime, processTime);
+      if (elapsedTime) edgeLineMetadata.elapsedTime = elapsedTime;
     }
 
     /**
@@ -199,18 +200,17 @@ function processEdgeLineSegments(
      *     |         |
      *     B         C
      */
-    const lineFromProcessToMidwayLine: EdgeLineSegment = [
-      [position[0], midwayY],
-      position,
-      edgeLineMetadata,
-    ];
+    const lineFromProcessToMidwayLine: EdgeLineSegment = {
+      points: [[position[0], midwayY], position],
+      metadata: edgeLineMetadata,
+    };
 
     const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
     const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
       // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
-      edgeLineSegments.push([parentPosition, position, edgeLineMetadata]);
+      edgeLineSegments.push({ points: [parentPosition, position], metadata: edgeLineMetadata });
     } else if (isFirstChild) {
       /**
        * If the parent has multiple children, we draw the 'midway' line, and the line from the
@@ -226,28 +226,29 @@ function processEdgeLineSegments(
        */
       const { firstChildWidth, lastChildWidth } = metadata;
 
-      const lineFromParentToMidwayLine: EdgeLineSegment = [
-        parentPosition,
-        [parentPosition[0], midwayY],
-      ];
+      const lineFromParentToMidwayLine: EdgeLineSegment = {
+        points: [parentPosition, [parentPosition[0], midwayY]],
+      };
 
       const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
 
       const minX = parentWidth / -2 + firstChildWidth / 2;
       const maxX = minX + widthOfMidline;
 
-      const midwayLine: EdgeLineSegment = [
-        [
-          // Position line relative to the parent's x component
-          parentPosition[0] + minX,
-          midwayY,
+      const midwayLine: EdgeLineSegment = {
+        points: [
+          [
+            // Position line relative to the parent's x component
+            parentPosition[0] + minX,
+            midwayY,
+          ],
+          [
+            // Position line relative to the parent's x component
+            parentPosition[0] + maxX,
+            midwayY,
+          ],
         ],
-        [
-          // Position line relative to the parent's x component
-          parentPosition[0] + maxX,
-          midwayY,
-        ],
-      ];
+      };
 
       edgeLineSegments.push(
         /* line from parent to midway line */
@@ -492,13 +493,19 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     }
 
     for (const edgeLineSegment of edgeLineSegments) {
-      // const transformedSegment = [];
-      const [startPoint, endPoint, edgeLineMetadata] = edgeLineSegment;
-      const transformedSegment: EdgeLineSegment = [
-        applyMatrix3(startPoint, isometricTransformMatrix),
-        applyMatrix3(endPoint, isometricTransformMatrix),
-      ];
-      if (edgeLineMetadata) transformedSegment.push(edgeLineMetadata);
+      const {
+        points: [startPoint, endPoint],
+        metadata,
+      } = edgeLineSegment;
+
+      const transformedSegment: EdgeLineSegment = {
+        points: [
+          applyMatrix3(startPoint, isometricTransformMatrix),
+          applyMatrix3(endPoint, isometricTransformMatrix),
+        ],
+      };
+
+      if (metadata) transformedSegment.metadata = metadata;
 
       transformedEdgeLineSegments.push(transformedSegment);
     }

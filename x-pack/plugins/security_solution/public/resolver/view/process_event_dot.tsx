@@ -210,7 +210,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   display: flex;
   flex-flow: column;
   font-size: ${(props) => `${props.fontSize}px`};
-  left: 20.8%;
+  left: 20.9%;
   line-height: 140%;
   padding: 0.25rem 0 0 0.1rem;
   position: absolute;
@@ -221,20 +221,22 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
 interface StyledDescriptionText {
   readonly backgroundColor: string;
   readonly color: string;
+  readonly isDisplaying: boolean;
 }
 
 const StyledDescriptionText = styled.div<StyledDescriptionText>`
-  text-transform: uppercase;
-  letter-spacing: -0.01px;
   background-color: ${(props) => props.backgroundColor};
-  line-height: 1;
-  font-weight: bold;
-  font-size: 0.8rem;
-  width: fit-content;
-  margin: 0;
-  text-align: left;
-  padding: 4px 0 0 2px;
   color: ${(props) => props.color};
+  display: ${(props) => (props.isDisplaying ? 'block' : 'none')};
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: -0.01px;
+  line-height: 1;
+  margin: 0;
+  padding: 4px 0 0 2px;
+  text-align: left;
+  text-transform: uppercase;
+  width: fit-content;
 `;
 
 /**
@@ -286,8 +288,26 @@ const ProcessEventDotComponents = React.memo(
     const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
     const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
-    const logicalProcessNodeViewWidth = 360;
-    const logicalProcessNodeViewHeight = 120;
+    const isShowingEventActions = magFactorX > 0.8;
+    const isShowingDescriptionText = magFactorX >= 0.55;
+
+    /**
+     * As the resolver zooms and buttons and text change visibility, we look to keep the overall container properly vertically aligned
+     */
+    const actionalButtonsBaseTopOffset = 5;
+    let actionableButtonsTopOffset;
+    switch (true) {
+      case isShowingEventActions:
+        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + 3.5 * magFactorX;
+        break;
+      case isShowingDescriptionText:
+        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + magFactorX;
+        break;
+      default:
+        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + 21 * magFactorX;
+        break;
+    }
+
     /**
      * The `left` and `top` values represent the 'center' point of the process node.
      * Since the view has content to the left and above the 'center' point, offset the
@@ -295,29 +315,18 @@ const ProcessEventDotComponents = React.memo(
      * with the correct position on the map.
      */
 
-    const isZoomedOut = magFactorX < 0.8;
-    const isShowingDescriptionText = magFactorX >= 0.55;
+    const logicalProcessNodeViewWidth = 360;
+    const logicalProcessNodeViewHeight = 120;
 
-    const nodeXOffsetValue = isZoomedOut
-      ? -0.143413 + (-magFactorX * (1 - magFactorX)) / 10
-      : -0.147413;
-    const nodeYOffsetValue = isZoomedOut
-      ? -0.53684 + (-magFactorX * 0.2 * (1 - magFactorX)) / magFactorX
-      : -0.53684;
-
-    const actionsBaseYOffsetPct = 5;
-    let actionsYOffsetPct;
-    switch (true) {
-      case !isZoomedOut:
-        actionsYOffsetPct = actionsBaseYOffsetPct + 3.5 * magFactorX;
-        break;
-      case isShowingDescriptionText:
-        actionsYOffsetPct = actionsBaseYOffsetPct + magFactorX;
-        break;
-      default:
-        actionsYOffsetPct = actionsBaseYOffsetPct + 21 * magFactorX;
-        break;
-    }
+    /**
+     * As the scale changes and button visibility toggles on the graph, these offsets help scale to keep the nodes centered on the edge
+     */
+    const nodeXOffsetValue = isShowingEventActions
+      ? -0.147413
+      : -0.147413 - (magFactorX - 0.5) * 0.08;
+    const nodeYOffsetValue = isShowingEventActions
+      ? -0.53684
+      : -0.53684 + (-magFactorX * 0.2 * (1 - magFactorX)) / magFactorX;
 
     const processNodeViewXOffset = nodeXOffsetValue * logicalProcessNodeViewWidth * magFactorX;
     const processNodeViewYOffset = nodeYOffsetValue * logicalProcessNodeViewHeight * magFactorX;
@@ -530,16 +539,15 @@ const ProcessEventDotComponents = React.memo(
           <StyledActionsContainer
             color={colorMap.full}
             fontSize={scaledTypeSize}
-            topPct={actionsYOffsetPct}
+            topPct={actionableButtonsTopOffset}
           >
-            {isShowingDescriptionText && (
-              <StyledDescriptionText
-                backgroundColor={colorMap.resolverBackground}
-                color={colorMap.descriptionText}
-              >
-                {descriptionText}
-              </StyledDescriptionText>
-            )}
+            <StyledDescriptionText
+              backgroundColor={colorMap.resolverBackground}
+              color={colorMap.descriptionText}
+              isDisplaying={isShowingDescriptionText}
+            >
+              {descriptionText}
+            </StyledDescriptionText>
             <div
               style={{
                 backgroundColor: colorMap.resolverBackground,
@@ -555,9 +563,10 @@ const ProcessEventDotComponents = React.memo(
                 size="s"
                 style={{
                   maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
-                  maxWidth: `${isZoomedOut ? 210 * magFactorX : 400}px`,
+                  maxWidth: `${isShowingEventActions ? 400 : 210 * magFactorX}px`,
                 }}
                 tabIndex={-1}
+                title={eventModel.eventName(event)}
               >
                 <span className="euiButton__content">
                   <span className="euiButton__text" data-test-subj={'euiButton__text'}>
@@ -566,36 +575,35 @@ const ProcessEventDotComponents = React.memo(
                 </span>
               </EuiButton>
             </div>
-            {!isZoomedOut && (
-              <EuiFlexGroup
-                justifyContent="flexStart"
-                gutterSize="xs"
-                style={{
-                  background: colorMap.resolverBackground,
-                  alignSelf: 'flex-start',
-                  padding: 0,
-                  margin: 0,
-                }}
-              >
-                <EuiFlexItem grow={false} className="related-dropdown">
-                  <NodeSubMenu
-                    buttonBorderColor={labelButtonFill}
-                    buttonFill={colorMap.resolverBackground}
-                    menuAction={handleRelatedEventRequest}
-                    menuTitle={subMenuAssets.relatedEvents.title}
-                    optionsWithActions={relatedEventStatusOrOptions}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <NodeSubMenu
-                    buttonBorderColor={labelButtonFill}
-                    buttonFill={colorMap.resolverBackground}
-                    menuTitle={subMenuAssets.relatedAlerts.title}
-                    menuAction={handleRelatedAlertsRequest}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+            <EuiFlexGroup
+              justifyContent="flexStart"
+              gutterSize="xs"
+              style={{
+                alignSelf: 'flex-start',
+                background: colorMap.resolverBackground,
+                display: `${isShowingEventActions ? 'flex' : 'none'}`,
+                margin: 0,
+                padding: 0,
+              }}
+            >
+              <EuiFlexItem grow={false} className="related-dropdown">
+                <NodeSubMenu
+                  buttonBorderColor={labelButtonFill}
+                  buttonFill={colorMap.resolverBackground}
+                  menuAction={handleRelatedEventRequest}
+                  menuTitle={subMenuAssets.relatedEvents.title}
+                  optionsWithActions={relatedEventStatusOrOptions}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <NodeSubMenu
+                  buttonBorderColor={labelButtonFill}
+                  buttonFill={colorMap.resolverBackground}
+                  menuTitle={subMenuAssets.relatedAlerts.title}
+                  menuAction={handleRelatedAlertsRequest}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </StyledActionsContainer>
         </div>
       </EuiKeyboardAccessible>

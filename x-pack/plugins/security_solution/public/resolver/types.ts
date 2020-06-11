@@ -242,17 +242,49 @@ export type ProcessWidths = Map<ResolverEvent, number>;
  */
 export type ProcessPositions = Map<ResolverEvent, Vector2>;
 
+export type DurationTypes =
+  | 'millisecond'
+  | 'milliseconds'
+  | 'second'
+  | 'seconds'
+  | 'minute'
+  | 'minutes'
+  | 'hour'
+  | 'hours'
+  | 'day'
+  | 'days'
+  | 'week'
+  | 'weeks'
+  | 'month'
+  | 'months'
+  | 'year'
+  | 'years';
+
+/**
+ * duration value and description string
+ */
+export interface DurationDetails {
+  duration: number;
+  durationType: DurationTypes;
+}
 /**
  * Values shared between two vertices joined by an edge line.
  */
 export interface EdgeLineMetadata {
-  elapsedTime?: string;
+  elapsedTime?: DurationDetails;
 }
+/**
+ * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
+ */
+export type EdgeLinePoints = Vector2[];
 
 /**
- * A tuple of 2 vector2 points and optional EdgeLineMetadata forming a polyline. Used to connect process nodes in the graph and display relevant information.
+ * Edge line components including the points joining the edgeline and any optional associated metadata
  */
-export type EdgeLineSegment = [Vector2, Vector2, EdgeLineMetadata?];
+export interface EdgeLineSegment {
+  points: EdgeLinePoints;
+  metadata?: EdgeLineMetadata;
+}
 
 /**
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
