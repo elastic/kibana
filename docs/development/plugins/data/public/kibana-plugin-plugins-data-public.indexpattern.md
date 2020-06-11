@@ -49,6 +49,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [init(forceFieldRefresh)](./kibana-plugin-plugins-data-public.indexpattern.init.md) |  |  |
+|  [initFromObject(response)](./kibana-plugin-plugins-data-public.indexpattern.initfromobject.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
@@ -58,6 +59,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [refreshFields()](./kibana-plugin-plugins-data-public.indexpattern.refreshfields.md) |  |  |
 |  [removeScriptedField(field)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
 |  [save(saveAttempts)](./kibana-plugin-plugins-data-public.indexpattern.save.md) |  |  |
+|  [serialize()](./kibana-plugin-plugins-data-public.indexpattern.serialize.md) |  |  |
 |  [toJSON()](./kibana-plugin-plugins-data-public.indexpattern.tojson.md) |  |  |
 |  [toString()](./kibana-plugin-plugins-data-public.indexpattern.tostring.md) |  |  |
 

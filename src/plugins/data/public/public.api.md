@@ -919,6 +919,8 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
     // (undocumented)
+    initFromObject(response: any): void;
+    // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
     isTimeBasedWildcard(): boolean;
@@ -940,6 +942,8 @@ export class IndexPattern implements IIndexPattern {
     removeScriptedField(field: IFieldType): Promise<void | Error>;
     // (undocumented)
     save(saveAttempts?: number): Promise<void | Error>;
+    // (undocumented)
+    serialize(): string;
     // (undocumented)
     timeFieldName: string | undefined;
     // (undocumented)

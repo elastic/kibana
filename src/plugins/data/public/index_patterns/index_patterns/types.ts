@@ -33,3 +33,16 @@ export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
   [key: string]: any;
 }
+
+export interface IndexPatternSpec {
+  _id: string;
+  _type: string;
+  _source: {
+    title: string;
+    timeFieldName: string;
+    sourceFilters: string;
+    fields: string;
+    fieldFormatMap: string;
+  };
+  _version: string;
+}

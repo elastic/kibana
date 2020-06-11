@@ -179,11 +179,12 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
-  private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
-    if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
-    }
+  public initFromObject(response: any) {
+    this.updateFromPlainObject(response);
+    this.initFields();
+  }
 
+  private updateFromPlainObject(response: any) {
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
       if (!fieldMapping._deserialize || !name) {
         return;
@@ -198,6 +199,15 @@ export class IndexPattern implements IIndexPattern {
     if (!this.title && this.id) {
       this.title = this.id;
     }
+    this.version = response._version;
+  }
+
+  private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
+    if (!response.found) {
+      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
+    }
+
+    this.updateFromPlainObject(response);
 
     return this.indexFields(forceFieldRefresh);
   }
@@ -249,11 +259,11 @@ export class IndexPattern implements IIndexPattern {
     }
 
     const savedObject = await this.savedObjectsClient.get(type, this.id);
-    this.version = savedObject._version;
 
     const response = {
       _id: savedObject.id,
       _type: savedObject.type,
+      _version: savedObject._version,
       _source: _.cloneDeep(savedObject.attributes),
       found: savedObject._version ? true : false,
     };
@@ -262,8 +272,26 @@ export class IndexPattern implements IIndexPattern {
     await this.updateFromElasticSearch(response, forceFieldRefresh);
     // Do it after to ensure we have the most up to date information
     this.originalBody = this.prepBody();
+    // console.log('index pattern init', response, JSON.stringify(response));
+    // console.log('originalBody', this.originalBody);
+    // console.log('resultFromPrepBody', this.prepBody());
+    /*
+    const serialized = this.serialize();
+    console.log('HERE', serialized);
+    const newIp =
+    console.log()
+    */
 
     return this;
+  }
+
+  public serialize() {
+    return JSON.stringify({
+      _id: this.id,
+      _type: this.type,
+      _source: this.prepBody(),
+      _version: this.version,
+    });
   }
 
   // Get the source filtering configuration for that index.

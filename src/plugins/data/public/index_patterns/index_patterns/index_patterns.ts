@@ -39,6 +39,7 @@ import {
   FieldSpec,
 } from '../fields';
 import { FieldFormatsStart } from '../../field_formats';
+import { IndexPatternSpec } from './types';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -172,7 +173,21 @@ export class IndexPatternsService {
     return indexPatternCache.set(id, indexPattern);
   };
 
-  make = (id?: string): Promise<IndexPattern> => {
+  deserializeIndexPattern(str: string) {
+    const obj = JSON.parse(str) as IndexPatternSpec;
+    const indexPattern = new IndexPattern(
+      obj._id,
+      (cfg: any) => this.config.get(cfg),
+      this.savedObjectsClient,
+      this.apiClient,
+      indexPatternCache
+    );
+
+    indexPattern.initFromObject(obj);
+    return indexPattern;
+  }
+
+  make = async (id?: string): Promise<IndexPattern> => {
     const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
@@ -180,8 +195,19 @@ export class IndexPatternsService {
       this.apiClient,
       indexPatternCache
     );
+    // console.log('original', indexPattern);
 
-    return indexPattern.init();
+    await indexPattern.init();
+
+    /*
+    const str = indexPattern.serialize();
+    // console.log('serialized!', str);
+
+    const cloned = this.deserializeIndexPattern(str);
+    console.log('deserialized', cloned);
+    */
+
+    return indexPattern;
   };
 }
 
