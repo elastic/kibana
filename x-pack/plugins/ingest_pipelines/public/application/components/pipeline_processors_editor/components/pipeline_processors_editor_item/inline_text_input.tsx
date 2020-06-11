@@ -46,18 +46,21 @@ export const InlineTextInput: FunctionComponent<Props> = ({
   }, [setIsShowingTextInput, onChange, textValue]);
 
   useEffect(() => {
-    const enterKeyboardListener = (event: KeyboardEvent) => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.keyCode === keyCodes.ESCAPE || event.code === 'Escape') {
+        setIsShowingTextInput(false);
+      }
       if (event.keyCode === keyCodes.ENTER || event.code === 'Enter') {
         submitChange();
       }
     };
     if (isShowingTextInput) {
-      window.addEventListener('keyup', enterKeyboardListener);
+      window.addEventListener('keyup', keyboardListener);
     }
     return () => {
-      window.removeEventListener('keyup', enterKeyboardListener);
+      window.removeEventListener('keyup', keyboardListener);
     };
-  }, [isShowingTextInput, submitChange]);
+  }, [isShowingTextInput, submitChange, setIsShowingTextInput]);
 
   return (
     <div

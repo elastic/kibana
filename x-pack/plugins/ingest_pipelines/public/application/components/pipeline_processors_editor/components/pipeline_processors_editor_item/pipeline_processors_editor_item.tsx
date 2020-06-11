@@ -107,12 +107,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       >
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
+            <EuiFlexItem grow={false}>
               <EuiText color={shouldDarkBold ? undefined : 'subdued'}>
                 <b>{processor.type}</b>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
+            <EuiFlexItem grow={false}>
               <InlineTextInput
                 onChange={(nextDescription) => {
                   let nextOptions: Record<string, any>;
