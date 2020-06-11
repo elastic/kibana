@@ -8,10 +8,9 @@
 
 import * as t from 'io-ts';
 
-import { entriesArrayOrUndefined } from '../types';
+import { commentsArrayOrUndefined, entriesArrayOrUndefined } from '../types';
 import {
   _tags,
-  commentOrUndefined,
   created_at,
   created_by,
   description,
@@ -30,7 +29,7 @@ import {
 export const exceptionListSoSchema = t.exact(
   t.type({
     _tags,
-    comment: commentOrUndefined,
+    comments: commentsArrayOrUndefined,
     created_at,
     created_by,
     description,
