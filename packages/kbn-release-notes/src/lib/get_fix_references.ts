@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const FIXES_RE = /(?:closes|close|closed|fix|fixes|fixed|resolve|resolves|resolved)[\s:]*(#\d*)/gi;
+const FIXES_RE = /(?:closes|close|closed|fix|fixes|fixed|resolve|resolves|resolved)[ :]*(#\d*)/gi;
 
 export function getFixReferences(prText: string) {
   const fixes: string[] = [];

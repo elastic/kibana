@@ -40,6 +40,8 @@ it('returns all fixed issue mentions in the PR text', () => {
       resolves: #16
       reSolved #17
       resolved: #18
+      fixed
+      #19
     `)
   ).toMatchInlineSnapshot(`
     Array [
