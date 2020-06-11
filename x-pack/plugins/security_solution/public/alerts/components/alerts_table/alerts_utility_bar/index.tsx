@@ -77,6 +77,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
             iconSize="m"
             ariaLabel="openSelectedAlerts"
             onClick={() => handleUpdateStatus('open')}
+            dataTestSubj="openSelectedAlertsButton"
           >
             {i18n.BATCH_ACTION_OPEN_SELECTED}
           </LinkIcon>
@@ -90,6 +91,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
             iconSize="m"
             ariaLabel="closeSelectedAlerts"
             onClick={() => handleUpdateStatus('closed')}
+            dataTestSubj="closeSelectedAlertsButton"
           >
             {i18n.BATCH_ACTION_CLOSE_SELECTED}
           </LinkIcon>
@@ -103,6 +105,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
             iconSize="m"
             ariaLabel="markSelectedAlertsInProgress"
             onClick={() => handleUpdateStatus('in-progress')}
+            dataTestSubj="markSelectedAlertsInProgressButton"
           >
             {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
           </LinkIcon>
