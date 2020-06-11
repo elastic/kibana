@@ -36,7 +36,6 @@ jest.mock('../../field_mapping', () => {
   return {
     ...originalModule,
     expandShorthand: jest.fn(() => ({
-      id: true,
       title: true,
       fieldFormatMap: {
         _deserialize: jest.fn().mockImplementation(() => []),
@@ -301,6 +300,20 @@ describe('IndexPattern', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
+    });
+  });
+
+  describe('toSpec', () => {
+    test('should match snapshot', () => {
+      expect(indexPattern.toSpec()).toMatchSnapshot();
+    });
+
+    test('can restore from spec', async () => {
+      const spec = indexPattern.toSpec();
+      const restoredPattern = await create('newId');
+      restoredPattern.initFromSpec(spec);
+      // const restoredPattern = (await create('newId')).initFromSpec(spec);
+      expect(restoredPattern.title).toEqual('test-pattern');
     });
   });
 

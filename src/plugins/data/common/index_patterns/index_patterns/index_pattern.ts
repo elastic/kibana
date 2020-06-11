@@ -41,6 +41,7 @@ import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
+import { IndexPatternSpec } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -184,7 +185,7 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
-  public initFromObject(response: any) {
+  public initFromSpec(response: any) {
     this.updateFromPlainObject(response);
     this.initFields();
   }
@@ -290,13 +291,13 @@ export class IndexPattern implements IIndexPattern {
     return this;
   }
 
-  public serialize() {
-    return JSON.stringify({
+  public toSpec() {
+    return {
       id: this.id,
       type: this.type,
       source: this.prepBody(),
       version: this.version,
-    });
+    } as IndexPatternSpec;
   }
 
   // Get the source filtering configuration for that index.

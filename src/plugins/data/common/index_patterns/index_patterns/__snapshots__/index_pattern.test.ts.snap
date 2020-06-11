@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPattern toSpec should match snapshot 1`] = `
+Object {
+  "id": "test-pattern",
+  "source": Object {
+    "fieldFormatMap": Array [],
+    "title": "test-pattern",
+  },
+  "type": undefined,
+  "version": 2,
+}
+`;

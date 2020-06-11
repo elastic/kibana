@@ -186,10 +186,9 @@ export class IndexPatternsService {
     return indexPatternCache.set(id, indexPattern);
   };
 
-  deserializeIndexPattern(str: string) {
-    const obj = JSON.parse(str) as IndexPatternSpec;
+  specToIndexPattern(spec: IndexPatternSpec) {
     const indexPattern = new IndexPattern(
-      obj.id,
+      spec.id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
@@ -199,7 +198,7 @@ export class IndexPatternsService {
       this.onError
     );
 
-    indexPattern.initFromObject(obj);
+    indexPattern.initFromSpec(spec);
     return indexPattern;
   }
 
@@ -217,12 +216,11 @@ export class IndexPatternsService {
     // console.log('original', indexPattern);
 
     await indexPattern.init();
-
     /*
-    const str = indexPattern.serialize();
-    // console.log('serialized!', str);
+    const spec = indexPattern.toSpec();
+    console.log('spec!', spec);
 
-    const cloned = this.deserializeIndexPattern(str);
+    const cloned = this.specToIndexPattern(spec);
     console.log('deserialized', cloned);
     */
 
