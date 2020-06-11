@@ -37,7 +37,9 @@ export const rumPageLoadDistributionRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    const { minPercentile, maxPercentile } = request.query;
+    const {
+      query: { minPercentile, maxPercentile },
+    } = context.params;
 
     return getPageLoadDistribution({ setup, minPercentile, maxPercentile });
   },

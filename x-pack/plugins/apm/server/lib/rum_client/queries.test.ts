@@ -43,6 +43,8 @@ describe('rum client dashboard queries', () => {
     mock = await inspectSearchParams((setup) =>
       getPageLoadDistribution({
         setup,
+        minPercentile: '0',
+        maxPercentile: '99',
       })
     );
     expect(mock.params).toMatchSnapshot();
