@@ -9,13 +9,21 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
+  KibanaRequest,
 } from 'src/core/server';
 
 import { i18n } from '@kbn/i18n';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets } from './lib';
-import { ActionResult, FindActionResult, RawAction, PreConfiguredAction } from './types';
+import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import {
+  ActionResult,
+  FindActionResult,
+  RawAction,
+  PreConfiguredAction,
+  ActionTypeExecutorResult,
+} from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
+import { ExecuteOptions } from './lib/action_executor';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -42,6 +50,8 @@ interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
+  actionExecutor: ActionExecutorContract;
+  request: KibanaRequest;
 }
 
 interface UpdateOptions {
@@ -55,6 +65,8 @@ export class ActionsClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly actionExecutor: ActionExecutorContract;
+  private readonly request: KibanaRequest;
 
   constructor({
     actionTypeRegistry,
@@ -62,12 +74,16 @@ export class ActionsClient {
     scopedClusterClient,
     savedObjectsClient,
     preconfiguredActions,
+    actionExecutor,
+    request,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.defaultKibanaIndex = defaultKibanaIndex;
     this.preconfiguredActions = preconfiguredActions;
+    this.actionExecutor = actionExecutor;
+    this.request = request;
   }
 
   /**
@@ -250,6 +266,13 @@ export class ActionsClient {
       );
     }
     return await this.savedObjectsClient.delete('action', id);
+  }
+
+  public async execute({
+    actionId,
+    params,
+  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
+    return this.actionExecutor.execute({ actionId, params, request: this.request });
   }
 }
 

@@ -203,7 +203,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     getAllActionRoute(router, this.licenseState);
     updateActionRoute(router, this.licenseState);
     listActionTypesRoute(router, this.licenseState);
-    executeActionRoute(router, this.licenseState, actionExecutor);
+    executeActionRoute(router, this.licenseState);
 
     return {
       registerType: (actionType: ActionType) => {
@@ -296,6 +296,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           defaultKibanaIndex: await kibanaIndex,
           scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
           preconfiguredActions,
+          request,
+          actionExecutor: actionExecutor!,
         });
       },
       preconfiguredActions,
@@ -319,7 +321,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
-    const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey, preconfiguredActions } = this;
+    const {
+      actionTypeRegistry,
+      isESOUsingEphemeralEncryptionKey,
+      preconfiguredActions,
+      actionExecutor,
+    } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
@@ -336,6 +343,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             defaultKibanaIndex,
             scopedClusterClient: context.core.elasticsearch.legacy.client,
             preconfiguredActions,
+            request,
+            actionExecutor: actionExecutor!,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

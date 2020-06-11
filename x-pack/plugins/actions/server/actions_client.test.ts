@@ -19,10 +19,15 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
+import { actionExecutorMock } from './lib/action_executor.mock';
+import uuid from 'uuid';
+import { KibanaRequest } from 'kibana/server';
 
 const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+const actionExecutor = actionExecutorMock.create();
+const request = {} as KibanaRequest;
 
 const mockTaskManager = taskManagerMock.setup();
 
@@ -53,6 +58,8 @@ beforeEach(() => {
     scopedClusterClient,
     defaultKibanaIndex,
     preconfiguredActions: [],
+    actionExecutor,
+    request,
   });
 });
 
@@ -232,6 +239,8 @@ describe('create()', () => {
       scopedClusterClient,
       defaultKibanaIndex,
       preconfiguredActions: [],
+      actionExecutor,
+      request,
     });
 
     const savedObjectCreateResult = {
@@ -328,6 +337,8 @@ describe('get()', () => {
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
+      actionExecutor,
+      request,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -388,6 +399,8 @@ describe('getAll()', () => {
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
+      actionExecutor,
+      request,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -453,6 +466,8 @@ describe('getBulk()', () => {
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
+      actionExecutor,
+      request,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -716,5 +731,28 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+});
+
+describe('execute()', () => {
+  test('calls the actionExecutor with the appropriate parameters', async () => {
+    const actionId = uuid.v4();
+    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+      })
+    ).resolves.toMatchObject({ status: 'ok', actionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+    });
   });
 });
