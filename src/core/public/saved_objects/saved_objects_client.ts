@@ -302,7 +302,6 @@ export class SavedObjectsClient {
       query,
     });
     return request.then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['find']>>,
         SavedObjectsFindResponsePublic
@@ -313,7 +312,10 @@ export class SavedObjectsClient {
           per_page: 'perPage',
           page: 'page',
         },
-        resp
+        {
+          ...resp,
+          saved_objects: resp.saved_objects.map((d) => this.createSavedObject(d)),
+        }
       ) as SavedObjectsFindResponsePublic<T>;
     });
   };

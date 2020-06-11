@@ -101,7 +101,7 @@ export const transformCases = (
 });
 
 export const flattenCaseSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects'],
+  savedObjects: Array<SavedObject<CaseAttributes>>,
   totalCommentByCase: TotalCommentByCase[],
   caseConfigureConnectorId: string = 'none'
 ): CaseResponse[] =>
@@ -146,7 +146,7 @@ export const transformComments = (
 });
 
 export const flattenCommentSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CommentAttributes>['saved_objects']
+  savedObjects: Array<SavedObject<CommentAttributes>>
 ): CommentResponse[] =>
   savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
     return [...acc, flattenCommentSavedObject(savedObject)];
