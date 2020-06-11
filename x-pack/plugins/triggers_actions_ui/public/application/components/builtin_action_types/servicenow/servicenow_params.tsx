@@ -19,14 +19,15 @@ import { ServiceNowActionParams } from './types';
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
 >> = ({ actionParams, editAction, index, errors, messageVariables }) => {
-  const { title, description, comments, severity, urgency, impact } = actionParams;
+  const { title, description, comments, severity, urgency, impact } =
+    actionParams.subActionParams || {};
   const selectOptions = [
     {
       value: '1',
       text: i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
         {
-          defaultMessage: 'Hight',
+          defaultMessage: 'High',
         }
       ),
     },
@@ -50,27 +51,32 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     },
   ];
 
+  const editSubActionProperty = (key: string, value: {}) => {
+    const newProps = { ...actionParams.subActionParams, [key]: value };
+    editAction('subActionParams', newProps, index);
+  };
+
   useEffect(() => {
+    editAction('subAction', 'pushToService', index);
     if (messageVariables?.find((variable) => variable === 'alertId')) {
-      editAction('savedObjectId', '{{alertId}}', index);
+      editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     if (!urgency) {
-      editAction('urgency', '3', index);
+      editSubActionProperty('urgency', '3');
     }
     if (!impact) {
-      editAction('impact', '3', index);
+      editSubActionProperty('impact', '3');
     }
     if (!severity) {
-      editAction('severity', '3', index);
+      editSubActionProperty('severity', '3');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(
+    editSubActionProperty(
       paramsProperty,
-      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
-      index
+      ((actionParams as any).subActionParams[paramsProperty] ?? '').concat(` {{${variable}}}`)
     );
   };
 
@@ -91,7 +97,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           options={selectOptions}
           value={urgency}
           onChange={(e) => {
-            editAction('urgency', e.target.value, index);
+            editSubActionProperty('urgency', e.target.value);
           }}
         />
       </EuiFormRow>
@@ -113,7 +119,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
               options={selectOptions}
               value={severity}
               onChange={(e) => {
-                editAction('severity', e.target.value, index);
+                editSubActionProperty('severity', e.target.value);
               }}
             />
           </EuiFormRow>
@@ -134,7 +140,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
               options={selectOptions}
               value={impact}
               onChange={(e) => {
-                editAction('impact', e.target.value, index);
+                editSubActionProperty('impact', e.target.value);
               }}
             />
           </EuiFormRow>
@@ -166,11 +172,11 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           isInvalid={errors.title.length > 0 && title !== undefined}
           value={title || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('title', e.target.value, index);
+            editSubActionProperty('title', e.target.value);
           }}
           onBlur={() => {
             if (!title) {
-              editAction('title', '', index);
+              editSubActionProperty('title', '');
             }
           }}
         />
@@ -202,11 +208,11 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           value={description || ''}
           data-test-subj="incidentDescriptionTextArea"
           onChange={(e) => {
-            editAction('description', e.target.value, index);
+            editSubActionProperty('description', e.target.value);
           }}
           onBlur={() => {
             if (!description) {
-              editAction('description', '', index);
+              editSubActionProperty('description', '');
             }
           }}
         />
@@ -235,11 +241,11 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
           value={comments || ''}
           data-test-subj="incidentCommentTextArea"
           onChange={(e) => {
-            editAction('comments', e.target.value, index);
+            editSubActionProperty('comments', e.target.value);
           }}
           onBlur={() => {
             if (!comments) {
-              editAction('comments', '', index);
+              editSubActionProperty('comments', '');
             }
           }}
         />

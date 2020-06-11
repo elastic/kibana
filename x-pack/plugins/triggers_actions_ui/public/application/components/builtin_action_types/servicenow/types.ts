@@ -15,17 +15,17 @@ export interface ServiceNowActionConnector extends ActionConnector {
 }
 
 export interface ServiceNowActionParams {
-  // subAction: string;
-  // subActionParams: {
-  savedObjectId: string;
-  title: string;
-  description: string;
-  comments: string;
-  externalId: string;
-  severity: string;
-  urgency: string;
-  impact: string;
-  // };
+  subAction: string;
+  subActionParams: {
+    savedObjectId: string;
+    title: string;
+    description: string;
+    comments: string;
+    externalId: string;
+    severity: string;
+    urgency: string;
+    impact: string;
+  };
 }
 
 interface IncidentConfiguration {
