@@ -114,14 +114,13 @@ export function runReleaseNotesCli() {
         );
       }
 
-      log.success(`Found ${prsToReport.length} prs to report on`);
+      log.info(`Found ${prsToReport.length} prs to report on`);
 
       for (const Format of Formats) {
         const format = new Format(version, prsToReport, log);
-        await asyncPipeline(
-          streamFromIterable(format.print()),
-          Fs.createWriteStream(Path.resolve(`${filename}.${Format.extension}`))
-        );
+        const outputPath = Path.resolve(`${filename}.${Format.extension}`);
+        await asyncPipeline(streamFromIterable(format.print()), Fs.createWriteStream(outputPath));
+        log.success(`[${Format.extension}] report written to ${outputPath}`);
       }
     },
     {
