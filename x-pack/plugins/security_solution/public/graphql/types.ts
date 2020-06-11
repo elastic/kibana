@@ -4340,6 +4340,8 @@ export namespace GetAllTimeline {
 
     pinnedEventIds: Maybe<string[]>;
 
+    status: Maybe<TimelineStatus>;
+
     title: Maybe<string>;
 
     timelineType: Maybe<TimelineType>;
