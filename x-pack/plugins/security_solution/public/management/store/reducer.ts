@@ -40,6 +40,5 @@ export const mockManagementState: Immutable<ManagementState> = {
 export const managementReducer = immutableCombineReducers({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
-  // @ts-ignore
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: hostListReducer,
 });

@@ -21,26 +21,26 @@ import { getFormattedEntries, getFormattedComments } from '../../helpers';
 import { FormattedEntry, ExceptionListItemSchema, ApiProps } from '../../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
-    &.comments--show {
-      padding: ${({ theme }) => theme.eui.euiSize};
-      border-top: ${({ theme }) => `${theme.eui.euiBorderThin}`}
-
+  &.comments--show {
+    padding: ${({ theme }) => theme.eui.euiSize};
+    border-top: ${({ theme }) => `${theme.eui.euiBorderThin}`};
+  }
 `;
 
 interface ExceptionItemProps {
   loadingItemIds: ApiProps[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
-  handleDelete: (arg: ApiProps) => void;
-  handleEdit: (item: ExceptionListItemSchema) => void;
+  onDeleteException: (arg: ApiProps) => void;
+  onEditException: (item: ExceptionListItemSchema) => void;
 }
 
 const ExceptionItemComponent = ({
   loadingItemIds,
   exceptionItem,
   commentsAccordionId,
-  handleDelete,
-  handleEdit,
+  onDeleteException,
+  onEditException,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -50,13 +50,13 @@ const ExceptionItemComponent = ({
     setEntryItems(formattedEntries);
   }, [exceptionItem.entries]);
 
-  const onDelete = useCallback((): void => {
-    handleDelete({ id: exceptionItem.id, namespaceType: exceptionItem.namespace_type });
-  }, [handleDelete, exceptionItem]);
+  const handleDelete = useCallback((): void => {
+    onDeleteException({ id: exceptionItem.id, namespaceType: exceptionItem.namespace_type });
+  }, [onDeleteException, exceptionItem]);
 
-  const onEdit = useCallback((): void => {
-    handleEdit(exceptionItem);
-  }, [handleEdit, exceptionItem]);
+  const handleEdit = useCallback((): void => {
+    onEditException(exceptionItem);
+  }, [onEditException, exceptionItem]);
 
   const onCommentsClick = useCallback((): void => {
     setShowComments(!showComments);
@@ -85,8 +85,8 @@ const ExceptionItemComponent = ({
             <ExceptionEntries
               disableDelete={disableDelete}
               entries={entryItems}
-              handleDelete={onDelete}
-              handleEdit={onEdit}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
