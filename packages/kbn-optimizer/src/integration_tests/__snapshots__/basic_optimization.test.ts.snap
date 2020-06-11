@@ -39,14 +39,14 @@ OptimizerConfig {
       "isUiPlugin": true,
     },
     Object {
-      "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/baz,
-      "id": "baz",
-      "isUiPlugin": false,
-    },
-    Object {
       "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo,
       "id": "foo",
       "isUiPlugin": true,
+    },
+    Object {
+      "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/nested/baz,
+      "id": "baz",
+      "isUiPlugin": false,
     },
   ],
   "profileWebpack": false,
