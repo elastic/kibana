@@ -209,8 +209,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
-      const links = await find.allByLinkText(name);
-      return links.length;
+      const buttons = await find.allByButtonText(name);
+      return buttons.length;
     }
 
     async isSetViewPopoverOpen() {
