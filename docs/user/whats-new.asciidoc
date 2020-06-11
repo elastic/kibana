@@ -1,26 +1,153 @@
 [[whats-new]]
-== What's new in {minor-version}
+== What's new in {kib} {minor-version}
+++++
+<titleabbrev>What's new in 7.8</titleabbrev>
+++++
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
-
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>. 
 
 coming[7.8.0]
+
+Each release of Kibana brings new features and product improvements.
+Here are the highlights of the feature and user experience changes in 7.8.
+
+* <<navigation-7-8, Side navigation organized around use cases>>
+* <<file-upload-7-8, Increased limit for file upload>>
+* <<dashboard-first-7-8, Dashboard first experience>>
+* <<dashboard-clone-7-8, Clone a dashboard>>
+* <<dashboard-to-dashboard-7-8, Dashboard-to-dashboard drilldowns>>
+* <<lens-7-8, New visualizations for Lens>>
+* <<canvas-7-8, Menu updates for Canvas>>
+* <<maps-7-8, Dedicated solution layer for Maps>>
+* <<ingest-node-pipeline-7-8, Ingest node pipeline builder>>
+
+
+Previous highlights
+
+{kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+
+
+
+
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
 
+[float]
+[[navigation-7-8]]
+=== Side navigation organized around use cases
+
+{kib} has a simpler, more organized navigation for guiding you
+through the apps and completing your tasks.  The new nav bar groups
+solutions by category. For example, the Observability category
+includes Logs, Metrics, APM, and Uptime . The nav also includes
+Recently viewed to easily
+access to previous projects. Hidden by default, the nav bar is accessible
+with a single click on the hamburger menu.
+
+[role="screenshot"]
+image:images/whats-new/7-8-navigation.png[Kibana side navigation organized by category]
+
+
+[float]
+[[file-upload-7-8]]
+=== Increased limit for file upload
+
+The File Data Visualizer now enables you to ingest larger CSV, JSON, and log files.
+The upload limit increased from 100 MB to 1 GB. You can configure this value in
+{kibana-ref}/advanced-options.html[Advanced Settings].
+
+
+[float]
+[[dashboard-first-7-8]]
+=== Dashboard first experience
+
+This release simplifies the workflow for updating the visualizations in a dashboard.
+You can open a visualization editor directly from the dashboard and then
+automatically return to the dashboard when you save the changes.
+Your focus remains on analyzing the data instead of moving between applications.
+
+
+[float]
+[[dashboard-clone-7-8]]
+=== Clone a Dashboard
+You can clone a dashboard and then look at that data
+in a different chart.  Clone enables you to quickly view your data from a
+different angle.
+
+
+[float]
+[[dashboard-to-dashboard-7-8]]
+=== Dashboard-to-dashboard drilldowns
+
+Drilldowns allow you to configure a custom
+workflow for analyzing and troubleshooting your data. Using a drilldown,
+you can navigate from one dashboard to another, taking the current time range,
+filters, and other parameters with you. The context remains the same, so
+you can continue your analysis from a new perspective.  For example, you might
+Have an Uptime monitoring dashboard and provide drill downs from a a high-level
+Dashboard to a more granular analyses that incorporates data like APM, logs, or infrastructure.
+
+[float]
+[[lens-7-8]]
+=== New visualizations for Lens
+
+Lens introduces three new visualization types: pie charts, donut charts, and treemaps.  New
+to Kibana, a treemap provides a hierarchical view of your data and works well
+for visualizing part-to-whole relationships when there
+is a large amount of categories.
+
+[role="screenshot"]
+image:images/whats-new/7-8-treemap.png[Treemap visualization]
+
+
+[float]
+[[canvas-7-8]]
+=== Menu updates for Canvas
+
+Canvas has a new top-level menu that makes it easier for you to find the actions you need.
+The updated menu gives you access to charts and maps so you can easily embed them in your workload.
+The updated menu also makes it easier to find new capabilities added to Kibana, such as
+the addition of Lens to Canvas.
+
+[role="screenshot"]
+image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
+
+
+[float]
+[[maps-7-8]]
+=== Dedicated solution layer for Maps
+
+When adding a layer to a map, you are now present with an Observability layer if you have APM indices
+In the Elastic Common Schema.  You can select either APM RUM Performance or APM RUN traffic
+
+Elastic Maps now has a solution layer for Observability. With two clicks, you
+get a meaningful layer of your APM data so you can look at APM RUM performance
+and traffic.
+
+[float]
+[[ingest-node-pipeline-7-8]]
+=== Ingest Node pipeline builder
+
+With the Ingest Node pipeline builder, you can
+create and manage Elasticsearch pipelines
+that perform common transformations and enrichments on your data.
+For example, you might remove a field, rename an existing field,
+or set a new field.you to view all of your data pipelines.
+You can create, delete, and edit pipelines
+using a JSON editor. view a  You can test how a pipeline and its processors
+transform data before putting it into production.
+
+[role="screenshot"]
+image:images/whats-new/7-8-ingest-node.png[Ingest Node Pipeline UI]
+
+
 // end::notable-highlights[]
+
+[float]
+=== Release notes and breaking changes
+Check out the <<release-notes>> and
+<<breaking-changes>> for the full list of changes in {minor-version}.
