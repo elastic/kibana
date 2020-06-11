@@ -21,6 +21,7 @@ const createResult = (id: string): GlobalSearchResult => ({
   title: id,
   type: 'test',
   url: `/app/test/${id}`,
+  provider: 'provider',
   score: 42,
 });
 

@@ -19,6 +19,7 @@ const createResult = (id: string, parts: Partial<GlobalSearchResult> = {}): Glob
   title: id,
   type: 'type',
   url: `/path/to/${id}`,
+  provider: 'provider',
   score: 100,
   ...parts,
 });
