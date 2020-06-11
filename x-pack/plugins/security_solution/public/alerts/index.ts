@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAlertsRoutes } from './routes';
+import { AlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
 
 export class Alerts {
@@ -12,7 +12,7 @@ export class Alerts {
 
   public start(): SecuritySubPlugin {
     return {
-      routes: getAlertsRoutes(),
+      SubPluginRoutes: AlertsRoutes,
     };
   }
 }

@@ -21,7 +21,7 @@ import * as i18nRules from './translations';
 import { RouteSpyState } from '../../../../common/utils/route/types';
 
 const getTabBreadcrumb = (pathname: string, search: string[]) => {
-  const tabPath = pathname.split('/')[2];
+  const tabPath = pathname.split('/')[1];
 
   if (tabPath === 'alerts') {
     return {

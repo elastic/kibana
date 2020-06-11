@@ -8,7 +8,6 @@
 
 import {
   EuiBadge,
-  EuiLink,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
@@ -39,6 +38,7 @@ import {
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import * as detectionI18n from '../../translations';
+import { LinkAnchor } from '../../../../../common/components/links';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -87,10 +87,11 @@ export type RuleStatusRowItemType = RuleStatus & {
 };
 export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
-
+type FormatUrl = (path: string) => string;
 interface GetColumns {
   dispatch: React.Dispatch<Action>;
   dispatchToaster: Dispatch<ActionToaster>;
+  formatUrl: FormatUrl;
   history: H.History;
   hasMlPermissions: boolean;
   hasNoPermissions: boolean;
@@ -102,6 +103,7 @@ interface GetColumns {
 export const getColumns = ({
   dispatch,
   dispatchToaster,
+  formatUrl,
   history,
   hasMlPermissions,
   hasNoPermissions,
@@ -113,9 +115,16 @@ export const getColumns = ({
       field: 'name',
       name: i18n.COLUMN_RULE,
       render: (value: Rule['name'], item: Rule) => (
-        <EuiLink data-test-subj="ruleName" href={getRuleDetailsUrl(item.id)}>
+        <LinkAnchor
+          data-test-subj="ruleName"
+          onClick={(ev: { preventDefault: () => void }) => {
+            ev.preventDefault();
+            history.push(getRuleDetailsUrl(item.id));
+          }}
+          href={formatUrl(getRuleDetailsUrl(item.id))}
+        >
           {value}
-        </EuiLink>
+        </LinkAnchor>
       ),
       truncateText: true,
       width: '24%',
@@ -222,16 +231,26 @@ export const getColumns = ({
   return hasNoPermissions ? cols : [...cols, ...actions];
 };
 
-export const getMonitoringColumns = (): RulesStatusesColumns[] => {
+export const getMonitoringColumns = (
+  history: H.History,
+  formatUrl: FormatUrl
+): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
     {
       field: 'name',
       name: i18n.COLUMN_RULE,
       render: (value: RuleStatus['current_status']['status'], item: RuleStatusRowItemType) => {
         return (
-          <EuiLink data-test-subj="ruleName" href={getRuleDetailsUrl(item.id)}>
+          <LinkAnchor
+            data-test-subj="ruleName"
+            onClick={(ev: { preventDefault: () => void }) => {
+              ev.preventDefault();
+              history.push(getRuleDetailsUrl(item.id));
+            }}
+            href={formatUrl(getRuleDetailsUrl(item.id))}
+          >
             {value}
-          </EuiLink>
+          </LinkAnchor>
         );
       },
       truncateText: true,

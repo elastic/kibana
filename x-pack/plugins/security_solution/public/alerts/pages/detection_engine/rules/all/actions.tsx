@@ -7,14 +7,14 @@
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import {
   deleteRules,
   duplicateRules,
   enableRules,
   Rule,
 } from '../../../../../alerts/containers/detection_engine/rules';
-import { Action } from './reducer';
+
+import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 
 import {
   ActionToaster,
@@ -26,9 +26,10 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../../common/lib/t
 
 import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
+import { Action } from './reducer';
 
 export const editRuleAction = (rule: Rule, history: H.History) => {
-  history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${rule.id}/edit`);
+  history.push(getEditRuleUrl(rule.id));
 };
 
 export const duplicateRulesAction = async (
