@@ -242,7 +242,16 @@ export const Cytoscape = ({
       }
       clearTimeout(layoutstopDelayTimeout);
     };
-  }, [cy, elements, height, serviceName, trackApmEvent, width, nodeHeight, theme.eui]);
+  }, [
+    cy,
+    elements,
+    height,
+    serviceName,
+    trackApmEvent,
+    width,
+    nodeHeight,
+    theme.eui,
+  ]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
