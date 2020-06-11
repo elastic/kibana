@@ -19,7 +19,7 @@ import { DescriptionListItem, ExceptionListItemSchema } from '../../types';
 import { getDescriptionListContent } from '../../helpers';
 import * as i18n from '../../translations';
 
-const StyledExceptionDetails = styled(EuiFlexItem)`
+const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorLightestShade};
     padding: ${theme.eui.euiSize};
@@ -68,7 +68,7 @@ const ExceptionDetailsComponent = ({
   }, [showComments, onCommentsClick, exceptionItem]);
 
   return (
-    <StyledExceptionDetails grow={2}>
+    <MyExceptionDetails grow={2}>
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem grow={1}>
           <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
@@ -82,7 +82,7 @@ const ExceptionDetailsComponent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{commentsSection}</EuiFlexItem>
       </EuiFlexGroup>
-    </StyledExceptionDetails>
+    </MyExceptionDetails>
   );
 };
 
