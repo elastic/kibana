@@ -137,15 +137,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.agent.version,
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    details.agent.version,
     details.endpoint.policy.id,
-    details.host.hostname,
     details.host.ip,
-    policyResponseUri.search,
-    policyStatusClickHandler,
+    details.host.hostname,
+    details.agent.version,
     policyStatus,
+    policyResponseUri,
+    policyStatusClickHandler,
   ]);
 
   return (
