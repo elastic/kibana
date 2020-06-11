@@ -10,17 +10,22 @@ import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
 export interface UptimeUrlParams {
+  // both
   absoluteDateRangeStart: number;
   absoluteDateRangeEnd: number;
   autorefreshInterval: number;
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
+
+  // overview only
   pagination?: string;
   filters: string;
   search: string;
-  selectedPingStatus: string;
   statusFilter: string;
+
+  // monitor only
+  selectedPingStatus: string;
 }
 
 const {

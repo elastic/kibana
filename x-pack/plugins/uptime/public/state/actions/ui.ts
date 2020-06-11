@@ -25,3 +25,5 @@ export const setSearchTextAction = createAction<string>('SET SEARCH');
 export const toggleIntegrationsPopover = createAction<PopoverState>(
   'TOGGLE INTEGRATION POPOVER STATE'
 );
+
+export const setDateRange = createAction<{ from: string; to: string }>('SET DATE RANGE');
