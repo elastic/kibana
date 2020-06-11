@@ -5,12 +5,7 @@
  */
 
 import { useMemo } from 'react';
-import {
-  TransformId,
-  TransformEndpointRequest,
-  TransformEndpointResult,
-  DeleteTransformEndpointResult,
-} from '../../../common';
+import { TransformEndpointRequest, TransformEndpointResult, TransformId } from '../../../common';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -45,12 +40,10 @@ export const useApi = () => {
         });
       },
       deleteTransforms(
-        transformsInfo: TransformEndpointRequest[],
-        deleteDestIndex: boolean | undefined,
-        deleteDestIndexPattern: boolean | undefined
-      ): Promise<DeleteTransformEndpointResult> {
+        transformsInfo: TransformEndpointRequest[]
+      ): Promise<TransformEndpointResult> {
         return http.post(`${API_BASE_PATH}delete_transforms`, {
-          body: JSON.stringify({ transformsInfo, deleteDestIndex, deleteDestIndexPattern }),
+          body: JSON.stringify(transformsInfo),
         });
       },
       getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
