@@ -6,7 +6,6 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AlertData } from '../../../../../plugins/security_solution/common/endpoint_alerts/types';
-import { AlertId } from '../../../../../plugins/security_solution/server/endpoint/alerts/handlers/lib/index';
 import { deleteEventsStream, deleteMetadataStream } from '../data_stream_helper';
 
 /**
