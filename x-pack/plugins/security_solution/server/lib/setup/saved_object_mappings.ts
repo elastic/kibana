@@ -27,7 +27,7 @@ export const endpointUserSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const type: SavedObjectsType = {
   name: endpointUserSavedObjectType,
-  hidden: true,
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: endpointUserSavedObjectMappings,
 };

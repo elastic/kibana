@@ -17,6 +17,7 @@ import { endpointUserSavedObjectType, EndpointUser } from './saved_object_mappin
 
 const ENDPOINT_MANAGER_ROLE = 'endpoint_manager_role';
 const ENDPOINT_MANAGER_USERNAME = 'endpoint_admin';
+const ENDPOINT_SETUP_ROUTE = '/api/endpoint/setup'; // TODO
 
 /**
  * Registers the setup route that enables the creation of an endpoint user
@@ -24,7 +25,7 @@ const ENDPOINT_MANAGER_USERNAME = 'endpoint_admin';
 export function postEndpointSetup(router: IRouter, security: SetupPlugins['security']) {
   router.post(
     {
-      path: '/api/endpoint/setup', // TODO
+      path: ENDPOINT_SETUP_ROUTE,
       validate: {},
       options: { authRequired: true },
     },
@@ -35,7 +36,22 @@ export function postEndpointSetup(router: IRouter, security: SetupPlugins['secur
         await setupEndpointUser(soClient, security, client);
         return res.ok();
       } catch (err) {
-        console.log(err);
+        return res.internalError({ body: err });
+      }
+    }
+  );
+  router.get(
+    {
+      path: ENDPOINT_SETUP_ROUTE,
+      validate: {},
+      options: { authRequired: true },
+    },
+    async (context, req, res) => {
+      try {
+        const soClient = context.core.savedObjects.client;
+        const userResp = await getEndpointUserKey(soClient);
+        return res.ok({ body: userResp });
+      } catch (err) {
         return res.internalError({ body: err });
       }
     }
@@ -110,5 +126,19 @@ async function setupEndpointUser(
 
 async function persistEndpointUser(soClient: SavedObjectsClientContract, user: EndpointUser) {
   const soResponse = await soClient.create(endpointUserSavedObjectType, user, {});
-  console.log(soResponse);
+}
+
+async function getEndpointUserKey(soClient: SavedObjectsClientContract) {
+  const resp = await soClient.find({
+    type: endpointUserSavedObjectType,
+    search: ENDPOINT_MANAGER_USERNAME,
+    searchFields: ['username'],
+    sortField: 'created',
+    sortOrder: 'desc',
+  });
+  if (resp.saved_objects.length > 0) {
+    return resp.saved_objects[0];
+  } else {
+    throw new Error('No Endpoint user created.');
+  }
 }
