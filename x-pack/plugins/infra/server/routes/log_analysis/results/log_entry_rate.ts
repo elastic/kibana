@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
@@ -49,14 +50,20 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
             },
           }),
         });
-      } catch (e) {
-        const { statusCode = 500, message = 'Unknown error occurred' } = e;
-        if (e instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message } });
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
         }
+
+        if (error instanceof NoLogAnalysisResultsIndexError) {
+          return response.notFound({ body: { message: error.message } });
+        }
+
         return response.customError({
-          statusCode,
-          body: { message },
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
         });
       }
     })
