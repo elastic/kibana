@@ -25,6 +25,8 @@ import {
 import { useContainerState } from '../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
+  insufficientLicenseLevel,
+  invalidDrilldownType,
   toastDrilldownCreated,
   toastDrilldownDeleted,
   toastDrilldownEdited,
@@ -137,6 +139,11 @@ export function createFlyoutManageDrilldowns({
         drilldownName: drilldown.action.name,
         actionName: actionFactory?.getDisplayName(factoryContext) ?? drilldown.action.factoryId,
         icon: actionFactory?.getIconType(factoryContext),
+        error: !actionFactory
+          ? invalidDrilldownType(drilldown.action.factoryId) // this shouldn't happen for the end user, but useful during development
+          : !actionFactory.isCompatibleLicence()
+          ? insufficientLicenseLevel
+          : undefined,
       };
     }
 

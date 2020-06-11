@@ -181,36 +181,46 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     willChange: 'opacity',
   };
 
+  /**
+   * make sure not compatible factories are in the end
+   */
+  const ensureOrder = (factories: ActionFactory[]) => {
+    const compatibleLicense = factories.filter((f) => f.isCompatibleLicence());
+    const notCompatibleLicense = factories.filter((f) => !f.isCompatibleLicence());
+    return [
+      ...compatibleLicense.sort((f1, f2) => f2.order - f1.order),
+      ...notCompatibleLicense.sort((f1, f2) => f2.order - f1.order),
+    ];
+  };
+
   return (
     <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
-      {[...actionFactories]
-        .sort((f1, f2) => f2.order - f1.order)
-        .map((actionFactory) => (
-          <EuiFlexItem grow={false} key={actionFactory.id}>
-            <EuiToolTip
-              content={
-                !actionFactory.isCompatibleLicence() && (
-                  <FormattedMessage
-                    defaultMessage="Upgrade your license to get access to this action"
-                    id="xpack.uiActionsEnhanced.components.actionWizard.upgradeYourLicenseTooltip"
-                  />
-                )
-              }
+      {ensureOrder(actionFactories).map((actionFactory) => (
+        <EuiFlexItem grow={false} key={actionFactory.id}>
+          <EuiToolTip
+            content={
+              !actionFactory.isCompatibleLicence() && (
+                <FormattedMessage
+                  defaultMessage="Insufficient license level"
+                  id="xpack.uiActionsEnhanced.components.actionWizard.insufficientLicenseLevelTooltip"
+                />
+              )
+            }
+          >
+            <EuiKeyPadMenuItem
+              className="auaActionWizard__actionFactoryItem"
+              label={actionFactory.getDisplayName(context)}
+              data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
+              onClick={() => onActionFactorySelected(actionFactory)}
+              disabled={!actionFactory.isCompatibleLicence()}
             >
-              <EuiKeyPadMenuItem
-                className="auaActionWizard__actionFactoryItem"
-                label={actionFactory.getDisplayName(context)}
-                data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
-                onClick={() => onActionFactorySelected(actionFactory)}
-                disabled={!actionFactory.isCompatibleLicence()}
-              >
-                {actionFactory.getIconType(context) && (
-                  <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
-                )}
-              </EuiKeyPadMenuItem>
-            </EuiToolTip>
-          </EuiFlexItem>
-        ))}
+              {actionFactory.getIconType(context) && (
+                <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+              )}
+            </EuiKeyPadMenuItem>
+          </EuiToolTip>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

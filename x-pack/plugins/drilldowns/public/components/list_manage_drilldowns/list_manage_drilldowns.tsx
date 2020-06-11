@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
@@ -28,6 +29,7 @@ export interface DrilldownListItem {
   actionName: string;
   drilldownName: string;
   icon?: string;
+  error?: string;
 }
 
 export interface ListManageDrilldownsProps {
@@ -52,11 +54,25 @@ export function ListManageDrilldowns({
 
   const columns: Array<EuiBasicTableColumn<DrilldownListItem>> = [
     {
-      field: 'drilldownName',
       name: 'Name',
       truncateText: true,
       width: '50%',
       'data-test-subj': 'drilldownListItemName',
+      render: (drilldown: DrilldownListItem) => (
+        <div>
+          {drilldown.drilldownName}{' '}
+          {drilldown.error && (
+            <EuiToolTip id={`drilldownError-${drilldown.id}`} content={drilldown.error}>
+              <EuiIcon
+                type="alert"
+                color="danger"
+                aria-label={drilldown.error}
+                data-test-subj={`drilldownError-${drilldown.id}`}
+              />
+            </EuiToolTip>
+          )}
+        </div>
+      ),
     },
     {
       name: 'Action',

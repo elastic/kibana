@@ -83,3 +83,20 @@ export const toastDrilldownsCRUDError = i18n.translate(
     description: 'Title for generic error toast when persisting drilldown updates failed',
   }
 );
+
+export const insufficientLicenseLevel = i18n.translate(
+  'xpack.drilldowns.components.flyoutDrilldownWizard.insufficientLicenseLevelError',
+  {
+    defaultMessage: 'Insufficient license level',
+    description:
+      'User created drilldown with higher license type, but then downgraded the license. This error is shown in the list near created drilldown',
+  }
+);
+
+export const invalidDrilldownType = (type: string) =>
+  i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.invalidDrilldownType', {
+    defaultMessage: "Drilldown type {type} doesn't exist",
+    values: {
+      type,
+    },
+  });
