@@ -20,6 +20,7 @@
 import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -27,6 +28,7 @@ interface SetupDeps {
 
 interface StartDeps {
   dashboard: DashboardStart;
+  embeddableExamples: EmbeddableExamplesStart;
 }
 
 export class DashboardEmbeddableExamples implements Plugin<void, void, {}, StartDeps> {
@@ -38,6 +40,7 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
+        await depsStart.embeddableExamples.createSampleData();
         return renderApp(
           {
             basename: params.appBasePath,
