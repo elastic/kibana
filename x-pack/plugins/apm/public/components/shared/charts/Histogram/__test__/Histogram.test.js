@@ -45,10 +45,6 @@ describe('Histogram', () => {
   });
 
   describe('Initially', () => {
-    // it('should have default state', () => {
-    //   expect(wrapper.state()).toEqual({ hoveredBucket: {} });
-    // });
-
     it('should have default markup', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -84,23 +80,6 @@ describe('Histogram', () => {
       expect(tooltips.prop('x')).toEqual(869010);
       expect(tooltips.prop('y')).toEqual(27.5);
     });
-
-    // it('should update state with "hoveredBucket"', () => {
-    //   expect(wrapper.state()).toEqual({
-    //     hoveredBucket: {
-    //       samples: [
-    //         {
-    //           transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
-    //         },
-    //       ],
-    //       style: { cursor: 'pointer' },
-    //       xCenter: 869010,
-    //       x0: 811076,
-    //       x: 926944,
-    //       y: 49,
-    //     },
-    //   });
-    // });
 
     it('should have correct markup for tooltip', () => {
       const tooltips = wrapper.find('Tooltip');
