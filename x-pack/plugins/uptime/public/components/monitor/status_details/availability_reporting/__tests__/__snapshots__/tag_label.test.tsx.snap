@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TagLabel component renders correctly against snapshot 1`] = `
+.c0 {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.c1 {
+  font-weight: 600;
+}
+
+@media (max-width:1042px) {
+  .c0 {
+    display: inline-block;
+    margin-right: 16px;
+  }
+}
+
+<div
+  class="c0"
+>
+  <span
+    class="euiBadge euiBadge--iconLeft"
+    style="background-color:#fff;color:#000"
+  >
+    <span
+      class="euiBadge__content"
+    >
+      <span
+        class="euiBadge__text"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          <div
+            class="c1"
+          >
+            US-East
+          </div>
+        </div>
+      </span>
+    </span>
+  </span>
+</div>
+`;
+
+exports[`TagLabel component shallow render correctly against snapshot 1`] = `
+<styled.div>
+  <EuiBadge
+    color="#fff"
+  >
+    <EuiText
+      size="s"
+    >
+      <styled.div>
+        US-East
+      </styled.div>
+    </EuiText>
+  </EuiBadge>
+</styled.div>
+`;
