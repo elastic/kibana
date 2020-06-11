@@ -16,7 +16,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiToolTip,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiModalBody } from '@elastic/eui';
@@ -24,15 +23,9 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUpdateEffect } from 'react-use';
 import { useMlKibana } from '../contexts/kibana';
-import {
-  SavedObjectDashboard,
-  SavedDashboardPanel,
-} from '../../../../../../src/plugins/dashboard/public';
-import {
-  AnomalySwimlaneEmbeddableCustomOutput,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  getDefaultPanelTitle,
-} from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public';
+import { AnomalySwimlaneEmbeddableCustomOutput } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { useDashboardService } from '../services/dashboard_service';
 
 export interface DashboardItem {
   id: string;
@@ -46,12 +39,10 @@ export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
 export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = memo(
   ({ children, ...embeddableConfig }) => {
     const {
-      services: {
-        savedObjects: { client: savedObjectClient },
-        kibanaVersion,
-      },
       notifications: { toasts },
     } = useMlKibana();
+
+    const dashboardService = useDashboardService();
 
     const [addedDashboards, setAddedDashboards] = useState<{
       [id: string]: 'success' | 'pending' | undefined;
@@ -64,12 +55,7 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
     const fetchDashboards = useCallback(
       debounce(async (query?: string) => {
         try {
-          const response = await savedObjectClient.find<SavedObjectDashboard>({
-            type: 'dashboard',
-            perPage: 10,
-            search: query ? `${query}*` : '',
-            searchFields: ['title^3', 'description'],
-          });
+          const response = await dashboardService.fetchDashboards(query);
           const items: DashboardItem[] = response.savedObjects.map((savedObject) => {
             return {
               id: savedObject.id,
@@ -115,35 +101,8 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
       async (item: DashboardItem) => {
         setAddedDashboards({ ...addedDashboards, [item.id]: 'pending' });
 
-        const { attributes } = item;
-        const panelData = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
-        const panelIndex = htmlIdGenerator()();
-
-        const maxPanel = panelData.reduce((prev, current) =>
-          prev.gridData.y > current.gridData.y ? prev : current
-        );
-        const version = kibanaVersion;
-
-        panelData.push({
-          panelIndex,
-          embeddableConfig: embeddableConfig as { [key: string]: any },
-          title: getDefaultPanelTitle(embeddableConfig.jobIds),
-          type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-          version,
-          gridData: {
-            h: 15,
-            i: panelIndex,
-            w: 24,
-            x: 0,
-            y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h + 10 : 0,
-          },
-        });
-
         try {
-          await savedObjectClient.update('dashboard', item.id, {
-            ...attributes,
-            panelsJSON: JSON.stringify(panelData),
-          });
+          await dashboardService.attachPanel(item.id, item.attributes, embeddableConfig);
           setAddedDashboards({ ...addedDashboards, [item.id]: 'success' });
         } catch (e) {
           toasts.danger({
