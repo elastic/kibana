@@ -85,5 +85,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     async isOnDetailsPage() {
       return await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
     },
+
+    async goToHomeViaBreadCrumb() {
+      await testSubjects.click('breadcrumb first');
+    },
   };
 }
