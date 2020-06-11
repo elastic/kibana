@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SINGLE_RULE_ALERTS_TABLE_ID = 'alerts-page-single-rule';
-export const ALERTS_TABLE_ID = 'alerts-page';
+export const SINGLE_RULE_ALERTS_TIMELINE_ID = 'alerts-page-single-rule';
+export const ALERTS_TIMELINE_ID = 'alerts-page';

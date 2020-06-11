@@ -36,7 +36,7 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { ALERTS_TABLE_ID } from '../../constants';
+import { ALERTS_TIMELINE_ID } from '../../constants';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
@@ -139,7 +139,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                         />
                         <EuiSpacer size="l" />
                         <AlertsTable
-                          timelineId={ALERTS_TABLE_ID}
+                          timelineId={ALERTS_TIMELINE_ID}
                           loading={loading}
                           hasIndexWrite={hasIndexWrite ?? false}
                           canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}

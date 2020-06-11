@@ -9,9 +9,9 @@ import { getTimelineInStorageById } from '../timelines/containers/local_storage'
 import { TimelineId } from '../timelines/containers/local_storage/types';
 import { getAlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
-import { SINGLE_RULE_ALERTS_TABLE_ID, ALERTS_TABLE_ID } from './constants';
+import { SINGLE_RULE_ALERTS_TIMELINE_ID, ALERTS_TIMELINE_ID } from './constants';
 
-const ALERTS_TIMELINE_IDS: TimelineId[] = [SINGLE_RULE_ALERTS_TABLE_ID, ALERTS_TABLE_ID];
+const ALERTS_TIMELINE_IDS: TimelineId[] = [SINGLE_RULE_ALERTS_TIMELINE_ID, ALERTS_TIMELINE_ID];
 
 export class Alerts {
   public setup() {}
