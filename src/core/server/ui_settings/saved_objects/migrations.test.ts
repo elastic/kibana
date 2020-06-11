@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { migrations790 } from './migrations_790';
-import { SavedObjectUnsanitizedUiSettings } from './types';
+import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { migrations } from './migrations';
 
 describe('ui_settings 7.9.0 migrations', () => {
-  const migration = migrations790['7.9.0'];
+  const migration = migrations['7.9.0'];
 
   test('returns doc on empty object', () => {
-    expect(migration({} as SavedObjectUnsanitizedUiSettings)).toEqual({
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
       references: [],
     });
   });

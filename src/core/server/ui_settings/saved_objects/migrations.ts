@@ -17,27 +17,26 @@
  * under the License.
  */
 
-import { SavedObjectSanitizedUiSettings, SavedObjectUnsanitizedUiSettings } from './types';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
 
-export const migrations790 = {
-  '7.9.0': (doc: SavedObjectUnsanitizedUiSettings<any>): SavedObjectSanitizedUiSettings<any> => ({
+export const migrations = {
+  '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
     ...doc,
-    ...(doc &&
-      doc.attributes && {
-        attributes: Object.keys(doc.attributes).reduce(
-          (acc, key) =>
-            key.indexOf('siem') > -1
-              ? {
-                  ...acc,
-                  [key.replace('siem', 'securitySolution')]: doc.attributes[key],
-                }
-              : {
-                  ...acc,
-                  [key]: doc.attributes[key],
-                },
-          {}
-        ),
-      }),
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          key.startsWith('siem')
+            ? {
+                ...acc,
+                [key.replace('siem', 'securitySolution')]: doc.attributes[key],
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
     references: doc.references || [],
   }),
 };
