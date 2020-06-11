@@ -45,8 +45,8 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized
   // List component and WindowScroller component.
-  const windowScrollerRef = useRef<WindowScroller>();
-  const listRef = useRef<List>();
+  const windowScrollerRef = useRef<WindowScroller>(null);
+  const listRef = useRef<List>(null);
 
   useEffect(() => {
     const cancelMoveKbListener = (event: KeyboardEvent) => {
@@ -87,7 +87,6 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
         <PrivateTree
           windowScrollerRef={windowScrollerRef}
           listRef={listRef}
-          onHeightChange={() => windowScrollerRef.current?.updatePosition()}
           level={1}
           onAction={onAction}
           movingProcessor={movingProcessor}

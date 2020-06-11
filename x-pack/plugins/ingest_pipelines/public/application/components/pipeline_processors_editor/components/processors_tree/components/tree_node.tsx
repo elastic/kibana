@@ -51,6 +51,50 @@ export const TreeNode: FunctionComponent<Props> = ({
     'pipelineProcessorsEditor__tree__item--selected': selected,
   });
 
+  const renderOnFailureHandlersTree = () => {
+    if (!processor.onFailure?.length) {
+      return;
+    }
+    const onFailureHandlerLabelClasses = classNames({
+      'pipelineProcessorsEditor__tree__onFailureHandlerLabel--withDropZone': movingProcessor
+        ? movingProcessor.id !== processor.onFailure[0].id && movingProcessor.id !== processor.id
+        : false,
+    });
+    return (
+      <div
+        className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
+        style={{ marginLeft: `${level * 34}px` }}
+      >
+        <div className="pipelineProcessorsEditor__tree__onFailureHandlerLabelContainer">
+          <EuiText
+            size="m"
+            className={`pipelineProcessorsEditor__tree__onFailureHandlerLabel ${onFailureHandlerLabelClasses}`}
+            color="subdued"
+          >
+            {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
+              defaultMessage: 'Failure handlers',
+            })}
+          </EuiText>
+        </div>
+        <PrivateTree
+          level={level + 1}
+          movingProcessor={movingProcessor}
+          onAction={onAction}
+          selector={processorInfo.selector.concat('onFailure')}
+          processors={processor.onFailure}
+        />
+        <AddProcessorButton
+          onClick={() =>
+            onAction({
+              type: 'addProcessor',
+              payload: { target: processorInfo.selector.concat('onFailure') },
+            })
+          }
+        />
+      </div>
+    );
+  };
+
   return (
     <EuiPanel className={`pipelineProcessorsEditor__tree__item ${panelClasses}`} paddingSize="s">
       <PipelineProcessorsEditorItem
@@ -61,37 +105,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         description={processor.options.tag}
         selected={Boolean(movingProcessor?.id === processor.id)}
       />
-      {processor.onFailure?.length ? (
-        <div
-          className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
-          style={{ marginLeft: `${level * 34}px` }}
-        >
-          <EuiText
-            size="s"
-            className="pipelineProcessorsEditor__tree__onFailureHandlerLabel"
-            color="subdued"
-          >
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
-              defaultMessage: 'Failure handlers',
-            })}
-          </EuiText>
-          <PrivateTree
-            level={level + 1}
-            movingProcessor={movingProcessor}
-            onAction={onAction}
-            selector={processorInfo.selector.concat('onFailure')}
-            processors={processor.onFailure}
-          />
-          <AddProcessorButton
-            onClick={() =>
-              onAction({
-                type: 'addProcessor',
-                payload: { target: processorInfo.selector.concat('onFailure') },
-              })
-            }
-          />
-        </div>
-      ) : undefined}
+      {renderOnFailureHandlersTree()}
     </EuiPanel>
   );
 };

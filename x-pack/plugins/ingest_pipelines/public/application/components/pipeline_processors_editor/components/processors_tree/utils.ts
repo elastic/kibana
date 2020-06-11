@@ -7,13 +7,15 @@
 import { ProcessorInternal } from '../../types';
 
 // These values are tied to the style and heights following components:
+// Do not change these numbers without testing the component for visual
+// regressions!
 // - ./components/tree_node.tsx
 // - ./components/drop_zone_button.tsx
 // - ./components/pipeline_processors_editor_item.tsx
-const ITEM_HEIGHTS_PX = {
-  withoutNestedItems: 59,
-  withNestedItems: 137,
-  padding: 16,
+const itemHeightsPx = {
+  WITHOUT_NESTED_ITEMS: 61,
+  WITH_NESTED_ITEMS: 137,
+  TOP_PADDING: 16,
 };
 
 export const calculateItemHeight = ({
@@ -23,14 +25,15 @@ export const calculateItemHeight = ({
   processor: ProcessorInternal;
   isFirstInArray: boolean;
 }): number => {
-  const padding = isFirstInArray ? ITEM_HEIGHTS_PX.padding : 0;
+  const padding = isFirstInArray ? itemHeightsPx.TOP_PADDING : 0;
+
   if (!processor.onFailure?.length) {
-    return padding + ITEM_HEIGHTS_PX.withoutNestedItems;
+    return padding + itemHeightsPx.WITHOUT_NESTED_ITEMS;
   }
 
   return (
     padding +
-    ITEM_HEIGHTS_PX.withNestedItems +
+    itemHeightsPx.WITH_NESTED_ITEMS +
     processor.onFailure.reduce((acc, p, idx) => {
       return acc + calculateItemHeight({ processor: p, isFirstInArray: idx === 0 });
     }, 0)

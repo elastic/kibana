@@ -21,12 +21,11 @@ export interface PrivateProps {
   processors: ProcessorInternal[];
   selector: ProcessorSelector;
   onAction: OnActionHandler;
-  movingProcessor?: ProcessorInfo;
   level: number;
+  movingProcessor?: ProcessorInfo;
   // Only passed into the top level list
-  onHeightChange?: () => void;
-  windowScrollerRef?: MutableRefObject<WindowScroller>;
-  listRef?: MutableRefObject<List>;
+  windowScrollerRef?: MutableRefObject<WindowScroller | null>;
+  listRef?: MutableRefObject<List | null>;
 }
 
 const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
@@ -64,7 +63,6 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   level,
   windowScrollerRef,
   listRef,
-  onHeightChange,
 }) => {
   const renderRow = ({
     idx,
@@ -121,13 +119,13 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   };
 
   useEffect(() => {
-    if (onHeightChange) {
-      onHeightChange();
+    if (windowScrollerRef && windowScrollerRef.current) {
+      windowScrollerRef.current.updatePosition();
     }
-    if (listRef?.current) {
+    if (listRef && listRef.current) {
       listRef.current.recomputeRowHeights();
     }
-  }, [processors, onHeightChange, listRef]);
+  }, [processors, listRef, windowScrollerRef, movingProcessor]);
 
   // A list optimized to handle very many items.
   const renderVirtualList = () => {
@@ -151,8 +149,9 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                         scrollTop={scrollTop}
                         rowCount={processors.length}
                         rowHeight={({ index }) => {
+                          const processor = processors[index];
                           return calculateItemHeight({
-                            processor: processors[index],
+                            processor,
                             isFirstInArray: index === 0,
                           });
                         }}

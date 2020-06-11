@@ -43,8 +43,16 @@
     }
   }
 
+  &__onFailureHandlerLabelContainer {
+    position: relative;
+    height: 14px;
+  }
   &__onFailureHandlerLabel {
-    margin-top: 10px;
+    position: absolute;
+    bottom: -16px;
+    &--withDropZone {
+      bottom: -4px;
+    }
   }
 
 

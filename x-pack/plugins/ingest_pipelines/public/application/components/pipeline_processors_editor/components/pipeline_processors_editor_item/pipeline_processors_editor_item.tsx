@@ -21,7 +21,7 @@ import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { usePipelineProcessorsContext } from '../../context';
 
-import './pipeline_processors_editor.scss';
+import './pipeline_processors_editor_item.scss';
 
 import { InlineTextInput } from './inline_text_input';
 
