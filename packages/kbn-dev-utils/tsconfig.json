@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "rootDir": "./src",
+    "tsBuildInfoFile": "target/.tsbuildinfo",
+    "composite": true,
     "outDir": "target",
     "target": "ES2019",
     "declaration": true,
