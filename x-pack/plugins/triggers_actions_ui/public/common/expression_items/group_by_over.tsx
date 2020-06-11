@@ -102,7 +102,8 @@ export const GroupByExpression = ({
           onClick={() => {
             setGroupByPopoverOpen(true);
           }}
-          color={groupBy === 'all' || (termSize && termField) ? 'secondary' : 'danger'}
+          display="columns"
+          isInvalid={!(groupBy === 'all' || (termSize && termField))}
         />
       }
       isOpen={groupByPopoverOpen}
@@ -111,6 +112,7 @@ export const GroupByExpression = ({
       }}
       ownFocus
       withTitle
+      display="block"
       anchorPosition={popupPosition ?? 'downRight'}
     >
       <div>

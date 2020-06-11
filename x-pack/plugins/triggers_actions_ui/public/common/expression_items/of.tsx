@@ -86,12 +86,13 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          display="columns"
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
           onClick={() => {
             setAggFieldPopoverOpen(true);
           }}
-          color={aggField ? 'secondary' : 'danger'}
+          isInvalid={!aggField}
         />
       }
       isOpen={aggFieldPopoverOpen}
@@ -99,6 +100,7 @@ export const OfExpression = ({
         setAggFieldPopoverOpen(false);
       }}
       withTitle
+      display="block"
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >

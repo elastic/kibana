@@ -81,11 +81,10 @@ export const ThresholdExpression = ({
           onClick={() => {
             setAlertThresholdPopoverOpen(true);
           }}
-          color={
+          display="columns"
+          isInvalid={
             (errors.threshold0 && errors.threshold0.length) ||
             (errors.threshold1 && errors.threshold1.length)
-              ? 'danger'
-              : 'secondary'
           }
         />
       }
@@ -95,6 +94,7 @@ export const ThresholdExpression = ({
       }}
       ownFocus
       withTitle
+      display="block"
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>

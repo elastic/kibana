@@ -44,6 +44,7 @@ export const WhenExpression = ({
       button={
         <EuiExpression
           data-test-subj="whenExpression"
+          display="columns"
           description={i18n.translate(
             'xpack.triggersActionsUI.common.expressionItems.threshold.descriptionLabel',
             {
@@ -62,6 +63,7 @@ export const WhenExpression = ({
         setAggTypePopoverOpen(false);
       }}
       ownFocus
+      display="block"
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >

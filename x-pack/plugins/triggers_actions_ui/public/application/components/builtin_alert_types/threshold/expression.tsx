@@ -21,8 +21,8 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { EuiSteps } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import {
   firstFieldOption,
@@ -154,213 +154,111 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
 
   const indexPopover = (
     <Fragment>
-      <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFormRow
-            id="indexSelectSearchBox"
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.threshold.indicesToQueryLabel"
-                defaultMessage="Indices to query"
-              />
-            }
-            isInvalid={errors.index.length > 0 && index !== undefined}
-            error={errors.index}
-            helpText={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.threshold.howToBroadenSearchQueryDescription"
-                defaultMessage="Use * to broaden your query."
-              />
-            }
-          >
-            <EuiComboBox
-              fullWidth
-              async
-              isLoading={isIndiciesLoading}
-              isInvalid={errors.index.length > 0 && index !== undefined}
-              noSuggestions={!indexOptions.length}
-              options={indexOptions}
-              data-test-subj="thresholdIndexesComboBox"
-              selectedOptions={(index || []).map((anIndex: string) => {
-                return {
-                  label: anIndex,
-                  value: anIndex,
-                };
-              })}
-              onChange={async (selected: EuiComboBoxOptionOption[]) => {
-                setAlertParams(
-                  'index',
-                  selected.map((aSelected) => aSelected.value)
-                );
-                const indices = selected.map((s) => s.value as string);
+      <EuiFormRow
+        id="indexSelectSearchBox"
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertAdd.threshold.indicesToQueryLabel"
+            defaultMessage="Indices to query"
+          />
+        }
+        isInvalid={errors.index.length > 0 && index !== undefined}
+        error={errors.index}
+        helpText={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertAdd.threshold.howToBroadenSearchQueryDescription"
+            defaultMessage="Use * to broaden your query."
+          />
+        }
+      >
+        <EuiComboBox
+          fullWidth
+          async
+          isLoading={isIndiciesLoading}
+          isInvalid={errors.index.length > 0 && index !== undefined}
+          noSuggestions={!indexOptions.length}
+          options={indexOptions}
+          data-test-subj="thresholdIndexesComboBox"
+          selectedOptions={(index || []).map((anIndex: string) => {
+            return {
+              label: anIndex,
+              value: anIndex,
+            };
+          })}
+          onChange={async (selected: EuiComboBoxOptionOption[]) => {
+            setAlertParams(
+              'index',
+              selected.map((aSelected) => aSelected.value)
+            );
+            const indices = selected.map((s) => s.value as string);
 
-                // reset time field and expression fields if indices are deleted
-                if (indices.length === 0) {
-                  setTimeFieldOptions([firstFieldOption]);
-                  setAlertProperty('params', {
-                    ...alertParams,
-                    index: indices,
-                    aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-                    termSize: DEFAULT_VALUES.TERM_SIZE,
-                    thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-                    timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-                    timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-                    groupBy: DEFAULT_VALUES.GROUP_BY,
-                    threshold: DEFAULT_VALUES.THRESHOLD,
-                    timeField: '',
-                  });
-                  return;
-                }
-                const currentEsFields = await getFields(http, indices);
-                const timeFields = getTimeFieldOptions(currentEsFields as any);
-
-                setEsFields(currentEsFields);
-                setTimeFieldOptions([firstFieldOption, ...timeFields]);
-              }}
-              onSearchChange={async (search) => {
-                setIsIndiciesLoading(true);
-                setIndexOptions(await getIndexOptions(http, search, indexPatterns));
-                setIsIndiciesLoading(false);
-              }}
-              onBlur={() => {
-                if (!index) {
-                  setAlertParams('index', []);
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            id="thresholdTimeField"
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldLabel"
-                defaultMessage="Time field"
-              />
+            // reset time field and expression fields if indices are deleted
+            if (indices.length === 0) {
+              setTimeFieldOptions([firstFieldOption]);
+              setAlertProperty('params', {
+                ...alertParams,
+                index: indices,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                timeField: '',
+              });
+              return;
             }
-            isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-            error={errors.timeField}
-          >
-            <EuiSelect
-              options={timeFieldOptions}
-              isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-              fullWidth
-              name="thresholdTimeField"
-              data-test-subj="thresholdAlertTimeFieldSelect"
-              value={timeField}
-              onChange={(e) => {
-                setAlertParams('timeField', e.target.value);
-              }}
-              onBlur={() => {
-                if (timeField === undefined) {
-                  setAlertParams('timeField', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+            const currentEsFields = await getFields(http, indices);
+            const timeFields = getTimeFieldOptions(currentEsFields as any);
+
+            setEsFields(currentEsFields);
+            setTimeFieldOptions([firstFieldOption, ...timeFields]);
+          }}
+          onSearchChange={async (search) => {
+            setIsIndiciesLoading(true);
+            setIndexOptions(await getIndexOptions(http, search, indexPatterns));
+            setIsIndiciesLoading(false);
+          }}
+          onBlur={() => {
+            if (!index) {
+              setAlertParams('index', []);
+            }
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        id="thresholdTimeField"
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldLabel"
+            defaultMessage="Time field"
+          />
+        }
+        isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+        error={errors.timeField}
+      >
+        <EuiSelect
+          options={timeFieldOptions}
+          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+          fullWidth
+          name="thresholdTimeField"
+          data-test-subj="thresholdAlertTimeFieldSelect"
+          value={timeField}
+          onChange={(e) => {
+            setAlertParams('timeField', e.target.value);
+          }}
+          onBlur={() => {
+            if (timeField === undefined) {
+              setAlertParams('timeField', '');
+            }
+          }}
+        />
+      </EuiFormRow>
     </Fragment>
   );
-
-  const firstSetOfSteps = [
-    {
-      title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.selectIndex', {
-        defaultMessage: 'Select an index',
-      }),
-      children: (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <WhenExpression
-                aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-                onChangeSelectedAggType={(selectedAggType: string) =>
-                  setAlertParams('aggType', selectedAggType)
-                }
-              />
-            </EuiFlexItem>
-            {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
-              <EuiFlexItem grow={false}>
-                <OfExpression
-                  aggField={aggField}
-                  fields={esFields}
-                  aggType={aggType}
-                  errors={errors}
-                  onChangeSelectedAggField={(selectedAggField?: string) =>
-                    setAlertParams('aggField', selectedAggField)
-                  }
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <GroupByExpression
-                groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
-                termField={termField}
-                termSize={termSize}
-                errors={errors}
-                fields={esFields}
-                onChangeSelectedGroupBy={(selectedGroupBy) =>
-                  setAlertParams('groupBy', selectedGroupBy)
-                }
-                onChangeSelectedTermField={(selectedTermField) =>
-                  setAlertParams('termField', selectedTermField)
-                }
-                onChangeSelectedTermSize={(selectedTermSize) =>
-                  setAlertParams('termSize', selectedTermSize)
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.conditionPrompt', {
-        defaultMessage: 'Define the condition',
-      }),
-      children: (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <ThresholdExpression
-                thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-                threshold={threshold}
-                errors={errors}
-                popupPosition={'upLeft'}
-                onChangeSelectedThreshold={(selectedThresholds) =>
-                  setAlertParams('threshold', selectedThresholds)
-                }
-                onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-                  setAlertParams('thresholdComparator', selectedThresholdComparator)
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ForLastExpression
-                popupPosition={'upLeft'}
-                timeWindowSize={timeWindowSize}
-                timeWindowUnit={timeWindowUnit}
-                errors={errors}
-                onChangeWindowSize={(selectedWindowSize: any) =>
-                  setAlertParams('timeWindowSize', selectedWindowSize)
-                }
-                onChangeWindowUnit={(selectedWindowUnit: any) =>
-                  setAlertParams('timeWindowUnit', selectedWindowUnit)
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ),
-    },
-  ];
 
   const renderIndices = (indices) => {
     const rows = indices.map((s: string, index: number) => {
@@ -384,7 +282,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
-      <EuiSteps className="actAddAlertSteps" steps={firstSetOfSteps} />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+            defaultMessage="Select an index"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiPopover
         id="indexPopover"
         button={
@@ -444,6 +350,72 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
           {indexPopover}
         </div>
       </EuiPopover>
+      <WhenExpression
+        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+        onChangeSelectedAggType={(selectedAggType: string) =>
+          setAlertParams('aggType', selectedAggType)
+        }
+      />
+      {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
+        <OfExpression
+          aggField={aggField}
+          fields={esFields}
+          aggType={aggType}
+          errors={errors}
+          onChangeSelectedAggField={(selectedAggField?: string) =>
+            setAlertParams('aggField', selectedAggField)
+          }
+        />
+      ) : null}
+      <GroupByExpression
+        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+        termField={termField}
+        termSize={termSize}
+        errors={errors}
+        fields={esFields}
+        onChangeSelectedGroupBy={(selectedGroupBy) => setAlertParams('groupBy', selectedGroupBy)}
+        onChangeSelectedTermField={(selectedTermField) =>
+          setAlertParams('termField', selectedTermField)
+        }
+        onChangeSelectedTermSize={(selectedTermSize) =>
+          setAlertParams('termSize', selectedTermSize)
+        }
+      />
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
+            defaultMessage="Define the condition"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ThresholdExpression
+        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+        threshold={threshold}
+        errors={errors}
+        popupPosition={'upLeft'}
+        onChangeSelectedThreshold={(selectedThresholds) =>
+          setAlertParams('threshold', selectedThresholds)
+        }
+        onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
+          setAlertParams('thresholdComparator', selectedThresholdComparator)
+        }
+      />
+      <ForLastExpression
+        popupPosition={'upLeft'}
+        timeWindowSize={timeWindowSize}
+        timeWindowUnit={timeWindowUnit}
+        errors={errors}
+        onChangeWindowSize={(selectedWindowSize: any) =>
+          setAlertParams('timeWindowSize', selectedWindowSize)
+        }
+        onChangeWindowUnit={(selectedWindowUnit: any) =>
+          setAlertParams('timeWindowUnit', selectedWindowUnit)
+        }
+      />
+      <EuiSpacer />
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
           <Fragment>

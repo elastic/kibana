@@ -71,6 +71,7 @@ export const ForLastExpression = ({
           onClick={() => {
             setAlertDurationPopoverOpen(true);
           }}
+          display="columns"
           color={timeWindowSize ? 'secondary' : 'danger'}
         />
       }
@@ -79,6 +80,7 @@ export const ForLastExpression = ({
         setAlertDurationPopoverOpen(false);
       }}
       ownFocus
+      display="block"
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >
