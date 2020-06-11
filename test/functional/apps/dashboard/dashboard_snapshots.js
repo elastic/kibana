@@ -45,29 +45,27 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await browser.setWindowSize(1300, 900);
     });
 
-    // Commenting out flaky test
-    // https://kibana-ci.elastic.co/job/elastic+kibana+coverage-ingestion/148/testReport/junit/Chrome%20UI%20Functional%20Tests/test_functional_apps_dashboard_dashboard_snapshots%C2%B7js/Kibana_Pipeline___kibana_oss_agent___dashboard_app_using_current_data_dashboard_snapshots_compare_TSVB_snapshot/
-    // it('compare TSVB snapshot', async () => {
-    //   await PageObjects.dashboard.gotoDashboardLandingPage();
-    //   await PageObjects.dashboard.clickNewDashboard();
-    //   await PageObjects.timePicker.setLogstashDataRange();
-    //   await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-    //   await PageObjects.common.closeToastIfExists();
-    //
-    //   await PageObjects.dashboard.saveDashboard('tsvb');
-    //   await PageObjects.dashboard.clickFullScreenMode();
-    //   await dashboardPanelActions.openContextMenu();
-    //   await dashboardPanelActions.clickExpandPanelToggle();
-    //
-    //   await PageObjects.dashboard.waitForRenderComplete();
-    //   const percentDifference = await screenshot.compareAgainstBaseline(
-    //     'tsvb_dashboard',
-    //     updateBaselines
-    //   );
-    //
-    //   await PageObjects.dashboard.clickExitFullScreenLogoButton();
-    //   expect(percentDifference).to.be.lessThan(0.02);
-    // });
+    it('compare TSVB snapshot', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setLogstashDataRange();
+      await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
+      await PageObjects.common.closeToastIfExists();
+
+      await PageObjects.dashboard.saveDashboard('tsvb');
+      await PageObjects.dashboard.clickFullScreenMode();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
+
+      await PageObjects.dashboard.waitForRenderComplete();
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'tsvb_dashboard',
+        updateBaselines
+      );
+
+      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+      expect(percentDifference).to.be.lessThan(0.02);
+    });
 
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
