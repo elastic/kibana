@@ -6,6 +6,7 @@
 
 import createContainer from 'constate';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { MetricsExplorerColor } from '../../../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
@@ -122,6 +123,18 @@ export const useMetricsExplorerOptions = () => {
     DEFAULT_CHART_OPTIONS
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
+
+  const { metricThresholdPrefill } = useAlertPrefillContext();
+
+  useEffect(() => {
+    const { setMetrics, setGroupBy, setFilterQuery } = metricThresholdPrefill;
+    const { metrics, groupBy, filterQuery } = options;
+
+    setGroupBy(groupBy);
+    setFilterQuery(filterQuery);
+    setMetrics(metrics);
+  }, [options, metricThresholdPrefill]);
+
   return {
     defaultViewState: {
       options: DEFAULT_OPTIONS,
