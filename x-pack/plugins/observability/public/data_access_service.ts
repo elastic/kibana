@@ -5,10 +5,10 @@
  */
 import { CoreSetup, Plugin, IContextContainer } from '../../../../src/core/public';
 import { Setup, DataAccessHandlerProvider } from './typings/data_access_service';
-import { ChartDataFetcher } from '../typings/chart';
+import { DataFetcher } from './typings/data_fetcher';
 
 export class ObservabilityDataAccessService implements Plugin<Setup, void> {
-  private dataProviders = new Map<string, ChartDataFetcher>();
+  private dataProviders = new Map<string, DataFetcher>();
   private contextContainer?: IContextContainer<DataAccessHandlerProvider>;
 
   public setup(core: CoreSetup): Setup {

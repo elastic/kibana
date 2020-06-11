@@ -4,12 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ChartData {
-  time: number;
-  value: number;
-  group: string;
+interface Stat {
+  label: string;
+  value: string;
+  color?: string;
 }
 
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
+interface Series {
+  label: string;
+  coordinates: Coordinates[];
+  color?: string;
+  key?: string;
+}
+
+export interface FetcherResponse {
+  title: string;
+  appLink: string;
+  stats: Stat[];
+  series: Series[];
+}
 export interface SearchParams {
   // The start timestamp in milliseconds of the queried time interval
   startTime: number;
@@ -19,4 +37,4 @@ export interface SearchParams {
   bucketSize: number;
 }
 
-export type ChartDataFetcher = (searchParams: SearchParams) => Promise<ChartData[]>;
+export type DataFetcher = (searchParams: SearchParams) => Promise<FetcherResponse[]>;

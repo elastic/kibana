@@ -12,9 +12,11 @@ import {
 } from '../../../../src/core/public';
 import { ObservabilityDataAccessService } from './data_access_service';
 import { Setup } from './typings/data_access_service';
+import { dataFetcherRegistry, Registry, getDataFetcher } from './data_fetcher';
 
 export interface ObservabilityPluginSetup {
   dataAccess: Setup;
+  dataFetcherRegistry: Registry;
 }
 
 export type ObservabilityPluginStart = void;
@@ -47,6 +49,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
 
     return {
       dataAccess: this.observabilityDataAccessService.setup(core),
+      dataFetcherRegistry,
     };
   }
   public start() {}
