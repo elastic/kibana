@@ -18,7 +18,7 @@ export function RumDashboard() {
         <h1>{EndUserExperienceLabel}</h1>
       </EuiTitle>
       <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <ClientMetrics />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
