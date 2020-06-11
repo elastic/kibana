@@ -16,13 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
+import html from './fullscreen.html';
 
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export function initFullscreenDirective(app) {
+  app.directive('timelionFullscreen', function () {
+    return {
+      restrict: 'E',
+      scope: {
+        expression: '=',
+        series: '=',
+        state: '=',
+        transient: '=',
+        onSearch: '=',
+      },
+      template: html,
+    };
+  });
+}
