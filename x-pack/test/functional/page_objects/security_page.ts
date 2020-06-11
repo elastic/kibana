@@ -16,6 +16,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
+  const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
 
   interface LoginOptions {
@@ -273,11 +274,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async addIndexToRole(index: string) {
       log.debug(`Adding index ${index} to role`);
-      const indexInput = await retry.try(() =>
-        find.byCssSelector('[data-test-subj="indicesInput0"] input')
-      );
-      await indexInput.type(index);
-      await indexInput.type('\n');
+      await comboBox.setCustom('indicesInput0', index);
     }
 
     async addPrivilegeToRole(privilege: string) {
@@ -411,10 +408,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
             return testSubjects.append('roleFormNameInput', roleName);
           })
           .then(function () {
-            return find.setValue(
-              '[data-test-subj="indicesInput0"] input',
-              roleObj.elasticsearch.indices[0].names + '\n'
-            );
+            return comboBox.setCustom('indicesInput0', roleObj.elasticsearch.indices[0].names);
           })
           .then(function () {
             return testSubjects.click('restrictDocumentsQuery0');
@@ -468,7 +462,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
               return field.reduce(function (promise: Promise<any>, fieldName: string) {
                 return promise
                   .then(function () {
-                    return find.setValue('[data-test-subj="fieldInput0"] input', fieldName + '\n');
+                    return comboBox.setCustom('fieldInput0', fieldName);
                   })
                   .then(function () {
                     return PageObjects.common.sleep(1000);
