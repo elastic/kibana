@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 import { State } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from '../types';
 import { DropSpecialLocations } from '../constants';
@@ -10,17 +11,14 @@ import { checkIfSamePath, getValue } from '../utils';
 
 export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
 
-export const duplicateProcessor = (
-  sourceProcessor: ProcessorInternal,
-  getId: () => string
-): ProcessorInternal => {
+export const duplicateProcessor = (sourceProcessor: ProcessorInternal): ProcessorInternal => {
   const onFailure = sourceProcessor.onFailure
-    ? sourceProcessor.onFailure.map((p) => duplicateProcessor(p, getId))
+    ? sourceProcessor.onFailure.map((p) => duplicateProcessor(p))
     : undefined;
   return {
     ...sourceProcessor,
     onFailure,
-    id: getId(),
+    id: uuid.v4(),
     options: {
       ...sourceProcessor.options,
     },

@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 import { Reducer, useReducer, Dispatch } from 'react';
-
 import { DeserializeResult } from '../deserialize';
 import { getValue, setValue } from '../utils';
 import { ProcessorInternal, ProcessorSelector } from '../types';
@@ -19,7 +19,7 @@ export type State = Omit<DeserializeResult, 'onFailure'> & {
 export type Action =
   | {
       type: 'addProcessor';
-      payload: { processor: ProcessorInternal; targetSelector: ProcessorSelector };
+      payload: { processor: Omit<ProcessorInternal, 'id'>; targetSelector: ProcessorSelector };
     }
   | {
       type: 'updateProcessor';
@@ -37,7 +37,6 @@ export type Action =
       type: 'duplicateProcessor';
       payload: {
         source: ProcessorSelector;
-        getId: () => string;
       };
     };
 
@@ -84,11 +83,16 @@ export const reducer: Reducer<State, Action> = (state, action) => {
       );
     }
     if (Array.isArray(targetProcessor)) {
-      return setValue(targetSelector, state, targetProcessor.concat(processor));
+      return setValue(
+        targetSelector,
+        state,
+        targetProcessor.concat({ ...processor, id: uuid.v4() })
+      );
     } else {
+      const processorWithId = { ...processor, id: uuid.v4() };
       targetProcessor.onFailure = targetProcessor.onFailure
-        ? targetProcessor.onFailure.concat(processor)
-        : [processor];
+        ? targetProcessor.onFailure.concat(processorWithId)
+        : [processorWithId];
       return setValue(targetSelector, state, targetProcessor);
     }
   }
@@ -115,7 +119,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const sourceProcessorsArray = [
       ...getValue<ProcessorInternal[]>(sourceProcessorsArraySelector, state),
     ];
-    const copy = duplicateProcessor(sourceProcessor, action.payload.getId);
+    const copy = duplicateProcessor(sourceProcessor);
     sourceProcessorsArray.splice(sourceIdx + 1, 0, copy);
     return setValue(sourceProcessorsArraySelector, state, sourceProcessorsArray);
   }

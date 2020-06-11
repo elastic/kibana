@@ -54,7 +54,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     onUpdate,
   }) {
     const {
-      services,
       state: { editor },
     } = usePipelineProcessorsContext();
     const { mode: editorMode, setMode: setEditorMode } = editor;
@@ -105,7 +104,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             processorsDispatch({
               type: 'addProcessor',
               payload: {
-                processor: { id: services.idGenerator.getId(), ...processorTypeAndOptions },
+                processor: { ...processorTypeAndOptions },
                 targetSelector: editorMode.arg,
               },
             });
@@ -126,7 +125,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
         }
         setEditorMode({ id: 'idle' });
       },
-      [processorsDispatch, editorMode, setEditorMode, services.idGenerator]
+      [processorsDispatch, editorMode, setEditorMode]
     );
 
     const onCloseSettingsForm = useCallback(() => {
@@ -163,7 +162,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               type: 'duplicateProcessor',
               payload: {
                 source: action.payload.source,
-                getId: () => services.idGenerator.getId(),
               },
             });
             break;
@@ -175,7 +173,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             break;
         }
       },
-      [processorsDispatch, setEditorMode, services.idGenerator]
+      [processorsDispatch, setEditorMode]
     );
 
     const movingProcessor = editorMode.id === 'movingProcessor' ? editorMode.arg : undefined;

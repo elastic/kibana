@@ -3,13 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import uuid from 'uuid';
 import { Processor } from '../../../../common/types';
 import { ProcessorInternal } from './types';
-import { IdGenerator } from './services';
 
 export interface DeserializeArgs {
-  idGenerator: IdGenerator;
   processors: Processor[];
   onFailure?: Processor[];
 }
@@ -23,39 +21,32 @@ const getProcessorType = (processor: Processor): string => {
   return Object.keys(processor)[0]!;
 };
 
-const convertToPipelineInternalProcessor = (
-  processor: Processor,
-  idGenerator: IdGenerator
-): ProcessorInternal => {
+const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInternal => {
   const type = getProcessorType(processor);
   const { on_failure: originalOnFailure, ...options } = processor[type];
   const onFailure = originalOnFailure?.length
-    ? convertProcessors(originalOnFailure, idGenerator)
+    ? convertProcessors(originalOnFailure)
     : (originalOnFailure as ProcessorInternal[] | undefined);
   return {
-    id: idGenerator.getId(),
+    id: uuid.v4(),
     type,
     onFailure,
     options,
   };
 };
 
-const convertProcessors = (processors: Processor[], idGenerator: IdGenerator) => {
+const convertProcessors = (processors: Processor[]) => {
   const convertedProcessors = [];
 
   for (const processor of processors) {
-    convertedProcessors.push(convertToPipelineInternalProcessor(processor, idGenerator));
+    convertedProcessors.push(convertToPipelineInternalProcessor(processor));
   }
   return convertedProcessors;
 };
 
-export const deserialize = ({
-  processors,
-  onFailure,
-  idGenerator,
-}: DeserializeArgs): DeserializeResult => {
+export const deserialize = ({ processors, onFailure }: DeserializeArgs): DeserializeResult => {
   return {
-    processors: convertProcessors(processors, idGenerator),
-    onFailure: onFailure ? convertProcessors(onFailure, idGenerator) : undefined,
+    processors: convertProcessors(processors),
+    onFailure: onFailure ? convertProcessors(onFailure) : undefined,
   };
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useMemo, useRef } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 
 import { Processor } from '../../../../common/types';
 
@@ -17,7 +17,6 @@ import { PipelineProcessorsContextProvider } from './context';
 import { OnUpdateHandlerArg } from './types';
 
 import { PipelineProcessorsEditor as PipelineProcessorsEditorUI } from './pipeline_processors_editor';
-import { IdGenerator } from './services';
 
 export interface Props {
   value: {
@@ -41,20 +40,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   learnMoreAboutProcessorsUrl,
   onTestPipelineClick,
 }) => {
-  const idGeneratorRef = useRef<IdGenerator>();
-  const getIdGenerator = () => {
-    if (!idGeneratorRef.current) {
-      idGeneratorRef.current = new IdGenerator();
-    }
-    return idGeneratorRef.current;
-  };
-
   const deserializedResult = useMemo(
     () =>
       deserialize({
         processors: originalProcessors,
         onFailure: originalOnFailureProcessors,
-        idGenerator: getIdGenerator(),
       }),
     // TODO: Re-add the dependency on the props and make the state set-able
     // when new props come in so that this component will be controllable
@@ -66,7 +56,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   return (
     <PipelineProcessorsContextProvider
       links={{ learnMoreAboutOnFailureProcessorsUrl, learnMoreAboutProcessorsUrl }}
-      services={{ idGenerator: getIdGenerator() }}
     >
       <PipelineProcessorsEditorUI
         onUpdate={onUpdate}

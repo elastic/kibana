@@ -5,7 +5,6 @@
  */
 
 import React, { createContext, Dispatch, FunctionComponent, useContext, useState } from 'react';
-import { IdGenerator } from './services';
 import { EditorMode } from './types';
 
 interface Links {
@@ -13,12 +12,7 @@ interface Links {
   learnMoreAboutOnFailureProcessorsUrl: string;
 }
 
-interface Services {
-  idGenerator: IdGenerator;
-}
-
 const PipelineProcessorsContext = createContext<{
-  services: Services;
   links: Links;
   state: {
     editor: {
@@ -29,20 +23,16 @@ const PipelineProcessorsContext = createContext<{
 }>({} as any);
 
 interface Props {
-  services: Services;
   links: Links;
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
-  services,
   links,
   children,
 }) => {
   const [mode, setMode] = useState<EditorMode>({ id: 'idle' });
   return (
-    <PipelineProcessorsContext.Provider
-      value={{ services, links, state: { editor: { mode, setMode } } }}
-    >
+    <PipelineProcessorsContext.Provider value={{ links, state: { editor: { mode, setMode } } }}>
       {children}
     </PipelineProcessorsContext.Provider>
   );

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESCommonProcessorOptions } from '../../../../common/types';
 import { OnFormUpdateArg } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SerializeResult } from './serialize';
 import { ProcessorInfo } from './components/processors_tree';
@@ -21,14 +20,11 @@ import { ProcessorInfo } from './components/processors_tree';
  */
 export type ProcessorSelector = string[];
 
-export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &
-  CustomProcessorOptions;
-
 /** @private */
 export interface ProcessorInternal<CustomProcessorOptions = {}> {
   id: string;
   type: string;
-  options: ProcessorOptions<CustomProcessorOptions>;
+  options: { [key: string]: any };
   onFailure?: ProcessorInternal[];
 }
 
