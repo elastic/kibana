@@ -41,7 +41,6 @@ import {
   SEARCHABLE_LIST_CONTAINER,
   LIST_CONTAINER,
 } from '../../embeddable_examples/public';
-import { BOOK_EMBEDDABLE } from '../../embeddable_examples/public/book/book_embeddable';
 
 interface Props {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
