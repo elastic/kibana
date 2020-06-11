@@ -6,14 +6,15 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import { ProcessorInternal } from '../types';
+import { ProcessorInternal, ProcessorSelector } from '../types';
 
 interface Props {
   processor: ProcessorInternal;
-  onResult: (confirmed: boolean) => void;
+  selector: ProcessorSelector;
+  onResult: (arg: { confirmed: boolean; selector: ProcessorSelector }) => void;
 }
 
-export const ProcessorRemoveModal = ({ processor, onResult }: Props) => {
+export const ProcessorRemoveModal = ({ processor, onResult, selector }: Props) => {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
@@ -26,8 +27,8 @@ export const ProcessorRemoveModal = ({ processor, onResult }: Props) => {
             values={{ type: processor.type }}
           />
         }
-        onCancel={() => onResult(false)}
-        onConfirm={() => onResult(true)}
+        onCancel={() => onResult({ confirmed: false, selector })}
+        onConfirm={() => onResult({ confirmed: true, selector })}
         cancelButtonText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.removeProcessorModal.cancelButtonLabel"

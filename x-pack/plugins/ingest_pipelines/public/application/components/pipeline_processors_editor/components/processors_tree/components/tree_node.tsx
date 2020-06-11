@@ -42,24 +42,6 @@ export const TreeNode: FunctionComponent<Props> = ({
       onCancelMove: () => {
         onAction({ type: 'cancelMove' });
       },
-      onDuplicate: () => {
-        onAction({ type: 'duplicate', payload: { source: processorInfo.selector } });
-      },
-      onDelete: () => {
-        onAction({
-          type: 'remove',
-          payload: { selector: processorInfo.selector, processor },
-        });
-      },
-      onEdit: () => {
-        onAction({
-          type: 'edit',
-          payload: { processor, selector: processorInfo.selector },
-        });
-      },
-      onAddOnFailure: () => {
-        onAction({ type: 'addProcessor', payload: { target: processorInfo.selector } });
-      },
     };
   }, [onAction, stringSelector, processor]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -72,6 +54,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   return (
     <EuiPanel className={`pipelineProcessorsEditor__tree__item ${panelClasses}`} paddingSize="s">
       <PipelineProcessorsEditorItem
+        selector={processorInfo.selector}
         processor={processor}
         handlers={handlers}
         // TODO: Replace with processor.options.description when it is available

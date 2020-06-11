@@ -35,7 +35,6 @@ import { usePipelineProcessorsContext } from './context';
 export interface Props {
   processors: ProcessorInternal[];
   onFailureProcessors: ProcessorInternal[];
-  processorsDispatch: import('./processors_reducer').ProcessorsDispatch;
   onUpdate: (arg: OnUpdateHandlerArg) => void;
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
@@ -48,18 +47,15 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
   function PipelineProcessorsEditor({
     processors,
     onFailureProcessors,
-    processorsDispatch,
     onTestPipelineClick,
     isTestButtonDisabled,
     onUpdate,
   }) {
     const {
-      state: { editor },
+      state: { editor, processorsDispatch },
     } = usePipelineProcessorsContext();
+
     const { mode: editorMode, setMode: setEditorMode } = editor;
-    const [processorToDeleteSelector, setProcessorToDeleteSelector] = useState<
-      ProcessorSelector | undefined
-    >();
 
     const [formState, setFormState] = useState<FormValidityState>({
       validate: () => Promise.resolve(true),
@@ -136,18 +132,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     const onTreeAction = useCallback<OnActionHandler>(
       (action) => {
         switch (action.type) {
-          case 'edit':
-            setEditorMode({
-              id: 'editingProcessor',
-              arg: { processor: action.payload.processor, selector: action.payload.selector },
-            });
-            break;
-          case 'remove':
-            setEditorMode({ id: 'idle' });
-            setProcessorToDeleteSelector(action.payload.selector);
-            break;
           case 'addProcessor':
-            setEditorMode({ id: 'idle' });
             setEditorMode({ id: 'creatingProcessor', arg: action.payload.target });
             break;
           case 'move':
@@ -155,14 +140,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             processorsDispatch({
               type: 'moveProcessor',
               payload: action.payload,
-            });
-            break;
-          case 'duplicate':
-            processorsDispatch({
-              type: 'duplicateProcessor',
-              payload: {
-                source: action.payload.source,
-              },
             });
             break;
           case 'selectToMove':
@@ -233,20 +210,21 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             onClose={onCloseSettingsForm}
           />
         ) : undefined}
-        {processorToDeleteSelector && (
+        {editorMode.id === 'removingProcessor' && (
           <ProcessorRemoveModal
-            processor={getValue(processorToDeleteSelector, {
+            selector={editorMode.arg.selector}
+            processor={getValue(editorMode.arg.selector, {
               processors,
               onFailure: onFailureProcessors,
             })}
-            onResult={(confirmed) => {
+            onResult={({ confirmed, selector }) => {
               if (confirmed) {
                 processorsDispatch({
                   type: 'removeProcessor',
-                  payload: { selector: processorToDeleteSelector },
+                  payload: { selector },
                 });
               }
-              setProcessorToDeleteSelector(undefined);
+              setEditorMode({ id: 'idle' });
             }}
           />
         )}

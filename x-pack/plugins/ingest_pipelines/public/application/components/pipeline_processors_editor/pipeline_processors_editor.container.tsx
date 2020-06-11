@@ -55,13 +55,13 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   return (
     <PipelineProcessorsContextProvider
+      processorsDispatch={processorsDispatch}
       links={{ learnMoreAboutOnFailureProcessorsUrl, learnMoreAboutProcessorsUrl }}
     >
       <PipelineProcessorsEditorUI
         onUpdate={onUpdate}
         processors={processors}
         onFailureProcessors={onFailure}
-        processorsDispatch={processorsDispatch}
         isTestButtonDisabled={isTestButtonDisabled}
         onTestPipelineClick={onTestPipelineClick}
       />

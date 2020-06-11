@@ -23,10 +23,7 @@ export type Action =
   | { type: 'move'; payload: { source: ProcessorSelector; destination: ProcessorSelector } }
   | { type: 'selectToMove'; payload: { info: ProcessorInfo } }
   | { type: 'cancelMove' }
-  | { type: 'edit'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } }
-  | { type: 'duplicate'; payload: { source: ProcessorSelector } }
-  | { type: 'addProcessor'; payload: { target: ProcessorSelector } }
-  | { type: 'remove'; payload: { selector: ProcessorSelector; processor: ProcessorInternal } };
+  | { type: 'addProcessor'; payload: { target: ProcessorSelector } };
 
 export type OnActionHandler = (action: Action) => void;
 

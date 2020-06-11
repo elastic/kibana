@@ -6,6 +6,7 @@
 
 import React, { createContext, Dispatch, FunctionComponent, useContext, useState } from 'react';
 import { EditorMode } from './types';
+import { ProcessorsDispatch } from './processors_reducer';
 
 interface Links {
   learnMoreAboutProcessorsUrl: string;
@@ -15,6 +16,7 @@ interface Links {
 const PipelineProcessorsContext = createContext<{
   links: Links;
   state: {
+    processorsDispatch: ProcessorsDispatch;
     editor: {
       mode: EditorMode;
       setMode: Dispatch<EditorMode>;
@@ -24,15 +26,19 @@ const PipelineProcessorsContext = createContext<{
 
 interface Props {
   links: Links;
+  processorsDispatch: ProcessorsDispatch;
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   links,
   children,
+  processorsDispatch,
 }) => {
   const [mode, setMode] = useState<EditorMode>({ id: 'idle' });
   return (
-    <PipelineProcessorsContext.Provider value={{ links, state: { editor: { mode, setMode } } }}>
+    <PipelineProcessorsContext.Provider
+      value={{ links, state: { editor: { mode, setMode }, processorsDispatch } }}
+    >
       {children}
     </PipelineProcessorsContext.Provider>
   );

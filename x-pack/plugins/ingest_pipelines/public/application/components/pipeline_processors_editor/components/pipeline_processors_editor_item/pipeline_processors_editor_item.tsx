@@ -12,43 +12,36 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiPopover,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ProcessorInternal } from '../../types';
+import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { usePipelineProcessorsContext } from '../../context';
+
+import './pipeline_processors_editor.scss';
+
+import { InlineTextInput } from './inline_text_input';
 
 export interface Handlers {
   onMove: () => void;
   onCancelMove: () => void;
-  onAddOnFailure: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
 }
 
 export interface Props {
   processor: ProcessorInternal;
   selected: boolean;
   handlers: Handlers;
+  selector: ProcessorSelector;
   description?: string;
 }
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
-  ({
-    processor,
-    description,
-    handlers: { onAddOnFailure, onCancelMove, onDelete, onDuplicate, onEdit, onMove },
-    selected,
-  }) => {
+  ({ processor, description, handlers: { onCancelMove, onMove }, selector, selected }) => {
     const {
-      links,
-      state: { editor },
+      state: { editor, processorsDispatch },
     } = usePipelineProcessorsContext();
     const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
 
@@ -62,7 +55,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         icon="copy"
         onClick={() => {
           setIsContextMenuOpen(false);
-          onDuplicate();
+          processorsDispatch({
+            type: 'duplicateProcessor',
+            payload: {
+              source: selector,
+            },
+          });
         }}
       >
         {i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moreMenu.duplicateButtonLabel', {
@@ -75,7 +73,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           icon="indexClose"
           onClick={() => {
             setIsContextMenuOpen(false);
-            onAddOnFailure();
+            editor.setMode({ id: 'creatingProcessor', arg: selector });
           }}
         >
           {i18n.translate(
@@ -92,7 +90,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         color="danger"
         onClick={() => {
           setIsContextMenuOpen(false);
-          onDelete();
+          editor.setMode({ id: 'removingProcessor', arg: { selector } });
         }}
       >
         {i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moreMenu.deleteButtonLabel', {
@@ -115,36 +113,34 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
-              {description ? (
-                <EuiText size="s" color="subdued">
-                  {description}
-                </EuiText>
-              ) : (
-                <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
-                      {`#${processor.id}`}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.item.uniqueIdToolTipDescription',
-                        {
-                          defaultMessage:
-                            'A unique identifier for this "{type}" processor. This value will not be saved for this processor. To provide your own processor description that can be saved use the tag field. Click on the help icon below to learn more.',
-                          values: { type: processor.type },
-                        }
-                      )}
-                    >
-                      <EuiLink target="_blank" href={links.learnMoreAboutProcessorsUrl}>
-                        <EuiIcon color="primary" type="questionInCircle" />
-                      </EuiLink>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
+              <InlineTextInput
+                onChange={(nextDescription) => {
+                  processorsDispatch({
+                    type: 'updateProcessor',
+                    payload: {
+                      processor: {
+                        ...processor,
+                        options: {
+                          tag: nextDescription,
+                        },
+                      },
+                      selector,
+                    },
+                  });
+                }}
+                ariaLabel={i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.item.textInputAriaLabel',
+                  {
+                    defaultMessage: 'Provide a description for this {type} processor',
+                    values: { type: processor.type },
+                  }
+                )}
+                text={description}
+                placeholder={i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.item.descriptionPlaceholder',
+                  { defaultMessage: 'No description' }
+                )}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -157,7 +153,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 )}
                 iconType="pencil"
                 size="s"
-                onClick={onEdit}
+                onClick={() => {
+                  editor.setMode({
+                    id: 'editingProcessor',
+                    arg: { processor, selector },
+                  });
+                }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
