@@ -482,9 +482,6 @@ describe('#setup()', () => {
 
 describe('#start()', () => {
   beforeEach(() => {
-    MockHistory.push.mockReset();
-    parseAppUrlMock.mockReset();
-
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
@@ -495,6 +492,12 @@ describe('#start()', () => {
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
+  });
+
+  afterEach(() => {
+    MockHistory.push.mockReset();
+    MockHistory.replace.mockReset();
+    parseAppUrlMock.mockReset();
   });
 
   it('rejects if called prior to #setup()', async () => {
@@ -979,6 +982,22 @@ describe('#start()', () => {
 
         await navigateToApp('alpha', { replace: true });
         expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/alpha');
+      });
+    });
+
+    describe('when `replace` option is false', () => {
+      it('behave as when the option is unspecified', async () => {
+        service.setup(setupDeps);
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('myTestApp', { replace: false });
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
+
+        await navigateToApp('myOtherApp', { replace: false });
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
+
+        expect(MockHistory.replace).not.toHaveBeenCalled();
       });
     });
   });
