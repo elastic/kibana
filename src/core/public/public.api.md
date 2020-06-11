@@ -1283,6 +1283,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    preference?: string;
     search?: string;
     searchFields?: string[];
     // (undocumented)
