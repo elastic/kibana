@@ -96,6 +96,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
         <Route path={settingsTab.pathname} component={LogsSettingsPage} />
         <RedirectWithQueryParams from={'/analysis'} to={logRateTab.pathname} exact />
+        <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
       </Switch>
     </ColumnarPage>
   );
