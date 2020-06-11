@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
+import Boom from 'boom';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { jobsQueryFactory } from '../lib/jobs_query';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
 } from './lib/job_response_handler';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 interface ListQuery {
   page: string;
@@ -23,11 +23,9 @@ interface ListQuery {
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 export function registerJobInfoRoutes(reporting: ReportingCore) {
-  const config = reporting.getConfig();
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
-  const { elasticsearch, router } = setupDeps;
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+  const { router } = setupDeps;
 
   // list jobs in the queue, paginated
   router.get(
@@ -47,7 +45,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
-      const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
+      const queryProvider = jobsQueryFactory(reporting);
+      const results = await queryProvider.list(jobTypes, user, page, size, jobIds);
 
       return res.ok({
         body: results,
@@ -69,7 +68,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const count = await jobsQuery.count(jobTypes, user);
+      const queryProvider = jobsQueryFactory(reporting);
+      const count = await queryProvider.count(jobTypes, user);
 
       return res.ok({
         body: count.toString(),
@@ -96,7 +96,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const result = await jobsQuery.get(user, docId, { includeContent: true });
+      const queryProvider = jobsQueryFactory(reporting);
+      const result = await queryProvider.get(user, docId, { includeContent: true });
 
       if (!result) {
         throw Boom.notFound();
@@ -135,7 +136,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const result = await jobsQuery.get(user, docId);
+      const queryProvider = jobsQueryFactory(reporting);
+      const result = await queryProvider.get(user, docId);
 
       if (!result) {
         throw Boom.notFound();
@@ -164,12 +166,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   );
 
   // trigger a download of the output from a job
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const downloadResponseHandler = downloadJobResponseHandlerFactory(
-    config,
-    elasticsearch,
-    exportTypesRegistry
-  );
+  const downloadResponseHandler = downloadJobResponseHandlerFactory(reporting);
 
   router.get(
     {
@@ -191,7 +188,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   );
 
   // allow a report to be deleted
-  const deleteResponseHandler = deleteJobResponseHandlerFactory(config, elasticsearch);
+  const deleteResponseHandler = deleteJobResponseHandlerFactory(reporting);
   router.delete(
     {
       path: `${MAIN_ENTRY}/delete/{docId}`,

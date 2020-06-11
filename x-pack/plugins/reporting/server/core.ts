@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { first, map, mapTo } from 'rxjs/operators';
+import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
@@ -33,7 +33,8 @@ export interface ReportingInternalSetup {
   security?: SecurityPluginSetup;
 }
 
-interface ReportingInternalStart {
+export interface ReportingInternalStart {
+  browserDriverFactory: HeadlessChromiumDriverFactory;
   enqueueJob: EnqueueJobFn;
   esqueue: ESQueueInstance;
   savedObjects: SavedObjectsServiceStart;
@@ -43,35 +44,75 @@ interface ReportingInternalStart {
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
-  private browserDriverFactory?: HeadlessChromiumDriverFactory;
-  private readonly pluginSetup$ = new Rx.ReplaySubject<ReportingInternalSetup>();
-  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // for pluginHasSetup
+  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // for getPluginStartDeps
   private exportTypesRegistry = getExportTypesRegistry();
+  private config?: ReportingConfig;
 
-  constructor(private config: ReportingConfig) {}
+  constructor() {}
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
     this.pluginSetupDeps = reportingSetupDeps;
-    this.pluginSetup$.next(reportingSetupDeps);
+    this.pluginSetup$.next(true);
   }
 
   public pluginStart(reportingStartDeps: ReportingInternalStart) {
     this.pluginStart$.next(reportingStartDeps);
   }
 
-  public pluginHasStarted(): Promise<boolean> {
-    return this.pluginStart$.pipe(first(), mapTo(true)).toPromise();
-  }
-
-  public setBrowserDriverFactory(browserDriverFactory: HeadlessChromiumDriverFactory) {
-    this.browserDriverFactory = browserDriverFactory;
+  public setConfig(config: ReportingConfig) {
+    this.config = config;
+    this.pluginSetup$.next(true);
   }
 
   /*
-   * Internal module dependencies
+   * High-level module dependencies
    */
+
+  public getConfig(): ReportingConfig {
+    if (!this.config) {
+      throw new Error('Config is not yet initialized');
+    }
+    return this.config;
+  }
+
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
+    }
+    return this.pluginSetupDeps;
+  }
+
+  private async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
+    }
+    return await this.pluginStart$.pipe(first()).toPromise();
+  }
+
+  public async pluginIsSetup(): Promise<boolean> {
+    // use deps and config as a cached resolver
+    if (this.pluginSetupDeps && this.config) {
+      return true;
+    }
+    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+  }
+
+  public async pluginIsStarted(): Promise<boolean> {
+    return await this.getPluginStartDeps().then(() => true);
+  }
+
+  /*
+   * Downstream dependencies
+   */
+
   public getExportTypesRegistry() {
     return this.exportTypesRegistry;
+  }
+
+  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
   }
 
   public async getEsqueue() {
@@ -92,48 +133,9 @@ export class ReportingCore {
       .toPromise();
   }
 
-  public getConfig(): ReportingConfig {
-    return this.config;
-  }
-
-  public getScreenshotsObservable(): ScreenshotsObservableFn {
-    const { browserDriverFactory } = this;
-    if (!browserDriverFactory) {
-      throw new Error(`"browserDriverFactory" dependency hasn't initialized yet`);
-    }
-    return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
-  }
-
-  public getPluginSetupDeps() {
-    if (!this.pluginSetupDeps) {
-      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
-    }
-    return this.pluginSetupDeps;
-  }
-
-  /*
-   * Outside dependencies
-   */
-
-  private async getPluginStartDeps() {
-    if (this.pluginStartDeps) {
-      return this.pluginStartDeps;
-    }
-    return await this.pluginStart$.pipe(first()).toPromise();
-  }
-
-  public async getElasticsearchService() {
-    return this.getPluginSetupDeps().elasticsearch;
-  }
-
-  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
-    const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
-  }
-
-  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
+  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
+    const config = this.getConfig();
+    const { browserDriverFactory } = await this.getPluginStartDeps();
+    return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
   }
 }
