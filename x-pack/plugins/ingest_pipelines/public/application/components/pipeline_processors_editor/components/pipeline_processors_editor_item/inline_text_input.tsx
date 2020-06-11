@@ -36,7 +36,7 @@ export const InlineTextInput: FunctionComponent<Props> = ({
     />
   ) : (
     <EuiText size="s" color="subdued">
-      {text ?? <em>{placeholder}</em>}
+      {text || <em>{placeholder}</em>}
     </EuiText>
   );
 

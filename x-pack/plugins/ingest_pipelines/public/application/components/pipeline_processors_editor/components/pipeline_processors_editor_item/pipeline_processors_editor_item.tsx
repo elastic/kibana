@@ -115,14 +115,22 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false} className="pipelineProcessorsEditor__tree__item__name">
               <InlineTextInput
                 onChange={(nextDescription) => {
+                  let nextOptions: Record<string, any>;
+                  if (!nextDescription) {
+                    const { tag, ...restOptions } = processor.options;
+                    nextOptions = restOptions;
+                  } else {
+                    nextOptions = {
+                      ...processor.options,
+                      tag: nextDescription,
+                    };
+                  }
                   processorsDispatch({
                     type: 'updateProcessor',
                     payload: {
                       processor: {
                         ...processor,
-                        options: {
-                          tag: nextDescription,
-                        },
+                        options: nextOptions,
                       },
                       selector,
                     },
