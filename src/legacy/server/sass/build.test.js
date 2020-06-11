@@ -33,6 +33,8 @@ afterEach(async () => {
 });
 
 it('builds light themed SASS', async () => {
+  // Increased timeout from 5000ms due to intermittent timeout failures
+  jest.setTimeout(60000);
   const targetPath = resolve(TMP, 'style.css');
   await new Build({
     sourcePath: FIXTURE,

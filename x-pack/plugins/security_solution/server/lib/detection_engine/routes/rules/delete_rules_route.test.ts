@@ -92,11 +92,12 @@ describe('delete_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         query: {},
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" must contain at least one of [id, rule_id]'
-      );
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: ['either "id" or "rule_id" must be set'],
+        status_code: 400,
+      });
     });
   });
 });

@@ -71,6 +71,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         deleteQuery({ id: ID });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const kibana = useKibana();
@@ -98,6 +99,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
       legendPosition: Position.Right,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
