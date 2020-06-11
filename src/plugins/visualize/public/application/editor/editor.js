@@ -79,6 +79,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     visualizations,
     dashboard,
     embeddable,
+    featureFlagConfig,
   } = getServices();
   const {
     filterManager,
@@ -281,10 +282,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                 />
               );
               const lastAppType = $scope.getOriginatingApp();
-              if (lastAppType !== 'dashboards') {
-                showSaveModal(saveModal, I18nContext);
-              } else {
+              if (lastAppType === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
                 createVisReference();
+              } else {
+                showSaveModal(saveModal, I18nContext);
               }
             },
           },

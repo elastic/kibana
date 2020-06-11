@@ -79,7 +79,6 @@ export class VisualizePlugin
     core: CoreSetup<VisualizePluginStartDependencies>,
     { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
   ) {
-    const featureFlagConfig = this.initializerContext.config.get<FeatureFlagConfig>();
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/visualize'),
       defaultSubUrl: '#/',
@@ -143,7 +142,7 @@ export class VisualizePlugin
           scopedHistory: () => this.currentHistory!,
           savedObjects: pluginsStart.savedObjects,
           embeddable: pluginsStart.embeddable,
-          featureFlagConfig,
+          featureFlagConfig: this.initializerContext.config.get<FeatureFlagConfig>(),
         };
         setServices(deps);
 
