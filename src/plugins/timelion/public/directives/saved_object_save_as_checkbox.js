@@ -16,13 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
+import saveObjectSaveAsCheckboxTemplate from './saved_object_save_as_checkbox.html';
 
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export function initSavedObjectSaveAsCheckBoxDirective(app) {
+  app.directive('savedObjectSaveAsCheckBox', function () {
+    return {
+      restrict: 'E',
+      template: saveObjectSaveAsCheckboxTemplate,
+      replace: true,
+      scope: {
+        savedObject: '=',
+      },
+    };
+  });
+}

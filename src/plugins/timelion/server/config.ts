@@ -16,13 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const configSchema = {
+  schema: schema.object({
+    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
+    enabled: schema.boolean({ defaultValue: true }),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
 };
 
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export type TimelionConfigType = TypeOf<typeof configSchema.schema>;

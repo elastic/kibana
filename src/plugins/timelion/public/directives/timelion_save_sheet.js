@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
+import saveTemplate from '../partials/save_sheet.html';
 
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export function initTimelionSaveSheetDirective(app) {
+  app.directive('timelionSave', function () {
+    return {
+      replace: true,
+      restrict: 'E',
+      template: saveTemplate,
+    };
+  });
+}

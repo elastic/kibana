@@ -16,13 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
+import React from 'react';
+import { TimelionHelpTabs } from './timelionhelp_tabs';
 
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export function initTimelionTabsDirective(app, deps) {
+  app.directive('timelionHelpTabs', function (reactDirective) {
+    return reactDirective(
+      (props) => {
+        return (
+          <deps.core.i18n.Context>
+            <TimelionHelpTabs {...props} />
+          </deps.core.i18n.Context>
+        );
+      },
+      [['activeTab'], ['activateTab', { watchDepth: 'reference' }]],
+      {
+        restrict: 'E',
+        scope: {
+          activeTab: '=',
+          activateTab: '=',
+        },
+      }
+    );
+  });
+}

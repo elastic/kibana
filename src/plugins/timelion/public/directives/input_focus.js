@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
-
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export function initInputFocusDirective(app) {
+  app.directive('inputFocus', function ($parse, $timeout) {
+    return {
+      restrict: 'A',
+      link: function ($scope, $elem, attrs) {
+        const isDisabled = attrs.disableInputFocus && $parse(attrs.disableInputFocus)($scope);
+        if (!isDisabled) {
+          $timeout(function () {
+            $elem.focus();
+            if (attrs.inputFocus === 'select') $elem.select();
+          });
+        }
+      },
+    };
+  });
+}

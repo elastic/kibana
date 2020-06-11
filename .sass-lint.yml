@@ -1,7 +1,7 @@
 files:
   include:
     - 'src/legacy/core_plugins/metrics/**/*.s+(a|c)ss'
-    - 'src/legacy/core_plugins/timelion/**/*.s+(a|c)ss'
+    - 'src/plugins/timelion/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_vislib/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_xy/**/*.s+(a|c)ss'
     - 'x-pack/plugins/canvas/**/*.s+(a|c)ss'

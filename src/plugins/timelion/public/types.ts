@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
-import { configSchema, TimelionConfigType } from './config';
 
-export const config: PluginConfigDescriptor<TimelionConfigType> = {
-  schema: configSchema.schema,
-};
+export interface TimelionAppState {
+  sheet: string[];
+  selected: number;
+  columns: number;
+  rows: number;
+  interval: string;
+}
 
-export const plugin = (context: PluginInitializerContext<TimelionConfigType>) =>
-  new TimelionPlugin(context);
+export interface TimelionAppStateTransitions {
+  set: (
+    state: TimelionAppState
+  ) => <T extends keyof TimelionAppState>(prop: T, value: TimelionAppState[T]) => TimelionAppState;
+  updateState: (
+    state: TimelionAppState
+  ) => <T extends keyof TimelionAppState>(newValues: Partial<TimelionAppState>) => TimelionAppState;
+}
