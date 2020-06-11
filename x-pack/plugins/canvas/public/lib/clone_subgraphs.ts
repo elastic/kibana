@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore Untyped local
 import { arrayToMap } from './aeroelastic/functional';
 import { getId } from './get_id';
+import { PositionedElement } from '../../types';
 
-export const cloneSubgraphs = (nodes) => {
+export const cloneSubgraphs = (nodes: PositionedElement[]) => {
   const idMap = arrayToMap(nodes.map((n) => n.id));
+
   // We simultaneously provide unique id values for all elements (across all pages)
   // AND ensure that parent-child relationships are retained (via matching id values within page)
   Object.keys(idMap).forEach((key) => (idMap[key] = getId(key.split('-')[0]))); // new group names to which we can map
+
   // must return elements in the same order, for several reasons
-  const newNodes = nodes.map((element) => ({
+  return nodes.map((element) => ({
     ...element,
     id: idMap[element.id],
     position: {
@@ -21,5 +25,4 @@ export const cloneSubgraphs = (nodes) => {
       parent: element.position.parent ? idMap[element.position.parent] : null,
     },
   }));
-  return newNodes;
 };
