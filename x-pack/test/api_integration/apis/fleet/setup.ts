@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         indices: [
           {
             names: ['logs-*', 'metrics-*', 'events-*'],
-            privileges: ['write', 'create_index'],
+            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
             allow_restricted_indices: false,
           },
         ],

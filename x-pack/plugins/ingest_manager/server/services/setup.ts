@@ -111,7 +111,7 @@ export async function setupFleet(
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: ['.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
           privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
