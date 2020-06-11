@@ -372,6 +372,7 @@ export {
   SearchInterceptor,
   RequestTimeoutError,
   LegacyApiCaller,
+  AggParamsMapping,
 } from './search';
 
 // Search namespace

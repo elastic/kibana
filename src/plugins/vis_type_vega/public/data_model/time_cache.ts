@@ -53,7 +53,7 @@ export class TimeCache {
    * Get cached time range values
    * @returns {{min: number, max: number}}
    */
-  getTimeBounds(): any {
+  getTimeBounds(): TimeRangeBounds {
     const ts = this._now();
 
     let bounds: TimeRangeBounds | null = null;

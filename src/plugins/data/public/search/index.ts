@@ -27,6 +27,7 @@ export {
   ISearchContext,
   TSearchStrategyProvider,
   ISearchStrategy,
+  AggsParamsMapping,
 } from './types';
 
 export {
