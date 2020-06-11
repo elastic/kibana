@@ -143,7 +143,7 @@ export async function getLogEntryCategoryDatasets(
     const finalizeEsSearchSpan = startTracingSpan('fetch category dataset batch from ES');
 
     const logEntryDatasetsResponse = decodeOrThrow(logEntryDatasetsResponseRT)(
-      context.infra.mlSystem.mlAnomalySearch(
+      await context.infra.mlSystem.mlAnomalySearch(
         createLogEntryDatasetsQuery(
           logEntryCategoriesCountJobId,
           startTime,
