@@ -87,7 +87,7 @@ environment variables are written in all capitals, with underscores as
 word separators. The helper translates these names to valid
 {kib} setting names.
 
-WARNING: All information that you include in environment variables is visible through the `ps` command, so only include nonsensitive information.
+WARNING: All information that you include in environment variables is visible through the `ps` command, including sensitive information.
 
 Some example translations are shown here:
 
