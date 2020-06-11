@@ -31,7 +31,7 @@ import {
   opensInspectQueryModal,
   waitsForEventsToBeLoaded,
 } from '../tasks/hosts/events';
-import { clearSearchBar, kqlSearch } from '../tasks/siem_header';
+import { clearSearchBar, kqlSearch } from '../tasks/security_header';
 
 import { HOSTS_PAGE } from '../urls/navigation';
 import { resetFields } from '../tasks/timeline';

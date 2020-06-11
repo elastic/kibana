@@ -16,3 +16,4 @@ export * from './test_providers';
 export * from './utils';
 export * from './mock_ecs';
 export * from './timeline_results';
+export * from './kibana_react';
