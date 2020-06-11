@@ -51,7 +51,6 @@ import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
 import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
 
@@ -286,9 +285,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           }
           data-test-subj="mlNoDataFrameAnalyticsFound"
         />
-        {!isManagementTable && createAnalyticsForm && (
-          <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
-        )}
         {isSourceIndexModalVisible === true && (
           <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
@@ -440,9 +436,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         />
       </div>
 
-      {!isManagementTable && createAnalyticsForm?.state.isModalVisible && (
-        <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
-      )}
       {isSourceIndexModalVisible === true && (
         <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}

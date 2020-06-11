@@ -38,7 +38,7 @@ import {
   Error,
 } from '../../../../../components';
 import { useLoadIndexTemplate } from '../../../../../services/api';
-import { decodePath } from '../../../../../services/routing';
+import { decodePathFromReactRouter } from '../../../../../services/routing';
 import { SendRequestResponse } from '../../../../../../shared_imports';
 import { useServices } from '../../../../../app_context';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from '../../template_details/tabs';
@@ -107,7 +107,7 @@ export const LegacyTemplateDetails: React.FunctionComponent<Props> = ({
   reload,
 }) => {
   const { uiMetricService } = useServices();
-  const decodedTemplateName = decodePath(templateName);
+  const decodedTemplateName = decodePathFromReactRouter(templateName);
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(
     decodedTemplateName,
     isLegacy
