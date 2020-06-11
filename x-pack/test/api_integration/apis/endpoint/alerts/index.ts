@@ -6,7 +6,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AlertData } from '../../../../../plugins/security_solution/common/endpoint_alerts/types';
-import { AlertId } from '../../../../../plugins/security_solution/server/endpoint/alerts/handlers/lib/index';
+import { deleteEventsStream, deleteMetadataStream } from '../data_stream_helper';
 
 /**
  * The number of alert documents in the es archive.
@@ -66,26 +66,25 @@ export default function ({ getService }: FtrProviderContext) {
   const nextPrevPrefixOrder = 'order=desc';
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
-  const alertIndex = 'events-endpoint-1';
 
   let nullableEventId = '';
 
-  // SKIPPED as it is failing ES PROMOTION: https://github.com/elastic/kibana/issues/68613
-  describe.skip('Endpoint alert API', () => {
+  describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(async () => {
-        await esArchiver.load('endpoint/alerts/api_feature');
-        await esArchiver.load('endpoint/alerts/host_api_feature');
+        await esArchiver.load('endpoint/alerts/api_feature', { useCreate: true });
+        await esArchiver.load('endpoint/alerts/host_api_feature', { useCreate: true });
         const res = await es.search({
-          index: alertIndex,
+          index: 'events-endpoint-*',
           body: ES_QUERY_MISSING,
         });
         nullableEventId = res.hits.hits[0]._source.event.id;
       });
 
       after(async () => {
-        await esArchiver.unload('endpoint/alerts/api_feature');
-        await esArchiver.unload('endpoint/alerts/host_api_feature');
+        // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
+        // to do it manually
+        await Promise.all([deleteEventsStream(getService), deleteMetadataStream(getService)]);
       });
 
       it('should not support POST requests', async () => {
@@ -373,40 +372,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.request_page_size).to.eql(defaultPageSize);
         expect(body.request_page_index).to.eql(0);
         expect(body.result_from_index).to.eql(0);
-      });
-
-      it('should return alert details by id, getting last alert', async () => {
-        const documentID = new AlertId(alertIndex, 'zbNm0HABdD75WLjLYgcB');
-        const prevDocumentID = new AlertId(alertIndex, '2rNm0HABdD75WLjLYgcU');
-        const { body } = await supertest
-          .get(`/api/endpoint/alerts/${documentID.toString()}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.id).to.eql(documentID.toString());
-        expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID.toString()}`);
-        expect(body.next).to.eql(null); // last alert, no more beyond this
-        expect(body.state.host_metadata.host.id).to.eql(body.host.id);
-      });
-
-      it('should return alert details by id, getting first alert', async () => {
-        const documentID = new AlertId(alertIndex, 'p7Nm0HABdD75WLjLYghv');
-        const nextDocumentID = new AlertId(alertIndex, 'mbNm0HABdD75WLjLYgho');
-        const { body } = await supertest
-          .get(`/api/endpoint/alerts/${documentID.toString()}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.id).to.eql(documentID.toString());
-        expect(body.next).to.eql(`/api/endpoint/alerts/${nextDocumentID.toString()}`);
-        expect(body.prev).to.eql(null); // first alert, no more before this
-      });
-
-      it('should return 404 when alert is not found', async () => {
-        const documentID = new AlertId(alertIndex, 'does-not-exit');
-
-        await supertest
-          .get(`/api/endpoint/alerts/${documentID.toString()}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(404);
       });
 
       it('should return 400 when alert id is not valid', async () => {
