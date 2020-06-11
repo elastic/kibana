@@ -6,16 +6,18 @@
 
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { deletePolicyStream } from './data_stream_helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  // SKIPPED as it is failing ES PROMOTION: https://github.com/elastic/kibana/issues/68638
-  describe.skip('Endpoint policy api', () => {
+  describe('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
-      before(async () => await esArchiver.load('endpoint/policy'));
+      before(async () => await esArchiver.load('endpoint/policy', { useCreate: true }));
 
-      after(async () => await esArchiver.unload('endpoint/policy'));
+      // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
+      // to do it manually
+      after(async () => await deletePolicyStream(getService));
 
       it('should return one policy response for host', async () => {
         const expectedHostId = '4f3b9858-a96d-49d8-a326-230d7763d767';
