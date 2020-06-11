@@ -52,14 +52,11 @@ export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Pro
         <EuiPageContentBody>
           <EuiText>
             Here the embeddable is rendered without the factory. A developer may use this method if
-            they want to statically embed a single embeddable into their application or page.
-            `input` may be used to declaratively update current embeddable input
+            they want to statically embed a single embeddable into their application or page. Also
+            `input` prop may be used to declaratively update current embeddable input
           </EuiText>
           <EuiPanel data-test-subj="helloWorldEmbeddablePanel" paddingSize="none" role="figure">
-            <EmbeddableRenderer
-              embeddable={new HelloWorldEmbeddable({ id: 'hello' })}
-              input={{ id: 'hello' }}
-            />
+            <EmbeddableRenderer embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
           </EuiPanel>
 
           <EuiText>
