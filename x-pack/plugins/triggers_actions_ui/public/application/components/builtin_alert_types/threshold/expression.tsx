@@ -152,18 +152,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  renderIndices(indices) {
-    // indices.join(' ')
-    // const 
-    indices.map((s: string, index: number) => {
-      return (
-        <p key={index}>
-          {s}
-        </p>
-      );
-    });
-  }
-
   const indexPopover = (
     <Fragment>
       <EuiSpacer />
@@ -374,6 +362,18 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
     },
   ];
 
+  const renderIndices = (indices) => {
+    const rows = indices.map((s: string, index: number) => {
+      return (
+        <p key={index}>
+          {s}
+          {index < indices.length - 1 ? ',' : null}
+        </p>
+      );
+    });
+    return <div>{rows}</div>;
+  };
+
   return (
     <Fragment>
       {hasExpressionErrors ? (
@@ -402,7 +402,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
             onClick={() => {
               setIndexPopoverOpen(true);
             }}
-            color={index && index.length > 0 && timeField !== '' ? 'secondary' : 'danger'}
+            isInvalid={!(index && index.length > 0 && timeField !== '')}
           />
         }
         isOpen={indexPopoverOpen}
