@@ -31,6 +31,14 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 
+export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
+export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
+export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
+export const APP_NETWORK_PATH = `${APP_PATH}/network`;
+export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
+export const APP_CASES_PATH = `${APP_PATH}/cases`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}/management`;
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',

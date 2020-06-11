@@ -5,7 +5,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useThrottledResizeObserver } from '../../common/components/utils';
@@ -13,7 +12,6 @@ import { DragDropContextWrapper } from '../../common/components/drag_and_drop/dr
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
-import { LinkToPage } from '../../common/components/link_to';
 import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
@@ -22,9 +20,7 @@ import {
   WithSource,
   indicesExistOrDataTemporarilyUnavailable,
 } from '../../common/containers/source';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { NotFoundPage } from '../404';
 import { navTabs } from './home_navigations';
 import { SecurityPageName } from '../types';
 
@@ -90,8 +86,6 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
 
               {children}
               {/* <Switch>
-                <Redirect exact from="/" to={`/${SecurityPageName.overview}`} />
-                <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
                 <Route
                   path="/ml-hosts"
                   render={({ location, match }) => (
@@ -112,8 +106,6 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
       </Main>
 
       <HelpMenu />
-
-      <SpyRoute />
     </WrappedByAutoSizer>
   );
 };

@@ -22,10 +22,22 @@ import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
-import { APP_ID, APP_ICON, APP_PATH, APP_ALERT_PATH } from '../common/constants';
+import {
+  APP_ID,
+  APP_ICON,
+  APP_PATH,
+  APP_ALERTS_PATH,
+  APP_HOSTS_PATH,
+  APP_OVERVIEW_PATH,
+  APP_NETWORK_PATH,
+  APP_TIMELINES_PATH,
+  APP_MANAGEMENT_PATH,
+  APP_CASES_PATH,
+} from '../common/constants';
 import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
 
 import { State, createStore, createInitialState } from './common/store';
+import { SecurityPageName } from './app/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -70,14 +82,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     core.application.register({
-      id: `${APP_ID}:overview`,
+      id: `${APP_ID}:${SecurityPageName.overview}`,
       title: i18n.translate('xpack.securitySolution.overviewPage.title', {
         defaultMessage: 'Overview',
       }),
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/overview`,
+      appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
@@ -99,14 +111,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:alerts`,
+      id: `${APP_ID}:${SecurityPageName.alerts}`,
       title: i18n.translate('xpack.securitySolution.alertsPage.title', {
         defaultMessage: 'Alerts',
       }),
       order: 9001,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: APP_ALERT_PATH,
+      appRoute: APP_ALERTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
@@ -128,12 +140,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:hosts`,
+      id: `${APP_ID}:${SecurityPageName.hosts}`,
       title: 'Hosts',
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/hosts`,
+      appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
@@ -155,12 +167,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:network`,
+      id: `${APP_ID}:${SecurityPageName.network}`,
       title: 'Network',
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/network`,
+      appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
@@ -182,17 +194,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:timelines`,
+      id: `${APP_ID}:${SecurityPageName.timelines}`,
       title: 'Timelines',
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/timelines`,
+      appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
-          { networkSubPlugin },
+          { timelinesSubPlugin },
         ] = await Promise.all([
           mountSecurityFactory(),
           this.downloadAssets(),
@@ -203,23 +215,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: networkSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: timelinesSubPlugin.start().SubPluginRoutes,
         });
       },
     });
 
     core.application.register({
-      id: `${APP_ID}:cases`,
+      id: `${APP_ID}:${SecurityPageName.case}`,
       title: 'Cases',
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/cases`,
+      appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, store, services },
           { renderApp, composeLibs },
-          { networkSubPlugin },
+          { casesSubPlugin },
         ] = await Promise.all([
           mountSecurityFactory(),
           this.downloadAssets(),
@@ -230,18 +242,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services,
           store,
-          SubPluginRoutes: networkSubPlugin.start().SubPluginRoutes,
+          SubPluginRoutes: casesSubPlugin.start().SubPluginRoutes,
         });
       },
     });
 
     core.application.register({
-      id: `${APP_ID}:management`,
+      id: `${APP_ID}:${SecurityPageName.management}`,
       title: 'Management',
       order: 9002,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      appRoute: `${APP_PATH}/management`,
+      appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
         const [
           { coreStart, startPlugins, store, services },
