@@ -8,8 +8,8 @@ import { CheckGeoType, SummaryType } from '../common';
 
 // IO type for validation
 export const MonitorLocationType = t.type({
-  ups: t.number,
-  downs: t.number,
+  up_history: t.number,
+  down_history: t.number,
   timestamp: t.string,
   summary: SummaryType,
   geo: CheckGeoType,
@@ -21,8 +21,8 @@ export type MonitorLocation = t.TypeOf<typeof MonitorLocationType>;
 export const MonitorLocationsType = t.intersection([
   t.type({
     monitorId: t.string,
-    ups: t.number,
-    downs: t.number,
+    up_history: t.number,
+    down_history: t.number,
   }),
   t.partial({ locations: t.array(MonitorLocationType) }),
 ]);

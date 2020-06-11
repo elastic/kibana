@@ -17,15 +17,15 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
@@ -38,15 +38,15 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
@@ -59,8 +59,8 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
@@ -73,8 +73,8 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
@@ -87,15 +87,15 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
@@ -108,15 +108,15 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        ups: 4,
-        downs: 0,
+        up_history: 4,
+        down_history: 0,
         timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];

@@ -47,7 +47,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
       label: item.geo.name!,
       timestamp: moment(new Date(item.timestamp).valueOf()).fromNow(),
       color: item.summary.down === 0 ? gray : danger,
-      availability: (item.ups / (item.ups + item.downs)) * 100,
+      availability: (item.up_history / (item.up_history + item.down_history)) * 100,
     });
   });
 

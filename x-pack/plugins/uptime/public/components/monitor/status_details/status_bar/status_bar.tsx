@@ -38,7 +38,7 @@ export const MonListDescription = styled(EuiDescriptionListDescription)`
 export const MonitorStatusBar: React.FC = () => {
   const { monitorId, monitorStatus, monitorLocations = {} } = useStatusBar();
 
-  const { locations, ups, downs } = monitorLocations as MonitorLocations;
+  const { locations, up_history: ups, down_history: downs } = monitorLocations as MonitorLocations;
 
   const full = monitorStatus?.url?.full ?? '';
 

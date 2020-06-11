@@ -36,7 +36,7 @@ Array [
       class="euiDescriptionList__description c1"
       data-test-subj="uptimeOverallAvailability"
     >
-      NaN%
+      0.00 %
     </dd>
     <dt
       class="euiDescriptionList__title c0"

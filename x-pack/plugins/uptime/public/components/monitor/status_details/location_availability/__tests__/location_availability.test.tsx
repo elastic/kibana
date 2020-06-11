@@ -28,29 +28,29 @@ describe('LocationAvailability component', () => {
 
     monitorLocations = {
       monitorId: 'wapo',
-      ups: 12,
-      downs: 0,
+      up_history: 12,
+      down_history: 0,
       locations: [
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'New York', location: { lat: '40.730610', lon: ' -73.935242' } },
           timestamp: '2020-01-13T22:50:06.536Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
           timestamp: '2020-01-13T22:50:04.354Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'Unnamed-location' },
           timestamp: '2020-01-13T22:50:02.753Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
       ],
     };
@@ -65,22 +65,22 @@ describe('LocationAvailability component', () => {
     selectedView = 'map';
     monitorLocations = {
       monitorId: 'wapo',
-      ups: 8,
-      downs: 0,
+      up_history: 8,
+      down_history: 0,
       locations: [
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
           timestamp: '2020-01-13T22:50:04.354Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'Unnamed-location' },
           timestamp: '2020-01-13T22:50:02.753Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
       ],
     };
@@ -94,22 +94,22 @@ describe('LocationAvailability component', () => {
   it('doesnt shows warning if geo is provided', () => {
     monitorLocations = {
       monitorId: 'wapo',
-      ups: 8,
-      downs: 0,
+      up_history: 8,
+      down_history: 0,
       locations: [
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'New York', location: { lat: '40.730610', lon: ' -73.935242' } },
           timestamp: '2020-01-13T22:50:06.536Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
           timestamp: '2020-01-13T22:50:04.354Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
       ],
     };
@@ -123,15 +123,15 @@ describe('LocationAvailability component', () => {
   it('renders named locations that have missing geo data', () => {
     monitorLocations = {
       monitorId: 'wapo',
-      ups: 4,
-      downs: 0,
+      up_history: 4,
+      down_history: 0,
       locations: [
         {
           summary: { up: 4, down: 0 },
           geo: { name: 'New York', location: undefined },
           timestamp: '2020-01-13T22:50:06.536Z',
-          ups: 4,
-          downs: 0,
+          up_history: 4,
+          down_history: 0,
         },
       ],
     };

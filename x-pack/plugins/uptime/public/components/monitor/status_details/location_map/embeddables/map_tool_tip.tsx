@@ -40,7 +40,11 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
   if (!locationName || !monitorLocations?.locations) {
     return null;
   }
-  const { timestamp, ups, downs }: MonitorLocation = monitorLocations.locations!.find(
+  const {
+    timestamp,
+    up_history: ups,
+    down_history: downs,
+  }: MonitorLocation = monitorLocations.locations!.find(
     ({ geo }: MonitorLocation) => geo.name === locationName
   )!;
 

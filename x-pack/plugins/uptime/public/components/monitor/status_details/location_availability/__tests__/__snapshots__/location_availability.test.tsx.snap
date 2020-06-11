@@ -94,7 +94,7 @@ exports[`LocationAvailability component renders correctly against snapshot 1`] =
         locations={
           Array [
             Object {
-              "downs": 0,
+              "down_history": 0,
               "geo": Object {
                 "location": Object {
                   "lat": "40.730610",
@@ -107,10 +107,10 @@ exports[`LocationAvailability component renders correctly against snapshot 1`] =
                 "up": 4,
               },
               "timestamp": "2020-01-13T22:50:06.536Z",
-              "ups": 4,
+              "up_history": 4,
             },
             Object {
-              "downs": 0,
+              "down_history": 0,
               "geo": Object {
                 "location": Object {
                   "lat": "52.487448",
@@ -123,10 +123,10 @@ exports[`LocationAvailability component renders correctly against snapshot 1`] =
                 "up": 4,
               },
               "timestamp": "2020-01-13T22:50:04.354Z",
-              "ups": 4,
+              "up_history": 4,
             },
             Object {
-              "downs": 0,
+              "down_history": 0,
               "geo": Object {
                 "name": "Unnamed-location",
               },
@@ -135,7 +135,7 @@ exports[`LocationAvailability component renders correctly against snapshot 1`] =
                 "up": 4,
               },
               "timestamp": "2020-01-13T22:50:02.753Z",
-              "ups": 4,
+              "up_history": 4,
             },
           ]
         }
