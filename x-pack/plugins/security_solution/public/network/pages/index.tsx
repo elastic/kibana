@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
 
 import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
@@ -14,23 +14,23 @@ import { FlowTarget } from '../../graphql/types';
 import { IPDetails } from './ip_details';
 import { Network } from './network';
 import { GlobalTime } from '../../common/containers/global_time';
-import { SecurityPageName } from '../../app/types';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-const networkPagePath = `/:pageName(${SecurityPageName.network})`;
-const ipDetailsPageBasePath = `${networkPagePath}/ip/:detailName`;
+const networkPagePath = '';
+const ipDetailsPageBasePath = `/ip/:detailName`;
 
 const NetworkContainerComponent: React.FC<Props> = () => {
+  const history = useHistory();
   const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;
   const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
     capabilities,
   ]);
   const networkRoutePath = useMemo(
-    () => getNetworkRoutePath(networkPagePath, capabilitiesFetched, userHasMlUserPermissions),
+    () => getNetworkRoutePath(capabilitiesFetched, userHasMlUserPermissions),
     [capabilitiesFetched, userHasMlUserPermissions]
   );
 
@@ -79,17 +79,17 @@ const NetworkContainerComponent: React.FC<Props> = () => {
               match: {
                 params: { detailName },
               },
-            }) => (
-              <Redirect
-                to={`/${SecurityPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
-              />
-            )}
+            }) => {
+              history.replace(`ip/${detailName}/${FlowTarget.source}${search}`);
+              return null;
+            }}
           />
           <Route
-            path={`/${SecurityPageName.network}/`}
-            render={({ location: { search = '' } }) => (
-              <Redirect to={`/${SecurityPageName.network}/${NetworkRouteType.flows}${search}`} />
-            )}
+            path="/"
+            render={({ location: { search = '' } }) => {
+              history.replace(`${NetworkRouteType.flows}${search}`);
+              return null;
+            }}
           />
         </Switch>
       )}

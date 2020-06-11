@@ -71,7 +71,6 @@ export enum NetworkRouteType {
 }
 
 export type GetNetworkRoutePath = (
-  pagePath: string,
   capabilitiesFetched: boolean,
   hasMlUserPermission: boolean
 ) => string;
