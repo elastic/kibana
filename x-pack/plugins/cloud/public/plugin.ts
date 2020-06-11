@@ -26,10 +26,14 @@ export interface CloudSetup {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  private config!: CloudConfigType;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<CloudConfigType>();
+  }
 
   public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    const { id, resetPasswordUrl } = this.initializerContext.config.get<CloudConfigType>();
+    const { id, resetPasswordUrl } = this.config;
     const isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
@@ -46,7 +50,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start(coreStart: CoreStart) {
-    const { deploymentUrl } = this.initializerContext.config.get<CloudConfigType>();
+    const { deploymentUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
     if (deploymentUrl) {
       coreStart.chrome.setCustomNavLink({
@@ -54,7 +58,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
           defaultMessage: 'Manage this deployment',
         }),
         euiIconType: 'arrowLeft',
-        url: deploymentUrl,
+        href: deploymentUrl,
       });
     }
   }
