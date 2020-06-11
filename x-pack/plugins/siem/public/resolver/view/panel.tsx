@@ -11,7 +11,8 @@ import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiBreadcrumbs } from '@elastic/eui';
+import styled from 'styled-components';
 import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -33,6 +34,16 @@ export interface CrumbInfo {
   readonly crumbId: string;
   readonly crumbEvent: string;
 }
+
+/**
+ * Breadcrumb menu with adjustments per direction from UX team
+ */
+export const StyledBreadcrumbs = styled(EuiBreadcrumbs)`
+  &.euiBreadcrumbs.euiBreadcrumbs--responsive {
+    background-color: #f5f5fa;
+    padding: 1em;
+  }
+`;
 
 export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
@@ -105,7 +116,6 @@ const PanelContent = memo(function PanelContent() {
    * This is to cover cases where users e.g. share links to reconstitute a Resolver state and it _should never run otherwise_ under the assumption that the query parameters are updated along with the selection in state
    */
   useLayoutEffect(() => {
-    
     if (
       paramsSelectedEvent &&
       // Check state to ensure we don't dispatch this in a way that causes unnecessary re-renders, or disrupts animation:

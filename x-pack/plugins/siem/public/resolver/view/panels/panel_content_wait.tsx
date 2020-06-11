@@ -6,9 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { memo, useEffect, useMemo } from 'react';
-import { EuiBreadcrumbs, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import { StyledBreadcrumbs } from '../panel';
 
 /**
  * Display a waiting message to the user when we can't display what they requested because we don't have related event data yet.
@@ -43,7 +44,7 @@ export const WaitForRelatedEvents = memo(function ({
   }, []);
   return (
     <>
-      <EuiBreadcrumbs breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiText textAlign="center">
         <div role="presentation">
           <EuiLoadingSpinner />

@@ -333,7 +333,6 @@ const ProcessEventDotComponents = React.memo(
       });
     }, [dispatch, nodeId]);
 
-    
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
@@ -469,8 +468,6 @@ const ProcessEventDotComponents = React.memo(
           aria-selected={isSelectedDescendant ? 'true' : undefined}
           style={nodeViewportStyle}
           id={nodeId}
-          
-          onFocus={handleFocus}
           tabIndex={-1}
         >
           <svg
@@ -510,7 +507,6 @@ const ProcessEventDotComponents = React.memo(
                   type="scale"
                   values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
                   dur="0.2s"
-                  begin="click"
                   repeatCount="1"
                   className="squish"
                   ref={animationTarget}
@@ -556,6 +552,8 @@ const ProcessEventDotComponents = React.memo(
               data-test-subject="nodeLabel"
               id={labelId}
               onClick={handleClick}
+              onFocus={handleFocus}
+              tabIndex={-1}
               style={{
                 backgroundColor: labelBackground,
                 padding: '.15rem 0',

@@ -7,7 +7,6 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   htmlIdGenerator,
-  EuiBreadcrumbs,
   EuiSpacer,
   EuiTitle,
   EuiText,
@@ -16,7 +15,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as event from '../../../../common/endpoint/models/event';
-import { CrumbInfo, formatDate } from '../panel';
+import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
 import {
   hostPathForProcess,
   hostPidForProcess,
@@ -121,7 +120,7 @@ export const ProcessDetails = memo(function ProcessDetails({
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
-      <EuiBreadcrumbs breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4 aria-describedby={titleId}>

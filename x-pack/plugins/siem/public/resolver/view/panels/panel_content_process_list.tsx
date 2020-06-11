@@ -8,7 +8,6 @@ import {
   EuiBasicTableColumn,
   EuiBadge,
   EuiButtonEmpty,
-  EuiBreadcrumbs,
   EuiSpacer,
   EuiInMemoryTable,
 } from '@elastic/eui';
@@ -16,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { CrumbInfo, formatter } from '../panel';
+import { CrumbInfo, formatter, StyledBreadcrumbs } from '../panel';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './process_cube_icon';
@@ -133,7 +132,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     return [
       {
         text: i18n.translate('xpack.siem.endpoint.resolver.panel.processListWithCounts.events', {
-          defaultMessage: 'Events',
+          defaultMessage: 'All Process Events',
         }),
         onClick: () => {},
       },
@@ -142,7 +141,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
 
   return (
     <>
-      <EuiBreadcrumbs breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
     </>

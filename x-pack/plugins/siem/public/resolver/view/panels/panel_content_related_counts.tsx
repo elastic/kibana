@@ -10,11 +10,10 @@ import {
   EuiI18nNumber,
   EuiBasicTableColumn,
   EuiButtonEmpty,
-  EuiBreadcrumbs,
   EuiSpacer,
   EuiInMemoryTable,
 } from '@elastic/eui';
-import { CrumbInfo } from '../panel';
+import { CrumbInfo, StyledBreadcrumbs } from '../panel';
 import { RelatedEventDataEntryWithStats } from '../../types';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
@@ -126,7 +125,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
   );
   return (
     <>
-      <EuiBreadcrumbs breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />
     </>

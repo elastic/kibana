@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { CrumbInfo } from '../panel';
+import { CrumbInfo, StyledBreadcrumbs } from '../panel';
 
 export const TableServiceError = memo(function ({
   errorMessage,
@@ -36,7 +36,7 @@ export const TableServiceError = memo(function ({
   }, []);
   return (
     <>
-      <EuiBreadcrumbs breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText textAlign="center">{errorMessage}</EuiText>
       <EuiSpacer size="l" />

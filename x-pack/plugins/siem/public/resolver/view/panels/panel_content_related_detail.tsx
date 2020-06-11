@@ -8,16 +8,16 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiI18nNumber,
-  EuiBreadcrumbs,
   EuiSpacer,
   EuiText,
-  EuiCard,
   EuiDescriptionList,
   EuiCode,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { RelatedEventDataEntryWithStats } from '../../types';
-import { CrumbInfo, formatDate } from '../panel';
+import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 
@@ -55,6 +55,36 @@ const surfacePrimitives = function* (
   }
 };
 
+// Adding some styles to prevent horizontal scrollbars, per request from UX review
+const StyledDescriptionList = styled(EuiDescriptionList)`
+  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
+    max-width: 8em;
+  }
+  &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
+    max-width: calc(100% - 8.5em);
+    overflow-wrap: break-word;
+  }
+`;
+
+// Styling subtitles, per UX review:
+const StyledFlexTitle = memo(styled('h4')`
+  display: flex;
+  flex-flow: row;
+`);
+const StyledTitleRule = styled('hr')`
+  &.euiHorizontalRule.euiHorizontalRule--full.euiHorizontalRule--marginSmall.override {
+    display: block;
+    flex: 1;
+    margin-left: 0.5em;
+  }
+`;
+
+const TitleHr = () => {
+  return (
+    <StyledTitleRule className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall override" />
+  );
+};
+
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
@@ -72,7 +102,6 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
   relatedEventsState: RelatedEventDataEntryWithStats;
   eventType: string;
 }) {
-  
   const processName = (parentEvent && event.eventName(parentEvent)) || '*';
   const processEntityId = event.entityId(relatedEvent);
   const totalCount = Object.values(relatedEventsState.stats).reduce((a, v) => {
@@ -97,23 +126,27 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     );
   }, [relatedEventsState, eventType]);
 
-  const sections = useMemo(() => {
+  const [sections, formattedDate] = useMemo(() => {
     const { agent, ecs, process, ...relevantData } = relatedEvent as ResolverEvent & {
       ecs: unknown;
     };
+    let displayDate = '';
     const sectionData: Array<{
       sectionTitle: string;
       entries: Array<{ title: string; description: string }>;
-    }> = Object.entries(relevantData).map(([sectionTitle, val]) => {
-      if (sectionTitle === '@timestamp') {
-        return { sectionTitle, entries: [{ title: 'time', description: formatDate(val) }] };
-      }
-      if (typeof val !== 'object') {
-        return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
-      }
-      return { sectionTitle, entries: [...surfacePrimitives(val)] };
-    });
-    return sectionData;
+    }> = Object.entries(relevantData)
+      .map(([sectionTitle, val]) => {
+        if (sectionTitle === '@timestamp') {
+          displayDate = formatDate(val);
+          return { sectionTitle: '', entries: [] };
+        }
+        if (typeof val !== 'object') {
+          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
+        }
+        return { sectionTitle, entries: [...surfacePrimitives(val)] };
+      })
+      .filter((v) => v.sectionTitle !== '' && v.entries.length);
+    return [sectionData, displayDate];
   }, [relatedEvent]);
 
   const crumbs = useMemo(() => {
@@ -161,18 +194,36 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
 
   return (
     <>
-      <EuiBreadcrumbs truncate={false} breadcrumbs={crumbs} />
+      <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
-      <EuiText textAlign="center">
+      <EuiText>
         <BoldCode>{`${eventType} ${event.ecsEventType(relatedEvent)}`}</BoldCode>
+        {' @ '}
+        {formattedDate}
       </EuiText>
-      <EuiText textAlign="center">{event.descriptiveName(relatedEvent)}</EuiText>
+      <EuiSpacer size="m" />
+      <EuiText>{event.descriptiveName(relatedEvent)}</EuiText>
       <EuiSpacer size="l" />
-      {sections.map(({ sectionTitle, entries }) => {
+      {sections.map(({ sectionTitle, entries }, index) => {
         return (
-          <EuiCard title={sectionTitle} description={''}>
-            <EuiDescriptionList type="inline" listItems={entries} />
-          </EuiCard>
+          <>
+            <EuiTitle size="xs">
+              <EuiTextColor color="subdued">
+                <StyledFlexTitle>
+                  {sectionTitle}
+                  <TitleHr />
+                </StyledFlexTitle>
+              </EuiTextColor>
+            </EuiTitle>
+            <StyledDescriptionList
+              type="column"
+              align="left"
+              titleProps={{ className: 'desc-title' }}
+              compressed
+              listItems={entries}
+            />
+            {index === sections.length - 1 ? null : <EuiSpacer size="s" />}
+          </>
         );
       })}
     </>

@@ -6,15 +6,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiI18nNumber,
-  EuiBreadcrumbs,
-  EuiSpacer,
-  EuiText,
-  EuiButtonEmpty,
-  EuiHorizontalRule,
-} from '@elastic/eui';
-import { CrumbInfo, formatDate } from '../panel';
+import { EuiI18nNumber, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
 import { RelatedEventDataEntryWithStats } from '../../types';
 import * as event from '../../../../common/endpoint/models/event';
 import { BoldCode } from './panel_content_related_detail';
@@ -117,7 +110,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
   }, []);
   return (
     <>
-      <EuiBreadcrumbs breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
