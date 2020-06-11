@@ -23,7 +23,7 @@ export declare class SavedObjectsRepository
 |  [delete(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.delete.md) |  | Deletes an object |
 |  [deleteByNamespace(namespace, options)](./kibana-plugin-core-server.savedobjectsrepository.deletebynamespace.md) |  | Deletes all objects from the provided namespace. |
 |  [deleteFromNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsrepository.deletefromnamespaces.md) |  | Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted entirely. This method and \[<code>addToNamespaces</code>\][SavedObjectsRepository.addToNamespaces()](./kibana-plugin-core-server.savedobjectsrepository.addtonamespaces.md) are the only ways to change which Spaces a multi-namespace saved object is shared to. |
-|  [find({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, })](./kibana-plugin-core-server.savedobjectsrepository.find.md) |  |  |
+|  [find({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, preference, })](./kibana-plugin-core-server.savedobjectsrepository.find.md) |  |  |
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.get.md) |  | Gets a single object |
 |  [incrementCounter(type, id, counterFieldName, options)](./kibana-plugin-core-server.savedobjectsrepository.incrementcounter.md) |  | Increases a counter field by one. Creates the document if one doesn't exist for the given id. |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsrepository.update.md) |  | Updates an object |
