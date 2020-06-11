@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 
 import {
   EuiBadge,
@@ -22,24 +22,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { useNotifications } from '../contexts/kibana';
 import { ml } from '../services/ml_api_service';
 
-interface Props {
-  canGetFilters: boolean;
-  canCreateFilter: boolean;
-  canGetCalendars: boolean;
-  canCreateCalendar: boolean;
-}
-
-export const AnomalyDetectionSettings: FC<Props> = ({
-  canGetFilters,
-  canCreateFilter,
-  canGetCalendars,
-  canCreateCalendar,
-}) => {
+export const AnomalyDetectionSettings: FC = () => {
   const [calendarsCount, setCalendarsCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
+
+  const { canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar } = useContext(
+    AnomalyDetectionSettingsContext
+  );
 
   const { toasts } = useNotifications();
 
@@ -101,14 +94,16 @@ export const AnomalyDetectionSettings: FC<Props> = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiTextColor color="subdued">
-              <p>
-                <small>
-                  Calendars contain a list of scheduled events for which you do not want to generate
-                  anomalies, such as planned system outages or public holidays.
-                </small>
-              </p>
-            </EuiTextColor>
+            <EuiText size="s">
+              <EuiTextColor color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.settings.anomalyDetection.calendarsText"
+                    defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays."
+                  />
+                </p>
+              </EuiTextColor>
+            </EuiText>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center">
               {canGetCalendars && (
@@ -167,18 +162,20 @@ export const AnomalyDetectionSettings: FC<Props> = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiTextColor color="subdued">
-              <p>
-                <small>
-                  Filter lists contain values that you can use to include or exclude events from the
-                  machine learning analysis.
-                </small>
-              </p>
-            </EuiTextColor>
+            <EuiText size="s">
+              <EuiTextColor color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.settings.anomalyDetection.filterListsText"
+                    defaultMessage=" Filter lists contain values that you can use to include or exclude events from the machine learning analysis."
+                  />
+                </p>
+              </EuiTextColor>
+            </EuiText>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center">
               {canGetFilters && (
-                <EuiFlexItem grow={false} style={{ display: 'block' }}>
+                <EuiFlexItem grow={false}>
                   <EuiText>
                     <FormattedMessage
                       id="xpack.ml.settings.anomalyDetection.filterListsSummaryCount"
@@ -215,7 +212,7 @@ export const AnomalyDetectionSettings: FC<Props> = ({
                   isDisabled={canCreateFilter === false}
                 >
                   <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.manageFilterListsLink"
+                    id="xpack.ml.settings.anomalyDetection.createFilterListsLink"
                     defaultMessage="Create"
                   />
                 </EuiButtonEmpty>

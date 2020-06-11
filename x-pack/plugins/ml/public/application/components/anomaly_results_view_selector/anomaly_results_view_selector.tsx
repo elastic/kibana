@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { encode } from 'rison-node';
 
 import { EuiButtonGroup } from '@elastic/eui';
@@ -19,28 +19,31 @@ interface Props {
 
 // Component for rendering a set of buttons for switching between the Anomaly Detection results views.
 
-const toggleButtonsIcons = [
-  {
-    id: 'timeseriesexplorer',
-    label: i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
-      defaultMessage: 'View results in the Single Metric Viewer',
-    }),
-    iconType: 'stats',
-    value: 'timeseriesexplorer',
-    'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
-  },
-  {
-    id: 'explorer',
-    label: i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
-      defaultMessage: 'View results in the Anomaly Explorer',
-    }),
-    iconType: 'tableOfContents',
-    value: 'explorer',
-    'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
-  },
-];
-
 export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
+  const toggleButtonsIcons = useMemo(
+    () => [
+      {
+        id: 'timeseriesexplorer',
+        label: i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
+          defaultMessage: 'View results in the Single Metric Viewer',
+        }),
+        iconType: 'stats',
+        value: 'timeseriesexplorer',
+        'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
+      },
+      {
+        id: 'explorer',
+        label: i18n.translate('xpack.ml.anomalyResultsViewSelector.anomalyExplorerLabel', {
+          defaultMessage: 'View results in the Anomaly Explorer',
+        }),
+        iconType: 'tableOfContents',
+        value: 'explorer',
+        'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
+      },
+    ],
+    []
+  );
+
   const [globalState] = useUrlState('_g');
 
   const onChangeView = (newViewId: string) => {

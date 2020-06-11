@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { AnomalyResultsViewSelector } from './index';
 
 describe('AnomalyResultsViewSelector', () => {
-  test('creates selector with correctly selected value', () => {
+  test('should create selector with correctly selected value', () => {
     const history = createBrowserHistory();
 
     const { getByTestId } = render(
@@ -32,7 +32,7 @@ describe('AnomalyResultsViewSelector', () => {
     ).toBe(true);
   });
 
-  test('opens window to other results view when clicking on non-checked input', () => {
+  test('should open window to other results view when clicking on non-checked input', () => {
     // Create mock for window.open
     const mockedOpen = jest.fn();
     const originalOpen = window.open;

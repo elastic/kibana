@@ -14,19 +14,7 @@ import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
-interface Props {
-  canGetFilters: boolean;
-  canCreateFilter: boolean;
-  canGetCalendars: boolean;
-  canCreateCalendar: boolean;
-}
-
-export const Settings: FC<Props> = ({
-  canGetFilters,
-  canCreateFilter,
-  canGetCalendars,
-  canCreateCalendar,
-}) => {
+export const Settings: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="settings" />
@@ -41,12 +29,7 @@ export const Settings: FC<Props> = ({
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
-          <AnomalyDetectionSettings
-            canGetCalendars={canGetCalendars}
-            canCreateFilter={canCreateFilter}
-            canGetFilters={canGetFilters}
-            canCreateCalendar={canCreateCalendar}
-          />
+          <AnomalyDetectionSettings />
         </EuiPageBody>
       </EuiPage>
     </Fragment>
