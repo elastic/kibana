@@ -15,7 +15,10 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiContextMenuPanel,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
+import { encode } from 'rison-node';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as DrilldownDefinition } from '../../../../ui_actions_enhanced/public';
 import {
@@ -36,9 +39,32 @@ import {
 } from '../../../../../../src/plugins/data/public';
 
 const handlebars = createHandlebars();
+
+handlebars.registerHelper('json', (v) => {
+  try {
+    return JSON.stringify(v);
+  } catch (e) {
+    return v;
+  }
+});
+
+handlebars.registerHelper('rison', (v) => {
+  try {
+    return encode(v);
+  } catch (e) {
+    return v;
+  }
+});
+
 function interpolate(url: string, scope: Scope): string {
-  const template = handlebars.compile(url);
-  return template(scope);
+  try {
+    const template = handlebars.compile(url);
+    return template(scope);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn(e);
+    return url;
+  }
 }
 
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
@@ -98,18 +124,18 @@ interface EventFilter {
 
 const mockEventScope: EventScope = {
   filter: {
-    key: '',
-    value: '',
-    from: '',
-    to: '',
+    key: 'testKey',
+    value: 'testValue',
+    from: 'testFrom',
+    to: 'testTo',
     negate: false,
   },
   filters: [
     {
-      key: '',
-      value: '',
-      from: '',
-      to: '',
+      key: 'testKey',
+      value: 'testValue',
+      from: 'testFrom',
+      to: 'testTo',
       negate: false,
     },
   ],
@@ -166,19 +192,24 @@ export class UrlDrilldownDefinition implements DrilldownDefinition<Config, Actio
   }) => {
     const { getGlobalScope } = this.params;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const variables = React.useMemo(
-      () =>
-        buildVariableListForSuggestions(
-          buildScope(getGlobalScope(), getContextScopeFromEmbeddable(context.embeddable))
-        ),
+    const scope = React.useMemo(
+      () => buildScope(getGlobalScope(), getContextScopeFromEmbeddable(context.embeddable)),
       [getGlobalScope, context]
     );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const variables = React.useMemo(() => buildVariableListForSuggestions(scope), [scope]);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const interpolatedUrl = React.useMemo(() => interpolate(config.url, scope), [
+      config.url,
+      scope,
+    ]);
+    const isValid = !interpolatedUrl || isValidUrl(interpolatedUrl);
+
     return (
       <>
         <EuiFormRow
           fullWidth
-          // error={errors.subject}
-          // isInvalid={errors.subject.length > 0 && subject !== undefined}
+          isInvalid={!isValid}
           label={'Enter target URL'}
           labelAppend={
             <AddVariableButton
@@ -196,12 +227,33 @@ export class UrlDrilldownDefinition implements DrilldownDefinition<Config, Actio
             name="url"
             data-test-subj="urlInput"
             value={config.url}
+            placeholder={'https://google.com/?q={{event.filter.value}}'}
             onChange={(event) => onConfig({ ...config, url: event.target.value })}
             onBlur={() => {
               if (!config.url) return;
               if (/https?:\/\//.test(config.url)) return;
               onConfig({ ...config, url: 'https://' + config.url });
             }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={'Target URL preview'}
+          isInvalid={!isValid}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink href={interpolatedUrl} target="_blank" external>
+                Preview
+              </EuiLink>
+            </EuiText>
+          }
+        >
+          <EuiTextArea
+            fullWidth
+            name="urlPreview"
+            data-test-subj="urlPreview"
+            value={interpolatedUrl}
+            disabled={true}
           />
         </EuiFormRow>
         <EuiFormRow hasChildLabel={false}>
