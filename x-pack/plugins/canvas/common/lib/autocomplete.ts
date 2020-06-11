@@ -419,7 +419,7 @@ function getArgNameSuggestions(
   });
 
   const argDefs: ArgSuggestionValue[] = unusedArgDefs
-    .map(([name, arg]) => ({ name, ...arg }))
+    .map(([_name, arg]) => arg)
     .sort(unnamedArgComparator);
 
   return argDefs.map((argDef) => {
