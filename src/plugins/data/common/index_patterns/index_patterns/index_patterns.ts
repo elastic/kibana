@@ -189,7 +189,7 @@ export class IndexPatternsService {
   deserializeIndexPattern(str: string) {
     const obj = JSON.parse(str) as IndexPatternSpec;
     const indexPattern = new IndexPattern(
-      obj._id,
+      obj.id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,

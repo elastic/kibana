@@ -195,16 +195,16 @@ export class IndexPattern implements IIndexPattern {
         return;
       }
 
-      response._source[name] = fieldMapping._deserialize(response._source[name]);
+      response.source[name] = fieldMapping._deserialize(response.source[name]);
     });
 
     // give index pattern all of the values in _source
-    _.assign(this, response._source);
+    _.assign(this, response.source);
 
     if (!this.title && this.id) {
       this.title = this.id;
     }
-    this.version = response._version;
+    this.version = response.version;
   }
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
@@ -266,10 +266,10 @@ export class IndexPattern implements IIndexPattern {
     const savedObject = await this.savedObjectsClient.get(type, this.id);
 
     const response = {
-      _id: savedObject.id,
-      _type: savedObject.type,
-      _version: savedObject._version,
-      _source: _.cloneDeep(savedObject.attributes),
+      id: savedObject.id,
+      type: savedObject.type,
+      version: savedObject._version,
+      source: _.cloneDeep(savedObject.attributes),
       found: savedObject._version ? true : false,
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
@@ -292,10 +292,10 @@ export class IndexPattern implements IIndexPattern {
 
   public serialize() {
     return JSON.stringify({
-      _id: this.id,
-      _type: this.type,
-      _source: this.prepBody(),
-      _version: this.version,
+      id: this.id,
+      type: this.type,
+      source: this.prepBody(),
+      version: this.version,
     });
   }
 
