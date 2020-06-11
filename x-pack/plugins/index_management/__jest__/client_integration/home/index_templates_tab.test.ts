@@ -188,7 +188,7 @@ describe('Index Templates tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(
-        `${API_BASE_PATH}/index-templates`
+        `${API_BASE_PATH}/index_templates`
       );
     });
 
@@ -318,7 +318,7 @@ describe('Index Templates tab', () => {
         const latestRequest = server.requests[server.requests.length - 1];
 
         expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-index-templates`);
+        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete_index_templates`);
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
           templates: [{ name: legacyTemplates[0].name, isLegacy }],
         });

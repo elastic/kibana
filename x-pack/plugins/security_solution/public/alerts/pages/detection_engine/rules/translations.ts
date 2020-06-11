@@ -485,7 +485,7 @@ export const IMPORT_RULE_BTN_TITLE = i18n.translate(
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select a SIEM rule (as exported from the Detection Engine view) to import',
+    defaultMessage: 'Select a Security rule (as exported from the Detection Engine view) to import',
   }
 );
 

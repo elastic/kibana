@@ -308,7 +308,7 @@ export function getCurrentMethodAndTokenPaths(
 }
 
 // eslint-disable-next-line
-export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
+export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
   function isUrlPathToken(token: Token | null) {
     switch ((token || ({} as any)).type) {
       case 'url.slash':
