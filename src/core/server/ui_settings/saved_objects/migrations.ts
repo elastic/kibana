@@ -25,7 +25,7 @@ export const migrations = {
     ...(doc.attributes && {
       attributes: Object.keys(doc.attributes).reduce(
         (acc, key) =>
-          key.startsWith('siem')
+          key.startsWith('siem:')
             ? {
                 ...acc,
                 [key.replace('siem', 'securitySolution')]: doc.attributes[key],
