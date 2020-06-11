@@ -38,7 +38,6 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { FieldFormatsStart } from '../../field_formats';
 import { IndexPatternSpec } from './types';
 import { OnNotification, OnError } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -194,7 +193,10 @@ export class IndexPatternsService {
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache
+      indexPatternCache,
+      this.fieldFormats,
+      this.onNotification,
+      this.onError
     );
 
     indexPattern.initFromObject(obj);
