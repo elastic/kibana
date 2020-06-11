@@ -34,10 +34,6 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
-  if (appContextService.getIsInitialized()?.status === 'success') {
-    return;
-  }
-
   try {
     const [installedPackages, defaultOutput, config] = await Promise.all([
       // packages installed by default
