@@ -5,6 +5,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { IndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 
 export async function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
   const client = getService('es');
@@ -20,13 +21,13 @@ export async function deleteDataStream(getService: (serviceName: 'es') => Client
 }
 
 export async function deleteMetadataStream(getService: (serviceName: 'es') => Client) {
-  await deleteDataStream(getService, 'metrics-endpoint.metadata-*');
+  await deleteDataStream(getService, IndexPattern.Metadata);
 }
 
 export async function deleteEventsStream(getService: (serviceName: 'es') => Client) {
-  await deleteDataStream(getService, 'events-endpoint-*');
+  await deleteDataStream(getService, IndexPattern.Events);
 }
 
 export async function deletePolicyStream(getService: (serviceName: 'es') => Client) {
-  await deleteDataStream(getService, 'metrics-endpoint.policy-*');
+  await deleteDataStream(getService, IndexPattern.Policy);
 }

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -20,8 +21,9 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('endpoint/alerts/host_api_feature');
     });
 
-    it('should return a 500', async () => {
-      await supertest.get('/api/endpoint/alerts').expect(500);
+    it('should not return data', async () => {
+      const { body } = await supertest.get('/api/endpoint/alerts').expect(200);
+      expect(body.alerts.length).to.eql(0);
     });
   });
 }
