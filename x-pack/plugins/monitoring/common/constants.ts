@@ -237,11 +237,17 @@ export const ALERT_PREFIX = 'monitoring_';
 export const ALERT_LICENSE_EXPIRATION = `${ALERT_PREFIX}alert_license_expiration`;
 export const ALERT_CLUSTER_HEALTH = `${ALERT_PREFIX}alert_cluster_health`;
 export const ALERT_CPU_USAGE = `${ALERT_PREFIX}alert_cpu_usage`;
+export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
 
 /**
  * A listing of all alert types
  */
-export const ALERTS = [ALERT_LICENSE_EXPIRATION, ALERT_CLUSTER_HEALTH, ALERT_CPU_USAGE];
+export const ALERTS = [
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_CPU_USAGE,
+  ALERT_NODES_CHANGED,
+];
 
 /**
  * Matches the id for the built-in in email action type

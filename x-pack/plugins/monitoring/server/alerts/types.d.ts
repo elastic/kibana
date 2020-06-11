@@ -45,6 +45,10 @@ export interface AlertCpuUsageState extends AlertState {
   nodeName: string;
 }
 
+export interface AlertNodesChangedState extends AlertState {
+  node: AlertClusterStatsNode;
+}
+
 export interface AlertUiState {
   isFiring: boolean;
   severity: AlertSeverity;
@@ -113,10 +117,17 @@ export interface AlertCpuUsageNodeStats {
   ccs: string | null;
 }
 
-export interface AlertCpuUsageActionable {
-  cluster: AlertCluster;
+export interface AlertClusterStatsNodes {
+  clusterUuid: string;
+  recentNodes: AlertClusterStatsNode[];
+  priorNodes: AlertClusterStatsNode[];
+  ccs: string | null;
+}
+
+export interface AlertClusterStatsNode {
+  nodeUuid: string;
+  nodeEphemeralId: string;
   nodeName: string;
-  cpuUsage: number;
 }
 
 export interface AlertData {
