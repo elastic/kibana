@@ -81,7 +81,9 @@ export function AnomalyDetection({ serviceNodeData }: AnomalyDetectionProps) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getSeverityColor(theme, anomalySeverity)} />
+                <EuiHealth
+                  color={getSeverityColor(theme.eui, anomalySeverity)}
+                />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>
