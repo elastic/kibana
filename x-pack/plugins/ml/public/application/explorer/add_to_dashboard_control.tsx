@@ -44,7 +44,7 @@ export interface DashboardItem {
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
 
 export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = memo(
-  (embeddableConfig) => {
+  ({ children, ...embeddableConfig }) => {
     const {
       services: {
         savedObjects: { client: savedObjectClient },
@@ -126,7 +126,7 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
 
         panelData.push({
           panelIndex,
-          embeddableConfig,
+          embeddableConfig: embeddableConfig as { [key: string]: any },
           title: getDefaultPanelTitle(embeddableConfig.jobIds),
           type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
           version,
@@ -135,7 +135,7 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
             i: panelIndex,
             w: 24,
             x: 0,
-            y: maxPanel.gridData.y + maxPanel.gridData.h + 10,
+            y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h + 10 : 0,
           },
         });
 
