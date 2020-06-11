@@ -269,7 +269,7 @@ describe('ExceptionsViewerHeader', () => {
     expect(mockOnAddExceptionClick).toHaveBeenCalledTimes(1);
   });
 
-  it('it invokes "onFilterChange" with filter value when search used', () => {
+  it('it invokes "onFilterChange" when search used and "Enter" pressed', () => {
     const mockOnFilterChange = jest.fn();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -284,54 +284,12 @@ describe('ExceptionsViewerHeader', () => {
       </ThemeProvider>
     );
 
-    wrapper
-      .find('input[data-test-subj="exceptionsHeaderSearch"]')
-      .at(0)
-      .simulate('change', {
-        target: { value: 'host' },
-      });
-
-    expect(mockOnFilterChange).toHaveBeenCalledWith({
-      filter: {
-        filter: 'host',
-        showDetectionsList: false,
-        showEndpointList: false,
-        tags: [],
-      },
-      pagination: {},
+    wrapper.find('EuiFieldSearch').at(0).simulate('keyup', {
+      charCode: 13,
+      code: 'Enter',
+      key: 'Enter',
     });
-  });
 
-  it('it invokes "onFilterChange" with tags values when search value includes "tags:..."', () => {
-    const mockOnFilterChange = jest.fn();
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
-          isInitLoading={false}
-          detectionsListItems={0}
-          endpointListItems={0}
-          onFilterChange={mockOnFilterChange}
-          onAddExceptionClick={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    wrapper
-      .find('input[data-test-subj="exceptionsHeaderSearch"]')
-      .at(0)
-      .simulate('change', {
-        target: { value: 'tags:malware' },
-      });
-
-    expect(mockOnFilterChange).toHaveBeenCalledWith({
-      filter: {
-        filter: '',
-        showDetectionsList: false,
-        showEndpointList: false,
-        tags: ['malware'],
-      },
-      pagination: {},
-    });
+    expect(mockOnFilterChange).toHaveBeenCalled();
   });
 });
