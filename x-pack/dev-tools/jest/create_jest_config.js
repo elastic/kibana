@@ -59,6 +59,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
     testMatch: ['**/*.test.{js,ts,tsx}'],
+    testPathIgnorePatterns: ['integration_tests/'],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

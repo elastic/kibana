@@ -27,11 +27,11 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   echo ""
   echo ""
 
-  # echo " -> Running jest integration tests"
-  # cd "$XPACK_DIR"
-  # node scripts/jest_integration --ci --verbose
-  # echo ""
-  # echo ""
+  echo " -> Running jest integration tests"
+  cd "$XPACK_DIR"
+  node scripts/jest_integration --ci --verbose
+  echo ""
+  echo ""
 else
   echo " -> Running jest tests with coverage"
   cd "$XPACK_DIR"
