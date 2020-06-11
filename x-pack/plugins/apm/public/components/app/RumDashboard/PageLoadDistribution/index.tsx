@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Axis, Chart, ScaleType, LineSeries, CurveType } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  ScaleType,
+  LineSeries,
+  CurveType,
+  BrushEndListener,
+  Settings,
+} from '@elastic/charts';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -23,6 +31,8 @@ export const PageLoadDistribution = () => {
 
   const { start, end } = urlParams;
 
+  const [percentileRange, setPercentileRange] = useState({ min: 0, max: 99 });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -33,13 +43,22 @@ export const PageLoadDistribution = () => {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
+              minPercentile: percentileRange.min,
+              maxPercentile: percentileRange.max,
             },
           },
         });
       }
     },
-    [end, start, uiFilters]
+    [end, start, uiFilters, percentileRange]
   );
+
+  const onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [minX, maxX] = x;
+  };
 
   return (
     <div>
@@ -49,6 +68,7 @@ export const PageLoadDistribution = () => {
       </EuiTitle>
       <ChartWrapper loading={status !== 'success'} height="300px">
         <Chart className="story-chart">
+          <Settings onBrushEnd={onBrushEnd} />
           <PercentileAnnotations percentiles={data?.percentiles} />
           <Axis
             id="bottom"

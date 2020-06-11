@@ -29,6 +29,7 @@ import {
 } from '../translations';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { formatBigValue } from '../ClientMetrics';
 
 export const ImpressionTrend = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -97,9 +98,10 @@ export const ImpressionTrend = () => {
             id="number_of_impressions"
             title={NoOfImpressionsLabels}
             position={Position.Left}
+            tickFormat={(d) => formatBigValue(Number(d))}
           />
           <BarSeries
-            id="impression_bars"
+            id={NoOfImpressionsLabels}
             color={[euiLightVars.euiColorLightShade]}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}

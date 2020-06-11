@@ -10,6 +10,13 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { BackEndLabel, FrontEndLabel, PageViewsLabel } from '../translations';
 
+export const formatBigValue = (val?: number | null): string => {
+  if (val && val >= 1000) {
+    return val / 1000 + 'k';
+  }
+  return val + '';
+};
+
 export const ClientMetrics = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
@@ -29,13 +36,6 @@ export const ClientMetrics = () => {
     [start, end, uiFilters]
   );
 
-  const getPageValue = (val?: number | null) => {
-    if (val && val > 1000) {
-      return val / 1000 + 'k';
-    }
-    return val;
-  };
-
   return (
     <>
       <EuiSpacer size="l" />
@@ -48,7 +48,7 @@ export const ClientMetrics = () => {
       <EuiSpacer size="l" />
       <EuiStat
         titleSize="m"
-        title={getPageValue(data?.pageViews?.value) ?? '--'}
+        title={formatBigValue(data?.pageViews?.value) ?? '--'}
         description={PageViewsLabel}
         isLoading={status !== 'success'}
       />
