@@ -17,7 +17,7 @@ export function registerHiddenSORoutes(
   router.get(
     {
       path: '/api/hidden_saved_objects/get-decrypted-as-internal-user/{type}/{id}',
-      validate: { params: value => ({ value }) },
+      validate: { params: (value) => ({ value }) },
     },
     async (context, request, response) => {
       const [, { encryptedSavedObjects }] = await core.getStartServices();
@@ -26,7 +26,9 @@ export function registerHiddenSORoutes(
       try {
         return response.ok({
           body: await encryptedSavedObjects
-            .getClient([request.params.type])
+            .getClient({
+              includedHiddenTypes: [request.params.type],
+            })
             .getDecryptedAsInternalUser(request.params.type, request.params.id, { namespace }),
         });
       } catch (err) {
@@ -92,7 +94,7 @@ export function registerHiddenSORoutes(
   router.get(
     {
       path: '/api/hidden_saved_objects/{type}/{id}',
-      validate: { params: value => ({ value }) },
+      validate: { params: (value) => ({ value }) },
     },
     async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();

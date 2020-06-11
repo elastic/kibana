@@ -8,7 +8,7 @@ import { Enabler } from '../';
 import sinon from 'sinon';
 import { forbidden } from 'boom';
 
-const updateModel = properties => properties;
+const updateModel = (properties) => properties;
 const updateModelSpy = sinon.spy(updateModel);
 
 describe('Settings Enabler Class for calling API to update Elasticsearch Settings', () => {

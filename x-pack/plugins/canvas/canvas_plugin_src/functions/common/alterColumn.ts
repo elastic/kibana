@@ -51,7 +51,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
         return input;
       }
 
-      const column = input.columns.find(col => col.name === args.column);
+      const column = input.columns.find((col) => col.name === args.column);
       if (!column) {
         throw errors.columnNotFound(args.column);
       }
@@ -94,7 +94,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
         })();
       }
 
-      const rows = input.rows.map(row => ({
+      const rows = input.rows.map((row) => ({
         ...omit(row, column.name),
         [name]: handler(row[column.name]),
       }));

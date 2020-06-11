@@ -38,18 +38,18 @@ const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data
 
 export const hasMLFeatureAvailable = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities =>
+  (mlCapabilities) =>
     mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
 );
 
 export const canCreateMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities => mlCapabilities?.capabilities.canCreateJob
+  (mlCapabilities) => mlCapabilities?.capabilities.canCreateJob
 );
 
 export const canDeleteMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities => mlCapabilities?.capabilities.canDeleteJob
+  (mlCapabilities) => mlCapabilities?.capabilities.canDeleteJob
 );
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;
@@ -84,3 +84,7 @@ export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
+
+export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
+
+export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;

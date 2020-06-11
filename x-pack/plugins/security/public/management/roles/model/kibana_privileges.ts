@@ -19,7 +19,7 @@ function toBasePrivilege(entry: [string, string[]]): [string, KibanaPrivilege] {
 function recordsToBasePrivilegeMap(
   record: Record<string, string[]>
 ): ReadonlyMap<string, KibanaPrivilege> {
-  return new Map(Object.entries(record).map(entry => toBasePrivilege(entry)));
+  return new Map(Object.entries(record).map((entry) => toBasePrivilege(entry)));
 }
 
 export class KibanaPrivileges {
@@ -33,7 +33,7 @@ export class KibanaPrivileges {
     this.global = recordsToBasePrivilegeMap(rawKibanaPrivileges.global);
     this.spaces = recordsToBasePrivilegeMap(rawKibanaPrivileges.space);
     this.feature = new Map(
-      features.map(feature => {
+      features.map((feature) => {
         const rawPrivs = rawKibanaPrivileges.features[feature.id];
         return [feature.id, new SecuredFeature(feature.toRaw(), rawPrivs)];
       })
@@ -60,7 +60,7 @@ export class KibanaPrivileges {
       assignedPrivileges.includes(privilege.id);
 
     const privileges: KibanaPrivilege[] = roleKibanaPrivileges
-      .map(entry => {
+      .map((entry) => {
         const assignedBasePrivileges = this.getBasePrivileges(entry).filter(
           filterAssigned(entry.base)
         );
@@ -73,9 +73,9 @@ export class KibanaPrivileges {
           }
         );
 
-        return [assignedBasePrivileges, assignedFeaturePrivileges].flat<KibanaPrivilege>(2);
+        return [assignedBasePrivileges, assignedFeaturePrivileges].flat(2);
       })
-      .flat<KibanaPrivilege>();
+      .flat();
 
     return new PrivilegeCollection(privileges);
   }

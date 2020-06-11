@@ -6,16 +6,15 @@
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
-import { USERS_PATH } from '../../../../../plugins/security/public/management/management_urls';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  describe('Login Selector', function() {
+  describe('Login Selector', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -42,9 +41,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can login with Login Form preserving original URL', async () => {
-      await PageObjects.common.navigateToActualUrl('kibana', USERS_PATH, {
+      await PageObjects.common.navigateToUrl('management', 'security/users', {
         ensureCurrentUrl: false,
         shouldLoginIfPrompted: false,
+        shouldUseHashForSubUrl: false,
       });
       await PageObjects.common.waitUntilUrlIncludes('next=');
 
@@ -52,14 +52,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.pathname).to.eql('/app/kibana');
-      expect(currentURL.hash).to.eql(`#${USERS_PATH}`);
+
+      expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
     it('can login with SSO preserving original URL', async () => {
-      await PageObjects.common.navigateToActualUrl('kibana', USERS_PATH, {
+      await PageObjects.common.navigateToUrl('management', 'security/users', {
         ensureCurrentUrl: false,
         shouldLoginIfPrompted: false,
+        shouldUseHashForSubUrl: false,
       });
       await PageObjects.common.waitUntilUrlIncludes('next=');
 
@@ -67,8 +68,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.pathname).to.eql('/app/kibana');
-      expect(currentURL.hash).to.eql(`#${USERS_PATH}`);
+      expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
     it('should show toast with error if SSO fails', async () => {

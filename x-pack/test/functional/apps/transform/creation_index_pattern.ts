@@ -13,11 +13,11 @@ interface GroupByEntry {
   intervalLabel?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function() {
+  describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -50,6 +50,34 @@ export default function({ getService }: FtrProviderContext) {
             identifier: 'avg(products.base_price)',
             label: 'products.base_price.avg',
           },
+          {
+            identifier: 'filter(geoip.city_name)',
+            label: 'geoip.city_name.filter',
+            form: {
+              transformFilterAggTypeSelector: 'term',
+              transformFilterTermValueSelector: 'New York',
+            },
+            subAggs: [
+              {
+                identifier: 'max(products.base_price)',
+                label: 'products.base_price.max',
+              },
+              {
+                identifier: 'filter(customer_gender)',
+                label: 'customer_gender.filter',
+                form: {
+                  transformFilterAggTypeSelector: 'term',
+                  transformFilterTermValueSelector: 'FEMALE',
+                },
+                subAggs: [
+                  {
+                    identifier: 'avg(taxful_total_price)',
+                    label: 'taxful_total_price.avg',
+                  },
+                ],
+              },
+            ],
+          },
         ],
         transformId: `ec_1_${Date.now()}`,
         transformDescription:
@@ -77,6 +105,34 @@ export default function({ getService }: FtrProviderContext) {
               'products.base_price.avg': {
                 avg: {
                   field: 'products.base_price',
+                },
+              },
+              'New York': {
+                filter: {
+                  term: {
+                    'geoip.city_name': 'New York',
+                  },
+                },
+                aggs: {
+                  'products.base_price.max': {
+                    max: {
+                      field: 'products.base_price',
+                    },
+                  },
+                  FEMALE: {
+                    filter: {
+                      term: {
+                        customer_gender: 'FEMALE',
+                      },
+                    },
+                    aggs: {
+                      'taxful_total_price.avg': {
+                        avg: {
+                          field: 'taxful_total_price',
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -110,6 +166,19 @@ export default function({ getService }: FtrProviderContext) {
             identifier: 'percentiles(products.base_price)',
             label: 'products.base_price.percentiles',
           },
+          {
+            identifier: 'filter(customer_phone)',
+            label: 'customer_phone.filter',
+            form: {
+              transformFilterAggTypeSelector: 'exists',
+            },
+            subAggs: [
+              {
+                identifier: 'max(products.discount_amount)',
+                label: 'products.discount_amount.max',
+              },
+            ],
+          },
         ],
         transformId: `ec_2_${Date.now()}`,
         transformDescription:
@@ -134,6 +203,20 @@ export default function({ getService }: FtrProviderContext) {
                   percents: [1, 5, 25, 50, 75, 95, 99],
                 },
               },
+              'customer_phone.filter': {
+                filter: {
+                  exists: {
+                    field: 'customer_phone',
+                  },
+                },
+                aggs: {
+                  'products.discount_amount.max': {
+                    max: {
+                      field: 'products.discount_amount',
+                    },
+                  },
+                },
+              },
             },
           },
           pivotPreview: {
@@ -154,7 +237,7 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPattern(testData.destinationIndex);
@@ -220,11 +303,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
-          }
+          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
         });
 
         it('displays the advanced pivot editor switch', async () => {
@@ -322,7 +401,7 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(testData.transformId);
           const rows = await transform.table.parseTransformTable();
-          expect(rows.filter(row => row.id === testData.transformId)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
         it('job creation displays details for the created job in the job list', async () => {

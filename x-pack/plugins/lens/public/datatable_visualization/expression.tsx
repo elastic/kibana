@@ -22,7 +22,7 @@ import {
 } from '../../../../../src/plugins/expressions/public';
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
-
+import { desanitizeFilterContext } from '../utils';
 export interface DatatableColumns {
   columnIds: string[];
 }
@@ -156,7 +156,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  firstTable.columns.forEach(column => {
+  firstTable.columns.forEach((column) => {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
@@ -166,7 +166,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
       const isDateHistogram = col.meta?.type === 'date_histogram';
       const timeFieldName =
         negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
-      const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
+      const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 
       const data: LensFilterEvent['data'] = {
         negate,
@@ -180,21 +180,23 @@ export function DatatableComponent(props: DatatableRenderProps) {
         ],
         timeFieldName,
       };
-      props.onClickValue(data);
+      props.onClickValue(desanitizeFilterContext(data));
     },
     [firstTable]
   );
 
   const bucketColumns = firstTable.columns
-    .filter(col => {
+    .filter((col) => {
       return col?.meta?.type && props.getType(col.meta.type)?.type === 'buckets';
     })
-    .map(col => col.id);
+    .map((col) => col.id);
 
   const isEmpty =
     firstTable.rows.length === 0 ||
     (bucketColumns.length &&
-      firstTable.rows.every(row => bucketColumns.every(col => typeof row[col] === 'undefined')));
+      firstTable.rows.every((row) =>
+        bucketColumns.every((col) => typeof row[col] === 'undefined')
+      ));
 
   if (isEmpty) {
     return <EmptyPlaceholder icon="visTable" />;
@@ -207,10 +209,10 @@ export function DatatableComponent(props: DatatableRenderProps) {
         data-test-subj="lnsDataTable"
         tableLayout="auto"
         columns={props.args.columns.columnIds
-          .map(field => {
-            const col = firstTable.columns.find(c => c.id === field);
+          .map((field) => {
+            const col = firstTable.columns.find((c) => c.id === field);
             const filterable = bucketColumns.includes(field);
-            const colIndex = firstTable.columns.findIndex(c => c.id === field);
+            const colIndex = firstTable.columns.findIndex((c) => c.id === field);
             return {
               field,
               name: (col && col.name) || '',

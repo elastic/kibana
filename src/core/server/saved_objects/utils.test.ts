@@ -142,7 +142,7 @@ describe('convertLegacyTypes', () => {
   });
 
   it('invokes indexPattern to retrieve the index when it is a function', () => {
-    const indexPatternAccessor: (config: LegacyConfig) => string = jest.fn(config => {
+    const indexPatternAccessor: (config: LegacyConfig) => string = jest.fn((config) => {
       config.get('foo.bar');
       return 'myIndex';
     });
@@ -301,13 +301,13 @@ describe('convertLegacyTypes', () => {
           isImportableAndExportable: true,
           icon: 'iconA',
           defaultSearchField: 'searchFieldA',
-          getTitle: savedObject => savedObject.id,
+          getTitle: (savedObject) => savedObject.id,
         },
         typeB: {
           isImportableAndExportable: false,
           icon: 'iconB',
-          getEditUrl: savedObject => `/some-url/${savedObject.id}`,
-          getInAppUrl: savedObject => ({ path: 'path', uiCapabilitiesPath: 'ui-path' }),
+          getEditUrl: (savedObject) => `/some-url/${savedObject.id}`,
+          getInAppUrl: (savedObject) => ({ path: 'path', uiCapabilitiesPath: 'ui-path' }),
         },
       },
       savedObjectMigrations: {},
@@ -377,7 +377,7 @@ describe('convertLegacyTypes', () => {
       },
       savedObjectSchemas: {
         typeA: {
-          indexPattern: jest.fn(config => {
+          indexPattern: jest.fn((config) => {
             config.get('foo.bar');
             return 'myIndex';
           }),

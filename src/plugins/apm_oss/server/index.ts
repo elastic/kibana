@@ -44,6 +44,8 @@ export { APMOSSPluginSetup } from './plugin';
 
 export { apmIndexPattern };
 
+export { APM_STATIC_INDEX_PATTERN_ID } from '../common/index_pattern_constants';
+
 export {
   createNodeAgentInstructions,
   createDjangoAgentInstructions,

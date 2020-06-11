@@ -94,7 +94,7 @@ export class JobsListView extends Component {
     }
   }
 
-  toggleRow = jobId => {
+  toggleRow = (jobId) => {
     if (this.state.itemIdToExpandedRowMap[jobId]) {
       const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
       delete itemIdToExpandedRowMap[jobId];
@@ -125,7 +125,7 @@ export class JobsListView extends Component {
 
       this.setState({ itemIdToExpandedRowMap }, () => {
         loadFullJob(jobId)
-          .then(job => {
+          .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             fullJobsList[jobId] = job;
             this.setState({ fullJobsList }, () => {
@@ -147,7 +147,7 @@ export class JobsListView extends Component {
               this.setState({ itemIdToExpandedRowMap });
             });
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(error);
           });
       });
@@ -157,32 +157,32 @@ export class JobsListView extends Component {
   addUpdateFunction = (id, f) => {
     this.updateFunctions[id] = f;
   };
-  removeUpdateFunction = id => {
+  removeUpdateFunction = (id) => {
     delete this.updateFunctions[id];
   };
 
-  setShowEditJobFlyoutFunction = func => {
+  setShowEditJobFlyoutFunction = (func) => {
     this.showEditJobFlyout = func;
   };
   unsetShowEditJobFlyoutFunction = () => {
     this.showEditJobFlyout = () => {};
   };
 
-  setShowDeleteJobModalFunction = func => {
+  setShowDeleteJobModalFunction = (func) => {
     this.showDeleteJobModal = func;
   };
   unsetShowDeleteJobModalFunction = () => {
     this.showDeleteJobModal = () => {};
   };
 
-  setShowStartDatafeedModalFunction = func => {
+  setShowStartDatafeedModalFunction = (func) => {
     this.showStartDatafeedModal = func;
   };
   unsetShowStartDatafeedModalFunction = () => {
     this.showStartDatafeedModal = () => {};
   };
 
-  setShowCreateWatchFlyoutFunction = func => {
+  setShowCreateWatchFlyoutFunction = (func) => {
     this.showCreateWatchFlyout = func;
   };
   unsetShowCreateWatchFlyoutFunction = () => {
@@ -192,24 +192,24 @@ export class JobsListView extends Component {
     return this.showCreateWatchFlyout;
   };
 
-  selectJobChange = selectedJobs => {
+  selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
   };
 
   refreshSelectedJobs() {
-    const selectedJobsIds = this.state.selectedJobs.map(j => j.id);
-    const filteredJobIds = this.state.filteredJobsSummaryList.map(j => j.id);
+    const selectedJobsIds = this.state.selectedJobs.map((j) => j.id);
+    const filteredJobIds = this.state.filteredJobsSummaryList.map((j) => j.id);
 
     // refresh the jobs stored as selected
     // only select those which are also in the filtered list
     const selectedJobs = this.state.jobsSummaryList
-      .filter(j => selectedJobsIds.find(id => id === j.id))
-      .filter(j => filteredJobIds.find(id => id === j.id));
+      .filter((j) => selectedJobsIds.find((id) => id === j.id))
+      .filter((j) => filteredJobIds.find((id) => id === j.id));
 
     this.setState({ selectedJobs });
   }
 
-  setFilters = filterClauses => {
+  setFilters = (filterClauses) => {
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
@@ -235,7 +235,7 @@ export class JobsListView extends Component {
       try {
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
-        const jobsSummaryList = jobs.map(job => {
+        const jobsSummaryList = jobs.map((job) => {
           if (job.fullJob !== undefined) {
             fullJobsList[job.id] = job.fullJob;
             delete job.fullJob;
@@ -251,18 +251,18 @@ export class JobsListView extends Component {
           }
         );
 
-        Object.keys(this.updateFunctions).forEach(j => {
+        Object.keys(this.updateFunctions).forEach((j) => {
           this.updateFunctions[j].setState({ job: fullJobsList[j] });
         });
 
-        jobs.forEach(job => {
+        jobs.forEach((job) => {
           if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
             this.toggleRow(job.id);
           }
         });
 
         this.isDoneRefreshing();
-        if (jobsSummaryList.some(j => j.deleting === true)) {
+        if (jobsSummaryList.some((j) => j.deleting === true)) {
           // if there are some jobs in a deleting state, start polling for
           // deleting jobs so we can update the jobs list once the
           // deleting tasks are over
@@ -351,7 +351,7 @@ export class JobsListView extends Component {
 
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList } = this.state;
-    const jobIds = jobsSummaryList.map(j => j.id);
+    const jobIds = jobsSummaryList.map((j) => j.id);
     return (
       <EuiPage data-test-subj="ml-jobs-list">
         <EuiPageBody>

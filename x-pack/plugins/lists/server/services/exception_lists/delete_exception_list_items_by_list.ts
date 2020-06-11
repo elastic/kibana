@@ -5,10 +5,9 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/';
-import { ListId } from '../../../common/schemas';
+import { ListId, NamespaceType } from '../../../common/schemas';
 
 import { findExceptionListItem } from './find_exception_list_item';
-import { NamespaceType } from './types';
 import { getSavedObjectType } from './utils';
 
 const PER_PAGE = 100;
@@ -46,7 +45,10 @@ export const getExceptionListItemIds = async ({
     sortOrder: 'desc',
   });
   while (foundExceptionListItems != null && foundExceptionListItems.data.length > 0) {
-    ids = [...ids, ...foundExceptionListItems.data.map(exceptionListItem => exceptionListItem.id)];
+    ids = [
+      ...ids,
+      ...foundExceptionListItems.data.map((exceptionListItem) => exceptionListItem.id),
+    ];
     page += 1;
     foundExceptionListItems = await findExceptionListItem({
       filter: undefined,
@@ -76,7 +78,7 @@ export const deleteFoundExceptionListItems = async ({
   namespaceType: NamespaceType;
 }): Promise<void> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
-  ids.forEach(async id => {
+  ids.forEach(async (id) => {
     try {
       await savedObjectsClient.delete(savedObjectType, id);
     } catch (err) {

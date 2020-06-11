@@ -8,7 +8,7 @@ import { render } from '@testing-library/react';
 import { CustomLinkSection } from './CustomLinkSection';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
@@ -19,11 +19,11 @@ describe('CustomLinkSection', () => {
     {
       id: '2',
       label: 'bar',
-      url: 'http://elastic.co?service.name={{service.name}}'
-    }
+      url: 'http://elastic.co?service.name={{service.name}}',
+    },
   ] as CustomLink[];
   const transaction = ({
-    service: { name: 'foo.bar' }
+    service: { name: 'foo.bar' },
   } as unknown) as Transaction;
   it('shows links', () => {
     const component = render(

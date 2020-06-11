@@ -11,6 +11,7 @@ import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
+  FieldSelectionItem,
   isClassificationAnalysis,
   isRegressionAnalysis,
   DataFrameAnalyticsId,
@@ -26,7 +27,8 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
   classification = '100mb',
 }
 
-export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 2;
+export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 0;
+export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
 export type DependentVariable = string;
@@ -47,6 +49,7 @@ export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
   form: {
+    computeFeatureInfluence: string;
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
@@ -57,31 +60,46 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    eta: undefined | number;
     excludes: string[];
+    excludesTableItems: FieldSelectionItem[];
     excludesOptions: EuiComboBoxOptionOption[];
+    featureBagFraction: undefined | number;
+    featureInfluenceThreshold: undefined | number;
     fieldOptionsFetchFail: boolean;
+    gamma: undefined | number;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
+    jobConfigQuery: any;
+    jobConfigQueryString: string | undefined;
+    lambda: number | undefined;
     loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
     maxDistinctValuesError: string | undefined;
+    maxTrees: undefined | number;
+    method: undefined | string;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     modelMemoryLimitValidationResult: any;
+    nNeighbors: undefined | number;
     numTopFeatureImportanceValues: number | undefined;
     numTopFeatureImportanceValuesValid: boolean;
+    numTopClasses: number;
+    outlierFraction: undefined | number;
+    predictionFieldName: undefined | string;
     previousJobType: null | AnalyticsJobType;
-    previousSourceIndex: EsIndexName | undefined;
     requiredFieldsError: string | undefined;
+    randomizeSeed: undefined | number;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
+    standardizationEnabled: undefined | string;
     trainingPercent: number;
   };
   disabled: boolean;
@@ -91,8 +109,6 @@ export interface State {
   isAdvancedEditorValidJson: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
-  isModalButtonDisabled: boolean;
-  isModalVisible: boolean;
   isValid: boolean;
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
@@ -105,7 +121,8 @@ export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
   form: {
-    createIndexPattern: false,
+    computeFeatureInfluence: 'true',
+    createIndexPattern: true,
     dependentVariable: '',
     dependentVariableFetchFail: false,
     dependentVariableOptions: [],
@@ -115,8 +132,13 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    eta: undefined,
     excludes: [],
+    featureBagFraction: undefined,
+    featureInfluenceThreshold: undefined,
     fieldOptionsFetchFail: false,
+    gamma: undefined,
+    excludesTableItems: [],
     excludesOptions: [],
     jobId: '',
     jobIdExists: false,
@@ -124,22 +146,32 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
+    jobConfigQuery: { match_all: {} },
+    jobConfigQueryString: undefined,
+    lambda: undefined,
     loadingDepVarOptions: false,
     loadingFieldOptions: false,
     maxDistinctValuesError: undefined,
+    maxTrees: undefined,
+    method: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     modelMemoryLimitValidationResult: null,
+    nNeighbors: undefined,
     numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
     numTopFeatureImportanceValuesValid: true,
+    numTopClasses: 2,
+    outlierFraction: undefined,
+    predictionFieldName: undefined,
     previousJobType: null,
-    previousSourceIndex: undefined,
     requiredFieldsError: undefined,
+    randomizeSeed: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
+    standardizationEnabled: 'true',
     trainingPercent: 80,
   },
   jobConfig: {},
@@ -153,8 +185,6 @@ export const getInitialState = (): State => ({
   isAdvancedEditorValidJson: true,
   isJobCreated: false,
   isJobStarted: false,
-  isModalVisible: false,
-  isModalButtonDisabled: false,
   isValid: false,
   jobIds: [],
   requestMessages: [],
@@ -220,8 +250,9 @@ export const getJobConfigFromFormState = (
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')
-        ? formState.sourceIndex.split(',').map(d => d.trim())
+        ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
+      query: formState.jobConfigQuery,
     },
     dest: {
       index: formState.destinationIndex,
@@ -239,17 +270,65 @@ export const getJobConfigFromFormState = (
     formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
     formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
   ) {
-    jobConfig.analysis = {
-      [formState.jobType]: {
-        dependent_variable: formState.dependentVariable,
-        num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
-        training_percent: formState.trainingPercent,
-      },
+    let analysis = {
+      dependent_variable: formState.dependentVariable,
+      num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
+      training_percent: formState.trainingPercent,
     };
+
+    analysis = Object.assign(
+      analysis,
+      formState.predictionFieldName && { prediction_field_name: formState.predictionFieldName },
+      formState.eta && { eta: formState.eta },
+      formState.featureBagFraction && {
+        feature_bag_fraction: formState.featureBagFraction,
+      },
+      formState.gamma && { gamma: formState.gamma },
+      formState.lambda && { lambda: formState.lambda },
+      formState.maxTrees && { max_trees: formState.maxTrees },
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed }
+    );
+
+    jobConfig.analysis = {
+      [formState.jobType]: analysis,
+    };
+  }
+
+  if (
+    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
+    jobConfig?.analysis?.classification !== undefined &&
+    formState.numTopClasses !== undefined
+  ) {
+    // @ts-ignore
+    jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+  }
+
+  if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
+    const analysis = Object.assign(
+      {},
+      formState.method && { method: formState.method },
+      formState.nNeighbors && {
+        n_neighbors: formState.nNeighbors,
+      },
+      formState.outlierFraction && { outlier_fraction: formState.outlierFraction },
+      formState.standardizationEnabled && {
+        standardization_enabled: formState.standardizationEnabled,
+      }
+    );
+    // @ts-ignore
+    jobConfig.analysis.outlier_detection = analysis;
   }
 
   return jobConfig;
 };
+
+function toCamelCase(property: string): string {
+  const camelCased = property.replace(/_([a-z])/g, function (g) {
+    return g[1].toUpperCase();
+  });
+
+  return camelCased;
+}
 
 /**
  * Extracts form state for a job clone from the analytics job configuration.
@@ -276,9 +355,13 @@ export function getCloneFormStateFromJobConfig(
   ) {
     const analysisConfig = analyticsJobConfig.analysis[jobType];
 
-    resultState.dependentVariable = analysisConfig.dependent_variable;
-    resultState.numTopFeatureImportanceValues = analysisConfig.num_top_feature_importance_values;
-    resultState.trainingPercent = analysisConfig.training_percent;
+    for (const key in analysisConfig) {
+      if (analysisConfig.hasOwnProperty(key)) {
+        const camelCased = toCamelCase(key);
+        // @ts-ignore
+        resultState[camelCased] = analysisConfig[key];
+      }
+    }
   }
 
   return resultState;

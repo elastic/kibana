@@ -30,6 +30,7 @@ export const TELEMETRY_TYPE = 'maps-telemetry';
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
+export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
@@ -72,11 +73,12 @@ export enum FIELD_ORIGIN {
 }
 export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
 
-export const SOURCE_DATA_ID_ORIGIN = 'source';
-export const META_ID_ORIGIN_SUFFIX = 'meta';
-export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
-export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
-export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
+export const META_DATA_REQUEST_ID_SUFFIX = 'meta';
+export const FORMATTERS_DATA_REQUEST_ID_SUFFIX = 'formatters';
+export const SOURCE_DATA_REQUEST_ID = 'source';
+export const SOURCE_META_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${META_DATA_REQUEST_ID_SUFFIX}`;
+export const SOURCE_FORMATTERS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
+export const SOURCE_BOUNDS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_bounds`;
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -170,10 +172,10 @@ export enum LAYER_STYLE_TYPE {
   TILE = 'TILE',
 }
 
-export const COLOR_MAP_TYPE = {
-  CATEGORICAL: 'CATEGORICAL',
-  ORDINAL: 'ORDINAL',
-};
+export enum COLOR_MAP_TYPE {
+  CATEGORICAL = 'CATEGORICAL',
+  ORDINAL = 'ORDINAL',
+}
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
 export const ORDINAL_DATA_TYPES = ['number', 'date'];

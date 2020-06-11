@@ -44,7 +44,7 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
     return (
       <ExtendedTemplate
         argValue={this.state.argValue}
-        onValueChange={argValue => {
+        onValueChange={(argValue) => {
           action('onValueChange')(argValue);
           this.setState({ argValue });
         }}
@@ -61,14 +61,14 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
 }
 
 storiesOf('arguments/SeriesStyle', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .addDecorator(withKnobs)
   .add('extended', () => <Interactive />);
 
 storiesOf('arguments/SeriesStyle/components', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('extended: defaults', () => (

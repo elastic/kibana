@@ -14,10 +14,10 @@ export const useIndexPattern = () => {
   const indexPattern = useSelector(selectIndexPattern);
 
   useEffect(() => {
-    if (!indexPattern) {
+    if (!indexPattern.index_pattern) {
       dispatch(getIndexPattern());
     }
-  }, [indexPattern, dispatch]);
+  }, [indexPattern.index_pattern, dispatch]);
 
   return indexPattern;
 };

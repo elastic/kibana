@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import numeral from 'numeral';
+import numeral from '@elastic/numeral';
 import { PieContainsAllZeros, ContainerTooSmall } from '../errors';
 import { Chart } from './_chart';
 import { truncateLabel } from '../components/labels/truncate_labels';
@@ -54,7 +54,7 @@ export class PieChart extends Chart {
    * If so, an error is thrown.
    */
   _validatePieData(charts) {
-    const isAllZeros = charts.every(chart => {
+    const isAllZeros = charts.every((chart) => {
       return chart.slices.children.length === 0;
     });
 
@@ -88,12 +88,12 @@ export class PieChart extends Chart {
       const parentPercent = parent.percentOfParent;
 
       const sum = (parent.sumOfChildren = Math.abs(
-        children.reduce(function(sum, child) {
+        children.reduce(function (sum, child) {
           return sum + Math.abs(child.size);
         }, 0)
       ));
 
-      children.forEach(function(child) {
+      children.forEach(function (child) {
         child.percentOfGroup = Math.abs(child.size) / sum;
         child.percentOfParent = child.percentOfGroup;
 
@@ -138,18 +138,18 @@ export class PieChart extends Chart {
     const partition = d3.layout
       .partition()
       .sort(null)
-      .value(function(d) {
+      .value(function (d) {
         return d.percentOfParent * 100;
       });
 
     const x = d3.scale.linear().range([0, 2 * Math.PI]);
     const y = d3.scale.sqrt().range([0, showLabels ? radius * 0.7 : radius]);
 
-    const startAngle = function(d) {
+    const startAngle = function (d) {
       return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
     };
 
-    const endAngle = function(d) {
+    const endAngle = function (d) {
       if (d.dx < 1e-8) return x(d.x);
       return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
     };
@@ -158,7 +158,7 @@ export class PieChart extends Chart {
       .arc()
       .startAngle(startAngle)
       .endAngle(endAngle)
-      .innerRadius(function(d) {
+      .innerRadius(function (d) {
         // option for a single layer, i.e pie chart
         if (d.depth === 1 && !isDonut) {
           // return no inner radius
@@ -167,7 +167,7 @@ export class PieChart extends Chart {
 
         return Math.max(0, y(d.y));
       })
-      .outerRadius(function(d) {
+      .outerRadius(function (d) {
         return Math.max(0, y(d.y + d.dy));
       });
 
@@ -186,20 +186,20 @@ export class PieChart extends Chart {
       .enter()
       .append('path')
       .attr('d', arc)
-      .attr('class', function(d) {
+      .attr('class', function (d) {
         if (d.depth === 0) {
           return;
         }
         if (d.depth > maxDepth) maxDepth = d.depth;
         return 'slice';
       })
-      .attr('data-test-subj', function(d) {
+      .attr('data-test-subj', function (d) {
         if (d.name) {
           return `pieSlice-${d.name.split(' ').join('-')}`;
         }
       })
       .call(self._addIdentifier, 'name')
-      .style('fill', function(d) {
+      .style('fill', function (d) {
         if (d.depth === 0) {
           return 'none';
         }
@@ -208,10 +208,7 @@ export class PieChart extends Chart {
 
     // add labels
     if (showLabels) {
-      const labelGroups = labels
-        .datum(slices)
-        .selectAll('.label')
-        .data(partition.nodes);
+      const labelGroups = labels.datum(slices).selectAll('.label').data(partition.nodes);
 
       // create an empty quadtree to hold label positions
       const svgParentNode = svg.node().parentNode.parentNode;
@@ -226,10 +223,10 @@ export class PieChart extends Chart {
           [-svgBBox.width, -svgBBox.height],
           [svgBBox.width, svgBBox.height],
         ])
-        .x(function(d) {
+        .x(function (d) {
           return d.position.x;
         })
-        .y(function(d) {
+        .y(function (d) {
           return d.position.y;
         })([]);
 
@@ -238,7 +235,7 @@ export class PieChart extends Chart {
         .append('g')
         .attr('class', 'label')
         .append('text')
-        .text(function(d) {
+        .text(function (d) {
           if (d.depth === 0) {
             d3.select(this.parentNode).remove();
             return;
@@ -249,10 +246,10 @@ export class PieChart extends Chart {
           }
           return d.name;
         })
-        .text(function() {
+        .text(function () {
           return truncateLabel(this, truncateLabelLength);
         })
-        .attr('text-anchor', function(d) {
+        .attr('text-anchor', function (d) {
           const midAngle = startAngle(d) + (endAngle(d) - startAngle(d)) / 2;
           return midAngle < Math.PI ? 'start' : 'end';
         })
@@ -281,7 +278,7 @@ export class PieChart extends Chart {
           };
 
           const conflicts = [];
-          labelLayout.visit(function(node) {
+          labelLayout.visit(function (node) {
             if (!node.point) return;
             if (conflicts.length) return true;
 
@@ -310,13 +307,13 @@ export class PieChart extends Chart {
 
           labelLayout.add(d);
         })
-        .attr('x', function(d) {
+        .attr('x', function (d) {
           if (d.depth === 0 || !d.position) {
             return;
           }
           return d.position.x;
         })
-        .attr('y', function(d) {
+        .attr('y', function (d) {
           if (d.depth === 0 || !d.position) {
             return;
           }
@@ -325,7 +322,7 @@ export class PieChart extends Chart {
 
       labelGroups
         .append('polyline')
-        .attr('points', function(d) {
+        .attr('points', function (d) {
           if (d.depth === 0 || !d.position) {
             return;
           }
@@ -363,8 +360,8 @@ export class PieChart extends Chart {
   draw() {
     const self = this;
 
-    return function(selection) {
-      selection.each(function(data) {
+    return function (selection) {
+      selection.each(function (data) {
         const slices = data.slices;
         const div = d3.select(this);
         const width = $(this).width();

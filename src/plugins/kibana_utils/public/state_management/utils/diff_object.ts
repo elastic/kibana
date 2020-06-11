@@ -30,8 +30,8 @@ export interface IDiffObject {
  * @param {string} key The keys
  * @returns {boolean}
  */
-const filterPrivateAndMethods = function(obj: Record<string, any>) {
-  return function(key: string) {
+const filterPrivateAndMethods = function (obj: Record<string, any>) {
+  return function (key: string) {
     if (isFunction(obj[key])) return false;
     if (key.charAt(0) === '$') return false;
     return key.charAt(0) !== '_';
@@ -56,13 +56,13 @@ export function applyDiff(target: Record<string, any>, source: Record<string, an
   diff.added = difference(sourceKeys, targetKeys);
 
   // Find the keys that will be changed
-  diff.changed = filter(sourceKeys, key => !isEqual(target[key], source[key]));
+  diff.changed = filter(sourceKeys, (key) => !isEqual(target[key], source[key]));
 
   // Make a list of all the keys that are changing
   diff.keys = union(diff.changed, diff.removed, diff.added);
 
   // Remove all the keys
-  each(diff.removed, key => {
+  each(diff.removed, (key) => {
     delete target[key];
   });
 

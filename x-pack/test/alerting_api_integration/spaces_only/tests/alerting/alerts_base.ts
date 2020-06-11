@@ -45,7 +45,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -70,7 +70,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      objectRemover.add(space.id, indexRecordActionId, 'action');
+      objectRemover.add(space.id, indexRecordActionId, 'action', 'actions');
       await objectRemover.removeAll();
     });
 
@@ -174,7 +174,7 @@ instanceStateValue: true
       const retryDate = new Date(Date.now() + 60000);
 
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Test rate limit',
@@ -182,11 +182,11 @@ instanceStateValue: true
           config: {},
         })
         .expect(200);
-      objectRemover.add(space.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -211,7 +211,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const scheduledActionTask = await retry.try(async () => {
         const searchResult = await es.search({
           index: '.kibana_task_manager',
@@ -255,7 +255,7 @@ instanceStateValue: true
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -271,7 +271,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const alertTestRecord = (
         await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
       )[0];
@@ -292,16 +292,16 @@ instanceStateValue: true
     it('should have proper callCluster and savedObjectsClient authorization for action type executor', async () => {
       const reference = alertUtils.generateReference();
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
           actionTypeId: 'test.authorization',
         })
         .expect(200);
-      objectRemover.add(space.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'action', 'actions');
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -327,7 +327,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.authorization', reference)
       )[0];

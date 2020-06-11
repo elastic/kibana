@@ -58,7 +58,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
           },
         },
       },
-      ...availableFields.map<SelectableColumnOption>(field => ({
+      ...availableFields.map<SelectableColumnOption>((field) => ({
         optionProps: {
           'data-test-subj': `addFieldLogColumn addFieldLogColumn:${field}`,
           // this key works around EuiSelectable using a lowercased label as
@@ -79,7 +79,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
   );
 
   const availableOptions = useMemo<EuiSelectableOption[]>(
-    () => availableColumnOptions.map(availableColumnOption => availableColumnOption.optionProps),
+    () => availableColumnOptions.map((availableColumnOption) => availableColumnOption.optionProps),
     [availableColumnOptions]
   );
 
@@ -88,7 +88,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
       closePopover();
 
       const selectedOptionIndex = selectedOptions.findIndex(
-        selectedOption => selectedOption.checked === 'on'
+        (selectedOption) => selectedOption.checked === 'on'
       );
       const selectedOption = availableColumnOptions[selectedOptionIndex];
 

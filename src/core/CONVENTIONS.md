@@ -167,17 +167,21 @@ leverage this pattern.
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParams } from '../../src/core/public';
+import { CoreStart, AppMountParameters } from 'src/core/public';
 
 import { MyAppRoot } from './components/app.ts';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export const renderApp = (core: CoreStart, deps: MyPluginDepsStart, { element, history }: AppMountParams) => {
+export const renderApp = (
+  core: CoreStart,
+  deps: MyPluginDepsStart,
+  { element, history }: AppMountParameters
+) => {
   ReactDOM.render(<MyAppRoot core={core} deps={deps} routerHistory={history} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
-}
+};
 ```
 
 ```ts
@@ -332,7 +336,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const myType: SavedObjectsType = {
   name: 'my-type',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'single',
   mappings: {
     properties: {
       someField: {

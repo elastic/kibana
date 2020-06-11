@@ -50,11 +50,11 @@ export class UpdateSourceEditor extends Component {
     }
 
     this.setState({
-      fields: indexPattern.fields.filter(field => !indexPatterns.isNestedField(field)),
+      fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
     });
   }
 
-  _onMetricsChange = metrics => {
+  _onMetricsChange = (metrics) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 

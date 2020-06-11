@@ -24,18 +24,18 @@ const getRelativeImpact = (
 function getWithRelativeImpact(items: TransactionGroupListAPIResponse) {
   const impacts = items
     .map(({ impact }) => impact)
-    .filter(impact => impact !== null) as number[];
+    .filter((impact) => impact !== null) as number[];
 
   const impactMin = Math.min(...impacts);
   const impactMax = Math.max(...impacts);
 
-  return items.map(item => {
+  return items.map((item) => {
     return {
       ...item,
       impactRelative:
         item.impact !== null
           ? getRelativeImpact(item.impact, impactMin, impactMax)
-          : null
+          : null,
     };
   });
 }
@@ -44,7 +44,7 @@ export function useTransactionList(urlParams: IUrlParams) {
   const { serviceName, transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
   const { data = [], error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/transaction_groups',
@@ -54,9 +54,9 @@ export function useTransactionList(urlParams: IUrlParams) {
               start,
               end,
               transactionType,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -67,6 +67,6 @@ export function useTransactionList(urlParams: IUrlParams) {
   return {
     data: memoizedData,
     status,
-    error
+    error,
   };
 }

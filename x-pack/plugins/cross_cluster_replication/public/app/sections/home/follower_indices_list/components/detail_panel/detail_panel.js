@@ -32,6 +32,7 @@ import {
 import 'brace/theme/textmate';
 
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
+import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
 import { ContextMenu } from '../context_menu';
 
@@ -452,7 +453,12 @@ export class DetailPanel extends Component {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton href={indexManagementUri} data-test-subj="viewIndexManagementButton">
+                <EuiButton
+                  href={routing._reactRouter.getUrlForApp('management', {
+                    path: `data/index_management${indexManagementUri}`,
+                  })}
+                  data-test-subj="viewIndexManagementButton"
+                >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexDetailPanel.viewIndexLink"
                     defaultMessage="View in Index Management"

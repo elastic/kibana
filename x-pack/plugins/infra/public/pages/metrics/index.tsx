@@ -109,7 +109,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   <Route path={'/inventory'} component={SnapshotPage} />
                   <Route
                     path={'/explorer'}
-                    render={props => (
+                    render={(props) => (
                       <WithSource>
                         {({ configuration, createDerivedIndexPattern }) => (
                           <MetricsExplorerOptionsContainer.Provider>

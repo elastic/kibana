@@ -14,7 +14,7 @@ import { NoIndexPatternCallout } from '../../../components/no_index_pattern_call
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { getAggregatableGeoFieldTypes, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { RenderAsSelect } from './render_as_select';
 
 export class CreateSourceEditor extends Component {
@@ -38,7 +38,7 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  onIndexPatternSelect = indexPatternId => {
+  onIndexPatternSelect = (indexPatternId) => {
     this.setState(
       {
         indexPatternId,
@@ -47,7 +47,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  loadIndexPattern = indexPatternId => {
+  loadIndexPattern = (indexPatternId) => {
     this.setState(
       {
         isLoadingIndexPattern: true,
@@ -58,7 +58,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  debouncedLoad = _.debounce(async indexPatternId => {
+  debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -93,7 +93,7 @@ export class CreateSourceEditor extends Component {
     }
   }, 300);
 
-  _onGeoFieldSelect = geoField => {
+  _onGeoFieldSelect = (geoField) => {
     this.setState(
       {
         geoField,
@@ -102,7 +102,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onRequestTypeSelect = newValue => {
+  _onRequestTypeSelect = (newValue) => {
     this.setState(
       {
         requestType: newValue,
@@ -176,7 +176,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={AGGREGATABLE_GEO_FIELD_TYPES}
+          fieldTypes={getAggregatableGeoFieldTypes()}
           onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>

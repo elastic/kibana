@@ -82,7 +82,7 @@ export class SavedObjectsManagementPlugin
           'Import, export, and manage your saved searches, visualizations, and dashboards.',
       }),
       icon: 'savedObjectsApp',
-      path: '/app/kibana#/management/kibana/objects',
+      path: '/app/management/kibana/objects',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN,
     });
@@ -94,7 +94,7 @@ export class SavedObjectsManagementPlugin
         defaultMessage: 'Saved Objects',
       }),
       order: 1,
-      mount: async mountParams => {
+      mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({
           core,

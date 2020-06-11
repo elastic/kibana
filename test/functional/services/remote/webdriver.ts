@@ -241,8 +241,8 @@ async function attemptToCreateCommand(
         return {
           session,
           consoleLog$: chunk$.pipe(
-            map(chunk => chunk.toString('utf8')),
-            mergeMap(msg => {
+            map((chunk) => chunk.toString('utf8')),
+            mergeMap((msg) => {
               const match = msg.match(CONSOLE_LINE_RE);
               if (!match) {
                 log.debug('Firefox stdout: ' + msg);

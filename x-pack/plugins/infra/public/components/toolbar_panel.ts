@@ -15,5 +15,5 @@ export const ToolbarPanel = euiStyled(EuiPanel).attrs(() => ({
   border-right: none;
   border-left: none;
   border-radius: 0;
-  padding: ${props => `12px ${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
 `;

@@ -65,6 +65,7 @@ export function setStartServices(npStart: NpStart) {
   visualizationsServices.setCapabilities(npStart.core.application.capabilities);
   visualizationsServices.setHttp(npStart.core.http);
   visualizationsServices.setApplication(npStart.core.application);
+  visualizationsServices.setEmbeddable(npStart.plugins.embeddable);
   visualizationsServices.setSavedObjects(npStart.core.savedObjects);
   visualizationsServices.setIndexPatterns(npStart.plugins.data.indexPatterns);
   visualizationsServices.setFilterManager(npStart.plugins.data.query.filterManager);

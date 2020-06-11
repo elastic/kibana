@@ -17,7 +17,7 @@ const handlers = {
 };
 
 storiesOf('components/Sidebar/SidebarHeader', module)
-  .addDecorator(story => <div style={{ width: '300px' }}>{story()}</div>)
+  .addDecorator((story) => <div style={{ width: '300px' }}>{story()}</div>)
   .add('default', () => <SidebarHeader title="Selected layer" {...handlers} />)
   .add('with layer controls', () => (
     <SidebarHeader title="Grouped element" showLayerControls={true} {...handlers} />

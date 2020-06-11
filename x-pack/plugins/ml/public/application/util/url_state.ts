@@ -35,7 +35,7 @@ export function getUrlState(search: string): Dictionary<any> {
   const parsedQueryString = parse(search, { sort: false });
 
   try {
-    Object.keys(parsedQueryString).forEach(a => {
+    Object.keys(parsedQueryString).forEach((a) => {
       if (isRisonSerializationRequired(a)) {
         urlState[a] = decode(parsedQueryString[a] as string);
       } else {
@@ -77,7 +77,7 @@ export const useUrlState = (accessor: string): UrlState => {
         urlState[accessor][attribute] = value;
       } else {
         const attributes = attribute;
-        Object.keys(attributes).forEach(a => {
+        Object.keys(attributes).forEach((a) => {
           urlState[accessor][a] = attributes[a];
         });
       }
@@ -85,7 +85,7 @@ export const useUrlState = (accessor: string): UrlState => {
       try {
         const oldLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
 
-        Object.keys(urlState).forEach(a => {
+        Object.keys(urlState).forEach((a) => {
           if (isRisonSerializationRequired(a)) {
             parsedQueryString[a] = encode(urlState[a]);
           } else {

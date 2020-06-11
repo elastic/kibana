@@ -38,7 +38,7 @@ export function exportApi(server) {
     method: ['GET'],
     handler: async (req, h) => {
       const currentDate = moment.utc();
-      return exportDashboards(req).then(resp => {
+      return exportDashboards(req).then((resp) => {
         const json = JSON.stringify(resp, null, '  ');
         const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
         return h

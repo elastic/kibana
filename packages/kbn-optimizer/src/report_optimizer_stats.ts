@@ -29,14 +29,14 @@ export function reportOptimizerStats(reporter: CiStatsReporter, config: Optimize
     let lastState: OptimizerState | undefined;
     return update$.pipe(
       materialize(),
-      mergeMap(async n => {
+      mergeMap(async (n) => {
         if (n.kind === 'N' && n.value?.state) {
           lastState = n.value?.state;
         }
 
         if (n.kind === 'C' && lastState) {
           await reporter.metrics(
-            config.bundles.map(bundle => {
+            config.bundles.map((bundle) => {
               // make the cache read from the cache file since it was likely updated by the worker
               bundle.cache.refresh();
 

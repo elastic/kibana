@@ -64,7 +64,7 @@ export class GisMap extends Component {
   // - If it's not, then reporting injects a listener into the browser for a custom "renderComplete" event.
   // - When that event is fired, we snapshot the viz and move on.
   // Failure to not have the dom attribute, or custom event, will timeout the job.
-  // See x-pack/legacy/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
+  // See x-pack/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
   _onInitialLoadRenderComplete = () => {
     const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
 
@@ -73,7 +73,7 @@ export class GisMap extends Component {
     }
   };
 
-  _loadGeoFields = async nextIndexPatternIds => {
+  _loadGeoFields = async (nextIndexPatternIds) => {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -84,8 +84,8 @@ export class GisMap extends Component {
     const geoFields = [];
     try {
       const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-      indexPatterns.forEach(indexPattern => {
-        indexPattern.fields.forEach(field => {
+      indexPatterns.forEach((indexPattern) => {
+        indexPattern.fields.forEach((field) => {
           if (
             !indexPatternsUtils.isNestedField(field) &&
             (field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||

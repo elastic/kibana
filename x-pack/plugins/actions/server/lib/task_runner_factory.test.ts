@@ -59,6 +59,7 @@ const actionExecutorInitializerParams = {
   logger: loggingServiceMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
+  getScopedSavedObjectsClient: () => savedObjectsClientMock.create(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],

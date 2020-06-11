@@ -41,14 +41,14 @@ function getPageData($injector) {
 
   return $http
     .post(url, data)
-    .then(response => {
+    .then((response) => {
       const result = get(response, 'data', []);
       if (KIBANA_ALERTING_ENABLED) {
         return result.alerts;
       }
       return result;
     })
-    .catch(err => {
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -88,7 +88,7 @@ uiRoutes.when('/alerts', {
 
       this.data = $route.current.locals.alerts;
 
-      const renderReact = data => {
+      const renderReact = (data) => {
         const app = data.message ? (
           <p>{data.message}</p>
         ) : (
@@ -121,7 +121,7 @@ uiRoutes.when('/alerts', {
       };
       $scope.$watch(
         () => this.data,
-        data => renderReact(data)
+        (data) => renderReact(data)
       );
     }
   },

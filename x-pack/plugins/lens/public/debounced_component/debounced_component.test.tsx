@@ -25,7 +25,7 @@ describe('debouncedComponent', () => {
     component.setProps({ title: 'yall' });
     expect(component.text()).toEqual('there');
     await act(async () => {
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
     });
     expect(component.text()).toEqual('yall');
   });

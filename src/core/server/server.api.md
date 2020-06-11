@@ -480,11 +480,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
+    get: (request: KibanaRequest | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -823,16 +823,15 @@ export class ElasticsearchErrorHelpers {
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // @deprecated (undocumented)
-    readonly adminClient: IClusterClient;
-    // @deprecated (undocumented)
-    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-    // @deprecated (undocumented)
-    readonly dataClient: IClusterClient;
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
-    // (undocumented)
+    // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
         readonly client: IClusterClient;
@@ -1576,8 +1575,9 @@ export interface RequestHandlerContext {
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
-            dataClient: IScopedClusterClient;
-            adminClient: IScopedClusterClient;
+            legacy: {
+                client: IScopedClusterClient;
+            };
         };
         uiSettings: {
             client: IUiSettingsClient;

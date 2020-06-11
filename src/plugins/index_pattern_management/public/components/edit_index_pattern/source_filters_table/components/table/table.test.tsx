@@ -103,10 +103,7 @@ describe('Table', () => {
         // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
         <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(1)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
       // Ensure the state change propagates
       component.update();
 
@@ -123,10 +120,7 @@ describe('Table', () => {
         <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
 
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(1)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
 
       // Ensure the state change propagates
       component.update();
@@ -159,10 +153,7 @@ describe('Table', () => {
         <div>{localComponent.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
 
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(1)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
 
       // Update the value
       localComponent.setState({ editingFilterValue: 'time*' });
@@ -191,10 +182,7 @@ describe('Table', () => {
         <div>{getTableColumnRender(component, 2).render({ clientId, value: 'tim*' })}</div>
       );
 
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(0)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(0).simulate('click');
 
       editingComponent.update();
 
@@ -228,10 +216,7 @@ describe('Table', () => {
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
-    deleteCellComponent
-      .find('EuiButtonIcon')
-      .at(1)
-      .simulate('click');
+    deleteCellComponent.find('EuiButtonIcon').at(1).simulate('click');
     expect(deleteFilter).toBeCalled();
   });
 
@@ -254,10 +239,7 @@ describe('Table', () => {
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
-    editingComponent
-      .find('EuiButtonIcon')
-      .at(0)
-      .simulate('click');
+    editingComponent.find('EuiButtonIcon').at(0).simulate('click');
 
     component.update();
 
@@ -295,10 +277,7 @@ describe('Table', () => {
       <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
 
-    editingComponent
-      .find('EuiButtonIcon')
-      .at(0)
-      .simulate('click');
+    editingComponent.find('EuiButtonIcon').at(0).simulate('click');
 
     // Ensure the state change propagates
     component.update();

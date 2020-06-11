@@ -79,18 +79,29 @@ def getDefaultContext() {
   ].join(' · '))
 }
 
+def getStatusIcon() {
+  def status = buildUtils.getBuildStatus()
+  if (status == 'UNSTABLE') {
+    return ':yellow_heart:'
+  }
+
+  return ':broken_heart:'
+}
+
 def sendFailedBuild(Map params = [:]) {
   def config = [
     channel: '#kibana-operations-alerts',
-    title: ":broken_heart: *<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
-    message: ":broken_heart: ${getDefaultDisplayName()}",
+    title: "*<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
+    message: getDefaultDisplayName(),
     color: 'danger',
     icon: ':jenkins:',
     username: 'Kibana Operations',
     context: getDefaultContext(),
   ] + params
 
-  def blocks = [markdownBlock(config.title)]
+  def title = "${getStatusIcon()} ${config.title}"
+
+  def blocks = [markdownBlock(title)]
   getFailedBuildBlocks().each { blocks << it }
   blocks << dividerBlock()
   blocks << config.context

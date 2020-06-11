@@ -9,7 +9,7 @@ import {
   CoreSetup,
   KibanaRequest,
   RequestHandlerContext,
-  Logger
+  Logger,
 } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
@@ -18,6 +18,7 @@ import { ObservabilityPluginSetup } from '../../../observability/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FetchOptions } from '../../public/services/rest/callApi';
 import { SecurityPluginSetup } from '../../../security/public';
+import { MlPluginSetup } from '../../../ml/server';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -67,6 +68,7 @@ export type APMRequestHandlerContext<
   plugins: {
     observability?: ObservabilityPluginSetup;
     security?: SecurityPluginSetup;
+    ml?: MlPluginSetup;
   };
 };
 
@@ -114,6 +116,7 @@ export interface ServerAPI<TRouteState extends RouteState> {
       plugins: {
         observability?: ObservabilityPluginSetup;
         security?: SecurityPluginSetup;
+        ml?: MlPluginSetup;
       };
     }
   ) => void;

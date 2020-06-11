@@ -10,6 +10,17 @@
   - [Integration tests](server/integration_tests/router.test.ts)
 - Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
 
+## Fleet Requirements
+
+Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag `--xpack.ingestManager.fleet.tlsCheckDisabled=false`)
+
+Also you need to configure the hosts your agent is going to use to comunication with Elasticsearch and Kibana (Not needed if you use Elastic cloud). You can use the following flags:
+
+```
+--xpack.ingestManager.fleet.elasticsearch.host=http://localhost:9200
+--xpack.ingestManager.fleet.kibana.host=http://localhost:5601
+```
+
 ## Development
 
 ### Getting started
@@ -41,12 +52,12 @@ This plugin follows the `common`, `server`, `public` structure from the [Archite
 1. In one terminal, change to the `x-pack` directory and start the test server with
 
    ```
-   node scripts/functional_tests_server.js --config test/api_integration/config.js
+   node scripts/functional_tests_server.js --config test/api_integration/config.ts
    ```
 
 1. in a second terminal, run the tests from the Kibana root directory with
    ```
-   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.js
+   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts
    ```
 
 #### EPM

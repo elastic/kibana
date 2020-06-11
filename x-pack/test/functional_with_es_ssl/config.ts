@@ -26,7 +26,7 @@ const enabledActionTypes = [
 ];
 
 // eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {
@@ -50,8 +50,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
-        pathname: '/app/kibana',
-        hash: '/management/insightsAndAlerting/triggersActions',
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
     },
     esTestCluster: {
@@ -70,7 +69,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
           'my-slack1': {
             actionTypeId: '.slack',
             name: 'Slack#xyztest',
-            config: {
+            secrets: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
           },

@@ -22,12 +22,12 @@ import { getSelectedAutoFollowPatternId } from '../selectors';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
-export const selectDetailAutoFollowPattern = id => ({
+export const selectDetailAutoFollowPattern = (id) => ({
   type: t.AUTO_FOLLOW_PATTERN_SELECT_DETAIL,
   payload: id,
 });
 
-export const selectEditAutoFollowPattern = id => ({
+export const selectEditAutoFollowPattern = (id) => ({
   type: t.AUTO_FOLLOW_PATTERN_SELECT_EDIT,
   payload: id,
 });
@@ -40,7 +40,7 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     handler: async () => await loadAutoFollowPatternsRequest(),
   });
 
-export const getAutoFollowPattern = id =>
+export const getAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_GET,
     scope: `${scope}-get`,
@@ -76,13 +76,13 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isUpdating = false)
           );
 
       getToasts().addSuccess(successMessage);
-      routing.navigate(`/auto_follow_patterns`, undefined, {
+      routing.navigate(`/auto_follow_patterns`, {
         pattern: encodeURIComponent(id),
       });
     },
   });
 
-export const deleteAutoFollowPattern = id =>
+export const deleteAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_DELETE,
     scope: `${scope}-delete`,
@@ -144,13 +144,13 @@ export const deleteAutoFollowPattern = id =>
     },
   });
 
-export const pauseAutoFollowPattern = id =>
+export const pauseAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_PAUSE,
     scope: `${scope}-pause`,
     status: API_STATUS.UPDATING,
     handler: () => pauseAutoFollowPatternRequest(id),
-    onSuccess: response => {
+    onSuccess: (response) => {
       /**
        * We can have 1 or more auto-follow pattern pause operations
        * that can fail or succeed. We will show 1 toast notification for each.
@@ -200,13 +200,13 @@ export const pauseAutoFollowPattern = id =>
     },
   });
 
-export const resumeAutoFollowPattern = id =>
+export const resumeAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_RESUME,
     scope: `${scope}-resume`,
     status: API_STATUS.UPDATING,
     handler: () => resumeAutoFollowPatternRequest(id),
-    onSuccess: response => {
+    onSuccess: (response) => {
       /**
        * We can have 1 or more auto-follow pattern resume operations
        * that can fail or succeed. We will show 1 toast notification for each.

@@ -20,7 +20,7 @@
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('dashboard time picker', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });

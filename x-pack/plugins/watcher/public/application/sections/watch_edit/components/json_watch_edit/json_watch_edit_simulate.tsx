@@ -42,7 +42,7 @@ import { useAppContext } from '../../../../app_context';
 
 import { useXJsonMode } from '../../../../shared_imports';
 
-const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
+const actionModeOptions = Object.keys(ACTION_MODES).map((mode) => ({
   text: ACTION_MODES[mode],
   value: ACTION_MODES[mode],
 }));
@@ -124,7 +124,7 @@ export const JsonWatchEditSimulate = ({
           options={actionModeOptions}
           value={actionModes[row.actionId]}
           data-test-subj="actionModesSelect"
-          onChange={e => {
+          onChange={(e) => {
             setExecuteDetails(
               new ExecuteDetails({
                 ...executeDetails,
@@ -199,7 +199,7 @@ export const JsonWatchEditSimulate = ({
                   }
                   min={0}
                   data-test-subj="scheduledTimeInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     const value = e.target.value;
                     setExecuteDetails(
                       new ExecuteDetails({
@@ -214,7 +214,7 @@ export const JsonWatchEditSimulate = ({
                 <EuiSelect
                   value={scheduledTimeUnit}
                   options={getScheduleTimeOptions(scheduledTimeValue)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setExecuteDetails(
                       new ExecuteDetails({
                         ...executeDetails,
@@ -247,7 +247,7 @@ export const JsonWatchEditSimulate = ({
                   {getTimeUnitLabel(TIME_UNITS.SECOND, triggeredTimeValue)}
                 </EuiText>
               }
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 setExecuteDetails(
                   new ExecuteDetails({
@@ -288,7 +288,7 @@ export const JsonWatchEditSimulate = ({
             )}
             checked={ignoreCondition}
             data-test-subj="ignoreConditionSwitch"
-            onChange={e => {
+            onChange={(e) => {
               setExecuteDetails(
                 new ExecuteDetails({ ...executeDetails, ignoreCondition: e.target.checked })
               );

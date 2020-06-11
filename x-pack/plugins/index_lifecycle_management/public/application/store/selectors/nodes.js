@@ -6,14 +6,14 @@
 
 import { createSelector } from 'reselect';
 
-export const getNodes = state => state.nodes.nodes;
+export const getNodes = (state) => state.nodes.nodes;
 
-export const getNodeOptions = createSelector([state => getNodes(state)], nodes => {
+export const getNodeOptions = createSelector([(state) => getNodes(state)], (nodes) => {
   if (!nodes) {
     return null;
   }
 
-  const options = Object.keys(nodes).map(attrs => ({
+  const options = Object.keys(nodes).map((attrs) => ({
     text: `${attrs} (${nodes[attrs].length})`,
     value: attrs,
   }));
@@ -26,14 +26,14 @@ export const getNodeOptions = createSelector([state => getNodes(state)], nodes =
   }
 });
 
-export const getSelectedPrimaryShardCount = state => state.nodes.selectedPrimaryShardCount;
+export const getSelectedPrimaryShardCount = (state) => state.nodes.selectedPrimaryShardCount;
 
-export const getSelectedReplicaCount = state =>
+export const getSelectedReplicaCount = (state) =>
   state.nodes.selectedReplicaCount !== undefined ? state.nodes.selectedReplicaCount : 1;
 
-export const getSelectedNodeAttrs = state => state.nodes.selectedNodeAttrs;
+export const getSelectedNodeAttrs = (state) => state.nodes.selectedNodeAttrs;
 
-export const getNodesFromSelectedNodeAttrs = state => {
+export const getNodesFromSelectedNodeAttrs = (state) => {
   const nodes = getNodes(state)[getSelectedNodeAttrs(state)];
   if (nodes) {
     return nodes.length;

@@ -90,7 +90,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             compressed
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
-            onChange={ev => {
+            onChange={(ev) => {
               onChangeValue(index, ev.target.value, 'from');
             }}
             value={item.from.value}
@@ -109,7 +109,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             compressed
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
-            onChange={ev => {
+            onChange={(ev) => {
               onChangeValue(index, ev.target.value, 'to');
             }}
             value={item.to.value}

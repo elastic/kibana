@@ -12,10 +12,9 @@ type Pre790AgentConfig = Exclude<AgentConfig, 'updated_at'> & {
   updated_on: string;
 };
 
-export const migrateAgentConfigToV790: SavedObjectMigrationFn<
-  Pre790AgentConfig,
-  AgentConfig
-> = doc => {
+export const migrateAgentConfigToV790: SavedObjectMigrationFn<Pre790AgentConfig, AgentConfig> = (
+  doc
+) => {
   const updatedAgentConfig = cloneDeep(doc);
 
   updatedAgentConfig.attributes.updated_at = doc.attributes.updated_on;

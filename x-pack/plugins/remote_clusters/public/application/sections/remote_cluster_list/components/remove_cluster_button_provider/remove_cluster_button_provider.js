@@ -22,7 +22,7 @@ export class RemoveClusterButtonProvider extends Component {
     isModalOpen: false,
   };
 
-  onMouseOverModal = event => {
+  onMouseOverModal = (event) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
@@ -75,7 +75,7 @@ export class RemoveClusterButtonProvider extends Component {
             />
           </p>
           <ul>
-            {clusterNames.map(name => (
+            {clusterNames.map((name) => (
               <li key={name}>{name}</li>
             ))}
           </ul>

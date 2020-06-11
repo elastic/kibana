@@ -21,20 +21,20 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../global_state';
 
-describe('State Management', function() {
+describe('State Management', function () {
   let $location;
   let state;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function(_$location_, globalState) {
+    ngMock.inject(function (_$location_, globalState) {
       $location = _$location_;
       state = globalState;
     })
   );
 
-  describe('Global State', function() {
-    it('should use previous state when not in URL', function() {
+  describe('Global State', function () {
+    it('should use previous state when not in URL', function () {
       // set satte via URL
       $location.search({ _g: '(foo:(bar:baz))' });
       state.fetch();

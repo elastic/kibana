@@ -45,7 +45,7 @@ export class PipelineListing extends Component {
         }),
         field: 'id',
         sortable: true,
-        render: id => (
+        render: (id) => (
           <EuiLink
             data-test-subj="id"
             onClick={() => {
@@ -73,7 +73,7 @@ export class PipelineListing extends Component {
                   series={throughput.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
+                    xValueFormatter: (value) => this.tooltipXValueFormatter(value, dateFormat),
                     yValueFormatter: partialRight(
                       this.tooltipYValueFormatter,
                       throughput.metric.format,
@@ -105,7 +105,7 @@ export class PipelineListing extends Component {
                   series={nodesCount.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
+                    xValueFormatter: (value) => this.tooltipXValueFormatter(value, dateFormat),
                     yValueFormatter: partialRight(
                       this.tooltipYValueFormatter,
                       nodesCount.metric.format,

@@ -24,16 +24,12 @@ import {
   CompilerErrorMsg,
 } from './compiler_messages';
 
-export type InternalWorkerMsg =
-  | WorkerPingMsg
+export type WorkerMsg =
   | CompilerRunningMsg
   | CompilerIssueMsg
   | CompilerSuccessMsg
   | CompilerErrorMsg
   | WorkerErrorMsg;
-
-// ping messages are internal, they don't apper in public message streams
-export type WorkerMsg = Exclude<InternalWorkerMsg, WorkerPingMsg>;
 
 /**
  * Message sent when the worker encounters an error that it can't
@@ -46,10 +42,6 @@ export interface WorkerErrorMsg {
   errorStack?: string;
 }
 
-export interface WorkerPingMsg {
-  type: 'ping';
-}
-
 const WORKER_STATE_TYPES: ReadonlyArray<WorkerMsg['type']> = [
   'running',
   'compiler issue',
@@ -58,19 +50,10 @@ const WORKER_STATE_TYPES: ReadonlyArray<WorkerMsg['type']> = [
   'worker error',
 ];
 
-export const isWorkerPing = (value: any): value is WorkerPingMsg =>
-  typeof value === 'object' && value && value.type === 'ping';
-
 export const isWorkerMsg = (value: any): value is WorkerMsg =>
   typeof value === 'object' && value && WORKER_STATE_TYPES.includes(value.type);
 
 export class WorkerMsgs {
-  ping(): WorkerPingMsg {
-    return {
-      type: 'ping',
-    };
-  }
-
   error(error: Error): WorkerErrorMsg {
     return {
       type: 'worker error',

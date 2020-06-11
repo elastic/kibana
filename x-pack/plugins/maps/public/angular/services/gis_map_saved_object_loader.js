@@ -15,7 +15,7 @@ import {
   getData,
 } from '../../kibana_services';
 
-export const getMapsSavedObjectLoader = _.once(function() {
+export const getMapsSavedObjectLoader = _.once(function () {
   const services = {
     savedObjectsClient: getSavedObjectsClient(),
     indexPatterns: getIndexPatternService(),

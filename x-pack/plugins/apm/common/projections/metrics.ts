@@ -7,13 +7,13 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   PROCESSOR_EVENT,
-  SERVICE_NODE_NAME
+  SERVICE_NODE_NAME,
 } from '../elasticsearch_fieldnames';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
@@ -34,7 +34,7 @@ function getServiceNodeNameFilters(serviceNodeName?: string) {
 export function getMetricsProjection({
   setup,
   serviceName,
-  serviceNodeName
+  serviceNodeName,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
@@ -47,7 +47,7 @@ export function getMetricsProjection({
     { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...getServiceNodeNameFilters(serviceNodeName),
-    ...uiFiltersES
+    ...uiFiltersES,
   ];
 
   return {
@@ -55,9 +55,9 @@ export function getMetricsProjection({
     body: {
       query: {
         bool: {
-          filter
-        }
-      }
-    }
+          filter,
+        },
+      },
+    },
   };
 }

@@ -190,7 +190,7 @@ describe('<FollowerIndicesList />', () => {
 
         expect(contextMenu.length).toBe(1);
         const contextMenuButtons = contextMenu.find('button');
-        const buttonsLabel = contextMenuButtons.map(btn => btn.text());
+        const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
 
         expect(buttonsLabel).toEqual([
           'Pause replication',
@@ -206,7 +206,7 @@ describe('<FollowerIndicesList />', () => {
         const contextMenu = find('contextMenu');
 
         const contextMenuButtons = contextMenu.find('button');
-        const buttonsLabel = contextMenuButtons.map(btn => btn.text());
+        const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
         expect(buttonsLabel).toEqual([
           'Resume replication',
           'Edit follower index',
@@ -250,7 +250,7 @@ describe('<FollowerIndicesList />', () => {
         const buttonLabels = component
           .find('.euiContextMenuPanel')
           .find('.euiContextMenuItem')
-          .map(button => button.text());
+          .map((button) => button.text());
 
         expect(buttonLabels).toEqual([
           'Pause replication',
@@ -266,7 +266,7 @@ describe('<FollowerIndicesList />', () => {
         const buttonLabels = component
           .find('.euiContextMenuPanel')
           .find('.euiContextMenuItem')
-          .map(button => button.text());
+          .map((button) => button.text());
 
         expect(buttonLabels).toEqual([
           'Resume replication',
@@ -326,11 +326,7 @@ describe('<FollowerIndicesList />', () => {
 
       test('should have a "settings" section', () => {
         actions.clickFollowerIndexAt(0);
-        expect(
-          find('followerIndexDetail.settingsSection')
-            .find('h3')
-            .text()
-        ).toEqual('Settings');
+        expect(find('followerIndexDetail.settingsSection').find('h3').text()).toEqual('Settings');
         expect(exists('followerIndexDetail.settingsValues')).toBe(true);
       });
 

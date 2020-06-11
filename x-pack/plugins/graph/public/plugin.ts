@@ -107,7 +107,7 @@ export class GraphPlugin
     if (this.licensing === null) {
       throw new Error('Start called before setup');
     }
-    this.licensing.license$.subscribe(license => {
+    this.licensing.license$.subscribe((license) => {
       toggleNavLink(checkLicense(license), core.chrome.navLinks);
     });
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsSetup, setupSavedObjects } from '.';
+import { ClientInstanciator, setupSavedObjects } from '.';
 
 import {
   coreMock,
@@ -24,7 +24,7 @@ import {
 import { EncryptedSavedObjectsService } from '../crypto';
 
 describe('#setupSavedObjects', () => {
-  let setupContract: SavedObjectsSetup;
+  let setupContract: ClientInstanciator;
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let coreSetupMock: ReturnType<typeof coreMock.createSetup>;
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
@@ -91,7 +91,7 @@ describe('#setupSavedObjects', () => {
 
   describe('#setupContract', () => {
     it('includes hiddenTypes when specified', async () => {
-      await setupContract(['hiddenType']);
+      await setupContract({ includedHiddenTypes: ['hiddenType'] });
       expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith([
         'hiddenType',
       ]);

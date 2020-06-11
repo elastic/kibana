@@ -15,24 +15,24 @@ interface ServiceMetricFetcherProps {
 }
 
 export function ServiceMetricFetcher({
-  serviceName
+  serviceName,
 }: ServiceMetricFetcherProps) {
   const {
-    urlParams: { start, end, environment }
+    urlParams: { start, end, environment },
   } = useUrlParams();
 
   const { data = {} as ServiceNodeMetrics, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/service-map/service/{serviceName}',
-          params: { path: { serviceName }, query: { start, end, environment } }
+          params: { path: { serviceName }, query: { start, end, environment } },
         });
       }
     },
     [serviceName, start, end, environment],
     {
-      preservePreviousData: false
+      preservePreviousData: false,
     }
   );
   const isLoading = status === 'loading';

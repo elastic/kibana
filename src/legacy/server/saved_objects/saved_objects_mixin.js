@@ -27,23 +27,22 @@ import {
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
 } from '../../../core/server/saved_objects';
-import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const typeRegistry = kbnServer.newPlatform.start.core.savedObjects.getTypeRegistry();
   const mappings = migrator.getActiveMappings();
-  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+  const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
   const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
-  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+  const visibleTypes = allTypes.filter((type) => !schema.isHiddenType(type));
 
   server.decorate('server', 'kibanaMigrator', migrator);
 
-  const warn = message => server.log(['warning', 'saved-objects'], message);
+  const warn = (message) => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
-  if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
+  if (!kbnServer.pluginSpecs.some((p) => p.getId() === 'kibana')) {
     warn('Saved Objects uninitialized because the Kibana plugin is disabled.');
     return;
   }
@@ -55,7 +54,7 @@ export function savedObjectsMixin(kbnServer, server) {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
     }
     // throw an exception if an extraType is not defined.
-    includedHiddenTypes.forEach(type => {
+    includedHiddenTypes.forEach((type) => {
       if (!allTypes.includes(type)) {
         throw new Error(`Missing mappings for saved objects type '${type}'`);
       }
@@ -98,7 +97,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function(options) {
+  server.decorate('request', 'getSavedObjectsClient', function (options) {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {

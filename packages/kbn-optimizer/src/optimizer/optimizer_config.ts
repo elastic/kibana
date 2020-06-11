@@ -106,7 +106,7 @@ export class OptimizerConfig {
       ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
-    if (!pluginScanDirs.every(p => Path.isAbsolute(p))) {
+    if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }
 
@@ -118,7 +118,7 @@ export class OptimizerConfig {
     }
 
     const pluginPaths = options.pluginPaths || [];
-    if (!pluginPaths.every(s => Path.isAbsolute(s))) {
+    if (!pluginPaths.every((s) => Path.isAbsolute(s))) {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
@@ -152,7 +152,7 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              entry: './public/entry_point',
+              entry: './public/index',
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),

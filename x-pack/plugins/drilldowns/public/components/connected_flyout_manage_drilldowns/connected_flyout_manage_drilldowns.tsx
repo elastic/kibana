@@ -7,12 +7,12 @@
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
-  AdvancedUiActionsActionFactory as ActionFactory,
+  UiActionsEnhancedActionFactory as ActionFactory,
   AdvancedUiActionsStart,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedSerializedAction,
   UiActionsEnhancedSerializedEvent,
-} from '../../../../advanced_ui_actions/public';
+} from '../../../../ui_actions_enhanced/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
@@ -48,17 +48,17 @@ enum Routes {
 }
 
 export function createFlyoutManageDrilldowns({
-  advancedUiActions,
+  uiActionsEnhanced,
   storage,
   notifications,
 }: {
-  advancedUiActions: AdvancedUiActionsStart;
+  uiActionsEnhanced: AdvancedUiActionsStart;
   storage: IStorageWrapper;
   notifications: NotificationsStart;
 }) {
   // fine to assume this is static,
   // because all action factories should be registered in setup phase
-  const allActionFactories = advancedUiActions.getActionFactories();
+  const allActionFactories = uiActionsEnhanced.getActionFactories();
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
@@ -115,7 +115,7 @@ export function createFlyoutManageDrilldowns({
     function resolveInitialDrilldownWizardConfig(): DrilldownWizardConfig | undefined {
       if (route !== Routes.Edit) return undefined;
       if (!currentEditId) return undefined;
-      const drilldownToEdit = drilldowns?.find(d => d.eventId === currentEditId);
+      const drilldownToEdit = drilldowns?.find((d) => d.eventId === currentEditId);
       if (!drilldownToEdit) return undefined;
 
       return {
@@ -200,11 +200,11 @@ export function createFlyoutManageDrilldowns({
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
-            onDelete={ids => {
+            onDelete={(ids) => {
               setCurrentEditId(null);
               deleteDrilldown(ids);
             }}
-            onEdit={id => {
+            onEdit={(id) => {
               setCurrentEditId(id);
               setRoute(Routes.Edit);
             }}
@@ -228,7 +228,7 @@ function useCompatibleActionFactoriesForCurrentContext<Context extends object = 
     let canceled = false;
     async function updateCompatibleFactoriesForContext() {
       const compatibility = await Promise.all(
-        actionFactories.map(factory => factory.isCompatible(context))
+        actionFactories.map((factory) => factory.isCompatible(context))
       );
       if (canceled) return;
       setCompatibleActionFactories(actionFactories.filter((_, i) => compatibility[i]));

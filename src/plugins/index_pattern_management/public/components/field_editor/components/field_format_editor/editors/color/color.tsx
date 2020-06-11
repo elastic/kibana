@@ -105,7 +105,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
               return (
                 <EuiFieldText
                   value={value}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.onColorChange(
                       {
                         regex: e.target.value,
@@ -129,7 +129,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
               return (
                 <EuiFieldText
                   value={value}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.onColorChange(
                       {
                         range: e.target.value,
@@ -153,7 +153,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
           return (
             <EuiColorPicker
               color={color}
-              onChange={newColor => {
+              onChange={(newColor) => {
                 this.onColorChange(
                   {
                     text: newColor,
@@ -177,7 +177,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
           return (
             <EuiColorPicker
               color={color}
-              onChange={newColor => {
+              onChange={(newColor) => {
                 this.onColorChange(
                   {
                     background: newColor,

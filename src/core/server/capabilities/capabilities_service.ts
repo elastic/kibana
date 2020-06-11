@@ -127,7 +127,7 @@ export class CapabilitiesService {
       () =>
         mergeCapabilities(
           defaultCapabilities,
-          ...this.capabilitiesProviders.map(provider => provider())
+          ...this.capabilitiesProviders.map((provider) => provider())
         ),
       () => this.capabilitiesSwitchers
     );
@@ -150,7 +150,7 @@ export class CapabilitiesService {
 
   public start(): CapabilitiesStart {
     return {
-      resolveCapabilities: request => this.resolveCapabilities(request, []),
+      resolveCapabilities: (request) => this.resolveCapabilities(request, []),
     };
   }
 }

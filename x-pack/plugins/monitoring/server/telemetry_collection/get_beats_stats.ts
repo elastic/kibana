@@ -164,7 +164,7 @@ export function processResults(
   }: BeatsProcessOptions
 ) {
   const currHits = results?.hits?.hits || [];
-  currHits.forEach(hit => {
+  currHits.forEach((hit) => {
     const clusterUuid = hit._source.cluster_uuid;
     if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getBaseStats();
@@ -211,7 +211,7 @@ export function processResults(
       const stateInput = hit._source.beats_state?.state?.input;
       if (stateInput !== undefined) {
         const inputSet = clusterInputSets[clusterUuid];
-        stateInput.names.forEach(name => inputSet.add(name));
+        stateInput.names.forEach((name) => inputSet.add(name));
         clusters[clusterUuid].input.names = Array.from(inputSet);
         clusters[clusterUuid].input.count += stateInput.count;
       }
@@ -220,7 +220,7 @@ export function processResults(
       const statsType = hit._source.beats_state?.beat?.type;
       if (stateModule !== undefined) {
         const moduleSet = clusterModuleSets[clusterUuid];
-        stateModule.names.forEach(name => moduleSet.add(statsType + '.' + name));
+        stateModule.names.forEach((name) => moduleSet.add(statsType + '.' + name));
         clusters[clusterUuid].module.names = Array.from(moduleSet);
         clusters[clusterUuid].module.count += stateModule.count;
       }

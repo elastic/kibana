@@ -27,7 +27,7 @@ const getFilteredPatterns = (autoFollowPatterns, queryText) => {
   if (queryText) {
     const normalizedSearchText = queryText.toLowerCase();
 
-    return autoFollowPatterns.filter(autoFollowPattern => {
+    return autoFollowPatterns.filter((autoFollowPattern) => {
       const {
         name,
         remoteCluster,
@@ -107,7 +107,7 @@ export class AutoFollowPatternTable extends PureComponent {
         ),
         sortable: true,
         truncateText: false,
-        render: name => {
+        render: (name) => {
           return (
             <EuiLink
               onClick={() => {
@@ -130,7 +130,7 @@ export class AutoFollowPatternTable extends PureComponent {
             defaultMessage: 'Status',
           }
         ),
-        render: active => {
+        render: (active) => {
           const statusText = active
             ? i18n.translate(
                 'xpack.crossClusterReplication.autoFollowPatternList.table.statusTextActive',
@@ -169,7 +169,7 @@ export class AutoFollowPatternTable extends PureComponent {
             defaultMessage: 'Leader patterns',
           }
         ),
-        render: leaderIndexPatterns => leaderIndexPatterns.join(', '),
+        render: (leaderIndexPatterns) => leaderIndexPatterns.join(', '),
       },
       {
         field: 'followIndexPatternPrefix',
@@ -217,7 +217,7 @@ export class AutoFollowPatternTable extends PureComponent {
 
               return (
                 <span
-                  onClick={event => {
+                  onClick={(event) => {
                     if (event.stopPropagation) {
                       event.stopPropagation();
                     }
@@ -250,7 +250,7 @@ export class AutoFollowPatternTable extends PureComponent {
 
               return (
                 <span
-                  onClick={() => (window.location.hash = routing.getAutoFollowPatternPath(name))}
+                  onClick={() => routing.navigate(routing.getAutoFollowPatternPath(name))}
                   data-test-subj="contextMenuEditButton"
                 >
                   <EuiIcon aria-label={label} type="pencil" className="euiContextMenu__icon" />
@@ -270,7 +270,7 @@ export class AutoFollowPatternTable extends PureComponent {
 
               return (
                 <AutoFollowPatternDeleteProvider>
-                  {deleteAutoFollowPattern => (
+                  {(deleteAutoFollowPattern) => (
                     <span
                       onClick={() => deleteAutoFollowPattern(name)}
                       data-test-subj="contextMenuDeleteButton"
@@ -318,7 +318,7 @@ export class AutoFollowPatternTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: selectedItems =>
+      onSelectionChange: (selectedItems) =>
         this.setState({ selectedItems: selectedItems.map(({ name }) => name) }),
     };
 
@@ -326,13 +326,11 @@ export class AutoFollowPatternTable extends PureComponent {
       toolsLeft: selectedItems.length ? (
         <AutoFollowPatternActionMenu
           arrowDirection="down"
-          patterns={this.state.selectedItems.map(name =>
-            filteredAutoFollowPatterns.find(item => item.name === name)
+          patterns={this.state.selectedItems.map((name) =>
+            filteredAutoFollowPatterns.find((item) => item.name === name)
           )}
         />
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       onChange: this.onSearch,
       box: {
         incremental: true,

@@ -37,12 +37,8 @@ export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormat
     ...defaultState,
     sampleInputs: [
       Date.now(),
-      moment()
-        .startOf('year')
-        .valueOf(),
-      moment()
-        .endOf('year')
-        .valueOf(),
+      moment().startOf('year').valueOf(),
+      moment().endOf('year').valueOf(),
     ],
   };
 
@@ -82,7 +78,7 @@ export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormat
             data-test-subj="dateEditorPattern"
             value={formatParams.pattern}
             placeholder={defaultPattern}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ pattern: e.target.value });
             }}
             isInvalid={!!error}

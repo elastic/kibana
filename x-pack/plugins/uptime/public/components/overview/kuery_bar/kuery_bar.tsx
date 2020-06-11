@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
-import { useUrlParams } from '../../../hooks';
+import { useSearchText, useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
@@ -36,15 +36,22 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
+  defaultKuery?: string;
   'data-test-subj': string;
+  shouldUpdateUrl?: boolean;
+  updateDefaultKuery?: (value: string) => void;
 }
 
 export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
+  defaultKuery,
   'data-test-subj': dataTestSubj,
+  shouldUpdateUrl,
+  updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
+  const { updateSearchText } = useSearchText();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -55,6 +62,10 @@ export function KueryBar({
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
+
+  useEffect(() => {
+    updateSearchText(kuery);
+  }, [kuery, updateSearchText]);
 
   const indexPatternMissing = loading && !indexPattern;
 
@@ -79,7 +90,7 @@ export function KueryBar({
           selectionEnd: selectionStart,
         })) || []
       )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {
@@ -105,7 +116,13 @@ export function KueryBar({
         return;
       }
 
-      updateUrlParams({ search: inputValue.trim() });
+      if (shouldUpdateUrl !== false) {
+        updateUrlParams({ search: inputValue.trim() });
+      }
+      updateSearchText(inputValue);
+      if (updateDefaultKuery) {
+        updateDefaultKuery(inputValue);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
@@ -118,7 +135,7 @@ export function KueryBar({
         data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={kuery}
+        initialValue={defaultKuery || kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}

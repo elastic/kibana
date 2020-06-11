@@ -5,46 +5,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { lazy } from 'react';
+import { ConfigSchema } from '.';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
-  PluginInitializerContext
+  PluginInitializerContext,
 } from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-
-import {
-  PluginSetupContract as AlertingPluginPublicSetup,
-  PluginStartContract as AlertingPluginPublicStart
-} from '../../alerting/public';
-import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,
-  DataPublicPluginStart
+  DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  PluginSetupContract as AlertingPluginPublicSetup,
+  PluginStartContract as AlertingPluginPublicStart,
+} from '../../alerts/public';
+import { FeaturesPluginSetup } from '../../features/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart
+  TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { ConfigSchema } from '.';
-import { createCallApmApi } from './services/rest/createCallApmApi';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { AlertType } from '../common/alert_types';
-import { ErrorRateAlertTrigger } from './components/shared/ErrorRateAlertTrigger';
-import { TransactionDurationAlertTrigger } from './components/shared/TransactionDurationAlertTrigger';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
+import { createCallApmApi } from './services/rest/createCallApmApi';
+import { createStaticIndexPattern } from './services/rest/index_pattern';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
-import { createStaticIndexPattern } from './services/rest/index_pattern';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerting?: AlertingPluginPublicSetup;
+  alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home: HomePublicPluginSetup;
@@ -53,7 +51,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmPluginStartDeps {
-  alerting?: AlertingPluginPublicStart;
+  alerts?: AlertingPluginPublicStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
@@ -75,7 +73,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     core.application.register({
       id: 'apm',
       title: 'APM',
-      order: 8100,
+      order: 8300,
       euiIconType: 'apmApp',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
@@ -92,13 +90,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         setReadonlyBadge(coreStart);
 
         // Automatically creates static index pattern and stores as saved object
-        createStaticIndexPattern().catch(e => {
+        createStaticIndexPattern().catch((e) => {
           // eslint-disable-next-line no-console
           console.log('Error creating static index pattern', e);
         });
 
         return renderApp(coreStart, pluginSetupDeps, params, config);
-      }
+      },
     });
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
@@ -109,27 +107,31 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.triggers_actions_ui.alertTypeRegistry.register({
       id: AlertType.ErrorRate,
       name: i18n.translate('xpack.apm.alertTypes.errorRate', {
-        defaultMessage: 'Error rate'
+        defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
-      alertParamsExpression: ErrorRateAlertTrigger,
+      alertParamsExpression: lazy(() =>
+        import('./components/shared/ErrorRateAlertTrigger')
+      ),
       validate: () => ({
-        errors: []
+        errors: [],
       }),
-      requiresAppContext: true
+      requiresAppContext: true,
     });
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
       id: AlertType.TransactionDuration,
       name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-        defaultMessage: 'Transaction duration'
+        defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
-      alertParamsExpression: TransactionDurationAlertTrigger,
+      alertParamsExpression: lazy(() =>
+        import('./components/shared/TransactionDurationAlertTrigger')
+      ),
       validate: () => ({
-        errors: []
+        errors: [],
       }),
-      requiresAppContext: true
+      requiresAppContext: true,
     });
   }
 }

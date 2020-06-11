@@ -15,7 +15,7 @@ const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
   beforeEach(() => {
-    require('../kibana_services').getInjectedVarFunc = () => jest.fn();
+    require('../kibana_services').getIsEmsEnabled = () => true;
   });
 
   it('Should get initial layers from saved object', () => {
@@ -66,18 +66,11 @@ describe('EMS is enabled', () => {
       return null;
     };
     require('../kibana_services').getIsEmsEnabled = () => true;
-    require('../kibana_services').getInjectedVarFunc = () => key => {
-      switch (key) {
-        case 'emsTileLayerId':
-          return {
-            bright: 'road_map',
-            desaturated: 'road_map_desaturated',
-            dark: 'dark_map',
-          };
-        default:
-          throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
-      }
-    };
+    require('../kibana_services').getEmsTileLayerId = () => ({
+      bright: 'road_map',
+      desaturated: 'road_map_desaturated',
+      dark: 'dark_map',
+    });
   });
 
   it('Should get initial layer with EMS tile source', () => {

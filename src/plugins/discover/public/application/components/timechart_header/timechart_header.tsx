@@ -147,9 +147,7 @@ export function TimechartHeader({
                   size="s"
                   type="alert"
                 />
-              ) : (
-                undefined
-              )
+              ) : undefined
             }
           />
         </EuiFlexItem>

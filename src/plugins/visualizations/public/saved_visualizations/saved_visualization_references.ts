@@ -16,9 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
+import {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from '../../../../core/public';
 import { VisSavedObject } from '../types';
-import { injectSearchSourceReferences, extractSearchSourceReferences } from '../../../data/public';
+import {
+  extractSearchSourceReferences,
+  injectSearchSourceReferences,
+  SearchSourceFields,
+} from '../../../data/public';
 
 export function extractReferences({
   attributes,
@@ -32,10 +40,10 @@ export function extractReferences({
 
   if (updatedAttributes.searchSourceFields) {
     const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
-      updatedAttributes.searchSourceFields as any
+      updatedAttributes.searchSourceFields as SearchSourceFields
     );
-    updatedAttributes.searchSourceFields = searchSource;
-    searchSourceReferences.forEach(r => updatedReferences.push(r));
+    updatedAttributes.searchSourceFields = searchSource as SavedObjectAttribute;
+    searchSourceReferences.forEach((r) => updatedReferences.push(r));
   }
 
   // Extract saved search
@@ -83,7 +91,7 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
   }
   if (savedObject.savedSearchRefName) {
     const savedSearchReference = references.find(
-      reference => reference.name === savedObject.savedSearchRefName
+      (reference) => reference.name === savedObject.savedSearchRefName
     );
     if (!savedSearchReference) {
       throw new Error(`Could not find saved search reference "${savedObject.savedSearchRefName}"`);
@@ -97,7 +105,7 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
       if (!control.indexPatternRefName) {
         return;
       }
-      const reference = references.find(ref => ref.name === control.indexPatternRefName);
+      const reference = references.find((ref) => ref.name === control.indexPatternRefName);
       if (!reference) {
         throw new Error(`Could not find index pattern reference "${control.indexPatternRefName}"`);
       }

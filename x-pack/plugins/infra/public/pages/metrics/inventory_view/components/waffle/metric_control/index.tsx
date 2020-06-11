@@ -84,7 +84,7 @@ export const WaffleMetricControls = ({
         onChange({ type: options[0].value as SnapshotMetricType });
       }
       // Filter out the deleted metric from the editbale.
-      const newMetrics = editModeCustomMetrics.filter(v => v.id !== m.id);
+      const newMetrics = editModeCustomMetrics.filter((v) => v.id !== m.id);
       setEditModeCustomMetrics(newMetrics);
     },
     [editModeCustomMetrics, metric, onChange, options]
@@ -92,7 +92,9 @@ export const WaffleMetricControls = ({
 
   const handleEditCustomMetric = useCallback(
     (currentMetric: SnapshotCustomMetricInput) => {
-      const newMetrics = customMetrics.map(m => (m.id === currentMetric.id && currentMetric) || m);
+      const newMetrics = customMetrics.map(
+        (m) => (m.id === currentMetric.id && currentMetric) || m
+      );
       onChangeCustomMetrics(newMetrics);
       setModeToPick();
       setEditCustomMetric(void 0);
@@ -125,7 +127,7 @@ export const WaffleMetricControls = ({
   const id = SnapshotCustomMetricInputRT.is(metric) && metric.id ? metric.id : metric.type;
   const currentLabel = SnapshotCustomMetricInputRT.is(metric)
     ? getCustomMetricLabel(metric)
-    : options.find(o => o.value === id)?.text;
+    : options.find((o) => o.value === id)?.text;
 
   if (!currentLabel) {
     return null;

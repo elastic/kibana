@@ -167,15 +167,26 @@ export class DashboardPlugin
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
-      const useHideChrome = () => {
+      const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
         React.useEffect(() => {
-          coreStart.chrome.setIsVisible(false);
-          return () => coreStart.chrome.setIsVisible(true);
-        }, []);
+          if (toggleChrome) {
+            coreStart.chrome.setIsVisible(false);
+          }
+
+          return () => {
+            if (toggleChrome) {
+              coreStart.chrome.setIsVisible(true);
+            }
+          };
+        }, [toggleChrome]);
       };
 
-      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
-        useHideChrome();
+      const ExitFullScreenButton: React.FC<
+        ExitFullScreenButtonProps & {
+          toggleChrome: boolean;
+        }
+      > = ({ toggleChrome, ...props }) => {
+        useHideChrome({ toggleChrome });
         return <ExitFullScreenButtonUi {...props} />;
       };
       return {
@@ -228,7 +239,7 @@ export class DashboardPlugin
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
-      order: -1001,
+      order: 2500,
       euiIconType: 'dashboardApp',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
@@ -290,7 +301,7 @@ export class DashboardPlugin
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
-      path => {
+      (path) => {
         const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
         if (!id && !tail) {
           // unrecognized sub url
@@ -307,7 +318,7 @@ export class DashboardPlugin
     kibanaLegacy.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
-      path => {
+      (path) => {
         const [, tail] = /(\?.*)/.exec(path) || [];
         // carry over query if it exists
         return `#/list${tail || ''}`;

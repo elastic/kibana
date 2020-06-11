@@ -25,7 +25,7 @@ import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../
 
 function filterByName(items: IndexPatternField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();
-  return items.filter(item => item.name.toLowerCase().includes(lowercaseFilter));
+  return items.filter((item) => item.name.toLowerCase().includes(lowercaseFilter));
 }
 
 function getCounts(
@@ -35,7 +35,7 @@ function getCounts(
   },
   fieldFilter = ''
 ) {
-  const fieldCount = countBy(filterByName(fields, fieldFilter), function(field) {
+  const fieldCount = countBy(filterByName(fields, fieldFilter), function (field) {
     return field.scripted ? 'scripted' : 'indexed';
   });
 
@@ -43,7 +43,7 @@ function getCounts(
     indexed: 0,
     scripted: 0,
     sourceFilters: sourceFilters.excludes
-      ? sourceFilters.excludes.filter(value =>
+      ? sourceFilters.excludes.filter((value) =>
           value.toLowerCase().includes(fieldFilter.toLowerCase())
         ).length
       : 0,
@@ -117,7 +117,7 @@ export function getTabs(
 }
 
 export function getPath(field: IndexPatternField) {
-  return `${field.indexPattern?.id}/field/${field.name}`;
+  return `/patterns/${field.indexPattern?.id}/field/${field.name}`;
 }
 
 const allTypesDropDown = i18n.translate(
@@ -145,7 +145,7 @@ export function convertToEuiSelectOption(options: string[], type: string) {
         ]
       : [];
   return euiOptions.concat(
-    unique(options).map(option => {
+    unique(options).map((option) => {
       return {
         value: option,
         text: option,

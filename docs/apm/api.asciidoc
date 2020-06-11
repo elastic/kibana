@@ -11,6 +11,43 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<apm-annotation-api>>
 
+[float]
+[[apm-api-example]]
+=== Using the APIs
+
+// The following content is reused throughout the API docs
+// tag::using-the-APIs[]
+Interact with APM APIs using cURL or another API tool.
+All APM APIs are Kibana APIs, not Elasticsearch APIs;
+because of this, the Kibana dev tools console cannot be used to interact with APM APIs.
+
+For all APM APIs, you must use a request header.
+Supported headers are `Authorization`, `kbn-xsrf`, and `Content-Type`.
+
+`Authorization: ApiKey {credentials}`::
+Kibana supports token-based authentication with the Elasticsearch API key service.
+The API key returned by the  {ref}/security-api-create-api-key.html[Elasticsearch create API key API]
+can be used by sending a request with an `Authorization` header that has a value of `ApiKey` followed by the `{credentials}`,
+where `{credentials}` is the base64 encoding of `id` and `api_key` joined by a colon.
++
+Alternatively, you can create a user and use their username and password to authenticate API access: `-u $USER:$PASSWORD`.
++
+Whether using `Authorization: ApiKey {credentials}`, or `-u $USER:$PASSWORD`,
+users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
+
+`kbn-xsrf: true`::
+  By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
+
+* The API endpoint uses the `GET` or `HEAD` operations
+* The path is whitelisted using the <<settings, `server.xsrf.whitelist`>> setting
+* XSRF protections are disabled using the `server.xsrf.disableProtection` setting
+
+`Content-Type: application/json`::
+  Applicable only when you send a payload in the API request.
+  {kib} API requests and responses use JSON.
+  Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
+// end::using-the-APIs[]
+
 Here's an example CURL request that adds an annotation to the APM app:
 
 [source,curl]
@@ -32,17 +69,6 @@ curl -X POST \
     }'
 ----
 
-For more information, the Kibana <<api,REST API reference>> provides information on how to use Kibana APIs,
-like required request headers and authentication options.
-
-// AGENT CONFIG API
-// GET --> Feature (APM) Read
-// CREATE/EDIT/DELETE --> Feature (APM) All
-
-// ANNOTATION API
-// Feature (APM) All
-// Index: `observability-annotations`. Privileges: `create_index`, `create_doc`, `manage`, and `read`.
-
 ////
 *******************************************************
 ////
@@ -60,6 +86,16 @@ The following Agent configuration APIs are available:
 * <<apm-delete-config>> to delete an Agent configuration.
 * <<apm-list-config>> to list all Agent configurations.
 * <<apm-search-config>> to search for an Agent configuration.
+
+[float]
+[[use-agent-config-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
 
 ////
 *******************************************************
@@ -100,7 +136,7 @@ The following Agent configuration APIs are available:
 [[apm-update-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 PUT /api/apm/settings/agent-configuration
 {
@@ -150,7 +186,7 @@ PUT /api/apm/settings/agent-configuration
 [[apm-delete-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 DELETE /api/apm/settings/agent-configuration
 {
@@ -228,7 +264,7 @@ DELETE /api/apm/settings/agent-configuration
 [[apm-list-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 GET  /api/apm/settings/agent-configuration
 --------------------------------------------------
@@ -293,7 +329,7 @@ GET  /api/apm/settings/agent-configuration
 [[apm-search-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 POST /api/apm/settings/agent-configuration/search
 {
@@ -317,6 +353,9 @@ POST /api/apm/settings/agent-configuration/search
 The Annotation API allows you to annotate visualizations in the APM app with significant events, like deployments,
 allowing you to easily see how these events are impacting the performance of your existing applications.
 
+By default, annotations are stored in a newly created `observability-annotations` index.
+The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+
 The following APIs are available:
 
 * <<apm-annotation-create>> to create an annotation for APM.
@@ -324,8 +363,15 @@ The following APIs are available:
 // * <<obs-annotation-get>> GET /api/observability/annotation/:id
 // * <<obs-annotation-delete>> DELETE /api/observability/annotation/:id
 
-By default, annotations are stored in a newly created `observability-annotations` index.
-The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+[float]
+[[use-annotation-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
 
 ////
 *******************************************************
@@ -372,19 +418,20 @@ While you can add additional tags, you cannot remove the `apm` tag.
 
 The following example creates an annotation for a service named `opbeans-java`.
 
-[source,console]
+[source,curl]
 --------------------------------------------------
-POST /api/apm/services/opbeans-java/annotation
-{
-	"@timestamp": "2020-05-08T10:31:30.452Z",
-	"service": {
-		"version": "1.2"
-	},
-	"message": "Deployment 1.2",
-	"tags": [
-		"elastic.co", "customer"
-	]
-}
+curl -X POST \
+  http://localhost:5601/api/apm/services/opbeans-java/annotation \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+-d '{
+      "@timestamp": "2020-05-08T10:31:30.452Z",
+      "service": {
+        "version": "1.2"
+      },
+      "message": "Deployment 1.2"
+    }'
 --------------------------------------------------
 
 [[apm-annotation-config-body]]

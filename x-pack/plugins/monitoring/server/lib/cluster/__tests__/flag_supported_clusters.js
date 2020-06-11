@@ -13,10 +13,7 @@ const mockReq = (log, queryResult = {}) => {
     server: {
       config() {
         return {
-          get: sinon
-            .stub()
-            .withArgs('server.uuid')
-            .returns('kibana-1234'),
+          get: sinon.stub().withArgs('server.uuid').returns('kibana-1234'),
         };
       },
       plugins: {
@@ -57,7 +54,7 @@ describe('Flag Supported Clusters', () => {
       return flagSupportedClusters(
         req,
         kbnIndices
-      )(clusters).then(resultClusters => {
+      )(clusters).then((resultClusters) => {
         expect(resultClusters).to.eql([
           { ...goldLicense(), isSupported: true },
           {}, // no license
@@ -89,7 +86,7 @@ describe('Flag Supported Clusters', () => {
       return flagSupportedClusters(
         req,
         kbnIndices
-      )(clusters).then(resultClusters => {
+      )(clusters).then((resultClusters) => {
         expect(resultClusters).to.eql([
           {
             cluster_uuid: 'supported_cluster_uuid',
@@ -128,7 +125,7 @@ describe('Flag Supported Clusters', () => {
       return flagSupportedClusters(
         req,
         kbnIndices
-      )(clusters).then(resultClusters => {
+      )(clusters).then((resultClusters) => {
         expect(resultClusters).to.eql([
           {
             cluster_uuid: 'supported_cluster_uuid_1',
@@ -171,7 +168,7 @@ describe('Flag Supported Clusters', () => {
         return flagSupportedClusters(
           req,
           kbnIndices
-        )(clusters).then(resultClusters => {
+        )(clusters).then((resultClusters) => {
           expect(resultClusters).to.eql([
             {
               cluster_uuid: 'supported_cluster_uuid',
@@ -208,7 +205,7 @@ describe('Flag Supported Clusters', () => {
         return flagSupportedClusters(
           req,
           kbnIndices
-        )(clusters).then(resultClusters => {
+        )(clusters).then((resultClusters) => {
           expect(resultClusters).to.eql([
             {
               cluster_uuid: 'supported_cluster_uuid',
@@ -245,7 +242,7 @@ describe('Flag Supported Clusters', () => {
         return flagSupportedClusters(
           req,
           kbnIndices
-        )(clusters).then(resultClusters => {
+        )(clusters).then((resultClusters) => {
           expect(resultClusters).to.eql([
             {
               cluster_uuid: 'supported_cluster_uuid_1',
@@ -283,7 +280,7 @@ describe('Flag Supported Clusters', () => {
       return flagSupportedClusters(
         req,
         kbnIndices
-      )(clusters).then(result => {
+      )(clusters).then((result) => {
         expect(result).to.eql([{ isSupported: true, ...basicLicense() }]);
         sinon.assert.calledWith(
           logStub,
@@ -300,7 +297,7 @@ describe('Flag Supported Clusters', () => {
       return flagSupportedClusters(
         req,
         kbnIndices
-      )(clusters).then(result => {
+      )(clusters).then((result) => {
         expect(result).to.eql([{ isSupported: true, ...goldLicense() }]);
         sinon.assert.calledWith(
           logStub,
@@ -318,7 +315,7 @@ describe('Flag Supported Clusters', () => {
       return flagSupportedClusters(
         req,
         kbnIndices
-      )(clusters).then(result => {
+      )(clusters).then((result) => {
         expect(result).to.eql([{ ...deletedLicense() }]);
         sinon.assert.calledWith(
           logStub,
@@ -336,7 +333,7 @@ describe('Flag Supported Clusters', () => {
         return flagSupportedClusters(
           req,
           kbnIndices
-        )(clusters).then(result => {
+        )(clusters).then((result) => {
           expect(result).to.eql([{ ...standaloneCluster(), isSupported: true }]);
           sinon.assert.calledWith(
             logStub,

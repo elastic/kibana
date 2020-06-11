@@ -28,7 +28,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   const changeIsIndexSelected = useCallback(
     (indexName: string, isSelected: boolean) => {
       onChangeSelectedIndices(
-        indices.map(index => {
+        indices.map((index) => {
           return index.name === indexName ? { ...index, isSelected } : index;
         })
       );
@@ -39,7 +39,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   const changeDatasetFilter = useCallback(
     (indexName: string, datasetFilter) => {
       onChangeSelectedIndices(
-        indices.map(index => {
+        indices.map((index) => {
           return index.name === indexName ? { ...index, datasetFilter } : index;
         })
       );
@@ -74,7 +74,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
           labelType="legend"
         >
           <>
-            {indices.map(index => (
+            {indices.map((index) => (
               <IndexSetupRow
                 index={index}
                 isDisabled={disabled}

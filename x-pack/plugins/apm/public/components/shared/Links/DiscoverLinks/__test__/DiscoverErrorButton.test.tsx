@@ -14,7 +14,7 @@ describe('DiscoverErrorLink without kuery', () => {
   beforeEach(() => {
     const error = {
       service: { name: 'myServiceName' },
-      error: { grouping_key: 'myGroupingKey' }
+      error: { grouping_key: 'myGroupingKey' },
     } as APMError;
 
     wrapper = shallow(<DiscoverErrorLink error={error} />);
@@ -37,7 +37,7 @@ describe('DiscoverErrorLink with kuery', () => {
   beforeEach(() => {
     const error = {
       service: { name: 'myServiceName' },
-      error: { grouping_key: 'myGroupingKey' }
+      error: { grouping_key: 'myGroupingKey' },
     } as APMError;
 
     const kuery = 'transaction.sampled: true';

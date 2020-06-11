@@ -106,7 +106,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
     // fetch existing transform IDs and indices once for form validation
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
-      (async function() {
+      (async function () {
         try {
           setTransformIds(
             (await api.getTransforms()).transforms.map(
@@ -125,7 +125,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
         }
 
         try {
-          setIndexNames((await api.getIndices()).map(index => index.name));
+          setIndexNames((await api.getIndices()).map((index) => index.name));
         } catch (e) {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
@@ -158,8 +158,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
     }, []);
 
     const dateFieldNames = searchItems.indexPattern.fields
-      .filter(f => f.type === KBN_FIELD_TYPES.DATE)
-      .map(f => f.name)
+      .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
+      .map((f) => f.name)
       .sort();
     const isContinuousModeAvailable = dateFieldNames.length > 0;
     const [continuousModeDateField, setContinuousModeDateField] = useState(
@@ -168,14 +168,14 @@ export const StepDetailsForm: FC<Props> = React.memo(
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
     const isContinuousModeDelayValid = delayValidator(continuousModeDelay);
 
-    const transformIdExists = transformIds.some(id => transformId === id);
+    const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
     const transformIdValid = isTransformIdValid(transformId);
 
-    const indexNameExists = indexNames.some(name => destinationIndex === name);
+    const indexNameExists = indexNames.some((name) => destinationIndex === name);
     const indexNameEmpty = destinationIndex === '';
     const indexNameValid = isValidIndexName(destinationIndex);
-    const indexPatternTitleExists = indexPatternTitles.some(name => destinationIndex === name);
+    const indexPatternTitleExists = indexPatternTitles.some((name) => destinationIndex === name);
 
     const valid =
       !transformIdEmpty &&
@@ -241,7 +241,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
           >
             <EuiFieldText
               value={transformId}
-              onChange={e => setTransformId(e.target.value)}
+              onChange={(e) => setTransformId(e.target.value)}
               aria-label={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformIdInputAriaLabel',
                 {
@@ -263,7 +263,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 { defaultMessage: 'Description (optional)' }
               )}
               value={transformDescription}
-              onChange={e => setTransformDescription(e.target.value)}
+              onChange={(e) => setTransformDescription(e.target.value)}
               aria-label={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel',
                 {
@@ -307,7 +307,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
           >
             <EuiFieldText
               value={destinationIndex}
-              onChange={e => setDestinationIndex(e.target.value)}
+              onChange={(e) => setDestinationIndex(e.target.value)}
               aria-label={i18n.translate(
                 'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
                 {
@@ -378,9 +378,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map(text => ({ text }))}
+                  options={dateFieldNames.map((text) => ({ text }))}
                   value={continuousModeDateField}
-                  onChange={e => setContinuousModeDateField(e.target.value)}
+                  onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
                 />
               </EuiFormRow>
@@ -406,7 +406,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 <EuiFieldText
                   placeholder="delay"
                   value={continuousModeDelay}
-                  onChange={e => setContinuousModeDelay(e.target.value)}
+                  onChange={(e) => setContinuousModeDelay(e.target.value)}
                   aria-label={i18n.translate(
                     'xpack.transform.stepDetailsForm.continuousModeAriaLabel',
                     {

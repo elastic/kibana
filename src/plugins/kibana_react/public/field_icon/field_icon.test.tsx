@@ -23,7 +23,7 @@ import { FieldIcon, typeToEuiIconMap } from './field_icon';
 const availableTypes = Object.keys(typeToEuiIconMap);
 
 describe('FieldIcon renders known field types', () => {
-  availableTypes.forEach(type => {
+  availableTypes.forEach((type) => {
     test(`${type} is rendered`, () => {
       const component = shallow(<FieldIcon type={type} />);
       expect(component).toMatchSnapshot();

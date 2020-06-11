@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import {
   Filter,
-  CustomLink
+  CustomLink,
 } from '../../../../../../../common/custom_link/custom_link_types';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
@@ -17,7 +17,7 @@ export async function saveCustomLink({
   label,
   url,
   filters,
-  toasts
+  toasts,
 }: {
   id?: string;
   label: string;
@@ -29,7 +29,7 @@ export async function saveCustomLink({
     const customLink: CustomLink = {
       label,
       url,
-      filters: filters.filter(({ key, value }) => key && value)
+      filters: filters.filter(({ key, value }) => key && value),
     };
 
     if (id) {
@@ -38,16 +38,16 @@ export async function saveCustomLink({
         method: 'PUT',
         params: {
           path: { id },
-          body: customLink
-        }
+          body: customLink,
+        },
       });
     } else {
       await callApmApi({
         pathname: '/api/apm/settings/custom_links',
         method: 'POST',
         params: {
-          body: customLink
-        }
+          body: customLink,
+        },
       });
     }
     toasts.addSuccess({
@@ -55,7 +55,7 @@ export async function saveCustomLink({
       title: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.create.successed',
         { defaultMessage: 'Link saved!' }
-      )
+      ),
     });
   } catch (error) {
     toasts.addDanger({
@@ -69,10 +69,10 @@ export async function saveCustomLink({
           defaultMessage:
             'Something went wrong when saving the link. Error: "{errorMessage}"',
           values: {
-            errorMessage: error.message
-          }
+            errorMessage: error.message,
+          },
         }
-      )
+      ),
     });
   }
 }

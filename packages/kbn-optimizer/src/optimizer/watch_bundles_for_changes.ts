@@ -38,7 +38,7 @@ function recursiveGetNextChange$(
   return !bundles.length
     ? Rx.EMPTY
     : watcher.getNextChange$(bundles, startTime).pipe(
-        mergeMap(event => {
+        mergeMap((event) => {
           if (event.type === 'changes detected') {
             return Rx.of(event);
           }
@@ -48,7 +48,7 @@ function recursiveGetNextChange$(
 
             recursiveGetNextChange$(
               watcher,
-              bundles.filter(b => !event.bundles.includes(b)),
+              bundles.filter((b) => !event.bundles.includes(b)),
               Date.now()
             )
           );
@@ -74,11 +74,11 @@ export function watchBundlesForChanges$(
   initialStartTime: number
 ) {
   return bundleCacheEvent$.pipe(
-    maybeMap(event => (event.type === 'bundle cached' ? event.bundle : undefined)),
+    maybeMap((event) => (event.type === 'bundle cached' ? event.bundle : undefined)),
     toArray(),
-    mergeMap(bundles =>
+    mergeMap((bundles) =>
       bundles.length
-        ? Watcher.using(watcher => recursiveGetNextChange$(watcher, bundles, initialStartTime))
+        ? Watcher.using((watcher) => recursiveGetNextChange$(watcher, bundles, initialStartTime))
         : Rx.EMPTY
     )
   );

@@ -58,6 +58,10 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
     public async closeCollapsibleNav() {
       const CLOSE_BUTTON = '[data-test-subj=collapsibleNav] > button';
       if (await find.existsByCssSelector(CLOSE_BUTTON)) {
+        // Close button is only visible when focused
+        const button = await find.byCssSelector(CLOSE_BUTTON);
+        await button.focus();
+
         await find.clickByCssSelector(CLOSE_BUTTON);
       }
     }
@@ -79,7 +83,7 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await appMenu.parseDomContent();
       const links = $.findTestSubjects('collapsibleNavAppLink')
         .toArray()
-        .map(link => {
+        .map((link) => {
           return {
             text: $(link).text(),
             href: $(link).attr('href'),
@@ -97,7 +101,7 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
      * @param name
      */
     public async getLink(name: string) {
-      return (await this.readLinks()).find(nl => nl.text === name);
+      return (await this.readLinks()).find((nl) => nl.text === name);
     }
 
     /**
@@ -105,7 +109,7 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
      * @param name
      */
     public async linkExists(name: string) {
-      return (await this.readLinks()).some(nl => nl.text === name);
+      return (await this.readLinks()).some((nl) => nl.text === name);
     }
 
     /**
