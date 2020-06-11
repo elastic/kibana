@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shouldCreateConfigAction } from './checkin';
 import { Agent } from '../../types';
 
 function getAgent(data: Partial<Agent>) {

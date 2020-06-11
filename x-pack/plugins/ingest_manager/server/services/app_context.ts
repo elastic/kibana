@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/server';
+import { SavedObjectsServiceStart, HttpServiceSetup, Logger, KibanaRequest } from 'src/core/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -82,6 +82,13 @@ class AppContextService {
       throw new Error('Saved objects start service not set.');
     }
     return this.savedObjects;
+  }
+
+  public getInternalUserSOClient(request: KibanaRequest) {
+    // soClient as kibana internal users, be carefull on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(request, {
+      excludedWrappers: ['security'],
+    });
   }
 
   public getIsProductionMode() {

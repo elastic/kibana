@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, KibanaRequest } from 'src/core/server';
+import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   GetAgentsResponse,
@@ -31,13 +31,6 @@ import {
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
-
-export function getInternalUserSOClient(request: KibanaRequest) {
-  // soClient as kibana internal users, be carefull on how you use it, security is not enabled
-  return appContextService.getSavedObjects().getScopedClient(request, {
-    excludedWrappers: ['security'],
-  });
-}
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -176,7 +169,7 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
+    const soClient = appContextService.getInternalUserSOClient(request);
     const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
     const { actions } = await AgentService.agentCheckin(
@@ -218,7 +211,7 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
+    const soClient = appContextService.getInternalUserSOClient(request);
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
 
