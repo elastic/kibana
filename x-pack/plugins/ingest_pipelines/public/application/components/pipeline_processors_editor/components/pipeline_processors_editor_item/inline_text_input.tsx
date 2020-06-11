@@ -60,7 +60,12 @@ export const InlineTextInput: FunctionComponent<Props> = ({
   }, [isShowingTextInput, submitChange]);
 
   return (
-    <div tabIndex={0} onFocus={() => setIsShowingTextInput(true)} onBlur={submitChange}>
+    <div
+      className="pipelineProcessorsEditor__item__textContainer"
+      tabIndex={0}
+      onFocus={() => setIsShowingTextInput(true)}
+      onBlur={submitChange}
+    >
       {content}
     </div>
   );
