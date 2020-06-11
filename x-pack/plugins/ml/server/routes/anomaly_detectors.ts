@@ -643,7 +643,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         body: updateModelSnapshotSchema,
       },
       options: {
-        tags: ['access:ml:canCreateJob'], // TODO IS THIS CORRECT?
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

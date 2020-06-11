@@ -20,6 +20,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { ml } from '../../services/ml_api_service';
@@ -44,6 +45,9 @@ enum COMBINED_JOB_STATE {
 }
 
 export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
+  const canCreateJob = checkPermission('canCreateJob');
+  const canStartStopDatafeed = checkPermission('canStartStopDatafeed');
+
   const [snapshots, setSnapshots] = useState<ModelSnapshot[]>([]);
   const [snapshotsLoaded, setSnapshotsLoaded] = useState<boolean>(false);
   const [editSnapshot, setEditSnapshot] = useState<ModelSnapshot | null>(null);
@@ -153,6 +157,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           description: i18n.translate('xpack.ml.modelSnapshotTable.actions.revert.description', {
             defaultMessage: 'Revert this snapshot',
           }),
+          enabled: () => canCreateJob && canStartStopDatafeed,
           type: 'icon',
           icon: 'crosshairs',
           onClick: checkJobIsClosed,
@@ -164,6 +169,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           description: i18n.translate('xpack.ml.modelSnapshotTable.actions.edit.description', {
             defaultMessage: 'Edit this snapshot',
           }),
+          enabled: () => canCreateJob,
           type: 'icon',
           icon: 'pencil',
           onClick: setEditSnapshot,

@@ -72,6 +72,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   const [eventRateData, setEventRateData] = useState<LineChartPoint[]>([]);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [chartReady, setChartReady] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     createChartData();
@@ -123,6 +124,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   }
 
   async function applyRevert() {
+    setApplying(true);
     const end =
       replay && runInRealTime === false ? job.data_counts.latest_record_timestamp : undefined;
     try {
@@ -142,6 +144,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
       hideRevertModal();
       closeWithReload();
     } catch (error) {
+      setApplying(false);
       toasts.addError(new Error(error.body.message), {
         title: i18n.translate('xpack.ml.revertModelSnapshotFlyout.revertErrorTitle', {
           defaultMessage: 'Model snapshot revert failed',
@@ -376,6 +379,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
                 defaultMessage: 'Apply',
               }
             )}
+            confirmButtonDisabled={applying}
             buttonColor="danger"
             defaultFocusedButton="confirm"
           />
