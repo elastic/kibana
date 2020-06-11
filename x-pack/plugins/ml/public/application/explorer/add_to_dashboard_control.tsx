@@ -143,6 +143,7 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
           name: i18n.translate('xpack.ml.explorer.dashboardsTable.actionsColumnHeader', {
             defaultMessage: 'Actions',
           }),
+          align: 'right',
           actions: [
             {
               name: i18n.translate('xpack.ml.explorer.dashboardsTable.quickAddLabel', {
@@ -181,6 +182,17 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
                   </EuiToolTip>
                 );
               },
+            },
+            {
+              name: i18n.translate('xpack.ml.explorer.dashboardsTable.editInDashboard', {
+                defaultMessage: 'Edit in dashboard',
+              }),
+              onClick: async (item) => {
+                await addSwimlaneToDashboardCallback(item);
+                window.location.href = await dashboardService.getDashboardEditUrl(item.id);
+              },
+              type: 'icon',
+              icon: 'pencil',
             },
           ],
         },

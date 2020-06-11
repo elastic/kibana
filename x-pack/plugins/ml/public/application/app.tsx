@@ -36,6 +36,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
   const services = {
     appName: 'ML',
     kibanaVersion: deps.kibanaVersion,
+    share: deps.share,
     data: deps.data,
     security: deps.security,
     licenseManagement: deps.licenseManagement,

@@ -8,6 +8,8 @@ import { SavedObjectsClientContract } from 'kibana/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { useMemo } from 'react';
 import {
+  DASHBOARD_APP_URL_GENERATOR,
+  DashboardUrlGenerator,
   SavedDashboardPanel,
   SavedObjectDashboard,
 } from '../../../../../../src/plugins/dashboard/public';
@@ -17,9 +19,11 @@ export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 
 export function dashboardServiceProvider(
   savedObjectClient: SavedObjectsClientContract,
-  kibanaVersion: string
+  kibanaVersion: string,
+  dashboardUrlGenerator: DashboardUrlGenerator
 ) {
   const generateId = htmlIdGenerator();
+
   return {
     /**
      * Fetches dashboards
@@ -42,9 +46,12 @@ export function dashboardServiceProvider(
     ) {
       const panels = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];
       const panelIndex = generateId();
-      const maxPanel = panels.reduce((prev, current) =>
-        prev.gridData.y > current.gridData.y ? prev : current
-      );
+      const maxPanel =
+        panels.length > 0
+          ? panels.reduce((prev, current) =>
+              prev.gridData.y > current.gridData.y ? prev : current
+            )
+          : null;
       const version = kibanaVersion;
 
       panels.push({
@@ -67,6 +74,16 @@ export function dashboardServiceProvider(
         panelsJSON: JSON.stringify(panels),
       });
     },
+    /**
+     * Generates dashboard url with edit mode
+     */
+    async getDashboardEditUrl(dashboardId: string) {
+      return await dashboardUrlGenerator.createUrl({
+        dashboardId,
+        useHash: false,
+        viewMode: 'edit',
+      });
+    },
   };
 }
 
@@ -78,10 +95,16 @@ export function useDashboardService(): DashboardService {
     services: {
       savedObjects: { client: savedObjectClient },
       kibanaVersion,
+      share: { urlGenerators },
     },
   } = useMlKibana();
-  return useMemo(() => dashboardServiceProvider(savedObjectClient, kibanaVersion), [
-    savedObjectClient,
-    kibanaVersion,
-  ]);
+  return useMemo(
+    () =>
+      dashboardServiceProvider(
+        savedObjectClient,
+        kibanaVersion,
+        urlGenerators.getUrlGenerator(DASHBOARD_APP_URL_GENERATOR)
+      ),
+    [savedObjectClient, kibanaVersion]
+  );
 }

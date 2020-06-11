@@ -45,6 +45,7 @@ export interface MlSetupDependencies {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
+  share: SharePluginStart;
 }
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {

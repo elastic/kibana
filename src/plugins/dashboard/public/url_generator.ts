@@ -73,6 +73,11 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * true is default
    */
   preserveSavedFilters?: boolean;
+
+  /**
+   * View mode of the dashboard.
+   */
+  viewMode?: 'edit' | 'view';
 }>;
 
 export const createDashboardUrlGenerator = (
@@ -123,6 +128,7 @@ export const createDashboardUrlGenerator = (
       cleanEmptyKeys({
         query: state.query,
         filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        viewMode: state.viewMode,
       }),
       { useHash },
       `${appBasePath}#/${hash}`
