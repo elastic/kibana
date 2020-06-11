@@ -26,7 +26,7 @@ export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
     jobId: string,
     snapshotId: string,
     replay: boolean,
-    end: number,
+    end?: number,
     deleteInterveningResults: boolean = true,
     calendarEvents?: [{ start: number; end: number; description: string }]
   ) {
