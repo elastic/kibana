@@ -15,7 +15,7 @@ import {
 } from '../common/constants';
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
-import { UptimePage, useUptimeTelemetry } from './hooks';
+import { UptimePage, useUptimeTelemetry, useSynchronizedState } from './hooks';
 
 interface RouteProps {
   path: string;
@@ -71,6 +71,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
+  useSynchronizedState();
   return (
     <Switch>
       {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
