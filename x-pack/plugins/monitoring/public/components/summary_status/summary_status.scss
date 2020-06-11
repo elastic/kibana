@@ -2,9 +2,9 @@
   margin-left: $euiSizeM;
   margin-right: $euiSizeM;
 
-  .euiTitle {
-    @include euiFontSizeXS;
-    overflow-x: hidden;
-    white-space: nowrap;
+  .monSummaryStatusNoWrap__stat {
+    p {
+      @include euiTextTruncate;
+    }
   }
 }

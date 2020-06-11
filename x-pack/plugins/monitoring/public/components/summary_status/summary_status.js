@@ -14,8 +14,19 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import './summary_status.scss';
 
 const wrapChild = ({ label, value, ...props }, index) => (
-  <EuiFlexItem key={`summary-status-item-${index}`} grow={false} {...props}>
-    <EuiStat title={value} titleSize="xs" textAlign="left" description={label ? `${label}` : ''} />
+  <EuiFlexItem
+    style={{ maxWidth: 200 }}
+    key={`summary-status-item-${index}`}
+    grow={false}
+    {...props}
+  >
+    <EuiStat
+      title={value}
+      className="monSummaryStatusNoWrap__stat"
+      titleSize="xxxs"
+      textAlign="left"
+      description={label ? `${label}` : ''}
+    />
   </EuiFlexItem>
 );
 
@@ -47,7 +58,12 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   }
 
   return (
-    <EuiFlexItem key={`summary-status-item-status`} grow={false}>
+    <EuiFlexItem
+      className="eui-textTruncate"
+      style={{ maxWidth: 200 }}
+      key={`summary-status-item-status`}
+      grow={false}
+    >
       <EuiStat
         title={
           <Fragment>
@@ -56,8 +72,9 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
             {capitalize(status)}
           </Fragment>
         }
-        titleSize="xs"
+        titleSize="xxxs"
         textAlign="left"
+        className="monSummaryStatusNoWrap__stat"
         description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
           defaultMessage: 'Status',
         })}
