@@ -16,26 +16,34 @@ const paramsSchema = schema.object({
 export const registerGetRoutes = ({
   router,
   license,
-  lib: { handleErrors },
+  lib: { isEsError },
 }: RouteDependencies): void => {
   // Get all pipelines
   router.get(
     { path: API_BASE_PATH, validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const requestHandler = async () => {
-        const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
 
+      try {
         const pipelines = await callAsCurrentUser('ingest.getPipeline');
+
         return res.ok({ body: deserializePipelines(pipelines) });
-      };
+      } catch (error) {
+        if (isEsError(error)) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we return an empty array and 200 status back to the client
+          if (error.status === 404) {
+            return res.ok({ body: [] });
+          }
 
-      const customErrorHandler = (error: any) => {
-        if (error.statusCode === 404) {
-          return res.ok({ body: [] });
+          return res.customError({
+            statusCode: error.statusCode,
+            body: error,
+          });
         }
-      };
 
-      return handleErrors(res, requestHandler, customErrorHandler);
+        return res.internalError({ body: error });
+      }
     })
   );
 
@@ -48,10 +56,10 @@ export const registerGetRoutes = ({
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const requestHandler = async () => {
-        const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
-        const { name } = req.params;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { name } = req.params;
 
+      try {
         const pipeline = await callAsCurrentUser('ingest.getPipeline', { id: name });
 
         return res.ok({
@@ -60,9 +68,16 @@ export const registerGetRoutes = ({
             name,
           },
         });
-      };
+      } catch (error) {
+        if (isEsError(error)) {
+          return res.customError({
+            statusCode: error.statusCode,
+            body: error,
+          });
+        }
 
-      return handleErrors(res, requestHandler);
+        return res.internalError({ body: error });
+      }
     })
   );
 };

@@ -8,7 +8,7 @@ import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { License } from './services';
-import { handleErrors, isEsError } from './shared_imports';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;
@@ -22,7 +22,6 @@ export interface RouteDependencies {
     isSecurityEnabled: () => boolean;
   };
   lib: {
-    handleErrors: typeof handleErrors;
     isEsError: typeof isEsError;
   };
 }
