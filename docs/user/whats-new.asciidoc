@@ -1,8 +1,12 @@
+[[whats-new]]
+== What's new
+
+This section summarizes the most important changes in each release. For the 
+full list, see <<release-notes>> and <<breaking-changes>>. 
+
+[discrete]
 [[release-highlights-8.0.0]]
-== 8.0.0 release highlights
-++++
-<titleabbrev>8.0.0</titleabbrev>
-++++
+=== 8.0.0 release highlights
 
 coming[8.0.0]
 
