@@ -14,6 +14,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
+import { SecurityPageName } from '../../app/types';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -67,7 +68,7 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
         </TimelinesContainer>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.timelines} />
     </>
   );
 };
