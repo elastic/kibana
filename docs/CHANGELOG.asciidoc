@@ -224,7 +224,7 @@ Machine Learning::
 * Disables calendar all job switch {pull}65635[#65635]
 * Shows warning when the model memory limit is higher than the memory available in the ML node {pull}65652[#65652]
 * Removes assignment_explanation when cloning job {pull}68226[#68226]
-* DFA: ensure at least one field is included in analysis before job can be created {pull}65320[#65320]
+* Ensures at least one field is included in analysis before data frame analytics job is created {pull}65320[#65320]
 * Anomaly Explorer: if filter includes wildcard ensure matching swimlanes are not masked {pull}65384[#65384]
 * Fixes reordering in view by swimlane when overall cell selected {pull}65290[#65290]
 * Fixes anomaly charts for rare detectors when model plot is enabled {pull}66075[#66075]
