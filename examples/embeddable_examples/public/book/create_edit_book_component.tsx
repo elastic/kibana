@@ -43,17 +43,17 @@ export function CreateEditBookComponent({
         <h1>{`${savedObjectId ? 'Create new ' : 'Edit '}`}</h1>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFormRow label="To">
+        <EuiFormRow label="Title">
           <EuiFieldText
-            data-test-subj="toInputField"
+            data-test-subj="titleInputField"
             value={title}
             placeholder="Title"
             onChange={(e) => setTitle(e.target.value)}
           />
         </EuiFormRow>
-        <EuiFormRow label="From">
+        <EuiFormRow label="Author">
           <EuiFieldText
-            data-test-subj="fromInputField"
+            data-test-subj="authorInputField"
             value={author}
             placeholder="Author"
             onChange={(e) => setAuthor(e.target.value)}
@@ -69,14 +69,14 @@ export function CreateEditBookComponent({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton
-          data-test-subj="saveNoteEmbeddableByValue"
+          data-test-subj="saveBookEmbeddableByValue"
           disabled={title === ''}
           onClick={() => onSave({ title, author, readIt }, false)}
         >
           {savedObjectId ? 'Unlink from library item' : 'Save and Return'}
         </EuiButton>
         <EuiButton
-          data-test-subj="saveNoteEmbeddableByRef"
+          data-test-subj="saveBookEmbeddableByRef"
           disabled={title === ''}
           onClick={() => onSave({ title, author, readIt }, true)}
         >
