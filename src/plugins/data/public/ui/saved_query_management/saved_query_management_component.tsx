@@ -88,19 +88,47 @@ export function SavedQueryManagementComponent({
     }
   }, [isOpen, activePage, savedQueryService]);
 
+  const handleClosePopover = useCallback(() => setIsOpen(false), []);
+
   const handleSave = useCallback(() => {
     onSave();
-    setIsOpen(false);
-  }, [onSave]);
+    handleClosePopover();
+  }, [handleClosePopover, onSave]);
 
   const handleSaveAsNew = useCallback(() => {
     onSaveAsNew();
-    setIsOpen(false);
-  }, [onSaveAsNew]);
+    handleClosePopover();
+  }, [handleClosePopover, onSaveAsNew]);
 
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-  };
+  const handleSelect = useCallback(
+    (savedQueryToSelect) => {
+      onLoad(savedQueryToSelect);
+      handleClosePopover();
+    },
+    [handleClosePopover, onLoad]
+  );
+
+  const handleDelete = useCallback(
+    (savedQueryToDelete: SavedQuery) => {
+      const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
+        cancelPendingListingRequest.current();
+        setSavedQueries(
+          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
+        );
+
+        if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
+          onClearSavedQuery();
+        }
+
+        await savedQueryService.deleteSavedQuery(savedQuery.id);
+        setActivePage(0);
+      };
+
+      onDeleteSavedQuery(savedQueryToDelete);
+      handleClosePopover();
+    },
+    [handleClosePopover, loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+  );
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
@@ -123,18 +151,8 @@ export function SavedQueryManagementComponent({
     }
   );
 
-  const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
-    cancelPendingListingRequest.current();
-    setSavedQueries(
-      savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
-    );
-
-    if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
-      onClearSavedQuery();
-    }
-
-    await savedQueryService.deleteSavedQuery(savedQuery.id);
-    setActivePage(0);
+  const goToPage = (pageNumber: number) => {
+    setActivePage(pageNumber);
   };
 
   const savedQueryPopoverButton = (
@@ -169,11 +187,8 @@ export function SavedQueryManagementComponent({
         key={savedQuery.id}
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
-        onSelect={(savedQueryToSelect) => {
-          onLoad(savedQueryToSelect);
-          setIsOpen(false);
-        }}
-        onDelete={(savedQueryToDelete) => onDeleteSavedQuery(savedQueryToDelete)}
+        onSelect={handleSelect}
+        onDelete={handleDelete}
         showWriteOperations={!!showSaveQuery}
       />
     ));
@@ -185,9 +200,7 @@ export function SavedQueryManagementComponent({
         id="savedQueryPopover"
         button={savedQueryPopoverButton}
         isOpen={isOpen}
-        closePopover={() => {
-          setIsOpen(false);
-        }}
+        closePopover={handleClosePopover}
         anchorPosition="downLeft"
         panelPaddingSize="none"
         buffer={-8}
@@ -308,7 +321,7 @@ export function SavedQueryManagementComponent({
                   <EuiButtonEmpty
                     size="s"
                     flush="left"
-                    onClick={() => onClearSavedQuery()}
+                    onClick={onClearSavedQuery}
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
                       { defaultMessage: 'Clear current saved query' }
