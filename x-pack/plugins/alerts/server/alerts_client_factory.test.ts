@@ -15,7 +15,7 @@ import {
   savedObjectsServiceMock,
 } from '../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../security/public';
+import { AuthenticatedUser } from '../../../plugins/security/common/model';
 import { securityMock } from '../../security/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
