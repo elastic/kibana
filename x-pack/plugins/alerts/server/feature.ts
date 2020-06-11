@@ -5,11 +5,12 @@
  */
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { IndexThresholdId } from '../../alerting_builtins/server';
+import { AlertsFeatureId } from '../common';
 
 export function registerFeature(features: FeaturesPluginSetup) {
   features.registerFeature({
-    id: 'alerts',
-    name: 'alerts',
+    id: AlertsFeatureId,
+    name: 'Alerts',
     app: [],
     privileges: {
       all: {

@@ -9,13 +9,13 @@ import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { alertsAuthorizationMock } from './alerts_authorization.mock';
+import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
 import { TaskStatus } from '../../task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock } from '../../actions/server/mocks';
-import { AlertsAuthorization } from './alerts_authorization';
+import { AlertsAuthorization } from './authorization/alerts_authorization';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();

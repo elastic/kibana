@@ -7,11 +7,12 @@
 import Boom from 'boom';
 import { pluck, mapValues } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { AlertsFeatureId } from '../common';
-import { AlertTypeRegistry } from './types';
-import { SecurityPluginSetup } from '../../security/server';
-import { RegistryAlertType } from './alert_type_registry';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { AlertsFeatureId } from '../../common';
+import { AlertTypeRegistry } from '../types';
+import { SecurityPluginSetup } from '../../../security/server';
+import { RegistryAlertType } from '../alert_type_registry';
+import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { AlertsAuthorizationAuditLogger, ScopeType, AuthorizationResult } from './audit_logger';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -21,6 +22,7 @@ export interface ConstructorOptions {
   alertTypeRegistry: AlertTypeRegistry;
   request: KibanaRequest;
   features: FeaturesPluginStart;
+  auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
 }
 
@@ -29,12 +31,20 @@ export class AlertsAuthorization {
   private readonly features: FeaturesPluginStart;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly auditLogger: AlertsAuthorizationAuditLogger;
 
-  constructor({ alertTypeRegistry, request, authorization, features }: ConstructorOptions) {
+  constructor({
+    alertTypeRegistry,
+    request,
+    authorization,
+    features,
+    auditLogger,
+  }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.features = features;
     this.alertTypeRegistry = alertTypeRegistry;
+    this.auditLogger = auditLogger;
   }
 
   public async ensureAuthorized(alertTypeId: string, consumer: string, operation: string) {
@@ -51,7 +61,7 @@ export class AlertsAuthorization {
       const shouldAuthorizeConsumer = consumer !== AlertsFeatureId;
 
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, privileges } = await checkPrivileges(
+      const { hasAllRequested, username, privileges } = await checkPrivileges(
         shouldAuthorizeConsumer && consumer !== alertType.producer
           ? [
               // check for access at consumer level
@@ -66,7 +76,15 @@ export class AlertsAuthorization {
             ]
       );
 
-      if (!hasAllRequested) {
+      if (hasAllRequested) {
+        this.auditLogger.alertsAuthorizationSuccess(
+          username,
+          alertTypeId,
+          ScopeType.Consumer,
+          consumer,
+          operation
+        );
+      } else {
         const authorizedPrivileges = pluck(
           privileges.filter((privilege) => privilege.authorized),
           'privilege'
@@ -76,12 +94,19 @@ export class AlertsAuthorization {
           (privilege) => !authorizedPrivileges.includes(privilege)
         );
 
+        const [unauthorizedScopeType, unauthorizedScope] =
+          shouldAuthorizeConsumer && unauthorizedScopes.consumer
+            ? [ScopeType.Consumer, consumer]
+            : [ScopeType.Producer, alertType.producer];
+
         throw Boom.forbidden(
-          `Unauthorized to ${operation} a "${alertTypeId}" alert ${
-            shouldAuthorizeConsumer && unauthorizedScopes.consumer
-              ? `for "${consumer}"`
-              : `by "${alertType.producer}"`
-          }`
+          this.auditLogger.alertsAuthorizationFailure(
+            username,
+            alertTypeId,
+            unauthorizedScopeType,
+            unauthorizedScope,
+            operation
+          )
         );
       }
     }
@@ -92,13 +117,15 @@ export class AlertsAuthorization {
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
   }> {
     if (this.authorization) {
-      const authorizedAlertTypes = await this.checkAlertTypeAuthorization(
+      const { username, authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
         this.alertTypeRegistry.list(),
         'find'
       );
 
       if (!authorizedAlertTypes.size) {
-        throw Boom.forbidden(`Unauthorized to find a any alert types`);
+        throw Boom.forbidden(
+          this.auditLogger.alertsUnscopedAuthorizationFailure(username!, 'find')
+        );
       }
 
       const authorizedAlertTypeIdsToConsumers = new Set<string>(
@@ -114,7 +141,23 @@ export class AlertsAuthorization {
         filter: `(${this.asFiltersByAlertTypeAndConsumer(authorizedAlertTypes).join(' or ')})`,
         ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {
           if (!authorizedAlertTypeIdsToConsumers.has(`${alertTypeId}/${consumer}`)) {
-            throw Boom.forbidden(`Unauthorized to find "${alertTypeId}" alerts under ${consumer}`);
+            throw Boom.forbidden(
+              this.auditLogger.alertsAuthorizationFailure(
+                username!,
+                alertTypeId,
+                ScopeType.Consumer,
+                consumer,
+                'find'
+              )
+            );
+          } else {
+            this.auditLogger.alertsAuthorizationSuccess(
+              username!,
+              alertTypeId,
+              ScopeType.Consumer,
+              consumer,
+              'find'
+            );
           }
         },
       };
@@ -128,10 +171,27 @@ export class AlertsAuthorization {
     alertTypes: Set<RegistryAlertType>,
     operation: string
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
-    const featuresIds = this.features.getFeatures().map((feature) => feature.id);
+    const { authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
+      alertTypes,
+      operation
+    );
+    return authorizedAlertTypes;
+  }
 
+  private async augmentAlertTypesWithAuthorization(
+    alertTypes: Set<RegistryAlertType>,
+    operation: string
+  ): Promise<{
+    username?: string;
+    hasAllRequested: boolean;
+    authorizedAlertTypes: Set<RegistryAlertTypeWithAuth>;
+  }> {
+    const featuresIds = this.features.getFeatures().map((feature) => feature.id);
     if (!this.authorization) {
-      return this.augmentWithAuthorizedConsumers(alertTypes, featuresIds);
+      return {
+        hasAllRequested: true,
+        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(alertTypes, featuresIds),
+      };
     } else {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
@@ -154,22 +214,26 @@ export class AlertsAuthorization {
         }
       }
 
-      const { hasAllRequested, privileges } = await checkPrivileges([
+      const { username, hasAllRequested, privileges } = await checkPrivileges([
         ...privilegeToAlertType.keys(),
       ]);
 
-      return hasAllRequested
-        ? // has access to all features
-          this.augmentWithAuthorizedConsumers(alertTypes, featuresIds)
-        : // only has some of the required privileges
-          privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
-            if (authorized && privilegeToAlertType.has(privilege)) {
-              const [alertType, consumer] = privilegeToAlertType.get(privilege)!;
-              alertType.authorizedConsumers.push(consumer);
-              authorizedAlertTypes.add(alertType);
-            }
-            return authorizedAlertTypes;
-          }, new Set<RegistryAlertTypeWithAuth>());
+      return {
+        username,
+        hasAllRequested,
+        authorizedAlertTypes: hasAllRequested
+          ? // has access to all features
+            this.augmentWithAuthorizedConsumers(alertTypes, featuresIds)
+          : // only has some of the required privileges
+            privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
+              if (authorized && privilegeToAlertType.has(privilege)) {
+                const [alertType, consumer] = privilegeToAlertType.get(privilege)!;
+                alertType.authorizedConsumers.push(consumer);
+                authorizedAlertTypes.add(alertType);
+              }
+              return authorizedAlertTypes;
+            }, new Set<RegistryAlertTypeWithAuth>()),
+      };
     }
   }
 

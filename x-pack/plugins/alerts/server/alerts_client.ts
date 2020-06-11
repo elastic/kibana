@@ -36,7 +36,7 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import { AlertsAuthorization } from './alerts_authorization';
+import { AlertsAuthorization } from './authorization/alerts_authorization';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -69,7 +69,7 @@ export interface MuteOptions extends IndexType {
   alertInstanceId: string;
 }
 
-interface FindOptions extends IndexType {
+export interface FindOptions extends IndexType {
   perPage?: number;
   page?: number;
   search?: string;

@@ -16,7 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 import { renameKeys } from './lib/rename_keys';
-import { FindOptions } from '..';
+import { FindOptions } from '../alerts_client';
 
 // config definition
 const querySchema = schema.object({

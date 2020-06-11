@@ -6,13 +6,15 @@
 
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
+import { AlertsFeatureId } from '../common';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsServiceStart } from '../../../../src/core/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
-import { AlertsAuthorization } from './alerts_authorization';
+import { AlertsAuthorization } from './authorization/alerts_authorization';
+import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -62,6 +64,9 @@ export class AlertsClientFactory {
       request,
       alertTypeRegistry: this.alertTypeRegistry,
       features: features!,
+      auditLogger: new AlertsAuthorizationAuditLogger(
+        securityPluginSetup?.audit.getLogger(AlertsFeatureId)
+      ),
     });
 
     return new AlertsClient({

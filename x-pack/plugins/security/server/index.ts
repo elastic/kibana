@@ -30,7 +30,6 @@ export {
 export { AuditLogger } from './audit';
 export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';
-export { Actions } from './authorization';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,

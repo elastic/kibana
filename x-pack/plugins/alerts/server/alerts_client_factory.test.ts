@@ -19,9 +19,12 @@ import { AuthenticatedUser } from '../../security/public';
 import { securityMock } from '../../security/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
+import { AuditLogger } from '../../security/server';
+import { AlertsFeatureId } from '../common';
 
 jest.mock('./alerts_client');
-jest.mock('./alerts_authorization');
+jest.mock('./authorization/alerts_authorization');
+jest.mock('./authorization/audit_logger');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
@@ -65,7 +68,13 @@ test('creates an alerts client with proper constructor arguments when security i
   factory.initialize({ securityPluginSetup, ...alertsClientFactoryParams });
   const request = KibanaRequest.from(fakeRequest);
 
+  const { AlertsAuthorizationAuditLogger } = jest.requireMock('./authorization/audit_logger');
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+
+  const logger = {
+    log: jest.fn(),
+  } as jest.Mocked<AuditLogger>;
+  securityPluginSetup.audit.getLogger.mockReturnValue(logger);
 
   factory.create(request, savedObjectsService);
 
@@ -74,13 +83,17 @@ test('creates an alerts client with proper constructor arguments when security i
     includedHiddenTypes: ['alert'],
   });
 
-  const { AlertsAuthorization } = jest.requireMock('./alerts_authorization');
+  const { AlertsAuthorization } = jest.requireMock('./authorization/alerts_authorization');
   expect(AlertsAuthorization).toHaveBeenCalledWith({
     request,
     authorization: securityPluginSetup.authz,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
+    auditLogger: expect.any(AlertsAuthorizationAuditLogger),
   });
+
+  expect(AlertsAuthorizationAuditLogger).toHaveBeenCalledWith(logger);
+  expect(securityPluginSetup.audit.getLogger).toHaveBeenCalledWith(AlertsFeatureId);
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
@@ -112,12 +125,14 @@ test('creates an alerts client with proper constructor arguments', async () => {
     includedHiddenTypes: ['alert'],
   });
 
-  const { AlertsAuthorization } = jest.requireMock('./alerts_authorization');
+  const { AlertsAuthorization } = jest.requireMock('./authorization/alerts_authorization');
+  const { AlertsAuthorizationAuditLogger } = jest.requireMock('./authorization/audit_logger');
   expect(AlertsAuthorization).toHaveBeenCalledWith({
     request,
     authorization: undefined,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
+    auditLogger: expect.any(AlertsAuthorizationAuditLogger),
   });
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
