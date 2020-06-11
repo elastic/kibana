@@ -22,7 +22,6 @@ import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -36,8 +35,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         defaultIndex: 'logstash-*',
       });
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('settings');
-      await appsMenu.clickLink('Search Explorer');
+      await PageObjects.common.navigateToApp('searchExplorer');
     });
 
     after(async function () {

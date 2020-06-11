@@ -25,6 +25,7 @@ export const useShowTimeline = () => {
     } else if (!showTimeline) {
       setShowTimeline(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLocation.pathname]);
 
   return [showTimeline];

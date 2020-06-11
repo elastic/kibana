@@ -309,7 +309,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       OverviewSubPlugin,
       TimelinesSubPlugin,
       EndpointAlertsSubPlugin,
-      EndpointHostsSubPlugin,
       ManagementSubPlugin,
     ] = await Promise.all([
       import('./alerts'),
@@ -319,7 +318,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       import('./overview'),
       import('./timelines'),
       import('./endpoint_alerts'),
-      import('./endpoint_hosts'),
       import('./management'),
     ]);
 
@@ -331,7 +329,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       overviewSubPlugin: new OverviewSubPlugin.Overview(),
       timelinesSubPlugin: new TimelinesSubPlugin.Timelines(),
       endpointAlertsSubPlugin: new EndpointAlertsSubPlugin.EndpointAlerts(),
-      endpointHostsSubPlugin: new EndpointHostsSubPlugin.EndpointHosts(),
       managementSubPlugin: new ManagementSubPlugin.Management(),
     };
   }
@@ -344,7 +341,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       timelinesSubPlugin,
       endpointAlertsSubPlugin,
-      endpointHostsSubPlugin,
       managementSubPlugin,
     } = await this.downloadSubPlugins();
 
@@ -354,7 +350,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const networkStart = networkSubPlugin.start();
     const timelinesStart = timelinesSubPlugin.start();
     const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
-    const endpointHostsStart = endpointHostsSubPlugin.start(coreStart, startPlugins);
     const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
     this.store = createStore(
@@ -363,7 +358,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...networkStart.store.initialState,
         ...timelinesStart.store.initialState,
         ...endpointAlertsStart.store.initialState,
-        ...endpointHostsStart.store.initialState,
         ...managementSubPluginStart.store.initialState,
       }),
       {
@@ -371,13 +365,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...networkStart.store.reducer,
         ...timelinesStart.store.reducer,
         ...endpointAlertsStart.store.reducer,
-        ...endpointHostsStart.store.reducer,
         ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
       [
         ...(endpointAlertsStart.store.middleware ?? []),
-        ...(endpointHostsStart.store.middleware ?? []),
         ...(managementSubPluginStart.store.middleware ?? []),
       ]
     );

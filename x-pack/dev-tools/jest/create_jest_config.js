@@ -9,7 +9,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
   return {
     rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
-    moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+    moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
@@ -43,6 +43,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '!**/scripts/**',
       '!**/mocks/**',
       '!**/plugins/apm/e2e/**',
+      '!**/plugins/siem/cypress/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,

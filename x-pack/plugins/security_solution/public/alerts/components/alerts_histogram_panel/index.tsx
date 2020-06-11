@@ -133,6 +133,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           totalAlertsObj.value,
           totalAlertsObj.relation === 'gte' ? '>' : totalAlertsObj.relation === 'lte' ? '<' : ''
         ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [totalAlertsObj]
     );
 
@@ -140,6 +141,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       setSelectedStackByOption(
         stackByOptions?.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const goToDetectionEngine = useCallback(
@@ -163,6 +165,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [alertsData, selectedStackByOption.value]
     );
 
@@ -184,6 +187,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           deleteQuery({ id: uniqueQueryId });
         }
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -198,6 +202,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           refetch,
         });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setQuery, isLoadingAlerts, alertsData, response, request, refetch]);
 
     useEffect(() => {
@@ -228,6 +233,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           !isEmpty(converted) ? [converted] : []
         )
       );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStackByOption.value, from, to, query, filters]);
 
     const linkButton = useMemo(() => {
@@ -240,7 +246,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           </ViewAlertsFlexItem>
         );
       }
-    }, [showLinkToAlerts, goToDetectionEngine]);
+    }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
     const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
       onlyField,

@@ -162,6 +162,7 @@ const PollSchema = schema.object({
 });
 
 export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
   queue: QueueSchema,
   capture: CaptureSchema,

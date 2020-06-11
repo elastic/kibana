@@ -362,6 +362,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -388,6 +389,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -466,6 +468,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -492,6 +495,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -570,6 +574,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -596,6 +601,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -851,6 +857,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -877,6 +884,7 @@ Array [
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >

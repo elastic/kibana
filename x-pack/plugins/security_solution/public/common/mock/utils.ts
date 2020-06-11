@@ -11,9 +11,7 @@ import { managementReducer } from '../../management/store/reducer';
 import { ManagementPluginReducer } from '../../management';
 import { SubPluginsInitReducer } from '../store';
 import { EndpointAlertsPluginReducer } from '../../endpoint_alerts';
-import { EndpointHostsPluginReducer } from '../../endpoint_hosts';
 import { alertListReducer } from '../../endpoint_alerts/store/reducer';
-import { hostListReducer } from '../../endpoint_hosts/store/reducer';
 
 interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,7 +28,6 @@ export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.
    */
-  hostList: hostListReducer as EndpointHostsPluginReducer['hostList'],
   alertList: alertListReducer as EndpointAlertsPluginReducer['alertList'],
   management: managementReducer as ManagementPluginReducer['management'],
 };

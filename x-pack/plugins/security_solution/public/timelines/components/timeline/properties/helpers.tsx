@@ -21,18 +21,31 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { APP_ID } from '../../../../../common/constants';
+import {
+  TimelineTypeLiteral,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../../common/types/timeline';
+import { navTabs } from '../../../../app/home/home_navigations';
+import { SecurityPageName } from '../../../../app/types';
+import { timelineSelectors } from '../../../../timelines/store/timeline';
+import { useGetUrlSearch } from '../../../../common/components/navigation/use_get_url_search';
+import { getCreateCaseUrl } from '../../../../common/components/link_to';
+import { State } from '../../../../common/store';
+import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
+
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
-import { SecurityPageName } from '../../../../app/types';
-import { timelineSelectors } from '../../../../timelines/store/timeline';
-import { State } from '../../../../common/store';
+import { setInsertTimeline } from '../../../store/timeline/actions';
+import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -44,7 +57,15 @@ const NotesCountBadge = (styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
+type CreateTimeline = ({
+  id,
+  show,
+  timelineType,
+}: {
+  id: string;
+  show?: boolean;
+  timelineType?: TimelineTypeLiteral;
+}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -127,22 +148,31 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const history = useHistory();
+    const urlSearch = useGetUrlSearch(navTabs.case);
+    const dispatch = useDispatch();
     const { savedObjectId } = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
+    const { navigateToApp } = useKibana().services.application;
+
     const handleClick = useCallback(() => {
       onClosePopover();
+      dispatch(
+        setInsertTimeline({
+          timelineId,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        })
+      );
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(urlSearch),
+      });
       history.push({
         pathname: `/${SecurityPageName.case}/create`,
-        state: {
-          insertTimeline: {
-            timelineId,
-            timelineSavedObjectId: savedObjectId,
-            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-          },
-        },
       });
-    }, [onClosePopover, history, timelineId, timelineTitle]);
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, navigateToApp, onClosePopover, history, timelineId, timelineTitle, urlSearch]);
 
     return (
       <EuiButtonEmpty
@@ -160,30 +190,57 @@ export const NewCase = React.memo<NewCaseProps>(
 );
 NewCase.displayName = 'NewCase';
 
-interface NewTimelineProps {
-  createTimeline: CreateTimeline;
+interface ExistingCaseProps {
   onClosePopover: () => void;
+  onOpenCaseModal: () => void;
+  timelineStatus: TimelineStatus;
+}
+export const ExistingCase = React.memo<ExistingCaseProps>(
+  ({ onClosePopover, onOpenCaseModal, timelineStatus }) => {
+    const handleClick = useCallback(() => {
+      onClosePopover();
+      onOpenCaseModal();
+    }, [onOpenCaseModal, onClosePopover]);
+
+    return (
+      <>
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-existing-case"
+          color="text"
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+        >
+          {i18n.ATTACH_TIMELINE_TO_EXISTING_CASE}
+        </EuiButtonEmpty>
+      </>
+    );
+  }
+);
+ExistingCase.displayName = 'ExistingCase';
+
+export interface NewTimelineProps {
+  createTimeline?: CreateTimeline;
+  closeGearMenu?: () => void;
+  outline?: boolean;
   timelineId: string;
+  title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ createTimeline, onClosePopover, timelineId }) => {
-    const handleClick = useCallback(() => {
-      createTimeline({ id: timelineId, show: true });
-      onClosePopover();
-    }, [createTimeline, timelineId, onClosePopover]);
+  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
+    const uiCapabilities = useKibana().services.application.capabilities;
+    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.securitySolution.crud;
 
-    return (
-      <EuiButtonEmpty
-        data-test-subj="timeline-new"
-        color="text"
-        iconSide="left"
-        iconType="plusInCircle"
-        onClick={handleClick}
-      >
-        {i18n.NEW_TIMELINE}
-      </EuiButtonEmpty>
-    );
+    const { getButton } = useCreateTimelineButton({
+      timelineId,
+      timelineType: TimelineType.default,
+      closeGearMenu,
+    });
+    const button = getButton({ outline, title });
+
+    return capabilitiesCanUserCRUD ? button : null;
   }
 );
 NewTimeline.displayName = 'NewTimeline';

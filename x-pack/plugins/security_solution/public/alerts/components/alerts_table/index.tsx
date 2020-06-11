@@ -117,6 +117,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       });
     }
     return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
 
   // Callback for creating a new timeline -- utilized by row/batch actions
@@ -143,6 +144,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
       setEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isLoading });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setEventsLoading, ALERTS_TABLE_TIMELINE_ID]
   );
 
@@ -150,6 +152,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
       setEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isDeleted });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setEventsDeleted, ALERTS_TABLE_TIMELINE_ID]
   );
 
@@ -210,7 +213,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [setSelectAll, setShowClearSelectionAction]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
-    async (refetchQuery: inputsModel.Refetch, { alertIds, status }: UpdateAlertsStatusProps) => {
+    async (refetchQuery: inputsModel.Refetch, { status }: UpdateAlertsStatusProps) => {
       await updateAlertStatusAction({
         query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
         alertIds: Object.keys(selectedEventIds),
@@ -314,6 +317,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       title: i18n.ALERTS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     setTimelineRowActions({
@@ -321,6 +325,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       queryFields: requiredFieldsForActions,
       timelineRowActions: additionalActions,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [additionalActions]);
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,

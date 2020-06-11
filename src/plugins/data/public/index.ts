@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -267,6 +265,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
 } from '../common';
 
 /*
@@ -342,8 +341,6 @@ export {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
   ISearchStrategy,
   ISearch,
   ISearchOptions,
@@ -361,6 +358,7 @@ export {
   ISearchSource,
   parseSearchSourceJSON,
   injectSearchSourceReferences,
+  getSearchParamsFromRequest,
   extractSearchSourceReferences,
   SearchSourceFields,
   EsQuerySortValue,
@@ -444,6 +442,8 @@ export {
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export * from '../common/field_mapping';
 
 /*
  * Plugin setup

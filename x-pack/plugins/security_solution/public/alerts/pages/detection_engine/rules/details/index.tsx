@@ -5,6 +5,8 @@
  */
 
 /* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable complexity */
+// TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
   EuiLoadingSpinner,
@@ -72,16 +74,24 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
+import { ExceptionListType } from '../../../../../common/components/exceptions/types';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
+  exceptions = 'exceptions',
 }
 
 const ruleDetailTabs = [
   {
     id: RuleDetailTabs.alerts,
     name: detectionI18n.ALERT,
+    disabled: false,
+  },
+  {
+    id: RuleDetailTabs.exceptions,
+    name: i18n.EXCEPTIONS_TAB,
     disabled: false,
   },
   {
@@ -195,6 +205,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         ))}
       </EuiTabs>
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
   const ruleError = useMemo(
@@ -207,6 +218,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           date={rule?.last_failure_at}
         />
       ) : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [rule, ruleDetailTab]
   );
 
@@ -399,6 +411,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           />
                         )}
                       </>
+                    )}
+                    {ruleDetailTab === RuleDetailTabs.exceptions && (
+                      <ExceptionsViewer
+                        ruleId={ruleId ?? ''}
+                        availableListTypes={[
+                          ExceptionListType.DETECTION_ENGINE,
+                          ExceptionListType.ENDPOINT,
+                        ]}
+                        commentsAccordionId={'ruleDetailsTabExceptions'}
+                        exceptionListsMeta={[]}
+                      />
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
                   </WrapperPage>

@@ -239,6 +239,7 @@ export const AllRules = React.memo<AllRulesProps>(
             : [],
         reFetchRules: reFetchRulesData,
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       dispatch,
       dispatchToaster,
@@ -321,6 +322,7 @@ export const AllRules = React.memo<AllRulesProps>(
           ))}
         </EuiTabs>
       ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [allRulesTabs, allRulesTab, setAllRulesTab]
     );
 

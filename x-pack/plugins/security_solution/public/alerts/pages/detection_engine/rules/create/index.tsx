@@ -118,6 +118,7 @@ const CreateRulePageComponent: React.FC = () => {
   const actionMessageParams = useMemo(
     () =>
       getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [stepsData.current['define-rule'].data]
   );
   const history = useHistory();
@@ -160,6 +161,7 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
   );
 
@@ -176,6 +178,7 @@ const CreateRulePageComponent: React.FC = () => {
       }
       return 'passive';
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [openAccordionId, stepsData.current]
   );
 

@@ -54,8 +54,8 @@ export const createVegaFn = (
       help: '',
     },
   },
-  async fn(input, args) {
-    const vegaRequestHandler = createVegaRequestHandler(dependencies);
+  async fn(input, args, context) {
+    const vegaRequestHandler = createVegaRequestHandler(dependencies, context.abortSignal);
 
     const response = await vegaRequestHandler({
       timeRange: get(input, 'timeRange'),

@@ -64,7 +64,7 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
         path: getHostDetailsUrl(encodeURIComponent(hostName), search),
       });
     },
-    [navigateToApp, search]
+    [hostName, navigateToApp, search]
   );
 
   return (
@@ -125,7 +125,7 @@ const IPDetailsLinkComponent: React.FC<{
         path: getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
       });
     },
-    [navigateToApp, search]
+    [flowTarget, ip, navigateToApp, search]
   );
 
   return (
@@ -154,7 +154,7 @@ const CaseDetailsLinkComponent: React.FC<{
         path: getCaseDetailsUrl({ id: detailName, search }),
       });
     },
-    [navigateToApp, search]
+    [detailName, navigateToApp, search]
   );
 
   return (
@@ -318,6 +318,7 @@ const ReputationLinkComponent: React.FC<{
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
         })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 

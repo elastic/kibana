@@ -53,6 +53,7 @@ export const usePersistRule = (): ReturnPersistRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rule]);
 
   return [{ isLoading, isSaved }, setRule];

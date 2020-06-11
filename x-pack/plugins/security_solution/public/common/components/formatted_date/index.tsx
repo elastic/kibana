@@ -14,6 +14,7 @@ import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
 export const PreferenceFormattedDate = React.memo<{ dateFormat?: string; value: Date }>(
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
   ({ value, dateFormat = useDateFormat() }) => (
     <>{moment.tz(value, useTimeZone()).format(dateFormat)}</>
   )
@@ -75,14 +76,15 @@ PreferenceFormattedP1DTDate.displayName = 'PreferenceFormattedP1DTDate';
 export const FormattedDate = React.memo<{
   fieldName: string;
   value?: string | number | null;
+  className?: string;
 }>(
-  ({ value, fieldName }): JSX.Element => {
+  ({ value, fieldName, className = '' }): JSX.Element => {
     if (value == null) {
       return getOrEmptyTagFromValue(value);
     }
     const maybeDate = getMaybeDate(value);
     return maybeDate.isValid() ? (
-      <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName}>
+      <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
         <PreferenceFormattedDate value={maybeDate.toDate()} />
       </LocalizedDateTooltip>
     ) : (

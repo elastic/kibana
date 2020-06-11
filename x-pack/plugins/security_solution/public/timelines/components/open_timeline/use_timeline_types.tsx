@@ -30,7 +30,7 @@ export const useTimelineTypes = (): {
       ev.preventDefault();
       history.push(getTimelineTabsUrl(TimelineType.default, urlSearch));
     },
-    [history]
+    [history, urlSearch]
   );
 
   const goToTemplateTimeline = useCallback(
@@ -38,7 +38,7 @@ export const useTimelineTypes = (): {
       ev.preventDefault();
       history.push(getTimelineTabsUrl(TimelineType.template, urlSearch));
     },
-    [history]
+    [history, urlSearch]
   );
 
   const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = (
@@ -99,6 +99,7 @@ export const useTimelineTypes = (): {
         <EuiSpacer size="m" />
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabName]);
 
   const timelineFilters = useMemo(() => {
@@ -118,6 +119,7 @@ export const useTimelineTypes = (): {
         ))}
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineType]);
 
   return {

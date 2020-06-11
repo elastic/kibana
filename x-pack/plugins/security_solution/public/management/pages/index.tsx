@@ -7,37 +7,27 @@
 import React, { memo } from 'react';
 import { useHistory, Route, Switch } from 'react-router-dom';
 
-import { SecurityPageName } from '../../app/types';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { PolicyContainer } from './policy';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from '../common/constants';
-import { ManagementPageView } from '../components/management_page_view';
 import { NotFoundPage } from '../../app/404';
-
-const TmpEndpoints = () => {
-  return (
-    <ManagementPageView viewType="list" headerLeft="Test">
-      <h1>{'Endpoints will go here'}</h1>
-      <SpyRoute pageName={SecurityPageName.management} />
-    </ManagementPageView>
-  );
-};
+import { EndpointsContainer } from './endpoint_hosts';
+import { getManagementUrl } from '..';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} exact component={TmpEndpoints} />
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
         render={() => {
-          history.replace('/endpoints');
+          history.replace(getManagementUrl({ name: 'endpointList', excludePrefix: true }));
           return null;
         }}
       />

@@ -44,6 +44,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
         onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isDisplayConfirmDeleteModal, caseData]
   );
   const propertyActions = useMemo(

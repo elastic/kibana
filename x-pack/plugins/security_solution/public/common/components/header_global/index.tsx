@@ -20,7 +20,7 @@ import * as i18n from './translations';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { useKibana } from '../../lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, ADD_DATA_PATH } from '../../../../common/constants';
 import { LinkAnchor } from '../links';
 
 const Wrapper = styled.header`
@@ -99,7 +99,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                   <FlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="add-data"
-                      href="home#/tutorial_directory/siem"
+                      href={ADD_DATA_PATH}
                       iconType="plusInCircle"
                     >
                       {i18n.BUTTON_ADD_DATA}
