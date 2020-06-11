@@ -492,7 +492,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                             defaultMessage: 'No fields match the current filters.',
                           })
                         : paginatedEmptyFields
-                        ? i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
+                        ? i18n.translate('xpack.lens.indexPatterns.noDataLabel', {
                             defaultMessage: `Looks like you don't have any fields with data`,
                           })
                         : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
