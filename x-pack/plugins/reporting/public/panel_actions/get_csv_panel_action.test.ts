@@ -96,8 +96,7 @@ describe('GetCsvReportPanelAction', () => {
     const licenseMock = mockLicense$('invalid');
     const plugin = new GetCsvReportPanelAction(core, licenseMock);
     await licenseMock.pipe(first()).toPromise();
-    const compat = plugin.isCompatible(context);
-    expect(plugin.isCompatible(context)).toEqual(false);
+    expect(await plugin.isCompatible(context)).toEqual(false);
   });
 
   it('sets a display and icon type', () => {

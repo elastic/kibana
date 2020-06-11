@@ -70,7 +70,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
-  public isCompatible = (context: ActionContext) => {
+  public isCompatible = async (context: ActionContext) => {
     if (!this.canDownloadCSV) {
       return false;
     }
