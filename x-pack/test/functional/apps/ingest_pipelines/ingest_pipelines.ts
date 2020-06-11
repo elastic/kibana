@@ -7,32 +7,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// const PIPELINE = {
-//   name: 'test_pipeline',
-//   description: 'My pipeline description.',
-//   version: 1,
-//   processors: JSON.stringify([
-//     {
-//       set: {
-//         field: 'foo',
-//         value: 'new',
-//       },
-//     },
-//   ]),
-//   onFailureProcessors: JSON.stringify([
-//     {
-//       set: {
-//         field: '_index',
-//         value: 'failed-{{ _index }}',
-//       },
-//     },
-//   ]),
-// };
+const PIPELINE = {
+  name: 'test_pipeline',
+  description: 'My pipeline description.',
+  version: 1,
+};
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines']);
   const log = getService('log');
-  // const es = getService('legacyEs');
+  const es = getService('legacyEs');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
@@ -47,21 +31,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(headingText).to.be('Ingest Node Pipelines');
     });
 
-    // TODO: Re-enable this test
-    // it('Creates a pipeline', async () => {
-    //   await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
-    //
-    //   const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
-    //   const newPipelineExists = Boolean(
-    //     pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
-    //   );
-    //
-    //   expect(newPipelineExists).to.be(true);
-    // });
+    it('Creates a pipeline', async () => {
+      await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
 
-    // after(async () => {
-    //   // Delete the pipeline that was created
-    //   await es.ingest.deletePipeline({ id: PIPELINE.name });
-    // });
+      const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+      const newPipelineExists = Boolean(
+        pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
+      );
+
+      expect(newPipelineExists).to.be(true);
+    });
+
+    after(async () => {
+      // Delete the pipeline that was created
+      await es.ingest.deletePipeline({ id: PIPELINE.name });
+    });
   });
 };
