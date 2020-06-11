@@ -67,7 +67,7 @@ export const sendDeleteDatasource = (
   body: DeleteDatasourcesRequest,
   options?: HttpFetchOptions
 ) => {
-  return http.post<DeleteDatasourcesResponse>(`${INGEST_API_DELETE_DATASOURCE}`, {
+  return http.post<DeleteDatasourcesResponse>(INGEST_API_DELETE_DATASOURCE, {
     ...options,
     body: JSON.stringify(body.body),
   });

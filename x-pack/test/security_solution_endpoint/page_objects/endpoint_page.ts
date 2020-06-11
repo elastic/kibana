@@ -35,7 +35,7 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
 
     async waitForTableToNotHaveData(dataTestSubj: string) {
       await retry.waitForWithTimeout('table to not have data', 2000, async () => {
-        const tableData = await this.getEndpointAppTableData(dataTestSubj);
+        const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
         if (tableData[1][0] === 'No items found') {
           return true;
         }

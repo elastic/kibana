@@ -15,6 +15,7 @@ import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
 import {
   DeleteDatasourcesResponse,
+  DeleteDatasourcesRequest,
   GetAgentStatusResponse,
 } from '../../../../../../../ingest_manager/common';
 
@@ -60,7 +61,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       });
     } else if (action.type === 'userClickedPolicyListDeleteButton') {
       const { policyId } = action.payload;
-      const datasourceIds: string[] = [policyId];
+      const datasourceIds: DeleteDatasourcesRequest['body']['datasourceIds'] = [policyId];
       let apiResponse: DeleteDatasourcesResponse;
       try {
         apiResponse = await sendDeleteDatasource(http, { body: { datasourceIds } });

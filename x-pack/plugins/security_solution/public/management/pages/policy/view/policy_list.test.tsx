@@ -31,14 +31,12 @@ describe('when on the policies page', () => {
 
   describe('when list data loads', () => {
     let firstPolicyID: string;
-    let firstAgentConfigID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
         history.push('/management/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;
-          firstAgentConfigID = policyListData.items[0].config_id;
           const action: AppAction = {
             type: 'serverReturnedPolicyListData',
             payload: {
@@ -62,16 +60,6 @@ describe('when on the policies page', () => {
       const policyNameLink = (await renderResult.findAllByTestId('policyNameLink'))[0];
       expect(policyNameLink).not.toBeNull();
       expect(policyNameLink.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
-    });
-    it('should display agent config action as a link', async () => {
-      const renderResult = render();
-      const policyActionsButton = (await renderResult.findAllByTestId('policyActionsButton'))[0];
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(policyActionsButton);
-      });
-      return renderResult.findByTestId('agentConfigLink').then((agentConfigLink) => {
-        expect(agentConfigLink.getAttribute('href')).toContain(`configs/${firstAgentConfigID}`);
-      });
     });
   });
 });

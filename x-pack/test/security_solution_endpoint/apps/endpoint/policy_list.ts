@@ -82,6 +82,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
+      it('should show agent config action as a link', async () => {
+        await (await pageObjects.policy.findFirstActionsButton()).click();
+        const agentConfigLink = await testSubjects.find('agentConfigLink');
+        expect(await agentConfigLink.getAttribute('href')).to.match(
+          new RegExp(`\/ingestManager#\/configs\/${policyInfo.agentConfig.id}$`)
+        );
+        // Close action menu
+        await (await pageObjects.policy.findFirstActionsButton()).click();
+      });
+
       it('should delete a policy', async () => {
         await pageObjects.policy.launchAndFindDeleteModal();
         await testSubjects.existOrFail('policyListDeleteModal');
