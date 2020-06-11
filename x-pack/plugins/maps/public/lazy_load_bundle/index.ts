@@ -5,14 +5,14 @@
  */
 
 import { AnyAction } from 'redux';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapStore, MapStoreState } from '../reducers/store';
 import { EventHandlers } from '../reducers/non_serializable_instances';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsService } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
