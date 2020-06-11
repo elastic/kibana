@@ -8,22 +8,30 @@ Kibana Background Sessions are a way to execute, track and restore a group of `s
 
 They can be used to execute long running tasks asynchronously, while the user is free to work on other tasks or close Kibana altogether.
 
-# Basic example
+# Motivation
+
+Kibana is great at proving fast results from large data sets of "hot" data. However, when running slower searches in huge amounts of historical data, potentially on "cold" storage or frozen indices, users encounter a timeout that prevents them from running queries longer than 30 seconds (by default).
+
+While we already introduced an option to explicitly bypass this timeout in v7.7, users still have to wait on-screen for the results to return. 
+
+The motivation of this RFC is to allow users to:
+ - Run queries longer than 30 seconds, while being able to work on other things (in the same application, different Kibana applications or closing Kibana altogether)
+ - Allow a user to restore a completed long running query, without having to wait.
+
+# Detailed design
+
+From the perspective of a user, when he runs a view that takes a long time (A dashboard, a discover search, a SIEM timeline, etc.), he will recieve a notification stating that it can be sent to background, and returned to later. If he chooses to do so, that view will be treated as a "Background Session": It will be stored and tracked for progress, allowing the user to come back and retrive the results in the future.
 
 ## Session Management
 
+A session is a grouping of search requests, who's results are required to produce a specific view of Kibana. 
+It's an application's responsibility to manage its' sessions, by using the `data.search.session` APIs. 
+
 ### Starting a new session
 
-It's an application's responsibility to manage its' sessions. 
-A session should represent a logical grouping of search requests, i.e. a single dashboard configuration.
+To start a session, an application should call `const sessionId = data.search.session.start();`, where `data` is the start contract of the data plugin.
 
-To start a session, an application should call 
-
-`const sessionId = data.search.session.start();`
-
-Where `data` is the start contract of the data plugin.
-
-If the application uses the services provided by the `data.search` plugin, it only needs to pass down the `sessionId` to the API, and the `search` service will track and restore requests internally.
+If the application uses the services provided by the `data.search` plugin, it only needs to pass down that `sessionId` to the search API, and the `search` service will track and restore requests internally.
 
  - If the request is issued using the `data.search.search`, use: 
  ```
@@ -42,7 +50,7 @@ Each session is automatically closed when a new one is started. You may also cal
 
 Sessions are also closed automatically when navigating between applications.
 
-If there is no open session, Kibana will behave as before, suggesting a user to "Run Beyond Timeout" instead of "Run in Background".
+If there is no open session, Kibana will act as before, suggesting a user to "Run Beyond Timeout" instead of "Run in Background".
 
 ### Restoring a session
 
@@ -58,31 +66,49 @@ If the `sessionId` is not found, the request parameters don't match or the store
 
 ??
 
-# Motivation
-
-Kibana is great at proving fast results from large data sets of "hot" data. However, when running slower searches in huge amounts of historical data, potentially on "cold" storage or frozen indices, users encounter a timeout that prevents them from running queries longer than 30 seconds (by default).
-
-While we already introduced an option to explicitly bypass this timeout in v7.7, users still have to wait on-screen for the results to return. 
-
-The motivation of this RFC is to allow users to:
- - Run queries longer than 30 seconds, while being able to work on other things (in the same application, different Kibana applications or closing Kibana altogether)
- - Allow a user to restore a completed long running query, without having to wait.
-
-# Detailed design
-
-## High level 
-
-The key 
-
 ## Background Session Service
 
-The main service 
+The main component of this RFC is the background session service.
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody
-familiar with Kibana to understand, and for somebody familiar with the
-implementation to implement. This should get into specifics and corner-cases,
-and include examples of how the feature is used. Any new terminology should be
-defined here.
+It is a server side service, that tracks and stores sessions and all associated requests. 
+When a user starts executing a session, the service stores information in memory, until the user decides to "Send to Background" or until the expiration time.
+If the use chooses to "Send to Background", all existing session info is saved into a Saved Object as well as subsequent requests with the same seesion ID.
+
+When a user wants to restore the session, the service can be user to retrieve the IDs.
+
+The service offers three public APIs:
+
+```
+   // Track a searchId for a given session
+   // Automatically called by search_interceptor for each request
+   data_enhanced.search.session.trackId(
+    request: KibanaRequest,
+    sessionId: string,
+    requestParams: SessionKeys,
+    searchId: string
+  )
+
+   // Store session Id, while providing a URL to restore it.
+   data_enhanced.search.session.store(
+      request: KibanaRequest, 
+      sessionId: string, 
+      restoreUrl: string
+   )
+
+   // Get the searchId from a given session.
+   // Automatically called by search_interceptor for each request, if a known sessionId is provided.
+   const searchId = await data_enhanced.search.session.get(request: KibanaRequest, sessionId: string)
+```
+
+## Tracking Background Session Progress
+
+While the Background Session Service is responsible for storing a `BackgroundSession` in a `BackgroundSessionObject`, it does **not** track it's progress. Instead, tracking the progress is the responsibility of the monitoring flow. 
+
+During setup, the `data_enhanced` plugin should register a task into the Kibana Task Mananger. The task will run in a configurable interval, fetching all Background Sessions with a `RUNNING` state,  This task will 
+
+## Search Service
+
+
 
 # Drawbacks
 
