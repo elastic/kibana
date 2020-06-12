@@ -74,8 +74,8 @@ const ListItem = styled.button<{ selected: boolean }>`
 
 const Icon = styled.div<{ type: string }>`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type) as string)};
-  color: ${props => getIconColor(props.type)};
+  background: ${(props) => tint(0.1, getIconColor(props.type) as string)};
+  color: ${(props) => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;

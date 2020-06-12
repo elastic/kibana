@@ -115,8 +115,7 @@ export function KueryBar({
             },
           ],
         })) || []
-      )
-        .filter((suggestion: QuerySuggestion) => !startsWith(suggestion.text, 'span.'));
+      ).filter((suggestion: QuerySuggestion) => !startsWith(suggestion.text, 'span.'));
       if (currentRequest !== currentRequestCheck) {
         return;
       }
