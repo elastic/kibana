@@ -9,10 +9,10 @@
 
 // @ts-ignore
 export * from '../../angular/services/gis_map_saved_object_loader';
-export * from '../map_embeddable';
+export * from '../../embeddable/map_embeddable';
 export * from '../../kibana_services';
 export * from '../../reducers/store';
 export * from '../../actions';
 export * from '../../selectors/map_selectors';
 export * from '../../angular/get_initial_layers';
-export * from './../merge_input_with_saved_map';
+export * from '../../embeddable/merge_input_with_saved_map';
