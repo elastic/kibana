@@ -43,6 +43,8 @@ export interface PingHistogramComponentProps {
   data: HistogramResult | null;
 
   loading?: boolean;
+
+  updateDateRange: (from: number, to: number) => void;
 }
 
 interface BarPoint {
@@ -57,12 +59,11 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   data,
   loading = false,
   height,
+  updateDateRange,
 }) => {
   const {
     colors: { danger, gray },
   } = useContext(UptimeThemeContext);
-
-  const [, updateUrlParams] = useUrlParams();
 
   let content: JSX.Element | undefined;
   if (!data?.histogram?.length) {
@@ -92,10 +93,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
         return;
       }
       const [min, max] = x;
-      updateUrlParams({
-        dateRangeStart: moment(min).toISOString(),
-        dateRangeEnd: moment(max).toISOString(),
-      });
+      updateDateRange(min, max);
     };
 
     const barData: BarPoint[] = [];
