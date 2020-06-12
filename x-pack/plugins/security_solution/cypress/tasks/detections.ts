@@ -16,7 +16,7 @@ import {
   ALERTS,
   ALERT_CHECKBOX,
 } from '../screens/detections';
-import { REFRESH_BUTTON } from '../screens/siem_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 
 export const closeFirstAlert = () => {
   cy.get(OPEN_CLOSE_ALERT_BTN).first().click({ force: true });

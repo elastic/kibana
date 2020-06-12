@@ -103,6 +103,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { loading, ...signalIndex };

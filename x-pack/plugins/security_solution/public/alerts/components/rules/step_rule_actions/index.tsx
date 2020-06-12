@@ -99,6 +99,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [form]
   );
 
@@ -112,12 +113,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.ruleActions, form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
@@ -142,6 +145,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         options: throttleOptions,
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLoading, updateThrottle]
   );
 
