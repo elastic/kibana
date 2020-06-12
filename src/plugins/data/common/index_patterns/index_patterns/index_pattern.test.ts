@@ -28,7 +28,7 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { fieldFormatsMock } from '../../field_formats/mocks';
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');
@@ -102,10 +102,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     savedObjectsClient: savedObjectsClient as any,
     apiClient,
     patternCache,
-    fieldFormats: ({
-      getDefaultInstance: () => {},
-      getType: () => {},
-    } as unknown) as FieldFormatsStartCommon,
+    fieldFormats: fieldFormatsMock,
     onNotification: () => {},
     onError: () => {},
   });
@@ -370,10 +367,7 @@ describe('IndexPattern', () => {
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
-      fieldFormats: ({
-        getDefaultInstance: () => {},
-        getType: () => {},
-      } as unknown) as FieldFormatsStartCommon,
+      fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
     });
@@ -387,10 +381,7 @@ describe('IndexPattern', () => {
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
-      fieldFormats: ({
-        getDefaultInstance: () => {},
-        getType: () => {},
-      } as unknown) as FieldFormatsStartCommon,
+      fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
     });
