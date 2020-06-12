@@ -1,5 +1,7 @@
 include::introduction.asciidoc[]
 
+include::whats-new.asciidoc[]
+
 include::getting-started.asciidoc[]
 
 include::setup.asciidoc[]
@@ -37,6 +39,8 @@ include::dev-tools.asciidoc[]
 include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
+
+include::{kib-repo-dir}/ingest_manager/ingest-manager.asciidoc[]
 
 include::reporting/index.asciidoc[]
 
