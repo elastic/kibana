@@ -507,7 +507,7 @@ export interface StateUrl {
 /** Monitor status data over time. */
 export interface SummaryHistogram {
   /** The number of documents used to assemble the histogram. */
-  count: number;
+  count?: number;
   /** The individual histogram data points. */
   points: SummaryHistogramPoint[];
 }
@@ -516,9 +516,9 @@ export interface SummaryHistogramPoint {
   /** The time at which these data were collected. */
   timestamp: UnsignedInteger;
   /** The number of _up_ documents. */
-  up: number;
+  up?: number;
   /** The number of _down_ documents. */
-  down: number;
+  down?: number;
 }
 
 export interface AllPingsQueryArgs {
