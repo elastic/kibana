@@ -10,7 +10,7 @@ import {
   EndpointEvent,
   Host,
   HostMetadata,
-  HostOS,
+  OSFields,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
   PolicyData,
@@ -28,38 +28,46 @@ interface EventOptions {
   processName?: string;
 }
 
-const Windows: HostOS[] = [
+const Windows: OSFields[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
     version: '10.0',
-    variant: 'Windows Pro',
+    Ext: {
+      variant: 'Windows Pro',
+    },
   },
   {
     name: 'windows 10.0',
     full: 'Windows Server 2016',
     version: '10.0',
-    variant: 'Windows Server',
+    Ext: {
+      variant: 'Windows Server',
+    },
   },
   {
     name: 'windows 6.2',
     full: 'Windows Server 2012',
     version: '6.2',
-    variant: 'Windows Server',
+    Ext: {
+      variant: 'Windows Server',
+    },
   },
   {
     name: 'windows 6.3',
     full: 'Windows Server 2012R2',
     version: '6.3',
-    variant: 'Windows Server Release 2',
+    Ext: {
+      variant: 'Windows Server Release 2',
+    },
   },
 ];
 
-const Linux: HostOS[] = [];
+const Linux: OSFields[] = [];
 
-const Mac: HostOS[] = [];
+const Mac: OSFields[] = [];
 
-const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
+const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -179,9 +187,12 @@ interface HostInfo {
     id: string;
   };
   host: Host;
-  endpoint: {
+  Endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        name: string;
+      };
     };
   };
 }
@@ -271,7 +282,7 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.endpoint.policy.id = this.randomChoice(POLICIES).id;
+    this.commonInfo.Endpoint.policy.applied = this.randomChoice(POLICIES);
   }
 
   private createHostData(): HostInfo {
@@ -292,8 +303,10 @@ export class EndpointDocGenerator {
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
       },
-      endpoint: {
-        policy: this.randomChoice(POLICIES),
+      Endpoint: {
+        policy: {
+          applied: this.randomChoice(POLICIES),
+        },
       },
     };
   }
@@ -348,77 +361,88 @@ export class EndpointDocGenerator {
           sha1: 'fake file sha1',
           sha256: 'fake file sha256',
         },
-        code_signature: {
-          trusted: false,
-          subject_name: 'bad signer',
+        Ext: {
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          malware_classification: {
+            identifier: 'endpointpe',
+            score: 1,
+            threshold: 0.66,
+            version: '3.0.33',
+          },
+          temp_file_path: 'C:/temp/fake_malware.exe',
         },
-        malware_classification: {
-          identifier: 'endpointpe',
-          score: 1,
-          threshold: 0.66,
-          version: '3.0.33',
-        },
-        temp_file_path: 'C:/temp/fake_malware.exe',
       },
       process: {
         pid: 2,
         name: 'malware writer',
         start: ts,
         uptime: 0,
-        user: 'SYSTEM',
         entity_id: entityID,
         executable: 'C:/malware.exe',
         parent: parentEntityID ? { entity_id: parentEntityID, pid: 1 } : undefined,
-        token: {
-          domain: 'NT AUTHORITY',
-          integrity_level: 16384,
-          integrity_level_name: 'system',
-          privileges: [
-            {
-              description: 'Replace a process level token',
-              enabled: false,
-              name: 'SeAssignPrimaryTokenPrivilege',
-            },
-          ],
-          sid: 'S-1-5-18',
-          type: 'tokenPrimary',
-          user: 'SYSTEM',
-        },
-        code_signature: {
-          trusted: false,
-          subject_name: 'bad signer',
-        },
         hash: {
           md5: 'fake md5',
           sha1: 'fake sha1',
           sha256: 'fake sha256',
+        },
+        Ext: {
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          user: 'SYSTEM',
+          token: {
+            domain: 'NT AUTHORITY',
+            integrity_level: 16384,
+            integrity_level_name: 'system',
+            privileges: [
+              {
+                description: 'Replace a process level token',
+                enabled: false,
+                name: 'SeAssignPrimaryTokenPrivilege',
+              },
+            ],
+            sid: 'S-1-5-18',
+            type: 'tokenPrimary',
+            user: 'SYSTEM',
+          },
         },
       },
       dll: [
         {
           pe: {
             architecture: 'x64',
-            imphash: 'c30d230b81c734e82e86e2e2fe01cd01',
           },
           code_signature: {
             subject_name: 'Cybereason Inc',
             trusted: true,
           },
-          compile_time: 1534424710,
+
           hash: {
             md5: '1f2d082566b0fc5f2c238a5180db7451',
             sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
             sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
           },
-          malware_classification: {
-            identifier: 'Whitelisted',
-            score: 0,
-            threshold: 0,
-            version: '3.0.0',
-          },
-          mapped_address: 5362483200,
-          mapped_size: 0,
+
           path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+          Ext: {
+            compile_time: 1534424710,
+            mapped_address: 5362483200,
+            mapped_size: 0,
+            malware_classification: {
+              identifier: 'Whitelisted',
+              score: 0,
+              threshold: 0,
+              version: '3.0.0',
+            },
+          },
         },
       ],
     };
@@ -974,7 +998,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
             ],
-            id: this.commonInfo.endpoint.policy.id,
+            id: this.commonInfo.Endpoint.policy.applied.id,
             response: {
               configurations: {
                 events: {
