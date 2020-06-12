@@ -22,6 +22,7 @@ import { debounce } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';
+import { UI_SETTINGS } from '../../../../common';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -54,7 +55,9 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   }
 
   protected isSuggestingValues() {
-    const shouldSuggestValues = this.services.uiSettings.get('filterEditor:suggestValues');
+    const shouldSuggestValues = this.services.uiSettings.get(
+      UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
+    );
     const { field } = this.props;
     return shouldSuggestValues && field && field.aggregatable && field.type === 'string';
   }
@@ -80,4 +83,4 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   }, 500);
 }
 
-export const PhraseSuggestor = withKibana(PhraseSuggestorUI);
+export const PhraseSuggestor = withKibana(PhraseSuggestorUI as any);

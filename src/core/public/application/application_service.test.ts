@@ -34,7 +34,15 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
+import {
+  App,
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  AppUpdater,
+  LegacyApp,
+  PublicLegacyAppInfo,
+} from './types';
 import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
@@ -366,7 +374,10 @@ describe('#setup()', () => {
       setup.registerAppUpdater(statusUpdater);
 
       const start = await service.start(startDeps);
-      let latestValue: ReadonlyMap<string, App | LegacyApp> = new Map<string, App | LegacyApp>();
+      let latestValue: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo> = new Map<
+        string,
+        PublicAppInfo | PublicLegacyAppInfo
+      >();
       start.applications$.subscribe((apps) => {
         latestValue = apps;
       });
@@ -471,9 +482,6 @@ describe('#setup()', () => {
 
 describe('#start()', () => {
   beforeEach(() => {
-    MockHistory.push.mockReset();
-    parseAppUrlMock.mockReset();
-
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
@@ -484,6 +492,12 @@ describe('#start()', () => {
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
+  });
+
+  afterEach(() => {
+    MockHistory.push.mockReset();
+    MockHistory.replace.mockReset();
+    parseAppUrlMock.mockReset();
   });
 
   it('rejects if called prior to #setup()', async () => {
@@ -912,6 +926,79 @@ describe('#start()', () => {
 
       await navigateToApp('baseApp:legacyApp1');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/baseApp');
+    });
+
+    describe('when `replace` option is true', () => {
+      it('use `history.replace` instead of `history.push`', async () => {
+        service.setup(setupDeps);
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('myTestApp', { replace: true });
+        expect(MockHistory.replace).toHaveBeenCalledWith('/app/myTestApp', undefined);
+
+        await navigateToApp('myOtherApp', { replace: true });
+        expect(MockHistory.replace).toHaveBeenCalledWith('/app/myOtherApp', undefined);
+      });
+
+      it('includes state if specified', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('myTestApp', { state: 'my-state', replace: true });
+        expect(MockHistory.replace).toHaveBeenCalledWith('/app/myTestApp', 'my-state');
+
+        await navigateToApp('app2', { state: 'my-state', replace: true });
+        expect(MockHistory.replace).toHaveBeenCalledWith('/custom/path', 'my-state');
+      });
+      it('appends a path if specified', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('myTestApp', { path: 'deep/link/to/location/2', replace: true });
+        expect(MockHistory.replace).toHaveBeenCalledWith(
+          '/app/myTestApp/deep/link/to/location/2',
+          undefined
+        );
+
+        await navigateToApp('app2', { path: 'deep/link/to/location/2', replace: true });
+        expect(MockHistory.replace).toHaveBeenCalledWith(
+          '/custom/path/deep/link/to/location/2',
+          undefined
+        );
+      });
+      it('do not change the behavior when in legacy mode', async () => {
+        setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
+        setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+        service.setup(setupDeps);
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('alpha', { replace: true });
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/alpha');
+      });
+    });
+
+    describe('when `replace` option is false', () => {
+      it('behave as when the option is unspecified', async () => {
+        service.setup(setupDeps);
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('myTestApp', { replace: false });
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
+
+        await navigateToApp('myOtherApp', { replace: false });
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
+
+        expect(MockHistory.replace).not.toHaveBeenCalled();
+      });
     });
   });
 

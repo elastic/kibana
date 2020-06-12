@@ -117,6 +117,7 @@ export const Expressions: React.FC<Props> = (props) => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
@@ -141,6 +142,7 @@ export const Expressions: React.FC<Props> = (props) => {
     [derivedIndexPattern, setAlertParams]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
@@ -333,6 +335,10 @@ export const Expressions: React.FC<Props> = (props) => {
     </>
   );
 };
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default Expressions;
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;
