@@ -65,21 +65,14 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
         BookByValueInput,
         BookByReferenceInput
       >(BOOK_SAVED_OBJECT);
-      const onSave = async (attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
-        const newInput = await attributeService.wrapAttributes(
-          attributes,
-          includeInLibrary,
-          embeddable
-        );
-        if (
-          !includeInLibrary &&
-          (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId
-        ) {
+      const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
+        const newInput = await attributeService.wrapAttributes(attributes, useRefType, embeddable);
+        if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
           // Remove the savedObejctId when un-linking
           newInput.savedObjectId = null;
         }
         embeddable.updateInput(newInput);
-        if (includeInLibrary) {
+        if (useRefType) {
           // Ensures that any duplicate embeddables also register the changes. This mirrors the behavior of going back and forth between apps
           embeddable.getRoot().reload();
         }
@@ -89,9 +82,9 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
           <CreateEditBookComponent
             savedObjectId={(embeddable.getInput() as BookByReferenceInput).savedObjectId}
             attributes={embeddable.getOutput().attributes}
-            onSave={(attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
+            onSave={(attributes: BookSavedObjectAttributes, useRefType: boolean) => {
               overlay.close();
-              onSave(attributes, includeInLibrary);
+              onSave(attributes, useRefType);
             }}
           />
         )

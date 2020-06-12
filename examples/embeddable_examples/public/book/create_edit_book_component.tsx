@@ -32,7 +32,7 @@ export function CreateEditBookComponent({
 }: {
   savedObjectId?: string;
   attributes?: BookSavedObjectAttributes;
-  onSave: (attributes: BookSavedObjectAttributes, saveToLibrary: boolean) => void;
+  onSave: (attributes: BookSavedObjectAttributes, useRefType: boolean) => void;
 }) {
   const [title, setTitle] = useState(attributes?.title ?? '');
   const [author, setAuthor] = useState(attributes?.author ?? '');

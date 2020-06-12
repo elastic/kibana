@@ -39,9 +39,8 @@ export class AttributeService<
         SavedObjectAttributes
       >(this.type, input.savedObjectId);
       return savedObject.attributes;
-    } else {
-      return input.attributes;
     }
+    return input.attributes;
   }
 
   public async wrapAttributes(

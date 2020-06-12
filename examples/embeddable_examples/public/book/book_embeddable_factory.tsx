@@ -95,18 +95,18 @@ export class BookEmbeddableFactory
   public async getExplicitInput(): Promise<Omit<BookEmbeddableInput, 'id'>> {
     const { openModal } = await this.getStartServices();
     return new Promise<Omit<BookEmbeddableInput, 'id'>>((resolve) => {
-      const onSave = async (attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
+      const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
         const wrappedAttributes = (await this.getAttributeService()).wrapAttributes(
           attributes,
-          includeInLibrary
+          useRefType
         );
         resolve(wrappedAttributes);
       };
       const overlay = openModal(
         toMountPoint(
           <CreateEditBookComponent
-            onSave={(attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
-              onSave(attributes, includeInLibrary);
+            onSave={(attributes: BookSavedObjectAttributes, useRefType: boolean) => {
+              onSave(attributes, useRefType);
               overlay.close();
             }}
           />
