@@ -4,11 +4,10 @@
 
 ## HttpServiceSetup.auth property
 
+Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md)
+
 <b>Signature:</b>
 
 ```typescript
-auth: {
-        get: GetAuthState;
-        isAuthenticated: IsAuthenticated;
-    };
+auth: HttpAuth;
 ```

@@ -81,7 +81,7 @@ async (context, request, response) => {
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [auth](./kibana-plugin-core-server.httpservicesetup.auth.md) | <code>{</code><br/><code>        get: GetAuthState;</code><br/><code>        isAuthenticated: IsAuthenticated;</code><br/><code>    }</code> |  |
+|  [auth](./kibana-plugin-core-server.httpservicesetup.auth.md) | <code>HttpAuth</code> | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
 |  [basePath](./kibana-plugin-core-server.httpservicesetup.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
 |  [createCookieSessionStorageFactory](./kibana-plugin-core-server.httpservicesetup.createcookiesessionstoragefactory.md) | <code>&lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt;</code> | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) |
 |  [createRouter](./kibana-plugin-core-server.httpservicesetup.createrouter.md) | <code>() =&gt; IRouter</code> | Provides ability to declare a handler function for a particular path and HTTP request method. |

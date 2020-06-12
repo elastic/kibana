@@ -121,6 +121,7 @@ export {
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
+  HttpAuth,
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerInfo,

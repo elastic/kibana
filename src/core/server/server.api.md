@@ -657,6 +657,8 @@ export interface CoreStart {
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
+    http: HttpServiceStart;
+    // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
@@ -905,6 +907,12 @@ export type Headers = {
     [header: string]: string | string[] | undefined;
 };
 
+// @public (undocumented)
+export interface HttpAuth {
+    get: GetAuthState;
+    isAuthenticated: IsAuthenticated;
+}
+
 // @public
 export interface HttpResources {
     register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
@@ -948,11 +956,7 @@ export interface HttpServerInfo {
 
 // @public
 export interface HttpServiceSetup {
-    // (undocumented)
-    auth: {
-        get: GetAuthState;
-        isAuthenticated: IsAuthenticated;
-    };
+    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
@@ -968,7 +972,10 @@ export interface HttpServiceSetup {
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: (port: number) => boolean;
+    auth: HttpAuth;
+    basePath: IBasePath;
+    getServerInfo: () => HttpServerInfo;
+    isTlsEnabled: boolean;
 }
 
 // @public
