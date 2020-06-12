@@ -28,11 +28,7 @@ import {
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
 import * as data from '../../test_data/all_metadata_data.json';
-import {
-  createMockAgentService,
-  createMockMetadataIndexPatternRetriever,
-  createRouteHandlerContext,
-} from '../../mocks';
+import { createMockAgentService, createRouteHandlerContext } from '../../mocks';
 import { AgentService } from '../../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -63,7 +59,6 @@ describe('test endpoint route', () => {
     mockAgentService = createMockAgentService();
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.start({
-      indexPatternRetriever: createMockMetadataIndexPatternRetriever(),
       agentService: mockAgentService,
     });
 
