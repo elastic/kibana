@@ -9,7 +9,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { createRef } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Subject } from 'rxjs';
@@ -55,7 +55,6 @@ import {
   escapeParens,
   escapeDoubleQuotes,
 } from './explorer_utils';
-import { getSwimlaneContainerWidth } from './legacy_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
 
 import { FILTER_ACTION } from './explorer_constants';
@@ -66,7 +65,6 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
 
 const ExplorerPage = ({
@@ -80,9 +78,8 @@ const ExplorerPage = ({
   queryString,
   filterIconTriggeredQuery,
   updateLanguage,
-  resizeRef,
 }) => (
-  <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
+  <div data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="anomaly_detection" />
     <EuiPage style={{ background: 'none' }}>
       <EuiPageBody>
@@ -147,24 +144,13 @@ export class Explorer extends React.Component {
 
   _unsubscribeAll = new Subject();
 
-  resizeRef = createRef();
-  resizeChecker = undefined;
-  resizeHandler = () => {
-    explorerService.setSwimlaneContainerWidth(getSwimlaneContainerWidth());
-  };
-
   componentDidMount() {
     limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
-
-    // Required to redraw the time series chart when the container is resized.
-    this.resizeChecker = new ResizeChecker(this.resizeRef.current);
-    this.resizeChecker.on('resize', this.resizeHandler);
   }
 
   componentWillUnmount() {
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
-    this.resizeChecker.destroy();
   }
 
   viewByChangeHandler = (e) => explorerService.setViewBySwimlaneFieldName(e.target.value);
@@ -266,7 +252,6 @@ export class Explorer extends React.Component {
           indexPattern={indexPattern}
           queryString={queryString}
           updateLanguage={this.updateLanguage}
-          resizeRef={this.resizeRef}
         >
           <LoadingIndicator
             label={i18n.translate('xpack.ml.explorer.loadingLabel', {
@@ -279,7 +264,7 @@ export class Explorer extends React.Component {
 
     if (noJobsFound) {
       return (
-        <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+        <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoJobsFound />
         </ExplorerPage>
       );
@@ -287,7 +272,7 @@ export class Explorer extends React.Component {
 
     if (noJobsFound && hasResults === false) {
       return (
-        <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+        <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoResultsFound />
         </ExplorerPage>
       );
@@ -310,7 +295,6 @@ export class Explorer extends React.Component {
         indexPattern={indexPattern}
         queryString={queryString}
         updateLanguage={this.updateLanguage}
-        resizeRef={this.resizeRef}
       >
         <div className="results-container">
           {noInfluencersConfigured && (

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -54,10 +54,13 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     chartWidth
   );
 
-  const onResize = throttle((e: { width: number; height: number }) => {
-    const labelWidth = 200;
-    setChartWidth(e.width - labelWidth);
-  }, RESIZE_THROTTLE_TIME_MS);
+  const onResize = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      const labelWidth = 200;
+      setChartWidth(e.width - labelWidth);
+    }, RESIZE_THROTTLE_TIME_MS),
+    []
+  );
 
   if (error) {
     return (
