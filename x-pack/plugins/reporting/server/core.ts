@@ -44,22 +44,32 @@ export interface ReportingInternalStart {
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
-  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // for pluginIsSetup
-  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // for getPluginStartDeps
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
+  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private exportTypesRegistry = getExportTypesRegistry();
   private config?: ReportingConfig;
 
   constructor() {}
 
-  public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
-    this.pluginSetupDeps = reportingSetupDeps;
-    this.pluginSetup$.next(true);
+  /*
+   * Register setupDeps
+   */
+  public pluginSetup(setupDeps: ReportingInternalSetup) {
+    this.pluginSetup$.next(true); // trigger the observer
+    this.pluginSetupDeps = setupDeps; // cache
   }
 
-  public pluginStart(reportingStartDeps: ReportingInternalStart) {
-    this.pluginStart$.next(reportingStartDeps);
+  /*
+   * Register startDeps
+   */
+  public pluginStart(startDeps: ReportingInternalStart) {
+    this.pluginStart$.next(startDeps); // trigger the observer
+    this.pluginStartDeps = startDeps; // cache
   }
 
+  /*
+   * Blocks the caller until setup is done
+   */
   public async pluginSetsUp(): Promise<boolean> {
     // use deps and config as a cached resolver
     if (this.pluginSetupDeps && this.config) {
@@ -68,17 +78,47 @@ export class ReportingCore {
     return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
+  /*
+   * Blocks the caller until start is done
+   */
   public async pluginStartsUp(): Promise<boolean> {
     return await this.getPluginStartDeps().then(() => true);
   }
 
+  /*
+   * Synchronously checks if all async background setup and startup is completed
+   */
   public pluginIsStarted() {
-    return this.pluginStartDeps !== undefined;
+    return this.pluginSetupDeps != null && this.config != null && this.pluginStartDeps != null;
   }
 
+  /*
+   * Allows config to be set in the background
+   */
   public setConfig(config: ReportingConfig) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /*
+   * Gives synchronous access to the config
+   */
+  public getConfig(): ReportingConfig {
+    if (!this.config) {
+      throw new Error('Config is not yet initialized');
+    }
+    return this.config;
+  }
+
+  /*
+   * Gives async access to the startDeps
+   */
+  private async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
+    }
+
+    return await this.pluginStart$.pipe(first()).toPromise();
   }
 
   public getExportTypesRegistry() {
@@ -103,31 +143,20 @@ export class ReportingCore {
       .toPromise();
   }
 
-  public getConfig(): ReportingConfig {
-    if (!this.config) {
-      throw new Error('Config is not yet initialized');
-    }
-    return this.config;
-  }
-
   public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
     const config = this.getConfig();
     const { browserDriverFactory } = await this.getPluginStartDeps();
     return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
   }
 
+  /*
+   * Gives synchronous access to the setupDeps
+   */
   public getPluginSetupDeps() {
     if (!this.pluginSetupDeps) {
       throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
     }
     return this.pluginSetupDeps;
-  }
-
-  private async getPluginStartDeps() {
-    if (this.pluginStartDeps) {
-      return this.pluginStartDeps;
-    }
-    return await this.pluginStart$.pipe(first()).toPromise();
   }
 
   public getElasticsearchService() {
