@@ -12,7 +12,7 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
-import { TopNav } from './top_nav';
+import { DatePickerWrapper } from './date_picker_wrapper';
 
 jest.mock('../../../contexts/kibana', () => ({
   useMlKibana: () => {
@@ -43,7 +43,7 @@ jest.mock('../../../contexts/kibana', () => ({
 
 const noop = () => {};
 
-describe('Navigation Menu: <TopNav />', () => {
+describe('Navigation Menu: <DatePickerWrapper />', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -58,17 +58,17 @@ describe('Navigation Menu: <TopNav />', () => {
 
     const wrapper = mount(
       <MemoryRouter>
-        <TopNav />
+        <DatePickerWrapper />
       </MemoryRouter>
     );
-    expect(wrapper.find(TopNav)).toHaveLength(1);
+    expect(wrapper.find(DatePickerWrapper)).toHaveLength(1);
     expect(refreshListener).toBeCalledTimes(0);
 
     refreshSubscription.unsubscribe();
   });
 
   // The following tests are written against EuiSuperDatePicker
-  // instead of TopNav. TopNav uses hooks and we cannot write tests
+  // instead of DatePickerWrapper. DatePickerWrapper uses hooks and we cannot write tests
   // with async hook updates yet until React 16.9 is available.
   test('Listen for consecutive super date picker refreshs.', async () => {
     const onRefresh = jest.fn();
