@@ -29,4 +29,3 @@ export { url } from './url';
 export { now } from './now';
 export { calculateObjectHash } from './calculate_object_hash';
 export { defaultFeedbackMessage } from './default_feedback_message';
-export * from './field_mapping';

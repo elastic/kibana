@@ -35,7 +35,6 @@ export {
 } from '../common';
 export * from './core';
 export * from '../common/errors';
-export * from '../common/field_mapping';
 export * from './field_wildcard';
 export * from './parse';
 export * from './render_complete';

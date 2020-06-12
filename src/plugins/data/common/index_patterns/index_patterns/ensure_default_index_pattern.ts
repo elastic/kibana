@@ -18,13 +18,13 @@
  */
 
 import { contains } from 'lodash';
-import { CoreStart } from 'kibana/public';
 import { IndexPatternsContract } from './index_patterns';
+import { UiSettingsCommon } from '../types';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
-  uiSettings: CoreStart['uiSettings'],
+  uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void
 ) => {
   /**
@@ -33,12 +33,12 @@ export const createEnsureDefaultIndexPattern = (
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
     const patterns = await this.getIds();
-    let defaultId = uiSettings.get('defaultIndex');
+    let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
     const exists = contains(patterns, defaultId);
 
     if (defined && !exists) {
-      uiSettings.remove('defaultIndex');
+      await uiSettings.remove('defaultIndex');
       defaultId = defined = false;
     }
 
@@ -49,7 +49,7 @@ export const createEnsureDefaultIndexPattern = (
     // If there is any index pattern created, set the first as default
     if (patterns.length >= 1) {
       defaultId = patterns[0];
-      uiSettings.set('defaultIndex', defaultId);
+      await uiSettings.set('defaultIndex', defaultId);
     } else {
       return onRedirectNoIndexPattern();
     }

@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, KibanaRequest } from 'kibana/server';
-import { IUiSettingsClient, SavedObjectsClient } from 'kibana/public';
+import { SavedObjectsClient } from 'kibana/public';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -27,6 +27,7 @@ import {
   IndexPatternsApiClient,
 } from '../../common/index_patterns';
 import { FieldFormatsStart } from '../field_formats';
+import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 
 export interface IndexPatternsServiceStart {
   IndexPatternsServiceFactory: any;
@@ -54,9 +55,18 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
         // todo - separate out client api, uiSettings compat
 
         return new IndexPatternsCommonService(
-          (uiSettingsClient as unknown) as IUiSettingsClient,
-          // (savedObjectsClient as unknown) as SavedObjectsClient,
-          savedObjectsClient,
+          new UiSettingsServerToCommon(uiSettingsClient),
+          (savedObjectsClient as unknown) as SavedObjectsClient,
+          // savedObjectsClient,
+          // IndexPatterns
+          // refreshSavedObjectsCache
+          //
+          // Index Pattern
+          // get (via init)
+          // update (via popularize, save)
+          // create (via create)
+          // delete (via destroy)
+          // findByTitle
           {} as IndexPatternsApiClient, // hoooow
           formats,
           () => {},

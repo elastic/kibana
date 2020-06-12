@@ -44,6 +44,7 @@ import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
   IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
   setFieldFormats,
@@ -169,11 +170,13 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService(
-      uiSettings,
+      new UiSettingsPublicToCommon(uiSettings),
       savedObjects.client,
       new IndexPatternsApiClient(http),
       fieldFormats,
-      notifications.toasts.add,
+      (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
       notifications.toasts.addError,
       onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
     );

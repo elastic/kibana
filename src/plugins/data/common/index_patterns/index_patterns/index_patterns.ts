@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  IUiSettingsClient,
-  CoreStart,
-} from 'src/core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -37,8 +32,9 @@ import {
   Field,
   FieldSpec,
 } from '../fields';
-import { OnNotification, OnError } from '../types';
+import { OnNotification, OnError, UiSettingsCommon } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
+import { UI_SETTINGS } from '../../../common';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -49,10 +45,10 @@ export interface IndexPatternSavedObjectAttrs {
 }
 
 export class IndexPatternsService {
-  private config: IUiSettingsClient;
+  private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
-  private apiClient: IndexPatternsApiClient;
+  private apiClient?: IndexPatternsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
@@ -65,7 +61,7 @@ export class IndexPatternsService {
   ) => Field;
 
   constructor(
-    uiSettings: CoreStart['uiSettings'],
+    uiSettings: UiSettingsCommon,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IndexPatternsApiClient,
     fieldFormats: FieldFormatsStartCommon,
@@ -143,11 +139,19 @@ export class IndexPatternsService {
   };
 
   getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForTimePattern(options);
+    if (this.apiClient) {
+      return this.apiClient.getFieldsForTimePattern(options);
+    } else {
+      throw new Error('Index Patterns Service - no apiClient defiined');
+    }
   };
 
   getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForWildcard(options);
+    if (this.apiClient) {
+      return this.apiClient.getFieldsForWildcard(options);
+    } else {
+      throw new Error('Index Patterns Service - no apiClient defiined');
+    }
   };
 
   clearCache = (id?: string) => {
@@ -166,7 +170,7 @@ export class IndexPatternsService {
   };
 
   getDefault = async () => {
-    const defaultIndexPatternId = this.config.get('defaultIndex');
+    const defaultIndexPatternId = await this.config.get('defaultIndex');
     if (defaultIndexPatternId) {
       return await this.get(defaultIndexPatternId);
     }
@@ -185,16 +189,20 @@ export class IndexPatternsService {
     return indexPatternCache.set(id, indexPattern);
   };
 
-  make = (id?: string): Promise<IndexPattern> => {
+  make = async (id?: string): Promise<IndexPattern> => {
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const uiSettingsValues = await this.config.getAll();
     const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
-      this.apiClient,
+      this.apiClient || {},
       indexPatternCache,
       this.fieldFormats,
       this.onNotification,
-      this.onError
+      this.onError,
+      { ...uiSettingsValues, shortDotsEnable, metaFields }
     );
 
     return indexPattern.init();

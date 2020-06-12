@@ -51,3 +51,39 @@ export interface IndexPatternAttributes {
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
 export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+
+// todo - why do remove and set return boolean? is it for error handling?
+export interface UiSettingsCommon {
+  get: (key: string) => Promise<any>;
+  getAll: () => Promise<Record<string, any>>;
+  set: (key: string, value: any) => Promise<void>;
+  remove: (key: string) => Promise<void>;
+}
+
+export interface SavedObjectsClientCommonFindArgs {
+  type: string;
+  fields: string[];
+  perPage: number;
+}
+
+export interface SavedObjectCommon {
+  id: string;
+  attributes: Record<string, any>;
+}
+export interface SavedObjectsClientCommon {
+  find: (options: SavedObjectsClientCommonFindArgs) => Promise<SavedObjectCommon[]>;
+  get: (type: string, id: string) => Promise<SavedObjectCommon>;
+  // todo stricter on options
+  update: (
+    type: string,
+    id: string,
+    attributes: Record<string, any>,
+    options: Record<string, any>
+  ) => Promise<SavedObjectCommon>;
+  create: (
+    type: string,
+    attributes: Record<string, any>,
+    options: Record<string, any>
+  ) => Promise<SavedObjectCommon>;
+  delete: (type: string, id: string) => Promise<{}>;
+}
