@@ -43,7 +43,7 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
   mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
-export const TopNav: FC = () => {
+export const DatePickerWrapper: FC = () => {
   const { services } = useMlKibana();
   const config = services.uiSettings;
   const { timefilter, history } = services.data.query.timefilter;
@@ -124,7 +124,7 @@ export const TopNav: FC = () => {
   return (
     <Fragment>
       {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
-        <div className="mlNavigationMenu__topNav">
+        <div className="mlNavigationMenu__datePickerWrapper">
           <EuiSuperDatePicker
             start={time.from}
             end={time.to}
