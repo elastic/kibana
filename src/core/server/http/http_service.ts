@@ -22,6 +22,7 @@ import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
 
 import { CoreService } from '../../types';
+import { pick } from '../../utils';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
 import { Env } from '../config';
@@ -38,7 +39,7 @@ import {
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   InternalHttpServiceSetup,
-  HttpServiceStart,
+  InternalHttpServiceStart,
 } from './types';
 
 import { RequestHandlerContext } from '../../server';
@@ -49,7 +50,8 @@ interface SetupDeps {
 }
 
 /** @internal */
-export class HttpService implements CoreService<InternalHttpServiceSetup, HttpServiceStart> {
+export class HttpService
+  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
@@ -59,6 +61,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private readonly log: Logger;
   private readonly env: Env;
   private notReadyServer?: Server;
+  private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -97,7 +100,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
 
     registerCoreHandlers(serverContract, config, this.env);
 
-    const contract: InternalHttpServiceSetup = {
+    this.internalSetup = {
       ...serverContract,
 
       createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
@@ -114,7 +117,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
-    return contract;
+    return this.internalSetup;
   }
 
   public async start() {
@@ -135,6 +138,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     }
 
     return {
+      ...pick(this.internalSetup!, ['auth', 'basePath', 'isTlsEnabled', 'getServerInfo']),
       isListening: () => this.httpServer.isListening(),
     };
   }

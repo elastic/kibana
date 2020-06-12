@@ -19,7 +19,6 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
-import { CspConfig } from './csp';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -112,26 +111,10 @@ function createCoreSetupMock({
   pluginStartDeps?: object;
   pluginStartContract?: any;
 } = {}) {
-  const httpService = httpServiceMock.createSetupContract();
   const httpMock: jest.Mocked<CoreSetup['http']> = {
-    createCookieSessionStorageFactory: httpService.createCookieSessionStorageFactory,
-    registerOnPreAuth: httpService.registerOnPreAuth,
-    registerAuth: httpService.registerAuth,
-    registerOnPostAuth: httpService.registerOnPostAuth,
-    registerOnPreResponse: httpService.registerOnPreResponse,
-    basePath: httpService.basePath,
-    csp: CspConfig.DEFAULT,
-    isTlsEnabled: httpService.isTlsEnabled,
-    createRouter: jest.fn(),
-    registerRouteHandlerContext: jest.fn(),
-    auth: {
-      get: httpService.auth.get,
-      isAuthenticated: httpService.auth.isAuthenticated,
-    },
+    ...httpServiceMock.createSetupContract(),
     resources: httpResourcesMock.createRegistrar(),
-    getServerInfo: httpService.getServerInfo,
   };
-  httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
@@ -159,6 +142,7 @@ function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
+    http: httpServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
@@ -171,7 +155,7 @@ function createInternalCoreSetupMock() {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
-    http: httpServiceMock.createSetupContract(),
+    http: httpServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
@@ -187,6 +171,7 @@ function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
+    http: httpServiceMock.createInternalStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };

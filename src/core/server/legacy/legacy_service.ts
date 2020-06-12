@@ -264,6 +264,12 @@ export class LegacyService implements CoreService {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
       elasticsearch: startDeps.core.elasticsearch,
+      http: {
+        auth: startDeps.core.http.auth,
+        basePath: startDeps.core.http.basePath,
+        isTlsEnabled: startDeps.core.http.isTlsEnabled,
+        getServerInfo: startDeps.core.http.getServerInfo,
+      },
       savedObjects: {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,

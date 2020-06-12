@@ -7,12 +7,7 @@
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   savedObjectsClientMock,
   httpServiceMock,
@@ -44,7 +39,7 @@ describe('PUT workpad', () => {
     clock = sinon.useFakeTimers(now);
 
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeUpdateWorkpadRoute({
       router,
       logger: loggingServiceMock.create().get(),
@@ -158,7 +153,7 @@ describe('update assets', () => {
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeUpdateWorkpadAssetsRoute({
       router,
       logger: loggingServiceMock.create().get(),

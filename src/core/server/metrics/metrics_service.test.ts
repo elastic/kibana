@@ -30,7 +30,7 @@ const testInterval = 100;
 const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
 
 describe('MetricsService', () => {
-  const httpMock = httpServiceMock.createSetupContract();
+  const httpMock = httpServiceMock.createInternalSetupContract();
   let metricsService: MetricsService;
 
   beforeEach(() => {
