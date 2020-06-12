@@ -69,14 +69,20 @@ const Mac: OSFields[] = [];
 
 const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
-const POLICIES: Array<{ name: string; id: string }> = [
+const APPLIED_POLICIES: Array<{
+  name: string;
+  id: string;
+  status: HostPolicyResponseActionStatus;
+}> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
+    status: HostPolicyResponseActionStatus.success,
   },
   {
     name: 'With Eventing',
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+    status: HostPolicyResponseActionStatus.success,
   },
 ];
 
@@ -191,6 +197,7 @@ interface HostInfo {
     policy: {
       applied: {
         id: string;
+        status: HostPolicyResponseActionStatus;
         name: string;
       };
     };
@@ -282,7 +289,12 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.Endpoint.policy.applied = this.randomChoice(POLICIES);
+    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
+      HostPolicyResponseActionStatus.success,
+      HostPolicyResponseActionStatus.failure,
+      HostPolicyResponseActionStatus.warning,
+    ]);
   }
 
   private createHostData(): HostInfo {
@@ -305,7 +317,7 @@ export class EndpointDocGenerator {
       },
       Endpoint: {
         policy: {
-          applied: this.randomChoice(POLICIES),
+          applied: this.randomChoice(APPLIED_POLICIES),
         },
       },
     };
@@ -1039,8 +1051,9 @@ export class EndpointDocGenerator {
                 ],
               },
             },
-            status: this.randomHostPolicyResponseActionStatus(),
+            status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
+            name: this.commonInfo.Endpoint.policy.applied.name,
           },
         },
       },

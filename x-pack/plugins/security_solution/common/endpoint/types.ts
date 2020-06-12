@@ -265,6 +265,8 @@ export type AlertEvent = Immutable<{
     policy: {
       applied: {
         id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
       };
     };
   };
@@ -367,6 +369,8 @@ export type HostMetadata = Immutable<{
     policy: {
       applied: {
         id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
       };
     };
   };
@@ -710,6 +714,7 @@ export interface HostPolicyResponse {
       applied: {
         version: string;
         id: string;
+        name: string;
         status: HostPolicyResponseActionStatus;
         actions: HostPolicyResponseAppliedAction[];
         response: {
