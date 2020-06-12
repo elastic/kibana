@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-initFromSpec(response: any): void;
+initFromSpec(spec: IndexPatternSpec): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  response | <code>any</code> |  |
+|  spec | <code>IndexPatternSpec</code> |  |
 
 <b>Returns:</b>
 

@@ -49,7 +49,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [init(forceFieldRefresh)](./kibana-plugin-plugins-data-public.indexpattern.init.md) |  |  |
-|  [initFromSpec(response)](./kibana-plugin-plugins-data-public.indexpattern.initfromspec.md) |  |  |
+|  [initFromSpec(spec)](./kibana-plugin-plugins-data-public.indexpattern.initfromspec.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |

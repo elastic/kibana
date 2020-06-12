@@ -1040,8 +1040,10 @@ export class IndexPattern implements IIndexPattern {
     id?: string;
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    initFromSpec(response: any): void;
+    initFromSpec(spec: IndexPatternSpec): void;
     // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
@@ -1070,8 +1072,6 @@ export class IndexPattern implements IIndexPattern {
     title: string;
     // (undocumented)
     toJSON(): string | undefined;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     toSpec(): IndexPatternSpec;
     // (undocumented)
