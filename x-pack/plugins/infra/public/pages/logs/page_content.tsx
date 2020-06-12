@@ -17,7 +17,6 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
-import { useLogAnalysisCapabilitiesContext } from '../../containers/logs/log_analysis';
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
@@ -28,7 +27,6 @@ import { AlertDropdown } from '../../components/alerting/logs/alert_dropdown';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
 
   const { initialize } = useLogSourceContext();
 
@@ -77,13 +75,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
       <AppNavigation aria-label={pageTitle}>
         <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
           <EuiFlexItem>
-            <RoutedTabs
-              tabs={
-                logAnalysisCapabilities.hasLogAnalysisCapabilites
-                  ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
-                  : [streamTab, settingsTab]
-              }
-            />
+            <RoutedTabs tabs={[streamTab, logRateTab, logCategoriesTab, settingsTab]} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AlertDropdown />
