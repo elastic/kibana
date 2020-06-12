@@ -87,6 +87,11 @@ export function changeColumn<C extends IndexPatternColumn>({
       ? { ...newColumn, params: oldColumn.params }
       : newColumn;
 
+  if (oldColumn && oldColumn.customLabel) {
+    updatedColumn.customLabel = true;
+    updatedColumn.label = oldColumn.label;
+  }
+
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
       ...state.layers[layerId].columns,

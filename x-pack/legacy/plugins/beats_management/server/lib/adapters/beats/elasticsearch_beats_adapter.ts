@@ -11,6 +11,15 @@ import { DatabaseAdapter } from '../database/adapter_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 
+function formatWithTags(beat: CMBeat) {
+  const { tags, ...rest } = beat;
+
+  return {
+    tags: tags || [],
+    ...rest,
+  };
+}
+
 export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   private database: DatabaseAdapter;
 
@@ -97,10 +106,9 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (beats.length === 0) {
       return [];
     }
-    return beats.map((beat: any) => ({
-      tags: [] as string[],
-      ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
-    }));
+    return beats.map((beat: any) =>
+      formatWithTags(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat)
+    );
   }
 
   public async getBeatWithToken(
@@ -124,7 +132,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (beats.length === 0) {
       return null;
     }
-    return omit<CMBeat, {}>(_get<CMBeat>({ tags: [], ...beats[0] }, '_source.beat'), [
+    return omit<CMBeat, {}>(_get<CMBeat>(formatWithTags(beats[0]), '_source.beat'), [
       'access_token',
     ]);
   }
@@ -165,10 +173,9 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     }
     const beats = _get<any>(response, 'hits.hits', []);
 
-    return beats.map((beat: any) => ({
-      tags: [] as string[],
-      ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
-    }));
+    return beats.map((beat: any) =>
+      formatWithTags(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat)
+    );
   }
 
   public async removeTagsFromBeats(

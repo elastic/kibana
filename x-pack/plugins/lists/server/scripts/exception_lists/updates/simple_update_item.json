@@ -5,6 +5,14 @@
   "type": "simple",
   "description": "This is a sample change here this list",
   "name": "Sample Endpoint Exception List update change",
+  "comments": [
+    {
+      "comment": "this was an old comment.",
+      "created_by": "lily",
+      "created_at": "2020-04-20T15:25:31.830Z"
+    },
+    { "comment": "this is a newly added comment" }
+  ],
   "entries": [
     {
       "field": "event.category",
