@@ -17,26 +17,33 @@
  * under the License.
  */
 
+import React from 'react';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RenderErrorHandlerFnType, ExpressionRenderError } from './types';
-import { getNotifications } from './services';
-import { IInterpreterRenderHandlers } from '../common';
+import { EmbeddableError } from '../embeddables/i_embeddable';
 
-export const renderErrorHandler: RenderErrorHandlerFnType = (
-  element: HTMLElement,
-  error: ExpressionRenderError,
-  handlers: IInterpreterRenderHandlers
-) => {
-  if (error.name === 'AbortError') {
-    handlers.done();
-    return;
-  }
+interface Props {
+  error?: EmbeddableError;
+}
 
-  getNotifications().toasts.addError(error, {
-    title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
-      defaultMessage: 'Error in visualisation',
-    }),
-    toastMessage: error.message,
-  });
-  handlers.done();
-};
+export function EmbeddableErrorLabel(props: Props) {
+  if (!props.error) return null;
+  const labelText =
+    props.error.name === 'AbortError'
+      ? i18n.translate('embeddableApi.panel.labelAborted', {
+          defaultMessage: 'Aborted',
+        })
+      : i18n.translate('embeddableApi.panel.labelError', {
+          defaultMessage: 'Error',
+        });
+
+  return (
+    <div className="embPanel__labelWrapper">
+      <div className="embPanel__label">
+        <EuiToolTip content={props.error.message}>
+          <EuiBadge color="danger">{labelText}</EuiBadge>
+        </EuiToolTip>
+      </div>
+    </div>
+  );
+}
