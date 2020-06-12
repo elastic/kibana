@@ -370,7 +370,6 @@ export {
   TabbedTable,
   SearchInterceptor,
   RequestTimeoutError,
-  LegacyApiCaller,
   AggParamsMapping,
 } from './search';
 
@@ -437,8 +436,6 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
-  TimefilterSetup,
-  TimeRangeBounds,
 } from './query';
 
 export {
