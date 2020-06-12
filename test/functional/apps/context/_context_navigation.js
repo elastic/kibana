@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
 
-  describe('context link in discover', function contextSize() {
+  describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
