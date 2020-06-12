@@ -140,7 +140,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         }
                        if (doc.containsKey("tls.server.x509.not_after") && !doc["tls.server.x509.not_after"].isEmpty()) {
                           curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
-                        } else if (doc.containsKey("tls.certificate_not_valid_after") !doc["tls.certificate_not_valid_after"].isEmpty()) {
+                        } else if (doc.containsKey("tls.certificate_not_valid_after") && !doc["tls.certificate_not_valid_after"].isEmpty()) {
                           curCheck.tls.certificate_not_valid_after = doc["tls.certificate_not_valid_after"][0];
 
                         if (doc.containsKey("tls.server.x509.not_after") && !doc["tls.server.x509.not_before"].isEmpty()) {
