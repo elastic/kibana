@@ -127,12 +127,14 @@ export const useMetricsExplorerOptions = () => {
   const { metricThresholdPrefill } = useAlertPrefillContext();
 
   useEffect(() => {
-    const { setMetrics, setGroupBy, setFilterQuery } = metricThresholdPrefill;
-    const { metrics, groupBy, filterQuery } = options;
+    if (metricThresholdPrefill) {
+      const { setMetrics, setGroupBy, setFilterQuery } = metricThresholdPrefill;
+      const { metrics, groupBy, filterQuery } = options;
 
-    setGroupBy(groupBy);
-    setFilterQuery(filterQuery);
-    setMetrics(metrics);
+      setGroupBy(groupBy);
+      setFilterQuery(filterQuery);
+      setMetrics(metrics);
+    }
   }, [options, metricThresholdPrefill]);
 
   return {
