@@ -71,24 +71,25 @@ describe('Ingesting coverage', () => {
   });
 
   describe(`vcsInfo`, () => {
-    // describe(`without a commit msg in the vcs info file`, () => {
-    //   beforeAll(async () => {
-    //     const args = [
-    //       'scripts/ingest_coverage.js',
-    //       '--verbose',
-    //       '--vcsInfoPath',
-    //       'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
-    //       '--path',
-    //     ];
-    //     const opts = [...args, resolved];
-    //     const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-    //     vcsInfo = stdout;
-    //   });
-    //   it(`should be an obj w/o a commit msg`, () => {
-    //     const commitMsgRE = /"commitMsg"/;
-    //     expect(commitMsgRE.test(vcsInfo)).to.not.be.ok();
-    //   });
-    // });
+    let stdOutWithVcsInfo = '';
+    describe(`without a commit msg in the vcs info file`, () => {
+      beforeAll(async () => {
+        const args = [
+          'scripts/ingest_coverage.js',
+          '--verbose',
+          '--vcsInfoPath',
+          'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
+          '--path',
+        ];
+        const opts = [...args, resolved];
+        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+        stdOutWithVcsInfo = stdout;
+      });
+      it(`should be an obj w/o a commit msg`, () => {
+        const commitMsgRE = /"commitMsg"/;
+        expect(commitMsgRE.test(stdOutWithVcsInfo)).to.not.be.ok();
+      });
+    });
     describe(`including previous sha`, () => {
       let stdOutWithPrevious = '';
       beforeAll(async () => {
@@ -102,26 +103,25 @@ describe('Ingesting coverage', () => {
         expect(previousCompareUrlRe.test(stdOutWithPrevious)).to.be.ok();
       });
     });
-    // describe(`with a commit msg in the vcs info file`, () => {
-    //   const args = [
-    //     'scripts/ingest_coverage.js',
-    //     '--verbose',
-    //     '--vcsInfoPath',
-    //     'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
-    //     '--path',
-    //   ];
-    //
-    //   beforeAll(async () => {
-    //     const opts = [...args, resolved];
-    //     const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-    //     vcsInfo = stdout;
-    //   });
-    //
-    //   it(`should be an obj w/ a commit msg`, () => {
-    //     const commitMsgRE = /"commitMsg"/;
-    //     expect(commitMsgRE.test(vcsInfo)).to.be.ok();
-    //   });
-    // });
+    describe(`with a commit msg in the vcs info file`, () => {
+      beforeAll(async () => {
+        const args = [
+          'scripts/ingest_coverage.js',
+          '--verbose',
+          '--vcsInfoPath',
+          'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+          '--path',
+        ];
+        const opts = [...args, resolved];
+        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+        stdOutWithVcsInfo = stdout;
+      });
+
+      it(`should be an obj w/ a commit msg`, () => {
+        const commitMsgRE = /commitMsg/;
+        expect(commitMsgRE.test(stdOutWithVcsInfo)).to.be.ok();
+      });
+    });
   });
   describe(`team assignment`, () => {
     let shouldNotHavePipelineOut = '';

@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { left, right, fromNullable } from './either';
+import * as Either from './either';
+import { fromNullable } from './maybe';
 import { always, id, noop } from './utils';
 
-const maybeTotal = (x) => (x === 'total' ? left(x) : right(x));
+const maybeTotal = (x) => (x === 'total' ? Either.left(x) : Either.right(x));
 
 const trimLeftFrom = (text, x) => x.substr(x.indexOf(text));
 
@@ -54,13 +55,13 @@ const root = (urlBase) => (ts) => (testRunnerType) =>
   `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined`;
 
 const prokForTotalsIndex = (mutateTrue) => (urlRoot) => (obj) =>
-  right(obj)
+  Either.right(obj)
     .map(mutateTrue)
     .map(always(`${urlRoot}/index.html`))
     .fold(noop, id);
 
 const prokForCoverageIndex = (root) => (mutateFalse) => (urlRoot) => (obj) => (siteUrl) =>
-  right(siteUrl)
+  Either.right(siteUrl)
     .map((x) => {
       mutateFalse(obj);
       return x;
@@ -87,7 +88,7 @@ export const coveredFilePath = (obj) => {
 
   const withoutCoveredFilePath = always(obj);
   const leadingSlashRe = /^\//;
-  const maybeDropLeadingSlash = (x) => (leadingSlashRe.test(x) ? right(x) : left(x));
+  const maybeDropLeadingSlash = (x) => (leadingSlashRe.test(x) ? Either.right(x) : Either.left(x));
   const dropLeadingSlash = (x) => x.replace(leadingSlashRe, '');
   const dropRoot = (root) => (x) =>
     maybeDropLeadingSlash(x.replace(root, '')).fold(id, dropLeadingSlash);
@@ -97,13 +98,19 @@ export const coveredFilePath = (obj) => {
 };
 
 export const ciRunUrl = (obj) =>
-  fromNullable(process.env.CI_RUN_URL).fold(always(obj), (ciRunUrl) => ({ ...obj, ciRunUrl }));
+  Either.fromNullable(process.env.CI_RUN_URL).fold(always(obj), (ciRunUrl) => ({
+    ...obj,
+    ciRunUrl,
+  }));
 
 const size = 50;
-const truncateMsg = (msg) => (msg.length > size ? `${msg.slice(0, 50)}...` : msg);
+const truncateMsg = (msg) => {
+  const res = msg.length > size ? `${msg.slice(0, 50)}...` : msg;
+  return res;
+};
 const comparePrefix = () => 'https://github.com/elastic/kibana/compare';
 export const prokPrevious = (comparePrefixF) => (currentSha) => {
-  return fromNullable(process.env.FETCHED_PREVIOUS).fold(
+  return Either.fromNullable(process.env.FETCHED_PREVIOUS).fold(
     noop,
     (previousSha) => `${comparePrefixF()}/${previousSha}...${currentSha}`
   );
@@ -116,10 +123,11 @@ export const itemizeVcs = (vcsInfo) => (obj) => {
     sha,
     author,
     vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
-    commitMsg: truncateMsg(commitMsg),
   };
 
-  // const previous = prokPrevious();
+  const mutateVcs = (x) => (vcs.commitMsg = truncateMsg(x));
+  fromNullable(commitMsg).map(mutateVcs);
+
   const vcsCompareUrl = process.env.FETCHED_PREVIOUS
     ? `${comparePrefix()}/${process.env.FETCHED_PREVIOUS}...${sha}`
     : 'PREVIOUS SHA NOT PROVIDED';
