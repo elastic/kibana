@@ -4,21 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useMemo, useEffect, useReducer } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiText,
-  EuiLink,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalBody,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
+import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import { EuiOverlayMask, EuiModal, EuiModalBody, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import * as i18n from '../translations';
@@ -40,25 +27,9 @@ import {
   ExceptionIdentifiers,
   useApi,
 } from '../../../../../public/lists_plugin_deps';
-import { ExceptionItem } from './exception_item';
-import { AndOrBadge } from '../../and_or_badge';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
-import {
-  UtilityBar,
-  UtilityBarSection,
-  UtilityBarGroup,
-  UtilityBarText,
-  UtilityBarAction,
-} from '../../utility_bar';
-
-const StyledText = styled(EuiText)`
-  font-style: italic;
-`;
-
-const MyExceptionsContainer = styled.div`
-  height: 600px;
-  overflow: hidden;
-`;
+import { ExceptionsViewerUtility } from './exceptions_utility';
+import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
 const initialState: State = {
   filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
@@ -73,7 +44,9 @@ const initialState: State = {
   allExceptions: [],
   exceptions: [],
   exceptionToEdit: null,
+  loadingLists: [],
   loadingItemIds: [],
+  isInitLoading: true,
   isModalOpen: false,
 };
 
@@ -99,7 +72,6 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
-  const [initLoading, setInitLoading] = useState(true);
   const onDispatchToaster = useCallback(
     ({ title, color, iconType }) => (): void => {
       dispatchToaster({
@@ -114,7 +86,6 @@ const ExceptionsViewerComponent = ({
     },
     [dispatchToaster]
   );
-  const { deleteExceptionItem } = useApi(services.http);
   const [
     {
       endpointList,
@@ -122,13 +93,15 @@ const ExceptionsViewerComponent = ({
       exceptions,
       filterOptions,
       pagination,
+      loadingLists,
       loadingItemIds,
+      isInitLoading,
       isModalOpen,
     },
     dispatch,
-  ] = useReducer(allExceptionItemsReducer(), initialState);
+  ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
+  const { deleteExceptionItem } = useApi(services.http);
 
-  // TODO: Update icky typing once api updated
   const setExceptions = useCallback(
     ({
       lists: newLists,
@@ -146,14 +119,14 @@ const ExceptionsViewerComponent = ({
   );
   const [loadingList, , , , fetchList] = useExceptionList({
     http: services.http,
-    lists: exceptionListsMeta,
+    lists: loadingLists,
     filterOptions,
     pagination: {
       page: pagination.pageIndex + 1,
       perPage: pagination.pageSize,
       total: pagination.totalItemCount,
     },
-    dispatchListsInReducer: setExceptions,
+    onSuccess: setExceptions,
     onError: onDispatchToaster({
       color: 'danger',
       title: i18n.FETCH_LIST_ERROR,
@@ -171,31 +144,32 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const onFetchList = useCallback((): void => {
+  const handleFetchList = useCallback((): void => {
     if (fetchList != null) {
       fetchList();
     }
   }, [fetchList]);
 
-  const onFiltersChange = useCallback(
+  const handleFilterChange = useCallback(
     ({ filter, pagination: pag }: Filter): void => {
       dispatch({
         type: 'updateFilterOptions',
         filterOptions: filter,
         pagination: pag,
+        allLists: exceptionListsMeta,
       });
     },
-    [dispatch]
+    [dispatch, exceptionListsMeta]
   );
 
-  const onAddException = useCallback(
+  const handleAddException = useCallback(
     (type: ExceptionListType): void => {
       setIsModalOpen(true);
     },
     [setIsModalOpen]
   );
 
-  const onEditExceptionItem = useCallback(
+  const handleEditException = useCallback(
     (exception: ExceptionListItemSchema): void => {
       // TODO: Added this just for testing. Update
       // modal state logic as needed once ready
@@ -219,9 +193,9 @@ const ExceptionsViewerComponent = ({
         onAssociateList(listId);
       }
 
-      onFetchList();
+      handleFetchList();
     },
-    [setIsModalOpen, onFetchList, onAssociateList]
+    [setIsModalOpen, handleFetchList, onAssociateList]
   );
 
   const setLoadingItemIds = useCallback(
@@ -234,14 +208,16 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const onDeleteException = useCallback(
+  const handleDeleteException = useCallback(
     ({ id, namespaceType }: ApiProps) => {
+      setLoadingItemIds([{ id, namespaceType }]);
+
       deleteExceptionItem({
         id,
         namespaceType,
         onSuccess: () => {
           setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
-          onFetchList();
+          handleFetchList();
         },
         onError: () => {
           const dispatchToasterError = onDispatchToaster({
@@ -255,65 +231,29 @@ const ExceptionsViewerComponent = ({
         },
       });
     },
-    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, onFetchList, onDispatchToaster]
+    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, handleFetchList, onDispatchToaster]
   );
 
   // Logic for initial render
   useEffect((): void => {
-    if (initLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
-      setInitLoading(false);
+    if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
+      dispatch({
+        type: 'updateIsInitLoading',
+        loading: false,
+      });
     }
-  }, [initLoading, exceptions, loadingList]);
+  }, [isInitLoading, exceptions, loadingList, dispatch]);
 
+  // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {
     return services.application.getUrlForApp(
       `security#/detections/rules/id/${encodeURI(ruleId)}/edit`
     );
   }, [ruleId, services.application]);
 
-  const exceptionsSubtext = useMemo((): JSX.Element => {
-    if (filterOptions.showEndpointList) {
-      return (
-        <FormattedMessage
-          id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription"
-          defaultMessage="All exceptions to this rule are applied to the endpoint and the detection rule. View {ruleSettings} for more details."
-          values={{
-            ruleSettings: (
-              <EuiLink href={ruleSettingsUrl} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription.ruleSettingsLink"
-                  defaultMessage="rule settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      );
-    } else if (filterOptions.showDetectionsList) {
-      return (
-        <FormattedMessage
-          id="xpack.securitySolution.exceptions.viewer.exceptionDetectionDetailsDescription"
-          defaultMessage="All exceptions to this rule are applied to the detection rule, not the endpoint. View {ruleSettings} for more details."
-          values={{
-            ruleSettings: (
-              <EuiLink href={ruleSettingsUrl} target="_blank">
-                <FormattedMessage
-                  id="xpack.securitySolution.exceptions.viewer.exceptionDetectionDetailsDescription.ruleSettingsLink"
-                  defaultMessage="rule settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      );
-    } else {
-      return <></>;
-    }
-  }, [filterOptions.showEndpointList, filterOptions.showDetectionsList, ruleSettingsUrl]);
-
   const showEmpty = useMemo((): boolean => {
-    return !initLoading && !loadingList && exceptions.length === 0;
-  }, [initLoading, exceptions.length, loadingList]);
+    return !isInitLoading && !loadingList && exceptions.length === 0;
+  }, [isInitLoading, exceptions.length, loadingList]);
 
   return (
     <>
@@ -329,80 +269,43 @@ const ExceptionsViewerComponent = ({
         </EuiOverlayMask>
       )}
 
-      <Panel loading={initLoading}>
-        {initLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
+      <Panel loading={isInitLoading || loadingList}>
+        {(isInitLoading || loadingList) && (
+          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+        )}
 
         <ExceptionsViewerHeader
-          isInitLoading={initLoading}
+          isInitLoading={isInitLoading}
           supportedListTypes={availableListTypes}
           detectionsListItems={detectionsList != null ? detectionsList.totalItems : 0}
           endpointListItems={endpointList != null ? endpointList.totalItems : 0}
-          onFilterChange={onFiltersChange}
-          onAddExceptionClick={onAddException}
+          onFilterChange={handleFilterChange}
+          onAddExceptionClick={handleAddException}
         />
-
-        {(filterOptions.showEndpointList || filterOptions.showDetectionsList) && (
-          <>
-            <EuiSpacer size="xs" />
-            <StyledText size="s">{exceptionsSubtext}</StyledText>
-          </>
-        )}
 
         <EuiSpacer size="l" />
 
-        <UtilityBar>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText dataTestSubj="showingRules">
-                {i18n.SHOWING_EXCEPTIONS(pagination.totalItemCount ?? 0)}
-              </UtilityBarText>
-            </UtilityBarGroup>
+        <ExceptionsViewerUtility
+          pagination={pagination}
+          filterOptions={filterOptions}
+          onRefreshClick={handleFetchList}
+          ruleSettingsUrl={ruleSettingsUrl}
+        />
 
-            <UtilityBarGroup>
-              <UtilityBarAction iconSide="left" iconType="refresh" onClick={onFetchList}>
-                {i18n.REFRESH}
-              </UtilityBarAction>
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
+        <ExceptionsViewerItems
+          showEmpty={showEmpty}
+          isInitLoading={isInitLoading}
+          exceptions={exceptions}
+          loadingItemIds={loadingItemIds}
+          commentsAccordionId={commentsAccordionId}
+          onDeleteException={handleDeleteException}
+          onEditExceptionItem={handleEditException}
+        />
 
-        <EuiSpacer size="s" />
-
-        <MyExceptionsContainer className="eui-yScrollWithShadows">
-          {showEmpty && (
-            <EuiEmptyPrompt
-              iconType="advancedSettingsApp"
-              title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
-              body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
-              data-test-subj="exceptionsEmptyPrompt"
-            />
-          )}
-
-          <EuiSpacer size="s" />
-
-          <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
-            {!initLoading &&
-              exceptions.length > 0 &&
-              exceptions.map((exception, index) => (
-                <EuiFlexItem grow={false} key={exception.id}>
-                  {index !== 0 && (
-                    <>
-                      <AndOrBadge type="or" />
-                      <EuiSpacer />
-                    </>
-                  )}
-                  <ExceptionItem
-                    loadingItemIds={loadingItemIds}
-                    commentsAccordionId={commentsAccordionId}
-                    exceptionItem={exception}
-                    handleDelete={onDeleteException}
-                    handleEdit={onEditExceptionItem}
-                  />
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
-        </MyExceptionsContainer>
-        <ExceptionsViewerPagination onPaginationChange={onFiltersChange} pagination={pagination} />
+        <ExceptionsViewerPagination
+          onPaginationChange={handleFilterChange}
+          pagination={pagination}
+        />
       </Panel>
     </>
   );
