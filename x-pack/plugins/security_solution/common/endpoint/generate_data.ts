@@ -61,7 +61,11 @@ const Mac: HostOS[] = [];
 
 const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
-const POLICIES: Array<{ name: string; id: string; status: HostPolicyResponseActionStatus }> = [
+const APPLIED_POLICIES: Array<{
+  name: string;
+  id: string;
+  status: HostPolicyResponseActionStatus;
+}> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
@@ -277,7 +281,7 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.endpoint.policy.applied.id = this.randomChoice(POLICIES).id;
+    this.commonInfo.endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
     this.commonInfo.endpoint.policy.applied.status = this.randomChoice([
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.failure,
@@ -305,7 +309,7 @@ export class EndpointDocGenerator {
       },
       endpoint: {
         policy: {
-          applied: this.randomChoice(POLICIES),
+          applied: this.randomChoice(APPLIED_POLICIES),
         },
       },
     };
