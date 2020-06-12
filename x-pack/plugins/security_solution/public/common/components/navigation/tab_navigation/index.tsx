@@ -66,7 +66,11 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
       getOr(
         '',
         'id',
-        Object.values(navTabs).find((item) => tabName === item.id || pageName === item.id)
+        Object.values(navTabs).find(
+          (item) =>
+            (tabName === item.id && item.pageId != null) ||
+            (pageName === item.id && item.pageId == null)
+        )
       ),
     [pageName, tabName, navTabs]
   );
