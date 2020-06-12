@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './datapanel.scss';
 import { uniq, indexBy, groupBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
@@ -487,22 +488,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-                {paginatedAvailableFields.map((field: IndexPatternField) => {
-                  return (
-                    <FieldItem
-                      core={core}
-                      data={data}
-                      indexPattern={currentIndexPattern}
-                      key={field.name}
-                      field={field}
-                      highlight={hilight}
-                      exists={true}
-                      dateRange={dateRange}
-                      query={query}
-                      filters={filters}
-                    />
-                  );
-                })}
+                <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+                  {paginatedAvailableFields.map((field: IndexPatternField) => {
+                    return (
+                      <FieldItem
+                        core={core}
+                        data={data}
+                        indexPattern={currentIndexPattern}
+                        key={field.name}
+                        field={field}
+                        highlight={hilight}
+                        exists={true}
+                        dateRange={dateRange}
+                        query={query}
+                        filters={filters}
+                      />
+                    );
+                  })}
+                </div>
 
                 {paginatedAvailableFields.length === 0 && (
                   <EuiCallOut
@@ -572,9 +575,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     )}
                   </EuiCallOut>
                 )}
-                <EuiSpacer size="s" />
               </EuiAccordion>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               <EuiAccordion
                 initialIsOpen={false}
                 id="emptyFieldsLabel"
@@ -602,25 +604,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               >
                 <EuiSpacer size="s" />
-                {paginatedEmptyFields.map((field: IndexPatternField) => {
-                  return (
-                    <FieldItem
-                      core={core}
-                      data={data}
-                      indexPattern={currentIndexPattern}
-                      key={field.name}
-                      field={field}
-                      highlight={hilight}
-                      exists={false}
-                      dateRange={dateRange}
-                      query={query}
-                      filters={filters}
-                    />
-                  );
-                })}
-                <EuiSpacer size="s" />
+                <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+                  {paginatedEmptyFields.map((field: IndexPatternField) => {
+                    return (
+                      <FieldItem
+                        core={core}
+                        data={data}
+                        indexPattern={currentIndexPattern}
+                        key={field.name}
+                        field={field}
+                        highlight={hilight}
+                        exists={false}
+                        dateRange={dateRange}
+                        query={query}
+                        filters={filters}
+                      />
+                    );
+                  })}
+                </div>
               </EuiAccordion>
-              <EuiSpacer size="l" />
+              <EuiSpacer size="m" />
             </div>
           </div>
         </EuiFlexItem>
