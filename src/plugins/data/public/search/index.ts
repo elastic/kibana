@@ -61,4 +61,3 @@ export {
 
 export { SearchInterceptor } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';
-export { LegacyApiCaller } from './legacy/es_client';
