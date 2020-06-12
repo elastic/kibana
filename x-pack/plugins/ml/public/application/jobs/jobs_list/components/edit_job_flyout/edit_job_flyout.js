@@ -49,6 +49,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroups: [],
       jobModelMemoryLimit: '',
       jobModelSnapshotRetentionDays: 1,
+      jobDailyModelSnapshotRetentionAfterDays: 1,
       jobDetectors: [],
       jobDetectorDescriptions: [],
       jobCustomUrls: [],
@@ -98,6 +99,7 @@ export class EditJobFlyoutUI extends Component {
         'jobGroups',
         'jobModelMemoryLimit',
         'jobModelSnapshotRetentionDays',
+        'jobDailyModelSnapshotRetentionAfterDays',
         'jobCustomUrls',
         'jobDetectors',
         'jobDetectorDescriptions',
@@ -133,6 +135,12 @@ export class EditJobFlyoutUI extends Component {
 
     const modelSnapshotRetentionDays =
       job.model_snapshot_retention_days !== undefined ? job.model_snapshot_retention_days : 1;
+
+    const dailyModelSnapshotRetentionAfterDays =
+      job.daily_model_snapshot_retention_after_days !== undefined
+        ? job.daily_model_snapshot_retention_after_days
+        : modelSnapshotRetentionDays;
+
     const detectors =
       job.analysis_config && job.analysis_config.detectors
         ? [...job.analysis_config.detectors]
@@ -152,6 +160,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroups: job.groups !== undefined ? job.groups : [],
       jobModelMemoryLimit: mml,
       jobModelSnapshotRetentionDays: modelSnapshotRetentionDays,
+      jobDailyModelSnapshotRetentionAfterDays: dailyModelSnapshotRetentionAfterDays,
       jobDetectors: detectors,
       jobDetectorDescriptions: detectors.map((d) => d.detector_description),
       jobBucketSpan: bucketSpan,
@@ -236,6 +245,7 @@ export class EditJobFlyoutUI extends Component {
       groups: this.state.jobGroups,
       mml: this.state.jobModelMemoryLimit,
       modelSnapshotRetentionDays: this.state.jobModelSnapshotRetentionDays,
+      dailyModelSnapshotRetentionAfterDays: this.state.jobDailyModelSnapshotRetentionAfterDays,
       detectorDescriptions: this.state.jobDetectorDescriptions,
       datafeedQuery: collapseLiteralStrings(this.state.datafeedQuery),
       datafeedQueryDelay: this.state.datafeedQueryDelay,
@@ -283,6 +293,7 @@ export class EditJobFlyoutUI extends Component {
         jobGroups,
         jobModelMemoryLimit,
         jobModelSnapshotRetentionDays,
+        jobDailyModelSnapshotRetentionAfterDays,
         jobDetectors,
         jobDetectorDescriptions,
         jobBucketSpan,
@@ -311,6 +322,7 @@ export class EditJobFlyoutUI extends Component {
               jobGroups={jobGroups}
               jobModelMemoryLimit={jobModelMemoryLimit}
               jobModelSnapshotRetentionDays={jobModelSnapshotRetentionDays}
+              jobDailyModelSnapshotRetentionAfterDays={jobDailyModelSnapshotRetentionAfterDays}
               setJobDetails={this.setJobDetails}
               jobGroupsValidationError={jobGroupsValidationError}
               jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}

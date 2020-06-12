@@ -32,6 +32,7 @@ export class JobDetails extends Component {
       mmlValidationError: '',
       groupsValidationError: '',
       modelSnapshotRetentionDays: 1,
+      dailyModelSnapshotRetentionAfterDays: 1,
     };
 
     this.setJobDetails = props.setJobDetails;
@@ -61,6 +62,7 @@ export class JobDetails extends Component {
       mmlValidationError: props.jobModelMemoryLimitValidationError,
       groupsValidationError: props.jobGroupsValidationError,
       modelSnapshotRetentionDays: props.jobModelSnapshotRetentionDays,
+      dailyModelSnapshotRetentionAfterDays: props.jobDailyModelSnapshotRetentionAfterDays,
     };
   }
 
@@ -73,7 +75,21 @@ export class JobDetails extends Component {
   };
 
   onModelSnapshotRetentionDaysChange = (e) => {
-    this.setJobDetails({ jobModelSnapshotRetentionDays: Math.floor(+e.target.value) });
+    const jobModelSnapshotRetentionDays = Math.floor(+e.target.value);
+
+    this.setJobDetails({
+      jobModelSnapshotRetentionDays,
+      ...(this.state.dailyModelSnapshotRetentionAfterDays > jobModelSnapshotRetentionDays
+        ? { jobDailyModelSnapshotRetentionAfterDays: jobModelSnapshotRetentionDays }
+        : {}),
+    });
+  };
+
+  onDailyModelSnapshotRetentionAfterDaysChange = (e) => {
+    const jobDailyModelSnapshotRetentionAfterDays = Math.floor(+e.target.value);
+    if (jobDailyModelSnapshotRetentionAfterDays <= this.state.modelSnapshotRetentionDays) {
+      this.setJobDetails({ jobDailyModelSnapshotRetentionAfterDays });
+    }
   };
 
   onGroupsChange = (selectedGroups) => {
@@ -118,6 +134,7 @@ export class JobDetails extends Component {
       mmlValidationError,
       groupsValidationError,
       modelSnapshotRetentionDays,
+      dailyModelSnapshotRetentionAfterDays,
     } = this.state;
     const { datafeedRunning } = this.props;
     return (
@@ -198,6 +215,21 @@ export class JobDetails extends Component {
               min={0}
               value={modelSnapshotRetentionDays}
               onChange={this.onModelSnapshotRetentionDaysChange}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.dailyModelSnapshotRetentionAfterDaysLabel"
+                defaultMessage="Daily model snapshot retention after days"
+              />
+            }
+          >
+            <EuiFieldNumber
+              min={0}
+              max={modelSnapshotRetentionDays}
+              value={dailyModelSnapshotRetentionAfterDays}
+              onChange={this.onDailyModelSnapshotRetentionAfterDaysChange}
             />
           </EuiFormRow>
         </EuiForm>
