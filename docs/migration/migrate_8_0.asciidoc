@@ -9,7 +9,7 @@ your application to Kibana 8.0.
 
 coming[8.0.0]
 
-See also <<release-highlights>> and <<release-notes>>.
+See also <<whats-new>> and <<release-notes>>.
 
 * <<breaking_80_index_pattern_changes>>
 * <<breaking_80_setting_changes>>

@@ -57,7 +57,7 @@ describe('Exceptions Lists API', () => {
         method: 'POST',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual({ id: '1', ...getExceptionListSchemaMock() });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
 
     test('it uses PUT when "list.id" exists', async () => {
