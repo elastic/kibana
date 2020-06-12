@@ -43,6 +43,16 @@ const Button = styled(Legend)`
   align-items: flex-end;
 `;
 
+// We chose 240 characters because it fits most error messages and it's still easily readable on a screen.
+function truncateMessage(errorMessage?: string) {
+  const maxLength = 240;
+  if (typeof errorMessage === 'string' && errorMessage.length > maxLength) {
+    return errorMessage.substring(0, maxLength) + '…';
+  } else {
+    return errorMessage;
+  }
+}
+
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
@@ -74,6 +84,10 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     rangeTo,
   };
 
+  const errorMessage = truncateMessage(
+    error.error.log?.message || error.error.exception?.[0]?.message
+  );
+
   return (
     <EuiPopover
       id="popover"
@@ -101,7 +115,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
             errorGroupId={error.error.grouping_key}
             query={query}
           >
-            {error.error.log?.message || error.error.exception?.[0]?.message}
+            {errorMessage}
           </ErrorLink>
         </EuiText>
       </Popover>
