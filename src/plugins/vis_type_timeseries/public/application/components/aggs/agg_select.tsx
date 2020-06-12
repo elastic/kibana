@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { MetricsItemsSchema } from '../../../../common/types';
+import { UIRestrictions } from '../../../../common/ui_restrictions';
 
 type AggSelectOption = EuiComboBoxOptionOption;
 
@@ -238,7 +239,7 @@ interface AggSelectUiProps {
   panelType: string;
   siblings: MetricsItemsSchema[];
   value: string;
-  uiRestrictions?: { '*': boolean };
+  uiRestrictions?: UIRestrictions;
   onChange: (currentlySelectedOptions: AggSelectOption[]) => void;
 }
 

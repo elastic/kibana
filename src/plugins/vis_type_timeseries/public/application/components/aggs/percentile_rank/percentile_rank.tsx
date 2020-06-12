@@ -38,20 +38,15 @@ import { createSelectHandler } from '../../lib/create_select_handler';
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import {
-  MetricsItemsSchema,
-  PanelSchema,
-  SeriesItemsSchema,
-  FieldDescriptor,
-} from '../../../../../common/types';
+import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
 interface PercentileRankAggProps {
   disableDelete: boolean;
-  fields: FieldDescriptor[];
+  fields: IFieldType[];
   model: MetricsItemsSchema;
   panel: PanelSchema;
   series: SeriesItemsSchema;

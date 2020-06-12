@@ -17,6 +17,11 @@
  * under the License.
  */
 
+export interface UIRestrictions {
+  '*': boolean;
+  [restriction: string]: boolean;
+}
+
 /**
  * UI Restrictions keys
  * @constant
@@ -44,6 +49,6 @@ export const RESTRICTIONS_KEYS = {
  * @constant
  * @public
  */
-export const DEFAULT_UI_RESTRICTION = {
+export const DEFAULT_UI_RESTRICTION: UIRestrictions = {
   '*': true,
 };

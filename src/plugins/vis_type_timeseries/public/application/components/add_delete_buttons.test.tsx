@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+// @ts-ignore
 import { expect } from 'chai';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';

@@ -30,13 +30,13 @@ interface AddDeleteButtonsProps {
   deactivatePanelTooltip: string;
   isPanelActive?: boolean;
   disableAdd?: boolean;
-  disableDelete: boolean;
+  disableDelete?: boolean;
   responsive?: boolean;
   testSubj: string;
   togglePanelActivation?: () => void;
   onClone?: () => void;
-  onAdd: () => void;
-  onDelete: (event: MouseEvent) => void;
+  onAdd?: () => void;
+  onDelete?: (event: MouseEvent) => void;
 }
 
 export function AddDeleteButtons(props: AddDeleteButtonsProps) {

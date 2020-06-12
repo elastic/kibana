@@ -18,22 +18,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { metricsItems, panel, seriesItems } from './post_vis_schema';
-
-interface FieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
-
-export interface FieldDescriptor {
-  aggregatable: boolean;
-  name: string;
-  readFromDocValues: boolean;
-  searchable: boolean;
-  type: string;
-  esTypes: string[];
-  subType?: FieldSubType;
-}
+import { metricsItems, panel, seriesItems } from './vis_schema';
 
 export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
 export type MetricsItemsSchema = TypeOf<typeof metricsItems>;

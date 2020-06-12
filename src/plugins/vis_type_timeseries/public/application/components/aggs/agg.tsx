@@ -24,22 +24,19 @@ import { aggToComponent } from '../lib/agg_to_component';
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
-import {
-  MetricsItemsSchema,
-  PanelSchema,
-  SeriesItemsSchema,
-  FieldDescriptor,
-} from '../../../../common/types';
+import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
+import { UIRestrictions } from '../../../../common/ui_restrictions';
+import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
 interface AggProps extends HTMLAttributes<HTMLElement> {
   disableDelete: boolean;
-  fields: FieldDescriptor[];
+  fields: IFieldType[];
   model: MetricsItemsSchema;
   panel: PanelSchema;
   series: SeriesItemsSchema;
   siblings: MetricsItemsSchema[];
-  uiRestrictions: { '*': boolean };
+  uiRestrictions: UIRestrictions;
   dragHandleProps: DragHandleProps;
   onAdd: () => void;
   onChange: () => void;
