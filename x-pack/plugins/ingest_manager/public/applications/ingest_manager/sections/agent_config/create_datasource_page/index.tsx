@@ -255,6 +255,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const layoutProps = {
     from,
     cancelUrl,
+    cancelOnClick: cancelClickHandler,
     agentConfig,
     packageInfo,
   };

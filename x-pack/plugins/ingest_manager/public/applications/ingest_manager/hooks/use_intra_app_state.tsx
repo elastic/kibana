@@ -13,9 +13,6 @@ interface IntraAppState<S extends AnyIntraAppRouteState = AnyIntraAppRouteState>
   forRoute: string;
   routeState?: S;
 }
-type UseIntraAppStateHook = <S extends AnyIntraAppRouteState = AnyIntraAppRouteState>() =>
-  | IntraAppState<S>['routeState']
-  | undefined;
 
 const IntraAppStateContext = React.createContext<IntraAppState>({ forRoute: '' });
 const wasHandled = new WeakSet<IntraAppState>();
@@ -47,7 +44,9 @@ export const IntraAppStateProvider = memo<{
  * This state can be used by other Kibana Apps to influence certain behaviours in Ingest, for example,
  * redirecting back to an given Application after a craete action.
  */
-export const useIntraAppState: UseIntraAppStateHook = () => {
+export function useIntraAppState<S = AnyIntraAppRouteState>():
+  | IntraAppState<S>['routeState']
+  | undefined {
   const location = useLocation();
   const intraAppState = useContext(IntraAppStateContext);
   if (!intraAppState) {
@@ -60,7 +59,7 @@ export const useIntraAppState: UseIntraAppStateHook = () => {
     // consistently either.
     if (location.pathname === intraAppState.forRoute && !wasHandled.has(intraAppState)) {
       wasHandled.add(intraAppState);
-      return intraAppState.routeState;
+      return intraAppState.routeState as S;
     }
   }, [intraAppState, location.pathname]);
-};
+}

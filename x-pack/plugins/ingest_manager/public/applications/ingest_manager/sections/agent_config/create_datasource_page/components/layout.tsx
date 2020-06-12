@@ -23,13 +23,21 @@ import { CreateDatasourceFrom } from '../types';
 export const CreateDatasourcePageLayout: React.FunctionComponent<{
   from: CreateDatasourceFrom;
   cancelUrl: string;
+  cancelOnClick?: React.ReactEventHandler;
   agentConfig?: AgentConfig;
   packageInfo?: PackageInfo;
-}> = ({ from, cancelUrl, agentConfig, packageInfo, children }) => {
+}> = ({ from, cancelUrl, cancelOnClick, agentConfig, packageInfo, children }) => {
   const leftColumn = (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
-        <EuiButtonEmpty size="xs" iconType="arrowLeft" flush="left" href={cancelUrl}>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+        <EuiButtonEmpty
+          size="xs"
+          iconType="arrowLeft"
+          flush="left"
+          href={cancelUrl}
+          onClick={cancelOnClick}
+        >
           <FormattedMessage
             id="xpack.ingestManager.createDatasource.cancelLinkText"
             defaultMessage="Cancel"
