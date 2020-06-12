@@ -99,7 +99,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
           defaultMessage: 'Policy',
         }),
-        description: details.endpoint.policy.id,
+        description: details.endpoint.policy.applied.id,
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
