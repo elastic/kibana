@@ -20,6 +20,8 @@ interface Props {
 }
 
 interface Context {
+  httpClient: HttpSetup;
+  apiBasePath: string;
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
@@ -42,7 +44,9 @@ export const ComponentTemplatesProvider = ({
   const documentation = getDocumentation(docLinks);
 
   return (
-    <ComponentTemplatesContext.Provider value={{ api, documentation, trackMetric, toasts }}>
+    <ComponentTemplatesContext.Provider
+      value={{ api, documentation, trackMetric, toasts, httpClient, apiBasePath }}
+    >
       {children}
     </ComponentTemplatesContext.Provider>
   );
