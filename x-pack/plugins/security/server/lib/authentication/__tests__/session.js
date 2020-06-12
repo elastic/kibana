@@ -50,6 +50,58 @@ describe('Session', () => {
         path: 'base/path/'
       });
     });
+
+    it('throws an exception if "SameSite: None" set on not Secure connection', async () => {
+      config.get.withArgs('xpack.security.secureCookies').returns(false);
+      config.get.withArgs('xpack.security.sameSiteCookies').returns('None');
+
+      try {
+        await Session.create(server);
+        expect().fail('`Session.create` should fail.');
+      } catch(err) {
+        expect(err).to.be.a(Error);
+        expect(err.message).to.be('"SameSite: None" requires Secure connection');
+      }
+    });
+
+    it('sets isSameSite:false when sameSiteCookies: None', async () => {
+      config.get.withArgs('xpack.security.cookieName').returns('cookie-name');
+      config.get.withArgs('xpack.security.encryptionKey').returns('encryption-key');
+      config.get.withArgs('server.basePath').returns('base/path');
+      config.get.withArgs('xpack.security.secureCookies').returns(true);
+      config.get.withArgs('xpack.security.sameSiteCookies').returns('None');
+
+      await Session.create(server);
+
+      sinon.assert.calledOnce(server.auth.strategy);
+      sinon.assert.calledWith(server.auth.strategy, 'security-cookie', 'cookie', sinon.match.has('isSameSite', false));
+    });
+
+    it('sets isSameSite:Lax when sameSiteCookies: Lax', async () => {
+      config.get.withArgs('xpack.security.cookieName').returns('cookie-name');
+      config.get.withArgs('xpack.security.encryptionKey').returns('encryption-key');
+      config.get.withArgs('server.basePath').returns('base/path');
+      config.get.withArgs('xpack.security.secureCookies').returns(true);
+      config.get.withArgs('xpack.security.sameSiteCookies').returns('Lax');
+
+      await Session.create(server);
+
+      sinon.assert.calledOnce(server.auth.strategy);
+      sinon.assert.calledWith(server.auth.strategy, 'security-cookie', 'cookie', sinon.match.has('isSameSite', 'Lax'));
+    });
+
+    it('sets isSameSite:Strict when sameSiteCookies: Strict', async () => {
+      config.get.withArgs('xpack.security.cookieName').returns('cookie-name');
+      config.get.withArgs('xpack.security.encryptionKey').returns('encryption-key');
+      config.get.withArgs('server.basePath').returns('base/path');
+      config.get.withArgs('xpack.security.secureCookies').returns(true);
+      config.get.withArgs('xpack.security.sameSiteCookies').returns('Strict');
+
+      await Session.create(server);
+
+      sinon.assert.calledOnce(server.auth.strategy);
+      sinon.assert.calledWith(server.auth.strategy, 'security-cookie', 'cookie', sinon.match.has('isSameSite', 'Strict'));
+    });
   });
 
   describe('`get` method', () => {

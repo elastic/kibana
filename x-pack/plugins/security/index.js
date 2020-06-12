@@ -38,6 +38,7 @@ export const security = (kibana) => new kibana.Plugin({
       encryptionKey: Joi.string(),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
+      sameSiteCookies: Joi.string().valid(['Strict', 'Lax', 'None']).optional(),
       loginAssistanceMessage: Joi.string(),
       public: Joi.object({
         protocol: Joi.string().valid(['http', 'https']),
