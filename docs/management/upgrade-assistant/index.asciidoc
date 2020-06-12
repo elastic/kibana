@@ -3,7 +3,7 @@
 == Upgrade Assistant
 
 The Upgrade Assistant helps you prepare for your upgrade to {es} 9.0. 
-To access the assistant, go to *Management > 9.0 Upgrade Assistant*. 
+To access the assistant, open the menu, then go to *Stack Management > {es} > 9.0 Upgrade Assistant*. 
 
 The assistant identifies the deprecated settings in your cluster and indices 
 and guides you through the process of resolving issues, including reindexing. 

@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './popover_editor.scss';
 import _ from 'lodash';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSideNav,
+  EuiListGroup,
   EuiCallOut,
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -101,84 +103,94 @@ export function PopoverEditor(props: PopoverEditorProps) {
     );
   }
 
-  function getSideNavItems() {
-    return [
-      {
-        name: '',
-        id: '0',
-        items: getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => ({
-          name: operationPanels[operationType].displayName,
-          id: operationType as string,
-          className: classNames('lnsIndexPatternDimensionEditor__operation', {
-            'lnsIndexPatternDimensionEditor__operation--selected': Boolean(
-              incompatibleSelectedOperationType === operationType ||
-                (!incompatibleSelectedOperationType &&
-                  selectedColumn &&
-                  selectedColumn.operationType === operationType)
-            ),
-            'lnsIndexPatternDimensionEditor__operation--incompatible': !compatibleWithCurrentField,
-          }),
-          'data-test-subj': `lns-indexPatternDimension${
-            compatibleWithCurrentField ? '' : 'Incompatible'
-          }-${operationType}`,
-          onClick() {
-            if (!selectedColumn || !compatibleWithCurrentField) {
-              const possibleFields = fieldByOperation[operationType] || [];
+  function getSideNavItems(): EuiListGroupItemProps[] {
+    return getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => {
+      const isActive = Boolean(
+        incompatibleSelectedOperationType === operationType ||
+          (!incompatibleSelectedOperationType &&
+            selectedColumn &&
+            selectedColumn.operationType === operationType)
+      );
 
-              if (possibleFields.length === 1) {
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
-                    columnId,
-                    newColumn: buildColumn({
-                      columns: props.state.layers[props.layerId].columns,
-                      suggestedPriority: props.suggestedPriority,
-                      layerId: props.layerId,
-                      op: operationType,
-                      indexPattern: currentIndexPattern,
-                      field: fieldMap[possibleFields[0]],
-                      previousColumn: selectedColumn,
-                    }),
-                  })
-                );
-              } else {
-                setInvalidOperationType(operationType);
-              }
-              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-              return;
-            }
-            if (incompatibleSelectedOperationType) {
-              setInvalidOperationType(null);
-            }
-            if (selectedColumn.operationType === operationType) {
-              return;
-            }
-            const newColumn: IndexPatternColumn = buildColumn({
-              columns: props.state.layers[props.layerId].columns,
-              suggestedPriority: props.suggestedPriority,
-              layerId: props.layerId,
-              op: operationType,
-              indexPattern: currentIndexPattern,
-              field: fieldMap[selectedColumn.sourceField],
-              previousColumn: selectedColumn,
-            });
+      let color: EuiListGroupItemProps['color'] = 'primary';
+      if (isActive) {
+        color = 'text';
+      } else if (!compatibleWithCurrentField) {
+        color = 'subdued';
+      }
 
-            trackUiEvent(
-              `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
-            );
-            setState(
-              changeColumn({
-                state,
-                layerId,
-                columnId,
-                newColumn,
-              })
-            );
-          },
-        })),
-      },
-    ];
+      let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
+      if (isActive) {
+        label = <strong>{operationPanels[operationType].displayName}</strong>;
+      }
+
+      return {
+        id: operationType as string,
+        label,
+        color,
+        isActive,
+        size: 's',
+        className: 'lnsIndexPatternDimensionEditor__operation',
+        'data-test-subj': `lns-indexPatternDimension${
+          compatibleWithCurrentField ? '' : 'Incompatible'
+        }-${operationType}`,
+        onClick() {
+          if (!selectedColumn || !compatibleWithCurrentField) {
+            const possibleFields = fieldByOperation[operationType] || [];
+
+            if (possibleFields.length === 1) {
+              setState(
+                changeColumn({
+                  state,
+                  layerId,
+                  columnId,
+                  newColumn: buildColumn({
+                    columns: props.state.layers[props.layerId].columns,
+                    suggestedPriority: props.suggestedPriority,
+                    layerId: props.layerId,
+                    op: operationType,
+                    indexPattern: currentIndexPattern,
+                    field: fieldMap[possibleFields[0]],
+                    previousColumn: selectedColumn,
+                  }),
+                })
+              );
+            } else {
+              setInvalidOperationType(operationType);
+            }
+            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+            return;
+          }
+          if (incompatibleSelectedOperationType) {
+            setInvalidOperationType(null);
+          }
+          if (selectedColumn.operationType === operationType) {
+            return;
+          }
+          const newColumn: IndexPatternColumn = buildColumn({
+            columns: props.state.layers[props.layerId].columns,
+            suggestedPriority: props.suggestedPriority,
+            layerId: props.layerId,
+            op: operationType,
+            indexPattern: currentIndexPattern,
+            field: fieldMap[selectedColumn.sourceField],
+            previousColumn: selectedColumn,
+          });
+
+          trackUiEvent(
+            `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
+          );
+          setState(
+            changeColumn({
+              state,
+              layerId,
+              columnId,
+              newColumn,
+            })
+          );
+        },
+      };
+    });
   }
 
   return (
@@ -259,7 +271,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={null} className={classNames('lnsIndexPatternDimensionEditor__left')}>
-              <EuiSideNav items={getSideNavItems()} />
+              <EuiListGroup gutterSize="none" listItems={getSideNavItems()} />
             </EuiFlexItem>
             <EuiFlexItem grow={true} className="lnsIndexPatternDimensionEditor__right">
               {incompatibleSelectedOperationType && selectedColumn && (
