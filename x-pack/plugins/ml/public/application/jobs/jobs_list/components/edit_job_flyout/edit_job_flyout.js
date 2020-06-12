@@ -48,8 +48,8 @@ export class EditJobFlyoutUI extends Component {
       jobDescription: '',
       jobGroups: [],
       jobModelMemoryLimit: '',
-      jobModelSnapshotRetentionDays: 1,
-      jobDailyModelSnapshotRetentionAfterDays: 1,
+      jobModelSnapshotRetentionDays: 10,
+      jobDailyModelSnapshotRetentionAfterDays: 10,
       jobDetectors: [],
       jobDetectorDescriptions: [],
       jobCustomUrls: [],
@@ -134,7 +134,7 @@ export class EditJobFlyoutUI extends Component {
         : '';
 
     const modelSnapshotRetentionDays =
-      job.model_snapshot_retention_days !== undefined ? job.model_snapshot_retention_days : 1;
+      job.model_snapshot_retention_days !== undefined ? job.model_snapshot_retention_days : 10;
 
     const dailyModelSnapshotRetentionAfterDays =
       job.daily_model_snapshot_retention_after_days !== undefined
