@@ -7,9 +7,9 @@
 
 import minimatch from 'minimatch';
 import { SimpleSavedObject } from 'src/core/public';
-import { getIndexPatternService, getUiSettings } from '../../../../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternSavedObjectAttrs } from '../../../../../../../../src/plugins/data/public/index_patterns/index_patterns/index_patterns';
+import { IndexPatternSavedObjectAttrs } from 'src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import { getIndexPatternService, getUiSettings } from '../../../../kibana_services';
 
 export type IndexPatternMeta = {
   id: string;
