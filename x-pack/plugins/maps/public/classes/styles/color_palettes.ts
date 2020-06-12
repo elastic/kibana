@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chroma from 'chroma-js';
 import {
   euiPaletteForStatus,
   euiPaletteForTemperature,
@@ -13,8 +14,8 @@ import {
   euiPalettePositive,
   euiPaletteGray,
 } from '@elastic/eui/lib/services';
-
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './heatmap/components/heatmap_constants';
 
 const COLOR_PALETTES: EuiColorPalettePickerPaletteProps[] = [
   {
@@ -52,6 +53,17 @@ const COLOR_PALETTES: EuiColorPalettePickerPaletteProps[] = [
     palette: euiPaletteForTemperature(8),
     type: 'gradient',
   },
+  {
+    value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
+    palette: [
+      'rgb(65, 105, 225)', // royalblue
+      'rgb(0, 256, 256)', // cyan
+      'rgb(0, 256, 0)', // lime
+      'rgb(256, 256, 0)', // yellow
+      'rgb(256, 0, 0)', // red
+    ],
+    type: 'gradient',
+  },
 ];
 
 export const NUMERICAL_COLOR_PALETTES = COLOR_PALETTES.filter(
@@ -59,3 +71,49 @@ export const NUMERICAL_COLOR_PALETTES = COLOR_PALETTES.filter(
     return palette.type === 'gradient';
   }
 );
+
+export function getRGBColorRangeStrings(colorPaletteId: string): string[] {
+  const colorPalette = COLOR_PALETTES.find(({ value }: EuiColorPalettePickerPaletteProps) => {
+    return value === colorPaletteId;
+  });
+  return colorPalette ? colorPalette.palette : [];
+}
+
+export function getHexColorRangeStrings(colorPaletteId: string): string[] {
+  return getRGBColorRangeStrings(colorPaletteId).map((rgbColor) => chroma(rgbColor).hex());
+}
+
+// Returns an array of color stops
+// [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
+export function getOrdinalMbColorRampStops(
+  colorPaletteId: string,
+  min: number,
+  max: number
+): Array<number | string> | null {
+  if (!colorPaletteId) {
+    return null;
+  }
+
+  if (min > max) {
+    return null;
+  }
+
+  const hexColors = getHexColorRangeStrings(colorPaletteId);
+  if (hexColors.length === 0) {
+    return null;
+  }
+
+  if (max === min) {
+    // just return single stop value
+    return [max, hexColors[hexColors.length - 1]];
+  }
+
+  const delta = max - min;
+  return hexColors.reduce(
+    (accu: Array<number | string>, stopColor: string, idx: number, srcArr: string[]) => {
+      const stopNumber = min + (delta * idx) / srcArr.length;
+      return [...accu, stopNumber, stopColor];
+    },
+    []
+  );
+}
