@@ -193,16 +193,6 @@ export class JobDetails extends Component {
                 defaultMessage="Model snapshot retention days"
               />
             }
-            // helpText={
-            //   datafeedRunning ? (
-            //     <FormattedMessage
-            //       id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelSnapshotRetentionHelp"
-            //       defaultMessage="Model memory limit cannot be edited while the datafeed is running."
-            //     />
-            //   ) : null
-            // }
-            // isInvalid={mmlValidationError !== ''}
-            // error={mmlValidationError}
           >
             <EuiFieldNumber
               min={0}
