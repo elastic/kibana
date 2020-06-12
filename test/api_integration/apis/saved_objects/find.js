@@ -24,7 +24,7 @@ export default function ({ getService }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
-  describe('TOTO find', () => {
+  describe('find', () => {
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
