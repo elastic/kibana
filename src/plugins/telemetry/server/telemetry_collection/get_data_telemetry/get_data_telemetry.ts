@@ -18,11 +18,7 @@
  */
 
 import { APICaller } from 'kibana/server';
-import {
-  DATA_DATASETS_INDEX_PATTERNS,
-  DATA_SHIPPER_TO_TYPE_MAPPING,
-  DataTelemetryType,
-} from './constants';
+import { DATA_DATASETS_INDEX_PATTERNS, DataPatternName, DataTelemetryType } from './constants';
 
 export interface DataTelemetryBasePayload {
   index_count: number;
@@ -32,11 +28,12 @@ export interface DataTelemetryBasePayload {
 }
 
 export interface DataTelemetryDocument extends DataTelemetryBasePayload {
-  dataset: {
-    name: string;
-    type: DataTelemetryType | 'unknown' | string; // The union of types is to help autocompletion with some known `dataset.type`s
+  dataset?: {
+    name?: string;
+    type?: DataTelemetryType | 'unknown' | string; // The union of types is to help autocompletion with some known `dataset.type`s
   };
-  shipper: string;
+  shipper?: string;
+  pattern_name?: DataPatternName;
 }
 
 export type DataTelemetryPayload = DataTelemetryDocument[];
@@ -54,7 +51,14 @@ export interface DataTelemetryIndex {
   sizeInBytes?: number;
 }
 
-type DataDescriptor = Partial<Pick<DataTelemetryIndex, 'datasetName' | 'datasetType' | 'shipper'>>;
+type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+
+type DataDescriptor = AtLeastOne<{
+  datasetName: string;
+  datasetType: string;
+  shipper: string;
+  patternName: DataPatternName; // When found from the list of the index patterns
+}>;
 
 function findMatchingDescriptors({
   name,
@@ -62,22 +66,23 @@ function findMatchingDescriptors({
   datasetName,
   datasetType,
 }: DataTelemetryIndex): DataDescriptor | undefined {
-  const found = DATA_DATASETS_INDEX_PATTERNS.find(({ pattern }) => {
+  // If we already have the data from the indices' mappings...
+  if ([shipper, datasetName, datasetType].some(Boolean)) {
+    return {
+      ...(shipper && { shipper }),
+      ...(datasetName && { datasetName }),
+      ...(datasetType && { datasetType }),
+    } as AtLeastOne<{ datasetName: string; datasetType: string; shipper: string }>; // Using casting here because TS doesn't infer at least one exists from the if clause
+  }
+
+  // Otherwise, try with the list of known index patterns
+  return DATA_DATASETS_INDEX_PATTERNS.find(({ pattern }) => {
     if (!pattern.startsWith('.') && name.startsWith('.')) {
       // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.kibana-log-...`)
       return false;
     }
     return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(name);
   });
-
-  if ([found, shipper, datasetName, datasetType].some(Boolean)) {
-    return {
-      ...found,
-      ...(shipper && { shipper, datasetType: DATA_SHIPPER_TO_TYPE_MAPPING[shipper] }),
-      ...(datasetName && { datasetName }),
-      ...(datasetType && { datasetType }),
-    };
-  }
 }
 
 function increaseCounters(
@@ -120,15 +125,12 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
   for (const indexCandidate of indexCandidates) {
     const matchingDescriptors = findMatchingDescriptors(indexCandidate);
     if (matchingDescriptors) {
-      const {
-        datasetName = 'unknown',
-        datasetType = 'unknown',
-        shipper = 'unknown',
-      } = matchingDescriptors;
-      const key = `${datasetName}-${datasetType}-${shipper}`;
+      const { datasetName, datasetType, shipper, patternName } = matchingDescriptors;
+      const key = `${datasetName}-${datasetType}-${shipper}-${patternName}`;
       acc.set(key, {
-        dataset: { name: datasetName, type: datasetType },
-        shipper,
+        ...((datasetName || datasetType) && { dataset: { name: datasetName, type: datasetType } }),
+        ...(shipper && { shipper }),
+        ...(patternName && { pattern_name: patternName }),
         ...increaseCounters(acc.get(key), indexCandidate),
       });
     }

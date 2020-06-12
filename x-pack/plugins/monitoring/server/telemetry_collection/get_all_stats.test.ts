@@ -154,7 +154,6 @@ describe('get_all_stats', () => {
               },
               cloud: undefined,
             },
-            data: [],
           },
         },
       ];
@@ -224,7 +223,6 @@ describe('get_all_stats', () => {
         kibana: (kibanaStats as unknown) as KibanaStats,
         logstash: (logstashStats as unknown) as ClustersHighLevelStats,
         beats: {},
-        dataTelemetry: {},
       });
 
       const [a, b, c] = expectedClusters;

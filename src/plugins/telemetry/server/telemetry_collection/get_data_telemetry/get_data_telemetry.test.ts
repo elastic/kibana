@@ -18,7 +18,6 @@
  */
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
-import { DATA_SHIPPER_TO_TYPE_MAPPING } from './constants';
 
 describe('get_data_telemetry', () => {
   describe('buildIngestSolutionsPayload', () => {
@@ -78,41 +77,35 @@ describe('get_data_telemetry', () => {
         ])
       ).toStrictEqual([
         {
-          dataset: { name: 'apm', type: DATA_SHIPPER_TO_TYPE_MAPPING.apm },
           shipper: 'apm',
           index_count: 6,
           ecs_index_count: 6,
         },
         {
-          dataset: { name: 'packetbeat', type: DATA_SHIPPER_TO_TYPE_MAPPING.packetbeat },
           shipper: 'packetbeat',
           index_count: 1,
           ecs_index_count: 1,
         },
         {
-          dataset: { name: 'filebeat', type: 'unknown' },
-          shipper: 'unknown',
+          pattern_name: 'filebeat',
           index_count: 1,
           doc_count: 100,
           size_in_bytes: 10,
         },
         {
-          dataset: { name: 'metricbeat', type: 'unknown' },
-          shipper: 'unknown',
+          pattern_name: 'metricbeat',
           index_count: 1,
           ecs_index_count: 0,
           doc_count: 100,
           size_in_bytes: 10,
         },
         {
-          dataset: { name: 'app-search', type: 'unknown' },
-          shipper: 'unknown',
+          pattern_name: 'app-search',
           index_count: 1,
           doc_count: 0,
         },
         {
-          dataset: { name: 'third-party-logs', type: 'logs' },
-          shipper: 'unknown',
+          pattern_name: 'third-party-logs',
           index_count: 4,
           ecs_index_count: 1,
           doc_count: 1100,
@@ -140,8 +133,7 @@ describe('get_data_telemetry', () => {
       const callCluster = mockCallCluster(['filebeat-12314']);
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
         {
-          dataset: { name: 'filebeat', type: 'unknown' },
-          shipper: 'unknown',
+          pattern_name: 'filebeat',
           index_count: 1,
           ecs_index_count: 0,
         },
@@ -160,8 +152,7 @@ describe('get_data_telemetry', () => {
       );
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
         {
-          dataset: { name: 'filebeat', type: 'unknown' },
-          shipper: 'unknown',
+          pattern_name: 'filebeat',
           index_count: 1,
           ecs_index_count: 1,
           doc_count: 100,
@@ -184,7 +175,7 @@ describe('get_data_telemetry', () => {
       );
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
         {
-          dataset: { name: 'unknown', type: 'events' },
+          dataset: { name: undefined, type: 'events' },
           shipper: 'my-beat',
           index_count: 1,
           ecs_index_count: 1,

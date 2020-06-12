@@ -85,9 +85,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.data).to.be.an('object');
       expect(stats.stack_stats.data).to.be.an('array');
       expect(stats.stack_stats.data[0]).to.be.an('object');
-      expect(stats.stack_stats.data[0].dataset.name).to.be('third-party-logs');
-      expect(stats.stack_stats.data[0].dataset.type).to.be('logs');
-      expect(stats.stack_stats.data[0].shipper).to.be('unknown');
+      expect(stats.stack_stats.data[0].pattern_name).to.be('third-party-logs');
       expect(stats.stack_stats.data[0].index_count).to.be(1);
       expect(stats.stack_stats.data[0].doc_count).to.be(0);
       expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);

@@ -23,93 +23,72 @@ export const DATA_KNOWN_TYPES = ['logs', 'events', 'metrics'] as const;
 
 export type DataTelemetryType = typeof DATA_KNOWN_TYPES[number];
 
-export interface DataDatasetsIndexPatterns {
-  pattern: string;
-  datasetName: string;
-  // The ones below are only to categorise any known patterns
-  datasetType?: DataTelemetryType;
-  shipper?: string;
-}
+export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patternName'];
 
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
-export const DATA_DATASETS_INDEX_PATTERNS: Readonly<DataDatasetsIndexPatterns[]> = [
+export const DATA_DATASETS_INDEX_PATTERNS = [
   // Security - Elastic
-  { pattern: 'auditbeat-*', datasetName: 'auditbeat' },
-  { pattern: 'winlogbeat-*', datasetName: 'winlogbeat' },
-  { pattern: 'packetbeat-*', datasetName: 'packetbeat' },
+  { pattern: 'auditbeat-*', patternName: 'auditbeat' },
+  { pattern: 'winlogbeat-*', patternName: 'winlogbeat' },
+  { pattern: 'packetbeat-*', patternName: 'packetbeat' },
   // Security - 3rd party
   // TODO: Add/modify/remove entries once the security team confirms them
-  { pattern: '*tomcat*', datasetName: 'tomcat' },
-  { pattern: '*apache*', datasetName: 'apache' }, // Already in Observability (keeping it in here for documentation)
-  { pattern: '*artifactory*', datasetName: 'artifactory' },
-  { pattern: '*arubanetworks*', datasetName: 'arubanetworks' },
-  { pattern: 'barracuda*', datasetName: 'barracuda' },
-  { pattern: 'checkpoint*', datasetName: 'checkpoint' },
-  { pattern: 'cisco*', datasetName: 'cisco' },
-  { pattern: 'citrix*', datasetName: 'citrix' },
-  { pattern: 'cyberark*', datasetName: 'cyberark' },
-  { pattern: 'cylance*', datasetName: 'cylance' },
-  { pattern: '*dellswitch*', datasetName: 'dellswitch' },
-  // { pattern: '*devices/rhlinux*', datasetName: 'devices/rhlinux' }, // Pending to confirm
-  { pattern: '*emc*', datasetName: 'emc' },
-  { pattern: 'fortinet*', datasetName: 'fortinet' },
-  { pattern: 'mcafee*', datasetName: 'mcafee' },
-  { pattern: '*microsoft*', datasetName: 'microsoft' },
-  { pattern: 'paloaltonetworks*', datasetName: 'paloaltonetworks' },
-  { pattern: 'pan*', datasetName: 'paloaltonetworks' },
-  { pattern: 'symantec*', datasetName: 'symantec' },
-  { pattern: 'trendmicro*', datasetName: 'trendmicro' },
-  { pattern: 'tripwire*', datasetName: 'tripwire' },
-  { pattern: '*vmware*', datasetName: 'vmware' },
+  { pattern: '*tomcat*', patternName: 'tomcat' },
+  { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
+  { pattern: '*artifactory*', patternName: 'artifactory' },
+  { pattern: '*arubanetworks*', patternName: 'arubanetworks' },
+  { pattern: 'barracuda*', patternName: 'barracuda' },
+  { pattern: 'checkpoint*', patternName: 'checkpoint' },
+  { pattern: 'cisco*', patternName: 'cisco' },
+  { pattern: 'citrix*', patternName: 'citrix' },
+  { pattern: 'cyberark*', patternName: 'cyberark' },
+  { pattern: 'cylance*', patternName: 'cylance' },
+  { pattern: '*dellswitch*', patternName: 'dellswitch' },
+  // { pattern: '*devices/rhlinux*', patternName: 'devices/rhlinux' }, // Pending to confirm
+  { pattern: '*emc*', patternName: 'emc' },
+  { pattern: 'fortinet*', patternName: 'fortinet' },
+  { pattern: 'mcafee*', patternName: 'mcafee' },
+  { pattern: '*microsoft*', patternName: 'microsoft' },
+  { pattern: 'paloaltonetworks*', patternName: 'paloaltonetworks' },
+  { pattern: 'pan*', patternName: 'paloaltonetworks' },
+  { pattern: 'symantec*', patternName: 'symantec' },
+  { pattern: 'trendmicro*', patternName: 'trendmicro' },
+  { pattern: 'tripwire*', patternName: 'tripwire' },
+  { pattern: '*vmware*', patternName: 'vmware' },
 
   // Enterprise Search - Elastic
-  { pattern: '.ent-search-*', datasetName: 'enterprise-search' },
-  { pattern: '.app-search-*', datasetName: 'app-search' },
+  { pattern: '.ent-search-*', patternName: 'enterprise-search' },
+  { pattern: '.app-search-*', patternName: 'app-search' },
   // Enterprise Search - 3rd party
-  { pattern: '*magento2*', datasetName: 'magento2' },
-  { pattern: '*magento*', datasetName: 'magento' },
-  { pattern: '*shopify*', datasetName: 'shopify' },
-  { pattern: '*wordpress*', datasetName: 'wordpress' },
-  { pattern: '*wp*', datasetName: 'wp' },
-  { pattern: '*drupal*', datasetName: 'drupal' },
-  { pattern: '*joomla*', datasetName: 'joomla' },
-  { pattern: '*search*', datasetName: 'search' },
-  { pattern: '*wix*', datasetName: 'wix' },
-  { pattern: '*sharepoint*', datasetName: 'sharepoint' },
-  { pattern: '*squarespace*', datasetName: 'squarespace' },
-  { pattern: '*aem*', datasetName: 'aem' },
-  { pattern: '*sitecore*', datasetName: 'sitecore' },
-  { pattern: '*weebly*', datasetName: 'weebly' },
-  { pattern: '*acquia*', datasetName: 'acquia' },
+  { pattern: '*magento2*', patternName: 'magento2' },
+  { pattern: '*magento*', patternName: 'magento' },
+  { pattern: '*shopify*', patternName: 'shopify' },
+  { pattern: '*wordpress*', patternName: 'wordpress' },
+  { pattern: '*wp*', patternName: 'wp' },
+  { pattern: '*drupal*', patternName: 'drupal' },
+  { pattern: '*joomla*', patternName: 'joomla' },
+  { pattern: '*search*', patternName: 'search' },
+  { pattern: '*wix*', patternName: 'wix' },
+  { pattern: '*sharepoint*', patternName: 'sharepoint' },
+  { pattern: '*squarespace*', patternName: 'squarespace' },
+  { pattern: '*aem*', patternName: 'aem' },
+  { pattern: '*sitecore*', patternName: 'sitecore' },
+  { pattern: '*weebly*', patternName: 'weebly' },
+  { pattern: '*acquia*', patternName: 'acquia' },
 
   // Observability - Elastic
-  { pattern: 'filebeat-*', datasetName: 'filebeat' },
-  { pattern: 'metricbeat-*', datasetName: 'metricbeat' },
-  { pattern: 'apm-*', datasetName: 'apm' },
-  { pattern: 'functionbeat-*', datasetName: 'functionbeat' },
-  { pattern: 'heartbeat-*', datasetName: 'heartbeat' },
+  { pattern: 'filebeat-*', patternName: 'filebeat' },
+  { pattern: 'metricbeat-*', patternName: 'metricbeat' },
+  { pattern: 'apm-*', patternName: 'apm' },
+  { pattern: 'functionbeat-*', patternName: 'functionbeat' },
+  { pattern: 'heartbeat-*', patternName: 'heartbeat' },
   // Observability - 3rd party
-  { pattern: 'fluentd*', datasetName: 'fluentd' },
-  { pattern: 'telegraf*', datasetName: 'telegraf' },
-  { pattern: 'prometheusbeat*', datasetName: 'prometheusbeat' },
-  { pattern: 'fluentbit*', datasetName: 'fluentbit' },
-  { pattern: '*nginx*', datasetName: 'nginx' },
-  { pattern: '*apache*', datasetName: 'apache' }, // Already in Security (keeping it in here for documentation)
-  { pattern: '*logs*', datasetName: 'third-party-logs', datasetType: 'logs' },
+  { pattern: 'fluentd*', patternName: 'fluentd' },
+  { pattern: 'telegraf*', patternName: 'telegraf' },
+  { pattern: 'prometheusbeat*', patternName: 'prometheusbeat' },
+  { pattern: 'fluentbit*', patternName: 'fluentbit' },
+  { pattern: '*nginx*', patternName: 'nginx' },
+  { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
+  { pattern: '*logs*', patternName: 'third-party-logs' },
 ] as const;
-
-/**
- * If we only retrieve the shipper, what datasetType should we assume for them?
- * This mapping allows us to define it.
- */
-export const DATA_SHIPPER_TO_TYPE_MAPPING: { [key: string]: DataTelemetryType } = {
-  filebeat: 'logs',
-  metricbeat: 'metrics',
-  apm: 'events',
-  functionbeat: 'events',
-  heartbeat: 'metrics',
-  auditbeat: 'events',
-  winlogbeat: 'logs',
-  packetbeat: 'events',
-};

@@ -7,13 +7,11 @@
 import { get, set, merge } from 'lodash';
 
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { DATA_TELEMETRY_ID } from '../../../../../src/plugins/telemetry/server';
 import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats } from './get_beats_stats';
 import { getHighLevelStats } from './get_high_level_stats';
-import { getDataTelemetry } from './get_data_telemetry';
 
 type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extends Promise<infer R>
   ? R
@@ -35,15 +33,14 @@ export const getAllStats: StatsGetter<CustomContext> = async (
 ) => {
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
 
-  const [esClusters, kibana, logstash, beats, dataTelemetry] = await Promise.all([
+  const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
     getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
     getHighLevelStats(callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID, maxBucketSize), // stack_stats.logstash
     getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
-    getDataTelemetry(callCluster, clusterUuids, start, end, maxBucketSize),
   ]);
 
-  return handleAllStats(esClusters, { kibana, logstash, beats, dataTelemetry });
+  return handleAllStats(esClusters, { kibana, logstash, beats });
 };
 
 /**
@@ -62,12 +59,10 @@ export function handleAllStats(
     kibana,
     logstash,
     beats,
-    dataTelemetry,
   }: {
     kibana: KibanaStats;
     logstash: PromiseReturnType<typeof getHighLevelStats>;
     beats: PromiseReturnType<typeof getBeatsStats>;
-    dataTelemetry: PromiseReturnType<typeof getDataTelemetry>;
   }
 ) {
   return clusters.map((cluster) => {
@@ -79,7 +74,6 @@ export function handleAllStats(
         ...getStackStats(cluster.cluster_uuid, kibana, KIBANA_SYSTEM_ID),
         ...getStackStats(cluster.cluster_uuid, logstash, LOGSTASH_SYSTEM_ID),
         ...getStackStats(cluster.cluster_uuid, beats, BEATS_SYSTEM_ID),
-        ...getStackStats(cluster.cluster_uuid, dataTelemetry, DATA_TELEMETRY_ID),
       },
     };
 
