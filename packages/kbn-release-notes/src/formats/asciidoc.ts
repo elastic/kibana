@@ -32,9 +32,7 @@ export class AsciidocFormat extends Format {
   static extension = 'asciidoc';
 
   *print() {
-    const alphabeticalAreas = AREAS.slice().sort((a, b) =>
-      a.printableName.localeCompare(b.printableName)
-    );
+    const alphabeticalAreas = AREAS.slice().sort((a, b) => a.title.localeCompare(b.title));
 
     yield* lines(`
       [[release-notes-${this.version.label}]]
@@ -63,7 +61,7 @@ export class AsciidocFormat extends Format {
           continue;
         }
 
-        yield `${area.printableName}::\n`;
+        yield `${area.title}::\n`;
         for (const pr of prsInArea) {
           const fixes = pr.fixes.length ? `[Fixes ${pr.fixes.join(', ')}] ` : '';
           const strippedTitle = pr.title.replace(/^\s*\[[^\]]+\]\s*/, '');

@@ -23,18 +23,11 @@ import Axios from 'axios';
 import gql from 'graphql-tag';
 import * as GraphqlPrinter from 'graphql/language/printer';
 import { ASTNode } from 'graphql/language/ast';
-import terminalLink from 'terminal-link';
+import makeTerminalLink from 'terminal-link';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { Version } from './version';
 import { getFixReferences } from './get_fix_references';
-import {
-  Area,
-  AsciidocSection,
-  AREAS,
-  UNKNOWN_AREA,
-  ASCIIDOC_SECTIONS,
-  UNKNOWN_ASCIIDOC_SECTION,
-} from '../release_notes_config';
 import { getNoteFromDescription } from './get_note_from_description';
 
 const PrNodeFragment = gql`
@@ -74,25 +67,9 @@ export interface PullRequest {
     name: string;
     login: string;
   };
-  area: Area;
-  asciidocSection: AsciidocSection;
   versions: Version[];
   terminalLink: string;
   note?: string;
-}
-
-/**
- * Find an AREA or ASCIIDOC_SECTION by checking the passed labels
- */
-function findByLabels<T extends { labels: ReadonlyArray<string | RegExp> }>(
-  types: readonly T[],
-  labels: string[]
-) {
-  return types.find((a) =>
-    a.labels.some((test: string | RegExp) =>
-      typeof test === 'string' ? labels.includes(test) : labels.some((l) => l.match(test))
-    )
-  );
 }
 
 /**
@@ -121,12 +98,14 @@ async function gqlRequest(token: string, query: ASTNode, variables: Record<strin
  * @param node A GraphQL response from Github using the PrNode fragment
  */
 function parsePullRequestNode(node: any): PullRequest {
+  const terminalLink = makeTerminalLink(`#${node.number}`, node.url);
+
   const labels: string[] = node.labels.nodes.map((l: { name: string }) => l.name);
 
   return {
     number: node.number,
     url: node.url,
-    terminalLink: terminalLink(`#${node.number}`, node.url),
+    terminalLink,
     title: node.title,
     targetBranch: node.baseRefName,
     state: node.state,
@@ -137,8 +116,6 @@ function parsePullRequestNode(node: any): PullRequest {
       login: node.author.login,
       name: node.author.name,
     },
-    area: findByLabels(AREAS, labels) || UNKNOWN_AREA,
-    asciidocSection: findByLabels(ASCIIDOC_SECTIONS, labels) || UNKNOWN_ASCIIDOC_SECTION,
     versions: labels
       .map((l) => Version.fromLabel(l))
       .filter((v): v is Version => v instanceof Version),
@@ -149,7 +126,7 @@ function parsePullRequestNode(node: any): PullRequest {
 /**
  * Iterate all of the PRs which have the `version` label
  */
-export async function* iterRelevantPullRequests(token: string, version: Version) {
+export async function* iterRelevantPullRequests(token: string, version: Version, log: ToolingLog) {
   let nextCursor: string | undefined;
   let hasNextPage = true;
 

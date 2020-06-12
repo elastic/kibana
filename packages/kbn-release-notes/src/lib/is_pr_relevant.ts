@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-
 import { Version } from './version';
 import { PullRequest } from './pull_request';
-import { IGNORE_LABELS, UNKNOWN_AREA, UNKNOWN_ASCIIDOC_SECTION } from '../release_notes_config';
+import { IGNORE_LABELS } from '../release_notes_config';
 import { IrrelevantPrSummary } from './irrelevant_pr_summary';
 
 export function isPrRelevant(
   pr: PullRequest,
   version: Version,
   includeVersions: Version[],
-  summary: IrrelevantPrSummary,
-  log: ToolingLog
+  summary: IrrelevantPrSummary
 ) {
   for (const label of IGNORE_LABELS) {
     if (typeof label === 'string') {
@@ -58,14 +55,6 @@ export function isPrRelevant(
   if (version !== earliestVersion) {
     summary.skippedByVersion(pr, earliestVersion);
     return false;
-  }
-
-  const labels = pr.labels.join(', ');
-  if (pr.area === UNKNOWN_AREA) {
-    log.error(`${pr.terminalLink} can't be mapped to an area, labels: [${labels}]`);
-  }
-  if (pr.asciidocSection === UNKNOWN_ASCIIDOC_SECTION) {
-    log.error(`${pr.terminalLink} can't be mapped to an asciidoc section, labels: [${labels}]`);
   }
 
   return true;

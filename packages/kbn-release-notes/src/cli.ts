@@ -33,6 +33,7 @@ import {
   asyncPipeline,
   IrrelevantPrSummary,
   isPrRelevant,
+  classifyPr,
 } from './lib';
 
 const rootPackageJson = JSON.parse(
@@ -85,7 +86,8 @@ export function runReleaseNotesCli() {
             {
               version: version.label,
               includeVersions: includeVersions.map((v) => v.label),
-              isPrRelevant: isPrRelevant(pr, version, includeVersions, summary, log),
+              isPrRelevant: isPrRelevant(pr, version, includeVersions, summary),
+              ...classifyPr(pr, log),
               pr,
             },
             { depth: 100 }
@@ -99,9 +101,9 @@ export function runReleaseNotesCli() {
 
       const summary = new IrrelevantPrSummary(log);
       const prsToReport: PullRequest[] = [];
-      const prIterable = iterRelevantPullRequests(token, version);
+      const prIterable = iterRelevantPullRequests(token, version, log);
       for await (const pr of prIterable) {
-        if (!isPrRelevant(pr, version, includeVersions, summary, log)) {
+        if (!isPrRelevant(pr, version, includeVersions, summary)) {
           continue;
         }
         prsToReport.push(pr);
@@ -115,9 +117,10 @@ export function runReleaseNotesCli() {
       }
 
       log.info(`Found ${prsToReport.length} prs to report on`);
+      const classifiedPrs = prsToReport.map((pr) => classifyPr(pr, log));
 
       for (const Format of Formats) {
-        const format = new Format(version, prsToReport, log);
+        const format = new Format(version, classifiedPrs, log);
         const outputPath = Path.resolve(`${filename}.${Format.extension}`);
         await asyncPipeline(streamFromIterable(format.print()), Fs.createWriteStream(outputPath));
         log.success(`[${Format.extension}] report written to ${outputPath}`);

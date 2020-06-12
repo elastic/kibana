@@ -23,3 +23,4 @@ export * from './is_pr_relevant';
 export * from './streams';
 export * from './type_helpers';
 export * from './irrelevant_pr_summary';
+export * from './classify_pr';

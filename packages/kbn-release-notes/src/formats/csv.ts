@@ -44,7 +44,7 @@ export class CsvFormat extends Format {
   *print() {
     // columns
     yield row(
-      'area',
+      'areas',
       'versions',
       'user',
       'title',
@@ -58,7 +58,7 @@ export class CsvFormat extends Format {
 
     for (const pr of this.prs) {
       yield row(
-        pr.area.printableName,
+        pr.area.title,
         pr.versions.map((v) => v.label).join(', '),
         pr.user.name || pr.user.login,
         pr.title,

@@ -49,15 +49,15 @@ export type AsciidocSection = ArrayItem<typeof ASCIIDOC_SECTIONS> | typeof UNKNO
  */
 export const AREAS = [
   {
-    printableName: 'Design',
+    title: 'Design',
     labels: ['Team:Design', 'Project:Accessibility'],
   },
   {
-    printableName: 'Logstash',
+    title: 'Logstash',
     labels: ['App:Logstash', 'Feature:Logstash Pipelines'],
   },
   {
-    printableName: 'Management',
+    title: 'Management',
     labels: [
       'Feature:license',
       'Feature:Console',
@@ -77,19 +77,19 @@ export const AREAS = [
     ],
   },
   {
-    printableName: 'Monitoring',
+    title: 'Monitoring',
     labels: ['Team:Monitoring', 'Feature:Telemetry', 'Feature:Stack Monitoring'],
   },
   {
-    printableName: 'Operations',
+    title: 'Operations',
     labels: ['Team:Operations', 'Feature:License'],
   },
   {
-    printableName: 'Kibana UI',
+    title: 'Kibana UI',
     labels: ['Kibana UI', 'Team:Core UI', 'Feature:Header'],
   },
   {
-    printableName: 'Platform',
+    title: 'Platform',
     labels: [
       'Team:Platform',
       'Feature:Plugins',
@@ -104,7 +104,7 @@ export const AREAS = [
     ],
   },
   {
-    printableName: 'Machine Learning',
+    title: 'Machine Learning',
     labels: [
       ':ml',
       'Feature:Anomaly Detection',
@@ -115,19 +115,19 @@ export const AREAS = [
     ],
   },
   {
-    printableName: 'Maps',
+    title: 'Maps',
     labels: ['Team:Geo'],
   },
   {
-    printableName: 'Canvas',
+    title: 'Canvas',
     labels: ['Team:Canvas'],
   },
   {
-    printableName: 'QA',
+    title: 'QA',
     labels: ['Team:QA'],
   },
   {
-    printableName: 'Security',
+    title: 'Security',
     labels: [
       'Team:Security',
       'Feature:Security/Spaces',
@@ -138,19 +138,19 @@ export const AREAS = [
     ],
   },
   {
-    printableName: 'Dashboard',
+    title: 'Dashboard',
     labels: ['Feature:Dashboard', 'Feature:Drilldowns'],
   },
   {
-    printableName: 'Discover',
+    title: 'Discover',
     labels: ['Feature:Discover'],
   },
   {
-    printableName: 'Kibana Home & Add Data',
+    title: 'Kibana Home & Add Data',
     labels: ['Feature:Add Data', 'Feature:Home'],
   },
   {
-    printableName: 'Querying & Filtering',
+    title: 'Querying & Filtering',
     labels: [
       'Feature:Query Bar',
       'Feature:Courier',
@@ -162,15 +162,15 @@ export const AREAS = [
     ],
   },
   {
-    printableName: 'Reporting',
+    title: 'Reporting',
     labels: ['Feature:Reporting', 'Team:Reporting Services'],
   },
   {
-    printableName: 'Sharing',
+    title: 'Sharing',
     labels: ['Feature:Embedding', 'Feature:SharingURLs'],
   },
   {
-    printableName: 'Visualizations',
+    title: 'Visualizations',
     labels: [
       'Feature:Timelion',
       'Feature:TSVB',
@@ -196,53 +196,53 @@ export const AREAS = [
     ],
   },
   {
-    printableName: 'SIEM',
+    title: 'SIEM',
     labels: ['Team:SIEM'],
   },
   {
-    printableName: 'Code',
+    title: 'Code',
     labels: ['Team:Code'],
   },
   {
-    printableName: 'Infrastructure',
+    title: 'Infrastructure',
     labels: ['App:Infrastructure', 'Feature:Infra UI', 'Feature:Service Maps'],
   },
   {
-    printableName: 'Logs',
+    title: 'Logs',
     labels: ['App:Logs', 'Feature:Logs UI'],
   },
   {
-    printableName: 'Uptime',
+    title: 'Uptime',
     labels: ['App:Uptime', 'Feature:Uptime', 'Team:uptime'],
   },
   {
-    printableName: 'Beats Management',
+    title: 'Beats Management',
     labels: ['App:Beats', 'Feature:beats-cm', 'Team:Beats'],
   },
   {
-    printableName: 'APM',
+    title: 'APM',
     labels: ['Team:apm', /^apm[:\-]/],
   },
   {
-    printableName: 'Lens',
+    title: 'Lens',
     labels: ['App:Lens', 'Feature:Lens'],
   },
   {
-    printableName: 'Alerting',
+    title: 'Alerting',
     labels: ['App:Alerting', 'Feature:Alerting', 'Team:Alerting Services', 'Feature:Actions'],
   },
   {
-    printableName: 'Metrics',
+    title: 'Metrics',
     labels: ['App:Metrics', 'Feature:Metrics UI', 'Team:logs-metrics-ui'],
   },
   {
-    printableName: 'Data ingest',
+    title: 'Data ingest',
     labels: ['Ingest', 'Feature:Ingest Node Pipelines'],
   },
 ] as const;
 
 export const UNKNOWN_AREA = {
-  printableName: 'Unknown',
+  title: 'Unknown',
   labels: [],
 } as const;
 

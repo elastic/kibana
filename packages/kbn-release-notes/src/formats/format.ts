@@ -19,14 +19,14 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { PullRequest, Version } from '../lib';
+import { Version, ClassifiedPr } from '../lib';
 
 export abstract class Format {
   static extension: string;
 
   constructor(
     protected readonly version: Version,
-    protected readonly prs: PullRequest[],
+    protected readonly prs: ClassifiedPr[],
     protected readonly log: ToolingLog
   ) {}
 
