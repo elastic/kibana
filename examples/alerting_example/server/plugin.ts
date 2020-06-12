@@ -23,6 +23,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../x-pack/plug
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
+import { IndexThresholdId } from '../../../x-pack/plugins/alerting_builtins/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -42,7 +43,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            all: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
+            all: [alwaysFiringAlert.id, peopleInSpaceAlert.id, IndexThresholdId],
           },
           savedObject: {
             all: [],
@@ -52,7 +53,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            read: [alwaysFiringAlert.id, peopleInSpaceAlert.id],
+            read: [alwaysFiringAlert.id, peopleInSpaceAlert.id, IndexThresholdId],
           },
           savedObject: {
             all: [],
