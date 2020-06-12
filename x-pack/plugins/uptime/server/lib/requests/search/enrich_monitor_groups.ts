@@ -138,12 +138,15 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.server.x509.not_after"].isEmpty()) {
+                       if (doc.containsKey("tls.server.x509.not_after") && !doc["tls.server.x509.not_after"].isEmpty()) {
                           curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
-                        }
-                        if (!doc["tls.server.x509.not_before"].isEmpty()) {
+                        } else  if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
+                          curCheck.tls.certificate_not_valid_after = doc["tls.certificate_not_valid_after"][0];
+
+                        if (doc.containsKey("tls.server.x509.not_after") && !doc["tls.server.x509.not_before"].isEmpty()) {
                           curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
-                        }
+                        } else if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
+                          curCheck.tls.certificate_not_valid_before = doc["tls.certificate_not_valid_before"][0];
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
                 `,
