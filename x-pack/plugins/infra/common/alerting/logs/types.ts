@@ -145,7 +145,7 @@ const GroupedSearchQueryResponseRT = rt.intersection([
             doc_count: rt.number,
           })
         ),
-        after_key: rt.string,
+        after_key: rt.record(rt.string, rt.string),
       }),
     }),
     hits: rt.type({
