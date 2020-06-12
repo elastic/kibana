@@ -216,6 +216,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     });
     after(async () => {
       await resolver.deleteTrees(resolverTrees);
+      // this unload is for an endgame-* index so it does not use data streams
       await esArchiver.unload('endpoint/resolver/api_feature');
     });
 

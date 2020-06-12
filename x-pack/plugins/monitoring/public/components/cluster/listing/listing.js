@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import './listing.scss';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -191,7 +192,7 @@ const getColumns = (
         if (!licenseType) {
           return (
             <div>
-              <div className="monTableCell__clusterCellLiscense">N/A</div>
+              <div className="monTableCell__clusterCellLicense">N/A</div>
             </div>
           );
         }
@@ -209,7 +210,7 @@ const getColumns = (
 
           return (
             <div>
-              <div className="monTableCell__clusterCellLiscense">{capitalize(licenseType)}</div>
+              <div className="monTableCell__clusterCellLicense">{capitalize(licenseType)}</div>
               <div className="monTableCell__clusterCellExpiration">
                 {showLicenseExpiration ? licenseExpiry() : null}
               </div>
