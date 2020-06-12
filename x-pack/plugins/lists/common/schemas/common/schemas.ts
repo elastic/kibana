@@ -86,12 +86,6 @@ export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
 export const list_type = t.keyof({ item: null, list: null });
 export type ListType = t.TypeOf<typeof list_type>;
 
-// TODO: Investigate what the deep structure of a comment is really going to be and then change this to use that deep structure with a default array
-export const comment = DefaultStringArray;
-export type Comment = t.TypeOf<typeof comment>;
-export const commentOrUndefined = t.union([comment, t.undefined]);
-export type CommentOrUndefined = t.TypeOf<typeof commentOrUndefined>;
-
 export const item_id = NonEmptyString;
 export type ItemId = t.TypeOf<typeof item_id>;
 export const itemIdOrUndefined = t.union([item_id, t.undefined]);

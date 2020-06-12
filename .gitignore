@@ -46,6 +46,8 @@ package-lock.json
 npm-debug.log*
 .tern-project
 .nyc_output
+.ci/pipeline-library/build/
+.gradle
 
 # apm plugin
 /x-pack/plugins/apm/tsconfig.json
