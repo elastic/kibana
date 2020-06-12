@@ -92,8 +92,8 @@ export class PluginsSystem {
           createPluginSetupContext(this.coreContext, deps, plugin),
           pluginDepContracts
         ),
-        timeout: 3000 * Sec,
-        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 3000sec. Consider disabling the plugin and re-start.`,
+        timeout: 30 * Sec,
+        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
       });
 
       contracts.set(pluginName, contract);
