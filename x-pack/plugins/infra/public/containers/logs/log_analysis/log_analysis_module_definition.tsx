@@ -42,7 +42,7 @@ export const useLogAnalysisModuleDefinition = <JobType extends string>({
       createPromise: async () => {
         return await moduleDescriptor.getModuleDefinition();
       },
-      onResolve: response => {
+      onResolve: (response) => {
         setModuleDefinition(response);
       },
       onReject: () => {

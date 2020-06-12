@@ -24,14 +24,14 @@ import {
   RecursivePartial,
   LayerValue,
 } from '@elastic/charts';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { FormatFactory } from '../types';
+import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
+import { desanitizeFilterContext } from '../utils';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -42,13 +42,13 @@ export function PieComponent(
     formatFactory: FormatFactory;
     chartTheme: Exclude<PartialTheme, undefined>;
     isDarkMode: boolean;
-    executeTriggerActions: UiActionsStart['executeTriggerActions'];
+    onClickValue: (data: LensFilterEvent['data']) => void;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartTheme, isDarkMode, executeTriggerActions } = props;
+  const { chartTheme, isDarkMode, onClickValue } = props;
   const {
     shape,
     groups,
@@ -62,7 +62,7 @@ export function PieComponent(
   } = props.args;
 
   if (!hideLabels) {
-    firstTable.columns.forEach(column => {
+    firstTable.columns.forEach((column) => {
       formatters[column.id] = props.formatFactory(column.formatHint);
     });
   }
@@ -71,7 +71,7 @@ export function PieComponent(
   // [bucket, subtotal, bucket, count]
   // But the user only configured [bucket, bucket, count]
   const columnGroups: ColumnGroups = [];
-  firstTable.columns.forEach(col => {
+  firstTable.columns.forEach((col) => {
     if (groups.includes(col.id)) {
       columnGroups.push({
         col,
@@ -116,7 +116,7 @@ export function PieComponent(
           ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
           : fillLabel,
       shape: {
-        fillColor: d => {
+        fillColor: (d) => {
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
           let parentIndex = 0;
@@ -135,9 +135,7 @@ export function PieComponent(
           }
 
           const lighten = (d.depth - 1) / (columnGroups.length * 2);
-          return color(outputColor, 'hsl')
-            .lighten(lighten)
-            .hex();
+          return color(outputColor, 'hsl').lighten(lighten).hex();
         },
       },
     };
@@ -180,7 +178,7 @@ export function PieComponent(
       config.linkLabel = { maxCount: 0 };
     }
   }
-  const metricColumn = firstTable.columns.find(c => c.id === metric)!;
+  const metricColumn = firstTable.columns.find((c) => c.id === metric)!;
   const percentFormatter = props.formatFactory({
     id: 'percent',
     params: {
@@ -197,31 +195,33 @@ export function PieComponent(
 
   const reverseGroups = [...columnGroups].reverse();
 
-  const hasNegative = firstTable.rows.some(row => {
+  const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
-  if (firstTable.rows.length === 0 || hasNegative) {
+  const isEmpty =
+    firstTable.rows.length === 0 ||
+    firstTable.rows.every((row) =>
+      groups.every((colId) => !row[colId] || typeof row[colId] === 'undefined')
+    );
+
+  if (isEmpty) {
+    return <EmptyPlaceholder icon="visPie" />;
+  }
+
+  if (hasNegative) {
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        {hasNegative ? (
-          <FormattedMessage
-            id="xpack.lens.pie.pieWithNegativeWarningLabel"
-            defaultMessage="{chartType} charts can't render with negative values. Try a different chart type."
-            values={{
-              chartType: CHART_NAMES[shape].label,
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.lens.xyVisualization.noDataLabel"
-            defaultMessage="No results found"
-          />
-        )}
+        <FormattedMessage
+          id="xpack.lens.pie.pieWithNegativeWarningLabel"
+          defaultMessage="{chartType} charts can't render with negative values. Try a different chart type."
+          values={{
+            chartType: CHART_NAMES[shape].label,
+          }}
+        />
       </EuiText>
     );
   }
-
   return (
     <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
       <Chart>
@@ -236,14 +236,14 @@ export function PieComponent(
               (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
           }
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
-          onElementClick={args => {
+          onElementClick={(args) => {
             const context = getFilterContext(
               args[0][0] as LayerValue[],
               columnGroups.map(({ col }) => col.id),
               firstTable
             );
 
-            executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+            onClickValue(desanitizeFilterContext(context));
           }}
         />
         <Partition

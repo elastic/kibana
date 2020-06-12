@@ -55,7 +55,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
         label: i18n.translate('home.tutorials.activemqMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

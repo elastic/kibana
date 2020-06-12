@@ -11,12 +11,10 @@ import { StartDeps } from '../../plugin';
 import {
   IEmbeddable,
   EmbeddableFactory,
-  EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
 } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
-import { getSavedObjectFinder } from '../../../../../../src/plugins/saved_objects/public';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';
@@ -38,17 +36,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
       >
         <I18nContext>
-          <EmbeddablePanel
-            embeddable={embeddableObject}
-            getActions={plugins.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
-            getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
-            notifications={core.notifications}
-            overlays={core.overlays}
-            application={core.application}
-            inspector={plugins.inspector}
-            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
-          />
+          <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
         </I18nContext>
       </div>
     );
@@ -71,7 +59,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
-          embeddableFactory => embeddableFactory.type === embeddableType
+          (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
 
         if (!factory) {
@@ -84,7 +72,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         embeddablesRegistry[uniqueId] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
-        const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
+        const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
           const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
 
           if (updatedExpression) {
@@ -112,6 +100,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         });
       } else {
         embeddablesRegistry[uniqueId].updateInput(input);
+        embeddablesRegistry[uniqueId].reload();
       }
     },
   });

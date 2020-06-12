@@ -74,12 +74,12 @@ export class NavControlsService {
 
       getLeft$: () =>
         navControlsLeft$.pipe(
-          map(controls => sortBy([...controls.values()], 'order')),
+          map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
       getRight$: () =>
         navControlsRight$.pipe(
-          map(controls => sortBy([...controls.values()], 'order')),
+          map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
     };

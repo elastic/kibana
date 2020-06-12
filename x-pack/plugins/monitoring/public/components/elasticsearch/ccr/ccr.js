@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import './ccr.scss';
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
@@ -62,7 +63,7 @@ export class Ccr extends Component {
                   defaultMessage: 'Shard',
                 }
               ),
-              render: shardId => {
+              render: (shardId) => {
                 return (
                   <EuiLink
                     href={getSafeForExternalLink(`#/elasticsearch/ccr/${index}/shard/${shardId}`)}
@@ -126,7 +127,7 @@ export class Ccr extends Component {
                   defaultMessage: 'Last fetch time',
                 }
               ),
-              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>,
+              render: (syncLagTime) => <span>{toSeconds(syncLagTime)}</span>,
             },
             {
               field: 'opsSynced',
@@ -145,7 +146,7 @@ export class Ccr extends Component {
                   defaultMessage: 'Error',
                 }
               ),
-              render: error => <EuiTextColor color="danger">{error}</EuiTextColor>,
+              render: (error) => <EuiTextColor color="danger">{error}</EuiTextColor>,
             },
           ]}
           executeQueryOptions={{
@@ -232,7 +233,7 @@ export class Ccr extends Component {
                 defaultMessage: 'Last fetch time',
               }
             ),
-            render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>,
+            render: (syncLagTime) => <span>{toSeconds(syncLagTime)}</span>,
           },
           {
             field: 'opsSynced',
@@ -253,7 +254,7 @@ export class Ccr extends Component {
                 defaultMessage: 'Error',
               }
             ),
-            render: error => <EuiTextColor color="danger">{error}</EuiTextColor>,
+            render: (error) => <EuiTextColor color="danger">{error}</EuiTextColor>,
           },
         ]}
         items={items}

@@ -64,7 +64,7 @@ describe('creating index patterns from yaml fields', () => {
   describe('dedupFields', () => {
     const deduped = dedupeFields(dupeFields);
     const checkIfDup = (field: Field) => {
-      return deduped.filter(item => item.name === field.name);
+      return deduped.filter((item) => item.name === field.name);
     };
     test('there there is one field object with name of "1"', () => {
       expect(checkIfDup({ name: '1' }).length).toBe(1);
@@ -80,7 +80,7 @@ describe('creating index patterns from yaml fields', () => {
     });
     // existing field takes precendence
     test('the new merged field has correct attributes', () => {
-      const mergedField = deduped.find(field => field.name === '1');
+      const mergedField = deduped.find((field) => field.name === '1');
       expect(mergedField?.searchable).toBe(true);
       expect(mergedField?.aggregatable).toBe(true);
       expect(mergedField?.analyzed).toBe(true);
@@ -153,7 +153,7 @@ describe('creating index patterns from yaml fields', () => {
       { fields: [{ name: 'testField', type: 'constant_keyword' }], expect: 'string' },
     ];
 
-    tests.forEach(test => {
+    tests.forEach((test) => {
       const res = test.fields.map(transformField);
       expect(res[0].type).toBe(test.expect);
     });
@@ -261,7 +261,7 @@ describe('creating index patterns from yaml fields', () => {
       { fields: [{ name }], expect: undefined, attr: 'lang' },
       { fields: [{ name, script: 'doc[]' }], expect: 'painless', attr: 'lang' },
     ];
-    tests.forEach(test => {
+    tests.forEach((test) => {
       const res = test.fields.map(transformField);
       expect(res[0][test.attr]).toBe(test.expect);
     });

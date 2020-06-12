@@ -61,7 +61,7 @@ export function appendStaticAlerts(cluster, alerts, size) {
     // we can put it over any resolved alert, or anything with a lower severity (which is currently none)
     // the alerts array is pre-sorted from highest severity to lowest; unresolved alerts are at the bottom
     const alertIndex = alerts.findIndex(
-      alert => alert.resolved_timestamp || alert.metadata.severity < staticAlert.metadata.severity
+      (alert) => alert.resolved_timestamp || alert.metadata.severity < staticAlert.metadata.severity
     );
 
     if (alertIndex !== -1) {
@@ -214,9 +214,9 @@ export function alertsClusterSearch(req, alertsIndex, cluster, checkLicense, opt
     }
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    return callWithRequest(req, 'search', params).then(result => {
+    return callWithRequest(req, 'search', params).then((result) => {
       const hits = get(result, 'hits.hits', []);
-      const alerts = hits.map(alert => alert._source);
+      const alerts = hits.map((alert) => alert._source);
 
       return appendStaticAlerts(cluster, alerts, size);
     });

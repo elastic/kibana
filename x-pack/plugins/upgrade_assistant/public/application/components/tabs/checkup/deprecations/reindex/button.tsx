@@ -198,7 +198,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
 
   private subscribeToUpdates() {
     this.service.updateStatus();
-    this.subscription = this.service!.status$.subscribe(reindexState =>
+    this.subscription = this.service!.status$.subscribe((reindexState) =>
       this.setState({ reindexState })
     );
   }

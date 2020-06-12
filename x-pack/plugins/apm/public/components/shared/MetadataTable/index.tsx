@@ -10,7 +10,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiTitle,
-  EuiFieldSearch
+  EuiFieldSearch,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -43,8 +43,8 @@ export function MetadataTable({ sections }: Props) {
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
-          searchTerm: value
-        })
+          searchTerm: value,
+        }),
       });
     },
     [location]
@@ -64,10 +64,10 @@ export function MetadataTable({ sections }: Props) {
           <EuiFieldSearch
             onChange={onSearchChange}
             placeholder={i18n.translate('xpack.apm.searchInput.filter', {
-              defaultMessage: 'Filter...'
+              defaultMessage: 'Filter...',
             })}
             style={{
-              width: 400
+              width: 400,
             }}
             isInvalid={noResultFound}
             value={searchTerm}
@@ -75,7 +75,7 @@ export function MetadataTable({ sections }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <HeightRetainer>
-        {filteredSections.map(section => (
+        {filteredSections.map((section) => (
           <div key={section.key}>
             <EuiTitle size="xs">
               <h6>{section.label}</h6>
@@ -99,7 +99,7 @@ const NoResultFound = ({ value }: { value: string }) => (
           'xpack.apm.propertiesTable.agentFeature.noResultFound',
           {
             defaultMessage: `No results for "{value}".`,
-            values: { value }
+            values: { value },
           }
         )}
       </EuiText>

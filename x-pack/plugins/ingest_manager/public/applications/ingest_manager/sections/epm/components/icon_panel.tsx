@@ -15,11 +15,11 @@ export function IconPanel({ iconType }: { iconType: IconType }) {
       position: absolute;
       text-align: center;
       vertical-align: middle;
-      padding: ${props => props.theme.eui.spacerSizes.xl};
+      padding: ${(props) => props.theme.eui.spacerSizes.xl};
       svg,
       img {
-        height: ${props => props.theme.eui.euiKeyPadMenuSize};
-        width: ${props => props.theme.eui.euiKeyPadMenuSize};
+        height: ${(props) => props.theme.eui.euiKeyPadMenuSize};
+        width: ${(props) => props.theme.eui.euiKeyPadMenuSize};
       }
     }
   `;

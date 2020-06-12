@@ -31,30 +31,6 @@ import { ConfigManager } from '../lib/config_manager';
 
 const timelionDefaults = getNamespacesSettings();
 
-export interface TimelionRequestQuery {
-  payload: {
-    sheet: string[];
-    extended?: {
-      es: {
-        filter: {
-          bool: {
-            filter: string[] | object;
-            must: string[];
-            should: string[];
-            must_not: string[];
-          };
-        };
-      };
-    };
-  };
-  time?: {
-    from?: string;
-    interval: string;
-    timezone: string;
-    to?: string;
-  };
-}
-
 export function runRoute(
   router: IRouter,
   {
@@ -111,7 +87,7 @@ export function runRoute(
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
-          esDataClient: () => context.core.elasticsearch.dataClient,
+          esDataClient: () => context.core.elasticsearch.legacy.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));

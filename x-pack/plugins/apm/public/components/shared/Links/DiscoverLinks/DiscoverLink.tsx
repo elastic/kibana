@@ -11,7 +11,7 @@ import url from 'url';
 import rison, { RisonValue } from 'rison-node';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
 
@@ -35,7 +35,7 @@ interface Props {
 export const getDiscoverHref = ({
   basePath,
   location,
-  query
+  query,
 }: {
   basePath: AppMountContextBasePath;
   location: Location;
@@ -45,15 +45,15 @@ export const getDiscoverHref = ({
     _g: getTimepickerRisonData(location.search),
     _a: {
       ...query._a,
-      index: APM_STATIC_INDEX_PATTERN_ID
-    }
+      index: APM_STATIC_INDEX_PATTERN_ID,
+    },
   };
 
   const href = url.format({
-    pathname: basePath.prepend('/app/kibana'),
-    hash: `/discover?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
+    pathname: basePath.prepend('/app/discover'),
+    hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
       risonQuery._a as RisonValue
-    )}`
+    )}`,
   });
   return href;
 };
@@ -65,7 +65,7 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   const href = getDiscoverHref({
     basePath: core.http.basePath,
     query,
-    location
+    location,
   });
 
   return <EuiLink {...rest} href={href} />;

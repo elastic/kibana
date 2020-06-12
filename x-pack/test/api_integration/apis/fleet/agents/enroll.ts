@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest, getEsClientForAPIKey } from './services';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const esArchiver = getService('esArchiver');

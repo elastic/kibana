@@ -5,28 +5,31 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
-import { DatasourceInputPanel } from './components';
+import { DatasourceInputPanel, CustomConfigureDatasource } from './components';
+import { CreateDatasourceFrom } from './types';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
+  from?: CreateDatasourceFrom;
   packageInfo: PackageInfo;
   datasource: NewDatasource;
+  datasourceId?: string;
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
-}> = ({ packageInfo, datasource, updateDatasource, validationResults, submitAttempted }) => {
+}> = ({
+  from = 'config',
+  packageInfo,
+  datasource,
+  datasourceId,
+  updateDatasource,
+  validationResults,
+  submitAttempted,
+}) => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Configure inputs (and their streams)
@@ -37,8 +40,10 @@ export const StepConfigureDatasource: React.FunctionComponent<{
     packageInfo.datasources[0].inputs &&
     packageInfo.datasources[0].inputs.length ? (
       <EuiFlexGroup direction="column">
-        {packageInfo.datasources[0].inputs.map(packageInput => {
-          const datasourceInput = datasource.inputs.find(input => input.type === packageInput.type);
+        {packageInfo.datasources[0].inputs.map((packageInput) => {
+          const datasourceInput = datasource.inputs.find(
+            (input) => input.type === packageInput.type
+          );
           return datasourceInput ? (
             <EuiFlexItem key={packageInput.type}>
               <DatasourceInputPanel
@@ -46,7 +51,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 datasourceInput={datasourceInput}
                 updateDatasourceInput={(updatedInput: Partial<DatasourceInput>) => {
                   const indexOfUpdatedInput = datasource.inputs.findIndex(
-                    input => input.type === packageInput.type
+                    (input) => input.type === packageInput.type
                   );
                   const newInputs = [...datasource.inputs];
                   newInputs[indexOfUpdatedInput] = {
@@ -66,19 +71,11 @@ export const StepConfigureDatasource: React.FunctionComponent<{
       </EuiFlexGroup>
     ) : (
       <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="checkInCircleFilled"
-          iconColor="secondary"
-          body={
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
-                  defaultMessage="Nothing to configure"
-                />
-              </p>
-            </EuiText>
-          }
+        <CustomConfigureDatasource
+          from={from}
+          packageName={packageInfo.name}
+          datasource={datasource}
+          datasourceId={datasourceId}
         />
       </EuiPanel>
     );

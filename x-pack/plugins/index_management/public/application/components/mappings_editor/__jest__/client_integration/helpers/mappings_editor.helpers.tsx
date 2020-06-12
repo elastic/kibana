@@ -7,7 +7,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { registerTestBed, TestBed, nextTick } from '../../../../../../../../../test_utils';
+import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
 import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
 
@@ -40,7 +40,7 @@ jest.mock('@elastic/eui', () => ({
     <input
       data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
       value={props.valueOfSelected}
-      onChange={e => {
+      onChange={(e) => {
         props.onChange(e.target.value);
       }}
     />
@@ -56,7 +56,7 @@ export interface DomFields {
 }
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, exists, waitFor, waitForFn, form, component } = testBed;
+  const { find, form, component } = testBed;
 
   const getFieldInfo = (testSubjectField: string): { name: string; type: string } => {
     const name = find(`${testSubjectField}-fieldName` as TestSubjects).text();
@@ -87,11 +87,11 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     const isExpanded = (expandButton.props()['aria-label'] as string).includes('Collapse');
 
     if (!isExpanded) {
-      expandButton.simulate('click');
+      await act(async () => {
+        expandButton.simulate('click');
+      });
+      component.update();
     }
-
-    // Wait for the children FieldList to be in the DOM
-    await waitFor(`${testSubjectField}.fieldsList` as TestSubjects);
 
     return { hasChildren: true, testSubjectField };
   };
@@ -108,7 +108,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   ): Promise<DomFields> => {
     const fields = find(
       fieldName ? (`${fieldName}.fieldsList.fieldsListItem` as TestSubjects) : 'fieldsListItem'
-    ).map(wrapper => wrapper); // convert to Array for our for of loop below
+    ).map((wrapper) => wrapper); // convert to Array for our for of loop below
 
     for (const field of fields) {
       const { hasChildren, testSubjectField } = await expandField(field);
@@ -137,18 +137,11 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
   // Get a nested field in the rendered DOM tree
   const getFieldAt = (path: string) => {
-    const testSubjectField = `${path.split('.').join('')}Field`;
-    return find(testSubjectField as TestSubjects);
+    const testSubject = `${path.split('.').join('')}Field`;
+    return { field: find(testSubject as TestSubjects), testSubject };
   };
 
-  const addField = async (name: string, type: string) => {
-    const currentCount = find('fieldsListItem').length;
-
-    if (!exists('createFieldForm')) {
-      find('addFieldButton').simulate('click');
-      await waitFor('createFieldForm');
-    }
-
+  const addField = (name: string, type: string) => {
     form.setInputValue('nameParameterInput', name);
     find('createFieldForm.fieldType').simulate('change', [
       {
@@ -156,64 +149,54 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
         value: type,
       },
     ]);
-
-    await nextTick();
-    component.update();
-
     find('createFieldForm.addButton').simulate('click');
-
-    // We wait until there is one more field in the DOM
-    await waitFor('fieldsListItem', currentCount + 1);
   };
 
   const startEditField = (path: string) => {
-    const field = getFieldAt(path);
-    find('editFieldButton', field).simulate('click');
+    const { testSubject } = getFieldAt(path);
+    find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
     component.update();
   };
 
-  const updateFieldAndCloseFlyout = () => {
-    find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
+  const updateFieldAndCloseFlyout = async () => {
+    await act(async () => {
+      find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
+    });
     component.update();
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
   };
 
-  const showAdvancedSettings = async () => {
-    const checkIsVisible = async () =>
-      find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block';
-
-    if (await checkIsVisible()) {
+  const showAdvancedSettings = () => {
+    if (find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block') {
       // Already opened, nothing else to do
       return;
     }
 
-    await act(async () => {
-      find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
-    });
+    find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
 
-    await waitForFn(
-      checkIsVisible,
-      'Error waiting for the advanced settings CSS style.display to be "block"'
-    );
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    component.update();
   };
 
-  const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
+  const selectTab = (tab: 'fields' | 'templates' | 'advanced') => {
     const index = ['fields', 'templates', 'advanced'].indexOf(tab);
-    const tabIdToContentMap: { [key: string]: TestSubjects } = {
-      fields: 'documentFields',
-      templates: 'dynamicTemplates',
-      advanced: 'advancedConfiguration',
-    };
 
     const tabElement = find('formTab').at(index);
     if (tabElement.length === 0) {
       throw new Error(`Tab not found: "${tab}"`);
     }
     tabElement.simulate('click');
-
-    await waitFor(tabIdToContentMap[tab]);
   };
 
-  const updateJsonEditor = async (testSubject: TestSubjects, value: object) => {
+  const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
     find(testSubject).simulate('change', { jsonContent: JSON.stringify(value) });
   };
 
@@ -259,13 +242,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 };
 
-export const setup = async (props: any = { onUpdate() {} }): Promise<MappingsEditorTestBed> => {
-  const testBed = await registerTestBed<TestSubjects>(MappingsEditor, {
+export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
+  const setupTestBed = registerTestBed<TestSubjects>(MappingsEditor, {
     memoryRouter: {
       wrapComponent: false,
     },
     defaultProps: props,
-  })();
+  });
+
+  const testBed = setupTestBed() as MappingsEditorTestBed;
 
   return {
     ...testBed,
@@ -278,7 +263,7 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
    * Helper to access the latest data sent to the onChange handler back to the consumer of the <MappingsEditor />.
    * Read the latest call with its argument passed and build the mappings object from it.
    */
-  return async () => {
+  return async (component: ReactWrapper) => {
     const mockCalls = onChangeHandler.mock.calls;
 
     if (mockCalls.length === 0) {
@@ -290,7 +275,13 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
     const [arg] = mockCalls[mockCalls.length - 1];
     const { isValid, validate, getData } = arg;
 
-    const isMappingsValid = isValid === undefined ? await act(validate) : isValid;
+    let isMappingsValid = isValid;
+
+    if (isMappingsValid === undefined) {
+      isMappingsValid = await act(validate);
+      component.update();
+    }
+
     const data = getData(isMappingsValid);
 
     return {

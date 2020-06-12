@@ -11,7 +11,7 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Maybe } from '../../../../../typings/common';
@@ -28,26 +28,26 @@ interface Props {
 
 const style = {
   stroke: theme.euiColorSecondary,
-  strokeDasharray: 'none'
+  strokeDasharray: 'none',
 };
 
 export function AnnotationsPlot(props: Props) {
   const { plotValues, annotations } = props;
 
-  const tickValues = annotations.map(annotation => annotation['@timestamp']);
+  const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
   return (
     <>
       <SharedPlot plotValues={plotValues}>
         <VerticalGridLines tickValues={tickValues} style={style} />
       </SharedPlot>
-      {annotations.map(annotation => (
+      {annotations.map((annotation) => (
         <div
           key={annotation.id}
           style={{
             position: 'absolute',
             left: plotValues.x(annotation['@timestamp']) - 8,
-            top: -2
+            top: -2,
           }}
         >
           <EuiToolTip
@@ -57,7 +57,7 @@ export function AnnotationsPlot(props: Props) {
                 <EuiFlexItem grow={true}>
                   <EuiText>
                     {i18n.translate('xpack.apm.version', {
-                      defaultMessage: 'Version'
+                      defaultMessage: 'Version',
                     })}
                   </EuiText>
                 </EuiFlexItem>

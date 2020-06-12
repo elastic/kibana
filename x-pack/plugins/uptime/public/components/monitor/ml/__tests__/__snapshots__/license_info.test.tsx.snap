@@ -28,7 +28,7 @@ Array [
       </p>
       <a
         class="euiButton euiButton--primary"
-        href="/app/kibana#/management/elasticsearch/license_management/home"
+        href="/app/management/stack/license_management/home"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -64,7 +64,7 @@ exports[`ShowLicenseInfo shallow renders without errors 1`] = `
     </p>
     <EuiButton
       color="primary"
-      href="/app/kibana#/management/elasticsearch/license_management/home"
+      href="/app/management/stack/license_management/home"
       target="_blank"
     >
       Start free 14-day trial

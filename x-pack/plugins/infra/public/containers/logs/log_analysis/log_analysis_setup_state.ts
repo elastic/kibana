@@ -16,7 +16,7 @@ import {
 import {
   AvailableIndex,
   ValidationIndicesError,
-  ValidationIndicesUIError,
+  ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -46,8 +46,13 @@ export const useAnalysisSetupState = <JobType extends string>({
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
+  const isTimeRangeValid = useMemo(
+    () => (startTime != null && endTime != null ? startTime < endTime : true),
+    [endTime, startTime]
+  );
+
   const [validatedIndices, setValidatedIndices] = useState<AvailableIndex[]>(
-    sourceConfiguration.indices.map(indexName => ({
+    sourceConfiguration.indices.map((indexName) => ({
       name: indexName,
       validity: 'unknown' as const,
     }))
@@ -55,8 +60,8 @@ export const useAnalysisSetupState = <JobType extends string>({
 
   const updateIndicesWithValidationErrors = useCallback(
     (validationErrors: ValidationIndicesError[]) =>
-      setValidatedIndices(availableIndices =>
-        availableIndices.map(previousAvailableIndex => {
+      setValidatedIndices((availableIndices) =>
+        availableIndices.map((previousAvailableIndex) => {
           const indexValiationErrors = validationErrors.filter(
             ({ index }) => index === previousAvailableIndex.name
           );
@@ -91,8 +96,8 @@ export const useAnalysisSetupState = <JobType extends string>({
 
   const updateIndicesWithAvailableDatasets = useCallback(
     (availableDatasets: Array<{ indexName: string; datasets: string[] }>) =>
-      setValidatedIndices(availableIndices =>
-        availableIndices.map(previousAvailableIndex => {
+      setValidatedIndices((availableIndices) =>
+        availableIndices.map((previousAvailableIndex) => {
           if (previousAvailableIndex.validity !== 'valid') {
             return previousAvailableIndex;
           }
@@ -107,7 +112,7 @@ export const useAnalysisSetupState = <JobType extends string>({
           // filter out datasets that have disappeared if this index' datasets were updated
           const newDatasetFilter: DatasetFilter =
             availableDatasetsForIndex.length > 0
-              ? filterDatasetFilter(previousAvailableIndex.datasetFilter, dataset =>
+              ? filterDatasetFilter(previousAvailableIndex.datasetFilter, (dataset) =>
                   newAvailableDatasets.includes(dataset)
                 )
               : previousAvailableIndex.datasetFilter;
@@ -123,22 +128,22 @@ export const useAnalysisSetupState = <JobType extends string>({
   );
 
   const validIndexNames = useMemo(
-    () => validatedIndices.filter(index => index.validity === 'valid').map(index => index.name),
+    () => validatedIndices.filter((index) => index.validity === 'valid').map((index) => index.name),
     [validatedIndices]
   );
 
   const selectedIndexNames = useMemo(
     () =>
       validatedIndices
-        .filter(index => index.validity === 'valid' && index.isSelected)
-        .map(i => i.name),
+        .filter((index) => index.validity === 'valid' && index.isSelected)
+        .map((i) => i.name),
     [validatedIndices]
   );
 
   const datasetFilter = useMemo(
     () =>
       validatedIndices
-        .flatMap(validatedIndex =>
+        .flatMap((validatedIndex) =>
           validatedIndex.validity === 'valid'
             ? validatedIndex.datasetFilter
             : { type: 'includeAll' as const }
@@ -201,35 +206,54 @@ export const useAnalysisSetupState = <JobType extends string>({
     [validateDatasetsRequest.state, validateIndicesRequest.state]
   );
 
-  const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
+  const validationErrors = useMemo<ValidationUIError[]>(() => {
     if (isValidating) {
       return [];
     }
 
-    if (validateIndicesRequest.state === 'rejected') {
-      return [{ error: 'NETWORK_ERROR' }];
-    }
-
-    if (selectedIndexNames.length === 0) {
-      return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
-    }
-
-    return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
-      return index.validity === 'invalid' && selectedIndexNames.includes(index.name)
-        ? [...errors, ...index.errors]
-        : errors;
-    }, []);
-  }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
+    return [
+      // validate request status
+      ...(validateIndicesRequest.state === 'rejected' ||
+      validateDatasetsRequest.state === 'rejected'
+        ? [{ error: 'NETWORK_ERROR' as const }]
+        : []),
+      // validation request results
+      ...validatedIndices.reduce<ValidationUIError[]>((errors, index) => {
+        return index.validity === 'invalid' && selectedIndexNames.includes(index.name)
+          ? [...errors, ...index.errors]
+          : errors;
+      }, []),
+      // index count
+      ...(selectedIndexNames.length === 0 ? [{ error: 'TOO_FEW_SELECTED_INDICES' as const }] : []),
+      // time range
+      ...(!isTimeRangeValid ? [{ error: 'INVALID_TIME_RANGE' as const }] : []),
+    ];
+  }, [
+    isValidating,
+    validateIndicesRequest.state,
+    validateDatasetsRequest.state,
+    validatedIndices,
+    selectedIndexNames,
+    isTimeRangeValid,
+  ]);
 
   const prevStartTime = usePrevious(startTime);
   const prevEndTime = usePrevious(endTime);
   const prevValidIndexNames = usePrevious(validIndexNames);
 
   useEffect(() => {
+    if (!isTimeRangeValid) {
+      return;
+    }
+
     validateIndices();
-  }, [validateIndices]);
+  }, [isTimeRangeValid, validateIndices]);
 
   useEffect(() => {
+    if (!isTimeRangeValid) {
+      return;
+    }
+
     if (
       startTime !== prevStartTime ||
       endTime !== prevEndTime ||
@@ -239,6 +263,7 @@ export const useAnalysisSetupState = <JobType extends string>({
     }
   }, [
     endTime,
+    isTimeRangeValid,
     prevEndTime,
     prevStartTime,
     prevValidIndexNames,

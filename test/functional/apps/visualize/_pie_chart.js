@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
@@ -33,9 +33,9 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('pie chart', function() {
+  describe('pie chart', function () {
     const vizName1 = 'Visualization PieChart';
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickPieChart');
@@ -56,22 +56,22 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
     });
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show 10 slices in pie chart', async function() {
+    it('should show 10 slices in pie chart', async function () {
       pieChart.expectPieSliceCount(10);
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       const expectedTableData = [
         ['0', '55'],
         ['40,000', '50'],
@@ -91,7 +91,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('other bucket', () => {
-      it('should show other and missing bucket', async function() {
+      it('should show other and missing bucket', async function () {
         const expectedTableData = ['win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other'];
 
         await PageObjects.visualize.navigateToNewVisualization();
@@ -291,7 +291,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('empty time window', () => {
-      it('should show no data message when no data on selected timerange', async function() {
+      it('should show no data message when no data on selected timerange', async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
@@ -442,7 +442,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visChart.waitForVisualization();
       });
 
-      it('should still showing pie chart when a subseries have zero data', async function() {
+      it('should still showing pie chart when a subseries have zero data', async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();

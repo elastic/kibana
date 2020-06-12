@@ -41,8 +41,8 @@ export const StepDefineDatasource: React.FunctionComponent<{
       // Existing datasources on the agent config using the package name, retrieve highest number appended to datasource name
       const dsPackageNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
       const dsWithMatchingNames = (agentConfig.datasources as Datasource[])
-        .filter(ds => Boolean(ds.name.match(dsPackageNamePattern)))
-        .map(ds => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
+        .filter((ds) => Boolean(ds.name.match(dsPackageNamePattern)))
+        .map((ds) => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
         .sort();
 
       updateDatasource({
@@ -83,7 +83,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
           >
             <EuiFieldText
               value={datasource.name}
-              onChange={e =>
+              onChange={(e) =>
                 updateDatasource({
                   name: e.target.value,
                 })
@@ -112,7 +112,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
           >
             <EuiFieldText
               value={datasource.description}
-              onChange={e =>
+              onChange={(e) =>
                 updateDatasource({
                   description: e.target.value,
                 })

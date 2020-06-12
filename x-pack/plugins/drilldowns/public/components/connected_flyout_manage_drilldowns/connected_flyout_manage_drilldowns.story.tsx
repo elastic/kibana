@@ -12,13 +12,13 @@ import {
   dashboardFactory,
   urlFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
+} from '../../../../ui_actions_enhanced/public/components/action_wizard/test_data';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
 import { mockDynamicActionManager } from './test_data';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  advancedUiActions: {
+  uiActionsEnhanced: {
     getActionFactories() {
       return [dashboardFactory, urlFactory];
     },
@@ -38,6 +38,6 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
   <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns placeContext={{}} dynamicActionManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />
   </EuiFlyout>
 ));

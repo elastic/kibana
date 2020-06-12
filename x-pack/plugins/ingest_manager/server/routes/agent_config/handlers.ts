@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+import { configToYaml } from '../../../common/services';
 import { appContextService, agentConfigService, datasourceService } from '../../services';
 import { listAgents } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -100,14 +101,14 @@ export const createAgentConfigHandler: RequestHandler<
   TypeOf<typeof CreateAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
     // eslint-disable-next-line prefer-const
     let [agentConfig, newSysDatasource] = await Promise.all<AgentConfig, NewDatasource | undefined>(
       [
         agentConfigService.create(soClient, request.body, {
-          user: user || undefined,
+          user,
         }),
         // If needed, retrieve System package information and build a new Datasource for the system package
         // NOTE: we ignore failures in attempting to create datasource, since config might have been created
@@ -123,7 +124,7 @@ export const createAgentConfigHandler: RequestHandler<
     // Create the system monitoring datasource and add it to config.
     if (withSysMonitoring && newSysDatasource !== undefined && agentConfig !== undefined) {
       newSysDatasource.config_id = agentConfig.id;
-      const sysDatasource = await datasourceService.create(soClient, newSysDatasource);
+      const sysDatasource = await datasourceService.create(soClient, newSysDatasource, { user });
 
       if (sysDatasource) {
         agentConfig = await agentConfigService.assignDatasources(soClient, agentConfig.id, [
@@ -215,6 +216,40 @@ export const getFullAgentConfig: RequestHandler<TypeOf<
       };
       return response.ok({
         body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent config not found' },
+      });
+    }
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const downloadFullAgentConfig: RequestHandler<TypeOf<
+  typeof GetFullAgentConfigRequestSchema.params
+>> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const {
+    params: { agentConfigId },
+  } = request;
+
+  try {
+    const fullAgentConfig = await agentConfigService.getFullConfig(soClient, agentConfigId);
+    if (fullAgentConfig) {
+      const body = configToYaml(fullAgentConfig);
+      const headers: ResponseHeaders = {
+        'content-type': 'text/x-yaml',
+        'content-disposition': `attachment; filename="elastic-agent-config-${fullAgentConfig.id}.yml"`,
+      };
+      return response.ok({
+        body,
+        headers,
       });
     } else {
       return response.customError({

@@ -9,7 +9,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
-import { ConnectorEditFlyout } from './connector_edit_flyout';
+import ConnectorEditFlyout from './connector_edit_flyout';
 import { AppContextProvider } from '../../app_context';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -87,7 +87,7 @@ describe('connector_edit_flyout', () => {
           <ConnectorEditFlyout
             initialConnector={connector}
             editFlyoutVisible={true}
-            setEditFlyoutVisibility={state => {}}
+            setEditFlyoutVisibility={(state) => {}}
           />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
@@ -144,7 +144,7 @@ describe('connector_edit_flyout', () => {
           <ConnectorEditFlyout
             initialConnector={connector}
             editFlyoutVisible={true}
-            setEditFlyoutVisibility={state => {}}
+            setEditFlyoutVisibility={(state) => {}}
           />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>

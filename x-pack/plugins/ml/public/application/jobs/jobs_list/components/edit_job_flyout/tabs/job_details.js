@@ -33,18 +33,18 @@ export class JobDetails extends Component {
     // load groups to populate the select options
     ml.jobs
       .groups()
-      .then(resp => {
-        const groups = resp.map(g => ({ label: g.id }));
+      .then((resp) => {
+        const groups = resp.map((g) => ({ label: g.id }));
         this.setState({ groups });
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Could not load groups', error);
       });
   }
 
   static getDerivedStateFromProps(props) {
     const selectedGroups =
-      props.jobGroups !== undefined ? props.jobGroups.map(g => ({ label: g })) : [];
+      props.jobGroups !== undefined ? props.jobGroups.map((g) => ({ label: g })) : [];
 
     return {
       description: props.jobDescription,
@@ -55,16 +55,16 @@ export class JobDetails extends Component {
     };
   }
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setJobDetails({ jobDescription: e.target.value });
   };
 
-  onMmlChange = e => {
+  onMmlChange = (e) => {
     this.setJobDetails({ jobModelMemoryLimit: e.target.value });
   };
 
-  onGroupsChange = selectedGroups => {
-    this.setJobDetails({ jobGroups: selectedGroups.map(g => g.label) });
+  onGroupsChange = (selectedGroups) => {
+    this.setJobDetails({ jobGroups: selectedGroups.map((g) => g.label) });
   };
 
   onCreateGroup = (input, flattenedOptions) => {
@@ -82,7 +82,7 @@ export class JobDetails extends Component {
     // Create the option if it doesn't exist.
     if (
       flattenedOptions.findIndex(
-        option => option.label.trim().toLowerCase() === normalizedSearchValue
+        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
       ) === -1
     ) {
       groups.push(newGroup);

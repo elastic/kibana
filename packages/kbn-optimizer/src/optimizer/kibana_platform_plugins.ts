@@ -36,15 +36,15 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
     .sync(
       Array.from(
         new Set([
-          ...scanDirs.map(dir => `${dir}/*/kibana.json`),
-          ...paths.map(path => `${path}/kibana.json`),
+          ...scanDirs.map((dir) => `${dir}/*/kibana.json`),
+          ...paths.map((path) => `${path}/kibana.json`),
         ])
       ),
       {
         absolute: true,
       }
     )
-    .map(path =>
+    .map((path) =>
       // absolute paths returned from globby are using normalize or something so the path separators are `/` even on windows, Path.resolve solves this
       readKibanaPlatformPlugin(Path.resolve(path))
     );

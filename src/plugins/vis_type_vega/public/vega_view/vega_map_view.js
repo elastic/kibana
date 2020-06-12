@@ -42,7 +42,7 @@ export class VegaMapView extends VegaBaseView {
       const mapStyle =
         mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
       const isDarkMode = getUISettings().get('theme:darkMode');
-      baseMapOpts = tmsServices.find(s => s.id === mapStyle);
+      baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
         ...baseMapOpts,
         ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),

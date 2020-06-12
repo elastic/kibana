@@ -37,7 +37,7 @@ describe('when response has data', () => {
         onMouseLeave={onMouseLeave}
         onSelectionEnd={onSelectionEnd}
         width={800}
-        tickFormatX={x => x.getTime()} // Avoid timezone issues in snapshots
+        tickFormatX={(x) => x.getTime()} // Avoid timezone issues in snapshots
       />
     );
 
@@ -54,7 +54,7 @@ describe('when response has data', () => {
     it('should have 3 legends ', () => {
       const legends = wrapper.find('Legend');
       expect(legends.length).toBe(3);
-      expect(legends.map(e => e.props())).toMatchSnapshot();
+      expect(legends.map((e) => e.props())).toMatchSnapshot();
     });
 
     it('should have 3 XY plots', () => {
@@ -88,10 +88,7 @@ describe('when response has data', () => {
 
     describe('when legend is clicked once', () => {
       beforeEach(() => {
-        wrapper
-          .find('Legend')
-          .at(1)
-          .simulate('click');
+        wrapper.find('Legend').at(1).simulate('click');
       });
 
       it('should have 2 enabled series', () => {
@@ -100,7 +97,7 @@ describe('when response has data', () => {
 
       it('should add disabled prop to Legends', () => {
         expect(
-          wrapper.find('Legend').map(node => node.prop('disabled'))
+          wrapper.find('Legend').map((node) => node.prop('disabled'))
         ).toEqual([false, true, false]);
       });
 
@@ -108,7 +105,7 @@ describe('when response has data', () => {
         expect(wrapper.state('seriesEnabledState')).toEqual([
           false,
           true,
-          false
+          false,
         ]);
         expect(wrapper.find('StaticPlot').prop('series').length).toBe(2);
       });
@@ -124,22 +121,18 @@ describe('when response has data', () => {
 
     describe('when legend is clicked twice', () => {
       beforeEach(() => {
-        wrapper
-          .find('Legend')
-          .at(1)
-          .simulate('click')
-          .simulate('click');
+        wrapper.find('Legend').at(1).simulate('click').simulate('click');
       });
 
       it('should toggle series back to initial state', () => {
         expect(
-          wrapper.find('Legend').map(node => node.prop('disabled'))
+          wrapper.find('Legend').map((node) => node.prop('disabled'))
         ).toEqual([false, false, false]);
 
         expect(wrapper.state('seriesEnabledState')).toEqual([
           false,
           false,
-          false
+          false,
         ]);
 
         expect(wrapper.find('StaticPlot').prop('series').length).toBe(3);
@@ -158,10 +151,7 @@ describe('when response has data', () => {
   describe('when hovering over', () => {
     const index = 22;
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(index)
-        .simulate('mouseOver');
+      wrapper.find('.rv-voronoi__cell').at(index).simulate('mouseOver');
     });
 
     it('should call onHover', () => {
@@ -172,7 +162,7 @@ describe('when response has data', () => {
   describe('when setting hoverX', () => {
     beforeEach(() => {
       // Avoid timezone issues in snapshots
-      jest.spyOn(moment.prototype, 'format').mockImplementation(function() {
+      jest.spyOn(moment.prototype, 'format').mockImplementation(function () {
         return this.unix();
       });
 
@@ -209,15 +199,9 @@ describe('when response has data', () => {
 
   describe('when dragging without releasing', () => {
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(10)
-        .simulate('mouseDown');
+      wrapper.find('.rv-voronoi__cell').at(10).simulate('mouseDown');
 
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(20)
-        .simulate('mouseOver');
+      wrapper.find('.rv-voronoi__cell').at(20).simulate('mouseOver');
     });
 
     it('should display SelectionMarker', () => {
@@ -231,44 +215,32 @@ describe('when response has data', () => {
 
   describe('when dragging from left to right and releasing', () => {
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(10)
-        .simulate('mouseDown');
+      wrapper.find('.rv-voronoi__cell').at(10).simulate('mouseDown');
 
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(20)
-        .simulate('mouseOver');
+      wrapper.find('.rv-voronoi__cell').at(20).simulate('mouseOver');
       document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {
       expect(onSelectionEnd).toHaveBeenCalledWith({
         start: 1502283420000,
-        end: 1502284020000
+        end: 1502284020000,
       });
     });
   });
 
   describe('when dragging from right to left and releasing', () => {
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(20)
-        .simulate('mouseDown');
+      wrapper.find('.rv-voronoi__cell').at(20).simulate('mouseDown');
 
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(10)
-        .simulate('mouseOver');
+      wrapper.find('.rv-voronoi__cell').at(10).simulate('mouseOver');
       document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {
       expect(onSelectionEnd).toHaveBeenCalledWith({
         start: 1502283420000,
-        end: 1502284020000
+        end: 1502284020000,
       });
     });
   });
@@ -283,18 +255,34 @@ describe('when response has no data', () => {
   const onHover = jest.fn();
   const onMouseLeave = jest.fn();
   const onSelectionEnd = jest.fn();
+  const annotations = [
+    {
+      type: 'version',
+      id: '2020-06-10 04:36:31',
+      '@timestamp': 1591763925012,
+      text: '2020-06-10 04:36:31',
+    },
+    {
+      type: 'version',
+      id: '2020-06-10 15:23:01',
+      '@timestamp': 1591802689233,
+      text: '2020-06-10 15:23:01',
+    },
+  ];
+
   let wrapper;
   beforeEach(() => {
     const series = getEmptySeries(1451606400000, 1451610000000);
 
     wrapper = mount(
       <InnerCustomPlot
+        annotations={annotations}
         series={series}
         onHover={onHover}
         onMouseLeave={onMouseLeave}
         onSelectionEnd={onSelectionEnd}
         width={800}
-        tickFormatX={x => x.getTime()} // Avoid timezone issues in snapshots
+        tickFormatX={(x) => x.getTime()} // Avoid timezone issues in snapshots
       />
     );
   });
@@ -322,6 +310,10 @@ describe('when response has no data', () => {
       expect(wrapper.find('Tooltip').length).toEqual(0);
     });
 
+    it('should not show annotations', () => {
+      expect(wrapper.find('AnnotationsPlot')).toHaveLength(0);
+    });
+
     it('should have correct markup', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -331,7 +323,7 @@ describe('when response has no data', () => {
     });
 
     it('The series is empty and every y-value is null', () => {
-      expect(wrapper.prop('series')[0].data.every(d => d.y === null)).toEqual(
+      expect(wrapper.prop('series')[0].data.every((d) => d.y === null)).toEqual(
         true
       );
     });

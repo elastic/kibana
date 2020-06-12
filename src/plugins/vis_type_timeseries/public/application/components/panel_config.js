@@ -38,8 +38,8 @@ const types = {
   markdown,
 };
 
-const checkModelValidity = validationResults =>
-  Boolean(Object.values(validationResults).every(isValid => isValid));
+const checkModelValidity = (validationResults) =>
+  Boolean(Object.values(validationResults).every((isValid) => isValid));
 
 export function PanelConfig(props) {
   const { model } = props;

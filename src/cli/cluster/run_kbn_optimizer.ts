@@ -33,8 +33,10 @@ import { LegacyConfig } from '../../core/server/legacy';
 export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig) {
   const optimizerConfig = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
-    watch: true,
+    watch: !!opts.watch,
     includeCoreBundle: true,
+    cache: !!opts.cache,
+    dist: !!opts.dist,
     oss: !!opts.oss,
     examples: !!opts.runExamples,
     pluginPaths: config.get('plugins.paths'),

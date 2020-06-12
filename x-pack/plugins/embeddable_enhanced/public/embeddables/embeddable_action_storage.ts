@@ -7,7 +7,7 @@
 import {
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
-} from '../../../advanced_ui_actions/public';
+} from '../../../ui_actions_enhanced/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -78,7 +78,7 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
   public async remove(eventId: string) {
     const input = this.embbeddable.getInput();
     const events = input.enhancements?.dynamicActions?.events || [];
-    const index = events.findIndex(event => eventId === event.eventId);
+    const index = events.findIndex((event) => eventId === event.eventId);
 
     if (index === -1) {
       throw new Error(
@@ -94,7 +94,7 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
   public async read(eventId: string): Promise<SerializedEvent> {
     const input = this.embbeddable.getInput();
     const events = input.enhancements?.dynamicActions?.events || [];
-    const event = events.find(ev => eventId === ev.eventId);
+    const event = events.find((ev) => eventId === ev.eventId);
 
     if (!event) {
       throw new Error(

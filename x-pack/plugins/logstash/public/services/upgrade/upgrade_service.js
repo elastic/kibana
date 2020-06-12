@@ -14,8 +14,8 @@ export class UpgradeService {
   executeUpgrade() {
     return this.http
       .post(`${ROUTES.API_ROOT}/upgrade`)
-      .then(response => response.is_upgraded)
-      .catch(e => {
+      .then((response) => response.is_upgraded)
+      .catch((e) => {
         throw e.message;
       });
   }

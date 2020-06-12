@@ -178,7 +178,18 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  retryWithDelay(2, 15) {
+    try {
+      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+    } catch (ex) {
+      try {
+        // Setup expects this directory to be missing, so we need to remove it before we do a retry
+        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+      } finally {
+        throw ex
+      }
+    }
+  }
 }
 
 def buildOss() {
@@ -210,6 +221,8 @@ def call(Map params = [:], Closure closure) {
       timestamps {
         ansiColor('xterm') {
           if (config.checkPrChanges && githubPr.isPr()) {
+            pipelineLibraryTests()
+
             print "Checking PR for changes to determine if CI needs to be run..."
 
             if (prChanges.areChangesSkippable()) {
@@ -219,6 +232,16 @@ def call(Map params = [:], Closure closure) {
           }
           closure()
         }
+      }
+    }
+  }
+}
+
+def pipelineLibraryTests() {
+  whenChanged(['vars/', '.ci/pipeline-library/']) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+      dir('.ci/pipeline-library') {
+        sh './gradlew test'
       }
     }
   }

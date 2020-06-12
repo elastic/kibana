@@ -375,7 +375,7 @@ describe('AggConfig', () => {
       fieldFormats.getDefaultInstance = (() => ({
         getConverterFor: (t?: string) => t || identity,
       })) as any;
-      indexPattern.fields.getByName = name =>
+      indexPattern.fields.getByName = (name) =>
         ({
           format: {
             getConverterFor: (t?: string) => t || identity,
@@ -500,7 +500,7 @@ describe('AggConfig', () => {
       // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
       const range: MetricAggType = typesRegistry.get('range');
       range.expressionName = 'aggRange';
-      const rangesParam = range.params.find(p => p.name === 'ranges');
+      const rangesParam = range.params.find((p) => p.name === 'ranges');
       rangesParam!.toExpressionAst = (val: any) => ({
         type: 'function',
         function: 'aggRanges',
@@ -623,7 +623,7 @@ describe('AggConfig', () => {
       fieldFormats.getDefaultInstance = (() => ({
         getConverterFor: (t?: string) => t || identity,
       })) as any;
-      indexPattern.fields.getByName = name =>
+      indexPattern.fields.getByName = (name) =>
         ({
           format: {
             getConverterFor: (t?: string) => t || identity,
@@ -649,10 +649,7 @@ describe('AggConfig', () => {
         },
       };
       expect(aggConfig.fieldFormatter().toString()).toBe(
-        aggConfig
-          .getField()
-          .format.getConverterFor()
-          .toString()
+        aggConfig.getField().format.getConverterFor().toString()
       );
     });
 

@@ -16,9 +16,9 @@ import {
   SharedGlobalConfig,
   RequestHandler,
   IContextProvider,
-  SavedObjectsServiceStart,
   ElasticsearchServiceStart,
   IClusterClient,
+  SavedObjectsClientContract,
 } from '../../../../src/core/server';
 
 import {
@@ -86,6 +86,8 @@ export interface ActionsPluginsStart {
   taskManager: TaskManagerStartContract;
 }
 
+const includedHiddenTypes = ['action', 'action_task_params'];
+
 export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, PluginStartContract> {
   private readonly kibanaIndex: Promise<string>;
   private readonly config: Promise<ActionsConfig>;
@@ -103,10 +105,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private readonly preconfiguredActions: PreConfiguredAction[];
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config
-      .create<ActionsConfig>()
-      .pipe(first())
-      .toPromise();
+    this.config = initContext.config.create<ActionsConfig>().pipe(first()).toPromise();
 
     this.kibanaIndex = initContext.config.legacy.globalConfig$
       .pipe(
@@ -193,7 +192,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     core.http.registerRouteHandlerContext(
       'actions',
-      this.createRouteHandlerContext(await this.kibanaIndex)
+      this.createRouteHandlerContext(core, await this.kibanaIndex)
     );
 
     // Routes
@@ -232,12 +231,28 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       preconfiguredActions,
     } = this;
 
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
+      includedHiddenTypes,
+    });
+
+    const getScopedSavedObjectsClient = (request: KibanaRequest) =>
+      core.savedObjects.getScopedClient(request, {
+        includedHiddenTypes,
+      });
+
+    const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
+      core.savedObjects.getScopedClient(request);
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
       spaces: this.spaces,
-      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      getScopedSavedObjectsClient,
+      getServices: this.getServicesFactory(
+        getScopedSavedObjectsClientWithoutAccessToActions,
+        core.elasticsearch
+      ),
+      encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
     });
@@ -245,10 +260,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
-      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
+      getScopedSavedObjectsClient,
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
@@ -257,12 +272,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       execute: createExecuteFunction({
         taskManager: plugins.taskManager,
         actionTypeRegistry: actionTypeRegistry!,
-        getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
+        getScopedSavedObjectsClient,
         getBasePath: this.getBasePath,
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
         preconfiguredActions,
       }),
-      isActionTypeEnabled: id => {
+      isActionTypeEnabled: (id) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
       isActionExecutable: (actionId: string, actionTypeId: string) => {
@@ -276,7 +291,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           );
         }
         return new ActionsClient({
-          savedObjectsClient: core.savedObjects.getScopedClient(request),
+          savedObjectsClient: getScopedSavedObjectsClient(request),
           actionTypeRegistry: actionTypeRegistry!,
           defaultKibanaIndex: await kibanaIndex,
           scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
@@ -288,12 +303,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   private getServicesFactory(
-    savedObjects: SavedObjectsServiceStart,
+    getScopedClient: (request: KibanaRequest) => SavedObjectsClientContract,
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
-    return request => ({
+    return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
-      savedObjectsClient: savedObjects.getScopedClient(request),
+      savedObjectsClient: getScopedClient(request),
       getScopedCallCluster(clusterClient: IClusterClient) {
         return clusterClient.asScoped(request).callAsCurrentUser;
       },
@@ -301,11 +316,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   private createRouteHandlerContext = (
+    core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey, preconfiguredActions } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
+      const [{ savedObjects }] = await core.getStartServices();
       return {
         getActionsClient: () => {
           if (isESOUsingEphemeralEncryptionKey === true) {
@@ -314,10 +331,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             );
           }
           return new ActionsClient({
-            savedObjectsClient: context.core.savedObjects.client,
+            savedObjectsClient: savedObjects.getScopedClient(request, { includedHiddenTypes }),
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
-            scopedClusterClient: context.core.elasticsearch.adminClient,
+            scopedClusterClient: context.core.elasticsearch.legacy.client,
             preconfiguredActions,
           });
         },

@@ -31,7 +31,7 @@ import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { ScopedHistory } from '../scoped_history';
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('ApplicationService', () => {
   let setupDeps: MockLifecycle<'setup'>;
@@ -68,7 +68,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolveMount = resolve;
         });
 
@@ -102,7 +102,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolveMount = resolve;
         });
 
@@ -125,6 +125,25 @@ describe('ApplicationService', () => {
 
         expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
       });
+
+      it('replaces the current history entry when the `replace` option is true', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async ({}: AppMountParameters) => {
+            return () => undefined;
+          },
+        });
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { path: '/foo' });
+        await navigateToApp('app1', { path: '/bar', replace: true });
+
+        expect(history.entries.map((entry) => entry.pathname)).toEqual(['/', '/app/app1/bar']);
+      });
     });
   });
 
@@ -146,7 +165,7 @@ describe('ApplicationService', () => {
       id: 'app1',
       title: 'App1',
       mount: ({ onAppLeave }: AppMountParameters) => {
-        onAppLeave(actions => actions.default());
+        onAppLeave((actions) => actions.default());
         return () => undefined;
       },
     });
@@ -178,7 +197,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.default());
+          onAppLeave((actions) => actions.default());
           return () => undefined;
         },
       });
@@ -213,7 +232,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });
@@ -252,7 +271,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });

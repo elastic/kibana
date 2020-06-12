@@ -25,7 +25,7 @@ import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitByFilters = props => {
+export const SplitByFilters = (props) => {
   const { onChange, model, uiRestrictions, indexPattern } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);

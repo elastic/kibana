@@ -57,7 +57,7 @@ function toURL(base: string, path: string) {
 }
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function(header: any) {
+  const normalizeHeader = function (header: any) {
     if (!header) {
       return '';
     }
@@ -131,7 +131,7 @@ export const createHandler = ({
   const { body, query } = request;
   const { path, method } = query;
 
-  if (!pathFilters.some(re => re.test(path))) {
+  if (!pathFilters.some((re) => re.test(path))) {
     return response.forbidden({
       body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
       headers: {

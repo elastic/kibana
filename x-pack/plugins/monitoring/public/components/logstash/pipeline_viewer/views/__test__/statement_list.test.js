@@ -34,7 +34,7 @@ describe('StatementList', () => {
     };
   });
 
-  const render = props => shallow(<StatementList {...props} />);
+  const render = (props) => shallow(<StatementList {...props} />);
 
   it('renders nested elements as expected', () => {
     const wrapper = render(props);

@@ -32,7 +32,7 @@ import { ControlledTableWithEmptyPrompt } from './table_with_empty_prompt';
 import tableWithEmptyPromptSource from '!!raw-loader!./table_with_empty_prompt'; // eslint-disable-line import/default
 const tableWithEmptyPromptHtml = renderToHtml(ControlledTableWithEmptyPrompt);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Empty table prompt"

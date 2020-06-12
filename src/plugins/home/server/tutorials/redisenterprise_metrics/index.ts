@@ -55,7 +55,7 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
         label: i18n.translate('home.tutorials.redisenterpriseMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

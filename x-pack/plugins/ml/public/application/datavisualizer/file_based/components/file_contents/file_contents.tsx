@@ -60,8 +60,5 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
 };
 
 function limitByNumberOfLines(data: string, numberOfLines: number) {
-  return data
-    .split('\n')
-    .slice(0, numberOfLines)
-    .join('\n');
+  return data.split('\n').slice(0, numberOfLines).join('\n');
 }

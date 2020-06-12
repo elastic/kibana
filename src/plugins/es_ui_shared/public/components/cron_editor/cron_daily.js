@@ -41,7 +41,7 @@ export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }
             aria-label={i18n.translate('esUi.cronEditor.cronDaily.hourSelectLabel', {
               defaultMessage: 'Hour',
             })}
-            onChange={e => onChange({ hour: e.target.value })}
+            onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
             prepend={i18n.translate('esUi.cronEditor.cronDaily.fieldHour.textAtLabel', {
               defaultMessage: 'At',
@@ -57,7 +57,7 @@ export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }
             aria-label={i18n.translate('esUi.cronEditor.cronDaily.minuteSelectLabel', {
               defaultMessage: 'Minute',
             })}
-            onChange={e => onChange({ minute: e.target.value })}
+            onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"
             data-test-subj="cronFrequencyDailyMinuteSelect"

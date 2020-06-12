@@ -6,20 +6,18 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import * as labels from './translations';
 
 interface Props {
   newFilters: string[];
   onNewFilter: (val: string) => void;
+  alertFilters: { [key: string]: string[] };
 }
 
-export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) => {
+export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, alertFilters }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const currentFilters = useFilterUpdate();
-
-  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => alertFilters?.[fieldName] ?? [];
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -38,7 +36,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) =>
     { id: 'monitor.type', label: labels.TYPE },
   ];
 
-  allFilters.forEach(filter => {
+  allFilters.forEach((filter) => {
     if (getSelectedItems(filter.id)?.length === 0 && !newFilters.includes(filter.id)) {
       items.push(
         <EuiContextMenuItem

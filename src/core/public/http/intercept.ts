@@ -31,7 +31,7 @@ export async function interceptRequest(
   return [...interceptors].reduceRight(
     (promise, interceptor) =>
       promise.then(
-        async fetchOptions => {
+        async (fetchOptions) => {
           current = fetchOptions;
           checkHalt(controller);
 
@@ -45,7 +45,7 @@ export async function interceptRequest(
             ...overrides,
           };
         },
-        async error => {
+        async (error) => {
           checkHalt(controller, error);
 
           if (!interceptor.requestError) {
@@ -83,7 +83,7 @@ export async function interceptResponse(
   return await [...interceptors].reduce(
     (promise, interceptor) =>
       promise.then(
-        async httpResponse => {
+        async (httpResponse) => {
           current = httpResponse;
           checkHalt(controller);
 
@@ -98,7 +98,7 @@ export async function interceptResponse(
             ...interceptorOverrides,
           };
         },
-        async error => {
+        async (error) => {
           const request = error.request || (current && current.request);
 
           checkHalt(controller, error);

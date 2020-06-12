@@ -10,7 +10,7 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@babel/cli": "^7.8.4",
+    "@babel/cli": "^7.10.1",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
@@ -28,6 +28,7 @@
     "cpy": "^8.0.0",
     "css-loader": "^3.4.2",
     "del": "^5.1.0",
+    "execa": "^4.0.2",
     "file-loader": "^4.2.0",
     "istanbul-instrumenter-loader": "^3.0.1",
     "jest-diff": "^25.1.0",

@@ -76,7 +76,7 @@ describe('Kuery operator suggestions', () => {
 
     expect(suggestions.length).toBeGreaterThan(0);
 
-    suggestions.forEach(suggestion => {
+    suggestions.forEach((suggestion) => {
       expect(suggestion).toHaveProperty('description');
     });
   });

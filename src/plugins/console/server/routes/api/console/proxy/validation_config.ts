@@ -22,9 +22,9 @@ export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;
 
 const acceptedHttpVerb = schema.string({
-  validate: method => {
+  validate: (method) => {
     return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE'].some(
-      verb => verb.toLowerCase() === method.toLowerCase()
+      (verb) => verb.toLowerCase() === method.toLowerCase()
     )
       ? undefined
       : `Method must be one of, case insensitive ['HEAD', 'GET', 'POST', 'PUT', 'DELETE']. Received '${method}'.`;
@@ -32,7 +32,7 @@ const acceptedHttpVerb = schema.string({
 });
 
 const nonEmptyString = schema.string({
-  validate: s => (s === '' ? 'Expected non-empty string' : undefined),
+  validate: (s) => (s === '' ? 'Expected non-empty string' : undefined),
 });
 
 export const routeValidationConfig = {
