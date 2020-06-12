@@ -40,6 +40,8 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
+include::{kib-repo-dir}/ingest_manager/ingest-manager.asciidoc[]
+
 include::reporting/index.asciidoc[]
 
 include::alerting/index.asciidoc[]
