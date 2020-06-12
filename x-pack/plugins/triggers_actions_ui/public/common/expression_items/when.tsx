@@ -46,7 +46,6 @@ export const WhenExpression = ({
       button={
         <EuiExpression
           data-test-subj="whenExpression"
-          display="columns"
           description={i18n.translate(
             'xpack.triggersActionsUI.common.expressionItems.threshold.descriptionLabel',
             {
