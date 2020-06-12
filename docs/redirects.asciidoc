@@ -28,7 +28,7 @@ This page has moved. Please see the new section in the {heartbeat-ref}/securing-
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see <<infra-configure-source>>.
+This page has moved. Please see the new section in the {metrics-guide}/configure-metrics-source.html[Metrics Monitoring Guide].
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
@@ -105,3 +105,23 @@ This page has moved. Please see the new section in the {logs-guide}/detect-log-a
 == Logs alerting
 
 This page has moved. Please see the new section in the {logs-guide}/create-log-alert.html[Logs Monitoring Guide]
+
+[role="exclude",id="xpack-metrics-getting-started"]
+== Getting started with metrics
+
+This page has moved. Please see the new section in the {metrics-guide}/install-metrics-monitoring.html[Metrics Monitoring Guide].
+
+[role="exclude",id="infra-ui"]
+== Using the Metrics app
+
+This page has moved. Please see the new section in the {metrics-guide}/metrics-app-overview.html[Metrics Monitoring Guide].
+
+[role="exclude",id="xpack-view-metrics"]
+== Viewing infrastructure metrics
+
+This page has moved. Please see the new section in the {metrics-guide}/view-infrastructure-metrics.html[Metrics Monitoring Guide].
+
+[role="exclude",id="metrics-explorer"]
+== Metrics Explorer
+
+This page has moved. Please see the new section in the {metrics-guide}/metrics-explorer.html[Metrics Monitoring Guide].
