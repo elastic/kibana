@@ -16,7 +16,7 @@ Array [
   />,
   .c0.c0.c0 {
   width: 65%;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .c1.c1.c1 {
@@ -70,7 +70,7 @@ Array [
   />,
   .c0.c0.c0 {
   width: 65%;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 <dd

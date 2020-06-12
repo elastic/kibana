@@ -6,8 +6,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useState } from 'react';
-import styled from 'styled-components';
+import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
 import {
   EuiDescriptionList,
@@ -15,8 +14,6 @@ import {
   EuiDescriptionListTitle,
   EuiOutsideClickDetector,
   EuiPopoverTitle,
-  EuiStat,
-  EuiText,
 } from '@elastic/eui';
 import { TagLabel } from '../../availability_reporting';
 import { UptimeThemeContext } from '../../../../../contexts';
@@ -30,12 +27,6 @@ import { LastCheckLabel } from '../../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
-const TimestampText = styled(EuiText)`
-  display: inline-block;
-  text-transform: initial;
-  margin-left: 5px;
-`;
-
 export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipProps) => {
   const { id: featureId, layerId } = features[0] ?? {};
   const locationName = featureId?.toString();
@@ -44,8 +35,6 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
   } = useContext(UptimeThemeContext);
 
   const monitorId = useMonitorId();
-
-  const [isOpen, setIsOpen] = useState(false);
 
   const monitorLocations = useSelector((state: AppState) =>
     monitorLocationsSelector(state, monitorId)

@@ -20,7 +20,7 @@ Array [
 
 .c1.c1.c1 {
   width: 65%;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 <dl
