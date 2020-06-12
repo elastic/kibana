@@ -1,0 +1,399 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Color/PaletteSwatch default 1`] = `
+Array [
+  <div
+    className="canvasPaletteSwatch"
+  >
+    <div
+      className="canvasPaletteSwatch__background canvasCheckered"
+    />
+    <div
+      className="canvasPaletteSwatch__foreground"
+    >
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#882E72",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#B178A6",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#D6C1DE",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#1965B0",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#5289C7",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#7BAFDE",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#4EB265",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#90C987",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#CAE0AB",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#F7EE55",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#F6C141",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#F1932D",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#E8601C",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#DC050C",
+          }
+        }
+      />
+    </div>
+  </div>,
+  <div
+    className="canvasPaletteSwatch"
+  >
+    <div
+      className="canvasPaletteSwatch__background canvasCheckered"
+    />
+    <div
+      className="canvasPaletteSwatch__foreground"
+    >
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#771155",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#AA4488",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#CC99BB",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#114477",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#4477AA",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#77AADD",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#117777",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#44AAAA",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#77CCCC",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#117744",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#44AA77",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#88CCAA",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#777711",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#AAAA44",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#DDDD77",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#774411",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#AA7744",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#DDAA77",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#771122",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#AA4455",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#DD7788",
+          }
+        }
+      />
+    </div>
+  </div>,
+  <div
+    className="canvasPaletteSwatch"
+  >
+    <div
+      className="canvasPaletteSwatch__background canvasCheckered"
+    />
+    <div
+      className="canvasPaletteSwatch__foreground"
+    >
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#01A4A4",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#CC6666",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#D0D102",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#616161",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#00A1CB",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#32742C",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#F18D05",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#113F8C",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#61AE24",
+          }
+        }
+      />
+      <div
+        className="canvasPaletteSwatch__box"
+        style={
+          Object {
+            "backgroundColor": "#D70060",
+          }
+        }
+      />
+    </div>
+  </div>,
+]
+`;

@@ -4,45 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
+import { ExpressionAstFunction, ExpressionAstExpression } from 'src/plugins/expressions';
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
+import { findPalette, Palette } from '../../../common/lib';
 
 const { Palette: strings } = ArgumentStrings;
 
-const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
-  // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
+interface Props {
+  onValueChange: (value: ExpressionAstExpression) => void;
+  argValue: ExpressionAstExpression;
+  renderError: () => void;
+}
 
-  const throwNotParsed = () => renderError();
-
+export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderError }) => {
   // TODO: This is weird, its basically a reimplementation of what the interpretter would return.
-  // Probably a better way todo this, and maybe a better way to handle template stype objects in general?
-  function astToPalette({ chain }) {
+  // Probably a better way todo this, and maybe a better way to handle template type objects in general?
+  const astToPalette = ({ chain }: { chain: ExpressionAstFunction[] }): Palette | null => {
     if (chain.length !== 1 || chain[0].function !== 'palette') {
-      throwNotParsed();
+      renderError();
+      return null;
     }
+
     try {
       const colors = chain[0].arguments._.map((astObj) => {
         if (getType(astObj) !== 'string') {
-          throwNotParsed();
+          renderError();
         }
         return astObj;
-      });
+      }) as string[];
 
-      const gradient = get(chain[0].arguments.gradient, '[0]');
+      const gradient = get<boolean>(chain[0].arguments.gradient, '[0]');
+      const palette = findPalette({ colors, gradient });
 
-      return { colors, gradient };
+      if (palette) {
+        return palette;
+      }
+
+      return ({ label: 'Custom', colors, gradient } as any) as Palette;
     } catch (e) {
-      throwNotParsed();
+      renderError();
     }
-  }
+    return null;
+  };
 
-  function handleChange(palette) {
-    const astObj = {
+  const handleChange = (palette: Palette): void => {
+    const astObj: ExpressionAstExpression = {
       type: 'expression',
       chain: [
         {
@@ -57,12 +69,17 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
     };
 
     onValueChange(astObj);
-  }
+  };
 
   const palette = astToPalette(argValue);
 
+  if (!palette) {
+    renderError();
+    return null;
+  }
+
   return (
-    <PalettePicker value={palette} onChange={handleChange} ariaLabel={strings.getDisplayName()} />
+    <PalettePicker palette={palette} onChange={handleChange} ariaLabel={strings.getDisplayName()} />
   );
 };
 

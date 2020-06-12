@@ -4,18 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { map } from 'lodash';
+import { PopoverAnchorPosition } from '@elastic/eui';
 import { Popover } from '../popover';
 import { PaletteSwatch } from '../palette_swatch';
-import { palettes } from '../../../common/lib/palettes';
+import { palettes, Palette } from '../../../common/lib/palettes';
 
-export const PalettePicker = ({ onChange, value, anchorPosition, ariaLabel }) => {
-  const button = (handleClick) => (
+interface Props {
+  onChange?: (palette: Palette) => void;
+  palette: Palette;
+  anchorPosition?: PopoverAnchorPosition;
+  ariaLabel: string;
+}
+
+export const PalettePicker: FC<Props> = ({
+  onChange = () => {},
+  palette,
+  anchorPosition = 'downCenter',
+  ariaLabel,
+}) => {
+  const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <button aria-label={ariaLabel} style={{ width: '100%', height: 16 }} onClick={handleClick}>
-      <PaletteSwatch colors={value.colors} gradient={value.gradient} />
+      <PaletteSwatch palette={palette} />
     </button>
   );
 
@@ -30,19 +43,19 @@ export const PalettePicker = ({ onChange, value, anchorPosition, ariaLabel }) =>
     >
       {() => (
         <div className="canvas canvasPalettePicker__swatches">
-          {map(palettes, (palette, name) => (
+          {map(palettes, (item) => (
             <button
-              key={name}
-              onClick={() => onChange(palette)}
+              key={item.label}
+              onClick={() => onChange(item)}
               className="canvasPalettePicker__swatch"
               style={{ width: '100%' }}
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={1}>
-                  <span className="canvasPalettePicker__label">{name.replace(/_/g, ' ')}</span>
+                  <span className="canvasPalettePicker__label">{item.label}</span>
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
-                  <PaletteSwatch colors={palette.colors} gradient={palette.gradient} />
+                  <PaletteSwatch palette={item} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </button>
@@ -54,7 +67,8 @@ export const PalettePicker = ({ onChange, value, anchorPosition, ariaLabel }) =>
 };
 
 PalettePicker.propTypes = {
-  value: PropTypes.object,
+  palette: PropTypes.object,
   onChange: PropTypes.func,
   anchorPosition: PropTypes.string,
+  ariaLabel: PropTypes.string,
 };

@@ -234,6 +234,10 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.paletteLabel', {
         defaultMessage: 'Choose a color palette',
       }),
+    getCustomPaletteLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.customPaletteLabel', {
+        defaultMessage: 'Custom',
+      }),
   },
   Percentage: {
     getDisplayName: () =>

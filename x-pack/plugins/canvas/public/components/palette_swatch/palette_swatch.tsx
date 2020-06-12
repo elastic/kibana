@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
+import { Palette } from '../../../common/lib/palettes';
 
-export const PaletteSwatch = ({ colors, gradient }) => {
+interface Props {
+  palette: Palette;
+}
+
+export const PaletteSwatch: FC<Props> = ({ palette }) => {
   let colorBoxes;
+  const { gradient, colors } = palette;
 
   if (!gradient) {
     colorBoxes = colors.map((color) => (
@@ -41,6 +47,8 @@ export const PaletteSwatch = ({ colors, gradient }) => {
 };
 
 PaletteSwatch.propTypes = {
-  colors: PropTypes.array,
-  gradient: PropTypes.bool,
+  palette: PropTypes.shape({
+    colors: PropTypes.array,
+    gradient: PropTypes.bool,
+  }),
 };

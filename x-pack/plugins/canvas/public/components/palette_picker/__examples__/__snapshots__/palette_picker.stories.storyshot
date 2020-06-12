@@ -1,0 +1,162 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Color/PalettePicker default 1`] = `
+<div
+  className="canvasContainerWrapper"
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="euiPopover euiPopover--anchorDownCenter canvasPalettePicker__swatchesPopover"
+    container={null}
+    id="palette-picker-popover"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor canvasPalettePicker__swatchesPopoverAnchor"
+    >
+      <button
+        aria-label="palette picker"
+        onClick={[Function]}
+        style={
+          Object {
+            "height": 16,
+            "width": "100%",
+          }
+        }
+      >
+        <div
+          className="canvasPaletteSwatch"
+        >
+          <div
+            className="canvasPaletteSwatch__background canvasCheckered"
+          />
+          <div
+            className="canvasPaletteSwatch__foreground"
+          >
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#882E72",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#B178A6",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#D6C1DE",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#1965B0",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#5289C7",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#7BAFDE",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#4EB265",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#90C987",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#CAE0AB",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#F7EE55",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#F6C141",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#F1932D",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#E8601C",
+                }
+              }
+            />
+            <div
+              className="canvasPaletteSwatch__box"
+              style={
+                Object {
+                  "backgroundColor": "#DC050C",
+                }
+              }
+            />
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+`;
