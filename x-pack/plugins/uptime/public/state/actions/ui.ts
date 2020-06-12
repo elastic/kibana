@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createAction } from 'redux-actions';
+import { UiState } from '../reducers/ui';
 
 export interface PopoverState {
   id: string;
@@ -27,3 +28,7 @@ export const toggleIntegrationsPopover = createAction<PopoverState>(
 );
 
 export const setDateRange = createAction<{ from: string; to: string }>('SET DATE RANGE');
+
+export const setAutorefreshIsPaused = createAction<boolean>('SET AUTOREFRESH PAUSED');
+
+export const setUiState = createAction<Partial<UiState>>('SET UI STATE');
