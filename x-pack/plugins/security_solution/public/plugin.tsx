@@ -59,7 +59,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Explore security metrics and logs for events and alerts',
       }),
       icon: APP_ICON,
-      path: APP_PATH,
+      path: APP_OVERVIEW_PATH,
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
@@ -301,35 +301,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async downloadSubPlugins() {
-    const [
-      AlertsSubPlugin,
-      CasesSubPlugin,
-      HostsSubPlugin,
-      NetworkSubPlugin,
-      OverviewSubPlugin,
-      TimelinesSubPlugin,
-      EndpointAlertsSubPlugin,
-      ManagementSubPlugin,
-    ] = await Promise.all([
-      import('./alerts'),
-      import('./cases'),
-      import('./hosts'),
-      import('./network'),
-      import('./overview'),
-      import('./timelines'),
-      import('./endpoint_alerts'),
-      import('./management'),
-    ]);
+    const {
+      alertsSubPlugin,
+      casesSubPlugin,
+      hostsSubPlugin,
+      networkSubPlugin,
+      overviewSubPlugin,
+      timelinesSubPlugin,
+      endpointAlertsSubPlugin,
+      managementSubPlugin,
+    } = await import('./sub_plugins');
 
     return {
-      alertsSubPlugin: new AlertsSubPlugin.Alerts(),
-      casesSubPlugin: new CasesSubPlugin.Cases(),
-      hostsSubPlugin: new HostsSubPlugin.Hosts(),
-      networkSubPlugin: new NetworkSubPlugin.Network(),
-      overviewSubPlugin: new OverviewSubPlugin.Overview(),
-      timelinesSubPlugin: new TimelinesSubPlugin.Timelines(),
-      endpointAlertsSubPlugin: new EndpointAlertsSubPlugin.EndpointAlerts(),
-      managementSubPlugin: new ManagementSubPlugin.Management(),
+      alertsSubPlugin,
+      casesSubPlugin,
+      hostsSubPlugin,
+      networkSubPlugin,
+      overviewSubPlugin,
+      timelinesSubPlugin,
+      endpointAlertsSubPlugin,
+      managementSubPlugin,
     };
   }
 
