@@ -28,6 +28,7 @@ import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords, setDateRange } from '../../../state/actions';
 import { uiSelector } from '../../../state/selectors';
 import { useAbsoluteDate } from '../../../hooks/use_absolute_date';
+import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
 
 interface DurationChartProps {
   /**
@@ -45,25 +46,16 @@ interface DurationChartProps {
 }
 
 export const DurationChart: React.FC<DurationChartProps> = (props) => {
-  const ui = useSelector(uiSelector);
-  const min = useAbsoluteDate(ui.dateRange.from);
-  const max = useAbsoluteDate(ui.dateRange.to);
-  const dispatch = useDispatch();
-  const updateDateRange = useCallback(
-    (from: string, to: string) => {
-      dispatch(setDateRange({ from, to }));
-    },
-    [dispatch]
-  );
+  const { from, to, updateDateRange } = useAbsoluteDateRange();
   return (
-    <DurationChartComponent max={max} min={min} {...props} updateDateRange={updateDateRange} />
+    <DurationChartComponent max={to} min={from} {...props} updateDateRange={updateDateRange} />
   );
 };
 
 type Props = DurationChartProps & {
   min: number;
   max: number;
-  updateDateRange: (from: string, to: string) => void;
+  updateDateRange: (from: number, to: number) => void;
 };
 
 /**
@@ -89,7 +81,7 @@ export const DurationChartComponent: React.FC<Props> = ({
       return;
     }
     const [minX, maxX] = x;
-    updateDateRange(moment(minX).toISOString(), moment(maxX).toISOString());
+    updateDateRange(minX, maxX);
   };
 
   const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
