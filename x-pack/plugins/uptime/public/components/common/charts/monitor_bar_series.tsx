@@ -16,13 +16,12 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
-import { useUrlParams } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
+import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
 
 export interface MonitorBarSeriesProps {
   /**
@@ -31,27 +30,41 @@ export interface MonitorBarSeriesProps {
   histogramSeries: HistogramPoint[] | null;
 }
 
+export const MonitorBarSeries: React.FC<MonitorBarSeriesProps> = (props) => {
+  const { from, to, updateDateRange } = useAbsoluteDateRange();
+  return (
+    <MonitorBarSeriesComponent from={from} to={to} {...props} updateDateRange={updateDateRange} />
+  );
+};
+
+type Props = MonitorBarSeriesProps & {
+  from: number;
+  to: number;
+  updateDateRange: (min: number, max: number) => void;
+};
+
 /**
  * There is a specific focus on the monitor's down count, the up series is not shown,
  * so we will only render the series component if there are down counts for the selected monitor.
  * @param props - the values for the monitor this chart visualizes
  */
-export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => {
+export const MonitorBarSeriesComponent: React.FC<Props> = ({
+  histogramSeries,
+  from,
+  to,
+  updateDateRange,
+}) => {
   const {
     colors: { danger },
   } = useContext(UptimeThemeContext);
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
       return;
     }
     const [min, max] = x;
-    updateUrlParams({
-      dateRangeStart: moment(min).toISOString(),
-      dateRangeEnd: moment(max).toISOString(),
-    });
+
+    updateDateRange(min, max);
   };
 
   const id = 'downSeries';
@@ -59,17 +72,12 @@ export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => 
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
-        <Settings
-          xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
-          onBrushEnd={onBrushEnd}
-        />
+        <Settings xDomain={{ min: from, max: to }} onBrushEnd={onBrushEnd} />
         <Axis
           hide
           id="bottom"
           position={Position.Bottom}
-          tickFormat={timeFormatter(
-            getChartDateLabel(absoluteDateRangeStart, absoluteDateRangeEnd)
-          )}
+          tickFormat={timeFormatter(getChartDateLabel(from, to))}
         />
         <BarSeries
           id={id}
