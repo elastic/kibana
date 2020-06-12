@@ -44,7 +44,7 @@ export interface ReportingInternalStart {
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
-  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // for pluginHasSetup
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // for pluginIsSetup
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // for getPluginStartDeps
   private exportTypesRegistry = getExportTypesRegistry();
   private config?: ReportingConfig;
