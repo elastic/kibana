@@ -15,8 +15,6 @@ import {
   Matrix3,
   AdjacentProcessMap,
   Vector2,
-  RelatedEventData,
-  RelatedEventDataEntryWithStats,
   EdgeLineMetadata,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
