@@ -479,25 +479,25 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<T = any>(
+    public async executeAsync<T = unknown>(
       fn: (cb: (value?: T) => void) => void | Promise<void>
     ): Promise<T>;
-    public async executeAsync<T = any, A1 = any>(
+    public async executeAsync<T = unknown, A1 = unknown>(
       fn: (a1: A1, cb: (value?: T) => void) => void | Promise<void>,
       a1: A1
     ): Promise<T>;
-    public async executeAsync<T = any, A1 = any, A2 = any>(
+    public async executeAsync<T = unknown, A1 = unknown, A2 = unknown>(
       fn: (a1: A1, a2: A2, cb: (value?: T) => void) => void | Promise<void>,
       a1: A1,
       a2: A2
     ): Promise<T>;
-    public async executeAsync<T = any, A1 = any, A2 = any, A3 = any>(
+    public async executeAsync<T = unknown, A1 = unknown, A2 = unknown, A3 = unknown>(
       fn: (a1: A1, a2: A2, a3: A3, cb: (value?: T) => void) => void | Promise<void>,
       a1: A1,
       a2: A2,
       a3: A3
     ): Promise<T>;
-    public async executeAsync<T = any>(
+    public async executeAsync<T = unknown>(
       fn: (...args: any[]) => void | Promise<void>,
       ...args: any[]
     ): Promise<T> {
