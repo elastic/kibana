@@ -36,7 +36,9 @@ jest.mock('../../field_mapping', () => {
   return {
     ...originalModule,
     expandShorthand: jest.fn(() => ({
-      title: true,
+      title: 'text',
+      timeFieldName: 'keyword',
+      fields: 'json',
       fieldFormatMap: {
         _deserialize: jest.fn().mockImplementation(() => []),
       },
@@ -55,7 +57,9 @@ jest.mock('./_fields_fetcher', () => ({
   })),
 }));
 
-let object: any = {};
+let object: any = {
+  timeFieldName: 'timestamp',
+};
 
 const savedObjectsClient = {
   create: jest.fn(),
@@ -312,8 +316,9 @@ describe('IndexPattern', () => {
       const spec = indexPattern.toSpec();
       const restoredPattern = await create('newId');
       restoredPattern.initFromSpec(spec);
-      // const restoredPattern = (await create('newId')).initFromSpec(spec);
       expect(restoredPattern.title).toEqual('test-pattern');
+      expect(restoredPattern.timeFieldName).toEqual('timestamp');
+      expect(restoredPattern.fields.length).toEqual(mockLogStashFields().length);
     });
   });
 

@@ -27,6 +27,7 @@ export function stubbedSavedObjectIndexPattern(id) {
     id,
     type: 'index-pattern',
     attributes: {
+      timeFieldName: 'timestamp',
       customFormats: '{}',
       fields: mockLogstashFields,
     },
