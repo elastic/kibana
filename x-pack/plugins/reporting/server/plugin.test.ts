@@ -31,8 +31,8 @@ describe('Reporting Plugin', () => {
   beforeEach(async () => {
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
-    coreSetup = await coreMock.createSetup(configSchema);
-    coreStart = await coreMock.createStart();
+    coreSetup = coreMock.createSetup(configSchema);
+    coreStart = coreMock.createStart();
     pluginSetup = ({
       licensing: {},
       usageCollection: {
@@ -63,10 +63,10 @@ describe('Reporting Plugin', () => {
   });
 
   it('logs setup issues', async () => {
+    initContext.config = null;
     const plugin = new ReportingPlugin(initContext);
     // @ts-ignore overloading error logger
     plugin.logger.error = jest.fn();
-    coreSetup.elasticsearch = null;
     plugin.setup(coreSetup, pluginSetup);
 
     await sleep(5);
