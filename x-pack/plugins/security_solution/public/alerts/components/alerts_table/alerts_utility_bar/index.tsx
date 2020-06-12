@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Link } from '../../../../common/components/link_icon';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
@@ -68,8 +69,12 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     defaultNumberFormat
   );
 
+  const UtilityBarFlexGroup = styled(EuiFlexGroup)`
+    min-width: 175px;
+  `;
+
   const UtilityBarPopoverContent = (closePopover: () => void) => (
-    <EuiFlexGroup style={{ minWidth: 175 }} direction="column">
+    <UtilityBarFlexGroup direction="column">
       {currentFilter !== FILTER_OPEN && (
         <EuiFlexItem>
           <Link
@@ -105,7 +110,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           </Link>
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </UtilityBarFlexGroup>
   );
 
   return (

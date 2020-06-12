@@ -153,7 +153,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const onAlertStatusUpdateSuccess = useCallback(
     (count: number, status: Status) => {
-      let title;
+      let title: string;
       switch (status) {
         case 'closed':
           title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
@@ -169,7 +169,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const onAlertStatusUpdateFailure = useCallback(
     (status: Status, error: Error) => {
-      let title;
+      let title: string;
       switch (status) {
         case 'closed':
           title = i18n.CLOSED_ALERT_FAILED_TOAST;
