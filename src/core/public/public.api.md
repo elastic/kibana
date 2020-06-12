@@ -238,10 +238,7 @@ export interface ApplicationStart {
         path?: string;
         absolute?: boolean;
     }): string;
-    navigateToApp(appId: string, options?: {
-        path?: string;
-        state?: any;
-    }): Promise<void>;
+    navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
@@ -1034,6 +1031,15 @@ export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulPart
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
+// Warning: (ae-missing-release-tag) "NavigateToAppOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface NavigateToAppOptions {
+    path?: string;
+    replace?: boolean;
+    state?: unknown;
+}
 
 // Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
