@@ -6,11 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
-import {
-  getOrdinalMbColorRampStops,
-  getRGBColorRangeStrings,
-  getHexColorRangeStrings,
-} from '../../color_palettes';
+import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
 import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import {
@@ -91,7 +87,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   getNumberOfCategories() {
-    const colors = getRGBColorRangeStrings(this._options.colorCategory);
+    const colors = getColorPalette(this._options.colorCategory);
     return colors ? colors.length : 0;
   }
 
@@ -187,7 +183,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return EMPTY_STOPS;
     }
 
-    const colors = getRGBColorRangeStrings(this._options.colorCategory);
+    const colors = getColorPalette(this._options.colorCategory);
     if (!colors) {
       return EMPTY_STOPS;
     }
@@ -251,7 +247,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const colors = getHexColorRangeStrings(this._options.color);
+    const colors = getColorPalette(this._options.color);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.

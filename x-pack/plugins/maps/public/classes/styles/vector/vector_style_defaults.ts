@@ -11,8 +11,12 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../color_utils';
-import { NUMERICAL_COLOR_PALETTES, CATEGORICAL_COLOR_PALETTES } from '../color_palettes';
+import {
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS,
+  NUMERICAL_COLOR_PALETTES,
+  CATEGORICAL_COLOR_PALETTES,
+} from '../color_palettes';
 import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
 import { getUiSettings } from '../../../kibana_services';

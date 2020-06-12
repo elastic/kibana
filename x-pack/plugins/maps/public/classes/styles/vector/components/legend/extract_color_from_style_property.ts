@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getColorRampCenterColor, getRGBColorRangeStrings } from '../../../color_palettes';
+import { getColorRampCenterColor, getColorPalette } from '../../../color_palettes';
 import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
 import {
   ColorDynamicOptions,
@@ -41,7 +41,7 @@ export function extractColorFromStyleProperty(
       return defaultColor;
     }
 
-    const palette = getRGBColorRangeStrings(dynamicOptions.colorCategory);
+    const palette = getColorPalette(dynamicOptions.colorCategory);
     return palette ? palette[0] : defaultColor;
   } else {
     // return middle of gradient for dynamic style property
