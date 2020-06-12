@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { download } from './download';
+import { download } from '../../lib';
 import { getNodeShasums } from './node_shasums';
 import { getNodeDownloadInfo } from './node_download_info';
 

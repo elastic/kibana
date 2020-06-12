@@ -9,6 +9,7 @@ import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elast
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ClusterView } from './components/cluster_view';
+import './shard_allocation.scss';
 
 export const ShardAllocation = ({ scope, kbnUrl, type, shardStats }) => {
   const types = [
