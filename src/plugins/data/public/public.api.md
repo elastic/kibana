@@ -1041,7 +1041,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
     // (undocumented)
-    initFromObject(response: any): void;
+    initFromSpec(response: any): void;
     // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
@@ -1065,13 +1065,15 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     save(saveAttempts?: number): Promise<void | Error>;
     // (undocumented)
-    serialize(): string;
-    // (undocumented)
     timeFieldName: string | undefined;
     // (undocumented)
     title: string;
     // (undocumented)
     toJSON(): string | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    toSpec(): IndexPatternSpec;
     // (undocumented)
     toString(): string;
     // (undocumented)
