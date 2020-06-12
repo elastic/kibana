@@ -213,8 +213,18 @@ export class IndexPatternsService {
       this.onNotification,
       this.onError
     );
+    // console.log('original', indexPattern);
 
-    return indexPattern.init();
+    await indexPattern.init();
+    /*
+    const spec = indexPattern.toSpec();
+    console.log('spec!', spec);
+
+    const cloned = this.specToIndexPattern(spec);
+    console.log('deserialized', cloned);
+    */
+
+    return indexPattern;
   };
 }
 
