@@ -57,9 +57,7 @@ jest.mock('./_fields_fetcher', () => ({
   })),
 }));
 
-let object: any = {
-  timeFieldName: 'timestamp',
-};
+let object: any = {};
 
 const savedObjectsClient = {
   create: jest.fn(),
@@ -314,11 +312,12 @@ describe('IndexPattern', () => {
 
     test('can restore from spec', async () => {
       const spec = indexPattern.toSpec();
-      const restoredPattern = await create('newId');
+      const restoredPattern = await create(spec.id);
       restoredPattern.initFromSpec(spec);
-      expect(restoredPattern.title).toEqual('test-pattern');
-      expect(restoredPattern.timeFieldName).toEqual('timestamp');
-      expect(restoredPattern.fields.length).toEqual(mockLogStashFields().length);
+      expect(restoredPattern.id).toEqual(indexPattern.id);
+      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
+      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
     });
   });
 
