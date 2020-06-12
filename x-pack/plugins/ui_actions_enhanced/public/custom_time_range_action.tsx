@@ -103,7 +103,10 @@ export class CustomTimeRangeAction implements ActionByType<typeof CUSTOM_TIME_RA
           embeddable={embeddable}
           dateFormat={this.dateFormat}
           commonlyUsedRanges={this.commonlyUsedRanges}
-        />
+        />,
+        {
+          'data-test-subj': 'customizeTimeRangeModal',
+        }
       );
     }
   }
