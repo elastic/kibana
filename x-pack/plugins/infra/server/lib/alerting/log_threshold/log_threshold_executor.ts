@@ -194,9 +194,8 @@ const getESQuery = (
       : null;
 
   const body = {
-    // Ensure we accurately track the hit count for the ungrouped case, up to the count specified on the alert, otherwise we
-    // can only ensure accuracy up to 10,000 results. A padding of 1 is added so we can handle "more than" scenarios.
-    ...(!groupBy && { track_total_hits: count.value + 1 }),
+    // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
+    ...(!groupBy && { track_total_hits: true }),
     query: {
       bool: {
         filter: [...rangeFilters, ...mustFilters],
