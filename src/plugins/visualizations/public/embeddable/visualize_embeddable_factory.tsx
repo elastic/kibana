@@ -44,6 +44,7 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { ISavedVis } from '../types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -138,7 +139,7 @@ export class VisualizeEmbeddableFactory
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     const originatingAppParam = await this.getCurrentAppId();
     if (input.hideVisModal) {
-      const visState = convertToSerializedVis(input.savedVis);
+      const visState = convertToSerializedVis(input.savedVis as ISavedVis);
       const vis = new Vis(visState.type, visState);
       await vis.setState(visState);
       return createVisEmbeddableFromObject(this.deps)(vis, input, parent);

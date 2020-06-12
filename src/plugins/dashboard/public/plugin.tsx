@@ -33,7 +33,7 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
-import { parseUrl, stringify } from 'query-string';
+import { parseUrl } from 'query-string';
 import { DashboardContainerInput } from './index';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
@@ -92,6 +92,7 @@ import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { createDashboardContainerByValueRenderer } from './application';
 import { convertPanelStateToSavedDashboardPanel } from './application/lib/embeddable_saved_object_converters';
+import { DashboardPanels } from './application/embeddable/types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -133,7 +134,7 @@ export interface DashboardStart {
     embeddableId: string;
     embeddableType: string;
   }) => void | undefined;
-  navigateToDashboard: () => void;
+  navigateToDashboard: (input: DashboardContainerInput) => void;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
   getLastLoadedDashboardAppDashboardInput: () => DashboardContainerInput | undefined;
@@ -367,14 +368,20 @@ export class DashboardPlugin
       return;
     }
     const lastDashboardUrl = this.getActiveUrl();
-    const { query, panels, filters } = dashInput;
+    const { query, filters } = dashInput;
+    const panels = dashInput.panels as DashboardPanels;
     const { url } = parseUrl(lastDashboardUrl);
     const dashUrl = setStateToKbnUrl(
       '_a',
       {
         query,
         filters,
-        panels: Object.values(panels).map((panel) => convertPanelStateToSavedDashboardPanel(panel)),
+        panels: Object.values(panels).map((panel) => {
+          return convertPanelStateToSavedDashboardPanel(
+            panel,
+            this.initializerContext.env.packageInfo.version
+          );
+        }),
       },
       { useHash: false },
       url

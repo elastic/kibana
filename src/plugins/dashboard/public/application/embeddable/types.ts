@@ -27,3 +27,7 @@ export interface DashboardPanelState<
 > extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
 }
+
+export interface DashboardPanels {
+  [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
+}
