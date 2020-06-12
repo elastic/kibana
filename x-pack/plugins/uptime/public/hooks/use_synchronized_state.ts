@@ -8,10 +8,55 @@ import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { parse } from 'query-string';
-import { dateRangeSelector } from '../state/selectors';
-import { setDateRange } from '../state/actions';
-import { getSupportedUrlParams } from '../lib/helper';
+import { dateRangeSelector, uiSelector } from '../state/selectors';
+import { setDateRange, setUiState } from '../state/actions';
+import { getSupportedUrlParams, UptimeUrlParams } from '../lib/helper';
 import { useUrlParams } from './use_url_params';
+import { UiState } from '../state/reducers/ui';
+
+const resolveUrlUpdates = (
+  params: UptimeUrlParams,
+  storeState: UiState
+): Partial<UptimeUrlParams> => {
+  const urlState: Partial<UptimeUrlParams> = {};
+  if (
+    params.dateRangeStart !== storeState.dateRange.from ||
+    params.dateRangeEnd !== storeState.dateRange.to
+  ) {
+    urlState.dateRangeStart = storeState.dateRange.from;
+    urlState.dateRangeEnd = storeState.dateRange.to;
+  }
+
+  if (params.autorefreshInterval !== storeState.autorefreshInterval) {
+    urlState.autorefreshInterval = storeState.autorefreshInterval;
+  }
+
+  if (params.autorefreshIsPaused !== storeState.autorefreshIsPaused) {
+    urlState.autorefreshIsPaused = storeState.autorefreshIsPaused;
+  }
+
+  return urlState;
+};
+
+const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Partial<UiState> => {
+  const uiState: Partial<UiState> = {};
+  if (
+    params.dateRangeStart !== storeState.dateRange.from ||
+    params.dateRangeEnd !== storeState.dateRange.to
+  ) {
+    uiState.dateRange = { from: params.dateRangeStart, to: params.dateRangeEnd };
+  }
+
+  if (params.autorefreshInterval !== storeState.autorefreshInterval) {
+    uiState.autorefreshInterval = params.autorefreshInterval;
+  }
+
+  if (params.autorefreshIsPaused !== storeState.autorefreshIsPaused) {
+    uiState.autorefreshIsPaused = params.autorefreshIsPaused;
+  }
+
+  return uiState;
+};
 
 /**
  * TODO: it is probably best to move this hook to the router component,
@@ -23,11 +68,13 @@ export const useSynchronizedState = () => {
   const params = get();
   // console.log('params', params);
   const history = useHistory();
-  const dateRange = useSelector(dateRangeSelector);
+  const storeState = useSelector(uiSelector);
+  const { autorefreshInterval, autorefreshIsPaused, dateRange } = storeState;
   const dispatch = useDispatch();
   useEffect(() => {
-    if (params.dateRangeStart !== dateRange.from || params.dateRangeEnd !== dateRange.to) {
-      dispatch(setDateRange({ from: params.dateRangeStart, to: params.dateRangeEnd }));
+    const uiStateDelta = resolveStateChanges(params, storeState);
+    if (Object.keys(uiStateDelta).length > 0) {
+      dispatch(setUiState(uiStateDelta));
     }
     /*
      * We only want this effect to fire on initial render, so we can
@@ -37,32 +84,45 @@ export const useSynchronizedState = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(
-    () =>
-      history.listen((newHistory) => {
-        console.log('listener prop', newHistory);
-        const supportedParams = getSupportedUrlParams(parse(newHistory.search));
-        console.log('supported url params', supportedParams);
-        if (
-          dateRange.from !== supportedParams.dateRangeStart ||
-          dateRange.to !== supportedParams.dateRangeEnd
-        ) {
-          dispatch(
-            setDateRange({ from: supportedParams.dateRangeStart, to: supportedParams.dateRangeEnd })
-          );
-        }
-      }),
-    [dispatch, dateRange, history]
-  );
+  useEffect(() => {
+    history.listen((newHistory) => {
+      const supportedParams = getSupportedUrlParams(parse(newHistory.search));
+      const uiStateDelta = resolveStateChanges(supportedParams, storeState);
+      if (Object.keys(uiStateDelta).length > 0) {
+        dispatch(setUiState(uiStateDelta));
+      }
+      // if (
+      //   dateRange.from !== supportedParams.dateRangeStart ||
+      //   dateRange.to !== supportedParams.dateRangeEnd
+      // ) {
+      //   dispatch(
+      //     setDateRange({ from: supportedParams.dateRangeStart, to: supportedParams.dateRangeEnd })
+      //   );
+      // }
+    });
+  }, [dispatch, storeState, history]);
 
   useEffect(() => {
-    if (params.dateRangeStart !== dateRange.from || params.dateRangeEnd !== dateRange.to) {
-      set({
-        dateRangeStart: dateRange.from,
-        dateRangeEnd: dateRange.to,
-      });
+    const urlStateDelta = resolveUrlUpdates(params, storeState);
+    if (Object.keys(urlStateDelta).length > 0) {
+      set(urlStateDelta);
     }
-  }, [dateRange, params, set]);
+  }, [params, storeState, set]);
 
-  console.log('the date range from the store', dateRange);
+  // useEffect(() => {
+  //   if (params.dateRangeStart !== dateRange.from || params.dateRangeEnd !== dateRange.to) {
+  //     set({
+  //       dateRangeStart: dateRange.from,
+  //       dateRangeEnd: dateRange.to,
+  //     });
+  //   }
+  // }, [dateRange, params, set]);
+
+  // useEffect(() => {
+  //   if (params.autorefreshInterval !== autorefreshInterval) {
+  //     set({
+  //       autorefreshInterval,
+  //     });
+  //   }
+  // });
 };
