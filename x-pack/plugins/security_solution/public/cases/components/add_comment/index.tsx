@@ -8,6 +8,7 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { useDispatch } from 'react-redux';
 import { CommentRequest } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
@@ -18,6 +19,12 @@ import { Form, useForm, UseField } from '../../../shared_imports';
 
 import * as i18n from './translations';
 import { schema } from './schema';
+import {
+  dispatchUpdateTimeline,
+  queryTimelineById,
+} from '../../../timelines/components/open_timeline/helpers';
+import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
+import { useApolloClient } from '../../../common/utils/apollo_context';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -46,6 +53,8 @@ export const AddComment = React.memo<AddCommentProps>(
       options: { stripEmptyFields: false },
       schema,
     });
+    const dispatch = useDispatch();
+    const apolloClient = useApolloClient();
     const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
       form,
       'comment'
@@ -59,7 +68,30 @@ export const AddComment = React.memo<AddCommentProps>(
           `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [insertQuote]);
+
+    const handleTimelineClick = useCallback(
+      (timelineId: string) => {
+        queryTimelineById({
+          apolloClient,
+          timelineId,
+          updateIsLoading: ({
+            id: currentTimelineId,
+            isLoading: isLoadingTimeline,
+          }: {
+            id: string;
+            isLoading: boolean;
+          }) =>
+            dispatch(
+              dispatchUpdateIsLoading({ id: currentTimelineId, isLoading: isLoadingTimeline })
+            ),
+          updateTimeline: dispatchUpdateTimeline(dispatch),
+        });
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [apolloClient]
+    );
 
     const onSubmit = useCallback(async () => {
       const { isValid, data } = await form.submit();
@@ -67,9 +99,10 @@ export const AddComment = React.memo<AddCommentProps>(
         if (onCommentSaving != null) {
           onCommentSaving();
         }
-        await postComment(data, onCommentPosted);
+        postComment(data, onCommentPosted);
         form.reset();
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form, onCommentPosted, onCommentSaving]);
     return (
       <span id="add-comment-permLink">
@@ -84,6 +117,7 @@ export const AddComment = React.memo<AddCommentProps>(
               dataTestSubj: 'add-comment',
               placeholder: i18n.ADD_COMMENT_HELP_TEXT,
               onCursorPositionUpdate: handleCursorChange,
+              onClickTimeline: handleTimelineClick,
               bottomRightContent: (
                 <EuiButton
                   data-test-subj="submit-comment"
