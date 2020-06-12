@@ -28,10 +28,7 @@ export type IngestManagerSetup = void;
  */
 export interface IngestManagerStart {
   registerDatasource: typeof registerDatasource;
-  success: boolean;
-  error?: {
-    message: string;
-  };
+  success: Promise<boolean>;
 }
 
 export interface IngestManagerSetupDeps {
@@ -78,20 +75,16 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    try {
-      const permissionsResponse = await core.http.get(appRoutesService.getCheckPermissionsPath());
-      if (permissionsResponse.success) {
-        const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
-        return { success, registerDatasource };
-      } else {
-        throw new Error(permissionsResponse.error);
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: { message: error.body?.message || 'Unknown error' },
-        registerDatasource,
-      };
+    const permissionsResponse = await core.http.get(appRoutesService.getCheckPermissionsPath());
+    if (permissionsResponse.success) {
+      const successPromise = core.http
+        .post(setupRouteService.getSetupPath())
+        .then(({ isInitialized }: { isInitialized: boolean }) => Promise.resolve(isInitialized))
+        .catch(Promise.reject);
+
+      return { success: successPromise, registerDatasource };
+    } else {
+      throw new Error(permissionsResponse.error);
     }
   }
 

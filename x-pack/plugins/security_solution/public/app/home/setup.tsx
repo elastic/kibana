@@ -39,13 +39,9 @@ export const Setup: React.FunctionComponent<{
       });
     };
 
-    if (!ingestManager.success) {
-      if (ingestManager.error) {
-        displayToastWithModal(ingestManager.error.message);
-      } else {
-        displayToast();
-      }
-    }
+    ingestManager.success
+      .then(displayToast)
+      .catch((error: Error) => displayToastWithModal(error.message));
   }, [ingestManager, notifications.toasts]);
 
   return null;
