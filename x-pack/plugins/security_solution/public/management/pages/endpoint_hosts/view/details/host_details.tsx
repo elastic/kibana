@@ -13,13 +13,14 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useHostSelector, useHostLogsUrl, useHostIngestUrl } from '../hooks';
-import { policyResponseStatus, uiQueryParams, latestEndpointVersion } from '../../store/selectors';
+import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -34,8 +35,7 @@ const HostIds = styled(EuiListGroupItem)`
 `;
 
 const LinkToExternalApp = styled.div`
-  margin: ${(props) => props.theme.eui.ruleMargins.marginMedium} 0
-    ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
+  margin-top: ${(props) => props.theme.eui.ruleMargins.marginMedium};
   .hostDetailsLinkToExternalApp {
     .linkToAppIcon {
       margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
@@ -48,10 +48,7 @@ const LinkToExternalApp = styled.div`
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { url: logsUrl, appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
-  const endpointVersion = useHostSelector(latestEndpointVersion);
-  const { url: ingestUrl, appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl(
-    endpointVersion
-  );
+  const { url: ingestUrl, appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl();
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -121,11 +118,13 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
               href={policyResponseUri}
               onClick={policyStatusClickHandler}
             >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.host.details.policyStatusValue"
-                defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
-                values={{ policyStatus }}
-              />
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.host.details.policyStatusValue"
+                  defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
+                  values={{ policyStatus }}
+                />
+              </EuiText>
             </EuiLink>
           </EuiHealth>
         ),
@@ -169,40 +168,59 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsUpper}
         data-test-subj="hostDetailsUpperList"
       />
-      <EuiHorizontalRule margin="s" />
+      <EuiHorizontalRule margin="m" />
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsPolicy}
         data-test-subj="hostDetailsPolicyList"
       />
-      {endpointVersion !== undefined && (
-        <LinkToExternalApp>
-          <LinkToApp
-            className="hostDetailsLinkToExternalApp"
-            appId={ingestAppId}
-            appPath={ingestAppPath}
-            href={ingestUrl}
-            data-test-subj="hostDetailsLinkToIngest"
-          >
-            <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-              defaultMessage="Reassign Policy"
-            />
-            <EuiIcon type="popout" className="linkToAppPopoutIcon" />
-          </LinkToApp>
-        </LinkToExternalApp>
-      )}
+      <LinkToExternalApp>
+        <LinkToApp
+          className="hostDetailsLinkToExternalApp"
+          appId={ingestAppId}
+          appPath={ingestAppPath}
+          href={ingestUrl}
+          data-test-subj="hostDetailsLinkToIngest"
+        >
+          <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            defaultMessage="Reassign Policy"
+          />
+          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+        </LinkToApp>
+      </LinkToExternalApp>
+      <EuiHorizontalRule margin="m" />
+      <EuiDescriptionList
+        type="column"
+        listItems={detailsResultsPolicy}
+        data-test-subj="hostDetailsPolicyList"
+      />
+      <LinkToExternalApp>
+        <LinkToApp
+          className="hostDetailsLinkToExternalApp"
+          appId={ingestAppId}
+          appPath={ingestAppPath}
+          href={ingestUrl}
+          data-test-subj="hostDetailsLinkToIngest"
+        >
+          <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            defaultMessage="Reassign Policy"
+          />
+          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
+        </LinkToApp>
+      </LinkToExternalApp>
       <EuiHorizontalRule margin="s" />
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
-      <EuiHorizontalRule margin="s" />
+      <EuiHorizontalRule margin="m" />
       <LinkToExternalApp>
         <LinkToApp
-          className="hostDetailsLinkToExternalApp"
           appId={logsAppId}
           appPath={logsAppPath}
           href={logsUrl}
