@@ -240,6 +240,8 @@ kibana_vars=(
     xpack.security.public.protocol
     xpack.security.public.hostname
     xpack.security.public.port
+    xpack.spaces.enabled
+    xpack.spaces.maxSpaces
     telemetry.allowChangingOptInStatus
     telemetry.enabled
     telemetry.optIn
