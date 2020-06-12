@@ -8,14 +8,24 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { ES_GEO_FIELD_TYPES } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getAggregatableGeoFieldTypes, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import {
+  getFieldsWithGeoTileAgg,
+  getGeoFields,
+  getGeoTileAggNotSupportedReason,
+  supportsGeoTileAgg,
+} from '../../../index_pattern_util';
 import { RenderAsSelect } from './render_as_select';
+
+function doesNotSupportGeoTileAgg(field) {
+  return !supportsGeoTileAgg(field);
+}
 
 export class CreateSourceEditor extends Component {
   static propTypes = {
@@ -87,9 +97,9 @@ export class CreateSourceEditor extends Component {
     });
 
     //make default selection
-    const geoFields = getFieldsWithGeoTileAgg(indexPattern.fields);
-    if (geoFields[0]) {
-      this._onGeoFieldSelect(geoFields[0].name);
+    const geoFieldsWithGeoTileAgg = getFieldsWithGeoTileAgg(indexPattern.fields);
+    if (geoFieldsWithGeoTileAgg[0]) {
+      this._onGeoFieldSelect(geoFieldsWithGeoTileAgg[0].name);
     }
   }, 300);
 
@@ -141,10 +151,10 @@ export class CreateSourceEditor extends Component {
           value={this.state.geoField}
           onChange={this._onGeoFieldSelect}
           fields={
-            this.state.indexPattern
-              ? getFieldsWithGeoTileAgg(this.state.indexPattern.fields)
-              : undefined
+            this.state.indexPattern ? getGeoFields(this.state.indexPattern.fields) : undefined
           }
+          isFieldDisabled={doesNotSupportGeoTileAgg}
+          getFieldDisabledReason={getGeoTileAggNotSupportedReason}
         />
       </EuiFormRow>
     );
@@ -176,7 +186,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={getAggregatableGeoFieldTypes()}
+          fieldTypes={ES_GEO_FIELD_TYPES}
           onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>
