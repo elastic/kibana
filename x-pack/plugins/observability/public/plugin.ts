@@ -10,10 +10,10 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '../../../../src/core/public';
-import { RegisterHandler, registerHandler } from './data_handler';
+import { RegisterDataHandler, registerDataHandler } from './data_handler';
 
 export interface ObservabilityPluginSetup {
-  registerHandler: RegisterHandler;
+  dashboard: { register: RegisterDataHandler };
 }
 
 export type ObservabilityPluginStart = void;
@@ -40,7 +40,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
     });
 
     return {
-      registerHandler,
+      dashboard: { register: registerDataHandler },
     };
   }
   public start() {}

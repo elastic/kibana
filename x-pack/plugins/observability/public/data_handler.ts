@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Handler } from './typings/data_handler';
+import { FetchData, HasData } from './typings/data_handler';
 import { ObservabilityApp } from '../typings/common';
 
-const handlers: Partial<Record<ObservabilityApp, Handler>> = {};
+interface DataHandler {
+  fetchData: FetchData;
+  hasData: HasData;
+}
 
-export type RegisterHandler = (params: { name: ObservabilityApp; handler: Handler }) => void;
-export const registerHandler: RegisterHandler = ({ name, handler }) => {
-  handlers[name] = handler;
+const dataHandlers: Partial<Record<ObservabilityApp, DataHandler>> = {};
+
+export type RegisterDataHandler = (params: { appName: ObservabilityApp } & DataHandler) => void;
+export const registerDataHandler: RegisterDataHandler = ({ appName, fetchData, hasData }) => {
+  dataHandlers[appName] = { fetchData, hasData };
 };
 
-export function getHandler(name: ObservabilityApp): Handler | undefined {
-  return handlers[name];
+export function getDataHandler(appName: ObservabilityApp): DataHandler | undefined {
+  return dataHandlers[appName];
 }

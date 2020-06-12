@@ -22,13 +22,13 @@ interface Series {
   key?: string;
 }
 
-interface HandlerResponse {
+interface FetchDataResponse {
   title: string;
   appLink: string;
   stats: Stat[];
   series: Series[];
 }
-interface HandlerParams {
+interface FetchDataParams {
   // The start timestamp in milliseconds of the queried time interval
   startTime: number;
   // The end timestamp in milliseconds of the queried time interval
@@ -37,4 +37,6 @@ interface HandlerParams {
   bucketSize: number;
 }
 
-export type Handler = (handlerParams: HandlerParams) => Promise<HandlerResponse[]>;
+export type FetchData = (fetchDataParams: FetchDataParams) => Promise<FetchDataResponse[] | []>;
+
+export type HasData = () => Promise<boolean>;
