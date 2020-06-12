@@ -5,13 +5,13 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, OnTimeChangeProps } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUrlParams } from '../../hooks';
+import { ApplyRefreshInterval } from '@elastic/eui/src/components/date_picker/types';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
-import { setDateRange } from '../../state/actions';
-import { dateRangeSelector } from '../../state/selectors';
+import { setDateRange, setUiState } from '../../state/actions';
+import { uiSelector } from '../../state/selectors';
 
 export interface CommonlyUsedRange {
   from: string;
@@ -22,29 +22,51 @@ export interface CommonlyUsedRange {
 export const UptimeDatePicker: React.FC = () => {
   const dispatch = useDispatch();
   const onTimeChange = useCallback(
-    ({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
+    ({ start, end }: OnTimeChangeProps) => {
       dispatch(setDateRange({ from: start, to: end }));
     },
     [dispatch]
   );
-  const dateRange = useSelector(dateRangeSelector);
-  console.log('date range from SDP', dateRange);
-  return <UptimeDatePickerComponent {...dateRange} onTimeChange={onTimeChange} />;
+  const onRefreshChange: ApplyRefreshInterval = useCallback(
+    ({ isPaused: autorefreshIsPaused, refreshInterval: autorefreshInterval }) => {
+      dispatch(
+        setUiState({
+          autorefreshIsPaused,
+          autorefreshInterval,
+        })
+      );
+    },
+    [dispatch]
+  );
+  const { autorefreshInterval, autorefreshIsPaused, dateRange } = useSelector(uiSelector);
+  return (
+    <UptimeDatePickerComponent
+      autorefreshIsPaused={autorefreshIsPaused}
+      autorefreshInterval={autorefreshInterval}
+      {...dateRange}
+      onRefreshChange={onRefreshChange}
+      onTimeChange={onTimeChange}
+    />
+  );
 };
 
 interface Props {
+  autorefreshIsPaused: boolean;
+  autorefreshInterval: number;
   from: string;
   to: string;
-  onTimeChange: (e: SuperDateRangePickerRangeChangedEvent) => void;
+  onRefreshChange: ApplyRefreshInterval;
+  onTimeChange: (e: OnTimeChangeProps) => void;
 }
 
 export const UptimeDatePickerComponent: React.FC<Props> = ({
+  autorefreshInterval,
+  autorefreshIsPaused,
   from: start,
   to: end,
+  onRefreshChange,
   onTimeChange,
 }) => {
-  const [getUrlParams, updateUrl] = useUrlParams();
-  const { autorefreshInterval, autorefreshIsPaused } = getUrlParams();
   const { commonlyUsedRanges } = useContext(UptimeSettingsContext);
   const { refreshApp } = useContext(UptimeRefreshContext);
 
@@ -72,13 +94,7 @@ export const UptimeDatePickerComponent: React.FC<Props> = ({
         refreshApp();
       }}
       onRefresh={refreshApp}
-      onRefreshChange={({ isPaused, refreshInterval }) => {
-        updateUrl({
-          autorefreshInterval:
-            refreshInterval === undefined ? autorefreshInterval : refreshInterval,
-          autorefreshIsPaused: isPaused,
-        });
-      }}
+      onRefreshChange={onRefreshChange}
     />
   );
 };
