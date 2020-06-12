@@ -66,11 +66,16 @@ const TopNav = ({
     setInspectorSession(session);
   }, [embeddableHandler]);
 
-  const updateQuery = ({ query }: { query?: Query }) => {
-    if (!isEqual(currentAppState.query, query)) {
-      stateContainer.transitions.set('query', query || currentAppState.query);
-    }
-  };
+  const updateQuery = useCallback(
+    ({ query }: { query?: Query }) => {
+      if (!isEqual(currentAppState.query, query)) {
+        stateContainer.transitions.set('query', query || currentAppState.query);
+      } else {
+        savedVisInstance.embeddableHandler.reload();
+      }
+    },
+    [currentAppState.query, savedVisInstance.embeddableHandler, stateContainer.transitions]
+  );
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
