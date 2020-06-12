@@ -21,6 +21,11 @@ import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './process_cube_icon';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 
+/**
+ * The "default" view for the panel: A list of all the processes currently in the graph.
+ *
+ * @param {function} pushToQueryparams A function to update the hash value in the URL to control panel state
+ */
 export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   pushToQueryParams,
 }: {

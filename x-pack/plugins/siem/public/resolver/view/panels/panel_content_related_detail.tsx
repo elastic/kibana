@@ -28,11 +28,15 @@ export const BoldCode = styled(EuiCode)`
 `;
 
 /**
- * A helper function to turn objects into EuiDescriptionList entries
- * @param obj
- * @param prefix
+ * A helper function to turn objects into EuiDescriptionList entries.
+ * This reflects the strategy of more or less "dumping" metadata for related processes
+ * in description lists with little/no 'prettification'. This has the obvious drawback of
+ * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
+ * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
+ *
+ * @param {object} obj The object to turn into `<dt><dd>` entries
  */
-const surfacePrimitives = function* (
+const objectToDescriptionListEntries = function* (
   obj: object,
   prefix = ''
 ): Generator<{ title: string; description: string }> {
@@ -50,13 +54,13 @@ const surfacePrimitives = function* (
           .join(','),
       };
     } else if (typeof metaValue === 'object') {
-      yield* surfacePrimitives(metaValue, nextPrefix + metaKey);
+      yield* objectToDescriptionListEntries(metaValue, nextPrefix + metaKey);
     }
   }
 };
 
 // Adding some styles to prevent horizontal scrollbars, per request from UX review
-const StyledDescriptionList = styled(EuiDescriptionList)`
+const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 8em;
   }
@@ -64,26 +68,27 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
     max-width: calc(100% - 8.5em);
     overflow-wrap: break-word;
   }
-`;
+`);
 
 // Styling subtitles, per UX review:
 const StyledFlexTitle = memo(styled('h4')`
   display: flex;
   flex-flow: row;
 `);
-const StyledTitleRule = styled('hr')`
+const StyledTitleRule = memo(styled('hr')`
   &.euiHorizontalRule.euiHorizontalRule--full.euiHorizontalRule--marginSmall.override {
     display: block;
     flex: 1;
     margin-left: 0.5em;
   }
-`;
+`);
 
-const TitleHr = () => {
+const TitleHr = memo(() => {
   return (
     <StyledTitleRule className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall override" />
   );
-};
+});
+TitleHr.displayName = 'TitleHR';
 
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
@@ -143,7 +148,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         if (typeof val !== 'object') {
           return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
         }
-        return { sectionTitle, entries: [...surfacePrimitives(val)] };
+        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
       })
       .filter((v) => v.sectionTitle !== '' && v.entries.length);
     return [sectionData, displayDate];

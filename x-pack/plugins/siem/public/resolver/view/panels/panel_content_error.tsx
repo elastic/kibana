@@ -9,6 +9,12 @@ import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { CrumbInfo, StyledBreadcrumbs } from '../panel';
 
+/**
+ * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.
+ *
+ * @param {function} pushToQueryparams A function to update the hash value in the URL to control panel state
+ * @param {string} errorMessage The message to display in the panel when something goes wrong
+ */
 export const TableServiceError = memo(function ({
   errorMessage,
   pushToQueryParams,

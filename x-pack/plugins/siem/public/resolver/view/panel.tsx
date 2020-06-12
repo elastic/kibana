@@ -54,6 +54,10 @@ export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   second: '2-digit',
 });
 
+/**
+ * @param {ConstructorParameters<typeof Date>[0]} timestamp To be passed through Date->Intl.DateTimeFormat
+ * @returns {string} A nicely formatted string for a date
+ */
 export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
   const date = new Date(timestamp);
   if (isFinite(date.getTime())) {
@@ -76,6 +80,7 @@ export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
  *
  * This component implements the strategy laid out above by determining the "right" view and doing some other housekeeping e.g. effects to keep the UI-selected node in line with what's indicated by the URL parameters.
  *
+ * @returns {JSX.Element} The "right" table content to show based on the query params as described above
  */
 const PanelContent = memo(function PanelContent() {
   const history = useHistory();
@@ -162,9 +167,12 @@ const PanelContent = memo(function PanelContent() {
 
   const relatedEvents = useSelector(selectors.relatedEvents);
   const { crumbId, crumbEvent } = queryParams;
+
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
-   * for the table & breadcrumb nav
+   * for the table & breadcrumb nav.
+   *
+   * "Take query parameters -> return the right component".
    */
   const whichTableViewAndBreadcrumbsToRender = useMemo(() => {
     const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
