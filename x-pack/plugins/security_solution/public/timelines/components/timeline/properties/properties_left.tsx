@@ -14,7 +14,7 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 
-import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
 
@@ -33,6 +33,7 @@ interface Props {
   updateTitle: UpdateTitle;
   updateDescription: UpdateDescription;
   showNotes: boolean;
+  status: TimelineStatusLiteral;
   associateNote: AssociateNote;
   showNotesFromWidth: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -84,6 +85,7 @@ export const PropertiesLeft = React.memo<Props>(
     timelineType,
     updateTitle,
     updateDescription,
+    status,
     showNotes,
     showNotesFromWidth,
     associateNote,
@@ -130,6 +132,7 @@ export const PropertiesLeft = React.memo<Props>(
             toolTip={i18n.NOTES_TOOL_TIP}
             updateNote={updateNote}
             timelineType={timelineType}
+            timelineStatus={status}
           />
         </EuiFlexItem>
       ) : null}

@@ -56,7 +56,6 @@ export interface BodyProps {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
-  status: TimelineStatusLiteralWithNull;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   sort: Sort;

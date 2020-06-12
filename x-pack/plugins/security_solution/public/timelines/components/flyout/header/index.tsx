@@ -20,11 +20,9 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 interface OwnProps {
   timelineId: string;
-  timelineType: TimelineTypeLiteral;
   usersViewing: string[];
 }
 
@@ -101,6 +99,7 @@ const makeMapStateToProps = () => {
       title = '',
       noteIds = emptyNotesId,
       status,
+      timelineType,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
@@ -116,6 +115,7 @@ const makeMapStateToProps = () => {
       noteIds,
       status,
       title,
+      timelineType,
     };
   };
   return mapStateToProps;

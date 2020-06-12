@@ -153,9 +153,11 @@ const getTimelineTypeFilter = (
       : templateTimelineType === TemplateTimelineType.elastic
       ? `siem-ui-timeline.attributes.createdBy: "Elsatic"`
       : `not siem-ui-timeline.attributes.createdBy: "Elastic"`;
-  return [typeFilter, draftFilter, immutableFilter, templateTimelineTypeFilter]
-    .filter((f) => f != null)
-    .join(' and ');
+
+  const filters = disableTemplate
+    ? [typeFilter, draftFilter, immutableFilter]
+    : [typeFilter, draftFilter, immutableFilter /* templateTimelineTypeFilter*/];
+  return filters.filter((f) => f != null).join(' and ');
 };
 
 export const getAllTimeline = async (

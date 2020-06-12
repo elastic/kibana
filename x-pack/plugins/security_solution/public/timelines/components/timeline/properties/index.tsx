@@ -159,6 +159,7 @@ export const Properties = React.memo<Props>(
           isFavorite={isFavorite}
           noteIds={noteIds}
           onToggleShowNotes={onToggleShowNotes}
+          status={status}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
