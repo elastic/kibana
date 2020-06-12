@@ -7,7 +7,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiComboBox } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiComboBox,
+  EuiFieldNumber,
+} from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +31,7 @@ export class JobDetails extends Component {
       mml: '',
       mmlValidationError: '',
       groupsValidationError: '',
+      modelSnapshotRetentionDays: 1,
     };
 
     this.setJobDetails = props.setJobDetails;
@@ -52,6 +60,7 @@ export class JobDetails extends Component {
       mml: props.jobModelMemoryLimit,
       mmlValidationError: props.jobModelMemoryLimitValidationError,
       groupsValidationError: props.jobGroupsValidationError,
+      modelSnapshotRetentionDays: props.jobModelSnapshotRetentionDays,
     };
   }
 
@@ -61,6 +70,10 @@ export class JobDetails extends Component {
 
   onMmlChange = (e) => {
     this.setJobDetails({ jobModelMemoryLimit: e.target.value });
+  };
+
+  onModelSnapshotRetentionDaysChange = (e) => {
+    this.setJobDetails({ jobModelSnapshotRetentionDays: +e.target.value });
   };
 
   onGroupsChange = (selectedGroups) => {
@@ -104,6 +117,7 @@ export class JobDetails extends Component {
       groups,
       mmlValidationError,
       groupsValidationError,
+      modelSnapshotRetentionDays,
     } = this.state;
     const { datafeedRunning } = this.props;
     return (
@@ -170,6 +184,30 @@ export class JobDetails extends Component {
               isInvalid={mmlValidationError !== ''}
               error={mmlValidationError}
               disabled={datafeedRunning}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelSnapshotRetentionDaysLabel"
+                defaultMessage="Model snapshot retention days"
+              />
+            }
+            // helpText={
+            //   datafeedRunning ? (
+            //     <FormattedMessage
+            //       id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelSnapshotRetentionHelp"
+            //       defaultMessage="Model memory limit cannot be edited while the datafeed is running."
+            //     />
+            //   ) : null
+            // }
+            // isInvalid={mmlValidationError !== ''}
+            // error={mmlValidationError}
+          >
+            <EuiFieldNumber
+              min={0}
+              value={modelSnapshotRetentionDays}
+              onChange={this.onModelSnapshotRetentionDaysChange}
             />
           </EuiFormRow>
         </EuiForm>
