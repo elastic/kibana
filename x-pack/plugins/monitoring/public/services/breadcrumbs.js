@@ -76,6 +76,7 @@ function getKibanaBreadcrumbs(mainInstance) {
         })
       )
     );
+    breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
     breadcrumbs.push(createCrumb(null, 'Kibana'));
@@ -160,6 +161,7 @@ function getApmBreadcrumbs(mainInstance) {
         })
       )
     );
+    breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
     breadcrumbs.push(createCrumb(null, apmLabel));

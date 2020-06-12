@@ -56,8 +56,10 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageContent>
-          <Status stats={summary} />
-          <EuiSpacer size="s" />
+          <EuiPanel>
+            <Status stats={summary} />
+          </EuiPanel>
+          <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
