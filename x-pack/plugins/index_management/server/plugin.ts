@@ -59,7 +59,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { licensing }: Dependencies
+    { licensing, security }: Dependencies
   ): IndexManagementPluginSetup {
     const router = http.createRouter();
 
@@ -89,6 +89,9 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.apiRoutes.setup({
       router,
       license: this.license,
+      config: {
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+      },
       indexDataEnricher: this.indexDataEnricher,
       lib: {
         isEsError,
