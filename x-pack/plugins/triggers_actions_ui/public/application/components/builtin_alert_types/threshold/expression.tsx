@@ -260,7 +260,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
     </Fragment>
   );
 
-  const renderIndices = (indices) => {
+  const renderIndices = (indices: string[]) => {
     const rows = indices.map((s: string, i: number) => {
       return (
         <p key={i}>
