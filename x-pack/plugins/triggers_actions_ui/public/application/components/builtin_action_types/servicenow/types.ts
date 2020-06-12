@@ -20,7 +20,7 @@ export interface ServiceNowActionParams {
     savedObjectId: string;
     title: string;
     description: string;
-    comments: string;
+    comment: string;
     externalId: string;
     severity: string;
     urgency: string;

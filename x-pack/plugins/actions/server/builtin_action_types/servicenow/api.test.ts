@@ -49,7 +49,7 @@ describe('api', () => {
         const res = await api.pushToService({
           externalService,
           mapping,
-          params: apiParams,
+          params,
           secrets: {},
         });
 
@@ -152,7 +152,7 @@ describe('api', () => {
         const res = await api.pushToService({
           externalService,
           mapping,
-          params: apiParams,
+          params,
           secrets: {},
         });
 

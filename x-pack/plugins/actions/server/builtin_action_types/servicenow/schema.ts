@@ -5,26 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-export const MappingActionType = schema.oneOf([
-  schema.literal('nothing'),
-  schema.literal('overwrite'),
-  schema.literal('append'),
-]);
-
-export const MapRecordSchema = schema.object({
-  source: schema.string(),
-  target: schema.string(),
-  actionType: MappingActionType,
-});
-
-export const IncidentConfigurationSchema = schema.object({
-  mapping: schema.arrayOf(MapRecordSchema),
-});
+import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from './case_shema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
-  // did it otional for the current stage to support Case ServiceNow implementation
+  // TODO: to remove - set it otional for the current stage to support Case ServiceNow implementation
   incidentConfiguration: schema.maybe(IncidentConfigurationSchema),
 };
 
@@ -51,11 +36,14 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   savedObjectId: schema.string(),
   title: schema.string(),
   description: schema.nullable(schema.string()),
-  comments: schema.nullable(schema.string()),
+  comment: schema.nullable(schema.string()),
   externalId: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
   urgency: schema.nullable(schema.string()),
   impact: schema.nullable(schema.string()),
+  // TODO: remove later  - need for support Case push multiple comments
+  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  ...EntityInformation,
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({

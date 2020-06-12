@@ -20,7 +20,7 @@ import { ServiceNowActionParams } from './types';
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
 >> = ({ actionParams, editAction, index, errors, messageVariables }) => {
-  const { title, description, comments, severity, urgency, impact, savedObjectId } =
+  const { title, description, comment, severity, urgency, impact, savedObjectId } =
     actionParams.subActionParams || {};
   const selectOptions = [
     {
@@ -74,7 +74,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       editSubActionProperty('severity', '3');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, description, comments, severity, impact, urgency]);
+  }, [title, description, comment, severity, impact, urgency]);
 
   const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
     editSubActionProperty(
@@ -229,30 +229,30 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.commentsTextAreaFieldLabel',
           {
-            defaultMessage: 'Comments (optional)',
+            defaultMessage: 'Additional comments (optional)',
           }
         )}
         labelAppend={
           <AddMessageVariables
             messageVariables={messageVariables}
             onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('comments', variable)
+              onSelectMessageVariable('comment', variable)
             }
-            paramsProperty="comments"
+            paramsProperty="comment"
           />
         }
       >
         <EuiTextArea
           fullWidth
-          name="comments"
-          value={comments || ''}
+          name="comment"
+          value={comment || ''}
           data-test-subj="incidentCommentTextArea"
           onChange={(e) => {
-            editSubActionProperty('comments', e.target.value);
+            editSubActionProperty('comment', e.target.value);
           }}
           onBlur={() => {
-            if (!comments) {
-              editSubActionProperty('comments', '');
+            if (!comment) {
+              editSubActionProperty('comment', '');
             }
           }}
         />

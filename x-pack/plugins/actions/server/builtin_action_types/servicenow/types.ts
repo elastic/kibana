@@ -12,16 +12,12 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,
-  MapRecordSchema,
-  IncidentConfigurationSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-
-export interface AnyParams {
-  [index: string]: string | number | object | undefined | null;
-}
+import { IncidentConfigurationSchema } from './case_shema';
+import { PushToServiceResponse } from './case_types';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
@@ -29,13 +25,6 @@ export type ServiceNowPublicConfigurationType = TypeOf<
 export type ServiceNowSecretConfigurationType = TypeOf<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;
-
-export interface CreateIncidentRequest {
-  summary: string;
-  description: string;
-}
-
-export type UpdateIncidentRequest = Partial<CreateIncidentRequest>;
 
 export interface CreateCommentRequest {
   [key: string]: string;
@@ -45,7 +34,6 @@ export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
 export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
-export type MapRecord = TypeOf<typeof MapRecordSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -53,8 +41,8 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceValidation {
-  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: unknown) => void;
-  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: unknown) => void;
+  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
+  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
 }
 
 export interface ExternalServiceIncidentResponse {
@@ -62,12 +50,6 @@ export interface ExternalServiceIncidentResponse {
   title: string;
   url: string;
   pushedDate: string;
-}
-
-export interface ExternalServiceCommentResponse {
-  commentId: string;
-  pushedDate: string;
-  externalCommentId?: string;
 }
 
 export interface ExternalServiceParams {
@@ -111,38 +93,8 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionHandshakeParams;
 }
 
-export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
-  comments?: ExternalServiceCommentResponse[];
-}
-
 export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
-}
-
-export interface PipedField {
-  key: string;
-  value: string;
-  actionType: string;
-  pipes: string[];
-}
-
-export interface PrepareFieldsForTransformArgs {
-  params: PushToServiceApiParams;
-  mapping: Map<string, MapRecord>;
-  defaultPipes?: string[];
-}
-
-export interface TransformFieldsArgs {
-  params: PushToServiceApiParams;
-  fields: PipedField[];
-  currentIncident?: ExternalServiceParams;
-}
-
-export interface TransformerArgs {
-  value: string;
-  date?: string;
-  user?: string;
-  previousValue?: string;
 }

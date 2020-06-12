@@ -7,15 +7,10 @@
 import axios from 'axios';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
-import { addTimeZoneToDate, patch, request, getErrorMessage } from '../case/utils';
 
 import * as i18n from './translations';
-import {
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  CreateIncidentRequest,
-  UpdateIncidentRequest,
-} from './types';
+import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
@@ -81,7 +76,7 @@ export const createExternalService = ({
 
   const createIncident = async ({ incident }: ExternalServiceParams) => {
     try {
-      const res = await request<CreateIncidentRequest>({
+      const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
@@ -103,7 +98,7 @@ export const createExternalService = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      const res = await patch<UpdateIncidentRequest>({
+      const res = await patch({
         axios: axiosInstance,
         url: `${incidentUrl}/${incidentId}`,
         data: { ...incident },

@@ -6,16 +6,16 @@
 import { flow } from 'lodash';
 import {
   ExternalServiceParams,
-  PushToServiceResponse,
   PushToServiceApiHandlerArgs,
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
   ExternalServiceApi,
-  PrepareFieldsForTransformArgs,
-  PipedField,
-  TransformFieldsArgs,
 } from './types';
+
+// TODO: to remove, need to support Case
 import { transformers, Transformer } from '../case/transformers';
+import { PushToServiceResponse, TransformFieldsArgs } from './case_types';
+import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
   externalService,
@@ -34,7 +34,7 @@ const pushToServiceHandler = async ({
   params,
   secrets,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { externalId } = params;
+  const { externalId, comments } = params;
   const updateIncident = externalId ? true : false;
   const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
@@ -48,7 +48,7 @@ const pushToServiceHandler = async ({
   // TODO: should be removed later but currently keep it for the Case implementation support
   if (mapping) {
     const fields = prepareFieldsForTransformation({
-      params,
+      externalCase: params.externalObject,
       mapping,
       defaultPipes,
     });
@@ -59,41 +59,55 @@ const pushToServiceHandler = async ({
       currentIncident,
     });
   } else {
-    incident = { ...params, short_description: params.title };
+    incident = { ...params, short_description: params.title, comments: params.comment };
   }
 
-  if (updateIncident) {
+  // TODO: should temporary keep it for a Case usage
+  if (
+    updateIncident &&
+    comments &&
+    Array.isArray(comments) &&
+    comments.length > 0 &&
+    mapping &&
+    mapping.get('comments')?.actionType !== 'nothing'
+  ) {
+    const resComments = [];
+    const fieldsKey = mapping.get('comments')?.target ?? 'comments';
     res = await externalService.updateIncident({
+      incidentId: externalId,
+      incident: {
+        ...incident,
+        [fieldsKey]: comments[0].comment,
+      },
+    });
+    for (let i = 1; i < comments.length; i++) {
+      const currentComment = comments[i];
+      await externalService.updateIncident({
+        incidentId: externalId,
+        incident: {
+          ...incident,
+          [fieldsKey]: currentComment.comment,
+        },
+      });
+      resComments.push(...(res.comments ?? []), {
+        commentId: currentComment.commentId,
+        pushedDate: res.pushedDate,
+      });
+    }
+    res.comments = resComments;
+    return res;
+  } else if (updateIncident) {
+    return await externalService.updateIncident({
       incidentId: externalId,
       incident,
     });
-  } else {
-    res = await externalService.createIncident({
-      incident: {
-        ...incident,
-        caller_id: secrets.username,
-      },
-    });
   }
-  return res;
-};
-
-export const prepareFieldsForTransformation = ({
-  params,
-  mapping,
-  defaultPipes = ['informationCreated'],
-}: PrepareFieldsForTransformArgs): PipedField[] => {
-  return Object.keys(params.externalObject)
-    .filter((p) => mapping.get(p)?.actionType != null && mapping.get(p)?.actionType !== 'nothing')
-    .map((p) => {
-      const actionType = mapping.get(p)?.actionType ?? 'nothing';
-      return {
-        key: p,
-        value: params.externalObject[p],
-        actionType,
-        pipes: actionType === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
-      };
-    });
+  return await externalService.createIncident({
+    incident: {
+      ...incident,
+      caller_id: secrets.username,
+    },
+  });
 };
 
 export const transformFields = ({
@@ -107,6 +121,15 @@ export const transformFields = ({
       ...prev,
       [cur.key]: transform({
         value: cur.value,
+        date: params.updatedAt ?? params.createdAt,
+        user:
+          (params.updatedBy != null
+            ? params.updatedBy.fullName
+              ? params.updatedBy.fullName
+              : params.updatedBy.username
+            : params.createdBy.fullName
+            ? params.createdBy.fullName
+            : params.createdBy.username) ?? '',
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };

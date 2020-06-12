@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry, get } from 'lodash';
+import { curry } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 // import { config } from './config';
@@ -17,10 +17,12 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
-import { buildMap } from '../case/utils';
 import { api } from './api';
-import { ExecutorParams, ExecutorSubActionPushParams, MapRecord, AnyParams } from './types';
+import { ExecutorParams, ExecutorSubActionPushParams } from './types';
 import * as i18n from './translations';
+
+// TODO: to remove, need to support Case
+import { buildMap, mapParams } from '../case/utils';
 
 interface GetActionTypeParams {
   logger: Logger;
@@ -76,21 +78,15 @@ async function executor(
     throw new Error('[Action][ExternalService] subAction not implemented.');
   }
 
-  const mapParams = (mapping: Map<string, MapRecord>): AnyParams => {
-    return Object.keys(params).reduce((prev: AnyParams, curr: string): AnyParams => {
-      const field = mapping.get(curr);
-      if (field) {
-        prev[field.target] = get(params, curr);
-      }
-      return prev;
-    }, {});
-  };
-
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const mapping = config.indexConfiguration ? buildMap(config.indexConfiguration.mapping) : null;
-    const externalObject = config.indexConfiguration && mapping ? mapParams(mapping) : {};
+    const { comments, externalId, ...restParams } = pushToServiceParams;
+    const mapping = config.incidentConfiguration
+      ? buildMap(config.incidentConfiguration.mapping)
+      : null;
+    const externalObject =
+      config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
 
     data = await api.pushToService({
       externalService,

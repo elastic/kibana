@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExternalService,
-  PushToServiceApiParams,
-  ExecutorSubActionPushParams,
-  MapRecord,
-} from './types';
+import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+import { MapRecord } from './case_types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
@@ -72,10 +68,11 @@ const executorParams: ExecutorSubActionPushParams = {
   externalId: 'incident-3',
   title: 'Incident title',
   description: 'Incident description',
-  comments: 'case-comment-1',
+  comment: 'comment-1',
   severity: '3',
   urgency: '3',
   impact: '3',
+  updatedAt: null,
 };
 
 const apiParams: PushToServiceApiParams = {

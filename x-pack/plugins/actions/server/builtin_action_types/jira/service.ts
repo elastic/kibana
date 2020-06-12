@@ -16,7 +16,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request } from '../case/utils';
+import { request, getErrorMessage } from '../lib/axios_utils';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

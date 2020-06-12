@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalServiceValidation } from '../case/types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import {
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExternalServiceValidation,
+} from './types';
 
 import * as i18n from './translations';
 
