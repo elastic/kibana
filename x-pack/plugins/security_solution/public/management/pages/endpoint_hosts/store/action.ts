@@ -41,22 +41,10 @@ interface ServerFailedToReturnHostPolicyResponse {
   payload: ServerApiError;
 }
 
-interface ServerReturnedEndpointPackageVersion {
-  type: 'serverReturnedEndpointPackageVersion';
-  payload: string;
-}
-
-interface ServerFailedToReturnEndpointPackageVersion {
-  type: 'serverFailedToReturnEndpointPackageVersion';
-  payload: ServerApiError;
-}
-
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails
   | ServerReturnedHostPolicyResponse
-  | ServerFailedToReturnHostPolicyResponse
-  | ServerReturnedEndpointPackageVersion
-  | ServerFailedToReturnEndpointPackageVersion;
+  | ServerFailedToReturnHostPolicyResponse;

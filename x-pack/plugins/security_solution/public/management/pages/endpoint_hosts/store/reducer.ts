@@ -23,8 +23,6 @@ export const initialHostListState: Immutable<HostState> = {
   policyResponse: undefined,
   policyResponseLoading: false,
   policyResponseError: undefined,
-  endpointPackageVersion: undefined,
-  endpointPackageVersionError: undefined,
   location: undefined,
 };
 
@@ -80,18 +78,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       policyResponseError: action.payload,
       policyResponseLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPackageVersion') {
-    return {
-      ...state,
-      endpointPackageVersion: action.payload,
-      endpointPackageVersionError: undefined,
-    };
-  } else if (action.type === 'serverFailedToReturnEndpointPackageVersion') {
-    return {
-      ...state,
-      endpointPackageError: action.payload,
-      endpointPackageVersion: undefined,
-    };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {
       ...state,
@@ -111,7 +97,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           loading: true,
           error: undefined,
           detailsError: undefined,
-          endpointVersionError: undefined,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
@@ -125,7 +110,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           error: undefined,
           detailsError: undefined,
           policyResponseError: undefined,
-          endpointVersionError: undefined,
         };
       } else {
         // if previous page was not host list or host details, load both list and details
@@ -138,7 +122,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           error: undefined,
           detailsError: undefined,
           policyResponseError: undefined,
-          endpointVersionError: undefined,
         };
       }
     }
@@ -149,7 +132,6 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
-      endpointVersionError: undefined,
     };
   }
   return state;
