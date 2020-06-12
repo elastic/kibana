@@ -79,7 +79,11 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
         <EuiFlexItem>
           <Link
             aria-label="openSelectedAlerts"
-            onClick={() => handleUpdateStatus('open')}
+            onClick={() => {
+              closePopover();
+              handleUpdateStatus('open');
+            }}
+            color="text"
             data-test-subj="openSelectedAlertsButton"
           >
             {i18n.BATCH_ACTION_OPEN_SELECTED}
@@ -91,7 +95,11 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
         <EuiFlexItem>
           <Link
             aria-label="closeSelectedAlerts"
-            onClick={() => handleUpdateStatus('closed')}
+            onClick={() => {
+              closePopover();
+              handleUpdateStatus('closed');
+            }}
+            color="text"
             data-test-subj="closeSelectedAlertsButton"
           >
             {i18n.BATCH_ACTION_CLOSE_SELECTED}
@@ -103,7 +111,11 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
         <EuiFlexItem>
           <Link
             aria-label="markSelectedAlertsInProgress"
-            onClick={() => handleUpdateStatus('in-progress')}
+            onClick={() => {
+              closePopover();
+              handleUpdateStatus('in-progress');
+            }}
+            color="text"
             data-test-subj="markSelectedAlertsInProgressButton"
           >
             {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}

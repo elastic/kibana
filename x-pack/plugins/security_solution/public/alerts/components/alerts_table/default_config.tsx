@@ -6,8 +6,10 @@
 
 /* eslint-disable react/display-name */
 
+import React from 'react';
 import ApolloClient from 'apollo-client';
 
+import { EuiText } from '@elastic/eui';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
@@ -193,7 +195,7 @@ export const getAlertActions = ({
 }): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Open alert',
-    content: i18n.ACTION_OPEN_ALERT,
+    content: <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>,
     dataTestSubj: 'open-alert-status',
     displayType: 'contextMenu',
     id: FILTER_OPEN,
@@ -213,7 +215,7 @@ export const getAlertActions = ({
 
   const closeAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Close alert',
-    content: i18n.ACTION_CLOSE_ALERT,
+    content: <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>,
     dataTestSubj: 'close-alert-status',
     displayType: 'contextMenu',
     id: FILTER_CLOSED,
@@ -233,7 +235,7 @@ export const getAlertActions = ({
 
   const inProgressAlertActionComponent: TimelineRowAction = {
     ariaLabel: 'Mark alert in progress',
-    content: i18n.ACTION_IN_PROGRESS_ALERT,
+    content: <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>,
     dataTestSubj: 'in-progress-alert-status',
     displayType: 'contextMenu',
     id: FILTER_IN_PROGRESS,

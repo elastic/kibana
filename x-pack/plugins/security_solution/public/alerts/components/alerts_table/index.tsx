@@ -157,8 +157,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       switch (status) {
         case 'closed':
           title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
+          break;
         case 'open':
           title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+          break;
         case 'in-progress':
           title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
       }
@@ -173,8 +175,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       switch (status) {
         case 'closed':
           title = i18n.CLOSED_ALERT_FAILED_TOAST;
+          break;
         case 'open':
           title = i18n.OPENED_ALERT_FAILED_TOAST;
+          break;
         case 'in-progress':
           title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
       }
