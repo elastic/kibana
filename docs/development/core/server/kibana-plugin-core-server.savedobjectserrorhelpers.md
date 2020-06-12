@@ -16,12 +16,13 @@ export declare class SavedObjectsErrorHelpers
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [createBadRequestError(reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.createbadrequesterror.md) | <code>static</code> |  |
-|  [createEsAutoCreateIndexError()](./kibana-plugin-core-server.savedobjectserrorhelpers.createesautocreateindexerror.md) | <code>static</code> |  |
+|  [createConflictError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md) | <code>static</code> |  |
 |  [createGenericNotFoundError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.creategenericnotfounderror.md) | <code>static</code> |  |
 |  [createInvalidVersionError(versionInput)](./kibana-plugin-core-server.savedobjectserrorhelpers.createinvalidversionerror.md) | <code>static</code> |  |
 |  [createUnsupportedTypeError(type)](./kibana-plugin-core-server.savedobjectserrorhelpers.createunsupportedtypeerror.md) | <code>static</code> |  |
 |  [decorateBadRequestError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decoratebadrequesterror.md) | <code>static</code> |  |
 |  [decorateConflictError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorateconflicterror.md) | <code>static</code> |  |
+|  [decorateEsCannotExecuteScriptError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorateescannotexecutescripterror.md) | <code>static</code> |  |
 |  [decorateEsUnavailableError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorateesunavailableerror.md) | <code>static</code> |  |
 |  [decorateForbiddenError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorateforbiddenerror.md) | <code>static</code> |  |
 |  [decorateGeneralError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decorategeneralerror.md) | <code>static</code> |  |
@@ -29,7 +30,7 @@ export declare class SavedObjectsErrorHelpers
 |  [decorateRequestEntityTooLargeError(error, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.decoraterequestentitytoolargeerror.md) | <code>static</code> |  |
 |  [isBadRequestError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isbadrequesterror.md) | <code>static</code> |  |
 |  [isConflictError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isconflicterror.md) | <code>static</code> |  |
-|  [isEsAutoCreateIndexError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isesautocreateindexerror.md) | <code>static</code> |  |
+|  [isEsCannotExecuteScriptError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isescannotexecutescripterror.md) | <code>static</code> |  |
 |  [isEsUnavailableError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isesunavailableerror.md) | <code>static</code> |  |
 |  [isForbiddenError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isforbiddenerror.md) | <code>static</code> |  |
 |  [isInvalidVersionError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isinvalidversionerror.md) | <code>static</code> |  |

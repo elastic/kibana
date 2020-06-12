@@ -84,7 +84,7 @@ export function registerSnapshotsRoutes({
 
           // Decorate each snapshot with the repository with which it's associated.
           fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
-            fetchedSnapshots.forEach(snapshot => {
+            fetchedSnapshots.forEach((snapshot) => {
               snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
             });
           });
@@ -179,17 +179,19 @@ export function registerSnapshotsRoutes({
     })
   );
 
-  const deleteParamsSchema = schema.object({
-    ids: schema.string(),
-  });
+  const deleteSchema = schema.arrayOf(
+    schema.object({
+      repository: schema.string(),
+      snapshot: schema.string(),
+    })
+  );
 
   // DELETE one or multiple snapshots
-  router.delete(
-    { path: addBasePath('snapshots/{ids}'), validate: { params: deleteParamsSchema } },
+  router.post(
+    { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.snapshotRestore!.client;
-      const { ids } = req.params as TypeOf<typeof deleteParamsSchema>;
-      const snapshotIds = ids.split(',');
+
       const response: {
         itemsDeleted: Array<{ snapshot: string; repository: string }>;
         errors: any[];
@@ -198,21 +200,17 @@ export function registerSnapshotsRoutes({
         errors: [],
       };
 
+      const snapshots = req.body;
+
       try {
         // We intentially perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
         // because there can only be one snapshot deletion task performed at a time (ES restriction).
-        for (let i = 0; i < snapshotIds.length; i++) {
-          // IDs come in the format of `repository-name/snapshot-name`
-          // Extract the two parts by splitting at last occurrence of `/` in case
-          // repository name contains '/` (from older versions)
-          const id = snapshotIds[i];
-          const indexOfDivider = id.lastIndexOf('/');
-          const snapshot = id.substring(indexOfDivider + 1);
-          const repository = id.substring(0, indexOfDivider);
+        for (let i = 0; i < snapshots.length; i++) {
+          const { snapshot, repository } = snapshots[i];
 
           await callAsCurrentUser('snapshot.delete', { snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
-            .catch(e =>
+            .catch((e) =>
               response.errors.push({
                 id: { snapshot, repository },
                 error: wrapEsError(e),

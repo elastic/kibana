@@ -27,7 +27,7 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
           <EuiText>
             <ul>
               {(isShowingFullIndicesList ? displayIndices : [...displayIndices].splice(0, 10)).map(
-                index => (
+                (index) => (
                   <li key={index}>
                     <EuiTitle size="xs">
                       <span>{index}</span>

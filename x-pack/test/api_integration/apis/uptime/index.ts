@@ -6,20 +6,20 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const es = getService('legacyEs');
 
   describe('uptime', () => {
-    before(() =>
-      es.indices.delete({
-        index: 'heartbeat*',
-        ignore: [404],
-      })
+    before(
+      async () =>
+        await es.indices.delete({
+          index: 'heartbeat*',
+          ignore: [404],
+        })
     );
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));
-    loadTestFile(require.resolve('./graphql'));
     loadTestFile(require.resolve('./rest'));
   });
 }

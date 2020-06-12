@@ -18,7 +18,4 @@
  */
 
 export { registerTelemetryUsageCollector } from './usage';
-export { registerUiMetricUsageCollector } from './ui_metric';
 export { registerTelemetryPluginUsageCollector } from './telemetry_plugin';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';

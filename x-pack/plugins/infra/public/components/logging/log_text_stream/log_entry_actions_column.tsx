@@ -5,35 +5,35 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LogEntryColumnContent } from './log_entry_column';
-import {
-  euiStyled,
-  ActionMenu,
-  Section,
-  SectionTitle,
-  SectionLinks,
-  SectionLink,
-} from '../../../../../observability/public';
+import { euiStyled } from '../../../../../observability/public';
 
 interface LogEntryActionsColumnProps {
   isHovered: boolean;
   isMenuOpen: boolean;
   onOpenMenu: () => void;
   onCloseMenu: () => void;
-  onViewDetails: () => void;
+  onViewDetails?: () => void;
+  onViewLogInContext?: () => void;
 }
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
-  defaultMessage: 'View Details',
+  defaultMessage: 'View actions for line',
 });
 
 const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
-  defaultMessage: 'View actions for line',
+  defaultMessage: 'View details',
 });
+
+const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
+  'xpack.infra.lobs.logEntryActionsViewInContextButton',
+  {
+    defaultMessage: 'View in context',
+  }
+);
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   isHovered,
@@ -41,11 +41,23 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   onOpenMenu,
   onCloseMenu,
   onViewDetails,
+  onViewLogInContext,
 }) => {
   const handleClickViewDetails = useCallback(() => {
     onCloseMenu();
-    onViewDetails();
+
+    // Function might be `undefined` and the linter doesn't like that.
+    // eslint-disable-next-line no-unused-expressions
+    onViewDetails?.();
   }, [onCloseMenu, onViewDetails]);
+
+  const handleClickViewInContext = useCallback(() => {
+    onCloseMenu();
+
+    // Function might be `undefined` and the linter doesn't like that.
+    // eslint-disable-next-line no-unused-expressions
+    onViewLogInContext?.();
+  }, [onCloseMenu, onViewLogInContext]);
 
   const button = (
     <ButtonWrapper>
@@ -58,23 +70,32 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     </ButtonWrapper>
   );
 
+  const items = [
+    <EuiContextMenuItem key="log_details" onClick={handleClickViewDetails}>
+      {LOG_DETAILS_LABEL}
+    </EuiContextMenuItem>,
+  ];
+
+  if (onViewLogInContext !== undefined) {
+    items.push(
+      <EuiContextMenuItem key="view_in_context" onClick={handleClickViewInContext}>
+        {LOG_VIEW_IN_CONTEXT_LABEL}
+      </EuiContextMenuItem>
+    );
+  }
+
   return (
     <ActionsColumnContent>
       {isHovered || isMenuOpen ? (
         <AbsoluteWrapper>
-          <ActionMenu closePopover={onCloseMenu} isOpen={isMenuOpen} button={button}>
-            <Section>
-              <SectionTitle>
-                <FormattedMessage
-                  id="xpack.infra.logs.logEntryActionsMenuTitle"
-                  defaultMessage="Log line details"
-                />
-              </SectionTitle>
-              <SectionLinks>
-                <SectionLink label={LOG_DETAILS_LABEL} onClick={handleClickViewDetails} />
-              </SectionLinks>
-            </Section>
-          </ActionMenu>
+          <EuiPopover
+            closePopover={onCloseMenu}
+            isOpen={isMenuOpen}
+            button={button}
+            ownFocus={true}
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
         </AbsoluteWrapper>
       ) : null}
     </ActionsColumnContent>
@@ -87,12 +108,13 @@ const ActionsColumnContent = euiStyled(LogEntryColumnContent)`
 `;
 
 const ButtonWrapper = euiStyled.div`
-  background: ${props => props.theme.eui.euiColorPrimary};
+  background: ${(props) => props.theme.eui.euiColorPrimary};
   border-radius: 50%;
+  padding: 4px;
+  transform: translateY(-6px);
 `;
 
 // this prevents the button from influencing the line height
 const AbsoluteWrapper = euiStyled.div`
-  overflow: hidden;
   position: absolute;
 `;

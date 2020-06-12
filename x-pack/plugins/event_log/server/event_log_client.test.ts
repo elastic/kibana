@@ -112,7 +112,7 @@ describe('EventLogStart', () => {
         {
           page: 1,
           per_page: 10,
-          sort_field: 'event.start',
+          sort_field: '@timestamp',
           sort_order: 'asc',
         }
       );
@@ -172,12 +172,8 @@ describe('EventLogStart', () => {
       };
       esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
 
-      const start = moment()
-        .subtract(1, 'days')
-        .toISOString();
-      const end = moment()
-        .add(1, 'days')
-        .toISOString();
+      const start = moment().subtract(1, 'days').toISOString();
+      const end = moment().add(1, 'days').toISOString();
 
       expect(
         await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
@@ -193,7 +189,7 @@ describe('EventLogStart', () => {
         {
           page: 1,
           per_page: 10,
-          sort_field: 'event.start',
+          sort_field: '@timestamp',
           sort_order: 'asc',
           start,
           end,

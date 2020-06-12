@@ -18,6 +18,7 @@ const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'managem
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const subFeaturePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
+const reservedFeaturePrrivilegePartRegex = /^(?!reserved_)[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
@@ -33,53 +34,33 @@ const privilegeSchema = Joi.object({
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
-    all: Joi.array()
-      .items(Joi.string())
-      .required(),
-    read: Joi.array()
-      .items(Joi.string())
-      .required(),
+    all: Joi.array().items(Joi.string()).required(),
+    read: Joi.array().items(Joi.string()).required(),
   }).required(),
-  ui: Joi.array()
-    .items(Joi.string().regex(uiCapabilitiesRegex))
-    .required(),
+  ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
 const subFeaturePrivilegeSchema = Joi.object({
-  id: Joi.string()
-    .regex(subFeaturePrivilegePartRegex)
-    .required(),
+  id: Joi.string().regex(subFeaturePrivilegePartRegex).required(),
   name: Joi.string().required(),
-  includeIn: Joi.string()
-    .allow('all', 'read', 'none')
-    .required(),
+  includeIn: Joi.string().allow('all', 'read', 'none').required(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
-    all: Joi.array()
-      .items(Joi.string())
-      .required(),
-    read: Joi.array()
-      .items(Joi.string())
-      .required(),
+    all: Joi.array().items(Joi.string()).required(),
+    read: Joi.array().items(Joi.string()).required(),
   }).required(),
-  ui: Joi.array()
-    .items(Joi.string().regex(uiCapabilitiesRegex))
-    .required(),
+  ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
 const subFeatureSchema = Joi.object({
   name: Joi.string().required(),
   privilegeGroups: Joi.array().items(
     Joi.object({
-      groupType: Joi.string()
-        .valid('mutually_exclusive', 'independent')
-        .required(),
-      privileges: Joi.array()
-        .items(subFeaturePrivilegeSchema)
-        .min(1),
+      groupType: Joi.string().valid('mutually_exclusive', 'independent').required(),
+      privileges: Joi.array().items(subFeaturePrivilegeSchema).min(1),
     })
   ),
 });
@@ -98,9 +79,7 @@ const schema = Joi.object({
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string().regex(uiCapabilitiesRegex),
-  app: Joi.array()
-    .items(Joi.string())
-    .required(),
+  app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,
   privileges: Joi.object({
@@ -111,15 +90,20 @@ const schema = Joi.object({
     .required(),
   subFeatures: Joi.when('privileges', {
     is: null,
-    then: Joi.array()
-      .items(subFeatureSchema)
-      .max(0),
+    then: Joi.array().items(subFeatureSchema).max(0),
     otherwise: Joi.array().items(subFeatureSchema),
   }),
   privilegesTooltip: Joi.string(),
   reserved: Joi.object({
-    privilege: privilegeSchema.required(),
     description: Joi.string().required(),
+    privileges: Joi.array()
+      .items(
+        Joi.object({
+          id: Joi.string().regex(reservedFeaturePrrivilegePartRegex).required(),
+          privilege: privilegeSchema.required(),
+        })
+      )
+      .required(),
   }),
 });
 
@@ -133,7 +117,7 @@ export function validateFeature(feature: FeatureConfig) {
 
   const unseenApps = new Set(app);
 
-  const managementSets = Object.entries(management).map(entry => [
+  const managementSets = Object.entries(management).map((entry) => [
     entry[0],
     new Set(entry[1]),
   ]) as Array<[string, Set<string>]>;
@@ -143,7 +127,7 @@ export function validateFeature(feature: FeatureConfig) {
   const unseenCatalogue = new Set(catalogue);
 
   function validateAppEntry(privilegeId: string, entry: string[] = []) {
-    entry.forEach(privilegeApp => unseenApps.delete(privilegeApp));
+    entry.forEach((privilegeApp) => unseenApps.delete(privilegeApp));
 
     const unknownAppEntries = difference(entry, app);
     if (unknownAppEntries.length > 0) {
@@ -156,7 +140,7 @@ export function validateFeature(feature: FeatureConfig) {
   }
 
   function validateCatalogueEntry(privilegeId: string, entry: string[] = []) {
-    entry.forEach(privilegeCatalogue => unseenCatalogue.delete(privilegeCatalogue));
+    entry.forEach((privilegeCatalogue) => unseenCatalogue.delete(privilegeCatalogue));
 
     const unknownCatalogueEntries = difference(entry || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
@@ -174,7 +158,7 @@ export function validateFeature(feature: FeatureConfig) {
   ) {
     Object.entries(managementEntry).forEach(([managementSectionId, managementSectionEntry]) => {
       if (unseenManagement.has(managementSectionId)) {
-        managementSectionEntry.forEach(entry => {
+        managementSectionEntry.forEach((entry) => {
           unseenManagement.get(managementSectionId)!.delete(entry);
           if (unseenManagement.get(managementSectionId)?.size === 0) {
             unseenManagement.delete(managementSectionId);
@@ -209,7 +193,9 @@ export function validateFeature(feature: FeatureConfig) {
     privilegeEntries.push(...Object.entries(feature.privileges));
   }
   if (feature.reserved) {
-    privilegeEntries.push(['reserved', feature.reserved.privilege]);
+    feature.reserved.privileges.forEach((reservedPrivilege) => {
+      privilegeEntries.push([reservedPrivilege.id, reservedPrivilege.privilege]);
+    });
   }
 
   if (privilegeEntries.length === 0) {
@@ -229,9 +215,9 @@ export function validateFeature(feature: FeatureConfig) {
   });
 
   const subFeatureEntries = feature.subFeatures ?? [];
-  subFeatureEntries.forEach(subFeature => {
-    subFeature.privilegeGroups.forEach(subFeaturePrivilegeGroup => {
-      subFeaturePrivilegeGroup.privileges.forEach(subFeaturePrivilege => {
+  subFeatureEntries.forEach((subFeature) => {
+    subFeature.privilegeGroups.forEach((subFeaturePrivilegeGroup) => {
+      subFeaturePrivilegeGroup.privileges.forEach((subFeaturePrivilege) => {
         validateAppEntry(subFeaturePrivilege.id, subFeaturePrivilege.app);
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
@@ -262,7 +248,7 @@ export function validateFeature(feature: FeatureConfig) {
   if (unseenManagement.size > 0) {
     const ungrantedManagement = Array.from(unseenManagement.entries()).reduce((acc, entry) => {
       const values = Array.from(entry[1].values()).map(
-        managementPage => `${entry[0]}.${managementPage}`
+        (managementPage) => `${entry[0]}.${managementPage}`
       );
       return [...acc, ...values];
     }, [] as string[]);

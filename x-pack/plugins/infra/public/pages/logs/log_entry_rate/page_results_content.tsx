@@ -127,6 +127,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     [setAutoRefresh]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
     logEntryRate,
   ]);

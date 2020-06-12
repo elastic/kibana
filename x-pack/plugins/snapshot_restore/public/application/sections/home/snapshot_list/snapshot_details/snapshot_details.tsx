@@ -23,12 +23,8 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
-import {
-  SectionError,
-  SectionLoading,
-  SnapshotDeleteProvider,
-  Error,
-} from '../../../../components';
+import { SectionError, Error } from '../../../../../shared_imports';
+import { SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useServices } from '../../../../app_context';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
@@ -38,6 +34,8 @@ import {
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { TabSummary, TabFailures } from './tabs';
+
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   repositoryName: string;
@@ -60,7 +58,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   onClose,
   onSnapshotDeleted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
@@ -102,7 +100,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiTabs>
-          {tabOptions.map(tab => (
+          {tabOptions.map((tab) => (
             <EuiTab
               onClick={() => {
                 uiMetricService.trackUiMetric(panelTypeToUiMetricMap[tab.id]);
@@ -185,7 +183,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <SnapshotDeleteProvider>
-                  {deleteSnapshotPrompt => {
+                  {(deleteSnapshotPrompt) => {
                     return (
                       <EuiButtonEmpty
                         color="danger"
@@ -225,7 +223,10 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={linkToRestoreSnapshot(repositoryName, snapshotId)}
+                  {...reactRouterNavigate(
+                    history,
+                    linkToRestoreSnapshot(repositoryName, snapshotId)
+                  )}
                   fill
                   color="primary"
                   isDisabled={
@@ -261,7 +262,10 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
           </h2>
           <p>
             <small>
-              <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+              <EuiLink
+                {...reactRouterNavigate(history, linkToRepository(repositoryName))}
+                data-test-subj="repositoryLink"
+              >
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
                   defaultMessage="'{repositoryName}' repository"

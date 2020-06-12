@@ -16,11 +16,12 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 
 export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       validate: {
         body: escapeHatch,
       },
@@ -37,7 +38,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
 
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
-            myCaseConfigure.saved_objects.map(cc =>
+            myCaseConfigure.saved_objects.map((cc) =>
               caseConfigureService.delete({ client, caseConfigureId: cc.id })
             )
           );

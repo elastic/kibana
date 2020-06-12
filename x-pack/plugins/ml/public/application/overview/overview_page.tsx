@@ -6,7 +6,7 @@
 
 import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiPage, EuiPageBody } from '@elastic/eui';
-import { checkPermission } from '../privilege/check_privilege';
+import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check/check_ml_nodes';
 import { NavigationMenu } from '../components/navigation_menu';
 import { OverviewSideBar } from './components/sidebar';

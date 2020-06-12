@@ -19,6 +19,7 @@ export interface EsContext {
   esAdapter: IClusterClientAdapter;
   initialize(): void;
   waitTillReady(): Promise<boolean>;
+  initialized: boolean;
 }
 
 export interface EsError {
@@ -32,7 +33,7 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClient: EsClusterClient;
+  clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
 }
 
@@ -41,7 +42,7 @@ class EsContextImpl implements EsContext {
   public readonly esNames: EsNames;
   public esAdapter: IClusterClientAdapter;
   private readonly readySignal: ReadySignal<boolean>;
-  private initialized: boolean;
+  public initialized: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
@@ -50,7 +51,7 @@ class EsContextImpl implements EsContext {
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
-      clusterClient: params.clusterClient,
+      clusterClientPromise: params.clusterClientPromise,
     });
   }
 

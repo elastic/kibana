@@ -1,22 +1,22 @@
 [role="xpack"]
 [[configuring-monitoring]]
-== Configuring monitoring in {kib}
+== Configure monitoring in {kib}
 ++++
-<titleabbrev>Configuring monitoring</titleabbrev>
+<titleabbrev>Configure monitoring</titleabbrev>
 ++++
 
-If you enable the {monitor-features} in your cluster, there are two methods to 
+If you enable the {monitor-features} in your cluster, there are two methods to
 collect metrics about {kib}:
 
-* <<monitoring-kibana>>
-* <<monitoring-metricbeat>>
+* <<monitoring-metricbeat,{metricbeat} collection methods>>
+* <<monitoring-kibana,Legacy collection methods>>
 
-You can also use {kib} to 
+You can also use {kib} to
 <<monitoring-data,visualize monitoring data from across the {stack}>>.
 
-To learn about monitoring in general, see 
+To learn about monitoring in general, see
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
-include::monitoring-kibana.asciidoc[]
 include::monitoring-metricbeat.asciidoc[]
 include::viewing-metrics.asciidoc[]
+include::monitoring-kibana.asciidoc[]

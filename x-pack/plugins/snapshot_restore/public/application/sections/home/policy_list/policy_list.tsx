@@ -9,18 +9,26 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import {
+  SectionError,
+  Error,
+  WithPrivileges,
+  NotAuthorizedSection,
+} from '../../../../shared_imports';
+
 import { SlmPolicy } from '../../../../../common/types';
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 import { useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -124,7 +132,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         }
         actions={
           <EuiButton
-            href={linkToAddPolicy()}
+            {...reactRouterNavigate(history, linkToAddPolicy())}
             fill
             iconType="plusInCircle"
             data-test-subj="createPolicyButton"
@@ -187,7 +195,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   }
 
   return (
-    <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+    <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="policyList">

@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth } from './services';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
@@ -32,12 +32,12 @@ export default function(providerContext: FtrProviderContext) {
         body: { _source: agentDoc },
       } = await esClient.get({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
       });
-      agentDoc.agents.access_api_key_id = apiKey.id;
+      agentDoc['fleet-agents'].access_api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
         refresh: 'true',
         body: {
           doc: agentDoc,
@@ -106,7 +106,7 @@ export default function(providerContext: FtrProviderContext) {
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a2'
       );
       expect(expectedEvents.length).to.eql(2);
-      const expectedEvent = expectedEvents.find(
+      const { id, ...expectedEvent } = expectedEvents.find(
         (item: Record<string, string>) => item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1'
       );
       expect(expectedEvent).to.eql({

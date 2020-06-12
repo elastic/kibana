@@ -29,6 +29,14 @@ import {
   Highlights,
   compileFormattingRules,
 } from './message';
+import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
+import { decodeOrThrow } from '../../../../common/runtime_types';
+import {
+  logEntryDatasetsResponseRT,
+  LogEntryDatasetBucket,
+  CompositeDatasetKey,
+  createLogEntryDatasetsQuery,
+} from './queries/log_entry_datasets';
 
 export interface LogEntriesParams {
   startTimestamp: number;
@@ -51,10 +59,15 @@ export const LOG_ENTRIES_PAGE_SIZE = 200;
 
 const FIELDS_FROM_CONTEXT = ['log.file.path', 'host.name', 'container.id'] as const;
 
+const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
+
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
-    private readonly libs: { sources: InfraSources }
+    private readonly libs: {
+      framework: KibanaFramework;
+      sources: InfraSources;
+    }
   ) {}
 
   public async getLogEntriesAround(
@@ -113,7 +126,7 @@ export class InfraLogEntriesDomain {
     params: LogEntriesParams
   ): Promise<LogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
 
@@ -130,7 +143,7 @@ export class InfraLogEntriesDomain {
       params
     );
 
-    const entries = documents.map(doc => {
+    const entries = documents.map((doc) => {
       return {
         id: doc.id,
         cursor: doc.cursor,
@@ -156,14 +169,7 @@ export class InfraLogEntriesDomain {
             }
           }
         ),
-        context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
-          // Users might have different types here in their mappings.
-          const value = doc.fields[field];
-          if (typeof value === 'string') {
-            ctx[field] = value;
-          }
-          return ctx;
-        }, {}),
+        context: getContextFromDoc(doc),
       };
     });
 
@@ -179,7 +185,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
@@ -203,7 +209,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const messageFormattingRules = compileFormattingRules(
@@ -212,7 +218,7 @@ export class InfraLogEntriesDomain {
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
 
     const summaries = await Promise.all(
-      highlightQueries.map(async highlightQueryPhrase => {
+      highlightQueries.map(async (highlightQueryPhrase) => {
         const highlightQuery = createHighlightQueryDsl(highlightQueryPhrase, requiredFields);
         const query = filterQuery
           ? {
@@ -262,6 +268,45 @@ export class InfraLogEntriesDomain {
         'field'
       ),
     };
+  }
+
+  public async getLogEntryDatasets(
+    requestContext: RequestHandlerContext,
+    timestampField: string,
+    indexName: string,
+    startTime: number,
+    endTime: number
+  ) {
+    let datasetBuckets: LogEntryDatasetBucket[] = [];
+    let afterLatestBatchKey: CompositeDatasetKey | undefined;
+
+    while (true) {
+      const datasetsReponse = await this.libs.framework.callWithRequest(
+        requestContext,
+        'search',
+        createLogEntryDatasetsQuery(
+          indexName,
+          timestampField,
+          startTime,
+          endTime,
+          COMPOSITE_AGGREGATION_BATCH_SIZE,
+          afterLatestBatchKey
+        )
+      );
+
+      const { after_key: afterKey, buckets: latestBatchBuckets } = decodeOrThrow(
+        logEntryDatasetsResponseRT
+      )(datasetsReponse).aggregations.dataset_buckets;
+
+      datasetBuckets = [...datasetBuckets, ...latestBatchBuckets];
+      afterLatestBatchKey = afterKey;
+
+      if (latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
+        break;
+      }
+    }
+
+    return datasetBuckets.map(({ key: { dataset } }) => dataset);
   }
 }
 
@@ -352,3 +397,20 @@ const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
     type: 'phrase',
   },
 });
+
+const getContextFromDoc = (doc: LogEntryDocument): LogEntry['context'] => {
+  // Get all context fields, then test for the presence and type of the ones that go together
+  const containerId = doc.fields['container.id'];
+  const hostName = doc.fields['host.name'];
+  const logFilePath = doc.fields['log.file.path'];
+
+  if (typeof containerId === 'string') {
+    return { 'container.id': containerId };
+  }
+
+  if (typeof hostName === 'string' && typeof logFilePath === 'string') {
+    return { 'host.name': hostName, 'log.file.path': logFilePath };
+  }
+
+  return {};
+};

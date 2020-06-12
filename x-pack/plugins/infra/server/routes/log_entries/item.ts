@@ -37,8 +37,9 @@ export const initLogEntriesItemRoute = ({ framework, sources, logEntries }: Infr
         );
 
         const { id, sourceId } = payload;
-        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
-          .configuration;
+        const sourceConfiguration = (
+          await sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId)
+        ).configuration;
 
         const logEntry = await logEntries.getLogItem(requestContext, id, sourceConfiguration);
 

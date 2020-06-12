@@ -18,6 +18,6 @@ interface SetupDeps {
 export class CopySavedObjectsToSpaceService {
   public setup({ spacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
     const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager, notificationsSetup);
-    savedObjectsManagementSetup.actionRegistry.register(action);
+    savedObjectsManagementSetup.actions.register(action);
   }
 }

@@ -1,4 +1,35 @@
-.euiFormRow.mlDataFrameAnalyticsClassification__actualLabel {
-  padding-top: $euiSize * 4;
+/*
+  Workaround for EuiDataGrid within a Flex Layout,
+  this tricks browsers treating the width as a px value instead of %
+*/
+.mlDataFrameAnalyticsClassification {
+  width: 100%;
 }
 
+.mlDataFrameAnalyticsClassification__confusionMatrix {
+  padding: 0 5%;
+}
+
+/*
+  The following two classes are a workaround to avoid having EuiDataGrid in a flex layout
+  and just uses a legacy approach for a two column layout so we don't break IE11.
+*/
+.mlDataFrameAnalyticsClassification__confusionMatrix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.mlDataFrameAnalyticsClassification__actualLabel {
+  float: left;
+  width: 80px;
+  padding-top: $euiSize * 4 + $euiSizeXS;
+}
+
+/*
+  Gives EuiDataGrid a min-width of 480px, otherwise the columns options will disappear if you hide all columns.
+*/
+.mlDataFrameAnalyticsClassification__dataGridMinWidth {
+  min-width: 480px;
+  width: 100%;
+}

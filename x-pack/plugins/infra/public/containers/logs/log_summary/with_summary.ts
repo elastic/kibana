@@ -8,10 +8,10 @@ import { useContext } from 'react';
 import { useThrottle } from 'react-use';
 
 import { RendererFunction } from '../../../utils/typed_react';
-import { Source } from '../../source';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
 import { LogFilterState } from '../log_filter';
 import { LogPositionState } from '../log_position';
+import { useLogSourceContext } from '../log_source';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 
@@ -24,7 +24,7 @@ export const WithSummary = ({
     end: number | null;
   }>;
 }) => {
-  const { sourceId } = useContext(Source.Context);
+  const { sourceId } = useLogSourceContext();
   const { filterQuery } = useContext(LogFilterState.Context);
   const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
 

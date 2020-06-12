@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,11 +15,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiSearchBar,
 } from '@elastic/eui';
 
-import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
-import { getTaskStateBadge } from './columns';
+import {
+  getAnalysisType,
+  DataFrameAnalyticsId,
+  useRefreshAnalyticsList,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { getTaskStateBadge, getJobTypeBadge } from './columns';
 
 import {
   DataFrameAnalyticsListColumn,
@@ -45,14 +51,15 @@ import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
+import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
+import { SourceSelection } from '../source_selection';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
   dataFrameAnalytics: DataFrameAnalyticsListRow[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, analyticsId: DataFrameAnalyticsId) => {
-    const item = dataFrameAnalytics.find(analytics => analytics.config.id === analyticsId);
+    const item = dataFrameAnalytics.find((analytics) => analytics.config.id === analyticsId);
     if (item !== undefined) {
       m[analyticsId] = <ExpandedRow item={item} />;
     }
@@ -83,8 +90,11 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
+
+  const [queryText, setQueryText] = useState('');
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
@@ -102,6 +112,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
+  const [jobIdSelected, setJobIdSelected] = useState<boolean>(false);
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
@@ -113,6 +124,20 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setIsInitialized,
     blockRefresh
   );
+
+  // Query text/job_id based on url but only after getAnalytics is done first
+  // jobIdSelected makes sure the query is only run once since analytics is being refreshed constantly
+  const selectedId = getSelectedJobIdFromUrl(window.location.href);
+  useEffect(() => {
+    if (jobIdSelected === false && analytics.length > 0) {
+      if (selectedId !== undefined) {
+        setJobIdSelected(true);
+        setQueryText(selectedId);
+        const selectedIdQuery: Query = EuiSearchBar.Query.parse(selectedId);
+        onQueryChange({ query: selectedIdQuery, error: undefined });
+      }
+    }
+  }, [jobIdSelected, analytics]);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   useRefreshAnalyticsList({
@@ -129,6 +154,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         clauses = query.ast.clauses;
       }
       if (clauses.length > 0) {
+        setQueryText(query.text);
         setFilterActive(true);
         filterAnalytics(clauses as Array<TermClause | FieldClause>);
       } else {
@@ -151,10 +177,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       return p;
     }, {});
 
-    clauses.forEach(c => {
+    clauses.forEach((c) => {
       // the search term could be negated with a minus, e.g. -bananas
       const bool = c.match === 'must';
-      let ts = [];
+      let ts: DataFrameAnalyticsListRow[];
 
       if (c.type === 'term') {
         // filter term based clauses, e.g. bananas
@@ -162,32 +188,38 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         // if the term has been negated, AND the matches
         if (bool === true) {
           ts = analytics.filter(
-            d => stringMatch(d.id, c.value) === bool // ||
+            (d) => stringMatch(d.id, c.value) === bool // ||
             // stringMatch(d.config.description, c.value) === bool
           );
         } else {
           ts = analytics.filter(
-            d => stringMatch(d.id, c.value) === bool // &&
+            (d) => stringMatch(d.id, c.value) === bool // &&
             // stringMatch(d.config.description, c.value) === bool
           );
         }
       } else {
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
-          // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = analytics.filter(d => (c.value as string).includes(d.stats.state));
+          if (c.field === 'job_type') {
+            ts = analytics.filter((d) =>
+              (c.value as string).includes(getAnalysisType(d.config.analysis))
+            );
+          } else {
+            // the status value is an array of string(s) e.g. ['failed', 'stopped']
+            ts = analytics.filter((d) => (c.value as string).includes(d.stats.state));
+          }
         } else {
-          ts = analytics.filter(d => d.mode === c.value);
+          ts = analytics.filter((d) => d.mode === c.value);
         }
       }
 
-      ts.forEach(t => matches[t.id].count++);
+      ts.forEach((t) => matches[t.id].count++);
     });
 
     // loop through the matches and return only analytics which have match all the clauses
     const filtered = Object.values(matches)
-      .filter(m => (m && m.count) >= clauses.length)
-      .map(m => m.analytics);
+      .filter((m) => (m && m.count) >= clauses.length)
+      .map((m) => m.analytics);
 
     let pageStart = pageIndex * pageSize;
     if (pageStart >= filtered.length && filtered.length !== 0) {
@@ -240,7 +272,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             !isManagementTable && createAnalyticsForm
               ? [
                   <EuiButtonEmpty
-                    onClick={createAnalyticsForm.actions.openModal}
+                    onClick={() => setIsSourceIndexModalVisible(true)}
                     isDisabled={disabled}
                     data-test-subj="mlAnalyticsCreateFirstButton"
                   >
@@ -253,8 +285,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           }
           data-test-subj="mlNoDataFrameAnalyticsFound"
         />
-        {!isManagementTable && createAnalyticsForm && (
-          <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+        {isSourceIndexModalVisible === true && (
+          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
       </Fragment>
     );
@@ -286,6 +318,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   const search = {
+    query: queryText,
     onChange: onQueryChange,
     box: {
       incremental: true,
@@ -293,12 +326,25 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     filters: [
       {
         type: 'field_value_selection',
+        field: 'job_type',
+        name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: 'or',
+        options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
+          value: val,
+          name: val,
+          view: getJobTypeBadge(val),
+        })),
+      },
+      {
+        type: 'field_value_selection',
         field: 'state.state',
         name: i18n.translate('xpack.ml.dataframe.analyticsList.statusFilter', {
           defaultMessage: 'Status',
         }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map(val => ({
+        options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -357,7 +403,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </EuiFlexItem>
             {!isManagementTable && createAnalyticsForm && (
               <EuiFlexItem grow={false}>
-                <CreateAnalyticsButton {...createAnalyticsForm} />
+                <CreateAnalyticsButton
+                  {...createAnalyticsForm}
+                  setIsSourceIndexModalVisible={setIsSourceIndexModalVisible}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -381,14 +430,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           sorting={sorting}
           search={search}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
-          rowProps={item => ({
+          rowProps={(item) => ({
             'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
           })}
         />
       </div>
 
-      {!isManagementTable && createAnalyticsForm?.state.isModalVisible && (
-        <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+      {isSourceIndexModalVisible === true && (
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </Fragment>
   );

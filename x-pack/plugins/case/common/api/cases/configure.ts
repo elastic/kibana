@@ -8,10 +8,12 @@ import * as rt from 'io-ts';
 
 import { ActionResult } from '../../../../actions/common';
 import { UserRT } from '../user';
+import { JiraFieldsRT } from '../connectors/jira';
+import { ServiceNowFieldsRT } from '../connectors/servicenow';
 
 /*
  * This types below are related to the service now configuration
- * mapping between our case and service-now
+ * mapping between our case and [service-now, jira]
  *
  */
 
@@ -27,12 +29,7 @@ const CaseFieldRT = rt.union([
   rt.literal('comments'),
 ]);
 
-const ThirdPartyFieldRT = rt.union([
-  rt.literal('comments'),
-  rt.literal('description'),
-  rt.literal('not_mapped'),
-  rt.literal('short_description'),
-]);
+const ThirdPartyFieldRT = rt.union([JiraFieldsRT, ServiceNowFieldsRT, rt.literal('not_mapped')]);
 
 export const CasesConfigurationMapsRT = rt.type({
   source: CaseFieldRT,
@@ -60,13 +57,6 @@ export type CasesConnectorConfiguration = rt.TypeOf<typeof CasesConnectorConfigu
 /** ********************************************************************** */
 
 export type Connector = ActionResult;
-
-export interface CasesConnectorsFindResult {
-  page: number;
-  perPage: number;
-  total: number;
-  data: Connector[];
-}
 
 // TO DO we will need to add this type rt.literal('close-by-thrid-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);

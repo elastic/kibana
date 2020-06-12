@@ -6,27 +6,29 @@
 
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
-import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
+import { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
+import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
+import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const s3MetricTypes: SnapshotMetricType[] = [
+  's3BucketSize',
+  's3NumberOfObjects',
+  's3TotalRequests',
+  's3DownloadBytes',
+  's3UploadBytes',
+];
+
+export const s3GroupByFields = ['cloud.region'];
+
 export const AwsS3ToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = [
-    's3BucketSize',
-    's3NumberOfObjects',
-    's3TotalRequests',
-    's3DownloadBytes',
-    's3UploadBytes',
-  ];
-  const groupByFields = ['cloud.region'];
   return (
     <>
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={metricTypes}
-        groupByFields={groupByFields}
+        metricTypes={s3MetricTypes}
+        groupByFields={s3GroupByFields}
       />
     </>
   );

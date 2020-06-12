@@ -24,10 +24,9 @@ import { getRequestAbortedSignal } from '../lib';
 export function registerSearchRoute(router: IRouter): void {
   router.post(
     {
-      path: '/internal/search/{strategy}/{id?}',
+      path: '/internal/search/{strategy}',
       validate: {
         params: schema.object({
-          id: schema.string(),
           strategy: schema.string(),
         }),
 
@@ -37,16 +36,42 @@ export function registerSearchRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
-      const searchRequest = request.body;
+      const { strategy } = request.params;
+      const signal = getRequestAbortedSignal(request.events.aborted$);
+
+      try {
+        const response = await context.search!.search(request.body, { signal }, strategy);
+        return res.ok({ body: response });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/search/{strategy}/{id}',
+      validate: {
+        params: schema.object({
+          strategy: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
       const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const response = await context.search!.search(
-          { ...(id ? { id } : {}), ...searchRequest },
-          { signal },
-          strategy
-        );
+        const response = await context.search!.search({ id }, { signal }, strategy);
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({

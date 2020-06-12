@@ -17,7 +17,7 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { connectorReducer } from './connector_reducer';
@@ -25,6 +25,7 @@ import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
 import './connector_add_modal.scss';
 import { PLUGIN } from '../../constants/plugin';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -33,10 +34,12 @@ interface ConnectorAddModalProps {
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  capabilities: ApplicationStart['capabilities'];
+  docLinks: DocLinksStart;
 }
 
 export const ConnectorAddModal = ({
@@ -47,6 +50,8 @@ export const ConnectorAddModal = ({
   http,
   toastNotifications,
   actionTypeRegistry,
+  capabilities,
+  docLinks,
 }: ConnectorAddModalProps) => {
   let hasErrors = false;
   const initialConnector = {
@@ -55,6 +60,7 @@ export const ConnectorAddModal = ({
     secrets: {},
   } as ActionConnector;
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const canSave = hasSaveActionsCapability(capabilities);
 
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
   const setConnector = (value: any) => {
@@ -81,11 +87,11 @@ export const ConnectorAddModal = ({
     ...actionTypeModel?.validateConnector(connector).errors,
     ...validateBaseProperties(connector).errors,
   } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -101,7 +107,7 @@ export const ConnectorAddModal = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         setServerError(errorRes);
         return undefined;
       });
@@ -156,10 +162,10 @@ export const ConnectorAddModal = ({
             serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
+            docLinks={docLinks}
             http={http}
           />
         </EuiModalBody>
-
         <EuiModalFooter>
           <EuiButtonEmpty onClick={closeModal}>
             {i18n.translate(
@@ -169,32 +175,33 @@ export const ConnectorAddModal = ({
               }
             )}
           </EuiButtonEmpty>
-
-          <EuiButton
-            fill
-            color="secondary"
-            data-test-subj="saveActionButtonModal"
-            type="submit"
-            iconType="check"
-            isDisabled={hasErrors}
-            isLoading={isSaving}
-            onClick={async () => {
-              setIsSaving(true);
-              const savedAction = await onActionConnectorSave();
-              setIsSaving(false);
-              if (savedAction) {
-                if (postSaveEventHandler) {
-                  postSaveEventHandler(savedAction);
+          {canSave ? (
+            <EuiButton
+              fill
+              color="secondary"
+              data-test-subj="saveActionButtonModal"
+              type="submit"
+              iconType="check"
+              isDisabled={hasErrors}
+              isLoading={isSaving}
+              onClick={async () => {
+                setIsSaving(true);
+                const savedAction = await onActionConnectorSave();
+                setIsSaving(false);
+                if (savedAction) {
+                  if (postSaveEventHandler) {
+                    postSaveEventHandler(savedAction);
+                  }
+                  closeModal();
                 }
-                closeModal();
-              }
-            }}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+              }}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          ) : null}
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>

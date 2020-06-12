@@ -19,4 +19,5 @@
 
 export { KbnUrlProvider } from './url';
 export { RedirectWhenMissingProvider } from './redirect_when_missing';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { modifyUrl } from '../../../../core/utils';

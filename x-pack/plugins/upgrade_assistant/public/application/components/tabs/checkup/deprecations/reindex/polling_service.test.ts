@@ -6,7 +6,7 @@
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { ReindexPollingService } from './polling_service';
-import { httpServiceMock } from 'src/core/public/http/http_service.mock';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 const mockClient = httpServiceMock.createSetupContract();
 
@@ -24,7 +24,7 @@ describe('ReindexPollingService', () => {
 
     const service = new ReindexPollingService('myIndex', mockClient);
     service.updateStatus();
-    await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
+    await new Promise((resolve) => setTimeout(resolve, 1200)); // wait for poll interval
 
     expect(mockClient.get).toHaveBeenCalledTimes(1);
     service.stopPolling();
@@ -42,7 +42,7 @@ describe('ReindexPollingService', () => {
 
     const service = new ReindexPollingService('myIndex', mockClient);
     service.updateStatus();
-    await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
+    await new Promise((resolve) => setTimeout(resolve, 1200)); // wait for poll interval
 
     expect(mockClient.get).toHaveBeenCalledTimes(1);
     expect(service.status$.value.errorMessage).toEqual(`Oh no!`);
@@ -60,7 +60,7 @@ describe('ReindexPollingService', () => {
 
     const service = new ReindexPollingService('myIndex', mockClient);
     service.updateStatus();
-    await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
+    await new Promise((resolve) => setTimeout(resolve, 1200)); // wait for poll interval
 
     expect(mockClient.get).toHaveBeenCalledTimes(2);
     service.stopPolling();

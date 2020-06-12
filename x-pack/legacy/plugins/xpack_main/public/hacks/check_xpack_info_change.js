@@ -43,11 +43,11 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
   }
 
   return {
-    response: response => interceptor(response, identity),
-    responseError: response => interceptor(response, $q.reject),
+    response: (response) => interceptor(response, identity),
+    responseError: (response) => interceptor(response, $q.reject),
   };
 });
 
-module.config($httpProvider => {
+module.config(($httpProvider) => {
   $httpProvider.interceptors.push('checkXPackInfoChange');
 });

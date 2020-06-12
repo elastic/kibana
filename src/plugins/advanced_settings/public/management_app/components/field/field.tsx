@@ -266,7 +266,7 @@ export class Field extends PureComponent<FieldProps> {
       reader.onload = () => {
         resolve(reader.result || undefined);
       };
-      reader.onerror = err => {
+      reader.onerror = (err) => {
         reject(err);
       };
     });
@@ -378,7 +378,7 @@ export class Field extends PureComponent<FieldProps> {
           <EuiSelect
             {...a11yProps}
             value={currentValue}
-            options={(options as string[]).map(option => {
+            options={(options as string[]).map((option) => {
               return {
                 text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
                 value: option,

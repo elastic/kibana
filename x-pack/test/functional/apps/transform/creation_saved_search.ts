@@ -13,26 +13,28 @@ interface GroupByEntry {
   intervalLabel?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_saved_search', function() {
-    this.tags(['smoke']);
+  describe('creation_saved_search', function () {
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await transform.testResources.setKibanaTimeZoneToUTC();
+
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
-        source: 'farequote_filter',
+        source: 'ft_farequote_filter',
         groupByEntries: [
           {
             identifier: 'terms(airline)',
@@ -61,8 +63,8 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourceIndex: 'farequote',
-          sourcePreview: {
+          sourceIndex: 'ft_farequote',
+          indexPreview: {
             column: 2,
             values: ['ASA'],
           },
@@ -71,9 +73,10 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -97,14 +100,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the filtered source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewColumnValues(
-            testData.expected.sourcePreview.column,
-            testData.expected.sourcePreview.values
+        it('shows the filtered index preview', async () => {
+          await transform.wizard.assertIndexPreviewColumnValues(
+            testData.expected.indexPreview.column,
+            testData.expected.indexPreview.values
           );
         });
 
@@ -229,7 +232,7 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(testData.transformId);
           const rows = await transform.table.parseTransformTable();
-          expect(rows.filter(row => row.id === testData.transformId)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
         it('job creation displays details for the created job in the job list', async () => {

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -67,7 +67,7 @@ export default function(providerContext: FtrProviderContext) {
           },
         })
         .expect(404);
-      expect(apiResponse.message).to.eql('Saved object [agents/agent100] not found');
+      expect(apiResponse.message).to.eql('Saved object [fleet-agents/agent100] not found');
     });
   });
 }

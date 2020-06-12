@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
@@ -12,12 +12,50 @@ import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
+  analyticsIdSchema,
+  stopsDataFrameAnalyticsJobQuerySchema,
+  deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
+import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
+
+function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
+  return iph.getIndexPatternId(patternName);
+}
+
+function deleteDestIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
+  return iph.deleteIndexPatternById(indexPatternId);
+}
 
 /**
  * Routes for the data frame analytics
  */
 export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
+  async function userCanDeleteIndex(
+    context: RequestHandlerContext,
+    destinationIndex: string
+  ): Promise<boolean> {
+    if (!mlLicense.isSecurityEnabled()) {
+      return true;
+    }
+    const privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
+      body: {
+        index: [
+          {
+            names: [destinationIndex], // uses wildcard
+            privileges: ['delete_index'],
+          },
+        ],
+      },
+    });
+    if (!privilege) {
+      return false;
+    }
+    return privilege.has_all_requested === true;
+  }
+
   /**
    * @apiGroup DataFrameAnalytics
    *
@@ -31,8 +69,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
-      validate: {
-        params: schema.object({ analyticsId: schema.maybe(schema.string()) }),
+      validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -54,13 +93,16 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsById
    * @apiDescription Returns the data frame analytics job.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
    */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
-        params: schema.object({ analyticsId: schema.string() }),
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -89,6 +131,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -111,13 +156,16 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsStatsById
    * @apiDescription Returns data frame analytics job statistics.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
    */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
       validate: {
-        params: schema.object({ analyticsId: schema.string() }),
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -146,16 +194,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiDescription This API creates a data frame analytics job that performs an analysis
    *                 on the source index and stores the outcome in a destination index.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
+   * @apiSchema (body) dataAnalyticsJobConfigSchema
    */
   router.put(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
-        body: schema.object(dataAnalyticsJobConfigSchema),
+        params: analyticsIdSchema,
+        body: dataAnalyticsJobConfigSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -183,12 +233,17 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {post} /api/ml/data_frame/_evaluate Evaluate the data frame analytics for an annotated index
    * @apiName EvaluateDataFrameAnalytics
    * @apiDescription Evaluates the data frame analytics for an annotated index.
+   *
+   * @apiSchema (body) dataAnalyticsEvaluateSchema
    */
   router.post(
     {
       path: '/api/ml/data_frame/_evaluate',
       validate: {
-        body: schema.object({ ...dataAnalyticsEvaluateSchema }),
+        body: dataAnalyticsEvaluateSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -216,19 +271,16 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiDescription This API provides explanations for a data frame analytics config
    *                 that either exists already or one that has not been created yet.
    *
-   * @apiParam {String} [description]
-   * @apiParam {Object} [dest]
-   * @apiParam {Object} source
-   * @apiParam {String} source.index
-   * @apiParam {Object} analysis
-   * @apiParam {Object} [analyzed_fields]
-   * @apiParam {String} [model_memory_limit]
+   * @apiSchema (body) dataAnalyticsExplainSchema
    */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/_explain',
       validate: {
-        body: schema.object({ ...dataAnalyticsExplainSchema }),
+        body: dataAnalyticsExplainSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -255,26 +307,94 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName DeleteDataFrameAnalytics
    * @apiDescription Deletes specified data frame analytics job.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
    */
   router.delete(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
+        params: analyticsIdSchema,
+        query: deleteDataFrameAnalyticsJobSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.deleteDataFrameAnalytics',
-          {
-            analyticsId,
+        const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+        let destinationIndex: string | undefined;
+        const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+          success: false,
+        };
+
+        // Check if analyticsId is valid and get destination index
+        if (deleteDestIndex || deleteDestIndexPattern) {
+          try {
+            const dfa = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
+              analyticsId,
+            });
+            if (Array.isArray(dfa.data_frame_analytics) && dfa.data_frame_analytics.length > 0) {
+              destinationIndex = dfa.data_frame_analytics[0].dest.index;
+            }
+          } catch (e) {
+            return response.customError(wrapError(e));
           }
-        );
+
+          // If user checks box to delete the destinationIndex associated with the job
+          if (destinationIndex && deleteDestIndex) {
+            // Verify if user has privilege to delete the destination index
+            const userCanDeleteDestIndex = await userCanDeleteIndex(context, destinationIndex);
+            // If user does have privilege to delete the index, then delete the index
+            if (userCanDeleteDestIndex) {
+              try {
+                await context.ml!.mlClient.callAsCurrentUser('indices.delete', {
+                  index: destinationIndex,
+                });
+                destIndexDeleted.success = true;
+              } catch (deleteIndexError) {
+                destIndexDeleted.error = wrapError(deleteIndexError);
+              }
+            } else {
+              return response.forbidden();
+            }
+          }
+
+          // Delete the index pattern if there's an index pattern that matches the name of dest index
+          if (destinationIndex && deleteDestIndexPattern) {
+            try {
+              const indexPatternId = await getIndexPatternId(context, destinationIndex);
+              if (indexPatternId) {
+                await deleteDestIndexPatternById(context, indexPatternId);
+              }
+              destIndexPatternDeleted.success = true;
+            } catch (deleteDestIndexPatternError) {
+              destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+            }
+          }
+        }
+        // Grab the target index from the data frame analytics job id
+        // Delete the data frame analytics
+
+        try {
+          await context.ml!.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
+            analyticsId,
+          });
+          analyticsJobDeleted.success = true;
+        } catch (deleteDFAError) {
+          analyticsJobDeleted.error = wrapError(deleteDFAError);
+          if (analyticsJobDeleted.error.statusCode === 404) {
+            return response.notFound();
+          }
+        }
+        const results = {
+          analyticsJobDeleted,
+          destIndexDeleted,
+          destIndexPatternDeleted,
+        };
         return response.ok({
           body: results,
         });
@@ -291,15 +411,16 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName StartDataFrameAnalyticsJob
    * @apiDescription Starts a data frame analytics job.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
    */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -324,16 +445,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName StopsDataFrameAnalyticsJob
    * @apiDescription Stops a data frame analytics job.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
+   * @apiSchema (query) stopsDataFrameAnalyticsJobQuerySchema
    */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-          force: schema.maybe(schema.boolean()),
-        }),
+        params: analyticsIdSchema,
+        query: stopsDataFrameAnalyticsJobQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -367,13 +490,16 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsMessages
    * @apiDescription Returns the list of audit messages for data frame analytics jobs.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
    */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/messages',
       validate: {
-        params: schema.object({ analyticsId: schema.string() }),
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

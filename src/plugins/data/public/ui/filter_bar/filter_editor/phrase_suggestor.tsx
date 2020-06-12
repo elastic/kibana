@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { Component } from 'react';
+import React from 'react';
 import { debounce } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';
+import { UI_SETTINGS } from '../../../../common';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -39,7 +40,7 @@ export interface PhraseSuggestorState {
  * aggregatable), we pull out the common logic for requesting suggestions into this component
  * which both of them extend.
  */
-export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component<
+export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Component<
   T,
   PhraseSuggestorState
 > {
@@ -54,7 +55,9 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
   }
 
   protected isSuggestingValues() {
-    const shouldSuggestValues = this.services.uiSettings.get('filterEditor:suggestValues');
+    const shouldSuggestValues = this.services.uiSettings.get(
+      UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
+    );
     const { field } = this.props;
     return shouldSuggestValues && field && field.aggregatable && field.type === 'string';
   }
@@ -80,4 +83,4 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
   }, 500);
 }
 
-export const PhraseSuggestor = withKibana(PhraseSuggestorUI);
+export const PhraseSuggestor = withKibana(PhraseSuggestorUI as any);

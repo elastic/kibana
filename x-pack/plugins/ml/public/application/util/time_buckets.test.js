@@ -5,36 +5,23 @@
  */
 
 import moment from 'moment';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { TimeBuckets, getBoundsRoundedToInterval, calcEsInterval } from './time_buckets';
-
-jest.mock(
-  './dependency_cache',
-  () => ({
-    getUiSettings: () => {
-      return {
-        get(val) {
-          switch (val) {
-            case 'histogram:barTarget':
-              return 50;
-            case 'histogram:maxBars':
-              return 100;
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
 
 describe('ML - time buckets', () => {
   let autoBuckets;
   let customBuckets;
 
   beforeEach(() => {
-    autoBuckets = new TimeBuckets();
+    const timeBucketsConfig = {
+      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: 100,
+      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 50,
+    };
+
+    autoBuckets = new TimeBuckets(timeBucketsConfig);
     autoBuckets.setInterval('auto');
 
-    customBuckets = new TimeBuckets();
+    customBuckets = new TimeBuckets(timeBucketsConfig);
     customBuckets.setInterval('auto');
     customBuckets.setBarTarget(500);
     customBuckets.setMaxBars(550);

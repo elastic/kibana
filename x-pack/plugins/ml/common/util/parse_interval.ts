@@ -26,9 +26,7 @@ const SUPPORT_ZERO_DURATION_UNITS: SupportedUnits[] = ['ms', 's', 'm', 'h'];
 // 3. Fractional intervals e.g. 1.5h or 4.5d are not allowed, in line with the behaviour
 // of the Elasticsearch date histogram aggregation.
 export function parseInterval(interval: string): Duration | null {
-  const matches = String(interval)
-    .trim()
-    .match(INTERVAL_STRING_RE);
+  const matches = String(interval).trim().match(INTERVAL_STRING_RE);
   if (!Array.isArray(matches) || matches.length < 3) {
     return null;
   }

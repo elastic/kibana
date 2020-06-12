@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -38,7 +38,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/machine_learning'),
+      resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
@@ -53,11 +53,13 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/ingest_pipelines'),
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/endpoint'),
+      resolve(__dirname, './apps/reporting_management'),
+
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -86,9 +88,7 @@ export default async function({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
-        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
-        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -113,8 +113,7 @@ export default async function({ readConfigFile }) {
         pathname: '/app/monitoring',
       },
       logstashPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
+        pathname: '/app/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -123,12 +122,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',
@@ -146,61 +145,50 @@ export default async function({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
-      apm: {
-        pathname: '/app/apm',
-      },
       ml: {
         pathname: '/app/ml',
       },
       roleMappings: {
-        pathname: '/app/kibana',
-        hash: '/management/security/role_mappings',
+        pathname: '/app/management/security/role_mappings',
       },
       rollupJob: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/',
+        pathname: '/app/management/data/rollup_jobs',
       },
       apiKeys: {
-        pathname: '/app/kibana',
-        hash: '/management/security/api_keys/',
+        pathname: '/app/management/security/api_keys',
       },
       licenseManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/license_management',
+        pathname: '/app/management/stack/license_management',
       },
       indexManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_management',
+        pathname: '/app/management/data/index_management',
       },
       indexLifecycleManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_lifecycle_management',
+        pathname: '/app/management/data/index_lifecycle_management',
+      },
+      ingestPipelines: {
+        pathname: '/app/management/ingest/ingest_pipelines',
       },
       snapshotRestore: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/snapshot_restore',
-      },
-      crossClusterReplication: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/cross_cluster_replication',
+        pathname: '/app/management/data/snapshot_restore',
       },
       remoteClusters: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/remote_clusters',
+        pathname: '/app/management/data/remote_clusters',
+      },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',
       },
       watcher: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/watcher/watches/',
+        pathname: '/app/management/insightsAndAlerting/watcher/watches',
       },
       transform: {
-        pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform',
+        pathname: '/app/management/data/transform',
       },
-      endpoint: {
-        pathname: '/app/endpoint',
+      reporting: {
+        pathname: '/app/management/insightsAndAlerting/reporting',
       },
     },
 
@@ -232,6 +220,17 @@ export default async function({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965

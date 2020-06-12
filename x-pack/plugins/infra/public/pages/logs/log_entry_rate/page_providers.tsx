@@ -6,20 +6,20 @@
 
 import React from 'react';
 
-import { useSourceContext } from '../../../containers/source';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
 import { LogEntryRateModuleProvider } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
-  const { sourceId, source } = useSourceContext();
+  const { sourceId, sourceConfiguration } = useLogSourceContext();
   const spaceId = useKibanaSpaceId();
 
   return (
     <LogEntryRateModuleProvider
-      indexPattern={source ? source.configuration.logAlias : ''}
+      indexPattern={sourceConfiguration?.configuration.logAlias ?? ''}
       sourceId={sourceId}
       spaceId={spaceId}
-      timestampField={source ? source.configuration.fields.timestamp : ''}
+      timestampField={sourceConfiguration?.configuration.fields.timestamp ?? ''}
     >
       {children}
     </LogEntryRateModuleProvider>

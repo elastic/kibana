@@ -40,8 +40,8 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
       button={
         <EuiButton
           data-test-subj="createNew"
-          iconType="arrowDown"
-          iconSide="right"
+          iconType="plusInCircle"
+          iconSide="left"
           onClick={toggleCreateMenu}
           fill
         >

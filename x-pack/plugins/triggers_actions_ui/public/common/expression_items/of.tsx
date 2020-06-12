@@ -17,13 +17,14 @@ import {
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
 
 interface OfExpressionProps {
   aggType: string;
   aggField?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedAggField: (selectedAggType?: string) => void;
   fields: Record<string, any>;
   customAggTypesOptions?: {
@@ -124,7 +125,7 @@ export const OfExpression = ({
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   onChangeSelectedAggField(
                     selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                   );

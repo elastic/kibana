@@ -28,12 +28,6 @@ export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats'; // similar to KIBANA
  * @type {string}
  */
 export const KIBANA_SETTINGS_TYPE = 'kibana_settings';
-/**
- * The type name used within the Monitoring index to publish Kibana usage stats.
- * NOTE: this string shows as-is in the stats API as a field name for the kibana usage stats
- * @type {string}
- */
-export const KIBANA_USAGE_TYPE = 'kibana';
 
 /*
  * Key for the localStorage service
@@ -251,7 +245,7 @@ export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION, ALERT_TYPE_CLUSTER_ST
 
 /**
  * Matches the id for the built-in in email action type
- * See x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts
+ * See x-pack/plugins/actions/server/builtin_action_types/email.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
 

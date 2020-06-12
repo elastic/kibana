@@ -117,7 +117,7 @@ async function fetchFieldExistence({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.dataClient,
+    client: context.core.elasticsearch.legacy.client,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
     fields,
@@ -131,7 +131,7 @@ async function fetchFieldExistence({
 
 async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
   const savedObjectsClient = context.core.savedObjects.client;
-  const requestClient = context.core.elasticsearch.dataClient;
+  const requestClient = context.core.elasticsearch.legacy.client;
   const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
     'index-pattern',
     indexPatternId
@@ -171,7 +171,7 @@ export function buildFieldList(
 ): Field[] {
   const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
     .map(([name, v]) => ({ ...v, name }))
-    .filter(f => f.type === 'alias')
+    .filter((f) => f.type === 'alias')
     .reduce((acc, f) => {
       acc[f.name] = f.path;
       return acc;
@@ -236,7 +236,7 @@ async function fetchIndexPatternStats({
     },
   };
 
-  const scriptedFields = fields.filter(f => f.isScript);
+  const scriptedFields = fields.filter((f) => f.isScript);
   const result = await client.callAsCurrentUser('search', {
     index,
     body: {
@@ -258,6 +258,8 @@ async function fetchIndexPatternStats({
   return result.hits.hits;
 }
 
+// Recursive function to determine if the _source of a document
+// contains a known path.
 function exists(obj: unknown, path: string[], i = 0): boolean {
   if (obj == null) {
     return false;
@@ -268,10 +270,26 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
   }
 
   if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
+    return obj.some((child) => exists(child, path, i));
   }
 
   if (typeof obj === 'object') {
+    // Because Elasticsearch flattens paths, dots in the field name are allowed
+    // as JSON keys. For example, { 'a.b': 10 }
+    const partialKeyMatches = Object.getOwnPropertyNames(obj)
+      .map((key) => key.split('.'))
+      .filter((keyPaths) => keyPaths.every((key, keyIndex) => key === path[keyIndex + i]));
+
+    if (partialKeyMatches.length) {
+      return partialKeyMatches.every((keyPaths) => {
+        return exists(
+          (obj as Record<string, unknown>)[keyPaths.join('.')],
+          path,
+          i + keyPaths.length
+        );
+      });
+    }
+
     return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
   }
 
@@ -292,12 +310,12 @@ export function existingFields(
       break;
     }
 
-    missingFields.forEach(field => {
+    missingFields.forEach((field) => {
       if (exists(field.isScript ? doc.fields : doc._source, field.path)) {
         missingFields.delete(field);
       }
     });
   }
 
-  return fields.filter(field => !missingFields.has(field)).map(f => f.name);
+  return fields.filter((field) => !missingFields.has(field)).map((f) => f.name);
 }

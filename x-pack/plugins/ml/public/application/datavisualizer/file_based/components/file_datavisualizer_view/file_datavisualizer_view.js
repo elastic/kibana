@@ -19,17 +19,15 @@ import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
-import { MAX_BYTES } from '../../../../../../common/constants/file_datavisualizer';
 import {
+  getMaxBytes,
   readFile,
   createUrlOverrides,
   processResults,
-  reduceData,
   hasImportPermission,
 } from '../utils';
-import { MODE } from './constants';
 
-const UPLOAD_SIZE_MB = 5;
+import { MODE } from './constants';
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -39,6 +37,7 @@ export class FileDataVisualizerView extends Component {
       files: {},
       fileName: '',
       fileContents: '',
+      data: [],
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
@@ -57,6 +56,7 @@ export class FileDataVisualizerView extends Component {
     this.overrides = {};
     this.previousOverrides = {};
     this.originalSettings = {};
+    this.maxFileUploadBytes = getMaxBytes();
   }
 
   async componentDidMount() {
@@ -67,7 +67,7 @@ export class FileDataVisualizerView extends Component {
     this.setState({ hasPermissionToImport });
   }
 
-  onFilePickerChange = files => {
+  onFilePickerChange = (files) => {
     this.overrides = {};
 
     this.setState(
@@ -77,6 +77,7 @@ export class FileDataVisualizerView extends Component {
         loaded: false,
         fileName: '',
         fileContents: '',
+        data: [],
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
@@ -93,19 +94,18 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size <= MAX_BYTES) {
+    if (file.size <= this.maxFileUploadBytes) {
       try {
-        const fileContents = await readFile(file);
-        const data = fileContents.data;
+        const { data, fileContents } = await readFile(file);
         this.setState({
-          fileContents: data,
+          data,
+          fileContents,
           fileName: file.name,
           fileSize: file.size,
         });
 
-        await this.loadSettings(data);
+        await this.analyzeFile(fileContents);
       } catch (error) {
-        console.error(error);
         this.setState({
           loaded: false,
           loading: false,
@@ -123,14 +123,9 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async loadSettings(data, overrides, isRetry = false) {
+  async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
-      // reduce the amount of data being sent to the endpoint
-      // 5MB should be enough to contain 1000 lines
-      const lessData = reduceData(data, UPLOAD_SIZE_MB);
-      console.log('overrides', overrides);
-      const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await analyzeFile(lessData, overrides);
+      const resp = await ml.fileDatavisualizer.analyzeFile(fileContents, overrides);
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 
@@ -152,8 +147,8 @@ export class FileDataVisualizerView extends Component {
         // if no overrides were used, store all the settings returned from the endpoint
         this.originalSettings = serverSettings;
       } else {
-        Object.keys(serverOverrides).forEach(o => {
-          const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
+        Object.keys(serverOverrides).forEach((o) => {
+          const camelCaseO = o.replace(/_\w/g, (m) => m[1].toUpperCase());
           this.overrides[camelCaseO] = serverOverrides[o];
         });
 
@@ -161,7 +156,7 @@ export class FileDataVisualizerView extends Component {
         // e.g. changing the name of the time field which is also the time field
         // will cause the timestamp_field setting to change.
         // if any have changed, update the originalSettings value
-        Object.keys(serverSettings).forEach(o => {
+        Object.keys(serverSettings).forEach((o) => {
           const value = serverSettings[o];
           if (
             this.overrides[o] === undefined &&
@@ -181,8 +176,6 @@ export class FileDataVisualizerView extends Component {
         fileCouldNotBeRead: isRetry,
       });
     } catch (error) {
-      console.error(error);
-
       this.setState({
         results: undefined,
         explanation: undefined,
@@ -199,7 +192,7 @@ export class FileDataVisualizerView extends Component {
           loading: true,
           loaded: false,
         });
-        this.loadSettings(data, this.previousOverrides, true);
+        this.analyzeFile(fileContents, this.previousOverrides, true);
       }
     }
   }
@@ -232,7 +225,7 @@ export class FileDataVisualizerView extends Component {
     this.setState({ bottomBarVisible: false });
   };
 
-  setOverrides = overrides => {
+  setOverrides = (overrides) => {
     console.log('setOverrides', overrides);
     this.setState(
       {
@@ -241,12 +234,12 @@ export class FileDataVisualizerView extends Component {
       },
       () => {
         const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
-        this.loadSettings(this.state.fileContents, formattedOverrides);
+        this.analyzeFile(this.state.fileContents, formattedOverrides);
       }
     );
   };
 
-  changeMode = mode => {
+  changeMode = (mode) => {
     this.setState({ mode });
   };
 
@@ -262,6 +255,7 @@ export class FileDataVisualizerView extends Component {
       results,
       explanation,
       fileContents,
+      data,
       fileName,
       fileSize,
       fileTooLarge,
@@ -287,7 +281,9 @@ export class FileDataVisualizerView extends Component {
 
             {loading && <LoadingPanel />}
 
-            {fileTooLarge && <FileTooLarge fileSize={fileSize} maxFileSize={MAX_BYTES} />}
+            {fileTooLarge && (
+              <FileTooLarge fileSize={fileSize} maxFileSize={this.maxFileUploadBytes} />
+            )}
 
             {fileCouldNotBeRead && loading === false && (
               <React.Fragment>
@@ -338,6 +334,7 @@ export class FileDataVisualizerView extends Component {
               results={results}
               fileName={fileName}
               fileContents={fileContents}
+              data={data}
               indexPatterns={this.props.indexPatterns}
               kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}

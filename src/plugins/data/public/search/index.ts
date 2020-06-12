@@ -21,13 +21,7 @@ export * from './aggs';
 export * from './expressions';
 export * from './tabify';
 
-export {
-  ISearchSetup,
-  ISearchStart,
-  ISearchContext,
-  TSearchStrategyProvider,
-  ISearchStrategy,
-} from './types';
+export { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
 
 export {
   ISearch,
@@ -44,19 +38,26 @@ export { esSearchStrategyProvider, getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
-
-export { SearchError, SearchStrategyProvider, getSearchErrorType } from './search_strategy';
+export {
+  SearchError,
+  FetchOptions,
+  SearchRequest,
+  SearchResponse,
+  getSearchErrorType,
+  getSearchParamsFromRequest,
+} from './fetch';
 
 export {
   ISearchSource,
   SearchSource,
+  SearchSourceDependencies,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
+  extractReferences as extractSearchSourceReferences,
+  injectReferences as injectSearchSourceReferences,
+  parseSearchSourceJSON,
 } from './search_source';
 
 export { SearchInterceptor } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';
-
-export { FetchOptions } from './fetch';

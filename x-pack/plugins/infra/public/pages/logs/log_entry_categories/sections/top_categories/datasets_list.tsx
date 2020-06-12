@@ -14,7 +14,7 @@ export const DatasetsList: React.FunctionComponent<{
   datasets: LogEntryCategoryDataset[];
 }> = ({ datasets }) => (
   <ul>
-    {datasets.map(dataset => {
+    {datasets.map((dataset) => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
       return (
         <li key={datasetLabel}>

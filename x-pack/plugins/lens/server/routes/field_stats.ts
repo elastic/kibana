@@ -42,7 +42,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.dataClient;
+      const requestClient = context.core.elasticsearch.legacy.client;
       const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
@@ -149,7 +149,7 @@ export async function getNumberHistogram(
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
   const terms = minMaxResult.aggregations!.sample.top_values;
   const topValuesBuckets = {
-    buckets: terms.buckets.map(bucket => ({
+    buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
       key: bucket.key,
     })),
@@ -195,7 +195,7 @@ export async function getNumberHistogram(
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
-      buckets: histogramResult.aggregations!.sample.histo.buckets.map(bucket => ({
+      buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
       })),
@@ -230,7 +230,7 @@ export async function getStringSamples(
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
     topValues: {
-      buckets: topValuesResult.aggregations!.sample.top_values.buckets.map(bucket => ({
+      buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
       })),
@@ -276,7 +276,7 @@ export async function getDateHistogram(
   return {
     totalDocuments: results.hits.total,
     histogram: {
-      buckets: results.aggregations!.histo.buckets.map(bucket => ({
+      buckets: results.aggregations!.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
       })),

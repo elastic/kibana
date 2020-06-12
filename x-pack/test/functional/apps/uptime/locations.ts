@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
+import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -15,9 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const monitor = () => uptime.monitor;
 
   describe('Observer location', () => {
-    const start = moment()
-      .subtract('15', 'm')
-      .toISOString();
+    const start = moment().subtract('15', 'm').toISOString();
     const end = moment().toISOString();
 
     const MONITOR_ID = 'location-testing-id';

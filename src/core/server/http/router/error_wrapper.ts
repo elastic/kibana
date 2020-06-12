@@ -18,20 +18,10 @@
  */
 
 import Boom from 'boom';
-import { KibanaRequest } from './request';
-import { KibanaResponseFactory } from './response';
-import { RequestHandler } from './router';
-import { RequestHandlerContext } from '../../../server';
-import { RouteMethod } from './route';
+import { RequestHandlerWrapper } from './router';
 
-export const wrapErrors = <P, Q, B>(
-  handler: RequestHandler<P, Q, B, RouteMethod>
-): RequestHandler<P, Q, B, RouteMethod> => {
-  return async (
-    context: RequestHandlerContext,
-    request: KibanaRequest<P, Q, B, RouteMethod>,
-    response: KibanaResponseFactory
-  ) => {
+export const wrapErrors: RequestHandlerWrapper = (handler) => {
+  return async (context, request, response) => {
     try {
       return await handler(context, request, response);
     } catch (e) {

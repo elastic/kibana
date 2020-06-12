@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export function StringParameter({ id, label, value, setParameter }) {
-  const handleChange = evt => {
+  const handleChange = (evt) => {
     setParameter(id, evt.target.value);
   };
 

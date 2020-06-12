@@ -25,9 +25,7 @@ import {
   IEmbeddable,
 } from '../embeddables';
 
-export interface PanelState<E extends { id: string } = { id: string }> {
-  savedObjectId?: string;
-
+export interface PanelState<E extends { id: string; [key: string]: unknown } = { id: string }> {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
   type: string;
@@ -88,17 +86,6 @@ export interface IContainer<
    * @param embeddableId
    */
   removeEmbeddable(embeddableId: string): void;
-
-  /**
-   * Adds a new embeddable that is backed off of a saved object.
-   */
-  addSavedObjectEmbeddable<
-    EEI extends EmbeddableInput = EmbeddableInput,
-    E extends Embeddable<EEI> = Embeddable<EEI>
-  >(
-    type: string,
-    savedObjectId: string
-  ): Promise<E | ErrorEmbeddable>;
 
   /**
    * Adds a new embeddable to the container. `explicitInput` may partially specify the required embeddable input,

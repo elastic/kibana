@@ -22,15 +22,20 @@ import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 
-export function createIndexDocRecordsStream(client: Client, stats: Stats, progress: Progress) {
+export function createIndexDocRecordsStream(
+  client: Client,
+  stats: Stats,
+  progress: Progress,
+  useCreate: boolean = false
+) {
   async function indexDocs(docs: any[]) {
     const body: any[] = [];
-
-    docs.forEach(doc => {
+    const operation = useCreate === true ? 'create' : 'index';
+    docs.forEach((doc) => {
       stats.indexedDoc(doc.index);
       body.push(
         {
-          index: {
+          [operation]: {
             _index: doc.index,
             _id: doc.id,
           },

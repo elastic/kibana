@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import {
-  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   kibanaResponseFactory,
   Logger,
   SavedObjectsClient,
@@ -38,7 +38,7 @@ import { GetBatchQueueResponse, PostBatchResponse } from './types';
 
 interface CreateReindexWorker {
   logger: Logger;
-  elasticsearchService: ElasticsearchServiceSetup;
+  elasticsearchService: ElasticsearchServiceStart;
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
@@ -51,8 +51,8 @@ export function createReindexWorker({
   savedObjects,
   licensing,
 }: CreateReindexWorker) {
-  const { adminClient } = elasticsearchService;
-  return new ReindexWorker(savedObjects, credentialStore, adminClient, logger, licensing);
+  const esClient = elasticsearchService.legacy.client;
+  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
 }
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {
@@ -100,7 +100,9 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client: esClient },
+            },
           },
         },
         request,
@@ -110,7 +112,7 @@ export function registerReindexIndicesRoutes(
         try {
           const result = await reindexHandler({
             savedObjects: savedObjectsClient,
-            dataClient,
+            dataClient: esClient,
             indexName,
             log,
             licensing,
@@ -140,7 +142,9 @@ export function registerReindexIndicesRoutes(
     async (
       {
         core: {
-          elasticsearch: { dataClient },
+          elasticsearch: {
+            legacy: { client: esClient },
+          },
           savedObjects,
         },
       },
@@ -148,13 +152,13 @@ export function registerReindexIndicesRoutes(
       response
     ) => {
       const { client } = savedObjects;
-      const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+      const callAsCurrentUser = esClient.callAsCurrentUser.bind(esClient);
       const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
         const result: GetBatchQueueResponse = {
-          queue: queue.map(savedObject => savedObject.attributes),
+          queue: queue.map((savedObject) => savedObject.attributes),
         };
         return response.ok({
           body: result,
@@ -180,7 +184,9 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client: esClient },
+            },
           },
         },
         request,
@@ -195,7 +201,7 @@ export function registerReindexIndicesRoutes(
           try {
             const result = await reindexHandler({
               savedObjects: savedObjectsClient,
-              dataClient,
+              dataClient: esClient,
               indexName,
               log,
               licensing,
@@ -239,7 +245,9 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects,
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client: esClient },
+            },
           },
         },
         request,
@@ -247,7 +255,7 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { client } = savedObjects;
         const { indexName } = request.params;
-        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+        const callAsCurrentUser = esClient.callAsCurrentUser.bind(esClient);
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
         const reindexService = reindexServiceFactory(
           callAsCurrentUser,
@@ -295,7 +303,9 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects,
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client: esClient },
+            },
           },
         },
         request,
@@ -303,7 +313,7 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexName } = request.params;
         const { client } = savedObjects;
-        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+        const callAsCurrentUser = esClient.callAsCurrentUser.bind(esClient);
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
         const reindexService = reindexServiceFactory(
           callAsCurrentUser,

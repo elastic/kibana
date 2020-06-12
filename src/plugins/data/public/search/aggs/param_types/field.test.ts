@@ -23,13 +23,15 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../common';
 import { IAggConfig } from '../agg_config';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('Field', () => {
   const fieldParamTypeDependencies: FieldParamTypeDependencies = {
-    getInternalStartServices: () => ({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-    }),
+    getInternalStartServices: () =>
+      (({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
+      } as unknown) as InternalStartServices),
   };
 
   const indexPattern = {

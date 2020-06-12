@@ -29,6 +29,7 @@ import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -37,6 +38,12 @@ const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle',
 export interface DateRangeBucketAggDependencies {
   uiSettings: IUiSettingsClient;
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsDateRange extends BaseAggParams {
+  field?: string;
+  ranges?: DateRangeKey[];
+  time_zone?: string;
 }
 
 export const getDateRangeBucketAgg = ({
@@ -58,7 +65,7 @@ export const getDateRangeBucketAgg = ({
           TEXT_CONTEXT_TYPE,
           fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
         );
-        const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
+        const DateRangeFormat = FieldFormat.from(function (range: DateRangeKey) {
           return convertDateRangeToString(range, formatter);
         });
         return new DateRangeFormat();

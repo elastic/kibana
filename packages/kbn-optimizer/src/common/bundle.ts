@@ -23,7 +23,7 @@ import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
-const VALID_BUNDLE_TYPES = ['plugin' as const];
+const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
 export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
@@ -80,7 +80,7 @@ export class Bundle {
     return {
       spec: this.toSpec(),
       mtimes: entriesToObject(
-        files.map(p => [p, mtimes.get(p)] as const).sort(ascending(e => e[0]))
+        files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
       ),
     };
   }

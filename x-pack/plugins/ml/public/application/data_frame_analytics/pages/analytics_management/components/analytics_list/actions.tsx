@@ -12,7 +12,7 @@ import { DeepReadonly } from '../../../../../../../common/types/common';
 import {
   checkPermission,
   createPermissionFailureMessage,
-} from '../../../../../privilege/check_privilege';
+} from '../../../../../capabilities/check_capabilities';
 
 import {
   getAnalysisType,
@@ -82,7 +82,7 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
             iconType="stop"
             onClick={() => stopAnalytics(item)}
             aria-label={buttonStopText}
-            data-test-sub="mlAnalyticsJobStopButton"
+            data-test-subj="mlAnalyticsJobStopButton"
           >
             {buttonStopText}
           </EuiButtonEmpty>

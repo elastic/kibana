@@ -18,7 +18,7 @@
  */
 
 import ace from 'brace';
-import { ScriptHighlightRules } from '../../../../../../es_ui_shared/console_lang';
+import { ScriptHighlightRules } from '../../../../../../es_ui_shared/public';
 
 const oop = ace.acequire('ace/lib/oop');
 const TextMode = ace.acequire('ace/mode/text').Mode;
@@ -35,10 +35,10 @@ export function ScriptMode() {
 
 oop.inherits(ScriptMode, TextMode);
 
-(function() {
+(function () {
   this.HighlightRules = ScriptHighlightRules;
 
-  this.getNextLineIndent = function(state, line, tab) {
+  this.getNextLineIndent = function (state, line, tab) {
     let indent = this.$getIndent(line);
     const match = line.match(/^.*[\{\[]\s*$/);
     if (match) {
@@ -48,11 +48,11 @@ oop.inherits(ScriptMode, TextMode);
     return indent;
   };
 
-  this.checkOutdent = function(state, line, input) {
+  this.checkOutdent = function (state, line, input) {
     return this.$outdent.checkOutdent(line, input);
   };
 
-  this.autoOutdent = function(state, doc, row) {
+  this.autoOutdent = function (state, doc, row) {
     this.$outdent.autoOutdent(doc, row);
   };
 }.call(ScriptMode.prototype));

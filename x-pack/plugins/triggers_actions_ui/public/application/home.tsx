@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToAlerts } from './constants';
 import { getCurrentBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
@@ -29,8 +29,8 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
-import { SecurityEnabledCallOut } from './components/security_call_out';
 import { PLUGIN } from './constants/plugin';
+import { HealthCheck } from './components/health_check';
 
 interface MatchParams {
   section: Section;
@@ -76,7 +76,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`${BASE_PATH}/${newSection}`);
+    history.push(`/${newSection}`);
   };
 
   // Set breadcrumb and page title
@@ -88,7 +88,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <SecurityEnabledCallOut docLinks={docLinks} http={http} />
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle size="m">
@@ -126,7 +125,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         </EuiPageContentHeader>
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
@@ -142,11 +141,32 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <Switch>
           {canShowActions && (
-            <Route exact path={routeToConnectors} component={ActionsConnectorsList} />
+            <Route
+              exact
+              path={routeToConnectors}
+              component={() => (
+                <HealthCheck docLinks={docLinks} http={http}>
+                  <ActionsConnectorsList />
+                </HealthCheck>
+              )}
+            />
           )}
-          {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
+          {canShowAlerts && (
+            <Route
+              exact
+              path={routeToAlerts}
+              component={() => (
+                <HealthCheck docLinks={docLinks} http={http}>
+                  <AlertsList />
+                </HealthCheck>
+              )}
+            />
+          )}
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TriggersActionsUIHome as default };

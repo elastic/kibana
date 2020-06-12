@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './spaces_menu.scss';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -79,7 +80,7 @@ class SpacesMenuUI extends Component<Props, State> {
 
     let filteredSpaces = spaces;
     if (searchTerm) {
-      filteredSpaces = spaces.filter(space => {
+      filteredSpaces = spaces.filter((space) => {
         const { name, description = '' } = space;
         return (
           name.toLowerCase().indexOf(searchTerm) >= 0 ||

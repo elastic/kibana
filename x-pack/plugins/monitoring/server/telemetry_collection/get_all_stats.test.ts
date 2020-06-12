@@ -182,7 +182,6 @@ describe('get_all_stats', () => {
           },
           {
             logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            isDev: true,
             version: 'version',
             maxBucketSize: 1,
           }
@@ -208,7 +207,6 @@ describe('get_all_stats', () => {
           },
           {
             logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            isDev: true,
             version: 'version',
             maxBucketSize: 1,
           }

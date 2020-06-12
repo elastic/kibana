@@ -26,7 +26,7 @@ const PARAM_TYPES = {
 
 const TUTORIAL_CATEGORY = {
   LOGGING: 'logging',
-  SIEM: 'siem',
+  SECURITY_SOLUTION: 'security solution',
   METRICS: 'metrics',
   OTHER: 'other',
 };
@@ -47,9 +47,7 @@ const artifactsSchema = Joi.object({
     documentationUrl: Joi.string().required(),
   }),
   // Kibana dashboards created by this product.
-  dashboards: Joi.array()
-    .items(dashboardSchema)
-    .required(),
+  dashboards: Joi.array().items(dashboardSchema).required(),
   application: Joi.object({
     path: Joi.string().required(),
     label: Joi.string().required(),
@@ -63,9 +61,7 @@ const statusCheckSchema = Joi.object({
   success: Joi.string(),
   error: Joi.string(),
   esHitsCheck: Joi.object({
-    index: Joi.alternatives()
-      .try(Joi.string(), Joi.array().items(Joi.string()))
-      .required(),
+    index: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())).required(),
     query: Joi.object().required(),
   }).required(),
 });
@@ -79,9 +75,7 @@ const instructionSchema = Joi.object({
 
 const instructionVariantSchema = Joi.object({
   id: Joi.string().required(),
-  instructions: Joi.array()
-    .items(instructionSchema)
-    .required(),
+  instructions: Joi.array().items(instructionSchema).required(),
 });
 
 const instructionSetSchema = Joi.object({
@@ -92,9 +86,7 @@ const instructionSetSchema = Joi.object({
     iconType: Joi.string(),
   }),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: Joi.array()
-    .items(instructionVariantSchema)
-    .required(),
+  instructionVariants: Joi.array().items(instructionVariantSchema).required(),
   statusCheck: statusCheckSchema,
 });
 
@@ -104,15 +96,11 @@ const paramSchema = Joi.object({
     .regex(/^[a-zA-Z_]+$/)
     .required(),
   label: Joi.string().required(),
-  type: Joi.string()
-    .valid(Object.values(PARAM_TYPES))
-    .required(),
+  type: Joi.string().valid(Object.values(PARAM_TYPES)).required(),
 });
 
 const instructionsSchema = Joi.object({
-  instructionSets: Joi.array()
-    .items(instructionSetSchema)
-    .required(),
+  instructionSets: Joi.array().items(instructionSetSchema).required(),
   params: Joi.array().items(paramSchema),
 });
 
@@ -120,9 +108,7 @@ export const tutorialSchema = {
   id: Joi.string()
     .regex(/^[a-zA-Z0-9-]+$/)
     .required(),
-  category: Joi.string()
-    .valid(Object.values(TUTORIAL_CATEGORY))
-    .required(),
+  category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
   name: Joi.string().required(),
   isBeta: Joi.boolean().default(false),
   shortDescription: Joi.string().required(),

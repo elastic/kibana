@@ -94,7 +94,7 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { fileContents, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
+    const { data, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
@@ -217,7 +217,7 @@ export class ImportView extends Component {
                 if (success) {
                   const importer = importerFactory(format, results, indexCreationSettings);
                   if (importer !== undefined) {
-                    const readResp = importer.read(fileContents, this.setReadProgress);
+                    const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
@@ -319,13 +319,13 @@ export class ImportView extends Component {
     }
   }
 
-  onConfigModeChange = configMode => {
+  onConfigModeChange = (configMode) => {
     this.setState({
       configMode,
     });
   };
 
-  onIndexChange = e => {
+  onIndexChange = (e) => {
     const name = e.target.value;
     const { indexNames, indexPattern, indexPatternNames } = this.state;
 
@@ -341,7 +341,7 @@ export class ImportView extends Component {
     });
   };
 
-  onIndexPatternChange = e => {
+  onIndexPatternChange = (e) => {
     const name = e.target.value;
     const { indexPatternNames, index } = this.state;
     this.setState({
@@ -350,37 +350,37 @@ export class ImportView extends Component {
     });
   };
 
-  onCreateIndexPatternChange = e => {
+  onCreateIndexPatternChange = (e) => {
     this.setState({
       createIndexPattern: e.target.checked,
     });
   };
 
-  onIndexSettingsStringChange = text => {
+  onIndexSettingsStringChange = (text) => {
     this.setState({
       indexSettingsString: text,
     });
   };
 
-  onMappingsStringChange = text => {
+  onMappingsStringChange = (text) => {
     this.setState({
       mappingsString: text,
     });
   };
 
-  onPipelineStringChange = text => {
+  onPipelineStringChange = (text) => {
     this.setState({
       pipelineString: text,
     });
   };
 
-  setImportProgress = progress => {
+  setImportProgress = (progress) => {
     this.setState({
       uploadProgress: progress,
     });
   };
 
-  setReadProgress = progress => {
+  setReadProgress = (progress) => {
     this.setState({
       readProgress: progress,
     });
@@ -398,7 +398,7 @@ export class ImportView extends Component {
 
   async loadIndexNames() {
     const indices = await ml.getIndices();
-    const indexNames = indices.map(i => i.name);
+    const indexNames = indices.map((i) => i.name);
     this.setState({ indexNames });
   }
 
@@ -656,7 +656,7 @@ function getDefaultState(state, results) {
 }
 
 function isIndexNameValid(name, indexNames) {
-  if (indexNames.find(i => i === name)) {
+  if (indexNames.find((i) => i === name)) {
     return (
       <FormattedMessage
         id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
@@ -689,7 +689,7 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
     return '';
   }
 
-  if (indexPatternNames.find(i => i === name)) {
+  if (indexPatternNames.find((i) => i === name)) {
     return (
       <FormattedMessage
         id="xpack.ml.fileDatavisualizer.importView.indexPatternNameAlreadyExistsErrorMessage"

@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-import { TelemetryManagementSection } from './telemetry_management_section';
 
 // It should be this but the types are way too vague in the AdvancedSettings plugin `Record<string, any>`
 // type Props = Omit<TelemetryManagementSection['props'], 'telemetryService'>;
 type Props = any;
 
+const TelemetryManagementSectionComponent = lazy(() => import('./telemetry_management_section'));
+
 export function telemetryManagementSectionWrapper(
   telemetryService: TelemetryPluginSetup['telemetryService']
 ) {
   const TelemetryManagementSectionWrapper = (props: Props) => (
-    <TelemetryManagementSection
-      showAppliesSettingMessage={true}
-      telemetryService={telemetryService}
-      {...props}
-    />
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <TelemetryManagementSectionComponent
+        showAppliesSettingMessage={true}
+        telemetryService={telemetryService}
+        {...props}
+      />
+    </Suspense>
   );
 
   return TelemetryManagementSectionWrapper;

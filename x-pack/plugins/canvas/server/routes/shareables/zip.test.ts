@@ -15,12 +15,12 @@ import {
 } from 'src/core/server';
 import { httpServiceMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
 import { initializeZipShareableWorkpadRoute } from './zip';
-import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../legacy/plugins/canvas/common/lib';
+import { API_ROUTE_SHAREABLE_ZIP } from '../../../common/lib';
 import {
   SHAREABLE_RUNTIME_FILE,
   SHAREABLE_RUNTIME_SRC,
   SHAREABLE_RUNTIME_NAME,
-} from '../../../../../legacy/plugins/canvas/shareable_runtime/constants';
+} from '../../../shareable_runtime/constants';
 
 const mockRouteContext = {} as RequestHandlerContext;
 const mockWorkpad = {};

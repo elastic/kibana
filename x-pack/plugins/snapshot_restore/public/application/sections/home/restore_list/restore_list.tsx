@@ -18,14 +18,21 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
-import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
+import {
+  WithPrivileges,
+  NotAuthorizedSection,
+  SectionError,
+  Error,
+} from '../../../../shared_imports';
+import { SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
 import { useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
-import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -49,7 +56,7 @@ export const RestoreList: React.FunctionComponent = () => {
     currentInterval
   );
 
-  const { uiMetricService } = useServices();
+  const { uiMetricService, history } = useServices();
 
   // Track component loaded
   useEffect(() => {
@@ -105,7 +112,7 @@ export const RestoreList: React.FunctionComponent = () => {
                   defaultMessage="Go to {snapshotsLink} to start a restore."
                   values={{
                     snapshotsLink: (
-                      <EuiLink href={linkToSnapshots()}>
+                      <EuiLink {...reactRouterNavigate(history, linkToSnapshots())}>
                         <FormattedMessage
                           id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
                           defaultMessage="Snapshots"
@@ -162,7 +169,7 @@ export const RestoreList: React.FunctionComponent = () => {
                 anchorPosition="downLeft"
               >
                 <EuiContextMenuPanel
-                  items={INTERVAL_OPTIONS.map(interval => (
+                  items={INTERVAL_OPTIONS.map((interval) => (
                     <EuiContextMenuItem
                       key={interval}
                       icon="empty"
@@ -202,7 +209,7 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map(name => `index.${name}`)}>
+    <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map((name) => `index.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="restoreList">{content}</section>

@@ -42,8 +42,10 @@ export class ThemeService {
 
   /** A React hook for consuming the charts theme */
   public useChartsTheme = () => {
+    /* eslint-disable-next-line react-hooks/rules-of-hooks */
     const [value, update] = useState(this.chartsDefaultTheme);
 
+    /* eslint-disable-next-line react-hooks/rules-of-hooks */
     useEffect(() => {
       const s = this.chartsTheme$.subscribe(update);
       return () => s.unsubscribe();
@@ -57,7 +59,7 @@ export class ThemeService {
     this._chartsTheme$ = uiSettings
       .get$('theme:darkMode')
       .pipe(
-        map(darkMode => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
+        map((darkMode) => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
       );
   }
 }

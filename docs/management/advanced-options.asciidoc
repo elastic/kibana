@@ -68,6 +68,9 @@ into the document when displaying it.
 `metrics:max_buckets`:: The maximum numbers of buckets that a single
 data source can return. This might arise when the user selects a
 short interval (for example, 1s) for a long time period (1 year).
+`pageNavigation`:: The style of navigation menu for Kibana.
+Choices are Legacy, the legacy style where every plugin is represented in the nav,
+and Modern, a new format that bundles related plugins together in flyaway nested navigation.
 `query:allowLeadingWildcards`:: Allows a wildcard (*) as the first character
 in a query clause. Only applies when experimental query features are
 enabled in the query bar. To disallow leading wildcards in Lucene queries,
@@ -142,7 +145,14 @@ This setting does not have an effect when loading a saved search.
 Highlighting slows requests when
 working on big documents.
 
+[float]
+[[kibana-ml-settings]]
+==== Machine learning
 
+[horizontal]
+`ml:fileDataVisualizerMaxFileSize`:: Sets the file size limit when importing
+data in the {data-viz}. The default value is `100MB`. The highest supported
+value for this setting is `1GB`.
 
 
 [float]
@@ -217,6 +227,8 @@ might increase the search time. This setting is off by default. Users must opt-i
 [horizontal]
 `siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
 `siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
+`siem:ipReputationLinks`:: A JSON array containing links for verifying the reputation of an IP address. The links are displayed on
+{siem-guide}/siem-ui-overview.html#network-ui[IP detail] pages.
 `siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
 page.
 `siem:newsFeedUrl`:: The URL from which the security news feed content is

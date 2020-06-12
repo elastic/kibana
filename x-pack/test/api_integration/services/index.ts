@@ -19,9 +19,16 @@ import {
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
 } from './infraops_graphql_client';
-import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './siem_graphql_client';
+import {
+  SecuritySolutionGraphQLClientProvider,
+  SecuritySolutionGraphQLClientFactoryProvider,
+} from './security_solution_graphql_client';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
+import { InfraLogSourceConfigurationProvider } from './infra_log_source_configuration';
 import { MachineLearningProvider } from './ml';
+import { IngestManagerProvider } from './ingest_manager';
+import { ResolverGeneratorProvider } from './resolver';
+import { TransformProvider } from './transform';
 
 export const services = {
   ...commonServices,
@@ -34,9 +41,13 @@ export const services = {
   infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
   infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
-  siemGraphQLClient: SiemGraphQLClientProvider,
-  siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
+  infraLogSourceConfiguration: InfraLogSourceConfigurationProvider,
+  securitySolutionGraphQLClient: SecuritySolutionGraphQLClientProvider,
+  securitySolutionGraphQLClientFactory: SecuritySolutionGraphQLClientFactoryProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
+  ingestManager: IngestManagerProvider,
+  resolverGenerator: ResolverGeneratorProvider,
+  transform: TransformProvider,
 };

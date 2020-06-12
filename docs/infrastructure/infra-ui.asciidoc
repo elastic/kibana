@@ -103,11 +103,11 @@ You can:
 
 * Select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics>>.
 
-* Select *View Logs* to <<xpack-logs-using, view the logs>> in the *Logs* app.
+* Select *View Logs* to {logs-guide}/inspect-log-events.html[view the logs] in the *Logs* app.
 
 Depending on the features you have installed and configured, you may also be able to:
 
 * Select *View APM* to <<traces, view APM traces>> in the *APM* app.
 
-* Select *View Uptime* to <<uptime-overview, view uptime information>> in the *Uptime* app.
+* Select *View Uptime* to {uptime-guide}/uptime-app-overview.html[view uptime information] in the *Uptime* app.
 

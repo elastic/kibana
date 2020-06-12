@@ -22,8 +22,8 @@ import { Server } from 'hapi';
 import { ChromeNavLink } from '../../public';
 import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
-import { RenderingServiceSetup } from '../rendering';
+import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
+import { InternalRenderingServiceSetup } from '../rendering';
 import { SavedObjectsLegacyUiExports } from '../types';
 
 /**
@@ -34,7 +34,7 @@ export type LegacyVars = Record<string, any>;
 
 type LegacyCoreSetup = InternalCoreSetup & {
   plugins: PluginsServiceSetup;
-  rendering: RenderingServiceSetup;
+  rendering: InternalRenderingServiceSetup;
 };
 type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
 
@@ -98,6 +98,7 @@ export interface LegacyPluginSpec {
   getExpectedKibanaVersion: () => string;
   getConfigPrefix: () => string;
   getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
+  getPack: () => LegacyPluginPack;
 }
 
 /**
@@ -150,7 +151,7 @@ export type LegacyAppSpec = Partial<LegacyNavLink> & {
  * @internal
  * @deprecated
  */
-export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order'> & {
+export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order' | 'href'> & {
   order: number;
 };
 
@@ -173,6 +174,7 @@ export type LegacyUiExports = SavedObjectsLegacyUiExports & {
 export interface LegacyServiceSetupDeps {
   core: LegacyCoreSetup;
   plugins: Record<string, unknown>;
+  uiPlugins: UiPlugins;
 }
 
 /**

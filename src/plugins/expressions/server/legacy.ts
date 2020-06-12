@@ -26,7 +26,7 @@ import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger, APICaller } from 'src/core/server';
 import { ExpressionsServerSetupDependencies } from './plugin';
 import { typeSpecs, ExpressionType } from '../common';
 import { serializeProvider } from '../common';
@@ -97,7 +97,10 @@ export const createLegacyServerEndpoints = (
    * @param {*} handlers - The Canvas handlers
    * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
    */
-  async function runFunction(handlers: any, fnCall: any) {
+  async function runFunction(
+    handlers: { environment: string; elasticsearchClient: APICaller },
+    fnCall: any
+  ) {
     const { functionName, args, context } = fnCall;
     const { deserialize } = serializeProvider(registries.types.toJS());
     const fnDef = registries.serverFunctions.toJS()[functionName];
@@ -111,19 +114,15 @@ export const createLegacyServerEndpoints = (
    * Register an endpoint that executes a batch of functions, and streams the
    * results back using ND-JSON.
    */
-  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, request => {
-    const scopedClient = core.elasticsearch.dataClient.asScoped(request);
-    const handlers = {
-      environment: 'server',
-      elasticsearchClient: async (
-        endpoint: string,
-        clientParams: Record<string, any> = {},
-        options?: any
-      ) => scopedClient.callAsCurrentUser(endpoint, clientParams, options),
-    };
-
+  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, (request) => {
     return {
       onBatchItem: async (fnCall: any) => {
+        const [coreStart] = await core.getStartServices();
+        const handlers = {
+          environment: 'server',
+          elasticsearchClient: coreStart.elasticsearch.legacy.client.asScoped(request)
+            .callAsCurrentUser,
+        };
         const result = await runFunction(handlers, fnCall);
         if (typeof result === 'undefined') {
           throw new Error(`Function ${fnCall.functionName} did not return anything.`);

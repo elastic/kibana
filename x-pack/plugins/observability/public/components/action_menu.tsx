@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 
-export const SectionTitle: React.FC<{}> = props => (
+export const SectionTitle: React.FC<{}> = (props) => (
   <>
     <EuiText size={'s'} grow={false}>
       <h5>{props.children}</h5>
@@ -29,7 +29,7 @@ export const SectionTitle: React.FC<{}> = props => (
   </>
 );
 
-export const SectionSubtitle: React.FC<{}> = props => (
+export const SectionSubtitle: React.FC<{}> = (props) => (
   <>
     <EuiText size={'xs'} color={'subdued'} grow={false}>
       <small>{props.children}</small>
@@ -38,7 +38,7 @@ export const SectionSubtitle: React.FC<{}> = props => (
   </>
 );
 
-export const SectionLinks: React.FC<{}> = props => (
+export const SectionLinks: React.FC<{}> = (props) => (
   <EuiListGroup flush={true} bordered={false}>
     {props.children}
   </EuiListGroup>
@@ -54,10 +54,10 @@ export const Section = styled.div`
 `;
 
 export type SectionLinkProps = EuiListGroupItemProps;
-export const SectionLink: React.FC<EuiListGroupItemProps> = props => (
+export const SectionLink: React.FC<EuiListGroupItemProps> = (props) => (
   <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />
 );
 
-export const ActionMenuDivider: React.FC<{}> = props => <EuiHorizontalRule margin={'s'} />;
+export const ActionMenuDivider: React.FC<{}> = (props) => <EuiHorizontalRule margin={'s'} />;
 
-export const ActionMenu: React.FC<Props> = props => <EuiPopover {...props} ownFocus={true} />;
+export const ActionMenu: React.FC<Props> = (props) => <EuiPopover {...props} ownFocus={true} />;

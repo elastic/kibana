@@ -21,19 +21,21 @@ import { AggType, AggTypeConfig, AggTypeDependencies } from './agg_type';
 import { IAggConfig } from './agg_config';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../types';
 
 describe('AggType Class', () => {
   let dependencies: AggTypeDependencies;
 
   beforeEach(() => {
     dependencies = {
-      getInternalStartServices: () => ({
-        fieldFormats: {
-          ...fieldFormatsServiceMock.createStartContract(),
-          getDefaultInstance: jest.fn(() => 'default') as any,
-        },
-        notifications: notificationServiceMock.createStartContract(),
-      }),
+      getInternalStartServices: () =>
+        (({
+          fieldFormats: {
+            ...fieldFormatsServiceMock.createStartContract(),
+            getDefaultInstance: jest.fn(() => 'default') as any,
+          },
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
     };
   });
 
@@ -157,7 +159,7 @@ describe('AggType Class', () => {
       });
     });
 
-    describe('getFormat', function() {
+    describe('getFormat', function () {
       let aggConfig: IAggConfig;
       let field: any;
 

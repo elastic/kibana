@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { CommentResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObject, wrapError } from '../../utils';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 export function initGetCommentApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),

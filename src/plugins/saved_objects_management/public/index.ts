@@ -22,10 +22,14 @@ import { SavedObjectsManagementPlugin } from './plugin';
 
 export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
 export {
-  ISavedObjectsManagementActionRegistry,
+  SavedObjectsManagementActionServiceSetup,
+  SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementServiceRegistryEntry,
 } from './services';
+export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

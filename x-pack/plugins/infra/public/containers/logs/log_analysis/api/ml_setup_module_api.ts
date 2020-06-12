@@ -21,7 +21,8 @@ export const callSetupMlModuleAPI = async (
   sourceId: string,
   indexPattern: string,
   jobOverrides: SetupMlModuleJobOverrides[] = [],
-  datafeedOverrides: SetupMlModuleDatafeedOverrides[] = []
+  datafeedOverrides: SetupMlModuleDatafeedOverrides[] = [],
+  query?: object
 ) => {
   const response = await npStart.http.fetch(`/api/ml/modules/setup/${moduleId}`, {
     method: 'POST',
@@ -34,6 +35,7 @@ export const callSetupMlModuleAPI = async (
         startDatafeed: true,
         jobOverrides,
         datafeedOverrides,
+        query,
       })
     ),
   });
@@ -60,13 +62,20 @@ const setupMlModuleDatafeedOverridesRT = rt.object;
 
 export type SetupMlModuleDatafeedOverrides = rt.TypeOf<typeof setupMlModuleDatafeedOverridesRT>;
 
-const setupMlModuleRequestParamsRT = rt.type({
-  indexPatternName: rt.string,
-  prefix: rt.string,
-  startDatafeed: rt.boolean,
-  jobOverrides: rt.array(setupMlModuleJobOverridesRT),
-  datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
-});
+const setupMlModuleRequestParamsRT = rt.intersection([
+  rt.strict({
+    indexPatternName: rt.string,
+    prefix: rt.string,
+    startDatafeed: rt.boolean,
+    jobOverrides: rt.array(setupMlModuleJobOverridesRT),
+    datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
+  }),
+  rt.exact(
+    rt.partial({
+      query: rt.object,
+    })
+  ),
+]);
 
 const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleTimeParamsRT,

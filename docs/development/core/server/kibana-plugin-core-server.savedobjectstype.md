@@ -25,5 +25,5 @@ This is only internal for now, and will only be public when we expose the regist
 |  [mappings](./kibana-plugin-core-server.savedobjectstype.mappings.md) | <code>SavedObjectsTypeMappingDefinition</code> | The [mapping definition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) for the type. |
 |  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
 |  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | <code>string</code> | The name of the type, which is also used as the internal id. |
-|  [namespaceAgnostic](./kibana-plugin-core-server.savedobjectstype.namespaceagnostic.md) | <code>boolean</code> | Is the type global (true), or namespaced (false). |
+|  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | <code>SavedObjectsNamespaceType</code> | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
 

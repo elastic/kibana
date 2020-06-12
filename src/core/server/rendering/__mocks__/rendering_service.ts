@@ -18,12 +18,12 @@
  */
 
 import { RenderingService as Service } from '../rendering_service';
-import { RenderingServiceSetup } from '../types';
+import { InternalRenderingServiceSetup } from '../types';
 import { mockRenderingServiceParams } from './params';
 
 type IRenderingService = PublicMethodsOf<Service>;
 
-export const setupMock: jest.Mocked<RenderingServiceSetup> = {
+export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
   render: jest.fn(),
 };
 export const mockSetup = jest.fn().mockResolvedValue(setupMock);

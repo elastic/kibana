@@ -88,8 +88,8 @@ export function FieldPicker({
           }}
           searchable
           options={fieldOptions}
-          onChange={newOptions => {
-            newOptions.forEach(option => {
+          onChange={(newOptions) => {
+            newOptions.forEach((option) => {
               if (option.checked === 'on' && !fieldMap[option.label].selected) {
                 selectField(option.label);
               } else if (option.checked !== 'on' && fieldMap[option.label].selected) {
@@ -119,8 +119,8 @@ function toOptions(
       // don't show non-aggregatable fields, except for the case when they are already selected.
       // this is necessary to ensure backwards compatibility with existing workspaces that might
       // contain non-aggregatable fields.
-      .filter(field => isExplorable(field) || field.selected)
-      .map(field => ({
+      .filter((field) => isExplorable(field) || field.selected)
+      .map((field) => ({
         label: field.name,
         prepend: <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />,
         checked: field.selected ? 'on' : undefined,

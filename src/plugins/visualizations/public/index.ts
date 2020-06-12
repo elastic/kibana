@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
@@ -43,6 +41,8 @@ export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { VisualizeInput } from './embeddable';
 export type ExprVis = ExprVisClass;
 export { SchemaConfig } from './legacy/build_pipeline';
+// @ts-ignore
+export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
 export {
   VisualizationController,
@@ -51,3 +51,4 @@ export {
   VisSavedObject,
   VisResponseValue,
 } from './types';
+export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

@@ -6,15 +6,24 @@
 
 import { LoginLayout } from './licensing';
 
+export interface LoginSelectorProvider {
+  type: string;
+  name: string;
+  usesLoginForm: boolean;
+  description?: string;
+  hint?: string;
+  icon?: string;
+}
+
 export interface LoginSelector {
   enabled: boolean;
-  providers: Array<{ type: string; name: string; description?: string }>;
+  providers: LoginSelectorProvider[];
 }
 
 export interface LoginState {
   layout: LoginLayout;
   allowLogin: boolean;
-  showLoginForm: boolean;
   requiresSecureConnection: boolean;
+  loginHelp?: string;
   selector: LoginSelector;
 }

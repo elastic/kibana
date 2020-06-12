@@ -21,7 +21,8 @@ export const getCloudMetricsMetadata = async (
   framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
-  instanceId: string
+  instanceId: string,
+  timeRange: { from: number; to: number }
 ): Promise<InfraCloudMetricsAdapterResponse> => {
   const metricQuery = {
     allowNoIndices: true,
@@ -30,8 +31,19 @@ export const getCloudMetricsMetadata = async (
     body: {
       query: {
         bool: {
-          filter: [{ match: { 'cloud.instance.id': instanceId } }],
-          should: CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } })),
+          filter: [
+            { match: { 'cloud.instance.id': instanceId } },
+            {
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: timeRange.from,
+                  lte: timeRange.to,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+          should: CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } })),
         },
       },
       size: 0,

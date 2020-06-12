@@ -4,11 +4,7 @@
 
 ## ChromeNavLink.url property
 
-> Warning: This API is now obsolete.
-> 
-> 
-
-A url that legacy apps can set to deep link into their applications.
+The route used to open the [default path](./kibana-plugin-core-public.appbase.defaultpath.md) of an application. If unset, `baseUrl` will be used instead.
 
 <b>Signature:</b>
 

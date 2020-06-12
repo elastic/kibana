@@ -18,7 +18,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const indexNames = await this.adapter.getIndexNames(
@@ -32,7 +32,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const indexNames = await this.adapter.getIndexNames(
@@ -46,7 +46,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const hasAlias = await this.adapter.hasAlias(
@@ -60,7 +60,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const hasAlias = await this.adapter.hasAlias(
@@ -74,7 +74,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const hasIndices = await this.adapter.hasIndices(
@@ -88,7 +88,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const hasIndices = await this.adapter.hasIndices(

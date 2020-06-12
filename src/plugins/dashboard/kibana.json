@@ -11,6 +11,6 @@
     "savedObjects"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
-  "server": false,
+  "server": true,
   "ui": true
 }

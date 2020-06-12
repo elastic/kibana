@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export interface CalendarEvent {
@@ -23,41 +21,29 @@ export class EventManager {
   }
 
   async getCalendarEvents(calendarId: string) {
-    try {
-      const resp = await this._client('ml.events', { calendarId });
+    const resp = await this._client('ml.events', { calendarId });
 
-      return resp.events;
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    return resp.events;
   }
 
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    try {
-      const resp = await this._client('ml.events', {
-        calendarId,
-        jobId,
-      });
+    const resp = await this._client('ml.events', {
+      calendarId,
+      jobId,
+    });
 
-      return resp.events;
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    return resp.events;
   }
 
   async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
-    try {
-      return await this._client('ml.addEvent', {
-        calendarId,
-        body,
-      });
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    return await this._client('ml.addEvent', {
+      calendarId,
+      body,
+    });
   }
 
   async deleteEvent(calendarId: string, eventId: string) {

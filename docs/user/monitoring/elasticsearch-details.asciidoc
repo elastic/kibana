@@ -164,4 +164,4 @@ image::user/monitoring/images/monitoring-elasticsearch-logs.jpg["Recent {es} log
 
 TIP: By default, up to 10 log entries are shown. You can show up to 50 log
 entries by changing the
-<<monitoring-ui-settings,`xpack.monitoring.elasticsearch.logFetchCount` setting>>.
+<<monitoring-ui-settings,`monitoring.ui.elasticsearch.logFetchCount` setting>>.

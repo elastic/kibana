@@ -22,25 +22,26 @@ interface RewriteSubstitution {
 
 export const installPipelines = async (
   registryPackage: RegistryPackage,
+  paths: string[],
   callCluster: CallESAsCurrentUser
 ) => {
   const datasets = registryPackage.datasets;
+  const pipelinePaths = paths.filter((path) => isPipeline(path));
   if (datasets) {
     const pipelines = datasets.reduce<Array<Promise<AssetReference[]>>>((acc, dataset) => {
       if (dataset.ingest_pipeline) {
         acc.push(
           installPipelinesForDataset({
-            pkgkey: Registry.pkgToPkgKey(registryPackage),
             dataset,
             callCluster,
-            packageName: registryPackage.name,
-            packageVersion: registryPackage.version,
+            paths: pipelinePaths,
+            pkgVersion: registryPackage.version,
           })
         );
       }
       return acc;
     }, []);
-    return Promise.all(pipelines).then(results => results.flat());
+    return Promise.all(pipelines).then((results) => results.flat());
   }
   return [];
 };
@@ -49,7 +50,7 @@ export function rewriteIngestPipeline(
   pipeline: string,
   substitutions: RewriteSubstitution[]
 ): string {
-  substitutions.forEach(sub => {
+  substitutions.forEach((sub) => {
     const { source, target, templateFunction } = sub;
     // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
     // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
@@ -68,29 +69,25 @@ export function rewriteIngestPipeline(
 
 export async function installPipelinesForDataset({
   callCluster,
-  pkgkey,
+  pkgVersion,
+  paths,
   dataset,
-  packageName,
-  packageVersion,
 }: {
   callCluster: CallESAsCurrentUser;
-  pkgkey: string;
+  pkgVersion: string;
+  paths: string[];
   dataset: Dataset;
-  packageName: string;
-  packageVersion: string;
 }): Promise<AssetReference[]> {
-  const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
-    isDatasetPipeline(entry, dataset.path)
-  );
+  const pipelinePaths = paths.filter((path) => isDatasetPipeline(path, dataset.path));
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
 
-  pipelinePaths.forEach(path => {
+  pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataset,
-      packageVersion,
+      packageVersion: pkgVersion,
     });
     const content = Registry.getAsset(path).toString('utf-8');
     pipelines.push({
@@ -106,14 +103,14 @@ export async function installPipelinesForDataset({
     });
   });
 
-  pipelines = pipelines.map(pipeline => {
+  pipelines = pipelines.map((pipeline) => {
     return {
       ...pipeline,
       contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
     };
   });
 
-  const installationPromises = pipelines.map(async pipeline => {
+  const installationPromises = pipelines.map(async (pipeline) => {
     return installPipeline({ callCluster, pipeline });
   });
 
@@ -153,8 +150,8 @@ async function installPipeline({
 }
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
-const isDatasetPipeline = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
-  // TODO: better way to get particular assets
+
+const isDatasetPipeline = (path: string, datasetName: string) => {
   const pathParts = Registry.pathParts(path);
   return (
     !isDirectory({ path }) &&
@@ -162,6 +159,10 @@ const isDatasetPipeline = ({ path }: Registry.ArchiveEntry, datasetName: string)
     pathParts.dataset !== undefined &&
     datasetName === pathParts.dataset
   );
+};
+const isPipeline = (path: string) => {
+  const pathParts = Registry.pathParts(path);
+  return pathParts.type === ElasticsearchAssetType.ingestPipeline;
 };
 
 // XXX: assumes path/to/file.ext -- 0..n '/' and exactly one '.'

@@ -5,10 +5,9 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { calendarSchema } from './schemas/calendars_schema';
+import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
 function getAllCalendars(context: RequestHandlerContext) {
@@ -42,11 +41,20 @@ function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) 
 }
 
 export function calendars({ router, mlLicense }: RouteInitialization) {
-  // Gets calendars - size limit has been explicitly set to 1000
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {get} /api/ml/calendars Gets calendars
+   * @apiName GetCalendars
+   * @apiDescription Gets calendars - size limit has been explicitly set to 1000
+   */
   router.get(
     {
       path: '/api/ml/calendars',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetCalendars'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -61,11 +69,23 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {get} /api/ml/calendars/:calendarIds Gets a calendar
+   * @apiName GetCalendarById
+   * @apiDescription Gets calendar by id
+   *
+   * @apiSchema (params) calendarIdsSchema
+   */
   router.get(
     {
       path: '/api/ml/calendars/{calendarIds}',
       validate: {
-        params: schema.object({ calendarIds: schema.string() }),
+        params: calendarIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetCalendars'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -88,11 +108,23 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {put} /api/ml/calendars Creates a calendar
+   * @apiName PutCalendars
+   * @apiDescription Creates a calendar
+   *
+   * @apiSchema (body) calendarSchema
+   */
   router.put(
     {
       path: '/api/ml/calendars',
       validate: {
-        body: schema.object({ ...calendarSchema }),
+        body: calendarSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateCalendar'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -109,12 +141,25 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {put} /api/ml/calendars/:calendarId Updates a calendar
+   * @apiName UpdateCalendarById
+   * @apiDescription Updates a calendar
+   *
+   * @apiSchema (params) calendarIdSchema
+   * @apiSchema (body) calendarSchema
+   */
   router.put(
     {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
-        params: schema.object({ calendarId: schema.string() }),
-        body: schema.object({ ...calendarSchema }),
+        params: calendarIdSchema,
+        body: calendarSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateCalendar'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -132,11 +177,23 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {delete} /api/ml/calendars/:calendarId Deletes a calendar
+   * @apiName DeleteCalendarById
+   * @apiDescription Deletes a calendar
+   *
+   * @apiSchema (params) calendarIdSchema
+   */
   router.delete(
     {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
-        params: schema.object({ calendarId: schema.string() }),
+        params: calendarIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteCalendar'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

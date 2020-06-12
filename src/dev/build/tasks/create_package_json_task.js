@@ -50,7 +50,9 @@ export const CreatePackageJsonTask = {
     };
 
     if (build.isOss()) {
-      newPkg.workspaces.packages = newPkg.workspaces.packages.filter(p => !p.startsWith('x-pack'));
+      newPkg.workspaces.packages = newPkg.workspaces.packages.filter(
+        (p) => !p.startsWith('x-pack')
+      );
     }
 
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));

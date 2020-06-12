@@ -12,6 +12,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const comboBox = getService('comboBox');
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -62,7 +63,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       let actualText: string | undefined;
 
       await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
-        actualText = await find.byCssSelector(selector).then(el => el.getVisibleText());
+        actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
 
@@ -78,7 +79,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param expectedText - the expected text
      */
     assertExactText(selector: string, expectedText: string) {
-      return this.assertExpectedText(selector, value => value === expectedText);
+      return this.assertExpectedText(selector, (value) => value === expectedText);
     },
 
     /**
@@ -107,20 +108,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
      */
-    async configureDimension(opts: { dimension: string; operation?: string; field?: string }) {
+    async configureDimension(opts: { dimension: string; operation: string; field: string }) {
       await find.clickByCssSelector(opts.dimension);
 
-      if (opts.operation) {
-        await find.clickByCssSelector(
-          `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
-           [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
-        );
-      }
+      await find.clickByCssSelector(
+        `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
+          [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
+      );
 
-      if (opts.field) {
-        await testSubjects.click('indexPattern-dimension-field');
-        await testSubjects.click(`lns-fieldOption-${opts.field}`);
-      }
+      const target = await testSubjects.find('indexPattern-dimension-field');
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, opts.field);
     },
 
     /**
@@ -135,16 +133,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string) {
+    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.setValue('savedObjectTitle', title);
+
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        const state = saveAsNew ? 'check' : 'uncheck';
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
+      }
+
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      if (redirectToOriginCheckboxExists) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
+      }
+
       await testSubjects.click('confirmSaveSavedObjectButton');
-      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
           .catch(() => false)
       );
+    },
+
+    async saveAndReturn() {
+      await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
     getTitle() {

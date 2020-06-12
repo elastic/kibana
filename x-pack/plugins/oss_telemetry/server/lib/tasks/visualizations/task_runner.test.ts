@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import {
   getMockCallWithInternal,
   getMockConfig,
@@ -13,6 +12,8 @@ import {
 } from '../../../test_utils';
 import { visualizationsTaskRunner } from './task_runner';
 import { TaskInstance } from '../../../../../task_manager/server';
+import { getNextMidnight } from '../../get_next_midnight';
+import moment from 'moment';
 
 describe('visualizationsTaskRunner', () => {
   let mockTaskInstance: TaskInstance;
@@ -41,12 +42,6 @@ describe('visualizationsTaskRunner', () => {
   });
 
   test('Summarizes visualization response data', async () => {
-    const getNextMidnight = () =>
-      moment()
-        .add(1, 'days')
-        .startOf('day')
-        .toDate();
-
     const runner = visualizationsTaskRunner(mockTaskInstance, getMockConfig(), getMockEs());
     const result = await runner();
 
@@ -61,6 +56,9 @@ describe('visualizationsTaskRunner', () => {
             spaces_max: 1,
             spaces_min: 1,
             total: 1,
+            saved_7_days_total: 1,
+            saved_30_days_total: 1,
+            saved_90_days_total: 1,
           },
         },
       },
@@ -75,6 +73,7 @@ describe('visualizationsTaskRunner', () => {
         _source: {
           type: 'visualization',
           visualization: { visState: '{"type": "cave_painting"}' },
+          updated_at: moment().subtract(7, 'days').startOf('day').toString(),
         },
       },
       {
@@ -82,11 +81,16 @@ describe('visualizationsTaskRunner', () => {
         _source: {
           type: 'visualization',
           visualization: { visState: '{"type": "printing_press"}' },
+          updated_at: moment().subtract(20, 'days').startOf('day').toString(),
         },
       },
       {
         _id: 'meat:visualization:coolviz-789',
-        _source: { type: 'visualization', visualization: { visState: '{"type": "floppy_disk"}' } },
+        _source: {
+          type: 'visualization',
+          visualization: { visState: '{"type": "floppy_disk"}' },
+          updated_at: moment().subtract(2, 'months').startOf('day').toString(),
+        },
       },
       // meat space
       {
@@ -94,37 +98,98 @@ describe('visualizationsTaskRunner', () => {
         _source: {
           type: 'visualization',
           visualization: { visState: '{"type": "cave_painting"}' },
+          updated_at: moment().subtract(89, 'days').startOf('day').toString(),
         },
       },
       {
         _id: 'meat:visualization:coolviz-789',
-        _source: { type: 'visualization', visualization: { visState: '{"type": "cuneiform"}' } },
+        _source: {
+          type: 'visualization',
+          visualization: { visState: '{"type": "cuneiform"}' },
+          updated_at: moment().subtract(5, 'months').startOf('day').toString(),
+        },
       },
       {
         _id: 'meat:visualization:coolviz-789',
-        _source: { type: 'visualization', visualization: { visState: '{"type": "cuneiform"}' } },
+        _source: {
+          type: 'visualization',
+          visualization: { visState: '{"type": "cuneiform"}' },
+          updated_at: moment().subtract(2, 'days').startOf('day').toString(),
+        },
       },
       {
         _id: 'meat:visualization:coolviz-789',
-        _source: { type: 'visualization', visualization: { visState: '{"type": "floppy_disk"}' } },
+        _source: {
+          type: 'visualization',
+          visualization: { visState: '{"type": "floppy_disk"}' },
+          updated_at: moment().subtract(7, 'days').startOf('day').toString(),
+        },
       },
       // cyber space
       {
         _id: 'cyber:visualization:coolviz-789',
-        _source: { type: 'visualization', visualization: { visState: '{"type": "floppy_disk"}' } },
+        _source: {
+          type: 'visualization',
+          visualization: { visState: '{"type": "floppy_disk"}' },
+          updated_at: moment().subtract(7, 'months').startOf('day').toString(),
+        },
       },
       {
         _id: 'cyber:visualization:coolviz-789',
-        _source: { type: 'visualization', visualization: { visState: '{"type": "floppy_disk"}' } },
+        _source: {
+          type: 'visualization',
+          visualization: { visState: '{"type": "floppy_disk"}' },
+          updated_at: moment().subtract(3, 'days').startOf('day').toString(),
+        },
       },
       {
         _id: 'cyber:visualization:coolviz-123',
         _source: {
           type: 'visualization',
           visualization: { visState: '{"type": "cave_painting"}' },
+          updated_at: moment().subtract(15, 'days').startOf('day').toString(),
         },
       },
     ]);
+
+    const expectedStats = {
+      cave_painting: {
+        total: 3,
+        spaces_min: 1,
+        spaces_max: 1,
+        spaces_avg: 1,
+        saved_7_days_total: 1,
+        saved_30_days_total: 2,
+        saved_90_days_total: 3,
+      },
+      printing_press: {
+        total: 1,
+        spaces_min: 1,
+        spaces_max: 1,
+        spaces_avg: 1,
+        saved_7_days_total: 0,
+        saved_30_days_total: 1,
+        saved_90_days_total: 1,
+      },
+      cuneiform: {
+        total: 2,
+        spaces_min: 2,
+        spaces_max: 2,
+        spaces_avg: 2,
+        saved_7_days_total: 1,
+        saved_30_days_total: 1,
+        saved_90_days_total: 1,
+      },
+      floppy_disk: {
+        total: 4,
+        spaces_min: 2,
+        spaces_max: 2,
+        spaces_avg: 2,
+        saved_7_days_total: 2,
+        saved_30_days_total: 2,
+        saved_90_days_total: 3,
+      },
+    };
 
     const runner = visualizationsTaskRunner(
       mockTaskInstance,
@@ -137,13 +202,10 @@ describe('visualizationsTaskRunner', () => {
       error: undefined,
       state: {
         runs: 1,
-        stats: {
-          cave_painting: { total: 3, spaces_min: 1, spaces_max: 1, spaces_avg: 1 },
-          printing_press: { total: 1, spaces_min: 1, spaces_max: 1, spaces_avg: 1 },
-          cuneiform: { total: 2, spaces_min: 2, spaces_max: 2, spaces_avg: 2 },
-          floppy_disk: { total: 4, spaces_min: 2, spaces_max: 2, spaces_avg: 2 },
-        },
+        stats: expectedStats,
       },
     });
+
+    expect(result.state.stats).toMatchObject(expectedStats);
   });
 });

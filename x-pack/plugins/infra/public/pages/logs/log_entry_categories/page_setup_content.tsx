@@ -55,7 +55,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
       createProcessStep({
         cleanUpAndSetUp,
         errorMessages: lastSetupErrorMessages,
-        isConfigurationValid: validationErrors.length <= 0,
+        isConfigurationValid: validationErrors.length <= 0 && !isValidating,
         setUp,
         setupStatus,
         viewResults,

@@ -13,7 +13,7 @@ import {
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_STRUCTURES,
   API_ROUTE_WORKPAD_ASSETS,
-} from '../../../../../legacy/plugins/canvas/common/lib/constants';
+} from '../../../common/lib/constants';
 import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';

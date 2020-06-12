@@ -113,7 +113,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
 
       let messages = [];
       if (resp.hits.total !== 0) {
-        messages = resp.hits.hits.map(hit => hit._source);
+        messages = resp.hits.hits.map((hit) => hit._source);
       }
       return messages;
     } catch (e) {
@@ -210,14 +210,14 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
         messagesPerJob = resp.aggregations.levelsPerJob.buckets;
       }
 
-      messagesPerJob.forEach(job => {
+      messagesPerJob.forEach((job) => {
         // ignore system messages (id==='')
         if (job.key !== '' && job.levels && job.levels.buckets && job.levels.buckets.length) {
           let highestLevel = 0;
           let highestLevelText = '';
           let msgTime = 0;
 
-          job.levels.buckets.forEach(level => {
+          job.levels.buckets.forEach((level) => {
             const label = level.key;
             // note the highest message level
             if (LEVEL[label] > highestLevel) {
@@ -227,7 +227,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
                 level.latestMessage.buckets &&
                 level.latestMessage.buckets.length
               ) {
-                level.latestMessage.buckets.forEach(msg => {
+                level.latestMessage.buckets.forEach((msg) => {
                   // there should only be one result here.
                   highestLevelText = msg.key;
 

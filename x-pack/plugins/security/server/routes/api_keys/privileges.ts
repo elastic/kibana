@@ -8,7 +8,11 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineCheckPrivilegesRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineCheckPrivilegesRoutes({
+  router,
+  clusterClient,
+  authc,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key/privileges',
@@ -20,26 +24,25 @@ export function defineCheckPrivilegesRoutes({ router, clusterClient }: RouteDefi
 
         const [
           {
-            cluster: { manage_security: manageSecurity, manage_api_key: manageApiKey },
+            cluster: {
+              manage_security: manageSecurity,
+              manage_api_key: manageApiKey,
+              manage_own_api_key: manageOwnApiKey,
+            },
           },
-          { areApiKeysEnabled },
+          areApiKeysEnabled,
         ] = await Promise.all([
           scopedClusterClient.callAsCurrentUser('shield.hasPrivileges', {
-            body: { cluster: ['manage_security', 'manage_api_key'] },
+            body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
           }),
-          scopedClusterClient.callAsCurrentUser('shield.getAPIKeys', { owner: true }).then(
-            //  If the API returns a truthy result that means it's enabled.
-            result => ({ areApiKeysEnabled: !!result }),
-            // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
-            e =>
-              e.message.includes('api keys are not enabled')
-                ? Promise.resolve({ areApiKeysEnabled: false })
-                : Promise.reject(e)
-          ),
+          authc.areAPIKeysEnabled(),
         ]);
 
+        const isAdmin = manageSecurity || manageApiKey;
+        const canManage = manageSecurity || manageApiKey || manageOwnApiKey;
+
         return response.ok({
-          body: { areApiKeysEnabled, isAdmin: manageSecurity || manageApiKey },
+          body: { areApiKeysEnabled, isAdmin, canManage },
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

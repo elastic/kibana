@@ -19,7 +19,7 @@
 
 import { createHashHistory, History, UnregisterCallback } from 'history';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { AppBase, ToastsSetup } from 'kibana/public';
+import { AppUpdater, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
 
@@ -37,6 +37,7 @@ export interface KbnUrlTracker {
    */
   stop: () => void;
   setActiveUrl: (newUrl: string) => void;
+  getActiveUrl: () => string;
 }
 
 /**
@@ -57,12 +58,10 @@ export function createKbnUrlTracker({
   navLinkUpdater$,
   toastNotifications,
   history,
+  getHistory,
   storage,
-  shouldTrackUrlUpdate = pathname => {
-    const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
-    const targetAppName = pathname.split('/')[1];
-
-    return currentAppName === targetAppName;
+  shouldTrackUrlUpdate = () => {
+    return true;
   },
 }: {
   /**
@@ -94,7 +93,7 @@ export function createKbnUrlTracker({
   /**
    * App updater subject passed into the application definition to change nav link url.
    */
-  navLinkUpdater$: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  navLinkUpdater$: BehaviorSubject<AppUpdater>;
   /**
    * Toast notifications service to show toasts in error cases.
    */
@@ -103,6 +102,12 @@ export function createKbnUrlTracker({
    * History object to use to track url changes. If this isn't provided, a local history instance will be created.
    */
   history?: History;
+
+  /**
+   * Lazily retrieve history instance
+   */
+  getHistory?: () => History;
+
   /**
    * Storage object to use to persist currently active url. If this isn't provided, the browser wide session storage instance will be used.
    */
@@ -123,7 +128,7 @@ export function createKbnUrlTracker({
   let unsubscribeGlobalState: Subscription[] | undefined;
 
   function setNavLink(hash: string) {
-    navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
+    navLinkUpdater$.next(() => ({ defaultPath: hash }));
   }
 
   function getActiveSubUrl(url: string) {
@@ -138,7 +143,7 @@ export function createKbnUrlTracker({
     }
 
     if (unsubscribeGlobalState) {
-      unsubscribeGlobalState.forEach(sub => sub.unsubscribe());
+      unsubscribeGlobalState.forEach((sub) => sub.unsubscribe());
       unsubscribeGlobalState = undefined;
     }
   }
@@ -158,11 +163,11 @@ export function createKbnUrlTracker({
 
   function onMountApp() {
     unsubscribe();
-    const historyInstance = history || createHashHistory();
+    const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
-    unsubscribeURLHistory = historyInstance.listen(location => {
-      if (shouldTrackUrlUpdate(location.pathname)) {
-        setActiveUrl(location.pathname + location.search);
+    unsubscribeURLHistory = historyInstance.listen((location) => {
+      if (shouldTrackUrlUpdate(location.hash)) {
+        setActiveUrl(location.hash.substr(1));
       }
     });
   }
@@ -171,7 +176,7 @@ export function createKbnUrlTracker({
     unsubscribe();
     // propagate state updates when in other apps
     unsubscribeGlobalState = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
-      stateUpdate$.subscribe(state => {
+      stateUpdate$.subscribe((state) => {
         const updatedUrl = setStateToKbnUrl(
           kbnUrlKey,
           state,
@@ -209,5 +214,8 @@ export function createKbnUrlTracker({
       unsubscribe();
     },
     setActiveUrl,
+    getActiveUrl() {
+      return activeUrl;
+    },
   };
 }

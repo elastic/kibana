@@ -11,17 +11,6 @@ import { defineCommonRoutes } from './common';
 import { defineOIDCRoutes } from './oidc';
 import { RouteDefinitionParams } from '..';
 
-export function createCustomResourceResponse(body: string, contentType: string, cspHeader: string) {
-  return {
-    body,
-    headers: {
-      'content-type': contentType,
-      'content-security-policy': cspHeader,
-    },
-    statusCode: 200,
-  };
-}
-
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
   defineSessionRoutes(params);
   defineCommonRoutes(params);

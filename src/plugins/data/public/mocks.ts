@@ -21,11 +21,17 @@ import { Plugin, IndexPatternsContract } from '.';
 import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchSetupMock, searchStartMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
+import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
-const autocompleteMock: any = {
+const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
+  addQuerySuggestionProvider: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+};
+
+const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   getValueSuggestions: jest.fn(),
   getQuerySuggestions: jest.fn(),
   hasQuerySuggestions: jest.fn(),
@@ -34,7 +40,7 @@ const autocompleteMock: any = {
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
-    autocomplete: autocompleteMock,
+    autocomplete: automcompleteSetupMock,
     search: searchSetupMock,
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
@@ -45,9 +51,10 @@ const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   return {
     actions: {
-      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromRangeSelectAction: jest.fn(),
     },
-    autocomplete: autocompleteMock,
+    autocomplete: autocompleteStartMock,
     search: searchStartMock,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
@@ -56,17 +63,21 @@ const createStartContract = (): Start => {
       SearchBar: jest.fn(),
     },
     indexPatterns: ({
+      createField: jest.fn(() => {}),
+      createFieldList: jest.fn(() => []),
+      ensureDefaultIndexPattern: jest.fn(),
       make: () => ({
         fieldsFetcher: {
           fetchForWildcard: jest.fn(),
         },
       }),
       get: jest.fn().mockReturnValue(Promise.resolve({})),
+      clearCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
   };
 };
 
-export { searchSourceMock } from './search/mocks';
+export { createSearchSourceMock } from './search/mocks';
 export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {

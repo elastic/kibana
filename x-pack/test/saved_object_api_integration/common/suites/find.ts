@@ -3,271 +3,190 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import querystring from 'querystring';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES } from '../lib/spaces';
+import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
-interface FindTest {
-  statusCode: number;
-  description: string;
-  response: (resp: { [key: string]: any }) => void;
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+
+export interface FindTestDefinition extends TestDefinition {
+  request: { query: string };
+}
+export type FindTestSuite = TestSuite<FindTestDefinition>;
+export interface FindTestCase {
+  title: string;
+  query: string;
+  successResult?: {
+    savedObjects?: TestCase | TestCase[];
+    page?: number;
+    perPage?: number;
+    total?: number;
+  };
+  failure?: 400 | 403;
 }
 
-interface FindTests {
-  spaceAwareType: FindTest;
-  notSpaceAwareType: FindTest;
-  unknownType: FindTest;
-  pageBeyondTotal: FindTest;
-  unknownSearchField: FindTest;
-  hiddenType: FindTest;
-  noType: FindTest;
-  filterWithNotSpaceAwareType: FindTest;
-  filterWithHiddenType: FindTest;
-  filterWithUnknownType: FindTest;
-  filterWithNoType: FindTest;
-  filterWithUnAllowedType: FindTest;
-}
-
-interface FindTestDefinition {
-  user?: TestDefinitionAuthentication;
-  spaceId?: string;
-  tests: FindTests;
-}
+export const getTestCases = (spaceId?: string) => ({
+  singleNamespaceType: {
+    title: 'find single-namespace type',
+    query: 'type=isolatedtype&fields=title',
+    successResult: {
+      savedObjects:
+        spaceId === SPACE_1_ID
+          ? CASES.SINGLE_NAMESPACE_SPACE_1
+          : spaceId === SPACE_2_ID
+          ? CASES.SINGLE_NAMESPACE_SPACE_2
+          : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+    },
+  } as FindTestCase,
+  multiNamespaceType: {
+    title: 'find multi-namespace type',
+    query: 'type=sharedtype&fields=title',
+    successResult: {
+      savedObjects:
+        spaceId === SPACE_1_ID
+          ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+          : spaceId === SPACE_2_ID
+          ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
+          : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    },
+  } as FindTestCase,
+  namespaceAgnosticType: {
+    title: 'find namespace-agnostic type',
+    query: 'type=globaltype&fields=title',
+    successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
+  } as FindTestCase,
+  hiddenType: { title: 'find hidden type', query: 'type=hiddentype&fields=name' } as FindTestCase,
+  unknownType: { title: 'find unknown type', query: 'type=wigwags' } as FindTestCase,
+  pageBeyondTotal: {
+    title: 'find page beyond total',
+    query: 'type=isolatedtype&page=100&per_page=100',
+    successResult: { page: 100, perPage: 100, total: 1, savedObjects: [] },
+  } as FindTestCase,
+  unknownSearchField: {
+    title: 'find unknown search field',
+    query: 'type=url&search_fields=a',
+  } as FindTestCase,
+  filterWithNamespaceAgnosticType: {
+    title: 'filter with namespace-agnostic type',
+    query: 'type=globaltype&filter=globaltype.attributes.title:*global*',
+    successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
+  } as FindTestCase,
+  filterWithHiddenType: {
+    title: 'filter with hidden type',
+    query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'`,
+  } as FindTestCase,
+  filterWithUnknownType: {
+    title: 'filter with unknown type',
+    query: `type=wigwags&filter=wigwags.attributes.title:'unknown'`,
+  } as FindTestCase,
+  filterWithDisallowedType: {
+    title: 'filter with disallowed type',
+    query: `type=globaltype&filter=dashboard.title:'Requests'`,
+    failure: 400,
+  } as FindTestCase,
+});
+export const createRequest = ({ query }: FindTestCase) => ({ query });
+const getTestTitle = ({ failure, title }: FindTestCase) => {
+  let description = 'success';
+  if (failure === 400) {
+    description = 'bad request';
+  } else if (failure === 403) {
+    description = 'forbidden';
+  }
+  return `${description} ["${title}"]`;
+};
 
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectEmpty = (page: number, perPage: number, total: number) => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      page,
-      per_page: perPage,
-      total,
-      saved_objects: [],
-    });
-  };
-
-  const createExpectRbacForbidden = (type?: string) => (resp: { [key: string]: any }) => {
-    const message = type ? `Unable to find ${type}` : `Not authorized to find saved_object`;
-
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message,
-    });
-  };
-
-  const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      page: 1,
-      per_page: 20,
-      total: 1,
-      saved_objects: [
-        {
-          type: 'globaltype',
-          id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          version: resp.body.saved_objects[0].version,
-          attributes: {
-            name: 'My favorite global object',
-          },
-          references: [],
-          updated_at: '2017-09-21T18:59:16.270Z',
-        },
-      ],
-    });
-  };
-
-  const expectFilterWrongTypeError = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      error: 'Bad Request',
-      message: 'This type dashboard is not allowed: Bad Request',
-      statusCode: 400,
-    });
-  };
-
-  const expectTypeRequired = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      error: 'Bad Request',
-      message: '[request query.type]: expected at least one defined value but got [undefined]',
-      statusCode: 400,
-    });
-  };
-
-  const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      page: 1,
-      per_page: 20,
-      total: 1,
-      saved_objects: [
-        {
-          type: 'visualization',
-          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          version: resp.body.saved_objects[0].version,
-          attributes: {
-            title: 'Count of requests',
-          },
-          migrationVersion: resp.body.saved_objects[0].migrationVersion,
-          references: [
-            {
-              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
-              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-              type: 'index-pattern',
-            },
-          ],
-          updated_at: '2017-09-21T18:51:23.794Z',
-        },
-      ],
-    });
-  };
-
-  const makeFindTest = (describeFn: DescribeFn) => (
-    description: string,
-    definition: FindTestDefinition
+  const expectForbidden = expectResponses.forbidden('find');
+  const expectResponseBody = (testCase: FindTestCase): ExpectResponseBody => async (
+    response: Record<string, any>
   ) => {
-    const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { failure, successResult = {}, query } = testCase;
+    const parsedQuery = querystring.parse(query);
+    if (failure === 403) {
+      const type = parsedQuery.type;
+      await expectForbidden(type)(response);
+    } else if (failure === 400) {
+      const type = (parsedQuery.filter as string).split('.')[0];
+      expect(response.body.error).to.eql('Bad Request');
+      expect(response.body.statusCode).to.eql(failure);
+      expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);
+    } else {
+      // 2xx
+      expect(response.body).not.to.have.property('error');
+      const { page = 1, perPage = 20, total, savedObjects = [] } = successResult;
+      const savedObjectsArray = Array.isArray(savedObjects) ? savedObjects : [savedObjects];
+      expect(response.body.page).to.eql(page);
+      expect(response.body.per_page).to.eql(perPage);
+      expect(response.body.total).to.eql(total || savedObjectsArray.length);
+      for (let i = 0; i < savedObjectsArray.length; i++) {
+        const object = response.body.saved_objects[i];
+        const { type: expectedType, id: expectedId } = savedObjectsArray[i];
+        expect(object.type).to.eql(expectedType);
+        expect(object.id).to.eql(expectedId);
+        expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+        // don't test attributes, version, or references
+      }
+    }
+  };
+  const createTestDefinitions = (
+    testCases: FindTestCase | FindTestCase[],
+    forbidden: boolean,
+    options?: {
+      responseBodyOverride?: ExpectResponseBody;
+    }
+  ): FindTestDefinition[] => {
+    let cases = Array.isArray(testCases) ? testCases : [testCases];
+    if (forbidden) {
+      // override the expected result in each test case
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
+    }
+    return cases.map((x) => ({
+      title: getTestTitle(x),
+      responseStatusCode: x.failure ?? 200,
+      request: createRequest(x),
+      responseBody: options?.responseBodyOverride || expectResponseBody(x),
+    }));
+  };
+
+  const makeFindTest = (describeFn: Mocha.SuiteFunction) => (
+    description: string,
+    definition: FindTestSuite
+  ) => {
+    const { user, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${tests.spaceAwareType.description}`, async () =>
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&fields=title`)
-          .auth(user.username, user.password)
-          .expect(tests.spaceAwareType.statusCode)
-          .then(tests.spaceAwareType.response));
-
-      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${tests.notSpaceAwareType.description}`, async () =>
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=globaltype&fields=name`)
-          .auth(user.username, user.password)
-          .expect(tests.notSpaceAwareType.statusCode)
-          .then(tests.notSpaceAwareType.response));
-
-      it(`finding a hiddentype should return ${tests.hiddenType.statusCode} with ${tests.hiddenType.description}`, async () =>
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=hiddentype&fields=name`)
-          .auth(user.username, user.password)
-          .expect(tests.hiddenType.statusCode)
-          .then(tests.hiddenType.response));
-
-      describe('unknown type', () => {
-        it(`should return ${tests.unknownType.statusCode} with ${tests.unknownType.description}`, async () =>
+      for (const test of tests) {
+        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+          const query = test.request.query ? `?${test.request.query}` : '';
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags`)
-            .auth(user.username, user.password)
-            .expect(tests.unknownType.statusCode)
-            .then(tests.unknownType.response));
-      });
-
-      describe('page beyond total', () => {
-        it(`should return ${tests.pageBeyondTotal.statusCode} with ${tests.pageBeyondTotal.description}`, async () =>
-          await supertest
-            .get(
-              `${getUrlPrefix(
-                spaceId
-              )}/api/saved_objects/_find?type=visualization&page=100&per_page=100`
-            )
-            .auth(user.username, user.password)
-            .expect(tests.pageBeyondTotal.statusCode)
-            .then(tests.pageBeyondTotal.response));
-      });
-
-      describe('unknown search field', () => {
-        it(`should return ${tests.unknownSearchField.statusCode} with ${tests.unknownSearchField.description}`, async () =>
-          await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
-            .auth(user.username, user.password)
-            .expect(tests.unknownSearchField.statusCode)
-            .then(tests.unknownSearchField.response));
-      });
-
-      describe('no type', () => {
-        it(`should return ${tests.noType.statusCode} with ${tests.noType.description}`, async () =>
-          await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find`)
-            .auth(user.username, user.password)
-            .expect(tests.noType.statusCode)
-            .then(tests.noType.response));
-      });
-
-      describe('filter', () => {
-        it(`by wrong type should return ${tests.filterWithUnAllowedType.statusCode} with ${tests.filterWithUnAllowedType.description}`, async () =>
-          await supertest
-            .get(
-              `${getUrlPrefix(
-                spaceId
-              )}/api/saved_objects/_find?type=globaltype&filter=dashboard.title:'Requests'`
-            )
-            .auth(user.username, user.password)
-            .expect(tests.filterWithUnAllowedType.statusCode)
-            .then(tests.filterWithUnAllowedType.response));
-
-        it(`not space aware type should return ${tests.filterWithNotSpaceAwareType.statusCode} with ${tests.filterWithNotSpaceAwareType.description}`, async () =>
-          await supertest
-            .get(
-              `${getUrlPrefix(
-                spaceId
-              )}/api/saved_objects/_find?type=globaltype&filter=globaltype.attributes.name:*global*`
-            )
-            .auth(user.username, user.password)
-            .expect(tests.filterWithNotSpaceAwareType.statusCode)
-            .then(tests.filterWithNotSpaceAwareType.response));
-
-        it(`finding a hiddentype should return ${tests.filterWithHiddenType.statusCode} with ${tests.filterWithHiddenType.description}`, async () =>
-          await supertest
-            .get(
-              `${getUrlPrefix(
-                spaceId
-              )}/api/saved_objects/_find?type=hiddentype&fields=name&filter=hiddentype.attributes.name:'hello'`
-            )
-            .auth(user.username, user.password)
-            .expect(tests.filterWithHiddenType.statusCode)
-            .then(tests.filterWithHiddenType.response));
-
-        describe('unknown type', () => {
-          it(`should return ${tests.filterWithUnknownType.statusCode} with ${tests.filterWithUnknownType.description}`, async () =>
-            await supertest
-              .get(
-                `${getUrlPrefix(
-                  spaceId
-                )}/api/saved_objects/_find?type=wigwags&filter=wigwags.attributes.title:'unknown'`
-              )
-              .auth(user.username, user.password)
-              .expect(tests.filterWithUnknownType.statusCode)
-              .then(tests.filterWithUnknownType.response));
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find${query}`)
+            .auth(user?.username, user?.password)
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
         });
-
-        describe('no type', () => {
-          it(`should return ${tests.filterWithNoType.statusCode} with ${tests.filterWithNoType.description}`, async () =>
-            await supertest
-              .get(
-                `${getUrlPrefix(
-                  spaceId
-                )}/api/saved_objects/_find?filter=global.attributes.name:*global*`
-              )
-              .auth(user.username, user.password)
-              .expect(tests.filterWithNoType.statusCode)
-              .then(tests.filterWithNoType.response));
-        });
-      });
+      }
     });
   };
 
-  const findTest = makeFindTest(describe);
+  const addTests = makeFindTest(describe);
   // @ts-ignore
-  findTest.only = makeFindTest(describe.only);
+  addTests.only = makeFindTest(describe.only);
 
   return {
-    createExpectEmpty,
-    createExpectRbacForbidden,
-    createExpectVisualizationResults,
-    expectFilterWrongTypeError,
-    expectNotSpaceAwareResults,
-    expectTypeRequired,
-    findTest,
+    addTests,
+    createTestDefinitions,
   };
 }

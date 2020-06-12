@@ -39,23 +39,25 @@ export interface PluginsServiceSetup {
   initialized: boolean;
   /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
-  uiPlugins: {
-    /**
-     * Paths to all discovered ui plugin entrypoints on the filesystem, even if
-     * disabled.
-     */
-    internal: Map<PluginName, InternalPluginInfo>;
+}
 
-    /**
-     * Information needed by client-side to load plugins and wire dependencies.
-     */
-    public: Map<PluginName, DiscoveredPlugin>;
+/** @internal */
+export interface UiPlugins {
+  /**
+   * Paths to all discovered ui plugin entrypoints on the filesystem, even if
+   * disabled.
+   */
+  internal: Map<PluginName, InternalPluginInfo>;
 
-    /**
-     * Configuration for plugins to be exposed to the client-side.
-     */
-    browserConfigs: Map<PluginName, Observable<unknown>>;
-  };
+  /**
+   * Information needed by client-side to load plugins and wire dependencies.
+   */
+  public: Map<PluginName, DiscoveredPlugin>;
+
+  /**
+   * Configuration for plugins to be exposed to the client-side.
+   */
+  browserConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @internal */
@@ -85,7 +87,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
-      .pipe(map(rawConfig => new PluginsConfig(rawConfig, coreContext.env)));
+      .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
   }
 
   public async discover() {
@@ -97,8 +99,17 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    // Return dependency tree
-    return this.pluginsSystem.getPluginDependencies();
+    const uiPlugins = this.pluginsSystem.uiPlugins();
+
+    return {
+      // Return dependency tree
+      pluginTree: this.pluginsSystem.getPluginDependencies(),
+      uiPlugins: {
+        internal: this.uiPluginInternalInfo,
+        public: uiPlugins,
+        browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
+      },
+    };
   }
 
   public async setup(deps: PluginsServiceSetupDeps) {
@@ -115,15 +126,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       this.log.info('Plugin initialization disabled.');
     }
 
-    const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
       initialized: initialize,
       contracts,
-      uiPlugins: {
-        internal: this.uiPluginInternalInfo,
-        public: uiPlugins,
-        browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
-      },
     };
   }
 
@@ -148,7 +153,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           return (
             configDescriptor &&
             configDescriptor.exposeToBrowser &&
-            Object.values(configDescriptor?.exposeToBrowser).some(exposed => exposed)
+            Object.values(configDescriptor?.exposeToBrowser).some((exposed) => exposed)
           );
         })
         .map(([pluginId, plugin]) => {
@@ -181,14 +186,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     const errors = await error$
       .pipe(
-        filter(error => errorTypesToReport.includes(error.type)),
-        tap(pluginError => this.log.error(pluginError)),
+        filter((error) => errorTypesToReport.includes(error.type)),
+        tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
       .toPromise();
     if (errors.length > 0) {
       throw new Error(
-        `Failed to initialize plugins:${errors.map(err => `\n\t${err.message}`).join('')}`
+        `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
       );
     }
   }
@@ -200,7 +205,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     await plugin$
       .pipe(
-        mergeMap(async plugin => {
+        mergeMap(async (plugin) => {
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
@@ -258,8 +263,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       pluginInfo !== undefined &&
       pluginInfo.isEnabled &&
       pluginInfo.plugin.requiredPlugins
-        .filter(dep => !parents.includes(dep))
-        .every(dependencyName =>
+        .filter((dep) => !parents.includes(dep))
+        .every((dependencyName) =>
           this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
         )
     );

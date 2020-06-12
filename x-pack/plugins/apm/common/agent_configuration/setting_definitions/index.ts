@@ -7,58 +7,75 @@
 import * as t from 'io-ts';
 import { sortBy } from 'lodash';
 import { isRight } from 'fp-ts/lib/Either';
-import { i18n } from '@kbn/i18n';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { booleanRt } from '../runtime_types/boolean_rt';
-import { integerRt } from '../runtime_types/integer_rt';
+import { getIntegerRt } from '../runtime_types/integer_rt';
 import { isRumAgentName } from '../../agent_name';
-import { numberFloatRt } from '../runtime_types/number_float_rt';
-import { bytesRt, BYTE_UNITS } from '../runtime_types/bytes_rt';
-import { durationRt, DURATION_UNITS } from '../runtime_types/duration_rt';
+import { floatRt } from '../runtime_types/float_rt';
 import { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
+import { getDurationRt } from '../runtime_types/duration_rt';
+import { getBytesRt } from '../runtime_types/bytes_rt';
 
-function getDefaultsByType(settingDefinition: RawSettingDefinition) {
-  switch (settingDefinition.type) {
+function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
+  switch (setting.type) {
+    case 'select':
+      return { validation: t.string, ...setting };
+
     case 'boolean':
-      return { validation: booleanRt };
+      return { validation: booleanRt, ...setting };
+
     case 'text':
-      return { validation: t.string };
-    case 'integer':
+      return { validation: t.string, ...setting };
+
+    case 'integer': {
+      const { min, max } = setting;
+
       return {
-        validation: integerRt,
-        validationError: i18n.translate(
-          'xpack.apm.agentConfig.integer.errorText',
-          { defaultMessage: 'Must be an integer' }
-        )
+        validation: getIntegerRt({ min, max }),
+        min,
+        max,
+        ...setting,
       };
-    case 'float':
+    }
+
+    case 'float': {
       return {
-        validation: numberFloatRt,
-        validationError: i18n.translate(
-          'xpack.apm.agentConfig.float.errorText',
-          { defaultMessage: 'Must be a number between 0.000 and 1' }
-        )
+        validation: floatRt,
+        ...setting,
       };
-    case 'bytes':
+    }
+
+    case 'bytes': {
+      const units = setting.units ?? ['b', 'kb', 'mb'];
+      const min = setting.min ?? '0b';
+      const max = setting.max;
+
       return {
-        validation: bytesRt,
-        units: BYTE_UNITS,
-        validationError: i18n.translate(
-          'xpack.apm.agentConfig.bytes.errorText',
-          { defaultMessage: 'Please specify an integer and a unit' }
-        )
+        validation: getBytesRt({ min, max }),
+        units,
+        min,
+        ...setting,
       };
-    case 'duration':
+    }
+
+    case 'duration': {
+      const units = setting.units ?? ['ms', 's', 'm'];
+      const min = setting.min ?? '1ms';
+      const max = setting.max;
+
       return {
-        validation: durationRt,
-        units: DURATION_UNITS,
-        validationError: i18n.translate(
-          'xpack.apm.agentConfig.bytes.errorText',
-          { defaultMessage: 'Please specify an integer and a unit' }
-        )
+        validation: getDurationRt({ min, max }),
+        units,
+        min,
+        ...setting,
       };
+    }
+
+    default:
+      return setting;
   }
 }
 
@@ -91,23 +108,14 @@ export function filterByAgent(agentName?: AgentName) {
   };
 }
 
-export function isValid(setting: SettingDefinition, value: unknown) {
-  return isRight(setting.validation.decode(value));
+export function validateSetting(setting: SettingDefinition, value: unknown) {
+  const result = setting.validation.decode(value);
+  const message = PathReporter.report(result)[0];
+  const isValid = isRight(result);
+  return { isValid, message };
 }
 
-export const settingDefinitions = sortBy(
-  [...generalSettings, ...javaSettings].map(def => {
-    const defWithDefaults = {
-      ...getDefaultsByType(def),
-      ...def
-    };
-
-    // ensure every option has validation
-    if (!defWithDefaults.validation) {
-      throw new Error(`Missing validation for ${def.key}`);
-    }
-
-    return defWithDefaults as SettingDefinition;
-  }),
+export const settingDefinitions: SettingDefinition[] = sortBy(
+  [...generalSettings, ...javaSettings].map(getSettingDefaults),
   'key'
 );

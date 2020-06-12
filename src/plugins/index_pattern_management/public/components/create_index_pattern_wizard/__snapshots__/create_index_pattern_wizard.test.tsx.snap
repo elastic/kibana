@@ -1,0 +1,210 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      prompt={null}
+      showSystemIndices={true}
+    />
+    <LoadingState />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</EuiPanel>
+`;
+
+exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      prompt={null}
+      showSystemIndices={true}
+    />
+    <StepIndexPattern
+      allIndices={
+        Array [
+          Object {
+            "name": "myIndexPattern",
+          },
+        ]
+      }
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      isIncludingSystemIndices={false}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</EuiPanel>
+`;
+
+exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      prompt={null}
+      showSystemIndices={true}
+    />
+    <EmptyState
+      onRefresh={[Function]}
+      prependBasePath={[Function]}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</EuiPanel>
+`;
+
+exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      prompt={null}
+      showSystemIndices={true}
+    />
+    <StepTimeField
+      createIndexPattern={[Function]}
+      goToPreviousStep={[Function]}
+      indexPattern=""
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</EuiPanel>
+`;
+
+exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      prompt={null}
+      showSystemIndices={true}
+    />
+    <StepIndexPattern
+      allIndices={Array []}
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      isIncludingSystemIndices={false}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</EuiPanel>
+`;
+
+exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={true}
+      onChangeIncludingSystemIndices={[Function]}
+      prompt={null}
+      showSystemIndices={true}
+    />
+    <StepIndexPattern
+      allIndices={
+        Array [
+          Object {
+            "name": ".kibana ",
+          },
+        ]
+      }
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      isIncludingSystemIndices={true}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</EuiPanel>
+`;

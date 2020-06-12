@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { checkPermission } from '../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -29,7 +29,7 @@ class MultiJobActionsMenuUI extends Component {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isOpen: !prevState.isOpen,
     }));
   };
@@ -41,7 +41,7 @@ class MultiJobActionsMenuUI extends Component {
   };
 
   render() {
-    const anyJobsDeleting = this.props.jobs.some(j => j.deleting);
+    const anyJobsDeleting = this.props.jobs.some((j) => j.deleting);
     const button = (
       <EuiButtonIcon
         size="s"

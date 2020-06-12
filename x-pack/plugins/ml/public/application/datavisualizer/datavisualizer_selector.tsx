@@ -26,6 +26,7 @@ import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
+import { getMaxBytesFormatted } from './file_based/components/utils';
 
 function startTrialDescription() {
   return (
@@ -58,6 +59,8 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement !== undefined &&
     licenseManagement.enabled === true &&
     isFullLicense() === false;
+
+  const maxFileSize = getMaxBytesFormatted();
 
   return (
     <Fragment>
@@ -102,7 +105,8 @@ export const DatavisualizerSelector: FC = () => {
                 description={
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.selector.importDataDescription"
-                    defaultMessage="Import data from a log file. You can upload files up to 100 MB."
+                    defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
+                    values={{ maxFileSize }}
                   />
                 }
                 betaBadgeLabel={i18n.translate(
@@ -178,10 +182,7 @@ export const DatavisualizerSelector: FC = () => {
                     }
                     description={startTrialDescription()}
                     footer={
-                      <EuiButton
-                        target="_blank"
-                        href="kibana#/management/elasticsearch/license_management/home"
-                      >
+                      <EuiButton target="_blank" href="management/stack/license_management/home">
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                           defaultMessage="Start trial"

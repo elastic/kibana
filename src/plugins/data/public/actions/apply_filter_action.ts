@@ -42,6 +42,7 @@ export function createFilterAction(
   return createAction<typeof ACTION_GLOBAL_APPLY_FILTER>({
     type: ACTION_GLOBAL_APPLY_FILTER,
     id: ACTION_GLOBAL_APPLY_FILTER,
+    getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
@@ -61,12 +62,12 @@ export function createFilterAction(
 
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
-          filters.map(filter => {
+          filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
           })
         );
 
-        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
+        const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(

@@ -8,15 +8,20 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import React, { FC } from 'react';
 import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   CreateAnalyticsFormProps,
   DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
 } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 interface PropDefinition {
   /**
@@ -72,31 +77,39 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             eta: {
               optional: true,
+              formKey: 'eta',
             },
             feature_bag_fraction: {
               optional: true,
+              formKey: 'featureBagFraction',
             },
             max_trees: {
               optional: true,
+              formKey: 'maxTrees',
             },
             gamma: {
               optional: true,
+              formKey: 'gamma',
             },
             lambda: {
               optional: true,
+              formKey: 'lambda',
             },
             num_top_classes: {
               optional: true,
               defaultValue: 2,
+              formKey: 'numTopClasses',
             },
             prediction_field_name: {
               optional: true,
               defaultValue: `${config.analysis.classification.dependent_variable}_prediction`,
+              formKey: 'predictionFieldName',
             },
             randomize_seed: {
               optional: true,
               // By default it is randomly generated
               ignore: true,
+              formKey: 'randomizeSeed',
             },
             num_top_feature_importance_values: {
               optional: true,
@@ -116,23 +129,29 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             standardization_enabled: {
               defaultValue: true,
               optional: true,
+              formKey: 'standardizationEnabled',
             },
             compute_feature_influence: {
               defaultValue: true,
               optional: true,
+              formKey: 'computeFeatureInfluence',
             },
             outlier_fraction: {
               defaultValue: 0.05,
               optional: true,
+              formKey: 'outlierFraction',
             },
             feature_influence_threshold: {
               optional: true,
+              formKey: 'featureInfluenceThreshold',
             },
             method: {
               optional: true,
+              formKey: 'method',
             },
             n_neighbors: {
               optional: true,
+              formKey: 'nNeighbors',
             },
           },
         }
@@ -150,22 +169,28 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             eta: {
               optional: true,
+              formKey: 'eta',
             },
             feature_bag_fraction: {
               optional: true,
+              formKey: 'featureBagFraction',
             },
             max_trees: {
               optional: true,
+              formKey: 'maxTrees',
             },
             gamma: {
               optional: true,
+              formKey: 'gamma',
             },
             lambda: {
               optional: true,
+              formKey: 'lambda',
             },
             prediction_field_name: {
               optional: true,
               defaultValue: `${config.analysis.regression.dependent_variable}_prediction`,
+              formKey: 'predictionFieldName',
             },
             num_top_feature_importance_values: {
               optional: true,
@@ -176,6 +201,14 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               // By default it is randomly generated
               ignore: true,
+              formKey: 'randomizeSeed',
+            },
+            loss_function: {
+              optional: true,
+              defaultValue: 'mse',
+            },
+            loss_function_parameter: {
+              optional: true,
             },
           },
         }
@@ -214,7 +247,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     },
     results_field: {
       optional: true,
-      defaultValue: 'ml',
+      defaultValue: DEFAULT_RESULTS_FIELD,
     },
   },
   model_memory_limit: {
@@ -321,12 +354,57 @@ interface CloneActionProps {
  * to support EuiContext with a valid DOM structure without nested buttons.
  */
 export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item }) => {
+  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
+
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
     defaultMessage: 'Clone job',
   });
-  const { actions } = createAnalyticsForm;
+
+  const { notifications, savedObjects } = useMlKibana().services;
+  const savedObjectsClient = savedObjects.client;
+
   const onClick = async () => {
-    await actions.setJobClone(item.config);
+    const sourceIndex = Array.isArray(item.config.source.index)
+      ? item.config.source.index[0]
+      : item.config.source.index;
+    let sourceIndexId;
+
+    try {
+      const response = await savedObjectsClient.find<IIndexPattern>({
+        type: 'index-pattern',
+        perPage: 10,
+        search: `"${sourceIndex}"`,
+        searchFields: ['title'],
+        fields: ['title'],
+      });
+
+      const ip = response.savedObjects.find(
+        (obj) => obj.attributes.title.toLowerCase() === sourceIndex.toLowerCase()
+      );
+      if (ip !== undefined) {
+        sourceIndexId = ip.id;
+      }
+    } catch (e) {
+      const { toasts } = notifications;
+      const error = extractErrorMessage(e);
+
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.ml.dataframe.analyticsList.fetchSourceIndexPatternForCloneErrorMessage',
+          {
+            defaultMessage:
+              'An error occurred checking if index pattern {indexPattern} exists: {error}',
+            values: { indexPattern: sourceIndex, error },
+          }
+        )
+      );
+    }
+
+    if (sourceIndexId) {
+      window.location.href = `ml#/data_frame_analytics/new_job?index=${encodeURIComponent(
+        sourceIndexId
+      )}&jobId=${item.config.id}`;
+    }
   };
 
   return (
@@ -337,6 +415,7 @@ export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item })
       iconType="copy"
       onClick={onClick}
       aria-label={buttonText}
+      disabled={canCreateDataFrameAnalytics === false}
     >
       {buttonText}
     </EuiButtonEmpty>

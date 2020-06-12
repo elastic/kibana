@@ -21,7 +21,7 @@ describe('ML - numberAsOrdinal formatter', () => {
     { number: 100, asOrdinal: '100th' },
   ];
   test('returns the expected numeral format', () => {
-    tests.forEach(test => {
+    tests.forEach((test) => {
       expect(numberAsOrdinal(test.number)).toBe(test.asOrdinal);
     });
   });

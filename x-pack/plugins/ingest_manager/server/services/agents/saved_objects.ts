@@ -19,8 +19,8 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
     current_error_events: so.attributes.current_error_events
       ? JSON.parse(so.attributes.current_error_events)
       : [],
-    local_metadata: JSON.parse(so.attributes.local_metadata),
-    user_provided_metadata: JSON.parse(so.attributes.user_provided_metadata),
+    local_metadata: so.attributes.local_metadata,
+    user_provided_metadata: so.attributes.user_provided_metadata,
     access_api_key: undefined,
     status: undefined,
   };
@@ -38,5 +38,6 @@ export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes
   return {
     id: so.id,
     ...so.attributes,
+    data: so.attributes.data ? JSON.parse(so.attributes.data) : undefined,
   };
 }

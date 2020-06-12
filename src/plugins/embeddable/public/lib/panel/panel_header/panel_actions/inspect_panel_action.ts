@@ -31,7 +31,7 @@ interface ActionContext {
 export class InspectPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_INSPECT_PANEL;
   public readonly id = ACTION_INSPECT_PANEL;
-  public order = 10;
+  public order = 20;
 
   constructor(private readonly inspector: InspectorStartContract) {}
 

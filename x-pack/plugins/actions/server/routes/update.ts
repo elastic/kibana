@@ -28,7 +28,7 @@ const bodySchema = schema.object({
 export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.put(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -37,11 +37,11 @@ export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) 
         tags: ['access:actions-all'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });

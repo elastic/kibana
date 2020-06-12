@@ -18,8 +18,9 @@
  */
 
 import { format as formatUrl } from 'url';
-
+import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -27,6 +28,9 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   return new Client({
+    ssl: {
+      ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
+    },
     nodes: [formatUrl(config.get('servers.elasticsearch'))],
     requestTimeout: config.get('timeouts.esRequestTimeout'),
   });

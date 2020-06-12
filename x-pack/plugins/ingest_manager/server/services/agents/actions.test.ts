@@ -6,17 +6,17 @@
 
 import { createAgentAction } from './actions';
 import { SavedObject } from 'kibana/server';
-import { AgentAction, AgentActionSOAttributes } from '../../../common/types/models';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { AgentAction } from '../../../common/types/models';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 describe('test agent actions services', () => {
   it('should create a new action', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
 
-    const newAgentAction: AgentActionSOAttributes = {
+    const newAgentAction: Omit<AgentAction, 'id'> = {
       agent_id: 'agentid',
       type: 'CONFIG_CHANGE',
-      data: 'data',
+      data: { content: 'data' },
       sent_at: '2020-03-14T19:45:02.620Z',
       created_at: '2020-03-14T19:45:02.620Z',
     };
@@ -31,7 +31,7 @@ describe('test agent actions services', () => {
       .calls[0][1] as unknown) as AgentAction;
     expect(createdAction).toBeDefined();
     expect(createdAction?.type).toEqual(newAgentAction.type);
-    expect(createdAction?.data).toEqual(newAgentAction.data);
+    expect(createdAction?.data).toEqual(JSON.stringify(newAgentAction.data));
     expect(createdAction?.sent_at).toEqual(newAgentAction.sent_at);
   });
 });

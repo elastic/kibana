@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
 import { httpService } from './application/services/http';
@@ -20,7 +20,7 @@ import { setUiMetricService } from './application/services/api';
 import { IndexMgmtMetricsType } from './types';
 import { ExtensionsService, ExtensionsSetup } from './services';
 
-export interface IndexMgmtSetup {
+export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
@@ -40,7 +40,7 @@ export class IndexMgmtUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
     const { usageCollection, management } = plugins;
 
@@ -48,11 +48,11 @@ export class IndexMgmtUIPlugin {
     notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Data).registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      order: 1,
-      mount: async params => {
+      order: 0,
+      mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {
           httpService,

@@ -22,7 +22,7 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
-import { setupServer, createExportableType } from './test_utils';
+import { setupServer, createExportableType } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -187,7 +187,7 @@ describe('POST /internal/saved_objects/_import', () => {
           references: [],
           error: {
             statusCode: 409,
-            message: 'version conflict, document already exists',
+            message: 'Saved object [index-pattern/my-pattern] conflict',
           },
         },
         {

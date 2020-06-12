@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './feature_table_cell.scss';
+
 import React from 'react';
 import { EuiText, EuiIconTip, EuiIcon, IconType } from '@elastic/eui';
 import { SecuredFeature } from '../../../../model';

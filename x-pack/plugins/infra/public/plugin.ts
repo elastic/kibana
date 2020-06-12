@@ -4,55 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { merge } from 'lodash';
 import {
-  Plugin as PluginClass,
+  AppMountParameters,
   CoreSetup,
   CoreStart,
+  Plugin as PluginClass,
   PluginInitializerContext,
-  AppMountParameters,
 } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { createMetricThresholdAlertType } from './alerting/metric_threshold';
+import { getInventoryMetricAlertType } from './components/alerting/inventory/metric_inventory_threshold_alert_type';
+import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
-
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
+import { ClientPluginsSetup, ClientPluginsStart } from './types';
 
 export type ClientSetup = void;
 export type ClientStart = void;
 
-export interface ClientPluginsSetup {
-  home: HomePublicPluginSetup;
-  data: DataPublicPluginSetup;
-  usageCollection: UsageCollectionSetup;
-  dataEnhanced: DataEnhancedSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
-}
-
-export interface ClientPluginsStart {
-  data: DataPublicPluginStart;
-  dataEnhanced: DataEnhancedStart;
-}
-
-export type InfraPlugins = ClientPluginsSetup & ClientPluginsStart;
-
-const getMergedPlugins = (setup: ClientPluginsSetup, start: ClientPluginsStart): InfraPlugins => {
-  return merge({}, setup, start);
-};
-
 export class Plugin
   implements PluginClass<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
-  constructor(context: PluginInitializerContext) {}
+  constructor(_context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
+  setup(core: CoreSetup<ClientPluginsStart, ClientStart>, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getInventoryMetricAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
 
     core.application.register({
       id: 'logs',
@@ -60,21 +39,23 @@ export class Plugin
         defaultMessage: 'Logs',
       }),
       euiIconType: 'logsApp',
-      order: 8001,
+      order: 8100,
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
-        const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
+        const { renderApp } = await import('./apps/logs_app');
 
-        return startApp(
-          composeLibs(coreStart),
+        return renderApp(
           coreStart,
-          plugins,
-          params,
-          LogsRouter,
-          pluginsSetup.triggers_actions_ui
+          {
+            data: pluginsStart.data,
+            dataEnhanced: pluginsSetup.dataEnhanced,
+            home: pluginsSetup.home,
+            triggers_actions_ui: pluginsStart.triggers_actions_ui,
+            usageCollection: pluginsSetup.usageCollection,
+          },
+          params
         );
       },
     });
@@ -85,21 +66,23 @@ export class Plugin
         defaultMessage: 'Metrics',
       }),
       euiIconType: 'metricsApp',
-      order: 8000,
+      order: 8200,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
-        const { startApp, composeLibs, MetricsRouter } = await this.downloadAssets();
+        const { renderApp } = await import('./apps/metrics_app');
 
-        return startApp(
-          composeLibs(coreStart),
+        return renderApp(
           coreStart,
-          plugins,
-          params,
-          MetricsRouter,
-          pluginsSetup.triggers_actions_ui
+          {
+            data: pluginsStart.data,
+            dataEnhanced: pluginsSetup.dataEnhanced,
+            home: pluginsSetup.home,
+            triggers_actions_ui: pluginsStart.triggers_actions_ui,
+            usageCollection: pluginsSetup.usageCollection,
+          },
+          params
         );
       },
     });
@@ -112,28 +95,14 @@ export class Plugin
       title: 'infra',
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
-        const { startLegacyApp } = await import('./apps/start_legacy_app');
-        return startLegacyApp(params);
+        const { renderApp } = await import('./apps/legacy_app');
+
+        return renderApp(params);
       },
     });
   }
 
-  start(core: CoreStart, plugins: ClientPluginsStart) {
+  start(core: CoreStart, _plugins: ClientPluginsStart) {
     registerStartSingleton(core);
-  }
-
-  private async downloadAssets() {
-    const [{ startApp }, { composeLibs }, { LogsRouter, MetricsRouter }] = await Promise.all([
-      import('./apps/start_app'),
-      import('./compose_libs'),
-      import('./routers'),
-    ]);
-
-    return {
-      startApp,
-      composeLibs,
-      LogsRouter,
-      MetricsRouter,
-    };
   }
 }

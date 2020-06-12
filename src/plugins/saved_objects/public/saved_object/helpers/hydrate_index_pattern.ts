@@ -31,25 +31,19 @@ export async function hydrateIndexPattern(
   indexPatterns: IndexPatternsContract,
   config: SavedObjectConfig
 ) {
-  const clearSavedIndexPattern = !!config.clearSavedIndexPattern;
   const indexPattern = config.indexPattern;
 
   if (!savedObject.searchSource) {
     return null;
   }
 
-  if (clearSavedIndexPattern) {
-    savedObject.searchSource!.setField('index', undefined);
-    return null;
-  }
-
-  const index = id || indexPattern || savedObject.searchSource!.getOwnField('index');
+  const index = id || indexPattern || savedObject.searchSource.getOwnField('index');
 
   if (typeof index !== 'string' || !index) {
     return null;
   }
 
   const indexObj = await indexPatterns.get(index);
-  savedObject.searchSource!.setField('index', indexObj);
+  savedObject.searchSource.setField('index', indexObj);
   return indexObj;
 }

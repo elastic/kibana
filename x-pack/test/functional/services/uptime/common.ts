@@ -10,6 +10,7 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const find = getService('find');
 
   return {
     async assertExists(key: string) {
@@ -51,6 +52,20 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
     },
     async setStatusFilterDown() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
+    },
+    async resetStatusFilter() {
+      const upFilter = await find.byCssSelector(
+        '[data-test-subj="xpack.uptime.filterBar.filterStatusUp"]'
+      );
+      if (await upFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
+        this.setStatusFilterUp();
+      }
+      const downFilter = await find.byCssSelector(
+        '[data-test-subj="xpack.uptime.filterBar.filterStatusDown"]'
+      );
+      if (await downFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
+        this.setStatusFilterDown();
+      }
     },
     async selectFilterItem(filterType: string, option: string) {
       const popoverId = `filter-popover_${filterType}`;

@@ -104,7 +104,7 @@ The API returns the following:
       "type": "dashboard",
       "error": {
         "statusCode": 409,
-        "message": "version conflict, document already exists"
+        "message": "Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] conflict"
       }
     }
   ]

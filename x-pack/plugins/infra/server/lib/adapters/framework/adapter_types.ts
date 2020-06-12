@@ -11,19 +11,19 @@ import { RouteMethod, RouteConfig } from '../../../../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
-import { APMPluginContract } from '../../../../../../plugins/apm/server';
+import { APMPluginSetup } from '../../../../../../plugins/apm/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
-import { PluginSetupContract as AlertingPluginContract } from '../../../../../../plugins/alerting/server';
+import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  metrics: VisTypeTimeseriesSetup;
+  visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
-  apm: APMPluginContract;
-  alerting: AlertingPluginContract;
+  apm: APMPluginSetup;
+  alerts: AlertingPluginContract;
 }
 
 export interface CallWithRequestParams extends GenericParams {

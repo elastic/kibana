@@ -99,10 +99,14 @@ export class DeleteSpacesButton extends Component<Props, State> {
   public deleteSpaces = async () => {
     const { spacesManager, space } = this.props;
 
+    this.setState({
+      showConfirmDeleteModal: false,
+    });
+
     try {
       await spacesManager.deleteSpace(space);
     } catch (error) {
-      const { message: errorMessage = '' } = error.data || {};
+      const { message: errorMessage = '' } = error.data || error.body || {};
 
       this.props.notifications.toasts.addDanger(
         i18n.translate('xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle', {
@@ -110,11 +114,8 @@ export class DeleteSpacesButton extends Component<Props, State> {
           values: { errorMessage },
         })
       );
+      return;
     }
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
 
     const message = i18n.translate(
       'xpack.spaces.management.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',

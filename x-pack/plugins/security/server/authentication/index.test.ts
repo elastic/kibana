@@ -19,6 +19,7 @@ import {
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { securityAuditLoggerMock } from '../audit/index.mock';
 
 import {
   AuthenticationHandler,
@@ -40,18 +41,24 @@ import {
   InvalidateAPIKeyParams,
 } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
+import { SecurityAuditLogger } from '../audit';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 
 describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
+    auditLogger: jest.Mocked<SecurityAuditLogger>;
     config: ConfigType;
     loggers: LoggerFactory;
     http: jest.Mocked<CoreSetup['http']>;
     clusterClient: jest.Mocked<IClusterClient>;
     license: jest.Mocked<SecurityLicense>;
+    getFeatureUsageService: () => jest.Mocked<SecurityFeatureUsageServiceStart>;
   };
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
   beforeEach(() => {
     mockSetupAuthenticationParams = {
+      auditLogger: securityAuditLoggerMock.create(),
       http: coreMock.createSetup().http,
       config: createConfig(
         ConfigSchema.validate({
@@ -65,6 +72,9 @@ describe('setupAuthentication()', () => {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
       loggers: loggingServiceMock.create(),
+      getFeatureUsageService: jest
+        .fn()
+        .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();

@@ -18,7 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
+  useBreadcrumbs,
   usePagination,
   useGetEnrollmentAPIKeys,
   useGetAgentConfigs,
@@ -29,7 +31,6 @@ import {
 import { EnrollmentAPIKey } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
-import {} from '@elastic/eui';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
@@ -72,7 +73,7 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
             {key}
           </EuiText>
         ) : (
-          <EuiText color="subdued">••••••••••••••••••••••••••</EuiText>
+          <EuiText color="subdued">•••••••••••••••••••••</EuiText>
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -125,6 +126,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('fleet_enrollment_tokens');
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
@@ -151,11 +153,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Name',
       }),
       truncateText: true,
-      width: '300px',
       textOnly: true,
       render: (name: string) => {
         return (
-          <EuiText style={NO_WRAP_TRUNCATE_STYLE} title={name}>
+          <EuiText size="s" style={NO_WRAP_TRUNCATE_STYLE} title={name}>
             {name}
           </EuiText>
         );
@@ -166,7 +167,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.secretTitle', {
         defaultMessage: 'Secret',
       }),
-      width: '245px',
+      width: '215px',
       render: (apiKeyId: string) => {
         return <ApiKeyField apiKeyId={apiKeyId} />;
       },
@@ -177,7 +178,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Config',
       }),
       render: (configId: string) => {
-        const config = agentConfigs.find(c => c.id === configId);
+        const config = agentConfigs.find((c) => c.id === configId);
         return <>{config ? config.name : configId}</>;
       },
     },
@@ -186,7 +187,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.createdAtTitle', {
         defaultMessage: 'Created on',
       }),
-      width: '200px',
+      width: '150px',
       render: (createdAt: string) => {
         return createdAt ? (
           <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
@@ -198,7 +199,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.activeTitle', {
         defaultMessage: 'Active',
       }),
-      width: '80px',
+      width: '70px',
       render: (active: boolean) => {
         return (
           <EuiText textAlign="center">
@@ -212,7 +213,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.actionsTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '100px',
+      width: '70px',
       render: (_: any, apiKey: EnrollmentAPIKey) => {
         return (
           apiKey.active && (
@@ -245,14 +246,14 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,
               });
               setSearch(newSearch);
             }}
-            fieldPrefix="enrollment_api_keys"
+            fieldPrefix={ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

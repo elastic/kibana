@@ -1,0 +1,53 @@
+{
+  "description": "Adversaries may encode/decode data in an attempt to evade detection by host- or network-based security controls.",
+  "false_positives": [
+    "Automated tools such as Jenkins may encode or decode files as part of their normal behavior. These events can be filtered by the process executable or username values."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Base64 Encoding/Decoding Activity",
+  "query": "event.action:(executed or process_started) and process.name:(base64 or base64plain or base64url or base64mime or base64pem)",
+  "risk_score": 21,
+  "rule_id": "97f22dab-84e8-409d-955e-dacd1d31670b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1140",
+          "name": "Deobfuscate/Decode Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1140/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1027",
+          "name": "Obfuscated Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1027/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

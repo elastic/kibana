@@ -18,7 +18,6 @@ import { APIKeysGridPage } from './api_keys_grid_page';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { apiKeysAPIClientMock } from '../index.mock';
 
-const mock403 = () => ({ body: { statusCode: 403 } });
 const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
 
 const waitForRender = async (
@@ -48,6 +47,7 @@ describe('APIKeysGridPage', () => {
     apiClientMock.checkPrivileges.mockResolvedValue({
       isAdmin: true,
       areApiKeysEnabled: true,
+      canManage: true,
     });
     apiClientMock.getApiKeys.mockResolvedValue({
       apiKeys: [
@@ -64,10 +64,13 @@ describe('APIKeysGridPage', () => {
     });
   });
 
+  const coreStart = coreMock.createStart();
+
   const getViewProperties = () => {
-    const { docLinks, notifications } = coreMock.createStart();
+    const { docLinks, notifications, application } = coreStart;
     return {
       docLinks: new DocumentationLinksService(docLinks),
+      navigateToApp: application.navigateToApp,
       notifications,
       apiKeysAPIClient: apiClientMock,
     };
@@ -82,12 +85,13 @@ describe('APIKeysGridPage', () => {
   it('renders a callout when API keys are not enabled', async () => {
     apiClientMock.checkPrivileges.mockResolvedValue({
       isAdmin: true,
+      canManage: true,
       areApiKeysEnabled: false,
     });
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(NotEnabled).length > 0;
     });
 
@@ -95,11 +99,15 @@ describe('APIKeysGridPage', () => {
   });
 
   it('renders permission denied if user does not have required permissions', async () => {
-    apiClientMock.checkPrivileges.mockRejectedValue(mock403());
+    apiClientMock.checkPrivileges.mockResolvedValue({
+      canManage: false,
+      isAdmin: false,
+      areApiKeysEnabled: true,
+    });
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
 
@@ -111,7 +119,7 @@ describe('APIKeysGridPage', () => {
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiCallOut).length > 0;
     });
 
@@ -127,7 +135,7 @@ describe('APIKeysGridPage', () => {
     it('renders a callout indicating the user is an administrator', async () => {
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(calloutEl).length > 0;
       });
 
@@ -137,7 +145,7 @@ describe('APIKeysGridPage', () => {
     it('renders the correct description text', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 
@@ -152,6 +160,7 @@ describe('APIKeysGridPage', () => {
     beforeEach(() => {
       apiClientMock.checkPrivileges.mockResolvedValue({
         isAdmin: false,
+        canManage: true,
         areApiKeysEnabled: true,
       });
 
@@ -162,7 +171,7 @@ describe('APIKeysGridPage', () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 
@@ -172,7 +181,7 @@ describe('APIKeysGridPage', () => {
     it('renders the correct description text', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 

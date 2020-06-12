@@ -17,12 +17,12 @@ import {
 export function registerTasks({
   taskManager,
   logger,
-  elasticsearch,
+  getStartServices,
   config,
 }: {
   taskManager?: TaskManagerSetupContract;
   logger: Logger;
-  elasticsearch: CoreSetup['elasticsearch'];
+  getStartServices: CoreSetup['getStartServices'];
   config: Observable<{ kibana: { index: string } }>;
 }) {
   if (!taskManager) {
@@ -30,13 +30,18 @@ export function registerTasks({
     return;
   }
 
+  const esClientPromise = getStartServices().then(
+    ([{ elasticsearch }]) => elasticsearch.legacy.client
+  );
+
   taskManager.registerTaskDefinitions({
     [VIS_TELEMETRY_TASK]: {
       title: 'X-Pack telemetry calculator for Visualizations',
       type: VIS_TELEMETRY_TASK,
       createTaskRunner({ taskInstance }: { taskInstance: TaskInstance }) {
         return {
-          run: visualizationsTaskRunner(taskInstance, config, elasticsearch),
+          run: visualizationsTaskRunner(taskInstance, config, esClientPromise),
+          cancel: async () => {},
         };
       },
     },

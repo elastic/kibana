@@ -18,9 +18,10 @@
  */
 
 import { coreMock } from '../../../../core/public/mocks';
+import { CoreSetup } from '../../../../core/public';
+import { expressionsPluginMock } from '../../../../plugins/expressions/public/mocks';
 
 import { SearchService } from './search_service';
-import { CoreSetup } from '../../../../core/public';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -35,8 +36,9 @@ describe('Search service', () => {
     it('exposes proper contract', async () => {
       const setup = searchService.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
+        expressions: expressionsPluginMock.createSetupContract(),
       } as any);
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+      expect(setup).toHaveProperty('registerSearchStrategy');
     });
   });
 });

@@ -4,252 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AUTHENTICATION } from '../../common/lib/authentication';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { exportTestSuiteFactory } from '../../common/suites/export';
+import {
+  exportTestSuiteFactory,
+  getTestCases,
+  ExportTestDefinition,
+} from '../../common/suites/export';
 
-export default function({ getService }: FtrProviderContext) {
+const createTestCases = () => {
+  const cases = getTestCases();
+  const exportableTypes = [
+    cases.singleNamespaceObject,
+    cases.singleNamespaceType,
+    cases.namespaceAgnosticObject,
+    cases.namespaceAgnosticType,
+  ];
+  const nonExportableTypes = [
+    cases.multiNamespaceObject,
+    cases.multiNamespaceType,
+    cases.hiddenObject,
+    cases.hiddenType,
+  ];
+  const allTypes = exportableTypes.concat(nonExportableTypes);
+  return { exportableTypes, nonExportableTypes, allTypes };
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  describe('export', () => {
-    const {
-      createExpectRbacForbidden,
-      expectTypeOrObjectsRequired,
-      createExpectVisualizationResults,
-      expectInvalidTypeSpecified,
-      exportTest,
-    } = exportTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
+  const createTests = () => {
+    const { exportableTypes, nonExportableTypes, allTypes } = createTestCases();
+    return {
+      unauthorized: [
+        createTestDefinitions(exportableTypes, true),
+        createTestDefinitions(nonExportableTypes, false),
+      ].flat(),
+      authorized: createTestDefinitions(allTypes, false),
+    };
+  };
 
-    exportTest('user with no access', {
-      user: AUTHENTICATION.NOT_A_KIBANA_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
+  describe('_export', () => {
+    getTestScenarios().security.forEach(({ users }) => {
+      const { unauthorized, authorized } = createTests();
+      const _addTests = (user: TestUser, tests: ExportTestDefinition[]) => {
+        addTests(user.description, { user, tests });
+      };
 
-    exportTest('superuser', {
-      user: AUTHENTICATION.SUPERUSER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('legacy user', {
-      user: AUTHENTICATION.KIBANA_LEGACY_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('dual-privileges user', {
-      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('dual-privileges readonly user', {
-      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('rbac user with all globally', {
-      user: AUTHENTICATION.KIBANA_RBAC_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('rbac user with read globally', {
-      user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('rbac user with all at default space', {
-      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('rbac user with read at default space', {
-      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('rbac user with all at space_1', {
-      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('rbac user with read at space_1', {
-      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
+      [
+        users.noAccess,
+        users.legacyAll,
+        users.allAtDefaultSpace,
+        users.readAtDefaultSpace,
+        users.allAtSpace1,
+        users.readAtSpace1,
+      ].forEach((user) => {
+        _addTests(user, unauthorized);
+      });
+      [
+        users.dualAll,
+        users.dualRead,
+        users.allGlobally,
+        users.readGlobally,
+        users.superuser,
+      ].forEach((user) => {
+        _addTests(user, authorized);
+      });
     });
   });
 }

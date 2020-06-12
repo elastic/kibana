@@ -8,7 +8,7 @@ import { CallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../../legacy/plugins/monitoring/common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 import { PluginsSetup } from '../plugin';
 
@@ -44,10 +44,10 @@ async function getSpacesUsage(
   spacesAvailable: boolean
 ) {
   if (!spacesAvailable) {
-    return {} as UsageStats;
+    return null;
   }
 
-  const knownFeatureIds = features.getFeatures().map(feature => feature.id);
+  const knownFeatureIds = features.getFeatures().map((feature) => feature.id);
 
   let resp: SpacesAggregationResponse | undefined;
   try {
@@ -76,7 +76,7 @@ async function getSpacesUsage(
     });
   } catch (err) {
     if (err.status === 404) {
-      return {} as UsageStats;
+      return null;
     }
 
     throw err;
@@ -103,7 +103,7 @@ async function getSpacesUsage(
   );
 
   const usesFeatureControls = Object.values(disabledFeatures).some(
-    disabledSpaceCount => disabledSpaceCount > 0
+    (disabledSpaceCount) => disabledSpaceCount > 0
   );
 
   return {

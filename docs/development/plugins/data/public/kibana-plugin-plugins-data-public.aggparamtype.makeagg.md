@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-makeAgg: (agg: TAggConfig, state?: any) => TAggConfig;
+makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
 ```

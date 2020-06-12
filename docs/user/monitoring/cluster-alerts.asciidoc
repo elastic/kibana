@@ -49,13 +49,13 @@ To receive email notifications for the Cluster Alerts:
 . Configure an email account as described in
 {ref}/actions-email.html#configuring-email[Configuring email accounts].
 . Configure the
-`xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in
+`monitoring.cluster_alerts.email_notifications.email_address` setting in
 `kibana.yml` with your email address.
 +
 --
 TIP: If you have separate production and monitoring clusters and separate {kib}
 instances for those clusters, you must put the
-`xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in 
+`monitoring.cluster_alerts.email_notifications.email_address` setting in 
 the {kib} instance that is associated with the production cluster.
 
 --

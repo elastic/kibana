@@ -3,43 +3,84 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
-import {
-  useRouteMatch,
-  HashRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-  useHistory,
-} from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSteps,
+  EuiBottomBar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
+import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
-import { useLink, sendCreateDatasource } from '../../../hooks';
-import { useLinks as useEPMLinks } from '../../epm/hooks';
+import {
+  useLink,
+  useBreadcrumbs,
+  sendCreateDatasource,
+  useCore,
+  useConfig,
+  sendGetAgentStatus,
+} from '../../../hooks';
+import { ConfirmDeployConfigModal } from '../components';
 import { CreateDatasourcePageLayout } from './components';
-import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
-import { CREATE_DATASOURCE_STEP_PATHS } from './constants';
+import { CreateDatasourceFrom, DatasourceFormState } from './types';
+import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
-import { StepReviewDatasource } from './step_review';
+import { StepDefineDatasource } from './step_define_datasource';
 
 export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
+    notifications,
+    chrome: { getIsNavDrawerLocked$ },
+    uiSettings,
+  } = useCore();
+  const {
+    fleet: { enabled: isFleetEnabled },
+  } = useConfig();
+  const {
     params: { configId, pkgkey },
-    path: matchPath,
-    url: basePath,
   } = useRouteMatch();
+  const { getHref, getPath } = useLink();
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
-  const [maxStep, setMaxStep] = useState<CreateDatasourceStep | ''>('');
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
+
+  const agentConfigId = agentConfig?.id;
+  // Retrieve agent count
+  useEffect(() => {
+    const getAgentCount = async () => {
+      if (agentConfigId) {
+        const { data } = await sendGetAgentStatus({ configId: agentConfigId });
+        if (data?.results.total) {
+          setAgentCount(data.results.total);
+        }
+      }
+    };
+
+    if (isFleetEnabled && agentConfigId) {
+      getAgentCount();
+    }
+  }, [agentConfigId, isFleetEnabled]);
+  const [agentCount, setAgentCount] = useState<number>(0);
 
   // New datasource state
   const [datasource, setDatasource] = useState<NewDatasource>({
@@ -51,31 +92,51 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     inputs: [],
   });
 
-  // Update package info method
-  const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
-    if (updatedPackageInfo) {
-      setPackageInfo(updatedPackageInfo);
-    } else {
-      setPackageInfo(undefined);
-      setMaxStep('');
-    }
+  // Datasource validation state
+  const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
 
-    // eslint-disable-next-line no-console
-    console.debug('Package info updated', updatedPackageInfo);
-  };
+  // Form state
+  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
+
+  // Update package info method
+  const updatePackageInfo = useCallback(
+    (updatedPackageInfo: PackageInfo | undefined) => {
+      if (updatedPackageInfo) {
+        setPackageInfo(updatedPackageInfo);
+        if (agentConfig) {
+          setFormState('VALID');
+        }
+      } else {
+        setFormState('INVALID');
+        setPackageInfo(undefined);
+      }
+
+      // eslint-disable-next-line no-console
+      console.debug('Package info updated', updatedPackageInfo);
+    },
+    [agentConfig, setPackageInfo, setFormState]
+  );
 
   // Update agent config method
-  const updateAgentConfig = (updatedAgentConfig: AgentConfig | undefined) => {
-    if (updatedAgentConfig) {
-      setAgentConfig(updatedAgentConfig);
-    } else {
-      setAgentConfig(undefined);
-      setMaxStep('');
-    }
+  const updateAgentConfig = useCallback(
+    (updatedAgentConfig: AgentConfig | undefined) => {
+      if (updatedAgentConfig) {
+        setAgentConfig(updatedAgentConfig);
+        if (packageInfo) {
+          setFormState('VALID');
+        }
+      } else {
+        setFormState('INVALID');
+        setAgentConfig(undefined);
+      }
 
-    // eslint-disable-next-line no-console
-    console.debug('Agent config updated', updatedAgentConfig);
-  };
+      // eslint-disable-next-line no-console
+      console.debug('Agent config updated', updatedAgentConfig);
+    },
+    [packageInfo, setAgentConfig, setFormState]
+  );
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update datasource method
   const updateDatasource = (updatedFields: Partial<NewDatasource>) => {
@@ -87,181 +148,232 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
 
     // eslint-disable-next-line no-console
     console.debug('Datasource updated', newDatasource);
+    const newValidationResults = updateDatasourceValidation(newDatasource);
+    const hasPackage = newDatasource.package;
+    const hasValidationErrors = newValidationResults
+      ? validationHasErrors(newValidationResults)
+      : false;
+    const hasAgentConfig = newDatasource.config_id && newDatasource.config_id !== '';
+    if (hasPackage && hasAgentConfig && !hasValidationErrors) {
+      setFormState('VALID');
+    }
   };
 
-  // Cancel url
-  const CONFIG_URL = useLink(
-    `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
-  );
-  const PACKAGE_URL = useEPMLinks().toDetailView({
-    name: (pkgkey || '-').split('-')[0],
-    version: (pkgkey || '-').split('-')[1],
-  });
-  const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
+  const updateDatasourceValidation = (newDatasource?: NewDatasource) => {
+    if (packageInfo) {
+      const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
+      setValidationResults(newValidationResult);
+      // eslint-disable-next-line no-console
+      console.debug('Datasource validation results', newValidationResult);
 
-  // Redirect to first step
-  const redirectToFirstStep =
-    from === 'config' ? (
-      <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`} />
-    ) : (
-      <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`} />
-    );
+      return newValidationResult;
+    }
+  };
 
-  // Url to first and second steps
-  const SELECT_PACKAGE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`);
-  const SELECT_CONFIG_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`);
-  const CONFIGURE_DATASOURCE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
-  const firstStepUrl = from === 'config' ? SELECT_PACKAGE_URL : SELECT_CONFIG_URL;
-  const secondStepUrl = CONFIGURE_DATASOURCE_URL;
-
-  // Redirect to second step
-  const redirectToSecondStep = (
-    <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`} />
-  );
+  // Cancel path
+  const cancelUrl =
+    from === 'config'
+      ? getHref('configuration_details', { configId: agentConfig?.id || configId })
+      : getHref('integration_details', { pkgkey });
 
   // Save datasource
   const saveDatasource = async () => {
-    setIsSaving(true);
+    setFormState('LOADING');
     const result = await sendCreateDatasource(datasource);
-    setIsSaving(false);
+    setFormState('SUBMITTED');
     return result;
+  };
+
+  const onSubmit = async () => {
+    if (formState === 'VALID' && hasErrors) {
+      setFormState('INVALID');
+      return;
+    }
+    if (agentCount !== 0 && formState !== 'CONFIRM') {
+      setFormState('CONFIRM');
+      return;
+    }
+    const { error } = await saveDatasource();
+    if (!error) {
+      history.push(getPath('configuration_details', { configId: agentConfig?.id || configId }));
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.ingestManager.createDatasource.addedNotificationTitle', {
+          defaultMessage: `Successfully added '{datasourceName}'`,
+          values: {
+            datasourceName: datasource.name,
+          },
+        }),
+        text:
+          agentCount && agentConfig
+            ? i18n.translate('xpack.ingestManager.createDatasource.addedNotificationMessage', {
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentConfigName}' configuration`,
+                values: {
+                  agentConfigName: agentConfig.name,
+                },
+              })
+            : undefined,
+      });
+    } else {
+      notifications.toasts.addError(error, {
+        title: 'Error',
+      });
+      setFormState('VALID');
+    }
   };
 
   const layoutProps = {
     from,
-    basePath,
     cancelUrl,
-    maxStep,
     agentConfig,
     packageInfo,
-    restrictWidth: 770,
   };
 
-  return (
-    <Router>
-      <Switch>
-        {/* Redirect to first step from `/` */}
-        {from === 'config' ? (
-          <Redirect
-            exact
-            from={`${matchPath}`}
-            to={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`}
-          />
-        ) : (
-          <Redirect
-            exact
-            from={`${matchPath}`}
-            to={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`}
-          />
-        )}
-
-        {/* First step, either render select package or select config depending on entry */}
-        {from === 'config' ? (
-          <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`}>
-            <CreateDatasourcePageLayout {...layoutProps} currentStep="selectPackage">
-              <StepSelectPackage
-                agentConfigId={configId}
-                updateAgentConfig={updateAgentConfig}
-                packageInfo={packageInfo}
-                updatePackageInfo={updatePackageInfo}
-                cancelUrl={cancelUrl}
-                onNext={() => {
-                  setMaxStep('selectPackage');
-                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
-                }}
-              />
-            </CreateDatasourcePageLayout>
-          </Route>
-        ) : (
-          <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`}>
-            <CreateDatasourcePageLayout {...layoutProps} currentStep="selectConfig">
-              <StepSelectConfig
-                pkgkey={pkgkey}
-                updatePackageInfo={updatePackageInfo}
-                agentConfig={agentConfig}
-                updateAgentConfig={updateAgentConfig}
-                cancelUrl={cancelUrl}
-                onNext={() => {
-                  setMaxStep('selectConfig');
-                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
-                }}
-              />
-            </CreateDatasourcePageLayout>
-          </Route>
-        )}
-
-        {/* Second step to configure data source, redirect to first step if agent config */}
-        {/* or package info isn't defined (i.e. after full page reload) */}
-        <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.configure}`}>
-          <CreateDatasourcePageLayout {...layoutProps} currentStep="configure">
-            {!agentConfig || !packageInfo ? (
-              redirectToFirstStep
-            ) : (
-              <StepConfigureDatasource
-                agentConfig={agentConfig}
-                packageInfo={packageInfo}
-                datasource={datasource}
-                updateDatasource={updateDatasource}
-                backLink={
-                  <EuiButtonEmpty href={firstStepUrl} iconType="arrowLeft" iconSide="left">
-                    {from === 'config' ? (
-                      <FormattedMessage
-                        id="xpack.ingestManager.createDatasource.changePackageLinkText"
-                        defaultMessage="Change package"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.ingestManager.createDatasource.changeConfigLinkText"
-                        defaultMessage="Change configuration"
-                      />
-                    )}
-                  </EuiButtonEmpty>
-                }
-                cancelUrl={cancelUrl}
-                onNext={() => {
-                  setMaxStep('configure');
-                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.review}`);
-                }}
-              />
-            )}
-          </CreateDatasourcePageLayout>
-        </Route>
-
-        {/* Third step to review, redirect to second step if data source name is missing */}
-        {/* (i.e. after full page reload) */}
-        <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.review}`}>
-          <CreateDatasourcePageLayout {...layoutProps} currentStep="review">
-            {!agentConfig || !datasource.name ? (
-              redirectToSecondStep
-            ) : (
-              <StepReviewDatasource
-                agentConfig={agentConfig}
-                datasource={datasource}
-                cancelUrl={cancelUrl}
-                isSubmitLoading={isSaving}
-                backLink={
-                  <EuiButtonEmpty href={secondStepUrl} iconType="arrowLeft" iconSide="left">
-                    <FormattedMessage
-                      id="xpack.ingestManager.createDatasource.editDatasourceLinkText"
-                      defaultMessage="Edit data source"
-                    />
-                  </EuiButtonEmpty>
-                }
-                onSubmit={async () => {
-                  const { error } = await saveDatasource();
-                  if (!error) {
-                    history.push(
-                      `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
-                    );
-                  } else {
-                    // TODO: Handle save datasource error
-                  }
-                }}
-              />
-            )}
-          </CreateDatasourcePageLayout>
-        </Route>
-      </Switch>
-    </Router>
+  const stepSelectConfig = useMemo(
+    () => (
+      <StepSelectConfig
+        pkgkey={pkgkey}
+        updatePackageInfo={updatePackageInfo}
+        agentConfig={agentConfig}
+        updateAgentConfig={updateAgentConfig}
+      />
+    ),
+    [pkgkey, updatePackageInfo, agentConfig, updateAgentConfig]
   );
+
+  const stepSelectPackage = useMemo(
+    () => (
+      <StepSelectPackage
+        agentConfigId={configId}
+        updateAgentConfig={updateAgentConfig}
+        packageInfo={packageInfo}
+        updatePackageInfo={updatePackageInfo}
+      />
+    ),
+    [configId, updateAgentConfig, packageInfo, updatePackageInfo]
+  );
+
+  const steps: EuiStepProps[] = [
+    from === 'package'
+      ? {
+          title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
+            defaultMessage: 'Select an agent configuration',
+          }),
+          children: stepSelectConfig,
+        }
+      : {
+          title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageTitle', {
+            defaultMessage: 'Select an integration',
+          }),
+          children: stepSelectPackage,
+        },
+    {
+      title: i18n.translate('xpack.ingestManager.createDatasource.stepDefineDatasourceTitle', {
+        defaultMessage: 'Define your data source',
+      }),
+      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      children:
+        agentConfig && packageInfo ? (
+          <StepDefineDatasource
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            datasource={datasource}
+            updateDatasource={updateDatasource}
+            validationResults={validationResults!}
+          />
+        ) : null,
+    },
+    {
+      title: i18n.translate('xpack.ingestManager.createDatasource.stepConfgiureDatasourceTitle', {
+        defaultMessage: 'Select the data you want to collect',
+      }),
+      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      children:
+        agentConfig && packageInfo ? (
+          <StepConfigureDatasource
+            packageInfo={packageInfo}
+            datasource={datasource}
+            updateDatasource={updateDatasource}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
+        ) : null,
+    },
+  ];
+
+  return (
+    <CreateDatasourcePageLayout {...layoutProps}>
+      {formState === 'CONFIRM' && agentConfig && (
+        <ConfirmDeployConfigModal
+          agentCount={agentCount}
+          agentConfig={agentConfig}
+          onConfirm={onSubmit}
+          onCancel={() => setFormState('VALID')}
+        />
+      )}
+      {from === 'package'
+        ? packageInfo && (
+            <IntegrationBreadcrumb
+              pkgTitle={packageInfo.title}
+              pkgkey={`${packageInfo.name}-${packageInfo.version}`}
+            />
+          )
+        : agentConfig && (
+            <ConfigurationBreadcrumb configName={agentConfig.name} configId={agentConfig.id} />
+          )}
+      <EuiSteps steps={steps} />
+      <EuiSpacer size="l" />
+      {/* TODO #64541 - Remove classes */}
+      <EuiBottomBar
+        className={
+          uiSettings.get('pageNavigation') === 'legacy'
+            ? isNavDrawerLocked
+              ? 'ingestManager__bottomBar-isNavDrawerLocked'
+              : 'ingestManager__bottomBar'
+            : undefined
+        }
+      >
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="ghost" href={cancelUrl}>
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={onSubmit}
+              isLoading={formState === 'LOADING'}
+              disabled={formState !== 'VALID'}
+              iconType="save"
+              color="primary"
+              fill
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.saveButton"
+                defaultMessage="Save data source"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    </CreateDatasourcePageLayout>
+  );
+};
+
+const ConfigurationBreadcrumb: React.FunctionComponent<{
+  configName: string;
+  configId: string;
+}> = ({ configName, configId }) => {
+  useBreadcrumbs('add_datasource_from_configuration', { configName, configId });
+  return null;
+};
+
+const IntegrationBreadcrumb: React.FunctionComponent<{
+  pkgTitle: string;
+  pkgkey: string;
+}> = ({ pkgTitle, pkgkey }) => {
+  useBreadcrumbs('add_datasource_from_integration', { pkgTitle, pkgkey });
+  return null;
 };

@@ -19,14 +19,18 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
-import React from 'react';
+import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
+import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
+import React, { useState, ReactElement } from 'react';
+import ReactDOM from 'react-dom';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -38,6 +42,7 @@ import {
   QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
+  UI_SETTINGS,
 } from '../../../data/public';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../../saved_objects/public';
 
@@ -53,6 +58,7 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
+  SavedObjectEmbeddableInput,
   ContainerOutput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
@@ -86,6 +92,26 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  navigation: NavigationStart;
+}
+
+enum UrlParams {
+  SHOW_TOP_MENU = 'show-top-menu',
+  SHOW_QUERY_INPUT = 'show-query-input',
+  SHOW_TIME_FILTER = 'show-time-filter',
+  SHOW_FILTER_BAR = 'show-filter-bar',
+  HIDE_FILTER_BAR = 'hide-filter-bar',
+}
+
+interface UrlParamsSelectedMap {
+  [UrlParams.SHOW_TOP_MENU]: boolean;
+  [UrlParams.SHOW_QUERY_INPUT]: boolean;
+  [UrlParams.SHOW_TIME_FILTER]: boolean;
+  [UrlParams.SHOW_FILTER_BAR]: boolean;
+}
+
+interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
+  [UrlParams.HIDE_FILTER_BAR]: boolean;
 }
 
 export class DashboardAppController {
@@ -122,10 +148,21 @@ export class DashboardAppController {
     history,
     kbnUrlStateStorage,
     usageCollection,
+    navigation,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
+    const isEmbeddedExternally = Boolean($routeParams.embed);
+
+    // url param rules should only apply when embedded (e.g. url?embed=true)
+    const shouldForceDisplay = (param: string): boolean =>
+      isEmbeddedExternally && Boolean($routeParams[param]);
+
+    const forceShowTopNavMenu = shouldForceDisplay(UrlParams.SHOW_TOP_MENU);
+    const forceShowQueryInput = shouldForceDisplay(UrlParams.SHOW_QUERY_INPUT);
+    const forceShowDatePicker = shouldForceDisplay(UrlParams.SHOW_TIME_FILTER);
+    const forceHideFilterBar = shouldForceDisplay(UrlParams.HIDE_FILTER_BAR);
 
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -143,6 +180,7 @@ export class DashboardAppController {
     });
 
     // sync initial app filters from state to filterManager
+    // if there is an existing similar global filter, then leave it as global
     filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
     // setup syncing of app filters between appState and filterManager
     const stopSyncingAppFilters = connectToQueryState(
@@ -150,7 +188,11 @@ export class DashboardAppController {
       {
         set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
         get: () => ({ filters: dashboardStateManager.appState.filters }),
-        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+        state$: dashboardStateManager.appState$.pipe(
+          map((state) => ({
+            filters: state.filters,
+          }))
+        ),
       },
       {
         filters: esFilters.FilterStateStore.APP_STATE,
@@ -170,13 +212,16 @@ export class DashboardAppController {
     }
 
     // starts syncing `_g` portion of url with query services
-    // note: dashboard_state_manager.ts syncs `_a` portion of url
     // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
-    // otherwise it will case redundant browser history record
+    // otherwise it will case redundant browser history records
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       queryService,
       kbnUrlStateStorage
     );
+
+    // starts syncing `_a` portion of url
+    dashboardStateManager.startStateSyncing();
+
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const getShouldShowEditHelp = () =>
@@ -212,7 +257,7 @@ export class DashboardAppController {
       }
 
       let panelIndexPatterns: IndexPattern[] = [];
-      Object.values(container.getChildIds()).forEach(id => {
+      Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
         const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
@@ -226,7 +271,7 @@ export class DashboardAppController {
           $scope.indexPatterns = panelIndexPatterns;
         });
       } else {
-        indexPatterns.getDefault().then(defaultIndexPattern => {
+        indexPatterns.getDefault().then((defaultIndexPattern) => {
           $scope.$evalAsync(() => {
             $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
@@ -279,6 +324,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmbeddedExternally,
         isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
@@ -301,7 +347,6 @@ export class DashboardAppController {
         refreshInterval: timefilter.getRefreshInterval(),
       };
       $scope.panels = dashboardStateManager.getPanels();
-      $scope.screenTitle = dashboardStateManager.getTitle();
     };
 
     updateState();
@@ -386,7 +431,7 @@ export class DashboardAppController {
             if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
               const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
               const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-              container.addSavedObjectEmbeddable(type, id);
+              container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, { savedObjectId: id });
               removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
               removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
             }
@@ -403,7 +448,7 @@ export class DashboardAppController {
       dirty: !dash.id,
     };
 
-    dashboardStateManager.registerChangeListener(status => {
+    dashboardStateManager.registerChangeListener((status) => {
       this.appStatus.dirty = status.dirty || !dash.id;
       updateState();
     });
@@ -412,7 +457,8 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || {
         query: '',
         language:
-          localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
+          localStorage.get('kibana.userQueryLanguage') ||
+          uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
       },
       queryFilter.getFilters()
     );
@@ -466,7 +512,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, 'filters')).forEach(key => {
+      Object.keys(_.omit(containerInput, 'filters')).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -488,7 +534,7 @@ export class DashboardAppController {
       }
     };
 
-    $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    $scope.updateQueryAndFetch = function ({ query, dateRange }) {
       if (dateRange) {
         timefilter.setTime(dateRange);
       }
@@ -506,49 +552,8 @@ export class DashboardAppController {
       }
     };
 
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
-      timefilter.setRefreshInterval({
-        pause: isPaused,
-        value: refreshInterval ? refreshInterval : $scope.model.refreshInterval.value,
-      });
-    };
-
-    $scope.onFiltersUpdated = filters => {
-      // The filters will automatically be set when the queryFilter emits an update event (see below)
-      queryFilter.setFilters(filters);
-    };
-
-    $scope.onQuerySaved = savedQuery => {
-      $scope.savedQuery = savedQuery;
-    };
-
-    $scope.onSavedQueryUpdated = savedQuery => {
-      $scope.savedQuery = { ...savedQuery };
-    };
-
-    $scope.onClearSavedQuery = () => {
-      delete $scope.savedQuery;
-      dashboardStateManager.setSavedQueryId(undefined);
-      dashboardStateManager.applyFilters(
-        {
-          query: '',
-          language:
-            localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
-        },
-        queryFilter.getGlobalFilters()
-      );
-      // Making this method sync broke the updates.
-      // Temporary fix, until we fix the complex state in this file.
-      setTimeout(() => {
-        queryFilter.setFilters(queryFilter.getGlobalFilters());
-      }, 0);
-    };
-
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      const savedQueryFilters = savedQuery.attributes.filters || [];
-      const globalFilters = queryFilter.getGlobalFilters();
-      const allFilters = [...globalFilters, ...savedQueryFilters];
-
+      const allFilters = filterManager.getFilters();
       dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
@@ -577,7 +582,7 @@ export class DashboardAppController {
       () => {
         return dashboardStateManager.getSavedQueryId();
       },
-      newSavedQueryId => {
+      (newSavedQueryId) => {
         if (!newSavedQueryId) {
           $scope.savedQuery = undefined;
           return;
@@ -602,10 +607,68 @@ export class DashboardAppController {
 
     $scope.$watch(
       () => dashboardCapabilities.saveQuery,
-      newCapability => {
+      (newCapability) => {
         $scope.showSaveQuery = newCapability as boolean;
       }
     );
+
+    const onSavedQueryIdChange = (savedQueryId?: string) => {
+      dashboardStateManager.setSavedQueryId(savedQueryId);
+    };
+
+    const shouldShowFilterBar = (forceHide: boolean): boolean =>
+      !forceHide && ($scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode());
+
+    const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
+      (forceShow || $scope.isVisible) && !dashboardStateManager.getFullScreenMode();
+
+    const getNavBarProps = () => {
+      const isFullScreenMode = dashboardStateManager.getFullScreenMode();
+      const screenTitle = dashboardStateManager.getTitle();
+      const showTopNavMenu = shouldShowNavBarComponent(forceShowTopNavMenu);
+      const showQueryInput = shouldShowNavBarComponent(forceShowQueryInput);
+      const showDatePicker = shouldShowNavBarComponent(forceShowDatePicker);
+      const showQueryBar = showQueryInput || showDatePicker;
+      const showFilterBar = shouldShowFilterBar(forceHideFilterBar);
+      const showSearchBar = showQueryBar || showFilterBar;
+
+      return {
+        appName: 'dashboard',
+        config: showTopNavMenu ? $scope.topNavMenu : undefined,
+        className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
+        screenTitle,
+        showTopNavMenu,
+        showSearchBar,
+        showQueryBar,
+        showQueryInput,
+        showDatePicker,
+        showFilterBar,
+        indexPatterns: $scope.indexPatterns,
+        showSaveQuery: $scope.showSaveQuery,
+        query: $scope.model.query,
+        savedQuery: $scope.savedQuery,
+        onSavedQueryIdChange,
+        savedQueryId: dashboardStateManager.getSavedQueryId(),
+        useDefaultBehaviors: true,
+        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
+          if (!payload.query) {
+            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
+          } else {
+            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
+          }
+        },
+      };
+    };
+    const dashboardNavBar = document.getElementById('dashboardChrome');
+    const updateNavBar = () => {
+      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+    };
+
+    const unmountNavBar = () => {
+      if (dashboardNavBar) {
+        ReactDOM.unmountComponentAtNode(dashboardNavBar);
+      }
+    };
 
     $scope.timefilterSubscriptions$ = new Subscription();
 
@@ -693,11 +756,13 @@ export class DashboardAppController {
             }),
           }
         )
-        .then(isConfirmed => {
+        .then((isConfirmed) => {
           if (isConfirmed) {
             revertChangesAndExitEditMode();
           }
         });
+
+      updateNavBar();
     };
 
     /**
@@ -714,7 +779,7 @@ export class DashboardAppController {
      */
     function save(saveOptions: SavedObjectSaveOpts): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
-        .then(function(id) {
+        .then(function (id) {
           if (id) {
             notifications.toasts.addSuccess({
               title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
@@ -737,7 +802,7 @@ export class DashboardAppController {
           }
           return { id };
         })
-        .catch(error => {
+        .catch((error) => {
           notifications.toasts.addDanger({
             title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
@@ -751,9 +816,6 @@ export class DashboardAppController {
           return { error };
         });
     }
-
-    $scope.showFilterBar = () =>
-      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
 
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -776,7 +838,10 @@ export class DashboardAppController {
     const navActions: {
       [key: string]: NavAction;
     } = {};
-    navActions[TopNavIds.FULL_SCREEN] = () => dashboardStateManager.setFullScreenMode(true);
+    navActions[TopNavIds.FULL_SCREEN] = () => {
+      dashboardStateManager.setFullScreenMode(true);
+      updateNavBar();
+    };
     navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
     navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(ViewMode.EDIT);
     navActions[TopNavIds.SAVE] = () => {
@@ -849,6 +914,7 @@ export class DashboardAppController {
           if ((response as { error: Error }).error) {
             dashboardStateManager.setTitle(currentTitle);
           }
+          updateNavBar();
           return response;
         });
       };
@@ -881,7 +947,7 @@ export class DashboardAppController {
       }
     };
 
-    navActions[TopNavIds.OPTIONS] = anchorElement => {
+    navActions[TopNavIds.OPTIONS] = (anchorElement) => {
       showOptionsPopover({
         anchorElement,
         useMargins: dashboardStateManager.getUseMargins(),
@@ -897,7 +963,81 @@ export class DashboardAppController {
 
     if (share) {
       // the share button is only availabale if "share" plugin contract enabled
-      navActions[TopNavIds.SHARE] = anchorElement => {
+      navActions[TopNavIds.SHARE] = (anchorElement) => {
+        const EmbedUrlParamExtension = ({
+          setParamValue,
+        }: {
+          setParamValue: (paramUpdate: UrlParamValues) => void;
+        }): ReactElement => {
+          const [urlParamsSelectedMap, setUrlParamsSelectedMap] = useState<UrlParamsSelectedMap>({
+            [UrlParams.SHOW_TOP_MENU]: false,
+            [UrlParams.SHOW_QUERY_INPUT]: false,
+            [UrlParams.SHOW_TIME_FILTER]: false,
+            [UrlParams.SHOW_FILTER_BAR]: true,
+          });
+
+          const checkboxes = [
+            {
+              id: UrlParams.SHOW_TOP_MENU,
+              label: i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
+                defaultMessage: 'Top menu',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_QUERY_INPUT,
+              label: i18n.translate('dashboard.embedUrlParamExtension.query', {
+                defaultMessage: 'Query',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_TIME_FILTER,
+              label: i18n.translate('dashboard.embedUrlParamExtension.timeFilter', {
+                defaultMessage: 'Time filter',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_FILTER_BAR,
+              label: i18n.translate('dashboard.embedUrlParamExtension.filterBar', {
+                defaultMessage: 'Filter bar',
+              }),
+            },
+          ];
+
+          const handleChange = (param: string): void => {
+            const urlParamsSelectedMapUpdate = {
+              ...urlParamsSelectedMap,
+              [param]: !urlParamsSelectedMap[param as keyof UrlParamsSelectedMap],
+            };
+            setUrlParamsSelectedMap(urlParamsSelectedMapUpdate);
+
+            const urlParamValues = {
+              [UrlParams.SHOW_TOP_MENU]: urlParamsSelectedMap[UrlParams.SHOW_TOP_MENU],
+              [UrlParams.SHOW_QUERY_INPUT]: urlParamsSelectedMap[UrlParams.SHOW_QUERY_INPUT],
+              [UrlParams.SHOW_TIME_FILTER]: urlParamsSelectedMap[UrlParams.SHOW_TIME_FILTER],
+              [UrlParams.HIDE_FILTER_BAR]: !urlParamsSelectedMap[UrlParams.SHOW_FILTER_BAR],
+              [param === UrlParams.SHOW_FILTER_BAR ? UrlParams.HIDE_FILTER_BAR : param]:
+                param === UrlParams.SHOW_FILTER_BAR
+                  ? urlParamsSelectedMap[UrlParams.SHOW_FILTER_BAR]
+                  : !urlParamsSelectedMap[param as keyof UrlParamsSelectedMap],
+            };
+            setParamValue(urlParamValues);
+          };
+
+          return (
+            <EuiCheckboxGroup
+              options={checkboxes}
+              idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
+              onChange={handleChange}
+              legend={{
+                children: i18n.translate('dashboard.embedUrlParamExtension.include', {
+                  defaultMessage: 'Include',
+                }),
+              }}
+              data-test-subj="embedUrlParamExtension"
+            />
+          );
+        };
+
         share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: true,
@@ -910,6 +1050,12 @@ export class DashboardAppController {
             title: dash.title,
           },
           isDirty: dashboardStateManager.getIsDirty(),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
         });
       };
     }
@@ -927,9 +1073,10 @@ export class DashboardAppController {
       },
     });
 
-    const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
+    const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
       $scope.$evalAsync(() => {
         $scope.isVisible = isVisible;
+        updateNavBar();
       });
     });
 
@@ -940,9 +1087,17 @@ export class DashboardAppController {
         navActions,
         dashboardConfig.getHideWriteControls()
       );
+      updateNavBar();
+    });
+
+    $scope.$watch('indexPatterns', () => {
+      updateNavBar();
     });
 
     $scope.$on('$destroy', () => {
+      // we have to unmount nav bar manually to make sure all internal subscriptions are unsubscribed
+      unmountNavBar();
+
       updateSubscription.unsubscribe();
       stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();

@@ -24,7 +24,6 @@ export * from './agg_type';
 export * from './agg_types';
 export * from './agg_types_registry';
 export * from './buckets';
-export * from './filter';
 export * from './metrics';
 export * from './param_types';
 export * from './types';

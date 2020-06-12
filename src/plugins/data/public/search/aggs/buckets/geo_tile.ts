@@ -25,6 +25,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 export interface GeoTitleBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
@@ -33,6 +34,12 @@ export interface GeoTitleBucketAggDependencies {
 const geotileGridTitle = i18n.translate('data.search.aggs.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',
 });
+
+export interface AggParamsGeoTile extends BaseAggParams {
+  field: string;
+  useGeocentroid?: boolean;
+  precision?: number;
+}
 
 export const getGeoTitleBucketAgg = ({ getInternalStartServices }: GeoTitleBucketAggDependencies) =>
   new BucketAggType(

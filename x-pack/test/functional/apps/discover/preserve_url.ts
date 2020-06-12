@@ -7,32 +7,30 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'discover', 'spaceSelector', 'header']);
-  const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  describe('preserve url', function() {
-    before(async function() {
+  describe('preserve url', function () {
+    before(async function () {
       await esArchiver.load('spaces/multi_space');
     });
 
-    after(function() {
+    after(function () {
       return esArchiver.unload('spaces/multi_space');
     });
 
-    it('goes back to last opened url', async function() {
+    it('goes back to last opened url', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('A Search');
       await PageObjects.common.navigateToApp('home');
-      await appsMenu.clickLink('Discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.header.clickDiscover();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Search');
     });
 
-    it('remembers url after switching spaces', async function() {
+    it('remembers url after switching spaces', async function () {
       // default space
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Search');
@@ -42,7 +40,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Discover');
+      await PageObjects.header.clickDiscover();
       await PageObjects.discover.saveSearch('A Search in another space');
 
       await PageObjects.spaceSelector.openSpacesNav();
@@ -50,7 +48,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('default');
 
       // default space
-      await appsMenu.clickLink('Discover');
+      await PageObjects.header.clickDiscover();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Search');
@@ -60,7 +58,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Discover');
+      await PageObjects.header.clickDiscover();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Search in another space');

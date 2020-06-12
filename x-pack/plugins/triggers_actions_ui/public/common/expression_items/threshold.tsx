@@ -18,11 +18,12 @@ import {
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
   onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
   customComparators?: {
@@ -105,7 +106,7 @@ export const ThresholdExpression = ({
             <EuiSelect
               data-test-subj="comparatorOptionsComboBox"
               value={thresholdComparator}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeSelectedThresholdComparator(e.target.value);
                 const thresholdValues = threshold.slice(
                   0,
@@ -139,7 +140,7 @@ export const ThresholdExpression = ({
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
                       isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
-                      onChange={e => {
+                      onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;
                         const newThreshold = [...threshold];

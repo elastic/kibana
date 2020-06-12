@@ -11,7 +11,13 @@ import { ActionsClient as ActionsClientClass } from './actions_client';
 
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 
-export { ActionsPlugin, ActionResult, ActionTypeExecutorOptions, ActionType } from './types';
+export {
+  ActionsPlugin,
+  ActionResult,
+  ActionTypeExecutorOptions,
+  ActionType,
+  PreConfiguredAction,
+} from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);

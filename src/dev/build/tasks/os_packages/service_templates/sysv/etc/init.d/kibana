@@ -17,12 +17,12 @@
 
 name=kibana
 program=/usr/share/kibana/bin/kibana
-args=-c\\\ /etc/kibana/kibana.yml
-pidfile="/var/run/$name.pid"
+pidfile="/var/run/kibana/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
 
+export KIBANA_PATH_CONF
 export NODE_OPTIONS
 
 [ -z "$nice" ] && nice=0
@@ -37,22 +37,18 @@ emit() {
 }
 
 start() {
-
-  # Ensure the log directory is setup correctly.
   [ ! -d "/var/log/kibana/" ] && mkdir "/var/log/kibana/"
   chown "$user":"$group" "/var/log/kibana/"
   chmod 755 "/var/log/kibana/"
 
-
-  # Setup any environmental stuff beforehand
-
-
-  # Run the program!
+  [ ! -d "/var/run/kibana/" ] && mkdir "/var/run/kibana/"
+  chown "$user":"$group" "/var/run/kibana/"
+  chmod 755 "/var/run/kibana/"
 
   chroot --userspec "$user":"$group" "$chroot" sh -c "
 
     cd \"$chdir\"
-    exec \"$program\" $args
+    exec \"$program\"
   " >> /var/log/kibana/kibana.stdout 2>> /var/log/kibana/kibana.stderr &
 
   # Generate the pidfile from here. If we instead made the forked process

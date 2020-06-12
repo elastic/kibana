@@ -50,15 +50,14 @@ export function DashboardEmptyScreen({
 }: DashboardEmptyScreenProps) {
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
-    ? '/plugins/kibana/home/assets/welcome_graphic_dark_2x.png'
-    : '/plugins/kibana/home/assets/welcome_graphic_light_2x.png';
+    ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
+    : '/plugins/home/assets/welcome_graphic_light_2x.png';
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
       <EuiButton
-        iconSide="right"
+        iconSide="left"
         size="s"
-        fill
-        iconType="arrowDown"
+        iconType="plusInCircle"
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
         aria-label={constants.createNewVisualizationButtonAriaLabel}

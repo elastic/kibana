@@ -11,11 +11,12 @@ import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -38,7 +39,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find(c => c.type === CASE_SAVED_OBJECT);
+        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
         if (caseRef == null || (caseRef != null && caseRef.id !== request.params.case_id)) {
           throw Boom.notFound(
             `This comment ${request.params.comment_id} does not exist in ${request.params.case_id}).`

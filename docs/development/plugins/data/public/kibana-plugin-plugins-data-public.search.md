@@ -9,12 +9,7 @@
 ```typescript
 search: {
     aggs: {
-        AggConfigs: typeof AggConfigs;
-        aggGroupNamesMap: () => Record<"metrics" | "buckets", string>;
-        aggTypeFilters: import("./search/aggs/filter/agg_type_filters").AggTypeFilters;
         CidrMask: typeof CidrMask;
-        convertDateRangeToString: typeof convertDateRangeToString;
-        convertIPRangeToString: (range: import("./search").IpRangeKey, format: (val: any) => string) => string;
         dateHistogramInterval: typeof dateHistogramInterval;
         intervalOptions: ({
             display: string;
@@ -27,8 +22,9 @@ search: {
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
+        isNumberType: (agg: import("./search").AggConfig) => boolean;
         isStringType: (agg: import("./search").AggConfig) => boolean;
-        isType: (type: string) => (agg: import("./search").AggConfig) => boolean;
+        isType: (...types: string[]) => (agg: import("./search").AggConfig) => boolean;
         isValidEsInterval: typeof isValidEsInterval;
         isValidInterval: typeof isValidInterval;
         parentPipelineType: string;

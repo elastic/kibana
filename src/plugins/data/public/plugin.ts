@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -24,20 +26,21 @@ import {
   Plugin,
   PackageInfo,
 } from 'src/core/public';
-import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import { ConfigSchema } from '../config';
+import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  GetInternalStartServicesFn,
+  InternalStartServices,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
+import { IndexPatternsService, onRedirectNoIndexPattern } from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -48,8 +51,6 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
-  getFieldFormats,
-  getNotifications,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -58,7 +59,12 @@ import {
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
 } from '../../ui_actions/public';
-import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
+import {
+  ACTION_GLOBAL_APPLY_FILTER,
+  createFilterAction,
+  createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
+} from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {
   selectRangeAction,
@@ -80,17 +86,18 @@ declare module '../../ui_actions/public' {
 }
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteService();
+  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService();
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.packageInfo = initializerContext.env.packageInfo;
   }
@@ -99,14 +106,20 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     core: CoreSetup,
     { expressions, uiActions }: DataSetupDependencies
   ): DataPublicPluginSetup {
-    setInjectedMetadata(core.injectedMetadata);
+    const startServices = createStartServicesGetter(core.getStartServices);
+
+    const getInternalStartServices = (): InternalStartServices => {
+      const { core: coreStart, self }: any = startServices();
+      return {
+        fieldFormats: self.fieldFormats,
+        notifications: coreStart.notifications,
+        uiSettings: coreStart.uiSettings,
+        searchService: self.search,
+        injectedMetadata: coreStart.injectedMetadata,
+      };
+    };
 
     expressions.registerFunction(esaggs);
-
-    const getInternalStartServices: GetInternalStartServicesFn = () => ({
-      fieldFormats: getFieldFormats(),
-      notifications: getNotifications(),
-    });
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -117,12 +130,12 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       SELECT_RANGE_TRIGGER,
       selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       VALUE_CLICK_TRIGGER,
       valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
@@ -130,6 +143,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
+        expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
@@ -140,29 +154,47 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(
+      uiSettings,
+      savedObjects.client,
+      http,
+      fieldFormats,
+      (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      notifications.toasts.addError,
+      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
+    );
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core);
+    const search = this.searchService.start(core, {
+      indexPatterns,
+      fieldFormats,
+    });
     setSearchService(search);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
+      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+    );
 
     const dataServices = {
       actions: {
-        createFiltersFromEvent,
+        createFiltersFromValueClickAction,
+        createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,

@@ -31,3 +31,4 @@ export { config, configSchema, ElasticsearchConfig } from './elasticsearch_confi
 export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';
 export * from './api_types';
 export * from './types';
+export { NodesVersionCompatibility } from './version_check/ensure_es_version';

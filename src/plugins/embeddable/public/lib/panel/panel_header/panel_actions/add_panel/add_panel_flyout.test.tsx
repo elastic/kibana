@@ -18,6 +18,7 @@
  */
 
 import * as React from 'react';
+import { EuiFlyout } from '@elastic/eui';
 import { AddPanelFlyout } from './add_panel_flyout';
 import {
   ContactCardEmbeddableFactory,
@@ -75,9 +76,12 @@ test('createNewEmbeddable() add embeddable to container', async () => {
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
+  // https://github.com/elastic/kibana/issues/64789
+  expect(component.exists(EuiFlyout)).toBe(false);
+
   expect(Object.values(container.getInput().panels).length).toBe(0);
   component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   const ids = Object.keys(container.getInput().panels);
   const embeddableId = ids[0];
@@ -119,7 +123,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       getFactory={getEmbeddableFactory}
       getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
-      SavedObjectFinder={props => <DummySavedObjectFinder {...props} />}
+      SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 

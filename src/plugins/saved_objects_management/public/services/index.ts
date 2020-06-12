@@ -18,7 +18,13 @@
  */
 
 export {
-  SavedObjectsManagementActionRegistry,
-  ISavedObjectsManagementActionRegistry,
-} from './action_registry';
-export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './action_types';
+  SavedObjectsManagementActionService,
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementActionServiceSetup,
+} from './action_service';
+export {
+  SavedObjectsManagementServiceRegistry,
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementServiceRegistryEntry,
+} from './service_registry';
+export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './types';

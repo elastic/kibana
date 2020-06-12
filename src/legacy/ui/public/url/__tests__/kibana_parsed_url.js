@@ -21,8 +21,8 @@ import expect from '@kbn/expect';
 
 import { KibanaParsedUrl } from '../kibana_parsed_url';
 
-describe('KibanaParsedUrl', function() {
-  it('getHashedAppPath', function() {
+describe('KibanaParsedUrl', function () {
+  it('getHashedAppPath', function () {
     const kibanaParsedUrl = new KibanaParsedUrl({
       basePath: '/hi',
       appId: 'bye',
@@ -31,7 +31,7 @@ describe('KibanaParsedUrl', function() {
     expect(kibanaParsedUrl.getHashedAppPath()).to.be('#visualize?hi=there&bye');
   });
 
-  it('getAppRootPath', function() {
+  it('getAppRootPath', function () {
     const kibanaParsedUrl = new KibanaParsedUrl({
       basePath: '/hi',
       appId: 'appId',
@@ -40,8 +40,8 @@ describe('KibanaParsedUrl', function() {
     expect(kibanaParsedUrl.getAppRootPath()).to.be('/app/appId#dashboard?edit=123');
   });
 
-  describe('when basePath is specified', function() {
-    it('getRootRelativePath', function() {
+  describe('when basePath is specified', function () {
+    it('getRootRelativePath', function () {
       const kibanaParsedUrl = new KibanaParsedUrl({
         basePath: '/base',
         appId: 'appId',
@@ -50,12 +50,12 @@ describe('KibanaParsedUrl', function() {
       expect(kibanaParsedUrl.getRootRelativePath()).to.be('/base/app/appId#visualize?hi=there&bye');
     });
 
-    describe('getAbsolutePath', function() {
+    describe('getAbsolutePath', function () {
       const protocol = 'http';
       const hostname = 'www.test.com';
       const port = '5601';
 
-      it('returns the absolute url when there is a port', function() {
+      it('returns the absolute url when there is a port', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           basePath: '/base',
           appId: 'appId',
@@ -69,7 +69,7 @@ describe('KibanaParsedUrl', function() {
         );
       });
 
-      it('returns the absolute url when there are no query parameters', function() {
+      it('returns the absolute url when there are no query parameters', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           basePath: '/base',
           appId: 'appId',
@@ -82,7 +82,7 @@ describe('KibanaParsedUrl', function() {
         );
       });
 
-      it('returns the absolute url when the are query parameters', function() {
+      it('returns the absolute url when the are query parameters', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           basePath: '/base',
           appId: 'appId',
@@ -97,8 +97,8 @@ describe('KibanaParsedUrl', function() {
     });
   });
 
-  describe('when basePath is not specified', function() {
-    it('getRootRelativePath', function() {
+  describe('when basePath is not specified', function () {
+    it('getRootRelativePath', function () {
       const kibanaParsedUrl = new KibanaParsedUrl({
         appId: 'appId',
         appPath: 'visualize?hi=there&bye',
@@ -106,12 +106,12 @@ describe('KibanaParsedUrl', function() {
       expect(kibanaParsedUrl.getRootRelativePath()).to.be('/app/appId#visualize?hi=there&bye');
     });
 
-    describe('getAbsolutePath', function() {
+    describe('getAbsolutePath', function () {
       const protocol = 'http';
       const hostname = 'www.test.com';
       const port = '5601';
 
-      it('returns the absolute url when there is a port', function() {
+      it('returns the absolute url when there is a port', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           appId: 'appId',
           appPath: 'visualize?hi=there&bye',
@@ -124,7 +124,7 @@ describe('KibanaParsedUrl', function() {
         );
       });
 
-      it('returns the absolute url when there are no query parameters', function() {
+      it('returns the absolute url when there are no query parameters', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           appId: 'appId',
           appPath: 'visualize',
@@ -134,7 +134,7 @@ describe('KibanaParsedUrl', function() {
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be('http://www.test.com/app/appId#visualize');
       });
 
-      it('returns the absolute url when there are query parameters', function() {
+      it('returns the absolute url when there are query parameters', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           appId: 'appId',
           appPath: 'visualize?hi=bye&tata',
@@ -148,21 +148,21 @@ describe('KibanaParsedUrl', function() {
     });
   });
 
-  describe('getGlobalState', function() {
+  describe('getGlobalState', function () {
     const basePath = '/xyz';
     const appId = 'myApp';
 
-    it('returns an empty string when the KibanaParsedUrl is in an invalid state', function() {
+    it('returns an empty string when the KibanaParsedUrl is in an invalid state', function () {
       const url = new KibanaParsedUrl({ basePath });
       expect(url.getGlobalState()).to.be('');
     });
 
-    it('returns an empty string when there is no global state', function() {
+    it('returns an empty string when there is no global state', function () {
       const url = new KibanaParsedUrl({ basePath, appId, appPath: '/hi?notg=something' });
       expect(url.getGlobalState()).to.be('');
     });
 
-    it('returns the global state when it is the last parameter', function() {
+    it('returns the global state when it is the last parameter', function () {
       const url = new KibanaParsedUrl({
         basePath,
         appId,
@@ -171,7 +171,7 @@ describe('KibanaParsedUrl', function() {
       expect(url.getGlobalState()).to.be('(thisismyglobalstate)');
     });
 
-    it('returns the global state when it is the first parameter', function() {
+    it('returns the global state when it is the first parameter', function () {
       const url = new KibanaParsedUrl({
         basePath,
         appId,
@@ -181,23 +181,23 @@ describe('KibanaParsedUrl', function() {
     });
   });
 
-  describe('setGlobalState', function() {
+  describe('setGlobalState', function () {
     const basePath = '/xyz';
     const appId = 'myApp';
 
-    it('does nothing when KibanaParsedUrl is in an invalid state', function() {
+    it('does nothing when KibanaParsedUrl is in an invalid state', function () {
       const url = new KibanaParsedUrl({ basePath });
       url.setGlobalState('newglobalstate');
       expect(url.getGlobalState()).to.be('');
     });
 
-    it('clears the global state when setting it to an empty string', function() {
+    it('clears the global state when setting it to an empty string', function () {
       const url = new KibanaParsedUrl({ basePath, appId, appPath: '/hi?_g=globalstate' });
       url.setGlobalState('');
       expect(url.getGlobalState()).to.be('');
     });
 
-    it('updates the global state when a string is passed in', function() {
+    it('updates the global state when a string is passed in', function () {
       const url = new KibanaParsedUrl({
         basePath,
         appId,
@@ -207,7 +207,7 @@ describe('KibanaParsedUrl', function() {
       expect(url.getGlobalState()).to.be('newstate');
     });
 
-    it('adds the global state parameters if it did not exist before', function() {
+    it('adds the global state parameters if it did not exist before', function () {
       const url = new KibanaParsedUrl({ basePath, appId, appPath: '/hi' });
       url.setGlobalState('newstate');
       expect(url.getGlobalState()).to.be('newstate');

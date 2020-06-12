@@ -51,7 +51,7 @@ const logger = loggingServiceMock.create();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
+['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach((path) => {
   jest.doMock(join(path, 'server'), () => ({}), {
     virtual: true,
   });
@@ -120,6 +120,7 @@ describe('PluginsService', () => {
     pluginsService = new PluginsService({ coreId, env, logger, configService });
 
     [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
+    mockPluginSystem.uiPlugins.mockReturnValue(new Map());
   });
 
   afterEach(() => {
@@ -199,10 +200,9 @@ describe('PluginsService', () => {
     it('properly detects plugins that should be disabled.', async () => {
       jest
         .spyOn(configService, 'isEnabledAtPath')
-        .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
+        .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
 
       mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
-      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
 
       mockDiscover.mockReturnValue({
         error$: from([]),
@@ -234,8 +234,6 @@ describe('PluginsService', () => {
       const setup = await pluginsService.setup(setupDeps);
 
       expect(setup.contracts).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.public).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.internal).toBeInstanceOf(Map);
       expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
@@ -273,7 +271,8 @@ describe('PluginsService', () => {
         plugin$: from([firstPlugin, secondPlugin]),
       });
 
-      await expect(pluginsService.discover()).resolves.toBeUndefined();
+      const { pluginTree } = await pluginsService.discover();
+      expect(pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
@@ -308,7 +307,8 @@ describe('PluginsService', () => {
         plugin$: from([firstPlugin, secondPlugin, thirdPlugin, lastPlugin, missingDepsPlugin]),
       });
 
-      await expect(pluginsService.discover()).resolves.toBeUndefined();
+      const { pluginTree } = await pluginsService.discover();
+      expect(pluginTree).toBeUndefined();
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
@@ -466,12 +466,8 @@ describe('PluginsService', () => {
       });
       mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
-      await pluginsService.discover();
-      const {
-        uiPlugins: { browserConfigs },
-      } = await pluginsService.setup(setupDeps);
-
-      const uiConfig$ = browserConfigs.get('plugin-with-expose');
+      const { uiPlugins } = await pluginsService.discover();
+      const uiConfig$ = uiPlugins.browserConfigs.get('plugin-with-expose');
       expect(uiConfig$).toBeDefined();
 
       const uiConfig = await uiConfig$!.pipe(take(1)).toPromise();
@@ -506,12 +502,8 @@ describe('PluginsService', () => {
       });
       mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
-      await pluginsService.discover();
-      const {
-        uiPlugins: { browserConfigs },
-      } = await pluginsService.setup(setupDeps);
-
-      expect([...browserConfigs.entries()]).toHaveLength(0);
+      const { uiPlugins } = await pluginsService.discover();
+      expect([...uiPlugins.browserConfigs.entries()]).toHaveLength(0);
     });
   });
 
@@ -539,8 +531,7 @@ describe('PluginsService', () => {
     describe('uiPlugins.internal', () => {
       it('includes disabled plugins', async () => {
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
-        await pluginsService.discover();
-        const { uiPlugins } = await pluginsService.setup(setupDeps);
+        const { uiPlugins } = await pluginsService.discover();
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {

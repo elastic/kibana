@@ -7,8 +7,8 @@
 import { getEnvironments } from './get_environments';
 import {
   SearchParamsMock,
-  inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+  inspectSearchParams,
+} from '../../../public/utils/testHelpers';
 
 describe('ui filter queries', () => {
   let mock: SearchParamsMock;
@@ -18,13 +18,13 @@ describe('ui filter queries', () => {
   });
 
   it('fetches environments', async () => {
-    mock = await inspectSearchParams(setup => getEnvironments(setup, 'foo'));
+    mock = await inspectSearchParams((setup) => getEnvironments(setup, 'foo'));
 
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches environments without a service name', async () => {
-    mock = await inspectSearchParams(setup => getEnvironments(setup));
+    mock = await inspectSearchParams((setup) => getEnvironments(setup));
 
     expect(mock.params).toMatchSnapshot();
   });

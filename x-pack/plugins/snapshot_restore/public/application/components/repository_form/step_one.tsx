@@ -23,13 +23,14 @@ import {
 } from '@elastic/eui';
 
 import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
-import { REPOSITORY_TYPES } from '../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../common';
+import { SectionError, Error } from '../../../shared_imports';
 
 import { documentationLinksService } from '../../services/documentation';
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionError, SectionLoading, RepositoryTypeLogo, Error } from '../';
+import { SectionLoading, RepositoryTypeLogo } from '../';
 
 interface Props {
   repository: Repository | EmptyRepository;
@@ -111,7 +112,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <EuiFieldText
           defaultValue={repository.name}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             updateRepository({
               name: e.target.value,
             });
@@ -305,7 +306,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             />
           }
           checked={repository.type === REPOSITORY_TYPES.source}
-          onChange={e => {
+          onChange={(e) => {
             if (e.target.checked) {
               updateRepository({
                 type: REPOSITORY_TYPES.source,

@@ -9,7 +9,7 @@ import { createScenario } from '../scenario';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function(ftrContext: FtrProviderContext) {
+export default function (ftrContext: FtrProviderContext) {
   const { getService } = ftrContext;
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
@@ -31,7 +31,6 @@ export default function(ftrContext: FtrProviderContext) {
       } = await supertest.get('/api/xpack/v1/info').expect(200);
 
       expect(legacyInitialLicense.license?.type).to.be('basic');
-      expect(legacyInitialLicense.features).to.have.property('security');
       expect(legacyInitialLicenseHeaders['kbn-xpack-sig']).to.be.a('string');
 
       await scenario.startTrial();
@@ -42,7 +41,6 @@ export default function(ftrContext: FtrProviderContext) {
         .expect(200);
 
       expect(legacyTrialLicense.license?.type).to.be('trial');
-      expect(legacyTrialLicense.features).to.have.property('security');
       expect(legacyTrialLicenseHeaders['kbn-xpack-sig']).to.not.be(
         legacyInitialLicenseHeaders['kbn-xpack-sig']
       );
@@ -50,14 +48,8 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.startBasic();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
-      const { body: legacyBasicLicense, header: legacyBasicLicenseHeaders } = await supertest
-        .get('/api/xpack/v1/info')
-        .expect(200);
+      const { body: legacyBasicLicense } = await supertest.get('/api/xpack/v1/info').expect(200);
       expect(legacyBasicLicense.license?.type).to.be('basic');
-      expect(legacyBasicLicense.features).to.have.property('security');
-      expect(legacyBasicLicenseHeaders['kbn-xpack-sig']).to.not.be(
-        legacyInitialLicenseHeaders['kbn-xpack-sig']
-      );
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');

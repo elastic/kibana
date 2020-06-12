@@ -25,6 +25,7 @@ describe('Security Plugin', () => {
           idleTimeout: 1500,
           lifespan: null,
         },
+        audit: { enabled: false },
         authc: {
           selector: { enabled: false },
           providers: ['saml', 'token'],
@@ -38,47 +39,28 @@ describe('Security Plugin', () => {
     mockCoreSetup.http.isTlsEnabled = true;
 
     mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
-    );
+    mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
-    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
+    mockDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+    } as unknown) as PluginSetupDependencies;
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
-                "__legacyCompat": Object {
-                  "license": Object {
-                    "features$": Observable {
-                      "_isScalar": false,
-                      "operator": MapOperator {
-                        "project": [Function],
-                        "thisArg": undefined,
-                      },
-                      "source": Observable {
-                        "_isScalar": false,
-                        "_subscribe": [Function],
-                      },
-                    },
-                    "getFeatures": [Function],
-                    "isEnabled": [Function],
-                  },
-                  "registerLegacyAPI": [Function],
-                  "registerPrivilegesWithCluster": [Function],
+                "audit": Object {
+                  "getLogger": [Function],
                 },
                 "authc": Object {
+                  "areAPIKeysEnabled": [Function],
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
-                  "getSessionInfo": [Function],
                   "grantAPIKeyAsInternalUser": [Function],
                   "invalidateAPIKey": [Function],
                   "invalidateAPIKeyAsInternalUser": [Function],
                   "isAuthenticated": [Function],
-                  "isProviderTypeEnabled": [Function],
-                  "login": [Function],
-                  "logout": [Function],
                 },
                 "authz": Object {
                   "actions": Actions {
@@ -106,6 +88,21 @@ describe('Security Plugin', () => {
                     "useRbacForRequest": [Function],
                   },
                 },
+                "license": Object {
+                  "features$": Observable {
+                    "_isScalar": false,
+                    "operator": MapOperator {
+                      "project": [Function],
+                      "thisArg": undefined,
+                    },
+                    "source": Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    },
+                  },
+                  "getFeatures": [Function],
+                  "isEnabled": [Function],
+                },
                 "registerSpacesService": [Function],
               }
             `);
@@ -114,8 +111,8 @@ describe('Security Plugin', () => {
     it('properly creates cluster client instance', async () => {
       await plugin.setup(mockCoreSetup, mockDependencies);
 
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
         plugins: [elasticsearchClientPlugin],
       });
     });

@@ -22,7 +22,7 @@ import { load } from 'cheerio';
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { mockRenderingServiceParams, mockRenderingSetupDeps } from './__mocks__/params';
-import { RenderingServiceSetup } from './types';
+import { InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
 
 const INJECTED_METADATA = {
@@ -62,15 +62,9 @@ describe('RenderingService', () => {
   });
 
   describe('setup()', () => {
-    it('creates instance of RenderingServiceSetup', async () => {
-      const rendering = await service.setup(mockRenderingSetupDeps);
-
-      expect(rendering.render).toBeInstanceOf(Function);
-    });
-
     describe('render()', () => {
       let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
-      let render: RenderingServiceSetup['render'];
+      let render: InternalRenderingServiceSetup['render'];
 
       beforeEach(async () => {
         uiSettings = uiSettingsServiceMock.createClient();
@@ -78,6 +72,13 @@ describe('RenderingService', () => {
           registered: { name: 'title' },
         });
         render = (await service.setup(mockRenderingSetupDeps)).render;
+        await service.start({
+          legacy: {
+            legacyInternals: {
+              getVars: () => ({}),
+            },
+          },
+        } as any);
       });
 
       it('renders "core" page', async () => {
