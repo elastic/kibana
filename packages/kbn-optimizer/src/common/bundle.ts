@@ -20,7 +20,6 @@
 import Path from 'path';
 
 import { BundleCache } from './bundle_cache';
-import { BundleRefs } from './bundle_refs';
 import { UnknownVals } from './ts_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
@@ -32,8 +31,6 @@ export interface BundleSpec {
   readonly id: string;
   /** directory names relative to the contextDir that can be imported from */
   readonly publicDirNames: string[];
-  /** bundle ids which this bundle is allowed to depend on */
-  readonly dependencies: string[];
   /** Absolute path to the plugin source directory */
   readonly contextDir: string;
   /** Absolute path to the root of the repository */
@@ -49,8 +46,6 @@ export class Bundle {
   public readonly id: BundleSpec['id'];
   /** directory names relative to the contextDir that can be imported from */
   public readonly publicDirNames: BundleSpec['publicDirNames'];
-  /** bundle ids which this bundle is allowed to depend on */
-  public readonly dependencies: BundleSpec['dependencies'];
   /**
    * Absolute path to the root of the bundle context (plugin directory)
    * where the entry is resolved relative to and the default output paths
@@ -68,7 +63,6 @@ export class Bundle {
     this.type = spec.type;
     this.id = spec.id;
     this.publicDirNames = spec.publicDirNames;
-    this.dependencies = spec.dependencies;
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
@@ -99,7 +93,6 @@ export class Bundle {
       type: this.type,
       id: this.id,
       publicDirNames: this.publicDirNames,
-      dependencies: this.dependencies,
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
@@ -144,11 +137,6 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
         }
 
-        const { dependencies } = spec;
-        if (!Array.isArray(dependencies) || !dependencies.every((d) => typeof d === 'string')) {
-          throw new Error('`bundles[]` must have an array of strings `dependencies` property');
-        }
-
         const { contextDir } = spec;
         if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
           throw new Error('`bundles[]` must have an absolute path `contextDir` property');
@@ -168,7 +156,6 @@ export function parseBundles(json: string) {
           type,
           id,
           publicDirNames,
-          dependencies,
           contextDir,
           sourceRoot,
           outputDir,

@@ -31,7 +31,8 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
  */
 export interface CoreWindow {
   __kbnBundles__: {
-    [pluginBundleName: string]: { plugin: UnknownPluginInitializer } | undefined;
+    has(key: string): boolean;
+    get(key: string): { plugin: UnknownPluginInitializer } | undefined;
   };
 }
 
@@ -40,8 +41,11 @@ export interface CoreWindow {
  */
 export function read(name: string) {
   const coreWindow = (window as unknown) as CoreWindow;
-  const exportId = `plugin/${name}`;
-  const pluginExport = coreWindow.__kbnBundles__[exportId];
+  const exportId = `plugin/${name}/public`;
+  const pluginExport = coreWindow.__kbnBundles__.has(exportId)
+    ? coreWindow.__kbnBundles__.get(exportId)
+    : undefined;
+
   if (!pluginExport) {
     throw new Error(`Definition of plugin "${name}" not found and may have failed to load.`);
   } else if (typeof pluginExport.plugin !== 'function') {

@@ -206,17 +206,11 @@ export class BundleRefs {
       );
     }
 
-    if (!bundle.dependencies.includes(matchingRef.id)) {
-      throw new Error(
-        `import [${request}] references an export of the [${matchingRef.id}] bundle, but that plugin is not listed as a dependency in your kibana.json file.`
-      );
-    }
-
     const refsInBundle = this.refsInBundle.get(bundle) || new Set();
     refsInBundle.add(matchingRef);
     this.refsInBundle.set(bundle, refsInBundle);
 
-    return `__kbnBundles__['${matchingRef.exportId}']`;
+    return `__kbnBundles__.get('${matchingRef.exportId}')`;
   }
 
   getReferencedExportIds(bundle: Bundle) {

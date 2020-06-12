@@ -18,9 +18,9 @@
  */
 
 module.exports = function ({ entries }: { entries: Array<{ importId: string; relPath: string }> }) {
-  const lines = entries.map(
-    ({ importId, relPath }) => `__kbnBundles__['${importId}'] = require('./${relPath}');`
-  );
+  const lines = entries.map(({ importId, relPath }) => [
+    `__kbnBundles__.define('${importId}', __webpack_require__, require.resolve('./${relPath}'))`,
+  ]);
 
   return {
     code: lines.join('\n'),

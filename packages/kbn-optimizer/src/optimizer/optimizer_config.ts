@@ -163,7 +163,6 @@ export class OptimizerConfig {
               type: 'entry',
               id: 'core',
               publicDirNames: ['public', 'public/utils'],
-              dependencies: [],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
