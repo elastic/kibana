@@ -57,6 +57,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     optionalPlugins: true,
     ui: true,
     server: true,
+    extraPublicDirs: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -175,6 +176,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
+    extraPublicDirs: manifest.extraPublicDirs,
   };
 }
 

@@ -153,6 +153,12 @@ export interface PluginManifest {
    * Specifies whether plugin includes some server-side specific functionality.
    */
   readonly server: boolean;
+
+  /**
+   * Specifies directory names that can be imported by other plugins sharing
+   * the same instance of the @kbn/optimizer.
+   */
+  readonly extraPublicDirs: string[];
 }
 
 /**

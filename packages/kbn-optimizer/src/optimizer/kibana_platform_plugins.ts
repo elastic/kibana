@@ -26,6 +26,8 @@ export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly id: string;
   readonly isUiPlugin: boolean;
+  readonly extraPublicDirs: string[];
+  readonly dependencies: string[];
 }
 
 /**
@@ -64,9 +66,55 @@ function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
     throw new TypeError('expected new platform plugin manifest to have a string id');
   }
 
+  let extraPublicDirs: string[] | undefined;
+  if (manifest.extraPublicDirs) {
+    if (
+      !Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((p) => typeof p === 'string')
+    ) {
+      throw new TypeError(
+        'expected new platform plugin manifest to have an array of strings `extraPublicDirs` property'
+      );
+    }
+
+    extraPublicDirs = manifest.extraPublicDirs as string[];
+  }
+
+  const dependencies: string[] = [];
+  if (manifest.requiredPlugins) {
+    if (
+      !Array.isArray(manifest.requiredPlugins) ||
+      !manifest.requiredPlugins.every((p) => typeof p === 'string')
+    ) {
+      throw new TypeError(
+        'expected new platform plugin manifest to have an array of strings `requiredPlugins` property'
+      );
+    }
+
+    for (const dep of manifest.requiredPlugins) {
+      dependencies.push(dep as string);
+    }
+  }
+  if (manifest.optionalPlugins) {
+    if (
+      !Array.isArray(manifest.optionalPlugins) ||
+      !manifest.optionalPlugins.every((p) => typeof p === 'string')
+    ) {
+      throw new TypeError(
+        'expected new platform plugin manifest to have an array of strings `optionalPlugins` property'
+      );
+    }
+
+    for (const dep of manifest.optionalPlugins) {
+      dependencies.push(dep as string);
+    }
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     id: manifest.id,
     isUiPlugin: !!manifest.ui,
+    extraPublicDirs: extraPublicDirs || [],
+    dependencies,
   };
 }
