@@ -13,7 +13,6 @@ import {
 } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
-import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
 import { BASE_ACTION_API_PATH } from '../../common';
 

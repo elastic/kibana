@@ -6,7 +6,7 @@
 
 import { pluck } from 'lodash';
 import { AlertAction, State, Context, AlertType } from '../types';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
@@ -23,6 +23,7 @@ interface CreateExecutionHandlerOptions {
   alertType: AlertType;
   logger: Logger;
   eventLogger: IEventLogger;
+  request: KibanaRequest;
 }
 
 interface ExecutionHandlerOptions {
@@ -43,6 +44,7 @@ export function createExecutionHandler({
   apiKey,
   alertType,
   eventLogger,
+  request,
 }: CreateExecutionHandlerOptions) {
   const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
@@ -80,7 +82,7 @@ export function createExecutionHandler({
 
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
-      await actionsPlugin.execute({
+      await (await actionsPlugin.getActionsClientWithRequest(request)).enqueueExecution({
         id: action.id,
         params: action.params,
         spaceId,

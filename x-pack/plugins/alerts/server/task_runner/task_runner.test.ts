@@ -13,7 +13,7 @@ import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { actionsMock } from '../../../actions/server/mocks';
+import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
@@ -57,6 +57,7 @@ describe('Task Runner', () => {
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
   const services = alertsMock.createAlertServices();
   const savedObjectsClient = services.savedObjectsClient;
+  const actionsClient = actionsClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -108,6 +109,9 @@ describe('Task Runner', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+    taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
+      actionsClient
+    );
   });
 
   test('successfully executes the task', async () => {
@@ -206,9 +210,138 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(taskRunnerFactoryInitializerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-    expect(taskRunnerFactoryInitializerParams.actionsPlugin.execute.mock.calls[0])
-      .toMatchInlineSnapshot(`
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+                  Array [
+                    Object {
+                      "apiKey": "MTIzOmFiYw==",
+                      "id": "1",
+                      "params": Object {
+                        "foo": true,
+                      },
+                      "spaceId": undefined,
+                    },
+                  ]
+          `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "new-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' created new instance: '1'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('includes the apiKey in the request used to initialize the actionsClient', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(
+      taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
+    ).toHaveBeenCalledWith({
+      getBasePath: expect.anything(),
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
+    });
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
                   Array [
                     Object {
                       "apiKey": "MTIzOmFiYw==",

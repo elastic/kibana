@@ -24,6 +24,10 @@ import {
 } from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from './lib/action_executor';
+import {
+  ExecutionEnqueuer,
+  ExecuteOptions as EnqueueExecutionOptions,
+} from './create_execute_function';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -51,6 +55,7 @@ interface ConstructorOptions {
   savedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
+  executionEnqueuer: ExecutionEnqueuer;
   request: KibanaRequest;
 }
 
@@ -67,6 +72,7 @@ export class ActionsClient {
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
+  private readonly executionEnqueuer: ExecutionEnqueuer;
 
   constructor({
     actionTypeRegistry,
@@ -75,6 +81,7 @@ export class ActionsClient {
     savedObjectsClient,
     preconfiguredActions,
     actionExecutor,
+    executionEnqueuer,
     request,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
@@ -83,6 +90,7 @@ export class ActionsClient {
     this.defaultKibanaIndex = defaultKibanaIndex;
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
+    this.executionEnqueuer = executionEnqueuer;
     this.request = request;
   }
 
@@ -273,6 +281,10 @@ export class ActionsClient {
     params,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
     return this.actionExecutor.execute({ actionId, params, request: this.request });
+  }
+
+  public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
+    return this.executionEnqueuer(this.savedObjectsClient, options);
   }
 }
 

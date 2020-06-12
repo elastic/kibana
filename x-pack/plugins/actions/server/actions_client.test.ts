@@ -27,6 +27,7 @@ const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
+const executionEnqueuer = jest.fn();
 const request = {} as KibanaRequest;
 
 const mockTaskManager = taskManagerMock.setup();
@@ -59,6 +60,7 @@ beforeEach(() => {
     defaultKibanaIndex,
     preconfiguredActions: [],
     actionExecutor,
+    executionEnqueuer,
     request,
   });
 });
@@ -240,6 +242,7 @@ describe('create()', () => {
       defaultKibanaIndex,
       preconfiguredActions: [],
       actionExecutor,
+      executionEnqueuer,
       request,
     });
 
@@ -338,6 +341,7 @@ describe('get()', () => {
       scopedClusterClient,
       defaultKibanaIndex,
       actionExecutor,
+      executionEnqueuer,
       request,
       preconfiguredActions: [
         {
@@ -400,6 +404,7 @@ describe('getAll()', () => {
       scopedClusterClient,
       defaultKibanaIndex,
       actionExecutor,
+      executionEnqueuer,
       request,
       preconfiguredActions: [
         {
@@ -467,6 +472,7 @@ describe('getBulk()', () => {
       scopedClusterClient,
       defaultKibanaIndex,
       actionExecutor,
+      executionEnqueuer,
       request,
       preconfiguredActions: [
         {
@@ -754,5 +760,19 @@ describe('execute()', () => {
         name: 'my name',
       },
     });
+  });
+});
+
+describe('enqueueExecution()', () => {
+  test('calls the executionEnqueuer with the appropriate parameters', async () => {
+    const opts = {
+      id: uuid.v4(),
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    };
+    await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
+
+    expect(executionEnqueuer).toHaveBeenCalledWith(savedObjectsClient, opts);
   });
 });
