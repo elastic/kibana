@@ -26,21 +26,21 @@ describe('persistent timeline', () => {
   });
 
   it('persist the deletion of a column', () => {
-    const numberOfTimelineColumns = 9;
+    cy.get(DRAGGABLE_HEADER).then((header) => {
+      const currentNumberOfTimelineColumns = header.length;
+      const expectedNumberOfTimelineColumns = currentNumberOfTimelineColumns - 1;
 
-    cy.get(DRAGGABLE_HEADER)
-      .eq(TABLE_COLUMN_EVENTS_MESSAGE)
-      .invoke('text')
-      .should('equal', 'message');
+      cy.wrap(header).eq(TABLE_COLUMN_EVENTS_MESSAGE).invoke('text').should('equal', 'message');
+      removeColumn(TABLE_COLUMN_EVENTS_MESSAGE);
 
-    cy.get(DRAGGABLE_HEADER).should('have.length', numberOfTimelineColumns);
+      cy.get(DRAGGABLE_HEADER).should('have.length', expectedNumberOfTimelineColumns);
 
-    removeColumn(TABLE_COLUMN_EVENTS_MESSAGE);
-    reload(waitsForEventsToBeLoaded);
+      reload(waitsForEventsToBeLoaded);
 
-    cy.get(DRAGGABLE_HEADER).should('have.length', numberOfTimelineColumns - 1);
-    cy.get(DRAGGABLE_HEADER).each(($el) => {
-      expect($el.text()).not.equal('message');
+      cy.get(DRAGGABLE_HEADER).should('have.length', expectedNumberOfTimelineColumns);
+      cy.get(DRAGGABLE_HEADER).each(($el) => {
+        expect($el.text()).not.equal('message');
+      });
     });
   });
 });

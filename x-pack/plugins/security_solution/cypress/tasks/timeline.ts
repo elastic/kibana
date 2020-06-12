@@ -105,15 +105,9 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   );
 };
 
-export const waitForTimelineActionToFinish = () => {
-  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
-};
-
 export const removeColumn = (column: number) => {
   cy.get(REMOVE_COLUMN).first().should('exist');
   cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
-  waitForTimelineActionToFinish();
 };
 
 export const resetFields = () => {
