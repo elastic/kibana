@@ -147,7 +147,9 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
 
                 <UtilityBarAction
                   dataTestSubj="alertActionPopover"
-                  disabled={areEventsLoading || isEmpty(selectedEventIds)}
+                  disabled={
+                    areEventsLoading || (isEmpty(selectedEventIds) && showClearSelection === false)
+                  }
                   iconType="arrowDown"
                   iconSide="right"
                   ownFocus={false}

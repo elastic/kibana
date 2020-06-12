@@ -94,26 +94,29 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
 
-  const getGlobalQuery = useCallback(() => {
-    if (browserFields != null && indexPatterns != null) {
-      return combineQueries({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-        dataProviders: [],
-        indexPattern: indexPatterns,
-        browserFields,
-        filters: isEmpty(defaultFilters)
-          ? globalFilters
-          : [...(defaultFilters ?? []), ...globalFilters],
-        kqlQuery: globalQuery,
-        kqlMode: globalQuery.language,
-        start: from,
-        end: to,
-        isEventViewer: true,
-      });
-    }
-    return null;
+  const getGlobalQuery = useCallback(
+    (customFilters: Filter[]) => {
+      if (browserFields != null && indexPatterns != null) {
+        return combineQueries({
+          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          dataProviders: [],
+          indexPattern: indexPatterns,
+          browserFields,
+          filters: isEmpty(defaultFilters)
+            ? [...globalFilters, ...customFilters]
+            : [...(defaultFilters ?? []), ...globalFilters, ...customFilters],
+          kqlQuery: globalQuery,
+          kqlMode: globalQuery.language,
+          start: from,
+          end: to,
+          isEventViewer: true,
+        });
+      }
+      return null;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
+    [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+  );
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
@@ -227,8 +230,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       refetchQuery: inputsModel.Refetch,
       { status, selectedStatus }: UpdateAlertsStatusProps
     ) => {
+      const currentStatusFilter = buildAlertStatusFilter(status);
       await updateAlertStatusAction({
-        query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
+        query: showClearSelectionAction
+          ? getGlobalQuery(currentStatusFilter)?.filterQuery
+          : undefined,
         alertIds: Object.keys(selectedEventIds),
         status,
         selectedStatus,

@@ -47,7 +47,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => [
       },
     },
     query: {
-      match_phrase: {
+      term: {
         'signal.status': status,
       },
     },
