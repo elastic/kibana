@@ -19,4 +19,3 @@
 
 export * from './fields';
 export * from './types';
-export { IndexPatternSpec } from './index_patterns';
