@@ -2070,6 +2070,11 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it(`accepts preference`, async () => {
+        await findSuccess({ type, preference: 'pref' });
+        expectClusterCallArgs({ preference: 'pref' });
+      });
+
       it(`can filter by fields`, async () => {
         await findSuccess({ type, fields: ['title'] });
         expectClusterCallArgs({

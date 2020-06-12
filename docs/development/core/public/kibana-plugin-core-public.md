@@ -94,6 +94,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyCoreSetup](./kibana-plugin-core-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-core-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-core-public.legacynavlink.md) |  |
+|  [NavigateToAppOptions](./kibana-plugin-core-public.navigatetoappoptions.md) | Options for the [navigateToApp API](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) |
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
@@ -133,6 +134,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
 |  [URLMeaningfulParts](./kibana-plugin-core-public.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
+
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [URL\_MAX\_LENGTH](./kibana-plugin-core-public.url_max_length.md) | The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters cause URL to exceed this limit. |
 
 ## Type Aliases
 
