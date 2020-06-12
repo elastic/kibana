@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { IndexThresholdId } from '../../alerting_builtins/server';
+import { INDEX_THRESHOLD_ID } from '../../alerting_builtins/server';
 import { ALERTS_FEATURE_ID } from '../common';
 
 export function registerFeature(features: FeaturesPluginSetup) {
@@ -18,7 +18,7 @@ export function registerFeature(features: FeaturesPluginSetup) {
     privileges: {
       all: {
         alerting: {
-          all: [IndexThresholdId],
+          all: [INDEX_THRESHOLD_ID],
         },
         savedObject: {
           all: [],
@@ -28,7 +28,7 @@ export function registerFeature(features: FeaturesPluginSetup) {
       },
       read: {
         alerting: {
-          read: [IndexThresholdId],
+          read: [INDEX_THRESHOLD_ID],
         },
         savedObject: {
           all: [],
