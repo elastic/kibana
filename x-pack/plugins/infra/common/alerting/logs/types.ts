@@ -138,15 +138,19 @@ export const GroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({
     aggregations: rt.type({
-      groups: rt.type({
-        buckets: rt.array(
-          rt.type({
-            key: rt.record(rt.string, rt.string),
-            doc_count: rt.number,
-          })
-        ),
-        after_key: rt.record(rt.string, rt.string),
-      }),
+      groups: rt.intersection([
+        rt.type({
+          buckets: rt.array(
+            rt.type({
+              key: rt.record(rt.string, rt.string),
+              doc_count: rt.number,
+            })
+          ),
+        }),
+        rt.partial({
+          after_key: rt.record(rt.string, rt.string),
+        }),
+      ]),
     }),
     hits: rt.type({
       total: rt.type({
