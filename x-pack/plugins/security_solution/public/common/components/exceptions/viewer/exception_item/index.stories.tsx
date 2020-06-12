@@ -21,7 +21,7 @@ storiesOf('Components|ExceptionItem', module)
   .add('with os', () => {
     const payload = getExceptionItemMock();
     payload.description = '';
-    payload.comment = [];
+    payload.comments = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -44,7 +44,7 @@ storiesOf('Components|ExceptionItem', module)
   .add('with description', () => {
     const payload = getExceptionItemMock();
     payload._tags = [];
-    payload.comment = [];
+    payload.comments = [];
     payload.entries = [
       {
         field: 'actingProcess.file.signer',
@@ -91,7 +91,7 @@ storiesOf('Components|ExceptionItem', module)
     const payload = getExceptionItemMock();
     payload._tags = [];
     payload.description = '';
-    payload.comment = [];
+    payload.comments = [];
 
     return (
       <ExceptionItem
