@@ -57,6 +57,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
+      // @ts-ignore
       renderApp,
     } = await import('./lazy');
 

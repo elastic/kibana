@@ -159,6 +159,7 @@ export class MapsPlugin
         bindStartCoreAndPlugins(coreStart, startPlugins);
         // @ts-ignore
         const { renderApp } = await lazyLoadMapModules();
+        // @ts-ignore
         return renderApp(context, params);
       },
     });

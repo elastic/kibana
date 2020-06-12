@@ -155,7 +155,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       buttonText: string,
       element: WebDriver | WebElement | WebElementWrapper = driver,
       timeout: number = defaultFindTimeout
-    ): Promise<WebElementWrapper> {
+    ): Promise<string[]> {
       log.debug(`Find.byButtonText('${buttonText}') with timeout=${timeout}`);
       return await retry.tryForTime(timeout, async () => {
         // tslint:disable-next-line:variable-name
