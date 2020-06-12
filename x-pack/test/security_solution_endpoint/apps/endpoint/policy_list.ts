@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'policy']);
+  const pageObjects = getPageObjects(['common', 'endpoint', 'policy', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
@@ -31,7 +31,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(policyTotal).to.equal('0 Policies');
     });
     it('has correct table headers', async () => {
-      const allHeaderCells = await pageObjects.endpoint.tableHeaderVisibleText('policyTable');
+      const allHeaderCells = await pageObjects.endpointPageUtils.tableHeaderVisibleText(
+        'policyTable'
+      );
       expect(allHeaderCells).to.eql([
         'Policy Name',
         'Created By',
@@ -43,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ]);
     });
     it('should show empty table results message', async () => {
-      const [, [noItemsFoundMessage]] = await pageObjects.endpoint.getEndpointAppTableData(
+      const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
         'policyTable'
       );
       expect(noItemsFoundMessage).to.equal('No items found');
@@ -65,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show policy on the list', async () => {
-        const [, policyRow] = await pageObjects.endpoint.getEndpointAppTableData('policyTable');
+        const [, policyRow] = await pageObjects.endpointPageUtils.tableData('policyTable');
         // Validate row data with the exception of the Date columns - since those are initially
         // shown as relative.
         expect([policyRow[0], policyRow[1], policyRow[3], policyRow[5], policyRow[6]]).to.eql([
