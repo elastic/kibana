@@ -29,6 +29,7 @@ interface EventOptions {
   processName?: string;
   pid?: number;
   parentPid?: number;
+  extensions?: object;
 }
 
 const Windows: HostOS[] = [
@@ -301,15 +302,18 @@ export class EndpointDocGenerator {
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     const processName = options.processName ? options.processName : randomProcessName();
-    const detailRecordForEventType = ((eventCategory) => {
+    const detailRecordForEventType = options.extensions || ((eventCategory) => {
       if(eventCategory === 'registry'){
         return {registry: {key: `HKLM/Windows/Software/${this.randomString(5)}`}}
       }
       if(eventCategory === 'network'){
-        return {network: {direction: this.randomChoice(['inbound','outbound']), forwarded_ip: `${this.randomN(255)}.${this.randomN(255)}.${this.randomN(255)}.${this.randomN(255)}`}}
+        return {network: {direction: this.randomChoice(['inbound','outbound']), forwarded_ip: `${this.randomIP()}`}}
       }
       if(eventCategory === 'file'){
         return {file: {path: 'C:\\My Documents\\business\\January\\processName'}} 
+      }
+      if(eventCategory === 'dns'){
+        return {dns: {question: {name: `${this.randomIP()}`}}} 
       }
       return {};
     })(options.eventCategory)
@@ -785,7 +789,7 @@ export class EndpointDocGenerator {
     return [...this.randomNGenerator(255, 6)].map((x) => x.toString(16)).join('-');
   }
 
-  private randomIP(): string {
+  public randomIP(): string {
     return [10, ...this.randomNGenerator(255, 3)].map((x) => x.toString()).join('.');
   }
 
