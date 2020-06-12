@@ -424,4 +424,60 @@ describe('Cookie based SessionStorage', () => {
       ]);
     });
   });
+
+  describe('#options', () => {
+    describe('#SameSite', () => {
+      it('throws an exception if "SameSite: None" set on not Secure connection', async () => {
+        const { server: innerServer } = await server.setup(setupDeps);
+
+        expect(
+          createCookieSessionStorageFactory(logger.get(), innerServer, {
+            ...cookieOptions,
+            sameSite: 'None',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"\\"SameSite: None\\" requires Secure connection"`
+        );
+      });
+
+      for (const sameSite of ['Strict', 'Lax', 'None'] as const) {
+        it(`sets and parses SameSite = ${sameSite} correctly`, async () => {
+          const { server: innerServer, createRouter } = await server.setup(setupDeps);
+          const router = createRouter('');
+
+          router.get({ path: '/', validate: false }, async (context, req, res) => {
+            const sessionStorage = factory.asScoped(req);
+            const sessionValue = await sessionStorage.get();
+            if (!sessionValue) {
+              sessionStorage.set(sessVal());
+              return res.ok();
+            }
+            return res.ok({ body: { value: sessionValue.value } });
+          });
+
+          const factory = await createCookieSessionStorageFactory(logger.get(), innerServer, {
+            ...cookieOptions,
+            isSecure: true,
+            name: `sid-${sameSite}`,
+            sameSite,
+          });
+          await server.start();
+
+          const response = await supertest(innerServer.listener).get('/').expect(200);
+
+          const cookies = response.get('set-cookie');
+          expect(cookies).toBeDefined();
+          expect(cookies).toHaveLength(1);
+
+          const sessionCookie = retrieveSessionCookie(cookies[0]);
+          expect(sessionCookie.extensions).toContain(`SameSite=${sameSite}`);
+
+          await supertest(innerServer.listener)
+            .get('/')
+            .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+            .expect(200, { value: userData });
+        });
+      }
+    });
+  });
 });
