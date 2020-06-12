@@ -19,11 +19,12 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiAccordion,
+  EuiFilterGroup,
+  EuiFilterButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';

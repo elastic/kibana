@@ -30,15 +30,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsIndexPatternFiltersToggle');
     },
 
-    /**
-     * Toggles the field existence checkbox.
-     */
-    async toggleExistenceFilter() {
-      await this.toggleIndexPatternFiltersPopover();
-      await testSubjects.click('lnsEmptyFilter');
-      await this.toggleIndexPatternFiltersPopover();
-    },
-
     async findAllFields() {
       return await testSubjects.findAll('lnsFieldListPanelField');
     },
