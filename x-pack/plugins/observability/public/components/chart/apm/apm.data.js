@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const apmData = [
+const apmData = [
   {
     time: 1591365600000,
     value: 32,
@@ -1456,3 +1456,22 @@ export const apmData = [
     group: 'error',
   },
 ];
+
+const _ = require('lodash');
+
+const grouped = _.groupBy(apmData, 'group');
+console.log('### caue: grouped', grouped);
+
+const series = Object.keys(grouped).map((key) => {
+  const data = grouped[key];
+  const coordinates = data.map((d) => ({ x: d.time, y: d.value }));
+  return {
+    key,
+    label: key,
+    coordinates,
+  };
+});
+
+console.log('### caue: series', JSON.stringify(series));
+
+// console.log('### caue: coordinates', coordinates);

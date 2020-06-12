@@ -9,8 +9,12 @@ import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer, EuiPageProps } from '@elastic/eui';
 import { Header } from '../header/index';
 
+const getPaddingSize = (props: EuiPageProps) => (props.restrictWidth ? 0 : '24px');
+
 const Page = styled(EuiPage)<EuiPageProps>`
   background: transparent;
+  padding-right: ${getPaddingSize};
+  padding-left: ${getPaddingSize};
 `;
 
 const Container = styled.div<{ color?: string }>`

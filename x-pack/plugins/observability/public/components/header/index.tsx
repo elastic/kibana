@@ -19,6 +19,7 @@ const Wrapper = styled.div<{ restrictWidth?: number }>`
   max-width: ${(props) => `${props.restrictWidth}px`};
   margin: 0 auto;
   overflow: hidden;
+  padding: ${(props) => (props.restrictWidth ? 0 : '0 24px')};
 `;
 
 interface Props {
