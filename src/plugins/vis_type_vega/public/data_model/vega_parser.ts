@@ -72,7 +72,7 @@ export class VegaParser {
 
   constructor(
     spec: string,
-    searchCache: SearchCache,
+    searchAPI: SearchCache,
     timeCache: TimeCache,
     filters: Bool,
     serviceSettings: IServiceSettings
@@ -85,7 +85,7 @@ export class VegaParser {
 
     const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchCache, filters, onWarn),
+      elasticsearch: new EsQueryParser(timeCache, searchAPI, filters, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
       url: new UrlParser(onWarn),
     };

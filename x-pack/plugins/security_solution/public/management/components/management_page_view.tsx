@@ -35,7 +35,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
         href: getManagementUrl({ name: 'policyList' }),
       },
     ];
-  }, [tabName]);
+  }, [options.viewType, tabName]);
   return <PageView {...options} tabs={tabs} />;
 });
 

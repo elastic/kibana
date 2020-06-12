@@ -341,8 +341,6 @@ export {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
   ISearchStrategy,
   ISearch,
   ISearchOptions,
@@ -360,6 +358,7 @@ export {
   ISearchSource,
   parseSearchSourceJSON,
   injectSearchSourceReferences,
+  getSearchParamsFromRequest,
   extractSearchSourceReferences,
   SearchSourceFields,
   EsQuerySortValue,
@@ -447,6 +446,8 @@ export {
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export * from '../common/field_mapping';
 
 /*
  * Plugin setup
