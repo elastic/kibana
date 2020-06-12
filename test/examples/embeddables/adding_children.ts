@@ -24,6 +24,7 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
+  const retry = getService('retry');
 
   describe('creating and adding children', () => {
     before(async () => {
@@ -35,11 +36,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
 
       // this seem like an overkill, but clicking this button which opens context menu was flaky
-      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
       await testSubjects.waitForEnabled('createNew');
-
-      await testSubjects.click('createNew');
+      await retry.try(async () => {
+        await testSubjects.click('createNew');
+        await testSubjects.exists('createNew-TODO_EMBEDDABLE');
+      });
       await testSubjects.click('createNew-TODO_EMBEDDABLE');
+
       await testSubjects.setValue('taskInputField', 'new task');
       await testSubjects.click('createTodoEmbeddable');
       const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
