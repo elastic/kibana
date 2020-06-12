@@ -528,7 +528,7 @@ export type ExistsFilter = Filter & {
 // Warning: (ae-forgotten-export) The symbol "ShorthandFieldMapObject" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => Record<string, FieldMappingSpec>;
+export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => MappingObject;
 
 // Warning: (ae-forgotten-export) The symbol "SavedObjectReference" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "extractReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

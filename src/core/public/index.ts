@@ -126,6 +126,7 @@ export {
   ScopedHistory,
   LegacyApp,
   PublicLegacyAppInfo,
+  NavigateToAppOptions,
 } from './application';
 
 export {

@@ -7,17 +7,28 @@
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../browsers');
 jest.mock('../lib/create_queue');
 jest.mock('../lib/enqueue_job');
 jest.mock('../lib/validate');
 
 import { of } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { coreMock } from 'src/core/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
+import {
+  chromium,
+  HeadlessChromiumDriverFactory,
+  initializeBrowserDriverFactory,
+} from '../browsers';
 import { ReportingInternalSetup } from '../core';
 import { ReportingPlugin } from '../plugin';
 import { ReportingSetupDeps, ReportingStartDeps } from '../types';
+
+(initializeBrowserDriverFactory as jest.Mock<
+  Promise<HeadlessChromiumDriverFactory>
+>).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
+
+(chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
@@ -25,31 +36,36 @@ const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
     licensing: {
       license$: of({ isAvailable: true, isActive: true, type: 'basic' }),
     } as any,
-    usageCollection: {} as any,
+    usageCollection: {
+      makeUsageCollector: jest.fn(),
+      registerCollector: jest.fn(),
+    } as any,
   };
 };
+
+export const createMockConfigSchema = (overrides?: any) => ({
+  index: '.reporting',
+  kibanaServer: {
+    hostname: 'localhost',
+    port: '80',
+  },
+  capture: {
+    browser: {
+      chromium: {
+        disableSandbox: true,
+      },
+    },
+  },
+  ...overrides,
+});
 
 export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   data: startMock.data,
 });
 
 const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
-  const mockConfig = {
-    index: '.reporting',
-    kibanaServer: {
-      hostname: 'localhost',
-      port: '80',
-    },
-    capture: {
-      browser: {
-        chromium: {
-          disableSandbox: true,
-        },
-      },
-    },
-    ...config,
-  };
-  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfig));
+  const mockConfigSchema = createMockConfigSchema(config);
+  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfigSchema));
   const setupMock = coreMock.createSetup();
   const coreStartMock = coreMock.createStart();
   const startMock = {
@@ -57,8 +73,10 @@ const createMockReportingPlugin = async (config: ReportingConfig): Promise<Repor
     data: { fieldFormats: {} },
   };
 
-  await plugin.setup(setupMock, createMockSetupDeps(setupMock));
-  await plugin.start(startMock, createMockStartDeps(startMock));
+  plugin.setup(setupMock, createMockSetupDeps(setupMock));
+  await plugin.setup$.pipe(first()).toPromise();
+  plugin.start(startMock, createMockStartDeps(startMock));
+  await plugin.start$.pipe(first()).toPromise();
 
   return plugin;
 };
