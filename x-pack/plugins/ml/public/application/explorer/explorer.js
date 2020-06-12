@@ -12,7 +12,6 @@ import PropTypes from 'prop-types';
 import React, { createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -26,32 +25,23 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiSelect,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
-import {
-  ExplorerNoInfluencersFound,
-  ExplorerNoJobsFound,
-  ExplorerNoResultsFound,
-} from './components';
+import { ExplorerNoJobsFound, ExplorerNoResultsFound } from './components';
 import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 import { InfluencersList } from '../components/influencers_list';
-import {
-  ALLOW_CELL_RANGE_SELECTION,
-  dragSelect$,
-  explorerService,
-} from './explorer_dashboard_service';
+import { explorerService } from './explorer_dashboard_service';
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { SelectLimit, limit$ } from './select_limit/select_limit';
+import { limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
   ExplorerQueryBar,
@@ -66,9 +56,9 @@ import {
   escapeDoubleQuotes,
 } from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
-import { SwimlanePanel } from './swimlane_panel';
+import { AnomalyTimeline } from './anomaly_timeline';
 
-import { DRAG_SELECT_ACTION, FILTER_ACTION, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { FILTER_ACTION } from './explorer_constants';
 
 // Explorer Charts
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
@@ -78,14 +68,6 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
-import { hasMatchingPoints } from './has_matching_points';
-
-function mapSwimlaneOptionsToEuiOptions(options) {
-  return options.map((option) => ({
-    value: option,
-    text: option,
-  }));
-}
 
 const ExplorerPage = ({
   children,
@@ -164,52 +146,6 @@ export class Explorer extends React.Component {
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
 
   _unsubscribeAll = new Subject();
-  // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
-  disableDragSelectOnMouseLeave = true;
-
-  dragSelect = new DragSelect({
-    selectorClass: 'ml-swimlane-selector',
-    selectables: document.getElementsByClassName('sl-cell'),
-    callback(elements) {
-      if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
-        elements = [elements[0]];
-      }
-
-      if (elements.length > 0) {
-        dragSelect$.next({
-          action: DRAG_SELECT_ACTION.NEW_SELECTION,
-          elements,
-        });
-      }
-
-      this.disableDragSelectOnMouseLeave = true;
-    },
-    onDragStart(e) {
-      let target = e.target;
-      while (target && target !== document.body && !target.classList.contains('sl-cell')) {
-        target = target.parentNode;
-      }
-      if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
-        dragSelect$.next({
-          action: DRAG_SELECT_ACTION.DRAG_START,
-        });
-        this.disableDragSelectOnMouseLeave = false;
-      }
-    },
-    onElementSelect() {
-      if (ALLOW_CELL_RANGE_SELECTION) {
-        dragSelect$.next({
-          action: DRAG_SELECT_ACTION.ELEMENT_SELECT,
-        });
-      }
-    },
-  });
-
-  // Listens to render updates of the swimlanes to update dragSelect
-  swimlaneRenderDoneListener = () => {
-    this.dragSelect.clearSelection();
-    this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
-  };
 
   resizeRef = createRef();
   resizeChecker = undefined;
@@ -231,39 +167,8 @@ export class Explorer extends React.Component {
     this.resizeChecker.destroy();
   }
 
-  resetCache() {
-    this.anomaliesTablePreviousArgs = null;
-  }
-
   viewByChangeHandler = (e) => explorerService.setViewBySwimlaneFieldName(e.target.value);
 
-  isSwimlaneSelectActive = false;
-  onSwimlaneEnterHandler = () => this.setSwimlaneSelectActive(true);
-  onSwimlaneLeaveHandler = () => this.setSwimlaneSelectActive(false);
-  setSwimlaneSelectActive = (active) => {
-    if (this.isSwimlaneSelectActive && !active && this.disableDragSelectOnMouseLeave) {
-      this.dragSelect.stop();
-      this.isSwimlaneSelectActive = active;
-      return;
-    }
-    if (!this.isSwimlaneSelectActive && active) {
-      this.dragSelect.start();
-      this.dragSelect.clearSelection();
-      this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
-      this.isSwimlaneSelectActive = active;
-    }
-  };
-
-  // Listener for click events in the swimlane to load corresponding anomaly data.
-  swimlaneCellClick = (selectedCells) => {
-    // If selectedCells is an empty object we clear any existing selection,
-    // otherwise we save the new selection in AppState and update the Explorer.
-    if (Object.keys(selectedCells).length === 0) {
-      this.props.setSelectedCells();
-    } else {
-      this.props.setSelectedCells(selectedCells);
-    }
-  };
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
@@ -330,24 +235,16 @@ export class Explorer extends React.Component {
       annotationsData,
       chartsData,
       filterActive,
-      filteredFields,
       filterPlaceHolder,
       indexPattern,
       influencers,
       loading,
-      maskAll,
       noInfluencersConfigured,
       overallSwimlaneData,
       queryString,
       selectedCells,
       selectedJobs,
-      swimlaneContainerWidth,
       tableData,
-      viewByLoadedForTimeFormatted,
-      viewBySwimlaneData,
-      viewBySwimlaneDataLoading,
-      viewBySwimlaneFieldName,
-      viewBySwimlaneOptions,
     } = this.props.explorerState;
 
     const jobSelectorProps = {
@@ -399,19 +296,8 @@ export class Explorer extends React.Component {
     const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
     const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
-    const showOverallSwimlane =
-      overallSwimlaneData !== null &&
-      overallSwimlaneData.laneLabels &&
-      overallSwimlaneData.laneLabels.length > 0;
-    const showViewBySwimlane =
-      viewBySwimlaneData !== null &&
-      viewBySwimlaneData.laneLabels &&
-      viewBySwimlaneData.laneLabels.length > 0;
-
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
-
-    const jobIds = this.props.explorerState.selectedJobs.map((job) => job.id);
 
     return (
       <ExplorerPage
@@ -455,131 +341,12 @@ export class Explorer extends React.Component {
           )}
 
           <div className={mainColumnClasses}>
-            <EuiTitle className="panel-title">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.explorer.anomalyTimelineTitle"
-                  defaultMessage="Anomaly timeline"
-                />
-              </h2>
-            </EuiTitle>
-
-            <div
-              className="ml-explorer-swimlane euiText"
-              onMouseEnter={this.onSwimlaneEnterHandler}
-              onMouseLeave={this.onSwimlaneLeaveHandler}
-              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-            >
-              {showOverallSwimlane && (
-                <SwimlanePanel
-                  jobIds={jobIds}
-                  swimlaneType={'overall'}
-                  swimlaneData={overallSwimlaneData}
-                  filterActive={filterActive}
-                  swimlaneContainerWidth={swimlaneContainerWidth}
-                  maskAll={maskAll}
-                  selectedCells={selectedCells}
-                  swimlaneCellClick={this.swimlaneCellClick}
-                  swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                />
-              )}
-            </div>
-
-            {viewBySwimlaneOptions.length > 0 && (
-              <>
-                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.viewByLabel', {
-                        defaultMessage: 'View by',
-                      })}
-                    >
-                      <EuiSelect
-                        id="selectViewBy"
-                        options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
-                        value={viewBySwimlaneFieldName}
-                        onChange={this.viewByChangeHandler}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.limitLabel', {
-                        defaultMessage: 'Limit',
-                      })}
-                    >
-                      <SelectLimit />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                    <EuiFormRow label="&#8203;">
-                      <div className="panel-sub-title">
-                        {viewByLoadedForTimeFormatted && (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
-                            defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
-                            values={{ viewByLoadedForTimeFormatted }}
-                          />
-                        )}
-                        {viewByLoadedForTimeFormatted === undefined && (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
-                            defaultMessage="(Sorted by max anomaly score)"
-                          />
-                        )}
-                        {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
-                            defaultMessage="(Job score across all influencers)"
-                          />
-                        )}
-                      </div>
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                {showViewBySwimlane && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <div
-                      className="ml-explorer-swimlane euiText"
-                      onMouseEnter={this.onSwimlaneEnterHandler}
-                      onMouseLeave={this.onSwimlaneLeaveHandler}
-                      data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                    >
-                      <SwimlanePanel
-                        jobIds={jobIds}
-                        swimlaneType={'viewBy'}
-                        swimlaneData={viewBySwimlaneData}
-                        filterActive={filterActive}
-                        swimlaneContainerWidth={swimlaneContainerWidth}
-                        maskAll={
-                          maskAll &&
-                          !hasMatchingPoints({
-                            filteredFields,
-                            swimlaneData: viewBySwimlaneData,
-                          })
-                        }
-                        selectedCells={selectedCells}
-                        swimlaneCellClick={this.swimlaneCellClick}
-                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {viewBySwimlaneDataLoading && <LoadingIndicator />}
-
-                {!showViewBySwimlane &&
-                  !viewBySwimlaneDataLoading &&
-                  viewBySwimlaneFieldName !== null && (
-                    <ExplorerNoInfluencersFound
-                      viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                      showFilterMessage={filterActive === true}
-                    />
-                  )}
-              </>
-            )}
+            <EuiSpacer size="m" />
+            <AnomalyTimeline
+              explorerState={this.props.explorerState}
+              setSelectedCells={this.props.setSelectedCells}
+            />
+            <EuiSpacer size="m" />
 
             {annotationsData.length > 0 && (
               <>

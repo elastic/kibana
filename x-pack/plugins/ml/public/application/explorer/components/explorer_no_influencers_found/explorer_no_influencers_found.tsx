@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * React component for rendering EuiEmptyPrompt when no influencers were found.
- */
-
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoInfluencersFound = ({
-  viewBySwimlaneFieldName,
-  showFilterMessage = false,
-}) => (
+/*
+ * React component for rendering EuiEmptyPrompt when no influencers were found.
+ */
+export const ExplorerNoInfluencersFound: FC<{
+  viewBySwimlaneFieldName: string;
+  showFilterMessage?: boolean;
+}> = ({ viewBySwimlaneFieldName, showFilterMessage = false }) => (
   <EuiEmptyPrompt
     titleSize="xs"
     title={
@@ -40,8 +38,3 @@ export const ExplorerNoInfluencersFound = ({
     }
   />
 );
-
-ExplorerNoInfluencersFound.propTypes = {
-  viewBySwimlaneFieldName: PropTypes.string.isRequired,
-  showFilterMessage: PropTypes.bool,
-};

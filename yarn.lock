@@ -4784,6 +4784,11 @@
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
 
+"@types/dragselect@^1.13.1":
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/@types/dragselect/-/dragselect-1.13.1.tgz#f19b7b41063a7c9d5963194c83c3c364e84d46ee"
+  integrity sha512-3m0fvSM0cSs0DXvprytV/ZY92hNX3jJuEb/vkdqU+4QMzV2jxYKgBFTuaT2fflqbmfzUqHHIkGP55WIuigElQw==
+
 "@types/elasticsearch@^5.0.33":
   version "5.0.33"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"

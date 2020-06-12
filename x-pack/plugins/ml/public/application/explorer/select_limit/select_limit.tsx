@@ -36,5 +36,5 @@ export const SelectLimit = () => {
     setLimit(parseInt(e.target.value, 10));
   }
 
-  return <EuiSelect options={euiOptions} onChange={onChange} value={limit} />;
+  return <EuiSelect compressed options={euiOptions} onChange={onChange} value={limit} />;
 };
