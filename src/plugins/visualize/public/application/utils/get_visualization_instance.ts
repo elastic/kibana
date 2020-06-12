@@ -62,7 +62,7 @@ export const getVisualizationInstance = async (
     id: '',
   })) as VisualizeEmbeddableContract;
 
-  let savedSearch: SavedObject | null = null;
+  let savedSearch: SavedObject | undefined;
 
   if (vis.data.savedSearchId) {
     savedSearch = await createSavedSearchesLoader({

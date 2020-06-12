@@ -75,7 +75,7 @@ export interface EditorRenderProps {
   filters: Filter[];
   timeRange: TimeRange;
   query?: Query;
-  savedSearch?: SavedObject | null;
+  savedSearch?: SavedObject;
   uiState: PersistedState;
   /**
    * Flag to determine if visualiztion is linked to the saved search
@@ -105,7 +105,7 @@ export interface VisualizeServices extends CoreStart {
 export interface SavedVisInstance {
   vis: Vis;
   savedVis: VisSavedObject;
-  savedSearch: SavedObject | null;
+  savedSearch?: SavedObject;
   embeddableHandler: VisualizeEmbeddableContract;
 }
 

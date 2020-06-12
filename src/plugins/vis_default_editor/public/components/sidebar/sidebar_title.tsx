@@ -46,7 +46,7 @@ interface LinkedSearchProps {
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedObject | null;
+  savedSearch?: SavedObject;
   vis: Vis;
   eventEmitter: EventEmitter;
 }

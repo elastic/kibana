@@ -46,7 +46,7 @@ interface DefaultEditorSideBarProps {
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
-  savedSearch?: SavedObject | null;
+  savedSearch?: SavedObject;
   timeRange: TimeRange;
 }
 
