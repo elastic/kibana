@@ -25,5 +25,6 @@ yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 # Do not build kibana for code coverage run
 if [[ -z "$CODE_COVERAGE" ]] ; then
   echo " -> building and extracting OSS Kibana distributable for use in functional tests"
-  node scripts/build --debug --oss
+  # TEMP: build all platforms for PR testing
+  node scripts/build --debug --oss --all-platforms
 fi

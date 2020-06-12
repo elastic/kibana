@@ -78,9 +78,9 @@ describe('dev/build/lib/config', () => {
       expect(
         config
           .getTargetPlatforms()
-          .map((p) => p.getName())
+          .map((p) => p.getNodeArch())
           .sort()
-      ).to.eql(['darwin', 'linux', 'windows']);
+      ).to.eql(['darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
     });
 
     it('returns just this platform when targetAllPlatforms = false', async () => {
@@ -99,9 +99,9 @@ describe('dev/build/lib/config', () => {
       expect(
         config
           .getTargetPlatforms()
-          .map((p) => p.getName())
+          .map((p) => p.getNodeArch())
           .sort()
-      ).to.eql(['darwin', 'linux', 'windows']);
+      ).to.eql(['darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
     });
 
     it('returns this platform and linux, when targetAllPlatforms = false', async () => {
@@ -111,39 +111,20 @@ describe('dev/build/lib/config', () => {
       if (process.platform !== 'linux') {
         expect(platforms).to.have.length(2);
         expect(platforms[0]).to.be(config.getPlatformForThisOs());
-        expect(platforms[1]).to.be(config.getLinuxPlatform());
+        expect(platforms[1]).to.be(config.getPlatform('linux', 'x64'));
       } else {
         expect(platforms).to.have.length(1);
-        expect(platforms[0]).to.be(config.getLinuxPlatform());
+        expect(platforms[0]).to.be(config.getPlatform('linux', 'x64'));
       }
-    });
-  });
-
-  describe('#getLinuxPlatform()', () => {
-    it('returns the linux platform', async () => {
-      const { config } = await setup();
-      expect(config.getLinuxPlatform().getName()).to.be('linux');
-    });
-  });
-
-  describe('#getWindowsPlatform()', () => {
-    it('returns the windows platform', async () => {
-      const { config } = await setup();
-      expect(config.getWindowsPlatform().getName()).to.be('windows');
-    });
-  });
-
-  describe('#getMacPlatform()', () => {
-    it('returns the mac platform', async () => {
-      const { config } = await setup();
-      expect(config.getMacPlatform().getName()).to.be('darwin');
     });
   });
 
   describe('#getPlatformForThisOs()', () => {
     it('returns the platform that matches the arch of this machine', async () => {
       const { config } = await setup();
-      expect(config.getPlatformForThisOs().getName()).to.be(process.platform);
+      const currentPlatform = config.getPlatformForThisOs();
+      expect(currentPlatform.getName()).to.be(process.platform);
+      expect(currentPlatform.getArchitecture()).to.be(process.arch);
     });
   });
 
