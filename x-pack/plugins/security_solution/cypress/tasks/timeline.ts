@@ -23,7 +23,6 @@ import {
   TOGGLE_TIMELINE_EXPAND_EVENT,
   REMOVE_COLUMN,
   RESET_FIELDS,
-  TIMELINE_COLUMN_SPINNER,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
