@@ -111,7 +111,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
         defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
       }),
       icon: 'reportingApp',
-      path: '/app/management/kibana/reporting',
+      path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
