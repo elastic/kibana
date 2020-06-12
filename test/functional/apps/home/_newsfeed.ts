@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
@@ -60,8 +60,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    // TODO currently fails because styles are not correctly applied in the new platform
-    it.skip('clicking on newsfeed icon should close opened newsfeed', async () => {
+    it('clicking on newsfeed icon should close opened newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
       expect(isOpen).to.be(false);

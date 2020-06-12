@@ -46,7 +46,7 @@ export function getKibanaUsageCollector(
      * 1. Make this data part of the "kibana_stats" type
      * 2. Organize the payload in the usage namespace of the data payload (usage.index, etc)
      */
-    formatForBulkUpload: result => {
+    formatForBulkUpload: (result) => {
       return {
         type: KIBANA_STATS_TYPE,
         payload: {

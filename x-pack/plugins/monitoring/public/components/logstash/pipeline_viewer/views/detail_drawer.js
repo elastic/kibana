@@ -32,7 +32,7 @@ function renderIcon(vertex) {
 }
 
 function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
-  const eventsLatencyValueFormatter = value => formatMetric(value, '0.[00]a', 'ms/e');
+  const eventsLatencyValueFormatter = (value) => formatMetric(value, '0.[00]a', 'ms/e');
   const latestEventsLatency =
     Array.isArray(vertex.stats.millis_per_event.data) &&
     vertex.stats.millis_per_event.data.length > 0
@@ -64,7 +64,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
       </EuiTableRow>
     );
 
-  const eventsOutRateValueFormatter = value => formatMetric(value, '0.[0]a', 'e/s');
+  const eventsOutRateValueFormatter = (value) => formatMetric(value, '0.[0]a', 'e/s');
   const eventsOutRateRow = (
     <EuiTableRow key="events_out_rate">
       <EuiTableRowCell>
@@ -90,7 +90,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
     </EuiTableRow>
   );
 
-  const eventsInValueFormatter = value => formatMetric(value, '0a', 'events');
+  const eventsInValueFormatter = (value) => formatMetric(value, '0a', 'events');
   const latestEventsIn =
     Array.isArray(vertex.stats.events_in.data) && vertex.stats.events_in.data.length > 0
       ? last(vertex.stats.events_in.data)[1]

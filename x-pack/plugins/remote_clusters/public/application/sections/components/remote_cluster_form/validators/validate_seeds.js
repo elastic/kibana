@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateSeeds(seeds, seedInput) {
-  const seedsHaveBeenCreated = seeds.some(seed => Boolean(seed.trim()));
+  const seedsHaveBeenCreated = seeds.some((seed) => Boolean(seed.trim()));
 
   if (seedsHaveBeenCreated) {
     return null;

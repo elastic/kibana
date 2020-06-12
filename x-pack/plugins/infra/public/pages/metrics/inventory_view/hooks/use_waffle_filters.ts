@@ -50,7 +50,7 @@ export const useWaffleFilters = () => {
 
   const applyFilterQueryFromKueryExpression = useCallback(
     (expression: string) => {
-      setState(previous => ({
+      setState((previous) => ({
         ...previous,
         kind: 'kuery',
         expression,

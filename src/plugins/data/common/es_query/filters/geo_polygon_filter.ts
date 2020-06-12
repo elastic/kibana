@@ -35,6 +35,6 @@ export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
 
 export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
   return (
-    filter.geo_polygon && Object.keys(filter.geo_polygon).find(key => key !== 'ignore_unmapped')
+    filter.geo_polygon && Object.keys(filter.geo_polygon).find((key) => key !== 'ignore_unmapped')
   );
 };

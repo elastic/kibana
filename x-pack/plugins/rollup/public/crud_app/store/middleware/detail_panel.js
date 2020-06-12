@@ -7,7 +7,7 @@
 import { getRouter, getUserHasLeftApp } from '../../services';
 import { CLOSE_DETAIL_PANEL } from '../action_types';
 
-export const detailPanel = () => next => action => {
+export const detailPanel = () => (next) => (action) => {
   const { type } = action;
 
   switch (type) {

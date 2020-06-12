@@ -111,7 +111,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
-      badges = badges.filter(badge => disabledActions.indexOf(badge.id) === -1);
+      badges = badges.filter((badge) => disabledActions.indexOf(badge.id) === -1);
     }
 
     this.setState({
@@ -127,7 +127,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
-      notifications = notifications.filter(badge => disabledActions.indexOf(badge.id) === -1);
+      notifications = notifications.filter((badge) => disabledActions.indexOf(badge.id) === -1);
     }
 
     this.setState({
@@ -248,12 +248,12 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{ title: string | undefined }>(resolve => {
+        return new Promise<{ title: string | undefined }>((resolve) => {
           const session = overlays.openModal(
             toMountPoint(
               <CustomizePanelModal
                 embeddable={context.embeddable}
-                updateTitle={title => {
+                updateTitle={(title) => {
                   session.close();
                   resolve({ title });
                 }}

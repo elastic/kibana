@@ -15,6 +15,7 @@ import {
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapStore, MapStoreState } from '../reducers/store';
 import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
 import { MapEmbeddableOutput } from './map_embeddable';
@@ -38,9 +39,12 @@ let getIndexPatternService: () => {
 let getHttp: () => any;
 let getMapsCapabilities: () => any;
 let createMapStore: () => MapStore;
-let addLayerWithoutDataSync: (layerDescriptor: unknown) => AnyAction;
+let addLayerWithoutDataSync: (layerDescriptor: LayerDescriptor) => AnyAction;
 let getQueryableUniqueIndexPatternIds: (state: MapStoreState) => string[];
-let getInitialLayers: (layerListJSON?: string, initialLayers?: unknown[]) => unknown[];
+let getInitialLayers: (
+  layerListJSON?: string,
+  initialLayers?: LayerDescriptor[]
+) => LayerDescriptor[];
 let mergeInputWithSavedMap: any;
 
 async function waitForMapDependencies(): Promise<boolean> {
@@ -48,7 +52,7 @@ async function waitForMapDependencies(): Promise<boolean> {
     return whenModulesLoadedPromise;
   }
 
-  whenModulesLoadedPromise = new Promise(async resolve => {
+  whenModulesLoadedPromise = new Promise(async (resolve) => {
     ({
       // @ts-ignore
       getMapsSavedObjectLoader,
@@ -94,12 +98,12 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     });
   }
 
-  async _getIndexPatterns(layerList: unknown[]): Promise<IIndexPattern[]> {
+  async _getIndexPatterns(layerList: LayerDescriptor[]): Promise<IIndexPattern[]> {
     // Need to extract layerList from store to get queryable index pattern ids
     const store = createMapStore();
     let queryableIndexPatternIds: string[];
     try {
-      layerList.forEach((layerDescriptor: unknown) => {
+      layerList.forEach((layerDescriptor: LayerDescriptor) => {
         store.dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
       queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
@@ -111,7 +115,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       );
     }
 
-    const promises = queryableIndexPatternIds.map(async indexPatternId => {
+    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
       try {
         // @ts-ignore
         return await getIndexPatternService().get(indexPatternId);

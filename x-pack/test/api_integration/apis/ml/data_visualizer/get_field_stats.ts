@@ -7,11 +7,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -171,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body } = await supertest
       .post(`/api/ml/data_visualizer/get_field_stats/${index}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_HEADERS)
+      .set(COMMON_REQUEST_HEADERS)
       .send(requestBody)
       .expect(expectedResponsecode);
 
@@ -188,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
     return 0;
   }
 
-  describe('get_field_stats', function() {
+  describe('get_field_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();

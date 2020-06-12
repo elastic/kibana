@@ -7,20 +7,29 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ErrorRateAlertTrigger } from '.';
+import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import {
+  mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
+} from '../../../context/ApmPluginContext/MockApmPluginContext';
 
-storiesOf('app/ErrorRateAlertTrigger', module).add('example', props => {
+storiesOf('app/ErrorRateAlertTrigger', module).add('example', () => {
   const params = {
     threshold: 2,
-    window: '5m'
+    window: '5m',
   };
 
   return (
-    <div style={{ width: 400 }}>
-      <ErrorRateAlertTrigger
-        alertParams={params as any}
-        setAlertParams={() => undefined}
-        setAlertProperty={() => undefined}
-      />
-    </div>
+    <MockApmPluginContextWrapper
+      value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
+    >
+      <div style={{ width: 400 }}>
+        <ErrorRateAlertTrigger
+          alertParams={params as any}
+          setAlertParams={() => undefined}
+          setAlertProperty={() => undefined}
+        />
+      </div>
+    </MockApmPluginContextWrapper>
   );
 });

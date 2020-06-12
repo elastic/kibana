@@ -7,11 +7,21 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { KibanaDatatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  IInterpreterRenderHandlers,
+  KibanaDatatable,
+  SerializedFieldFormat,
+} from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  TriggerContext,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -280,6 +290,12 @@ export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProp
   setState: (newState: T) => void;
 };
 
+export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
+  groupId: string;
+  accessor: string;
+  setState: (newState: T) => void;
+};
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
@@ -290,6 +306,12 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
   dataTestSubj?: string;
+
+  /**
+   * When the dimension editor is enabled for this group, all dimensions in the group
+   * will render the extra tab for the dimension editor
+   */
+  enableDimensionEditor?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -450,6 +472,15 @@ export interface Visualization<T = unknown, P = unknown> {
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
 
   /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditor?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => void;
+
+  /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:
    * - When dragging a field
@@ -466,4 +497,30 @@ export interface Visualization<T = unknown, P = unknown> {
    * If there is no expression provided, the preview icon is used.
    */
   toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+}
+
+export interface LensFilterEvent {
+  name: 'filter';
+  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+}
+export interface LensBrushEvent {
+  name: 'brush';
+  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+  return event.name === 'filter';
+}
+
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+  return event.name === 'brush';
+}
+
+/**
+ * Expression renderer handlers specifically for lens renderers. This is a narrowed down
+ * version of the general render handlers, specifying supported event types. If this type is
+ * used, dispatched events will be handled correctly.
+ */
+export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
+  event: (event: LensFilterEvent | LensBrushEvent) => void;
 }

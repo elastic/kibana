@@ -46,7 +46,7 @@ const locToDirMap = {
 const DEFAULT_PARSER = 'elasticsearch';
 
 export class VegaParser {
-  constructor(spec, searchCache, timeCache, filters, serviceSettings) {
+  constructor(spec, searchAPI, timeCache, filters, serviceSettings) {
     this.spec = spec;
     this.hideWarnings = false;
     this.error = undefined;
@@ -54,7 +54,7 @@ export class VegaParser {
 
     const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchCache, filters, onWarn),
+      elasticsearch: new EsQueryParser(timeCache, searchAPI, filters, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
       url: new UrlParser(onWarn),
     };
@@ -408,7 +408,7 @@ export class VegaParser {
       if (
         !Array.isArray(maxBounds) ||
         maxBounds.length !== 4 ||
-        !maxBounds.every(v => typeof v === 'number' && Number.isFinite(v))
+        !maxBounds.every((v) => typeof v === 'number' && Number.isFinite(v))
       ) {
         this._onWarning(
           i18n.translate('visTypeVega.vegaParser.maxBoundsValueTypeWarningMessage', {
@@ -491,7 +491,7 @@ export class VegaParser {
   async _resolveDataUrls() {
     const pending = {};
 
-    this._findObjectDataUrls(this.spec, obj => {
+    this._findObjectDataUrls(this.spec, (obj) => {
       const url = obj.url;
       delete obj.url;
       let type = url['%type%'];
@@ -524,7 +524,7 @@ export class VegaParser {
     if (pendingParsers.length > 0) {
       // let each parser populate its data in parallel
       await Promise.all(
-        pendingParsers.map(type => this._urlParsers[type].populateData(pending[type]))
+        pendingParsers.map((type) => this._urlParsers[type].populateData(pending[type]))
       );
     }
   }

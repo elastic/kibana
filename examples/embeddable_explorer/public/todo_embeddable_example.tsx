@@ -82,7 +82,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
         icon: 'broom',
         title: 'Trash',
       })
-      .then(embeddable => {
+      .then((embeddable) => {
         this.embeddable = embeddable;
         this.setState({ loading: false });
       });
@@ -135,7 +135,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                 <EuiFormRow label="Title">
                   <EuiFieldText
                     data-test-subj="titleTodo"
-                    onChange={ev => this.setState({ title: ev.target.value })}
+                    onChange={(ev) => this.setState({ title: ev.target.value })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -143,7 +143,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                 <EuiFormRow label="Icon">
                   <EuiFieldText
                     data-test-subj="iconTodo"
-                    onChange={ev => this.setState({ icon: ev.target.value })}
+                    onChange={(ev) => this.setState({ icon: ev.target.value })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -153,7 +153,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                     fullWidth
                     resize="horizontal"
                     data-test-subj="taskTodo"
-                    onChange={ev => this.setState({ task: ev.target.value })}
+                    onChange={(ev) => this.setState({ task: ev.target.value })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

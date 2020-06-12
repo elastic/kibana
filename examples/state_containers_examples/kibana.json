@@ -2,9 +2,8 @@
   "id": "stateContainersExamples",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["state_containers_examples"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data"],
+  "requiredPlugins": ["navigation", "data", "developerExamples"],
   "optionalPlugins": []
 }

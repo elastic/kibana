@@ -9,7 +9,7 @@ Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsre
 <b>Signature:</b>
 
 ```typescript
-createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 ```
 
 ## Remarks

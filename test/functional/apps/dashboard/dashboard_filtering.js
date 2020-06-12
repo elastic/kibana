@@ -23,7 +23,7 @@ import expect from '@kbn/expect';
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially
  * with nested queries and filters on the visualizations themselves.
  */
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  describe('dashboard filtering', function() {
+  describe('dashboard filtering', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -182,7 +182,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('disabling a filter unfilters the data on', function() {
+    describe('disabling a filter unfilters the data on', function () {
       // Flaky test
       // https://github.com/elastic/kibana/issues/41087
       this.tags('skipFirefox');

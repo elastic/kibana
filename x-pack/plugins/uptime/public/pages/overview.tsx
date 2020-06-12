@@ -18,8 +18,10 @@ import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface Props {
+  loading: boolean;
   indexPattern: IIndexPattern | null;
   setEsKueryFilters: (esFilters: string) => void;
 }
@@ -36,51 +38,60 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = React.memo(({ indexPattern, setEsKueryFilters }: Props) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  const { search, filters: urlFilters } = params;
+export const OverviewPageComponent = React.memo(
+  ({ indexPattern, setEsKueryFilters, loading }: Props) => {
+    const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+    const { search, filters: urlFilters } = params;
 
-  useTrackPageview({ app: 'uptime', path: 'overview' });
-  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+    const {
+      services: {
+        data: { autocomplete },
+      },
+    } = useKibana();
 
-  const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
+    useTrackPageview({ app: 'uptime', path: 'overview' });
+    useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  useEffect(() => {
-    setEsKueryFilters(esFilters ?? '');
-  }, [esFilters, setEsKueryFilters]);
+    const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
-  const linkParameters = stringifyUrlParams(params, true);
+    useEffect(() => {
+      setEsKueryFilters(esFilters ?? '');
+    }, [esFilters, setEsKueryFilters]);
 
-  const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
-    defaultMessage: 'Overview',
-    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-  });
+    const linkParameters = stringifyUrlParams(params, true);
 
-  useBreadcrumbs([]); // No extra breadcrumbs on overview
+    const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
+      defaultMessage: 'Overview',
+      description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+    });
 
-  return (
-    <>
-      <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
-      <EmptyState>
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
-            <KueryBar
-              aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
-                defaultMessage: 'Input filter criteria for the overview page',
-              })}
-              data-test-subj="xpack.uptime.filterBar"
-            />
-          </EuiFlexItem>
-          <EuiFlexItemStyled grow={true}>
-            <FilterGroup esFilters={esFilters} />
-          </EuiFlexItemStyled>
-          {error && <ParsingErrorCallout error={error} />}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <StatusPanel />
-        <EuiSpacer size="s" />
-        <MonitorList filters={esFilters} linkParameters={linkParameters} />
-      </EmptyState>
-    </>
-  );
-});
+    useBreadcrumbs([]); // No extra breadcrumbs on overview
+
+    return (
+      <>
+        <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
+        <EmptyState>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
+              <KueryBar
+                aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
+                  defaultMessage: 'Input filter criteria for the overview page',
+                })}
+                autocomplete={autocomplete}
+                data-test-subj="xpack.uptime.filterBar"
+              />
+            </EuiFlexItem>
+            <EuiFlexItemStyled grow={true}>
+              <FilterGroup esFilters={esFilters} />
+            </EuiFlexItemStyled>
+            {error && !loading && <ParsingErrorCallout error={error} />}
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <StatusPanel />
+          <EuiSpacer size="s" />
+          <MonitorList filters={esFilters} linkParameters={linkParameters} />
+        </EmptyState>
+      </>
+    );
+  }
+);

@@ -77,7 +77,7 @@ export class HeaderBadge extends Component<Props, State> {
   }
 
   private subscribe() {
-    this.subscription = this.props.badge$.subscribe(badge => {
+    this.subscription = this.props.badge$.subscribe((badge) => {
       this.setState({
         badge,
       });

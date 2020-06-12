@@ -37,17 +37,17 @@ export class GrokDebuggerComponent extends React.Component {
     this.grokdebuggerRequest = new GrokdebuggerRequest();
   }
 
-  onRawEventChange = rawEvent => {
+  onRawEventChange = (rawEvent) => {
     this.setState({ rawEvent });
     this.grokdebuggerRequest.rawEvent = rawEvent.trimEnd();
   };
 
-  onPatternChange = pattern => {
+  onPatternChange = (pattern) => {
     this.setState({ pattern });
     this.grokdebuggerRequest.pattern = pattern.trimEnd();
   };
 
-  onCustomPatternsChange = customPatterns => {
+  onCustomPatternsChange = (customPatterns) => {
     this.setState({ customPatterns });
 
     customPatterns = customPatterns.trim();
@@ -58,7 +58,7 @@ export class GrokDebuggerComponent extends React.Component {
       return;
     }
 
-    customPatterns.split('\n').forEach(customPattern => {
+    customPatterns.split('\n').forEach((customPattern) => {
       // Patterns are defined like so:
       // patternName patternDefinition
       // For example:

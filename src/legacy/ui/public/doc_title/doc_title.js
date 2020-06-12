@@ -36,7 +36,7 @@ export const docTitle = {
   reset,
 };
 
-uiModules.get('kibana').run(function($rootScope) {
+uiModules.get('kibana').run(function ($rootScope) {
   // always bind to the route events
   $rootScope.$on('$routeChangeStart', docTitle.reset);
 });

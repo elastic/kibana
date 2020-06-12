@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { CSSProperties, memo, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -16,7 +16,6 @@ import {
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
   EuiTextColor,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -33,16 +32,9 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
+import { SearchBar } from '../../../components';
+import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
 import { CreateAgentConfigFlyout } from './components';
-import { SearchBar } from '../../../components/search_bar';
-import { LinkedAgentCount } from '../components';
-import { TableRowActions } from '../components/table_row_actions';
-
-const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
 
 const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -73,48 +65,6 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   >
     {children}
   </WithHeaderLayout>
-);
-
-const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
-  ({ config, onDelete }) => {
-    const { getHref } = useLink();
-    const hasWriteCapabilities = useCapabilities().write;
-
-    return (
-      <TableRowActions
-        items={[
-          <EuiContextMenuItem
-            icon="inspect"
-            href={getHref('configuration_details', { configId: config.id })}
-            key="viewConfig"
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.viewConfigActionText"
-              defaultMessage="View configuration"
-            />
-          </EuiContextMenuItem>,
-
-          <EuiContextMenuItem
-            disabled={!hasWriteCapabilities}
-            icon="plusInCircle"
-            href={getHref('add_datasource_from_configuration', { configId: config.id })}
-            key="createDataSource"
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
-              defaultMessage="Create data source"
-            />
-          </EuiContextMenuItem>,
-          // <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
-          //   <FormattedMessage
-          //     id="xpack.ingestManager.agentConfigList.copyConfigActionText"
-          //     defaultMessage="Copy configuration"
-          //   />
-          // </EuiContextMenuItem>,
-        ]}
-      />
-    );
-  }
 );
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
@@ -172,10 +122,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         width: '20%',
         render: (name: string, agentConfig: AgentConfig) => (
           <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
-            <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+            <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiLink
+                className="eui-textTruncate"
                 href={getHref('configuration_details', { configId: agentConfig.id })}
-                style={NO_WRAP_TRUNCATE_STYLE}
                 title={name || agentConfig.id}
               >
                 {name || agentConfig.id}
@@ -201,7 +151,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         width: '35%',
         truncateText: true,
         render: (description: AgentConfig['description']) => (
-          <EuiTextColor color="subdued" style={NO_WRAP_TRUNCATE_STYLE}>
+          <EuiTextColor color="subdued" className="eui-textTruncate">
             {description}
           </EuiTextColor>
         ),
@@ -239,9 +189,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         }),
         actions: [
           {
-            render: (config: AgentConfig) => (
-              <ConfigRowActions config={config} onDelete={() => sendRequest()} />
-            ),
+            render: (config: AgentConfig) => <AgentConfigActionMenu configId={config.id} />,
           },
         ],
       },
@@ -249,11 +197,11 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
     // If Fleet is not enabled, then remove the `agents` column
     if (!isFleetEnabled) {
-      return cols.filter(col => ('field' in col ? col.field !== 'agents' : true));
+      return cols.filter((col) => ('field' in col ? col.field !== 'agents' : true));
     }
 
     return cols;
-  }, [getHref, isFleetEnabled, sendRequest]);
+  }, [getHref, isFleetEnabled]);
 
   const createAgentConfigButton = useMemo(
     () => (
@@ -303,7 +251,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={4}>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,

@@ -39,12 +39,12 @@ export function ErrorRateAlertTrigger(props: Props) {
     threshold: 25,
     windowSize: 1,
     windowUnit: 'm',
-    environment: ALL_OPTION.value
+    environment: ALL_OPTION.value,
   };
 
   const params = {
     ...defaults,
-    ...alertParams
+    ...alertParams,
   };
 
   const threshold = isFinite(params.threshold) ? params.threshold : '';
@@ -57,13 +57,13 @@ export function ErrorRateAlertTrigger(props: Props) {
           : params.environment
       }
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.environment', {
-        defaultMessage: 'Environment'
+        defaultMessage: 'Environment',
       })}
     >
       <EuiSelect
         value={params.environment}
         options={environmentOptions}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'environment',
             e.target.value as ErrorRateAlertTriggerParams['environment']
@@ -74,36 +74,36 @@ export function ErrorRateAlertTrigger(props: Props) {
     </PopoverExpression>,
     <PopoverExpression
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.isAbove', {
-        defaultMessage: 'is above'
+        defaultMessage: 'is above',
       })}
       value={threshold.toString()}
     >
       <EuiFieldNumber
         value={threshold}
         step={0}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams('threshold', parseInt(e.target.value, 10))
         }
         compressed
         append={i18n.translate('xpack.apm.errorRateAlertTrigger.errors', {
-          defaultMessage: 'errors'
+          defaultMessage: 'errors',
         })}
       />
     </PopoverExpression>,
     <ForLastExpression
-      onChangeWindowSize={windowSize =>
+      onChangeWindowSize={(windowSize) =>
         setAlertParams('windowSize', windowSize || '')
       }
-      onChangeWindowUnit={windowUnit =>
+      onChangeWindowUnit={(windowUnit) =>
         setAlertParams('windowUnit', windowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
         timeWindowSize: [],
-        timeWindowUnit: []
+        timeWindowUnit: [],
       }}
-    />
+    />,
   ];
 
   return (

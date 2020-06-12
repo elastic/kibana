@@ -123,7 +123,7 @@ const AllValidationChecks: FC<{ validationChecks: FieldExampleCheck[] }> = ({
   validationChecks,
 }) => {
   const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {
-    const failedCheck = validationChecks.find(vc => vc.id === i);
+    const failedCheck = validationChecks.find((vc) => vc.id === i);
     if (
       failedCheck !== undefined &&
       failedCheck?.valid !== CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID

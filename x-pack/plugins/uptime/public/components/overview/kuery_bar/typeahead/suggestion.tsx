@@ -50,18 +50,19 @@ const Description = styled.div`
   }
 `;
 
-const ListItem = styled.li<{ selected: boolean }>`
+const ListItem = styled.button<{ selected: boolean }>`
+  width: inherit;
   font-size: ${fontSizes.small};
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props => (props.selected ? theme.euiColorLightestShade : 'initial')};
+  background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props =>
+      background: ${(props) =>
         props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
     }
     @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
@@ -82,6 +83,7 @@ const Icon = styled.div<{ type: string }>`
 `;
 
 const TextValue = styled.div`
+  text-align: left;
   flex: 0 0 ${px(unit * 12)};
   color: ${theme.euiColorDarkestShade};
   padding: 0 ${px(units.half)};

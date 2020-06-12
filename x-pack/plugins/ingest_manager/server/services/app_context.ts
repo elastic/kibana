@@ -6,14 +6,14 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
 import { IngestManagerAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
-  private encryptedSavedObjects: EncryptedSavedObjectsPluginStart | undefined;
+  private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private security: SecurityPluginSetup | undefined;
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
@@ -25,7 +25,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
-    this.encryptedSavedObjects = appContext.encryptedSavedObjects;
+    this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
     this.security = appContext.security;
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;

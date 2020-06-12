@@ -45,7 +45,7 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
 
       try {
         await addLifecyclePolicy(
-          context.core.elasticsearch.dataClient.callAsCurrentUser,
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
           indexName,
           policyName,
           alias

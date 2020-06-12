@@ -96,6 +96,11 @@ export function uiRenderMixin(kbnServer, server, config) {
             ? await uiSettings.get('theme:darkMode')
             : false;
 
+        const themeVersion =
+          !authEnabled || request.auth.isAuthenticated
+            ? await uiSettings.get('theme:version')
+            : 'v7';
+
         const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
 
@@ -103,10 +108,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         const dllBundlePath = `${basePath}/${buildHash}/built_assets/dlls`;
 
         const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.style.dll.css`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.style.dll.css`
         );
         const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
         );
 
         const styleSheetPaths = [
@@ -114,12 +119,16 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
-                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
+                themeVersion === 'v7'
+                  ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
+                  : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
                 `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
-                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+                themeVersion === 'v7'
+                  ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
+                  : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
@@ -130,9 +139,9 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/${app.getId()}.style.css`,
                 ...kbnServer.uiExports.styleSheetPaths
                   .filter(
-                    path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+                    (path) => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
                   )
-                  .map(path =>
+                  .map((path) =>
                     path.localPath.endsWith('.scss')
                       ? `${basePath}/${buildHash}/built_assets/css/${path.publicPath}`
                       : `${basePath}/${path.publicPath}`
@@ -153,7 +162,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
-            filename => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
+            (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
           ...(isCore
@@ -164,8 +173,9 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
 
+          `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
-            pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
+            (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
         ];
 
@@ -186,12 +196,11 @@ export function uiRenderMixin(kbnServer, server, config) {
         const bootstrap = new AppBootstrap({
           templateData: {
             darkMode,
+            themeVersion,
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
-              : `${regularBundlePath}/${app.getId()}.bundle.js`,
+            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
@@ -237,9 +246,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       rendering,
       legacy,
       savedObjectsClientProvider: savedObjects,
-      uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
-    const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
+    const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+      savedObjects.getClient(h.request)
+    );
     const vars = await legacy.getVars(app.getId(), h.request, {
       apmConfig: getApmConfig(app),
       ...overrides,
@@ -250,17 +260,14 @@ export function uiRenderMixin(kbnServer, server, config) {
       vars,
     });
 
-    return h
-      .response(content)
-      .type('text/html')
-      .header('content-security-policy', http.csp.header);
+    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
   }
 
-  server.decorate('toolkit', 'renderApp', function(app, overrides) {
+  server.decorate('toolkit', 'renderApp', function (app, overrides) {
     return renderApp(this, app, true, overrides);
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
     return renderApp(this, app, false);
   });
 }

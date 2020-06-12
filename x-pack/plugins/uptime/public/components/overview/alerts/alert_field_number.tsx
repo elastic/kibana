@@ -45,7 +45,7 @@ export const AlertFieldNumber = ({
       compressed
       data-test-subj={dataTestSubj}
       min={1}
-      onChange={e => handleAlertFieldNumberChange(e, isInvalid, setIsInvalid, setFieldValue)}
+      onChange={(e) => handleAlertFieldNumberChange(e, isInvalid, setIsInvalid, setFieldValue)}
       disabled={disabled}
       value={fieldValue}
       isInvalid={isInvalid}

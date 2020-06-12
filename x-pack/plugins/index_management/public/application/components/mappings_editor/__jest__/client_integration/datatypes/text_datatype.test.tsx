@@ -24,7 +24,8 @@ export const defaultTextParameters = {
   store: false,
 };
 
-describe('Mappings editor: text datatype', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/66669
+describe.skip('Mappings editor: text datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   /**
@@ -369,7 +370,7 @@ describe('Mappings editor: text datatype', () => {
     const subSelectOptions = indexAnalyzerSelects
       .at(1)
       .find('option')
-      .map(wrapper => wrapper.text());
+      .map((wrapper) => wrapper.text());
 
     expect(subSelectOptions).toEqual(customAnalyzers);
 

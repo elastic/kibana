@@ -38,7 +38,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
 
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
-            myCaseConfigure.saved_objects.map(cc =>
+            myCaseConfigure.saved_objects.map((cc) =>
               caseConfigureService.delete({ client, caseConfigureId: cc.id })
             )
           );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isOnlySingleFeatureType, assignCategoriesToPalette } from './style_util';
+import { isOnlySingleFeatureType, assignCategoriesToPalette, dynamicRound } from './style_util';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 
 describe('isOnlySingleFeatureType', () => {
@@ -98,5 +98,17 @@ describe('assignCategoriesToPalette', () => {
       ],
       fallback: 'yellow',
     });
+  });
+});
+
+describe('dynamicRound', () => {
+  test('Should truncate based on magnitude of number', () => {
+    expect(dynamicRound(1000.1234)).toBe(1000);
+    expect(dynamicRound(1.1234)).toBe(1.12);
+    expect(dynamicRound(0.0012345678)).toBe(0.00123);
+  });
+
+  test('Should return argument when not a number', () => {
+    expect(dynamicRound('foobar')).toBe('foobar');
   });
 });

@@ -37,7 +37,7 @@ export async function getAgentEvents(
     searchFields: ['agent_id'],
   });
 
-  const items: AgentEvent[] = saved_objects.map(so => {
+  const items: AgentEvent[] = saved_objects.map((so) => {
     return {
       id: so.id,
       ...so.attributes,

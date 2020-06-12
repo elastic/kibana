@@ -91,7 +91,7 @@ export function createExecuteFunction({
     });
 
     async function getActionTypeId(actionId: string): Promise<string> {
-      const pcAction = preconfiguredActions.find(action => action.id === actionId);
+      const pcAction = preconfiguredActions.find((action) => action.id === actionId);
       if (pcAction) {
         return pcAction.actionTypeId;
       }

@@ -1,0 +1,575 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndicesList should change pages 1`] = `
+<div>
+  <EuiTable>
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 1,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="none"
+        withTitle={true}
+      >
+        <EuiContextMenuPanel
+          hasFocus={true}
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`IndicesList should change per page 1`] = `
+<div>
+  <EuiTable>
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 1,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="none"
+        withTitle={true}
+      >
+        <EuiContextMenuPanel
+          hasFocus={true}
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPagination
+        activePage={0}
+        onPageClick={[Function]}
+        pageCount={2}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`IndicesList should highlight the query in the matches 1`] = `
+<div>
+  <EuiTable>
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          <span>
+            <strong>
+              ki
+            </strong>
+            bana
+          </span>
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="none"
+        withTitle={true}
+      >
+        <EuiContextMenuPanel
+          hasFocus={true}
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`IndicesList should render normally 1`] = `
+<div>
+  <EuiTable>
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="none"
+        withTitle={true}
+      >
+        <EuiContextMenuPanel
+          hasFocus={true}
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`IndicesList updating props should render all new indices 1`] = `
+<div>
+  <EuiTable>
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="2"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="3"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="4"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="5"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="6"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="7"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="8"
+      >
+        <EuiTableRowCell>
+          kibana
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="9"
+      >
+        <EuiTableRowCell>
+          es
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="none"
+        withTitle={true}
+      >
+        <EuiContextMenuPanel
+          hasFocus={true}
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPagination
+        activePage={0}
+        onPageClick={[Function]}
+        pageCount={2}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

@@ -7,16 +7,18 @@
 import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { OutputRuleAlertRest } from '../../plugins/siem/server/lib/detection_engine/types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/siem/common/constants';
+import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
+import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
+import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
+import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/security_solution/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedProperties = (
-  rule: Partial<OutputRuleAlertRest>
-): Partial<OutputRuleAlertRest> => {
+  rule: Partial<RulesSchema>
+): Partial<RulesSchema> => {
   const {
     created_at,
     updated_at,
@@ -37,8 +39,8 @@ export const removeServerGeneratedProperties = (
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
-  rule: Partial<OutputRuleAlertRest>
-): Partial<OutputRuleAlertRest> => {
+  rule: Partial<RulesSchema>
+): Partial<RulesSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
@@ -48,7 +50,22 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
  */
-export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getSimpleRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index: ['auditbeat-*'],
+  type: 'query',
+  query: 'user.name: root or user.name: admin',
+});
+
+/**
+ * This is a typical simple rule for testing that is easy for most basic testing
+ * @param ruleId
+ */
+export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   risk_score: 1,
@@ -63,7 +80,18 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
  * This is a representative ML rule payload as expected by the server
  * @param ruleId
  */
-export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
+});
+
+export const getSimpleMlRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   anomaly_threshold: 44,
@@ -107,7 +135,7 @@ export const getSignalStatusEmptyResponse = () => ({
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  */
-export const getSimpleRuleWithoutRuleId = (): Partial<OutputRuleAlertRest> => {
+export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
   const simpleRule = getSimpleRule();
   const { rule_id, ...ruleWithoutId } = simpleRule;
   return ruleWithoutId;
@@ -130,9 +158,10 @@ export const binaryToString = (res: any, callback: any): void => {
 };
 
 /**
- * This is the typical output of a simple rule that Kibana will output with all the defaults.
+ * This is the typical output of a simple rule that Kibana will output with all the defaults
+ * except for the server generated properties.  Useful for testing end to end tests.
  */
-export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
@@ -162,17 +191,16 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
 });
 
 /**
- * This is the typical output of a simple rule that Kibana will output with all the defaults.
+ * This is the typical output of a simple rule that Kibana will output with all the defaults except
+ * for all the server generated properties such as created_by. Useful for testing end to end tests.
  */
-export const getSimpleRuleOutputWithoutRuleId = (
-  ruleId = 'rule-1'
-): Partial<OutputRuleAlertRest> => {
+export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };
 
-export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => {
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
   const { query, language, index, ...rest } = rule;
 
@@ -221,11 +249,7 @@ export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
 export const createSignalsIndex = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  await supertest
-    .post(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
 
 /**
@@ -235,11 +259,7 @@ export const createSignalsIndex = async (
 export const deleteSignalsIndex = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  await supertest
-    .delete(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
 
 /**
@@ -248,7 +268,7 @@ export const deleteSignalsIndex = async (
  * @param ruleIds Array of strings of rule_ids
  */
 export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
-  const stringOfRules = ruleIds.map(ruleId => {
+  const stringOfRules = ruleIds.map((ruleId) => {
     const simpleRule = getSimpleRule(ruleId);
     return JSON.stringify(simpleRule);
   });
@@ -260,7 +280,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
+export const ruleToNdjson = (rule: Partial<RulesSchema>): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
@@ -269,7 +289,7 @@ export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -353,7 +373,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',

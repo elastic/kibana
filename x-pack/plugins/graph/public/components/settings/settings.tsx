@@ -123,7 +123,7 @@ export const Settings = connect<StateProps, DispatchProps, AsObservable<AngularP
     urlTemplates: templatesSelector(state),
     allFields: fieldsSelector(state),
   }),
-  dispatch =>
+  (dispatch) =>
     bindActionCreators(
       {
         updateSettings,

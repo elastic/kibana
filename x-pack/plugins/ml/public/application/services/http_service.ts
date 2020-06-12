@@ -56,7 +56,7 @@ export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
  * Creates an Observable from Kibana's HttpHandler.
  */
 export function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
-  return new Observable<T>(subscriber => {
+  return new Observable<T>((subscriber) => {
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -82,12 +82,12 @@ export function fromHttpHandler<T>(input: string, init?: RequestInit): Observabl
 
     getHttp()
       .fetch<T>(input, perSubscriberInit)
-      .then(response => {
+      .then((response) => {
         abortable = false;
         subscriber.next(response);
         subscriber.complete();
       })
-      .catch(err => {
+      .catch((err) => {
         abortable = false;
         if (!unsubscribed) {
           subscriber.error(err);
@@ -139,7 +139,7 @@ export class HttpService {
    * Creates an Observable from Kibana's HttpHandler.
    */
   private fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
-    return new Observable<T>(subscriber => {
+    return new Observable<T>((subscriber) => {
       const controller = new AbortController();
       const signal = controller.signal;
 
@@ -165,12 +165,12 @@ export class HttpService {
 
       this.httpStart
         .fetch<T>(input, perSubscriberInit)
-        .then(response => {
+        .then((response) => {
           abortable = false;
           subscriber.next(response);
           subscriber.complete();
         })
-        .catch(err => {
+        .catch((err) => {
           abortable = false;
           if (!unsubscribed) {
             subscriber.error(err);

@@ -57,10 +57,10 @@ function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedAr
   const resolvedArgsElements = Object.keys(resolvedArgs);
 
   const workpadElements = workpad.pages.reduce<string[]>((reduction, page) => {
-    return [...reduction, ...page.elements.map(element => element.id)];
+    return [...reduction, ...page.elements.map((element) => element.id)];
   }, []);
 
-  return workpadElements.every(element => resolvedArgsElements.includes(element));
+  return workpadElements.every((element) => resolvedArgsElements.includes(element));
 }
 
 export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
@@ -69,6 +69,7 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
 ) =>
   function ElementsLoadedTelemetry(props: ElementsLoadedTelemetryProps) {
     const { telemetryElementCounts, workpad, telemetryResolvedArgs, ...other } = props;
+    const { error, pending } = telemetryElementCounts;
 
     const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(undefined);
     const [hasReported, setHasReported] = useState(false);
@@ -87,27 +88,20 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
           0
         );
 
-        if (
-          workpadElementCount === 0 ||
-          (resolvedArgsAreForWorkpad && telemetryElementCounts.pending === 0)
-        ) {
+        if (workpadElementCount === 0 || (resolvedArgsAreForWorkpad && pending === 0)) {
           setHasReported(true);
         } else {
           setHasReported(false);
         }
-      } else if (
-        !hasReported &&
-        telemetryElementCounts.pending === 0 &&
-        resolvedArgsAreForWorkpad
-      ) {
-        if (telemetryElementCounts.error > 0) {
+      } else if (!hasReported && pending === 0 && resolvedArgsAreForWorkpad) {
+        if (error > 0) {
           trackMetric(METRIC_TYPE.LOADED, [WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
         } else {
           trackMetric(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
         }
         setHasReported(true);
       }
-    });
+    }, [currentWorkpadId, hasReported, error, pending, telemetryResolvedArgs, workpad]);
 
     return <Component {...(other as P)} workpad={workpad} />;
   };

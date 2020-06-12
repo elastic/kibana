@@ -68,7 +68,7 @@ export class LogEntryRateAnalysis {
 
       const { after_key: afterKey, buckets: latestBatchBuckets } = pipe(
         logRateModelPlotResponseRT.decode(mlModelPlotResponse),
-        map(response => response.aggregations.timestamp_partition_buckets),
+        map((response) => response.aggregations.timestamp_partition_buckets),
         fold(throwErrors(createPlainError), identity)
       );
 

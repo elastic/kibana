@@ -43,27 +43,27 @@ export function columns(): ExpressionFunctionDefinition<
       let result = { ...input };
 
       if (exclude) {
-        const fields = exclude.split(',').map(field => field.trim());
-        const cols = contextColumns.filter(col => !fields.includes(col.name));
-        const rows = cols.length > 0 ? contextRows.map(row => omit(row, fields)) : [];
+        const fields = exclude.split(',').map((field) => field.trim());
+        const cols = contextColumns.filter((col) => !fields.includes(col.name));
+        const rows = cols.length > 0 ? contextRows.map((row) => omit(row, fields)) : [];
 
         result = { rows, columns: cols, ...rest };
       }
 
       if (include) {
-        const fields = include.split(',').map(field => field.trim());
+        const fields = include.split(',').map((field) => field.trim());
         // const columns = result.columns.filter(col => fields.includes(col.name));
 
         // Include columns in the order the user specified
         const cols: DatatableColumn[] = [];
 
-        fields.forEach(field => {
+        fields.forEach((field) => {
           const column = find(result.columns, { name: field });
           if (column) {
             cols.push(column);
           }
         });
-        const rows = cols.length > 0 ? result.rows.map(row => pick(row, fields)) : [];
+        const rows = cols.length > 0 ? result.rows.map((row) => pick(row, fields)) : [];
         result = { rows, columns: cols, ...rest };
       }
 

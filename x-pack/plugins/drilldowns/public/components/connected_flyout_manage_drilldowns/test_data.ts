@@ -9,7 +9,7 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
   UiActionsEnhancedSerializedAction,
-} from '../../../../advanced_ui_actions/public';
+} from '../../../../ui_actions_enhanced/public';
 import { TriggerContextMapping } from '../../../../../../src/plugins/ui_actions/public';
 import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
 
@@ -48,8 +48,8 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
     const state = this.state.get();
     let events = state.events;
 
-    eventIds.forEach(id => {
-      events = events.filter(e => e.eventId !== id);
+    eventIds.forEach((id) => {
+      events = events.filter((e) => e.eventId !== id);
     });
 
     this.state.set({
@@ -65,7 +65,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
   ) {
     const state = this.state.get();
     const events = state.events;
-    const idx = events.findIndex(e => e.eventId === eventId);
+    const idx = events.findIndex((e) => e.eventId === eventId);
     const event = {
       eventId,
       action,

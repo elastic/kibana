@@ -87,14 +87,14 @@ export const EmailParamsFields = ({
             const newOptions = [...toOptions, { label: searchValue }];
             editAction(
               'to',
-              newOptions.map(newOption => newOption.label),
+              newOptions.map((newOption) => newOption.label),
               index
             );
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction(
               'to',
-              selectedOptions.map(selectedOption => selectedOption.label),
+              selectedOptions.map((selectedOption) => selectedOption.label),
               index
             );
           }}
@@ -127,14 +127,14 @@ export const EmailParamsFields = ({
               const newOptions = [...ccOptions, { label: searchValue }];
               editAction(
                 'cc',
-                newOptions.map(newOption => newOption.label),
+                newOptions.map((newOption) => newOption.label),
                 index
               );
             }}
             onChange={(selectedOptions: Array<{ label: string }>) => {
               editAction(
                 'cc',
-                selectedOptions.map(selectedOption => selectedOption.label),
+                selectedOptions.map((selectedOption) => selectedOption.label),
                 index
               );
             }}
@@ -168,14 +168,14 @@ export const EmailParamsFields = ({
               const newOptions = [...bccOptions, { label: searchValue }];
               editAction(
                 'bcc',
-                newOptions.map(newOption => newOption.label),
+                newOptions.map((newOption) => newOption.label),
                 index
               );
             }}
             onChange={(selectedOptions: Array<{ label: string }>) => {
               editAction(
                 'bcc',
-                selectedOptions.map(selectedOption => selectedOption.label),
+                selectedOptions.map((selectedOption) => selectedOption.label),
                 index
               );
             }}
@@ -213,7 +213,7 @@ export const EmailParamsFields = ({
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
-          onChange={e => {
+          onChange={(e) => {
             editAction('subject', e.target.value, index);
           }}
           onBlur={() => {
@@ -249,7 +249,7 @@ export const EmailParamsFields = ({
           value={message || ''}
           name="message"
           data-test-subj="emailMessageInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction('message', e.target.value, index);
           }}
           onBlur={() => {

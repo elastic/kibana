@@ -52,7 +52,7 @@ export class ToolsControl extends Component {
   };
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -61,7 +61,7 @@ export class ToolsControl extends Component {
     this.setState({ isPopoverOpen: false });
   };
 
-  _initiateShapeDraw = options => {
+  _initiateShapeDraw = (options) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.POLYGON,
       ...options,
@@ -69,7 +69,7 @@ export class ToolsControl extends Component {
     this._closePopover();
   };
 
-  _initiateBoundsDraw = options => {
+  _initiateBoundsDraw = (options) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.BOUNDS,
       ...options,
@@ -77,7 +77,7 @@ export class ToolsControl extends Component {
     this._closePopover();
   };
 
-  _initiateDistanceDraw = options => {
+  _initiateDistanceDraw = (options) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.DISTANCE,
       ...options,

@@ -95,7 +95,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -178,7 +178,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -262,7 +262,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -345,13 +345,13 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map(savedObject => ({
+      saved_objects: savedObjects.map((savedObject) => ({
         type: savedObject.type,
         id: savedObject.id,
         error: {
@@ -527,7 +527,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push({ id: '1', type: 'wigwags', attributes: { title: 'my title' }, references: [] });
         this.push(null);
       },
