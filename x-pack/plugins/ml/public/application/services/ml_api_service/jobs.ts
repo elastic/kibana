@@ -111,7 +111,7 @@ export const jobs = {
 
   forceStopAndCloseJob(jobId: string) {
     const body = JSON.stringify({ jobId });
-    return http<any>({
+    return http<{ success: boolean }>({
       path: `${basePath()}/jobs/force_stop_and_close_job`,
       method: 'POST',
       body,

@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { ChartLoader } from '../../../jobs/new_job/common/chart_loader';
 import { mlResultsService } from '../../../services/results_service';
-import {
-  // ModelSnapshot,
-  CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
+import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
 import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';

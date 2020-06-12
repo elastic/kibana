@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiConfirmModal,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -98,11 +99,23 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     hideCloseJobModalVisible();
   }
 
-  function renderDate(date: number) {
-    return formatDate(date, TIME_FORMAT);
+  function closeEditFlyout(reload: boolean) {
+    setEditSnapshot(null);
+    if (reload) {
+      loadModelSnapshots();
+    }
   }
 
-  const columns = [
+  function closeRevertFlyout(reload: boolean) {
+    setRevertSnapshot(null);
+    if (reload) {
+      loadModelSnapshots();
+      // wait half a second before refreshing the jobs list
+      setTimeout(refreshJobList, 500);
+    }
+  }
+
+  const columns: Array<EuiBasicTableColumn<any>> = [
     {
       field: 'snapshot_id',
       name: i18n.translate('xpack.ml.modelSnapshotTable.id', {
@@ -195,8 +208,8 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
       <EuiInMemoryTable
         className="eui-textOverflowWrap"
         compressed={true}
-        items={snapshots as any[]} // TODO EUI TABLES SUCK
-        columns={columns as any[]}
+        items={snapshots}
+        columns={columns}
         pagination={{
           pageSizeOptions: [5, 10, 25],
         }}
@@ -208,16 +221,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         }}
       />
       {editSnapshot !== null && (
-        <EditModelSnapshotFlyout
-          snapshot={editSnapshot}
-          job={job}
-          closeFlyout={(reload: boolean) => {
-            setEditSnapshot(null);
-            if (reload) {
-              loadModelSnapshots();
-            }
-          }}
-        />
+        <EditModelSnapshotFlyout snapshot={editSnapshot} job={job} closeFlyout={closeEditFlyout} />
       )}
 
       {revertSnapshot !== null && (
@@ -225,13 +229,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           snapshot={revertSnapshot}
           snapshots={snapshots}
           job={job}
-          closeFlyout={(reload: boolean) => {
-            setRevertSnapshot(null);
-            if (reload) {
-              loadModelSnapshots();
-              setTimeout(refreshJobList, 500);
-            }
-          }}
+          closeFlyout={closeRevertFlyout}
         />
       )}
 
@@ -281,6 +279,10 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     </>
   );
 };
+
+function renderDate(date: number) {
+  return formatDate(date, TIME_FORMAT);
+}
 
 async function getCombinedJobState(jobId: string) {
   const jobs = await ml.jobs.jobs([jobId]);

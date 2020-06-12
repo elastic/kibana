@@ -629,9 +629,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {get} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Get model snapshots by job ID and snapshot ID
-   * @apiName GetModelSnapshotsById
-   * @apiDescription Returns the model snapshots for the specified job ID and snapshot ID
+   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update update model snapshot by snapshot ID
+   * @apiName UpdateModelSnapshotsById
+   * @apiDescription Updates the model snapshot for the specified snapshot ID
    *
    * @apiSchema (params) getModelSnapshotsSchema
    */
@@ -665,9 +665,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {get} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Get model snapshots by job ID and snapshot ID
+   * @api {delete} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Delete model snapshots by snapshot ID
    * @apiName GetModelSnapshotsById
-   * @apiDescription Returns the model snapshots for the specified job ID and snapshot ID
+   * @apiDescription Deletes the model snapshot for the specified snapshot ID
    *
    * @apiSchema (params) getModelSnapshotsSchema
    */
@@ -678,7 +678,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         params: getModelSnapshotsSchema,
       },
       options: {
-        tags: ['access:ml:canCreateJob'], // TODO IS THIS CORRECT?
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

@@ -43,8 +43,8 @@ import {
 } from '../../../../../common/types/anomaly_detection_jobs';
 import { ml } from '../../../services/ml_api_service';
 import { useNotifications } from '../../../contexts/kibana';
-import { loadEventRateForJob, loadAnomalyDataForJob } from './utils';
-import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
+import { loadEventRateForJob, loadAnomalyDataForJob } from './chart_loader';
+import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
@@ -99,14 +99,14 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
   }, [calendarEvents]);
 
   async function createChartData() {
-    // setTimeout(async () => {
     const bucketSpanMs = parseInterval(job.analysis_config.bucket_span)!.asMilliseconds();
-    const d = await loadEventRateForJob(job, bucketSpanMs, 100);
-    const a = await loadAnomalyDataForJob(job, bucketSpanMs, 100);
-    setEventRateData(d);
-    setAnomalies(a[0]);
+    const eventRate = await loadEventRateForJob(job, bucketSpanMs, 100);
+    const anomalyData = await loadAnomalyDataForJob(job, bucketSpanMs, 100);
+    setEventRateData(eventRate);
+    if (anomalyData[0] !== undefined) {
+      setAnomalies(anomalyData[0]);
+    }
     setChartReady(true);
-    // }, 250);
   }
 
   function closeWithReload() {
@@ -181,7 +181,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {false && (
+          {false && ( // disabled for now
             <>
               <EuiSpacer size="s" />
 

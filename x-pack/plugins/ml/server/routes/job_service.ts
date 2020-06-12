@@ -168,11 +168,11 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/close_jobs Close jobs
-   * @apiName CloseJobs
-   * @apiDescription Closes one or more anomaly detection jobs
+   * @api {post} /api/ml/jobs/force_stop_and_close_job Force stop and close job
+   * @apiName ForceStopAndCloseJob
+   * @apiDescription Force stops the datafeed and then force closes the anomaly detection job specified by job ID
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) jobIdSchema
    */
   router.post(
     {
@@ -732,11 +732,11 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/top_categories Get top categories
+   * @api {post} /api/ml/jobs/revert_model_snapshot Revert model snapshot
    * @apiName TopCategories
-   * @apiDescription Returns list of top categories
+   * @apiDescription Reverts a job to a specified snapshot. Also allows the job to replayed to a specified date and to auto create calendars to skip analysis of specified date ranges
    *
-   * @apiSchema (body) topCategoriesSchema
+   * @apiSchema (body) revertModelSnapshotSchema
    */
   router.post(
     {

@@ -184,7 +184,6 @@ export class JobDetails extends Component {
           content: (
             <Fragment>
               <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
-              {/* <AnnotationFlyout /> */}
             </Fragment>
           ),
         });
