@@ -84,9 +84,9 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     rangeTo,
   };
 
-  const errorMessage = truncateMessage(
-    error.error.log?.message || error.error.exception?.[0]?.message
-  );
+  const errorMessage =
+    error.error.log?.message || error.error.exception?.[0]?.message;
+  const truncatedErrorMessage = truncateMessage(errorMessage);
 
   return (
     <EuiPopover
@@ -114,8 +114,9 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
             serviceName={error.service.name}
             errorGroupId={error.error.grouping_key}
             query={query}
+            title={errorMessage}
           >
-            {errorMessage}
+            {truncatedErrorMessage}
           </ErrorLink>
         </EuiText>
       </Popover>
