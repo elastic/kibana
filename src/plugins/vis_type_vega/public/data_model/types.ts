@@ -141,11 +141,6 @@ export interface Data {
   url?: UrlObject;
 }
 
-export interface Requests {
-  dataObject?: Data;
-  url: UrlObject;
-}
-
 export interface CacheOptions {
   max: number;
   maxAge: number;
