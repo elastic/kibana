@@ -36,13 +36,11 @@ const HostIds = styled(EuiListGroupItem)`
 
 const LinkToExternalApp = styled.div`
   margin-top: ${(props) => props.theme.eui.ruleMargins.marginMedium};
-  .hostDetailsLinkToExternalApp {
-    .linkToAppIcon {
-      margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
-    }
-    .linkToAppPopoutIcon {
-      margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
-    }
+  .linkToAppIcon {
+    margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+  }
+  .linkToAppPopoutIcon {
+    margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
   }
 `;
 
@@ -176,7 +174,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       />
       <LinkToExternalApp>
         <LinkToApp
-          className="hostDetailsLinkToExternalApp"
           appId={ingestAppId}
           appPath={ingestAppPath}
           href={ingestUrl}
