@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { LocationDurationLine } from '../../../../common/types';
 import { MLIntegrationComponent } from '../ml/ml_integeration';
 import { AnomalyRecords } from '../../../state/actions';
-import { DurationChartComponent } from '../../common/charts';
+import { DurationChart } from '../../common/charts';
 
 interface DurationChartProps {
   loading: boolean;
@@ -56,7 +56,7 @@ export const MonitorDurationComponent = ({
           <MLIntegrationComponent />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <DurationChartComponent
+      <DurationChart
         locationDurationLines={locationDurationLines}
         loading={loading}
         anomalies={anomalies}
