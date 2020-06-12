@@ -81,11 +81,12 @@ export interface TimeBucket {
 }
 
 export interface Bool {
+  [index: string]: any;
   bool?: Bool;
-  must: DslQuery[];
-  filter: Filter[];
-  should: never[];
-  must_not: Filter[];
+  must?: DslQuery[];
+  filter?: Filter[];
+  should?: never[];
+  must_not?: Filter[];
 }
 
 export interface Query {

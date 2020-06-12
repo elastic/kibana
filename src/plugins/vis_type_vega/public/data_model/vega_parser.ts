@@ -30,7 +30,7 @@ import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
-import { SearchCache } from './search_cache';
+import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
 import { IServiceSettings } from '../../../maps_legacy/public';
 import { Bool, Data, VegaSpec } from './types';
@@ -72,7 +72,7 @@ export class VegaParser {
 
   constructor(
     spec: string,
-    searchAPI: SearchCache,
+    searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
     serviceSettings: IServiceSettings
