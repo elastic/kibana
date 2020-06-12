@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq, indexBy } from 'lodash';
+import { uniq, indexBy, groupBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiFlexGroup,
@@ -181,6 +181,12 @@ interface DataPanelState {
   isTypeFilterOpen: boolean;
 }
 
+export interface FieldsGroup {
+  specialFields: IndexPatternField[];
+  availableFields: IndexPatternField[];
+  emptyFields: IndexPatternField[];
+}
+
 const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
   defaultMessage: 'Field filters',
 });
@@ -241,24 +247,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     (type) => type in fieldTypeNames
   );
 
-  const filteredFields = allFields.filter((field) => {
-    if (!supportedFieldTypes.has(field.type)) {
-      return false;
-    }
-
-    if (
-      localState.nameFilter.length &&
-      !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
-    ) {
-      return false;
-    }
-
-    if (localState.typeFilter.length > 0) {
-      return localState.typeFilter.includes(field.type as DataType);
-    }
-    return true;
-  });
-
   const containsData = (field: IndexPatternField) => {
     const fieldByName = indexBy(allFields, 'name');
     const overallField = fieldByName[field.name];
@@ -267,13 +255,53 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   };
 
-  const [specialFields, documentFields] = _.partition(filteredFields, (f) => f.type === 'document');
+  const allSupportedTypesFields = allFields.filter((field) => supportedFieldTypes.has(field.type));
 
-  const [availableFields, emptyFields] = _.partition(documentFields, containsData);
+  const fieldGroups: FieldsGroup = {
+    specialFields: [],
+    availableFields: [],
+    emptyFields: [],
+    ...groupBy(allSupportedTypesFields, (field) => {
+      if (field.type === 'document') {
+        return 'specialFields';
+      } else if (containsData(field)) {
+        return 'availableFields';
+      } else return 'emptyFields';
+    }),
+  };
+
+  const filterFieldGroup = (fieldGroup: IndexPatternField[]) =>
+    fieldGroup.filter((field) => {
+      if (
+        localState.nameFilter.length &&
+        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+      ) {
+        return false;
+      }
+
+      if (localState.typeFilter.length > 0) {
+        return localState.typeFilter.includes(field.type as DataType);
+      }
+      return true;
+    });
+
+  const filteredFieldGroups: FieldsGroup = Object.entries(fieldGroups).reduce(
+    (acc, [name, fields]) => {
+      return {
+        ...acc,
+        [name]: filterFieldGroup(fields).sort(sortFields),
+      };
+    },
+    {
+      specialFields: [],
+      availableFields: [],
+      emptyFields: [],
+    }
+  );
 
   const paginatedFields = [
-    ...availableFields.sort(sortFields),
-    ...emptyFields.sort(sortFields),
+    ...filteredFieldGroups.availableFields,
+    ...filteredFieldGroups.emptyFields,
   ].slice(0, pageSize);
 
   const [paginatedAvailableFields, paginatedEmptyFields] = _.partition(
@@ -414,7 +442,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
-              {specialFields.map((field) => (
+              {filteredFieldGroups.specialFields.map((field: IndexPatternField) => (
                 <FieldItem
                   core={core}
                   data={data}
@@ -422,7 +450,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   indexPattern={currentIndexPattern}
                   field={field}
                   highlight={hilight}
-                  exists={paginatedFields.length > 0}
+                  exists={!!fieldGroups.availableFields.length}
                   dateRange={dateRange}
                   query={query}
                   filters={filters}
@@ -447,17 +475,19 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   <EuiNotificationBadge
                     size="m"
                     color={
-                      localState.typeFilter.length || localState.nameFilter.length
+                      (localState.typeFilter.length || localState.nameFilter.length) &&
+                      filteredFieldGroups.availableFields.length !==
+                        fieldGroups.availableFields.length
                         ? 'accent'
                         : 'subdued'
                     }
                   >
-                    {availableFields.length}
+                    {filteredFieldGroups.availableFields.length}
                   </EuiNotificationBadge>
                 }
               >
                 <EuiSpacer size="s" />
-                {paginatedAvailableFields.map((field) => {
+                {paginatedAvailableFields.map((field: IndexPatternField) => {
                   return (
                     <FieldItem
                       core={core}
@@ -542,6 +572,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     )}
                   </EuiCallOut>
                 )}
+                <EuiSpacer size="s" />
               </EuiAccordion>
               <EuiSpacer size="s" />
               <EuiAccordion
@@ -560,17 +591,18 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   <EuiNotificationBadge
                     size="m"
                     color={
-                      localState.typeFilter.length || localState.nameFilter.length
+                      (localState.typeFilter.length || localState.nameFilter.length) &&
+                      filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
                         ? 'accent'
                         : 'subdued'
                     }
                   >
-                    {emptyFields.length}
+                    {filteredFieldGroups.emptyFields.length}
                   </EuiNotificationBadge>
                 }
               >
                 <EuiSpacer size="s" />
-                {paginatedEmptyFields.map((field) => {
+                {paginatedEmptyFields.map((field: IndexPatternField) => {
                   return (
                     <FieldItem
                       core={core}
@@ -586,7 +618,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     />
                   );
                 })}
+                <EuiSpacer size="s" />
               </EuiAccordion>
+              <EuiSpacer size="l" />
             </div>
           </div>
         </EuiFlexItem>
