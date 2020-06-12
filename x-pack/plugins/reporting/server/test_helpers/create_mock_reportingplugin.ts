@@ -65,8 +65,13 @@ export const createMockReportingCore = async (
 ) => {
   config = config || {};
   const core = new ReportingCore();
+
   core.pluginSetup(setupDepsMock);
   core.setConfig(config);
+  await core.pluginSetsUp();
+
   core.pluginStart(startDepsMock);
+  await core.pluginStartsUp();
+
   return core;
 };
