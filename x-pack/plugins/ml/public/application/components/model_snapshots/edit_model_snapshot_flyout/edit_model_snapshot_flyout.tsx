@@ -74,7 +74,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
       closeWithReload();
     } catch (error) {
       toasts.addError(new Error(error.body.message), {
-        title: i18n.translate('xpack.ml.editModelSnapshotFlyout.saveErrorTitle', {
+        title: i18n.translate('xpack.ml.editModelSnapshotFlyout.deleteErrorTitle', {
           defaultMessage: 'Model snapshot deletion failed',
         }),
       });
