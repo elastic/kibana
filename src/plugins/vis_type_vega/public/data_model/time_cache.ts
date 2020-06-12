@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TimefilterContract, TimeRangeBounds } from '../../../data/public';
+import { TimefilterContract } from '../../../data/public';
 import { TimeRange } from '../../../data/common';
 import { CacheBounds } from './types';
 
