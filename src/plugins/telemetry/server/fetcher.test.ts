@@ -19,7 +19,6 @@
 
 /* eslint-disable dot-notation */
 import { FetcherTask } from './fetcher';
-// import { CoreSetup } from 'src/core/server';
 import { coreMock } from '../../../core/server/mocks';
 
 describe('FetcherTask', () => {
