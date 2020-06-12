@@ -78,9 +78,9 @@ export const Controls = () => {
     if (cy) {
       const eles = cy.nodes();
       cy.animate({
-        ...getAnimationOptions(theme.eui),
+        ...getAnimationOptions(theme),
         center: { eles },
-        fit: { eles, padding: getNodeHeight(theme.eui) },
+        fit: { eles, padding: getNodeHeight(theme) },
       });
     }
   }

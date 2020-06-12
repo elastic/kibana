@@ -95,12 +95,12 @@ export const Popover = ({ focusedServiceName }: PopoverProps) => {
       event.preventDefault();
       if (cy) {
         cy.animate({
-          ...getAnimationOptions(theme.eui),
+          ...getAnimationOptions(theme),
           center: { eles: cy.getElementById(selectedNodeServiceName) },
         });
       }
     },
-    [cy, selectedNodeServiceName, theme.eui]
+    [cy, selectedNodeServiceName, theme]
   );
 
   const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;

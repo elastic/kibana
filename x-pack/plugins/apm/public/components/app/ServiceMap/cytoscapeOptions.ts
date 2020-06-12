@@ -18,12 +18,12 @@ export const popoverMinWidth = 280;
 export const getSeverityColor = (theme: EuiTheme, nodeSeverity?: string) => {
   switch (nodeSeverity) {
     case severity.warning:
-      return theme.euiColorVis0;
+      return theme.eui.euiColorVis0;
     case severity.minor:
     case severity.major:
-      return theme.euiColorVis5;
+      return theme.eui.euiColorVis5;
     case severity.critical:
-      return theme.euiColorVis9;
+      return theme.eui.euiColorVis9;
     default:
       return;
   }
@@ -36,12 +36,12 @@ const getBorderColorFn = (
     const hasAnomalyDetectionJob = el.data('ml_job_id') !== undefined;
     const nodeSeverity = el.data('anomaly_severity');
     if (hasAnomalyDetectionJob) {
-      return getSeverityColor(nodeSeverity) || theme.euiColorMediumShade;
+      return getSeverityColor(nodeSeverity) || theme.eui.euiColorMediumShade;
     }
     if (el.hasClass('primary') || el.selected()) {
-      return theme.euiColorPrimary;
+      return theme.eui.euiColorPrimary;
     }
-    return theme.euiColorMediumShade;
+    return theme.eui.euiColorMediumShade;
   };
 };
 
@@ -83,9 +83,9 @@ const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 export const getAnimationOptions = (
   theme: EuiTheme
 ): cytoscape.AnimationOptions => ({
-  duration: parseInt(theme.euiAnimSpeedNormal, 10),
+  duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
   // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
-  easing: theme.euiAnimSlightBounce,
+  easing: theme.eui.euiAnimSlightBounce,
 });
 
 const lineColor = '#C5CCD7';
@@ -95,7 +95,7 @@ const zIndexEdgeHighlight = 110;
 const zIndexEdgeHover = 120;
 
 export const getNodeHeight = (theme: EuiTheme): number =>
-  parseInt(theme.avatarSizing.l.size, 10);
+  parseInt(theme.eui.avatarSizing.l.size, 10);
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
@@ -105,7 +105,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
   {
     selector: 'node',
     style: {
-      'background-color': theme.euiColorEmptyShade,
+      'background-color': theme.eui.euiColorEmptyShade,
       // The DefinitelyTyped definitions don't specify that a function can be
       // used here.
       //
@@ -122,12 +122,12 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
       'border-width': getBorderWidth,
       color: (el: cytoscape.NodeSingular) =>
         el.hasClass('primary') || el.selected()
-          ? theme.euiColorPrimaryText
-          : theme.textColors.text,
+          ? theme.eui.euiColorPrimaryText
+          : theme.eui.textColors.text,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-      'font-size': theme.euiFontSizeS,
+      'font-size': theme.eui.euiFontSizeS,
       ghost: 'yes',
       'ghost-offset-x': 0,
       'ghost-offset-y': 2,
@@ -137,20 +137,20 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
         isService(el)
           ? el.data(SERVICE_NAME)
           : el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
-      'min-zoomed-font-size': parseInt(theme.euiSizeS, 10),
+      'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
         isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
-      'text-background-color': theme.euiColorPrimary,
+      'text-background-color': theme.eui.euiColorPrimary,
       'text-background-opacity': (el: cytoscape.NodeSingular) =>
         el.hasClass('primary') || el.selected() ? 0.1 : 0,
-      'text-background-padding': theme.paddingSizes.xs,
+      'text-background-padding': theme.eui.paddingSizes.xs,
       'text-background-shape': 'roundrectangle',
-      'text-margin-y': parseInt(theme.paddingSizes.s, 10),
+      'text-margin-y': parseInt(theme.eui.paddingSizes.s, 10),
       'text-max-width': '200px',
       'text-valign': 'bottom',
       'text-wrap': 'ellipsis',
-      width: theme.avatarSizing.l.size,
+      width: theme.eui.avatarSizing.l.size,
       'z-index': zIndexNode,
     },
   },
@@ -168,7 +168,9 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
       // fairly new.
       //
       // @ts-ignore
-      'target-distance-from-node': isIE11 ? undefined : theme.paddingSizes.xs,
+      'target-distance-from-node': isIE11
+        ? undefined
+        : theme.eui.paddingSizes.xs,
       width: 1,
       'source-arrow-shape': 'none',
       'z-index': zIndexEdge,
@@ -183,10 +185,10 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
       // @ts-ignore
       'source-distance-from-node': isIE11
         ? undefined
-        : parseInt(theme.paddingSizes.xs, 10),
+        : parseInt(theme.eui.paddingSizes.xs, 10),
       'target-distance-from-node': isIE11
         ? undefined
-        : parseInt(theme.paddingSizes.xs, 10),
+        : parseInt(theme.eui.paddingSizes.xs, 10),
     },
   },
   // @ts-ignore DefinitelyTyped says visibility is "none" but it's
@@ -202,9 +204,9 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
       width: 2,
       // @ts-ignore
       'z-index': zIndexEdgeHover,
-      'line-color': theme.euiColorDarkShade,
-      'source-arrow-color': theme.euiColorDarkShade,
-      'target-arrow-color': theme.euiColorDarkShade,
+      'line-color': theme.eui.euiColorDarkShade,
+      'source-arrow-color': theme.eui.euiColorDarkShade,
+      'target-arrow-color': theme.eui.euiColorDarkShade,
     },
   },
   {
@@ -217,9 +219,9 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
     selector: 'edge.highlight',
     style: {
       width: 2,
-      'line-color': theme.euiColorPrimary,
-      'source-arrow-color': theme.euiColorPrimary,
-      'target-arrow-color': theme.euiColorPrimary,
+      'line-color': theme.eui.euiColorPrimary,
+      'source-arrow-color': theme.eui.euiColorPrimary,
+      'target-arrow-color': theme.eui.euiColorPrimary,
       // @ts-ignore
       'z-index': zIndexEdgeHighlight,
     },
@@ -231,20 +233,20 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
 export const getCytoscapeDivStyle = (theme: EuiTheme): CSSProperties => ({
   background: `linear-gradient(
   90deg,
-  ${theme.euiPageBackgroundColor}
-    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
+  ${theme.eui.euiPageBackgroundColor}
+    calc(${theme.eui.euiSizeL} - calc(${theme.eui.euiSizeXS} / 2)),
   transparent 1%
 )
 center,
 linear-gradient(
-  ${theme.euiPageBackgroundColor}
-    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
+  ${theme.eui.euiPageBackgroundColor}
+    calc(${theme.eui.euiSizeL} - calc(${theme.eui.euiSizeXS} / 2)),
   transparent 1%
 )
 center,
-${theme.euiColorLightShade}`,
-  backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.gutterTypes.gutterLarge}`,
+${theme.eui.euiColorLightShade}`,
+  backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
+  margin: `-${theme.eui.gutterTypes.gutterLarge}`,
   marginTop: 0,
 });
 

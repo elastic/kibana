@@ -115,11 +115,11 @@ export const Cytoscape = ({
 }: CytoscapeProps) => {
   const theme = useContext(ThemeContext);
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme.eui),
+    ...getCytoscapeOptions(theme),
     elements,
   });
 
-  const nodeHeight = getNodeHeight(theme.eui);
+  const nodeHeight = getNodeHeight(theme);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
@@ -167,7 +167,7 @@ export const Cytoscape = ({
       layoutstopDelayTimeout = setTimeout(() => {
         if (serviceName) {
           event.cy.animate({
-            ...getAnimationOptions(theme.eui),
+            ...getAnimationOptions(theme),
             fit: {
               eles: event.cy.elements(),
               padding: nodeHeight,
@@ -250,7 +250,7 @@ export const Cytoscape = ({
     trackApmEvent,
     width,
     nodeHeight,
-    theme.eui,
+    theme,
   ]);
 
   return (

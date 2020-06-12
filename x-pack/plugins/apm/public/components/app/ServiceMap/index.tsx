@@ -77,7 +77,7 @@ export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
         elements={data?.elements ?? []}
         height={height}
         serviceName={serviceName}
-        style={getCytoscapeDivStyle(theme.eui)}
+        style={getCytoscapeDivStyle(theme)}
         width={width}
       >
         <Controls />
