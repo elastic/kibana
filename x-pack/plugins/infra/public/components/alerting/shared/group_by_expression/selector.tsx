@@ -36,9 +36,7 @@ export const GroupBySelector = ({
   }, [selectedGroups]);
 
   const options = useMemo(() => {
-    return fields
-      .filter((field) => field.aggregatable && field.type === 'string')
-      .map((field) => ({ label: field.name }));
+    return fields.filter((field) => field.aggregatable).map((field) => ({ label: field.name }));
   }, [fields]);
 
   return (

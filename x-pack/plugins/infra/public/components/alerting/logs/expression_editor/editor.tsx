@@ -141,6 +141,17 @@ export const Editor: React.FC<Props> = (props) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
+  const groupByFields = useMemo(() => {
+    if (sourceStatus?.logIndexFields) {
+      return sourceStatus.logIndexFields.filter((field) => {
+        return field.type === 'string' && field.searchable;
+      });
+    } else {
+      return [];
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [sourceStatus]);
+
   const updateCount = useCallback(
     (countParams) => {
       const nextCountParams = { ...alertParams.count, ...countParams };
@@ -230,7 +241,7 @@ export const Editor: React.FC<Props> = (props) => {
       <GroupByExpression
         selectedGroups={alertParams.groupBy}
         onChange={updateGroupBy}
-        fields={supportedFields}
+        fields={groupByFields}
       />
 
       <div>

@@ -94,7 +94,7 @@ const processUngroupedResults = (
     alertInstance.scheduleActions(FIRED_ACTIONS.id, {
       matchingDocuments: documentCount,
       conditions: createConditionsMessage(criteria),
-      group: UNGROUPED_NAME,
+      group: null,
     });
 
     alertInstance.replaceState({

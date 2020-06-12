@@ -30,7 +30,7 @@ const DEFAULT_GROUP_BY_LABEL = i18n.translate('xpack.infra.alerting.alertFlyout.
 const EVERYTHING_PLACEHOLDER = i18n.translate(
   'xpack.infra.alerting.alertFlyout.groupBy.placeholder',
   {
-    defaultMessage: 'Everything (ungrouped)',
+    defaultMessage: 'Nothing (ungrouped)',
   }
 );
 
@@ -46,9 +46,7 @@ export const GroupByExpression: React.FC<Props> = ({
     return selectedGroups.length > 0 ? selectedGroups.join(', ') : EVERYTHING_PLACEHOLDER;
   }, [selectedGroups]);
 
-  const labelProp = useMemo(() => {
-    return label || DEFAULT_GROUP_BY_LABEL;
-  }, [label]);
+  const labelProp = label ?? DEFAULT_GROUP_BY_LABEL;
 
   return (
     <EuiFlexGroup gutterSize="s">
