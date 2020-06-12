@@ -6,10 +6,18 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { EuiOutsideClickDetector, EuiPopoverTitle, EuiStat, EuiText } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiOutsideClickDetector,
+  EuiPopoverTitle,
+  EuiStat,
+  EuiText,
+} from '@elastic/eui';
 import { TagLabel } from '../../availability_reporting';
 import { UptimeThemeContext } from '../../../../../contexts';
 import { AppState } from '../../../../../state';
@@ -18,6 +26,7 @@ import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
 import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
+import { LastCheckLabel } from '../../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
@@ -35,6 +44,8 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
   } = useContext(UptimeThemeContext);
 
   const monitorId = useMonitorId();
+
+  const [isOpen, setIsOpen] = useState(false);
 
   const monitorLocations = useSelector((state: AppState) =>
     monitorLocationsSelector(state, monitorId)
@@ -67,20 +78,21 @@ export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipP
           ) : (
             <TagLabel label={locationName} color={danger} />
           )}
-          <TimestampText color="subdued" size="s">
-            {moment(timestamp).fromNow()}
-          </TimestampText>
         </EuiPopoverTitle>
-        <EuiStat
-          title={i18n.translate('xpack.uptime.mapToolTip.AvailabilityStat.title', {
-            defaultMessage: '{value} %',
-            values: { value: formatAvailabilityValue(availability) },
-            description: 'A percentage value like 23.5%',
-          })}
-          description="Availability"
-          textAlign="left"
-          titleSize="s"
-        />
+        <EuiDescriptionList type="column" textStyle="reverse" compressed={true}>
+          <EuiDescriptionListTitle>Availability</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {i18n.translate('xpack.uptime.mapToolTip.AvailabilityStat.title', {
+              defaultMessage: '{value} %',
+              values: { value: formatAvailabilityValue(availability) },
+              description: 'A percentage value like 23.5%',
+            })}
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>{LastCheckLabel}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {moment(timestamp).fromNow()}
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
       </>
     </EuiOutsideClickDetector>
   );

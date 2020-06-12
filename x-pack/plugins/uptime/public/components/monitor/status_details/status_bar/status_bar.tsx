@@ -33,7 +33,7 @@ export const MonListTitle = styled(EuiDescriptionListTitle)`
 export const MonListDescription = styled(EuiDescriptionListDescription)`
   &&& {
     width: 65%;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 `;
 
