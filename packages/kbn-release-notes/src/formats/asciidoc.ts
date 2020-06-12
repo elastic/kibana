@@ -20,7 +20,12 @@
 import dedent from 'dedent';
 
 import { Format } from './format';
-import { ASCIIDOC_SECTIONS, AREAS } from '../release_notes_config';
+import {
+  ASCIIDOC_SECTIONS,
+  UNKNOWN_ASCIIDOC_SECTION,
+  AREAS,
+  UNKNOWN_AREA,
+} from '../release_notes_config';
 
 function* lines(body: string) {
   for (const line of dedent(body).split('\n')) {
@@ -32,7 +37,10 @@ export class AsciidocFormat extends Format {
   static extension = 'asciidoc';
 
   *print() {
-    const alphabeticalAreas = AREAS.slice().sort((a, b) => a.title.localeCompare(b.title));
+    const sortedAreas = [
+      ...AREAS.slice().sort((a, b) => a.title.localeCompare(b.title)),
+      UNKNOWN_AREA,
+    ];
 
     yield* lines(`
       [[release-notes-${this.version.label}]]
@@ -41,7 +49,7 @@ export class AsciidocFormat extends Format {
       Also see <<breaking-changes-${this.version.major}.${this.version.minor}>>.
     `);
 
-    for (const section of ASCIIDOC_SECTIONS) {
+    for (const section of [...ASCIIDOC_SECTIONS, UNKNOWN_ASCIIDOC_SECTION]) {
       const prsInSection = this.prs.filter((pr) => pr.asciidocSection === section);
       if (!prsInSection.length) {
         continue;
@@ -54,7 +62,7 @@ export class AsciidocFormat extends Format {
         === ${section.title}
       `);
 
-      for (const area of alphabeticalAreas) {
+      for (const area of sortedAreas) {
         const prsInArea = prsInSection.filter((pr) => pr.area === area);
 
         if (!prsInArea.length) {
