@@ -34,6 +34,16 @@ interface Args {
   rejectUnauthorized?: boolean;
 }
 
+/**
+ * Node http request library does not expect there to be trailing "[" or "]"
+ * characters in ipv6 host names but the Node URL class with helpers (from the "url" module)
+ * does not scrub these from the "hostname" value.
+ *
+ * We do this just before sending the request.
+ */
+const scrubURLHostname = (hostName: string): string =>
+  hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
+
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
@@ -67,7 +77,7 @@ export const proxyRequest = ({
     method: method.toUpperCase(),
     // We support overriding this on a per request basis to support legacy proxy config. See ./proxy_config.
     rejectUnauthorized: typeof rejectUnauthorized === 'boolean' ? rejectUnauthorized : undefined,
-    host: hostname,
+    host: scrubURLHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
     path: `${pathname}${search || ''}`,
