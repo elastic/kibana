@@ -20,6 +20,7 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 
+import { OverlayRef } from 'kibana/public';
 import { Query } from 'src/plugins/data/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
@@ -59,7 +60,7 @@ const TopNav = ({
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { embeddableHandler, vis } = savedVisInstance;
-  const [inspectorSession, setInspectorSession] = useState();
+  const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
