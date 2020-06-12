@@ -28,7 +28,6 @@ import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
-import * as processModel from '../models/process_event';
 import * as selectors from '../store/selectors';
 
 const nodeAssets = {

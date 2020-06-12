@@ -10,7 +10,7 @@ import { resolverReducer } from './reducer';
 import { ResolverState } from '../types';
 import { LegacyEndpointEvent, ResolverEvent } from '../../../common/endpoint/types';
 import { visibleProcessNodePositionsAndEdgeLineSegments } from './selectors';
-import { mockProcessEvent } from '../../models/process_event_test_helpers';
+import { mockProcessEvent } from '../models/process_event_test_helpers';
 
 describe('resolver visible entities', () => {
   let processA: LegacyEndpointEvent;
