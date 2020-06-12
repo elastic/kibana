@@ -90,3 +90,5 @@ export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchTe
 export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;
 
 export const dateRangeSelector = ({ ui: { dateRange } }: AppState) => dateRange;
+
+export const uiSelector = ({ ui }: AppState) => ui;

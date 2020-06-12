@@ -14,15 +14,24 @@ import {
   UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
+  setAutorefreshIsPaused,
   setSearchTextAction,
   setDateRange,
+  setUiState,
 } from '../actions';
 
-const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
+const {
+  AUTOREFRESH_INTERVAL,
+  AUTOREFRESH_IS_PAUSED,
+  DATE_RANGE_START,
+  DATE_RANGE_END,
+} = CLIENT_DEFAULTS;
 
 export interface UiState {
   alertFlyoutVisible: boolean;
   alertFlyoutType?: string;
+  autorefreshInterval: number;
+  autorefreshIsPaused: boolean;
   basePath: string;
   dateRange: {
     from: string;
@@ -35,6 +44,8 @@ export interface UiState {
 
 const initialState: UiState = {
   alertFlyoutVisible: false,
+  autorefreshInterval: AUTOREFRESH_INTERVAL,
+  autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
   basePath: '',
   dateRange: {
     from: DATE_RANGE_START,
@@ -80,6 +91,16 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setDateRange)]: (state, action: Action<{ from: string; to: string }>) => ({
       ...state,
       dateRange: action.payload,
+    }),
+
+    [String(setAutorefreshIsPaused)]: (state, action: Action<boolean>) => ({
+      ...state,
+      autorefreshIsPaused: action.payload,
+    }),
+
+    [String(setUiState)]: (state, action: Action<Partial<UiState>>) => ({
+      ...state,
+      ...action.payload,
     }),
   },
   initialState
