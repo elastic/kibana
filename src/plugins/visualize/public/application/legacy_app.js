@@ -234,15 +234,15 @@ export function initVisualizeApp(app, deps) {
       })
       .otherwise({
         redirectTo: function () {
+          const path = window.location.hash.substr(1);
           deps.restorePreviousUrl();
-          const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl(
-            window.location.hash.substr(1)
-          );
-          if (!navigated) {
-            deps.kibanaLegacy.navigateToDefaultApp();
-          }
-          // prevent angular from completing the route change
-          throw new Error();
+          setTimeout(() => {
+            const { navigated } = deps.kibanaLegacy.navigateToLegacyKibanaUrl(path);
+            if (!navigated) {
+              deps.kibanaLegacy.navigateToDefaultApp();
+            }
+          }, 0);
+          return '/';
         },
       });
   });

@@ -55,6 +55,7 @@ import {
   setServices,
   setScopedHistory,
   getScopedHistory,
+  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -262,6 +263,12 @@ export class DiscoverPlugin
       },
     });
 
+    plugins.kibanaLegacy.forwardApp('doc', 'discover', (path) => {
+      return `#${path}`;
+    });
+    plugins.kibanaLegacy.forwardApp('context', 'discover', (path) => {
+      return `#${path}`;
+    });
     plugins.kibanaLegacy.forwardApp('discover', 'discover', (path) => {
       const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
       if (!id) {
@@ -364,6 +371,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
+      getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
       getInnerAngularModuleEmbeddable(
         embeddableAngularName,

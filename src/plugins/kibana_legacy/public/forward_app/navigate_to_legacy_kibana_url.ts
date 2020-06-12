@@ -19,6 +19,7 @@
 
 import { ApplicationStart, IBasePath } from 'kibana/public';
 import { ForwardDefinition } from '../index';
+import { normalizePath } from '../utils/normalize_path';
 
 export const navigateToLegacyKibanaUrl = (
   path: string,
@@ -26,14 +27,18 @@ export const navigateToLegacyKibanaUrl = (
   basePath: IBasePath,
   application: ApplicationStart
 ): { navigated: boolean } => {
+  const normalizedPath = normalizePath(path);
+
   // try to find an existing redirect for the target path if possible
   // this avoids having to load the legacy app just to get redirected to a core application again afterwards
-  const relevantForward = forwards.find((forward) => path.startsWith(`/${forward.legacyAppId}`));
+  const relevantForward = forwards.find((forward) =>
+    normalizedPath.startsWith(`/${forward.legacyAppId}`)
+  );
   if (!relevantForward) {
     return { navigated: false };
   }
-  const targetAppPath = relevantForward.rewritePath(path);
+  const targetAppPath = relevantForward.rewritePath(normalizedPath);
   const targetAppId = relevantForward.newAppId;
-  application.navigateToApp(targetAppId, { path: targetAppPath });
+  application.navigateToApp(targetAppId, { path: targetAppPath, replace: true });
   return { navigated: true };
 };

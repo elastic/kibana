@@ -43,7 +43,7 @@ export function navigateToDefaultApp(
   // when the correct app is already loaded, just set the hash to the right value
   // otherwise use navigateToApp (or setting href in case of kibana app)
   if (currentAppId !== targetAppId) {
-    application.navigateToApp(targetAppId, { path: targetAppPath });
+    application.navigateToApp(targetAppId, { path: targetAppPath, replace: true });
   } else if (overwriteHash) {
     window.location.hash = targetAppPath;
   }

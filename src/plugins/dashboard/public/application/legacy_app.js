@@ -243,13 +243,15 @@ export function initDashboardApp(app, deps) {
       })
       .otherwise({
         redirectTo: function () {
+          const path = window.location.hash.substr(1);
           deps.restorePreviousUrl();
-          const { navigated } = deps.navigateToLegacyKibanaUrl(window.location.hash.substr(1));
-          if (!navigated) {
-            deps.navigateToDefaultApp();
-          }
-          // prevent angular from completing the route change
-          throw new Error();
+          setTimeout(() => {
+            const { navigated } = deps.navigateToLegacyKibanaUrl(path);
+            if (!navigated) {
+              deps.navigateToDefaultApp();
+            }
+          }, 0);
+          return '/';
         },
       });
   });

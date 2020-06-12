@@ -17,24 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectLoader, SavedObjectKibanaServices } from '../../../saved_objects/public';
-import { createSavedSearchClass } from './_saved_search';
+import { normalize } from 'path';
 
-export function createSavedSearchesLoader(services: SavedObjectKibanaServices) {
-  const SavedSearchClass = createSavedSearchClass(services);
-  const savedSearchLoader = new SavedObjectLoader(
-    SavedSearchClass,
-    services.savedObjectsClient,
-    services.chrome
-  );
-  // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
-  savedSearchLoader.loaderProperties = {
-    name: 'searches',
-    noun: 'Saved Search',
-    nouns: 'saved searches',
-  };
-
-  savedSearchLoader.urlFor = (id: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
-
-  return savedSearchLoader;
+export function normalizePath(path: string) {
+  // resolve ../ within the path
+  const normalizedPath = normalize(path);
+  // strip any leading slashes and dots and replace with single leading slash
+  return normalizedPath.replace(/(\.?\.?\/?)*/, '/');
 }

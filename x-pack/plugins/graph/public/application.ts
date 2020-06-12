@@ -35,6 +35,7 @@ import {
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
+  KibanaLegacyStart,
 } from '../../../../src/plugins/kibana_legacy/public';
 
 import './index.scss';
@@ -67,9 +68,11 @@ export interface GraphDependencies {
   graphSavePolicy: string;
   overlays: OverlayStart;
   savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
-export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
+export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
+  kibanaLegacy.loadFontAwesome();
   const graphAngularModule = createLocalAngularModule(deps.navigation);
   configureAppAngularModule(
     graphAngularModule,
