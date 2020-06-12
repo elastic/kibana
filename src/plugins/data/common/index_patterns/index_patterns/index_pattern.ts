@@ -278,15 +278,6 @@ export class IndexPattern implements IIndexPattern {
     await this.updateFromElasticSearch(response, forceFieldRefresh);
     // Do it after to ensure we have the most up to date information
     this.originalBody = this.prepBody();
-    // console.log('index pattern init', response, JSON.stringify(response));
-    // console.log('originalBody', this.originalBody);
-    // console.log('resultFromPrepBody', this.prepBody());
-    /*
-    const serialized = this.serialize();
-    console.log('HERE', serialized);
-    const newIp =
-    console.log()
-    */
 
     return this;
   }
