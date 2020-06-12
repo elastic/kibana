@@ -185,8 +185,8 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
-  public initFromSpec(response: any) {
-    this.updateFromPlainObject(response);
+  public initFromSpec(spec: IndexPatternSpec) {
+    this.updateFromPlainObject(spec);
     this.initFields();
   }
 
