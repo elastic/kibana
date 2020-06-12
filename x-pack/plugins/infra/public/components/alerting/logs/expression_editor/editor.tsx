@@ -122,7 +122,6 @@ export const Editor: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
-
   useMount(() => {
     for (const [key, value] of Object.entries({ ...DEFAULT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
@@ -264,4 +263,4 @@ export const Editor: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Editor;
+export default ExpressionEditor;

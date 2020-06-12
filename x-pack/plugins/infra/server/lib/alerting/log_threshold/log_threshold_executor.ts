@@ -23,13 +23,6 @@ import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
-const UNGROUPED_NAME = i18n.translate(
-  'xpack.infra.logs.alerting.threshold.alerting.ungroupedGroupName',
-  {
-    defaultMessage: 'Ungrouped (*)',
-  }
-);
-
 const UNGROUPED_FACTORY_KEY = '*';
 
 const checkValueAgainstComparatorMap: {
@@ -202,8 +195,8 @@ const getESQuery = (
 
   const body = {
     // Ensure we accurately track the hit count for the ungrouped case, up to the count specified on the alert, otherwise we
-    // can only ensure accuracy up to 10,000 results.
-    ...(!groupBy && { track_total_hits: count.value }),
+    // can only ensure accuracy up to 10,000 results. A padding of 1 is added so we can handle "more than" scenarios.
+    ...(!groupBy && { track_total_hits: count.value + 1 }),
     query: {
       bool: {
         filter: [...rangeFilters, ...mustFilters],
