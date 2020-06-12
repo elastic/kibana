@@ -26,6 +26,8 @@ export interface Props {
   movingProcessor?: ProcessorInfo;
 }
 
+const INDENTATION_PX = 34;
+
 export const TreeNode: FunctionComponent<Props> = ({
   processor,
   processorInfo,
@@ -55,15 +57,18 @@ export const TreeNode: FunctionComponent<Props> = ({
     if (!processor.onFailure?.length) {
       return;
     }
+
     const onFailureHandlerLabelClasses = classNames({
-      'pipelineProcessorsEditor__tree__onFailureHandlerLabel--withDropZone': movingProcessor
-        ? movingProcessor.id !== processor.onFailure[0].id && movingProcessor.id !== processor.id
-        : false,
+      'pipelineProcessorsEditor__tree__onFailureHandlerLabel--withDropZone':
+        movingProcessor != null &&
+        movingProcessor.id !== processor.onFailure[0].id &&
+        movingProcessor.id !== processor.id,
     });
+
     return (
       <div
         className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
-        style={{ marginLeft: `${level * 34}px` }}
+        style={{ marginLeft: `${level * INDENTATION_PX}px` }}
       >
         <div className="pipelineProcessorsEditor__tree__onFailureHandlerLabelContainer">
           <EuiText

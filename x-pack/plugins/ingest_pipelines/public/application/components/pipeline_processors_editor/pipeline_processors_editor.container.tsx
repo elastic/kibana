@@ -29,7 +29,7 @@ export interface Props {
   learnMoreAboutProcessorsUrl: string;
   learnMoreAboutOnFailureProcessorsUrl: string;
   /**
-   * Give users a why to react to this component opening a flyout
+   * Give users a way to react to this component opening a flyout
    */
   onFlyoutOpen: () => void;
 }
