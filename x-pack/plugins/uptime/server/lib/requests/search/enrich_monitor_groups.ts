@@ -142,11 +142,13 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                           curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
                         } else if (doc.containsKey("tls.certificate_not_valid_after") && !doc["tls.certificate_not_valid_after"].isEmpty()) {
                           curCheck.tls.certificate_not_valid_after = doc["tls.certificate_not_valid_after"][0];
+                        }
 
                         if (doc.containsKey("tls.server.x509.not_after") && !doc["tls.server.x509.not_before"].isEmpty()) {
                           curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
                         } else if (doc.containsKey("tls.certificate_not_valid_before") && !doc["tls.certificate_not_valid_before"].isEmpty()) {
                           curCheck.tls.certificate_not_valid_before = doc["tls.certificate_not_valid_before"][0];
+                        }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
                 `,
