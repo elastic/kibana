@@ -31,8 +31,8 @@ describe('Reporting Plugin', () => {
   beforeEach(async () => {
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
-    coreSetup = coreMock.createSetup(configSchema);
-    coreStart = coreMock.createStart();
+    coreSetup = await coreMock.createSetup(configSchema);
+    coreStart = await coreMock.createStart();
     pluginSetup = ({
       licensing: {},
       usageCollection: {
