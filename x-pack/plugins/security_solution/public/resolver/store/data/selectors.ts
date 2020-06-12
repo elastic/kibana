@@ -407,11 +407,12 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
   return indexedProcessTreeFactory(graphableProcesses);
 });
 
-// Heeeallp
-export const relatedEventsStats = createSelector(
-  (data: DataState) => data.relatedEventsStats,
-  (stats) => stats
-);
+/**
+ * This returns a map of entity_ids to stats about the related events and alerts.
+ */
+export function relatedEventsStats(data: DataState) {
+  return data.relatedEventsStats;
+}
 
 export const processAdjacencies = createSelector(
   indexedProcessTree,

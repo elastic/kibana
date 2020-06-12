@@ -412,8 +412,6 @@ const ProcessEventDotComponents = React.memo(
     }, [relatedEventsStats, dispatch, event]);
 
     const relatedEventStatusOrOptions = (() => {
-      // TODO make the drop down visible immediately if there are stats
-      // Heeeallp TODO
       if (!relatedEventsStats) {
         return subMenuAssets.initialMenuStatus;
       }
