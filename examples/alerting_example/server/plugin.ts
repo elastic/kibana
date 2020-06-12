@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../x-pack/plugins/features/server';
 
@@ -38,7 +39,9 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
 
     features.registerFeature({
       id: 'alertsExample',
-      name: 'alertsExample',
+      name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
+        defaultMessage: 'Alerts Example',
+      }),
       app: [],
       privileges: {
         all: {

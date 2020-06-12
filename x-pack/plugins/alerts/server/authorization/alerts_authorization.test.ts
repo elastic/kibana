@@ -556,7 +556,7 @@ describe('getFindAuthorizationFilter', () => {
   });
 });
 
-describe('checkAlertTypeAuthorization', () => {
+describe('filterByAlertTypeAuthorization', () => {
   const alertingAlertType = {
     actionGroups: [],
     actionVariables: undefined,
@@ -585,7 +585,7 @@ describe('checkAlertTypeAuthorization', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     await expect(
-      alertAuthorization.checkAlertTypeAuthorization(
+      alertAuthorization.filterByAlertTypeAuthorization(
         new Set([myAppAlertType, alertingAlertType]),
         'create'
       )
@@ -668,7 +668,7 @@ describe('checkAlertTypeAuthorization', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     await expect(
-      alertAuthorization.checkAlertTypeAuthorization(
+      alertAuthorization.filterByAlertTypeAuthorization(
         new Set([myAppAlertType, alertingAlertType]),
         'create'
       )
@@ -750,7 +750,7 @@ describe('checkAlertTypeAuthorization', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     await expect(
-      alertAuthorization.checkAlertTypeAuthorization(
+      alertAuthorization.filterByAlertTypeAuthorization(
         new Set([myAppAlertType, alertingAlertType]),
         'create'
       )

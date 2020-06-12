@@ -172,9 +172,11 @@ export class AlertsClient {
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
-    // Throws an error if alert type isn't registered
     await this.authorization.ensureAuthorized(data.alertTypeId, data.consumer, 'create');
+
+    // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
+
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const username = await this.getUserName();
     const createdAPIKey = data.enabled ? await this.createAPIKey() : null;
@@ -674,7 +676,7 @@ export class AlertsClient {
   }
 
   public async listAlertTypes() {
-    return await this.authorization.checkAlertTypeAuthorization(
+    return await this.authorization.filterByAlertTypeAuthorization(
       this.alertTypeRegistry.list(),
       'get'
     );

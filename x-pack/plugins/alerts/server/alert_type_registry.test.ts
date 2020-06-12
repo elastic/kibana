@@ -75,6 +75,28 @@ describe('register()', () => {
     );
   });
 
+  test('throws if AlertType Id isnt a string', () => {
+    const alertType = {
+      id: (123 as any) as string,
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerting',
+    };
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(`expected value of type [string] but got [number]`)
+    );
+  });
+
   test('registers the executor with the task manager', () => {
     const alertType = {
       id: 'test',

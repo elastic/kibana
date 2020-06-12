@@ -37,7 +37,7 @@ import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import { AlertsFeatureId } from '../../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
 
 const ENTER_KEY = 13;
 
@@ -440,7 +440,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       >
         <AlertAdd
-          consumer={AlertsFeatureId}
+          consumer={ALERTS_FEATURE_ID}
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />

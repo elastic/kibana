@@ -307,15 +307,15 @@ In addition, when users are inside your feature you might want to grant them acc
 
 You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
 
-```
+```typescript
 features.registerFeature({
-      id: 'my-application-id',
-      name: 'My Application',
-      app: [],
-      privileges: {
-        all: {
-          alerting: {
-            all: [
+	id: 'my-application-id',
+	name: 'My Application',
+	app: [],
+	privileges: {
+		all: {
+			alerting: {
+		all: [
 				// grant `all` over our own types
 				'my-application-id.my-alert-type',
 				'my-application-id.my-restricted-alert-type',
@@ -323,21 +323,21 @@ features.registerFeature({
 				'.index-threshold',
 				// grant `all` over Uptime's TLS AlertType
 				'xpack.uptime.alerts.actionGroups.tls'],
-          },
-        },
-        read: {
-          alerting: {
-            read: [
+			},
+		},
+		read: {
+			alerting: {
+		read: [
 				// grant `read` over our own type
 				'my-application-id.my-alert-type',
 				// grant `read` over the built-in IndexThreshold
 				'.index-threshold', 
 				// grant `read` over Uptime's TLS AlertType
 				'xpack.uptime.alerts.actionGroups.tls'],
-          },
-        },
-      },
-    });
+			},
+		},
+	},
+});
 ```
 
 In this example we can see the following:
@@ -347,29 +347,36 @@ In this example we can see the following:
 
 It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple type, for example:
 
-```
+```typescript
 features.registerFeature({
-      id: 'my-application-id',
-      name: 'My Application',
-      app: [],
-      privileges: {
-        all: {
-          alerting: {
-            all: ['my-application-id.my-alert-type', 'my-application-id.my-restricted-alert-type'],
-          },
-        },
-        read: {
-          alerting: {
-			all:['my-application-id.my-alert-type']
-            read: ['my-application-id.my-restricted-alert-type'],
-          },
-        },
-      },
-    });
+	id: 'my-application-id',
+	name: 'My Application',
+	app: [],
+	privileges: {
+		all: {
+			alerting: {
+				all: [
+					'my-application-id.my-alert-type',
+					'my-application-id.my-restricted-alert-type'
+				],
+			},
+		},
+		read: {
+			alerting: {
+				all: [
+					'my-application-id.my-alert-type'
+				]
+				read: [
+					'my-application-id.my-restricted-alert-type'
+				],
+			},
+		},
+	},
+});
 ```
 
 In the above example, you note that instead of denying users with the `read` role any access to the `my-application-id.my-restricted-alert-type` type, we've decided that these users _should_ be granted `read` privileges over the _resitricted_ AlertType.
-As part of that same change, we also decided that not only should they be allowed to `read` the _restricted_ AlertType, but actually, despite having `read` privileges to the feature as a whole, we do actualyl want to allow them to create our basic 'my-application-id.my-alert-type' AlertType, as we consider it an extension of _reading_ data in our feature, rather than _writing_ it.
+As part of that same change, we also decided that not only should they be allowed to `read` the _restricted_ AlertType, but actually, despite having `read` privileges to the feature as a whole, we do actually want to allow them to create our basic 'my-application-id.my-alert-type' AlertType, as we consider it an extension of _reading_ data in our feature, rather than _writing_ it.
 
 ### `read` privileges vs. `all` privileges
 When a user is granted the `read` role in the Alerting Framework, they will be able to execute the following api calls:
@@ -377,7 +384,7 @@ When a user is granted the `read` role in the Alerting Framework, they will be a
 - getAlertState
 - find
 
-When a user is granted the `all` role in the Alerting Framework, they will be able to execute al lof the `read` privileged api calls, but in addition they'll be granted the following calls:
+When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
 - `create`
 - `delete`
 - `update`
@@ -392,7 +399,7 @@ When a user is granted the `all` role in the Alerting Framework, they will be ab
 Finally, all users, whether they're granted any role or not, are privileged to call the following:
 - `listAlertTypes`, but the output is limited to displaying the AlertTypes the user is perivileged to `get`
 
-Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error throws by the AlertsClient.
+Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error thrown by the AlertsClient.
 
 ## Alert Navigation
 When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created from within your solution within your own UI.

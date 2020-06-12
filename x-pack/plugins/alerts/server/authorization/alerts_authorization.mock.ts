@@ -12,7 +12,7 @@ export type AlertsAuthorizationMock = jest.Mocked<Schema>;
 const createAlertsAuthorizationMock = () => {
   const mocked: AlertsAuthorizationMock = {
     ensureAuthorized: jest.fn(),
-    checkAlertTypeAuthorization: jest.fn(),
+    filterByAlertTypeAuthorization: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
   };
   return mocked;

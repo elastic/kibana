@@ -78,13 +78,6 @@ describe('Alerting Plugin', () => {
           ],
         }
       `);
-      expect(privileges?.read.alerting).toMatchInlineSnapshot(`
-        Object {
-          "read": Array [
-            ".index-threshold",
-          ],
-        }
-      `);
     });
 
     it('should grant global `read` priviliges to built in AlertTypes for anyone with `read` priviliges to alerts', async () => {
@@ -114,13 +107,6 @@ describe('Alerting Plugin', () => {
       expect(features.registerFeature).toHaveBeenCalledTimes(1);
       const { privileges } = features.registerFeature.mock.calls[0][0];
 
-      expect(privileges?.all.alerting).toMatchInlineSnapshot(`
-        Object {
-          "all": Array [
-            ".index-threshold",
-          ],
-        }
-      `);
       expect(privileges?.read.alerting).toMatchInlineSnapshot(`
         Object {
           "read": Array [

@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { pluck, mapValues } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { AlertsFeatureId } from '../../common';
+import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
@@ -58,7 +58,7 @@ export class AlertsAuthorization {
 
       // We special case the Alerts Management `consumer` as we don't want to have to
       // manually authorize each alert type in the management UI
-      const shouldAuthorizeConsumer = consumer !== AlertsFeatureId;
+      const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
 
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges(
@@ -167,7 +167,7 @@ export class AlertsAuthorization {
     };
   }
 
-  public async checkAlertTypeAuthorization(
+  public async filterByAlertTypeAuthorization(
     alertTypes: Set<RegistryAlertType>,
     operation: string
   ): Promise<Set<RegistryAlertTypeWithAuth>> {

@@ -2185,7 +2185,7 @@ describe('find()', () => {
       ],
     });
     alertTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.checkAlertTypeAuthorization.mockResolvedValue(
+    authorization.filterByAlertTypeAuthorization.mockResolvedValue(
       new Set([
         {
           id: 'myType',
@@ -3661,7 +3661,7 @@ describe('listAlertTypes', () => {
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-    authorization.checkAlertTypeAuthorization.mockResolvedValue(
+    authorization.filterByAlertTypeAuthorization.mockResolvedValue(
       new Set([
         { ...myAppAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
         { ...alertingAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
@@ -3708,7 +3708,7 @@ describe('listAlertTypes', () => {
           authorizedConsumers: ['myApp'],
         },
       ]);
-      authorization.checkAlertTypeAuthorization.mockResolvedValue(authorizedTypes);
+      authorization.filterByAlertTypeAuthorization.mockResolvedValue(authorizedTypes);
 
       expect(await alertsClient.listAlertTypes()).toEqual(authorizedTypes);
     });

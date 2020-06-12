@@ -20,7 +20,7 @@ import { securityMock } from '../../security/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { AuditLogger } from '../../security/server';
-import { AlertsFeatureId } from '../common';
+import { ALERTS_FEATURE_ID } from '../common';
 
 jest.mock('./alerts_client');
 jest.mock('./authorization/alerts_authorization');
@@ -93,7 +93,7 @@ test('creates an alerts client with proper constructor arguments when security i
   });
 
   expect(AlertsAuthorizationAuditLogger).toHaveBeenCalledWith(logger);
-  expect(securityPluginSetup.audit.getLogger).toHaveBeenCalledWith(AlertsFeatureId);
+  expect(securityPluginSetup.audit.getLogger).toHaveBeenCalledWith(ALERTS_FEATURE_ID);
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,

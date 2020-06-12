@@ -6,7 +6,7 @@
 
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
-import { AlertsFeatureId } from '../common';
+import { ALERTS_FEATURE_ID } from '../common';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsServiceStart } from '../../../../src/core/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
@@ -65,7 +65,7 @@ export class AlertsClientFactory {
       alertTypeRegistry: this.alertTypeRegistry,
       features: features!,
       auditLogger: new AlertsAuthorizationAuditLogger(
-        securityPluginSetup?.audit.getLogger(AlertsFeatureId)
+        securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
       ),
     });
 
