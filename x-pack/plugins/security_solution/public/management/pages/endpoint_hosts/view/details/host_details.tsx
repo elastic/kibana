@@ -193,28 +193,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       <EuiHorizontalRule margin="m" />
       <EuiDescriptionList
         type="column"
-        listItems={detailsResultsPolicy}
-        data-test-subj="hostDetailsPolicyList"
-      />
-      <LinkToExternalApp>
-        <LinkToApp
-          className="hostDetailsLinkToExternalApp"
-          appId={ingestAppId}
-          appPath={ingestAppPath}
-          href={ingestUrl}
-          data-test-subj="hostDetailsLinkToIngest"
-        >
-          <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-            defaultMessage="Reassign Policy"
-          />
-          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
-        </LinkToApp>
-      </LinkToExternalApp>
-      <EuiHorizontalRule margin="s" />
-      <EuiDescriptionList
-        type="column"
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
