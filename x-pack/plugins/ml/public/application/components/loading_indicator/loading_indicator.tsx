@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 
-export const LoadingIndicator: FC<{ height: number; label: string }> = ({ height, label }) => {
+export const LoadingIndicator: FC<{ height?: number; label?: string }> = ({ height, label }) => {
   height = height ? +height : 100;
   return (
     <div
@@ -20,7 +20,7 @@ export const LoadingIndicator: FC<{ height: number; label: string }> = ({ height
       {label && (
         <>
           <EuiSpacer size="s" />
-          <div ml-loading-indicator-label="true">{label}</div>
+          <div>{label}</div>
         </>
       )}
     </div>

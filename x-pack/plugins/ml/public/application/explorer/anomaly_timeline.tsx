@@ -37,6 +37,7 @@ import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { LoadingIndicator } from '../components/loading_indicator';
 import { SwimlaneContainer } from './swimlane_container';
+import { OverallSwimlaneData } from './explorer_utils';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -91,9 +92,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             disableDragSelectOnMouseLeave.current = true;
           },
           onDragStart(e) {
-            let target = e.target;
+            let target = e.target as HTMLElement;
             while (target && target !== document.body && !target.classList.contains('sl-cell')) {
-              target = target.parentNode;
+              target = target.parentNode as HTMLElement;
             }
             if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
               dragSelect$.next({
@@ -171,8 +172,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewBySwimlaneData.laneLabels.length > 0;
 
     const jobIds = selectedJobs ? selectedJobs.map((job) => job.id) : null;
-
-    console.log('___render___');
 
     return (
       <EuiPanel paddingSize="s">
@@ -293,7 +292,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               maskAll={maskAll}
               timeBuckets={timeBuckets}
               swimlaneCellClick={swimlaneCellClick}
-              swimlaneData={overallSwimlaneData}
+              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
               swimlaneType={'overall'}
               selection={selectedCells}
               swimlaneRenderDoneListener={swimlaneRenderDoneListener}
@@ -302,38 +301,43 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           )}
         </div>
 
-        {viewBySwimlaneOptions.length > 0 && showViewBySwimlane && (
+        {viewBySwimlaneOptions.length > 0 && (
           <>
-            <EuiSpacer size="m" />
-            <div
-              className="ml-explorer-swimlane euiText"
-              onMouseEnter={onSwimlaneEnterHandler}
-              onMouseLeave={onSwimlaneLeaveHandler}
-              data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-            >
-              <SwimlaneContainer
-                filterActive={filterActive}
-                maskAll={
-                  maskAll &&
-                  !hasMatchingPoints({
-                    filteredFields,
-                    swimlaneData: viewBySwimlaneData,
-                  })
-                }
-                timeBuckets={timeBuckets}
-                swimlaneCellClick={swimlaneCellClick}
-                swimlaneData={viewBySwimlaneData}
-                swimlaneType={'viewBy'}
-                selection={selectedCells}
-                swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-                onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-              />
-            </div>
+            {showViewBySwimlane && (
+              <>
+                <EuiSpacer size="m" />
+                <div
+                  className="ml-explorer-swimlane euiText"
+                  onMouseEnter={onSwimlaneEnterHandler}
+                  onMouseLeave={onSwimlaneLeaveHandler}
+                  data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+                >
+                  <SwimlaneContainer
+                    filterActive={filterActive}
+                    maskAll={
+                      maskAll &&
+                      !hasMatchingPoints({
+                        filteredFields,
+                        swimlaneData: viewBySwimlaneData,
+                      })
+                    }
+                    timeBuckets={timeBuckets}
+                    swimlaneCellClick={swimlaneCellClick}
+                    swimlaneData={viewBySwimlaneData as OverallSwimlaneData}
+                    swimlaneType={'viewBy'}
+                    selection={selectedCells}
+                    swimlaneRenderDoneListener={swimlaneRenderDoneListener}
+                    onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+                  />
+                </div>
+              </>
+            )}
+
             {viewBySwimlaneDataLoading && <LoadingIndicator />}
 
             {!showViewBySwimlane &&
               !viewBySwimlaneDataLoading &&
-              viewBySwimlaneFieldName !== null && (
+              typeof viewBySwimlaneFieldName === 'string' && (
                 <ExplorerNoInfluencersFound
                   viewBySwimlaneFieldName={viewBySwimlaneFieldName}
                   showFilterMessage={filterActive === true}

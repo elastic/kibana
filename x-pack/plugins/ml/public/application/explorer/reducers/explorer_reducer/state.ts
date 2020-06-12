@@ -16,8 +16,9 @@ import {
   AnomaliesTableData,
   ExplorerJob,
   AppStateSelectedCells,
-  SwimlaneData,
   TimeRangeBounds,
+  OverallSwimlaneData,
+  SwimlaneData,
 } from '../../explorer_utils';
 
 export interface ExplorerState {
@@ -35,7 +36,7 @@ export interface ExplorerState {
   loading: boolean;
   maskAll: boolean;
   noInfluencersConfigured: boolean;
-  overallSwimlaneData: SwimlaneData;
+  overallSwimlaneData: SwimlaneData | OverallSwimlaneData;
   queryString: string;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
@@ -45,7 +46,7 @@ export interface ExplorerState {
   tableData: AnomaliesTableData;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneData: SwimlaneData;
+  viewBySwimlaneData: SwimlaneData | OverallSwimlaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
   viewBySwimlaneOptions: string[];
