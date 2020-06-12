@@ -117,6 +117,9 @@ const EdgeLineComponent = React.memo(
 
     let elapsedTimeLeftPosPct = 50;
 
+    /**
+     * Calculates a fractional offset from 0 -> 5% as magFactorX decreases from 1 to a min of .5
+     */
     if (magFactorX < 1) {
       const fractionalOffset = (1 / magFactorX) * ((1 - magFactorX) * 10);
       elapsedTimeLeftPosPct += fractionalOffset;

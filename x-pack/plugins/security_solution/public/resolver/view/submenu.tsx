@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiButton, EuiPopover, ButtonColor } from '@elastic/eui';
+import { EuiSelectable, EuiButton, EuiPopover, ButtonColor, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
@@ -35,7 +35,7 @@ export const subMenuAssets = {
     }),
   },
 };
-
+const idGenerator = htmlIdGenerator();
 interface ResolverSubmenuOption {
   optionTitle: string;
   action: () => unknown;
@@ -137,7 +137,8 @@ const NodeSubMenuComponents = React.memo(
       [menuAction]
     );
 
-    const closePopover = () => setMenuOpen(false);
+    const closePopover = useCallback(() => setMenuOpen(false), []);
+    const popoverId = idGenerator('submenu-popover');
 
     const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
 
@@ -182,7 +183,7 @@ const NodeSubMenuComponents = React.memo(
     return (
       <div className={className + (menuIsOpen ? ' is-open' : '')}>
         <EuiPopover
-          id="popover"
+          id={popoverId}
           panelPaddingSize="none"
           button={submenuPopoverButton}
           isOpen={menuIsOpen}
