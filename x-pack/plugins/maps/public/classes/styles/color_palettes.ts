@@ -13,6 +13,7 @@ import {
   euiPaletteNegative,
   euiPalettePositive,
   euiPaletteGray,
+  euiPaletteColorBlind,
 } from '@elastic/eui/lib/services';
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './heatmap/components/heatmap_constants';
@@ -64,11 +65,32 @@ const COLOR_PALETTES: EuiColorPalettePickerPaletteProps[] = [
     ],
     type: 'gradient',
   },
+  {
+    value: 'palette_0',
+    palette: euiPaletteColorBlind(),
+    type: 'fixed',
+  },
+  {
+    value: 'palette_20',
+    palette: euiPaletteColorBlind({ rotations: 2 }),
+    type: 'fixed',
+  },
+  {
+    value: 'palette_30',
+    palette: euiPaletteColorBlind({ rotations: 3 }),
+    type: 'fixed',
+  },
 ];
 
 export const NUMERICAL_COLOR_PALETTES = COLOR_PALETTES.filter(
   (palette: EuiColorPalettePickerPaletteProps) => {
     return palette.type === 'gradient';
+  }
+);
+
+export const CATEGORICAL_COLOR_PALETTES = COLOR_PALETTES.filter(
+  (palette: EuiColorPalettePickerPaletteProps) => {
+    return palette.type === 'fixed';
   }
 );
 
@@ -81,6 +103,14 @@ export function getRGBColorRangeStrings(colorPaletteId: string): string[] {
 
 export function getHexColorRangeStrings(colorPaletteId: string): string[] {
   return getRGBColorRangeStrings(colorPaletteId).map((rgbColor) => chroma(rgbColor).hex());
+}
+
+export function getColorRampCenterColor(colorPaletteId: string): string | null {
+  if (!colorPaletteId) {
+    return null;
+  }
+  const palette = getRGBColorRangeStrings(colorPaletteId);
+  return palette.length === 0 ? null : palette[Math.floor(palette.length / 2)];
 }
 
 // Returns an array of color stops

@@ -8,10 +8,9 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import {
   getOrdinalMbColorRampStops,
-  getColorPalette,
+  getRGBColorRangeStrings,
   getHexColorRangeStrings,
-  GRADIENT_INTERVALS,
-} from '../../color_utils';
+} from '../../color_palettes';
 import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import {
@@ -92,7 +91,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   getNumberOfCategories() {
-    const colors = getColorPalette(this._options.colorCategory);
+    const colors = getRGBColorRangeStrings(this._options.colorCategory);
     return colors ? colors.length : 0;
   }
 
@@ -138,8 +137,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const colorStops = getOrdinalMbColorRampStops(
         this._options.color,
         rangeFieldMeta.min,
-        rangeFieldMeta.max,
-        GRADIENT_INTERVALS
+        rangeFieldMeta.max
       );
       if (!colorStops) {
         return null;
@@ -189,7 +187,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return EMPTY_STOPS;
     }
 
-    const colors = getColorPalette(this._options.colorCategory);
+    const colors = getRGBColorRangeStrings(this._options.colorCategory);
     if (!colors) {
       return EMPTY_STOPS;
     }
@@ -253,7 +251,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const colors = getHexColorRangeStrings(this._options.color, GRADIENT_INTERVALS);
+    const colors = getHexColorRangeStrings(this._options.color);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.
@@ -266,7 +264,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     return colors.map((color, index) => {
-      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / GRADIENT_INTERVALS);
+      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / colors.length);
       return {
         color,
         stop: dynamicRound(rawStopValue),

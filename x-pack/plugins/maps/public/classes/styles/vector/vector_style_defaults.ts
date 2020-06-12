@@ -11,12 +11,8 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-import {
-  COLOR_GRADIENTS,
-  COLOR_PALETTES,
-  DEFAULT_FILL_COLORS,
-  DEFAULT_LINE_COLORS,
-} from '../color_utils';
+import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../color_utils';
+import { NUMERICAL_COLOR_PALETTES, CATEGORICAL_COLOR_PALETTES } from '../color_palettes';
 import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
 import { getUiSettings } from '../../../kibana_services';
@@ -28,8 +24,8 @@ export const DEFAULT_MAX_SIZE = 32;
 export const DEFAULT_SIGMA = 3;
 export const DEFAULT_LABEL_SIZE = 14;
 export const DEFAULT_ICON_SIZE = 6;
-export const DEFAULT_COLOR_RAMP = COLOR_GRADIENTS[0].value;
-export const DEFAULT_COLOR_PALETTE = COLOR_PALETTES[0].value;
+export const DEFAULT_COLOR_RAMP = NUMERICAL_COLOR_PALETTES[0].value;
+export const DEFAULT_COLOR_PALETTE = CATEGORICAL_COLOR_PALETTES[0].value;
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
 export const POLYGON_STYLES = [
