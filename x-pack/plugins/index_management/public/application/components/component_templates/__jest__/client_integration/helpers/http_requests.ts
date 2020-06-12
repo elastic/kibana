@@ -6,8 +6,7 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 import { ComponentTemplateListItem, ComponentTemplateDeserialized } from '../../../shared_imports';
-
-const API_BASE_PATH = '/api/index_management';
+import { API_BASE_PATH } from './constants';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {

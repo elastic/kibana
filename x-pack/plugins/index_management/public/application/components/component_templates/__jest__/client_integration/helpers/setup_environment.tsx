@@ -9,14 +9,15 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { HttpSetup } from 'kibana/public';
-import { API_BASE_PATH } from '../../../../../../../common/constants';
 import {
   notificationServiceMock,
   docLinksServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
 
-import { init as initHttpRequests } from './http_requests';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
+
+import { init as initHttpRequests } from './http_requests';
+import { API_BASE_PATH } from './constants';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 

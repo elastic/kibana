@@ -10,8 +10,7 @@ import { ComponentTemplateListItem } from '../../shared_imports';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { ComponentTemplateListTestBed } from './helpers/component_template_list.helpers';
-
-const API_BASE_PATH = '/api/index_management';
+import { API_BASE_PATH } from './helpers/constants';
 
 const { setup } = pageHelpers.componentTemplateList;
 
