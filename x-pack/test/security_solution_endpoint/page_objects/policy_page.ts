@@ -55,5 +55,16 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
     },
+
+    /**
+     * Finds and returns the Create New policy Policy button displayed on the List page
+     */
+    async findHeaderCreateNewButton() {
+      // The Create button is initially disabled because we need to first make a call to Ingest
+      // to retrieve the package version, so that the redirect works as expected. So, we wait
+      // for that to occur here a well.
+      await testSubjects.waitForEnabled('headerCreateNewPolicyButton');
+      return await testSubjects.find('headerCreateNewPolicyButton');
+    },
   };
 }

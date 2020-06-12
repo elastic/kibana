@@ -8,7 +8,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'policy', 'endpointPageUtils']);
+  const pageObjects = getPageObjects([
+    'common',
+    'endpoint',
+    'policy',
+    'endpointPageUtils',
+    'ingestManager',
+  ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
@@ -25,6 +31,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('displays page title', async () => {
       const policyTitle = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
       expect(policyTitle).to.equal('Policies');
+    });
+    it('shows header create policy button', async () => {
+      const createButtonTitle = await testSubjects.getVisibleText('headerCreateNewPolicyButton');
+      expect(createButtonTitle).to.equal('Create new policy');
     });
     it('shows policy count total', async () => {
       const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
@@ -88,6 +98,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           new RegExp(`\/management\/policy\/${policyInfo.datasource.id}$`)
         );
       });
+    });
+
+    describe('and user clicks on page header create button', () => {
+      beforeEach(async () => {
+        await pageObjects.policy.navigateToPolicyList();
+      });
+
+      it('should redirect to ingest management integrations add datasource', async () => {
+        const headerCreateButton = await pageObjects.policy.findHeaderCreateNewButton();
+        await headerCreateButton.click();
+        await pageObjects.ingestManager.ensureDatasourceCratePageOrFail();
+      });
+      it('should redirect user back to Policy List if Cancel button is clicked', async () => {});
+      it('should redirect user back to Policy List after a successful save', async () => {});
     });
   });
 }

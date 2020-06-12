@@ -298,6 +298,7 @@ export const PolicyList = React.memo(() => {
           iconType="plusInCircle"
           onClick={handleCreatePolicyClick}
           isDisabled={isFetchingPackageInfo}
+          data-test-subj="headerCreateNewPolicyButton"
         >
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyList.createNewButton"
