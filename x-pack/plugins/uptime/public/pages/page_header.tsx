@@ -59,6 +59,11 @@ export const PageHeader = React.memo(
             </EuiButtonEmpty>
           </Link>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty color="primary" iconType="plusInCircle">
+            Add data
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
 

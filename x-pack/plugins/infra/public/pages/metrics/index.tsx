@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
@@ -101,6 +101,11 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <EuiFlexItem grow={false}>
                       <Route path={'/explorer'} component={MetricsAlertDropdown} />
                       <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty size="s" color="primary" iconType="plusInCircle">
+                        Add data
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </AppNavigation>

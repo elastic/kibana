@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -87,6 +87,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AlertDropdown />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" color="primary" iconType="plusInCircle">
+              Add data
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </AppNavigation>
