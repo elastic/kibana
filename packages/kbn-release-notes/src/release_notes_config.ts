@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { ArrayItem } from './lib';
-
 /**
  * Exclude any PR from release notes that has a matching label. String
  * labels must match exactly, for more complicated use a RegExp
@@ -37,9 +35,6 @@ export const IGNORE_LABELS: Array<RegExp | string> = [
   'release_note:dev_docs',
 ];
 
-export type Area = ArrayItem<typeof AREAS> | typeof UNKNOWN_AREA;
-export type AsciidocSection = ArrayItem<typeof ASCIIDOC_SECTIONS> | typeof UNKNOWN_ASCIIDOC_SECTION;
-
 /**
  * Define areas that are used to categorize changes in the release notes
  * based on the labels a PR has. the `labels` array can contain strings, which
@@ -47,7 +42,13 @@ export type AsciidocSection = ArrayItem<typeof ASCIIDOC_SECTIONS> | typeof UNKNO
  * order, which has a `label` which matches and label on a PR is the area
  * assigned to that PR.
  */
-export const AREAS = [
+
+export interface Area {
+  title: string;
+  labels: Array<string | RegExp>;
+}
+
+export const AREAS: Area[] = [
   {
     title: 'Design',
     labels: ['Team:Design', 'Project:Accessibility'],
@@ -239,19 +240,26 @@ export const AREAS = [
     title: 'Data ingest',
     labels: ['Ingest', 'Feature:Ingest Node Pipelines'],
   },
-] as const;
+];
 
-export const UNKNOWN_AREA = {
+export const UNKNOWN_AREA: Area = {
   title: 'Unknown',
   labels: [],
-} as const;
+};
 
 /**
  * Define the sections that will be assigned to PRs when generating the
  * asciidoc formatted report. The order of the sections determines the
  * order they will be rendered in the report
  */
-export const ASCIIDOC_SECTIONS = [
+
+export interface AsciidocSection {
+  title: string;
+  labels: Array<string | RegExp>;
+  id: string;
+}
+
+export const ASCIIDOC_SECTIONS: AsciidocSection[] = [
   {
     id: 'enhancement',
     title: 'Enhancements',
@@ -277,10 +285,10 @@ export const ASCIIDOC_SECTIONS = [
     title: 'Breaking Changes',
     labels: ['release_note:breaking'],
   },
-] as const;
+];
 
-export const UNKNOWN_ASCIIDOC_SECTION = {
+export const UNKNOWN_ASCIIDOC_SECTION: AsciidocSection = {
   id: 'unknown',
   title: 'Unknown',
   labels: [],
-} as const;
+};

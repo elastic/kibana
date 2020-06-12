@@ -35,17 +35,13 @@ export interface ClassifiedPr extends PullRequest {
 }
 
 export function classifyPr(pr: PullRequest, log: ToolingLog): ClassifiedPr {
-  const areas = AREAS.filter((a) =>
-    a.labels.some((test: string | RegExp) =>
+  const filter = (a: Area | AsciidocSection) =>
+    a.labels.some((test) =>
       typeof test === 'string' ? pr.labels.includes(test) : pr.labels.some((l) => l.match(test))
-    )
-  );
+    );
 
-  const asciidocSections = ASCIIDOC_SECTIONS.filter((a) =>
-    a.labels.some((test: string | RegExp) =>
-      typeof test === 'string' ? pr.labels.includes(test) : pr.labels.some((l) => l.match(test))
-    )
-  );
+  const areas = AREAS.filter(filter);
+  const asciidocSections = ASCIIDOC_SECTIONS.filter(filter);
 
   const pickOne = <T extends Area | AsciidocSection>(name: string, options: T[]) => {
     if (options.length > 1) {
