@@ -16,27 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginFunctionalProviderContext } from '../../services';
 
-import { i18n } from '@kbn/i18n';
-import { RenderErrorHandlerFnType, ExpressionRenderError } from './types';
-import { getNotifications } from './services';
-import { IInterpreterRenderHandlers } from '../common';
-
-export const renderErrorHandler: RenderErrorHandlerFnType = (
-  element: HTMLElement,
-  error: ExpressionRenderError,
-  handlers: IInterpreterRenderHandlers
-) => {
-  if (error.name === 'AbortError') {
-    handlers.done();
-    return;
-  }
-
-  getNotifications().toasts.addError(error, {
-    title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
-      defaultMessage: 'Error in visualisation',
-    }),
-    toastMessage: error.message,
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
+  describe('application links', () => {
+    loadTestFile(require.resolve('./redirect_app_links'));
   });
-  handlers.done();
-};
+}

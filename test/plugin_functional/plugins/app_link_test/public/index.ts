@@ -17,26 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { RenderErrorHandlerFnType, ExpressionRenderError } from './types';
-import { getNotifications } from './services';
-import { IInterpreterRenderHandlers } from '../common';
+import { PluginInitializer } from 'kibana/public';
+import { CoreAppLinkPlugin, CoreAppLinkPluginSetup, CoreAppLinkPluginStart } from './plugin';
 
-export const renderErrorHandler: RenderErrorHandlerFnType = (
-  element: HTMLElement,
-  error: ExpressionRenderError,
-  handlers: IInterpreterRenderHandlers
-) => {
-  if (error.name === 'AbortError') {
-    handlers.done();
-    return;
-  }
-
-  getNotifications().toasts.addError(error, {
-    title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
-      defaultMessage: 'Error in visualisation',
-    }),
-    toastMessage: error.message,
-  });
-  handlers.done();
-};
+export const plugin: PluginInitializer<CoreAppLinkPluginSetup, CoreAppLinkPluginStart> = () =>
+  new CoreAppLinkPlugin();
