@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,15 +17,17 @@ import {
   SeriesIdentifier,
   BrushEndListener,
 } from '@elastic/charts';
+import { useSelector, useDispatch } from 'react-redux';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
 import { ChartWrapper } from './chart_wrapper';
-import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
-import { AnomalyRecords } from '../../../state/actions';
+import { AnomalyRecords, setDateRange } from '../../../state/actions';
+import { uiSelector } from '../../../state/selectors';
+import { useAbsoluteDate } from '../../../hooks/use_absolute_date';
 
 interface DurationChartProps {
   /**
@@ -42,20 +44,43 @@ interface DurationChartProps {
   anomalies: AnomalyRecords | null;
 }
 
+export const DurationChart: React.FC<DurationChartProps> = (props) => {
+  const ui = useSelector(uiSelector);
+  const min = useAbsoluteDate(ui.dateRange.from);
+  const max = useAbsoluteDate(ui.dateRange.to);
+  const dispatch = useDispatch();
+  const updateDateRange = useCallback(
+    (from: string, to: string) => {
+      dispatch(setDateRange({ from, to }));
+    },
+    [dispatch]
+  );
+  return (
+    <DurationChartComponent max={max} min={min} {...props} updateDateRange={updateDateRange} />
+  );
+};
+
+type Props = DurationChartProps & {
+  min: number;
+  max: number;
+  updateDateRange: (from: string, to: string) => void;
+};
+
 /**
  * This chart is intended to visualize monitor duration performance over time to
  * the users in a helpful way. Its x-axis is based on a timeseries, the y-axis is in
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChartComponent = ({
-  locationDurationLines,
+export const DurationChartComponent: React.FC<Props> = ({
   anomalies,
+  locationDurationLines,
   loading,
-}: DurationChartProps) => {
+  max,
+  min,
+  updateDateRange,
+}) => {
   const hasLines = locationDurationLines.length > 0;
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
@@ -64,10 +89,7 @@ export const DurationChartComponent = ({
       return;
     }
     const [minX, maxX] = x;
-    updateUrlParams({
-      dateRangeStart: moment(minX).toISOString(),
-      dateRangeEnd: moment(maxX).toISOString(),
-    });
+    updateDateRange(moment(minX).toISOString(), moment(maxX).toISOString());
   };
 
   const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
