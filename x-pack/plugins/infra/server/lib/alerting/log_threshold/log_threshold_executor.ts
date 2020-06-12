@@ -202,7 +202,7 @@ const getESQuery = (
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
-    ...(aggregations && aggregations),
+    ...(aggregations && { aggregations }),
     size: 0,
   };
 
