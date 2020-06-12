@@ -277,7 +277,6 @@ export class DashboardPlugin
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
-          config: kibanaLegacy.config,
           savedQueryService: dataStart.query.savedQueries,
           embeddable: embeddableStart,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,

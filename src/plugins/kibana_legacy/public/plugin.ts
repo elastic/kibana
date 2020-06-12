@@ -129,6 +129,16 @@ export class KibanaLegacyPlugin {
       loadFontAwesome: async () => {
         await import('./font_awesome');
       },
+      /**
+       * @deprecated
+       * Just exported for wiring up with legacy platform, should not be used.
+       */
+      getForwards: () => this.forwardDefinitions,
+      /**
+       * @deprecated
+       * Just exported for wiring up with dashboard mode, should not be used.
+       */
+      config: this.initializerContext.config.get(),
     };
   }
 
