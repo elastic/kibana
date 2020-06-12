@@ -234,7 +234,8 @@ Payload:
 
 ## Firing actions
 
-Running actions is achieved via the ActionsClient which is provided by the plugin's Start Contract. By providing the user's Request, allows us to scope the authentication of the various resources an action might access, you'll receive tan instance of the ActionsClient which is tailered to the current user.
+Running actions is possible by using the ActionsClient which is provided by the plugin's Start Contract.
+By providing the user's Request you'll receive an instance of the ActionsClient which is tailered to the current user and is scoped to the resources the user is authorized to access.
 
 ## Accessing a scoped ActionsClient
 

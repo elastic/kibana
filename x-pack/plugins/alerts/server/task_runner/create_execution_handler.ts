@@ -82,7 +82,8 @@ export function createExecutionHandler({
 
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
-      await (await actionsPlugin.getActionsClientWithRequest(request)).enqueueExecution({
+      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+      await actionsClient.enqueueExecution({
         id: action.id,
         params: action.params,
         spaceId,
