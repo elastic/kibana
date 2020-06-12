@@ -19,12 +19,13 @@
 
 import './app.scss';
 import React, { useEffect } from 'react';
-import { Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
 import { syncQueryStateWithUrl } from '../../../data/public';
 import { useKibana } from '../../../kibana_react/public';
 import { VisualizeServices } from './types';
 import { VisualizeEditor, VisualizeListing } from './components';
+import { VisualizeConstants } from './visualize_constants';
 
 export const VisualizeApp = () => {
   const {
@@ -47,12 +48,16 @@ export const VisualizeApp = () => {
 
   return (
     <Switch>
-      <Route path={['/create', '/edit/:id']}>
+      <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
         <VisualizeEditor />
       </Route>
-      <Route>
+      <Route
+        exact
+        path={[VisualizeConstants.LANDING_PAGE_PATH, VisualizeConstants.WIZARD_STEP_1_PAGE_PATH]}
+      >
         <VisualizeListing />
       </Route>
+      <Redirect to={VisualizeConstants.LANDING_PAGE_PATH} />
     </Switch>
   );
 };
