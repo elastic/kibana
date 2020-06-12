@@ -7,7 +7,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
 
-See also <<release-highlights>> and <<release-notes>>.
+See also <<whats-new>> and <<release-notes>>.
 
 * <<breaking_70_api_changes>>
 * <<breaking_70_browser_support_changes>>
