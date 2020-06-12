@@ -6,12 +6,13 @@
 
 import { APICaller } from 'kibana/server';
 import { LicenseCheck } from '../license_checks';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
     callAsCurrentUser: APICaller
   ): {
-    jobs(jobId?: string): Promise<any>;
+    jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
   };
 }
 

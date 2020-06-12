@@ -17,25 +17,27 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
+import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
 import { registerNavigation } from './alert_types';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
 export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  developerExamples: DeveloperExamplesSetup;
 }
 
 export interface AlertingExamplePublicStartDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -44,11 +46,12 @@ export interface AlertingExamplePublicStartDeps {
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(
     core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
-    { alerting, triggers_actions_ui }: AlertingExamplePublicSetupDeps
+    { alerts, triggers_actions_ui, developerExamples }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({
       id: 'AlertingExample',
       title: 'Alerting Example',
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
@@ -59,7 +62,22 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     triggers_actions_ui.alertTypeRegistry.register(getAlwaysFiringAlertType());
     triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
 
-    registerNavigation(alerting);
+    registerNavigation(alerts);
+
+    developerExamples.register({
+      appId: 'AlertingExample',
+      title: 'Alerting',
+      description: `This alerting example walks you through how to set up a new alert.`,
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerting',
+          iconType: 'logoGithub',
+          size: 's',
+          target: '_blank',
+        },
+      ],
+    });
   }
 
   public start() {}
