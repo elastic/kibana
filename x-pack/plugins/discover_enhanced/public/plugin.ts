@@ -8,7 +8,7 @@ import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { PluginInitializerContext } from 'kibana/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
@@ -25,13 +25,13 @@ declare module '../../../../src/plugins/ui_actions/public' {
 
 export interface DiscoverEnhancedSetupDependencies {
   embeddable: EmbeddableSetup;
-  share?: SharePluginSetup;
+  discover?: DiscoverSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface DiscoverEnhancedStartDependencies {
   embeddable: EmbeddableStart;
-  share?: SharePluginStart;
+  discover?: DiscoverStart;
   uiActions: UiActionsStart;
 }
 

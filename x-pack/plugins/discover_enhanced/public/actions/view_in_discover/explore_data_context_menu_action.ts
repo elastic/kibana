@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
+import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
 import {
   EmbeddableContext,
   IEmbeddable,
@@ -15,8 +16,6 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
-import { DISCOVER_APP_URL_GENERATOR } from '../../../../../../src/plugins/discover/public';
-import { DiscoverEnhancedStartDependencies } from '../../plugin';
 import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -61,12 +60,16 @@ const isVisualizeEmbeddable = (
   embeddable: IEmbeddable
 ): embeddable is VisualizeEmbeddableContract => embeddable?.type === VISUALIZE_EMBEDDABLE_TYPE;
 
-interface Params {
-  start: StartServicesGetter<
-    Pick<DiscoverEnhancedStartDependencies, 'share'>,
-    unknown,
-    Pick<CoreStart, 'application'>
-  >;
+export interface PluginDeps {
+  discover: Pick<DiscoverStart, 'urlGenerator'>;
+}
+
+export interface CoreDeps {
+  application: Pick<CoreStart['application'], 'navigateToApp'>;
+}
+
+export interface Params {
+  start: StartServicesGetter<PluginDeps, unknown, CoreDeps>;
 }
 
 export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
@@ -89,6 +92,7 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableContext) {
+    if (!this.params.start().plugins.discover.urlGenerator) return false;
     if (!isVisualizeEmbeddable(embeddable)) return false;
     if (!this.getIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
@@ -118,18 +122,21 @@ export class ExploreDataContextMenuAction implements Action<EmbeddableContext> {
 
   private async getUrl(embeddable: VisualizeEmbeddableContract): Promise<KibanaURL> {
     const { plugins } = this.params.start();
+    const { urlGenerator } = plugins.discover;
+
+    if (!urlGenerator) {
+      throw new Error('Discover URL generator not available.');
+    }
 
     const { timeRange, query, filters } = embeddable.getInput();
     const indexPatternId = this.getIndexPattern(embeddable);
 
-    const path = await plugins
-      .share!.urlGenerators.getUrlGenerator(DISCOVER_APP_URL_GENERATOR)
-      .createUrl({
-        indexPatternId,
-        filters,
-        query,
-        timeRange,
-      });
+    const path = await urlGenerator.createUrl({
+      indexPatternId,
+      filters,
+      query,
+      timeRange,
+    });
 
     return new KibanaURL(path);
   }
