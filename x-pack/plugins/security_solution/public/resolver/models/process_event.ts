@@ -79,6 +79,17 @@ export function uniquePidForProcess(passedEvent: ResolverEvent): string {
 }
 
 /**
+ * Returns the pid for the process on the host
+ */
+export function hostPidForProcess(passedEvent: ResolverEvent): string {
+  if (event.isLegacyEvent(passedEvent)) {
+    return String(passedEvent.endgame.unique_pid);
+  } else {
+    return String(passedEvent.process.pid);
+  }
+}
+
+/**
  * Returns the process event's parent pid
  */
 export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
@@ -87,4 +98,61 @@ export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | 
   } else {
     return passedEvent.process.parent?.entity_id;
   }
+}
+
+/**
+ * Returns the process event's parent pid
+ */
+export function hostParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    return String(passedEvent.endgame.unique_ppid);
+  } else {
+    const ppid = passedEvent.process.parent?.pid;
+    return ppid ? String(ppid) : undefined;
+  }
+}
+
+/**
+ * Returns the process event's path on its host
+ */
+export function hostPathForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    return passedEvent.endgame.process_path;
+  } else {
+    return passedEvent.process.executable;
+  }
+}
+
+/**
+ * Returns the username for the account that ran the process
+ */
+export function userInfoForProcess(passedEvent: ResolverEvent): object | undefined {
+  return passedEvent.user;
+}
+
+/**
+ * Returns the MD5 hash for the `passedEvent` param, or undefined if it can't be located
+ * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the MD5 value for
+ * @returns {string | undefined} The MD5 string for the event
+ */
+export function md5HashForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    // There is not currently a key for this on Legacy event types
+    return undefined;
+  }
+  return passedEvent?.process?.hash?.md5;
+}
+
+/**
+ * Returns the command line path and arguments used to run the `passedEvent` if any
+ *
+ * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the arguemnts value for
+ * @returns {string | undefined} The arguments (including the path) used to run the process
+ */
+export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    // There is not currently a key for this on Legacy event types
+    return undefined;
+  }
+  return passedEvent?.process?.args;
 }

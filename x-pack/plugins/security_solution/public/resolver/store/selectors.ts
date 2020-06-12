@@ -82,6 +82,14 @@ export const uiSelectedDescendantId = composeSelectors(
 );
 
 /**
+ * Returns the entity_id of the "selected" tree node's process
+ */
+export const uiSelectedDescendantProcessId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantProcessId
+);
+
+/**
  * Returns the camera state from within ResolverState
  */
 function cameraStateSelector(state: ResolverState) {
@@ -111,6 +119,14 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
  * Whether or not the resolver encountered an error while fetching data
  */
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+
+/**
+ * An array containing all the processes currently in the Resolver than can be graphed
+ */
+export const graphableProcesses = composeSelectors(
+  dataStateSelector,
+  dataSelectors.graphableProcesses
+);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

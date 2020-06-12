@@ -26,6 +26,9 @@ interface EventOptions {
   eventType?: string;
   eventCategory?: string | string[];
   processName?: string;
+  pid?: number;
+  parentPid?: number;
+  extensions?: object;
 }
 
 const Windows: HostOS[] = [
@@ -446,12 +449,36 @@ export class EndpointDocGenerator {
    * @param options - Allows event field values to be specified
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
+    const processName = options.processName ? options.processName : randomProcessName();
+    const detailRecordForEventType =
+      options.extensions ||
+      ((eventCategory) => {
+        if (eventCategory === 'registry') {
+          return { registry: { key: `HKLM/Windows/Software/${this.randomString(5)}` } };
+        }
+        if (eventCategory === 'network') {
+          return {
+            network: {
+              direction: this.randomChoice(['inbound', 'outbound']),
+              forwarded_ip: `${this.randomIP()}`,
+            },
+          };
+        }
+        if (eventCategory === 'file') {
+          return { file: { path: 'C:\\My Documents\\business\\January\\processName' } };
+        }
+        if (eventCategory === 'dns') {
+          return { dns: { question: { name: `${this.randomIP()}` } } };
+        }
+        return {};
+      })(options.eventCategory);
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
+      ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',
@@ -460,9 +487,26 @@ export class EndpointDocGenerator {
       },
       host: this.commonInfo.host,
       process: {
+        pid: options.pid ? options.pid : this.randomN(5000),
+        executable: `C:\\${processName}`,
+        args: `"C:\\${processName}" \\${this.randomString(3)}`,
+        code_signature: {
+          status: 'trusted',
+          subject_name: 'Microsoft',
+        },
+        hash: { md5: this.seededUUIDv4() },
         entity_id: options.entityID ? options.entityID : this.randomString(10),
-        parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : randomProcessName(),
+        parent: options.parentEntityID
+          ? {
+              entity_id: options.parentEntityID,
+              pid: options.parentPid ? options.parentPid : this.randomN(5000),
+            }
+          : undefined,
+        name: processName,
+      },
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
       },
     };
   }
@@ -633,7 +677,7 @@ export class EndpointDocGenerator {
   ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
-    const root = this.generateEvent({ timestamp: startDate + 1000 });
+    const root = this.generateEvent({ timestamp: startDate + 1000, pid: this.randomN(5000) });
     events.push(root);
     let ancestor = root;
     let timestamp = root['@timestamp'] + 1000;
@@ -668,6 +712,8 @@ export class EndpointDocGenerator {
       ancestor = this.generateEvent({
         timestamp,
         parentEntityID: ancestor.process.entity_id,
+        parentPid: ancestor.process.pid,
+        pid: this.randomN(5000),
       });
       events.push(ancestor);
       timestamp = timestamp + 1000;
@@ -1072,7 +1118,7 @@ export class EndpointDocGenerator {
     return [...this.randomNGenerator(255, 6)].map((x) => x.toString(16)).join('-');
   }
 
-  private randomIP(): string {
+  public randomIP(): string {
     return [10, ...this.randomNGenerator(255, 3)].map((x) => x.toString()).join('.');
   }
 

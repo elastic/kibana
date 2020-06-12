@@ -433,10 +433,25 @@ export interface EndpointEvent {
   process: {
     entity_id: string;
     name: string;
+    executable: string;
+    args: string;
+    code_signature: {
+      status: string;
+      subject_name: string;
+    };
+    pid: number;
+    hash: {
+      md5: string;
+    };
     parent?: {
       entity_id: string;
       name?: string;
+      pid: number;
     };
+  };
+  user: {
+    domain: string;
+    name: string;
   };
 }
 

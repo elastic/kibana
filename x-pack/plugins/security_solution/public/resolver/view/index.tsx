@@ -21,18 +21,23 @@ import { ResolverEvent } from '../../../common/endpoint/types';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
-  left: 1em;
-  top: 1em;
-  max-height: calc(100% - 2em);
+  left: 0;
+  top: 0;
+  bottom: 0;
   overflow: auto;
   width: 25em;
   max-width: 50%;
+  border-radius: 0;
 `;
 
 const StyledResolverContainer = styled.div`
   display: flex;
   flex-grow: 1;
-  contain: layout;
+  contain: strict;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
 `;
 
 const bgColor = NamedColors.resolverBackground;

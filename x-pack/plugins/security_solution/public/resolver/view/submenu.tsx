@@ -70,21 +70,44 @@ const OptionList = React.memo(
                 };
           })
     );
-    return useMemo(
-      () => (
-        <EuiSelectable
-          singleSelection={true}
-          options={options}
-          onChange={(newOptions) => {
-            setOptions(newOptions);
-          }}
-          listProps={{ showIcons: true, bordered: true }}
-          isLoading={isLoading}
-        >
-          {(list) => list}
-        </EuiSelectable>
-      ),
-      [isLoading, options]
+
+    const actionsByLabel: Record<string, () => unknown> = useMemo(() => {
+      if (typeof subMenuOptions !== 'object') {
+        return {};
+      }
+      return subMenuOptions.reduce((titleActionRecord, opt) => {
+        const { optionTitle, action } = opt;
+        return { ...titleActionRecord, [optionTitle]: action };
+      }, {});
+    }, [subMenuOptions]);
+
+    type ChangeOptions = Array<{ label: string; prepend?: ReactNode; checked?: string }>;
+    const selectableProps = useMemo(() => {
+      return {
+        listProps: { showIcons: true, bordered: true },
+        onChange: (newOptions: ChangeOptions) => {
+          const selectedOption = newOptions.find((opt) => opt.checked === 'on');
+          if (selectedOption) {
+            const { label } = selectedOption;
+            const actionToTake = actionsByLabel[label];
+            if (typeof actionToTake === 'function') {
+              actionToTake();
+            }
+          }
+          setOptions(options);
+        },
+      };
+    }, [actionsByLabel, options]);
+
+    return (
+      <EuiSelectable
+        singleSelection={true}
+        options={options}
+        {...selectableProps}
+        isLoading={isLoading}
+      >
+        {(list) => list}
+      </EuiSelectable>
     );
   }
 );

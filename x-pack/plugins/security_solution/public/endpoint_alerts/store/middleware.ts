@@ -13,11 +13,13 @@ import {
 import { AlertConstants } from '../../../common/endpoint_alerts/alert_constants';
 import { ImmutableMiddlewareFactory } from '../../common/store';
 import { cloneHttpFetchQuery } from '../../common/utils/clone_http_fetch_query';
+
 import {
   isOnAlertPage,
   apiQueryParams,
-  hasSelectedAlert,
   uiQueryParams,
+  selectedAlertHasChanged,
+  hasSelectedAlert,
   isAlertPageTabChange,
 } from './selectors';
 
@@ -53,7 +55,7 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> 
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: listResponse });
 
-      if (hasSelectedAlert(state)) {
+      if (hasSelectedAlert(state) && selectedAlertHasChanged(state)) {
         const uiParams = uiQueryParams(state);
         const detailsResponse: AlertDetails = await coreStart.http.get(
           `/api/endpoint/alerts/${uiParams.selected_alert}`
