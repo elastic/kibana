@@ -92,7 +92,6 @@ export interface State {
     outlierFraction: undefined | number;
     predictionFieldName: undefined | string;
     previousJobType: null | AnalyticsJobType;
-    previousSourceIndex: EsIndexName | undefined;
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     sourceIndex: EsIndexName;
@@ -110,8 +109,6 @@ export interface State {
   isAdvancedEditorValidJson: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
-  isModalButtonDisabled: boolean;
-  isModalVisible: boolean;
   isValid: boolean;
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
@@ -167,7 +164,6 @@ export const getInitialState = (): State => ({
     outlierFraction: undefined,
     predictionFieldName: undefined,
     previousJobType: null,
-    previousSourceIndex: undefined,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     sourceIndex: '',
@@ -189,8 +185,6 @@ export const getInitialState = (): State => ({
   isAdvancedEditorValidJson: true,
   isJobCreated: false,
   isJobStarted: false,
-  isModalVisible: false,
-  isModalButtonDisabled: false,
   isValid: false,
   jobIds: [],
   requestMessages: [],
@@ -328,6 +322,14 @@ export const getJobConfigFromFormState = (
   return jobConfig;
 };
 
+function toCamelCase(property: string): string {
+  const camelCased = property.replace(/_([a-z])/g, function (g) {
+    return g[1].toUpperCase();
+  });
+
+  return camelCased;
+}
+
 /**
  * Extracts form state for a job clone from the analytics job configuration.
  * For cloning we keep job id and destination index empty.
@@ -353,13 +355,12 @@ export function getCloneFormStateFromJobConfig(
   ) {
     const analysisConfig = analyticsJobConfig.analysis[jobType];
 
-    resultState.dependentVariable = analysisConfig.dependent_variable;
-    resultState.numTopFeatureImportanceValues = analysisConfig.num_top_feature_importance_values;
-    resultState.trainingPercent = analysisConfig.training_percent;
-
-    if (isClassificationAnalysis(analyticsJobConfig.analysis)) {
-      // @ts-ignore
-      resultState.numTopClasses = analysisConfig.num_top_classes;
+    for (const key in analysisConfig) {
+      if (analysisConfig.hasOwnProperty(key)) {
+        const camelCased = toCamelCase(key);
+        // @ts-ignore
+        resultState[camelCased] = analysisConfig[key];
+      }
     }
   }
 
