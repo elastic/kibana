@@ -73,7 +73,7 @@ export class JobDetails extends Component {
   };
 
   onModelSnapshotRetentionDaysChange = (e) => {
-    this.setJobDetails({ jobModelSnapshotRetentionDays: +e.target.value });
+    this.setJobDetails({ jobModelSnapshotRetentionDays: Math.floor(+e.target.value) });
   };
 
   onGroupsChange = (selectedGroups) => {
