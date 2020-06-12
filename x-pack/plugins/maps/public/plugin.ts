@@ -53,6 +53,7 @@ import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { ILicense } from '../../licensing/common/types';
+import { lazyLoadMapModules } from './lazy_load_bundle';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -157,7 +158,7 @@ export class MapsPlugin
         const [coreStart, startPlugins] = await core.getStartServices();
         bindStartCoreAndPlugins(coreStart, startPlugins);
         // @ts-ignore
-        const { renderApp } = await import('./routing/maps_router');
+        const { renderApp } = await lazyLoadMapModules();
         return renderApp(context, params);
       },
     });

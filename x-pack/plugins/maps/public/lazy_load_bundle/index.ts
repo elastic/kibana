@@ -36,6 +36,7 @@ interface LazyLoadedMapModules {
     initialLayers?: LayerDescriptor[]
   ) => LayerDescriptor[];
   mergeInputWithSavedMap: any;
+  renderApp: () => any;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -56,6 +57,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
+      renderApp,
     } = await import('./lazy');
 
     resolve({
@@ -69,6 +71,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
+      renderApp,
     });
   });
   return loadModulesPromise;

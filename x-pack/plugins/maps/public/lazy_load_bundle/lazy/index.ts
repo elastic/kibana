@@ -16,3 +16,5 @@ export * from '../../actions';
 export * from '../../selectors/map_selectors';
 export * from '../../bootstrap/get_initial_layers';
 export * from '../../embeddable/merge_input_with_saved_map';
+// @ts-ignore
+export * from '../../routing/maps_router';
