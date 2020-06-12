@@ -5,7 +5,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -24,6 +30,7 @@ import {
   PageLoadDistLabel,
   PageLoadTimeLabel,
   PercPageLoadedLabel,
+  ResetZoomLabel,
 } from '../translations';
 
 export const PageLoadDistribution = () => {
@@ -60,7 +67,7 @@ export const PageLoadDistribution = () => {
         });
       }
     },
-    [end, start, uiFilters, percentileRange]
+    [end, start, uiFilters, percentileRange.min, percentileRange.max]
   );
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
@@ -74,9 +81,26 @@ export const PageLoadDistribution = () => {
   return (
     <div>
       <EuiSpacer size="l" />
-      <EuiTitle size="s">
-        <h3>{PageLoadDistLabel}</h3>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{PageLoadDistLabel}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="inspect"
+            size="s"
+            onClick={() => {
+              setPercentileRange({ min: null, max: null });
+            }}
+            fill={percentileRange.min !== null && percentileRange.max !== null}
+          >
+            {ResetZoomLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <ChartWrapper loading={status !== 'success'} height="300px">
         <Chart className="story-chart">
           <Settings onBrushEnd={onBrushEnd} />

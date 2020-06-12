@@ -27,6 +27,7 @@ import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 import { RumOverview } from '../RumDashboard';
 import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
+import { EndUserExperienceLabel } from '../RumDashboard/translations';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -108,7 +109,11 @@ export function Home({ tab }: Props) {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>APM</h1>
+              <h1>
+                {selectedTab.name === 'rum-overview'
+                  ? EndUserExperienceLabel
+                  : 'APM'}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

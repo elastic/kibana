@@ -9,13 +9,24 @@ import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
 import { ImpressionTrend } from './ImpressionTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
-import { EndUserExperienceLabel } from './translations';
+import { getWhatIsGoingOnLabel } from './translations';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export function RumDashboard() {
+  const { urlParams } = useUrlParams();
+
+  const { environment } = urlParams;
+
+  let environmentLabel = environment || 'all environments';
+
+  if (environment === 'ENVIRONMENT_NOT_DEFINED') {
+    environmentLabel = 'undefined environment';
+  }
+
   return (
     <>
       <EuiTitle>
-        <h1>{EndUserExperienceLabel}</h1>
+        <h1>{getWhatIsGoingOnLabel(environmentLabel)}</h1>
       </EuiTitle>
       <EuiFlexGroup>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>

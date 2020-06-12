@@ -13,6 +13,12 @@ export const EndUserExperienceLabel = i18n.translate(
   }
 );
 
+export const getWhatIsGoingOnLabel = (environmentVal: string) =>
+  i18n.translate('xpack.apm.rum.dashboard.title', {
+    defaultMessage: `What's going on in {environmentVal}?`,
+    values: { environmentVal },
+  });
+
 export const BackEndLabel = i18n.translate('xpack.apm.rum.dashboard.backend', {
   defaultMessage: 'Backend',
 });
@@ -70,5 +76,12 @@ export const ImpressionsTrendsLabel = i18n.translate(
   'xpack.apm.rum.dashboard.impressionsTrends.label',
   {
     defaultMessage: 'Impressions trends',
+  }
+);
+
+export const ResetZoomLabel = i18n.translate(
+  'xpack.apm.rum.dashboard.resetZoom.label',
+  {
+    defaultMessage: 'Reset zoom',
   }
 );
