@@ -5,13 +5,17 @@
  */
 
 import React, { memo, useContext, useMemo } from 'react';
-import { ApplicationStart, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 import { useLocation } from 'react-router-dom';
+import { AnyIntraAppRouteState } from '../types';
 
-interface IntraAppState {
+interface IntraAppState<S extends AnyIntraAppRouteState = AnyIntraAppRouteState> {
   forRoute: string;
-  routeState?: {};
+  routeState?: S;
 }
+type UseIntraAppStateHook = <S extends AnyIntraAppRouteState = AnyIntraAppRouteState>() =>
+  | IntraAppState<S>['routeState']
+  | undefined;
 
 const IntraAppStateContext = React.createContext<IntraAppState>({ forRoute: '' });
 const wasHandled = new WeakSet<IntraAppState>();
@@ -28,9 +32,7 @@ export const IntraAppStateProvider = memo<{
   const internalAppToAppState = useMemo<IntraAppState>(() => {
     return {
       forRoute: kibanaScopedHistory.location.hash.substr(1),
-      routeState: (kibanaScopedHistory.location.state || undefined) as Parameters<
-        ApplicationStart['navigateToApp']
-      >,
+      routeState: kibanaScopedHistory.location.state as AnyIntraAppRouteState,
     };
   }, [kibanaScopedHistory.location.hash, kibanaScopedHistory.location.state]);
   return (
@@ -41,22 +43,24 @@ export const IntraAppStateProvider = memo<{
 });
 
 /**
- * Retrieve UI Route state from the React Router History for the current URL location
+ * Retrieve UI Route state from the React Router History for the current URL location.
+ * This state can be used by other Kibana Apps to influence certain behaviours in Ingest, for example,
+ * redirecting back to an given Application after a craete action.
  */
-export const useIntraAppState = (): IntraAppState | undefined => {
+export const useIntraAppState: UseIntraAppStateHook = () => {
   const location = useLocation();
   const intraAppState = useContext(IntraAppStateContext);
   if (!intraAppState) {
     throw new Error('Hook called outside of IntraAppStateContext');
   }
-  return useMemo((): IntraAppState | undefined => {
+  return useMemo(() => {
     // Due to the use of HashRouter in Ingest, we only want state to be returned
     // once so that it does not impact navigation to the page from within the
     // ingest app. side affect is that the browser back button would not work
     // consistently either.
     if (location.pathname === intraAppState.forRoute && !wasHandled.has(intraAppState)) {
       wasHandled.add(intraAppState);
-      return intraAppState;
+      return intraAppState.routeState;
     }
   }, [intraAppState, location.pathname]);
 };

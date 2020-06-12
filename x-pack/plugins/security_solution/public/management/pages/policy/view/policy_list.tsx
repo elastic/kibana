@@ -37,6 +37,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -118,14 +119,22 @@ export const PolicyList = React.memo(() => {
     selectApiError: apiError,
   } = usePolicyListSelector(selector);
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler('ingestManager', {
-    path: '#/integrations/endpoint-0.3.0/add-datasource',
-    state: {
-      onCancelNavigateTo: [],
-      onCancelUrl: [],
-      onSaveNavigateTo: [],
-    },
-  });
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+    'ingestManager',
+    {
+      path: '#/integrations/endpoint-0.3.0/add-datasource',
+      state: {
+        onCancelNavigateTo: [
+          'securitySolution',
+          { path: getManagementUrl({ name: 'policyList' }) },
+        ],
+        onCancelUrl: services.application?.getUrlForApp('securitySolution', {
+          path: getManagementUrl({ name: 'policyList' }),
+        }),
+        onSaveNavigateTo: ['securitySolution', { path: getManagementUrl({ name: 'policyList' }) }],
+      },
+    }
+  );
 
   useEffect(() => {
     if (apiError) {
