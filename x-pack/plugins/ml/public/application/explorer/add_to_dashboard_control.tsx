@@ -239,6 +239,7 @@ export const AddToDashboardControl: FC<AnomalySwimlaneEmbeddableCustomOutput> = 
           onClick={() => {
             setIsModalVisible(true);
           }}
+          size="l"
         >
           <FormattedMessage
             id="xpack.ml.explorer.addToDashboardLabel"

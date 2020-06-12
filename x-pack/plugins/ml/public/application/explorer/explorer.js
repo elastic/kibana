@@ -36,8 +36,6 @@ import {
   ExplorerNoJobsFound,
   ExplorerNoResultsFound,
 } from './components';
-import { ExplorerSwimlane } from './explorer_swimlane';
-import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
@@ -64,14 +62,9 @@ import {
   escapeDoubleQuotes,
 } from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
-import { AddToDashboardControl } from './add_to_dashboard_control';
+import { SwimlanePanel } from './swimlane_panel';
 
-import {
-  DRAG_SELECT_ACTION,
-  FILTER_ACTION,
-  SWIMLANE_TYPE,
-  VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
+import { DRAG_SELECT_ACTION, FILTER_ACTION, VIEW_BY_JOB_LABEL } from './explorer_constants';
 
 // Explorer Charts
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
@@ -81,7 +74,6 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
-import { MlTooltipComponent } from '../components/chart_tooltip';
 import { hasMatchingPoints } from './has_matching_points';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
@@ -177,8 +169,6 @@ export class Explorer extends React.Component {
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', this.resizeHandler);
-
-    this.timeBuckets = getTimeBucketsFromCache();
   }
 
   componentWillUnmount() {
@@ -356,6 +346,8 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
 
+    const jobIds = this.props.explorerState.selectedJobs.map((job) => job.id);
+
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
@@ -409,11 +401,6 @@ export class Explorer extends React.Component {
               </h2>
             </EuiTitle>
 
-            <AddToDashboardControl
-              jobIds={this.props.explorerState.selectedJobs.map((job) => job.id)}
-              swimlaneType="overall"
-            />
-
             <div
               className="ml-explorer-swimlane euiText"
               onMouseEnter={this.onSwimlaneEnterHandler}
@@ -421,25 +408,17 @@ export class Explorer extends React.Component {
               data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             >
               {showOverallSwimlane && (
-                <>
-                  <MlTooltipComponent>
-                    {(tooltipService) => (
-                      <ExplorerSwimlane
-                        chartWidth={swimlaneContainerWidth}
-                        filterActive={filterActive}
-                        filteredFields={filteredFields}
-                        maskAll={maskAll}
-                        timeBuckets={this.timeBuckets}
-                        swimlaneCellClick={this.swimlaneCellClick}
-                        swimlaneData={overallSwimlaneData}
-                        swimlaneType={SWIMLANE_TYPE.OVERALL}
-                        selection={selectedCells}
-                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                        tooltipService={tooltipService}
-                      />
-                    )}
-                  </MlTooltipComponent>
-                </>
+                <SwimlanePanel
+                  jobIds={jobIds}
+                  swimlaneType={'overall'}
+                  swimlaneData={overallSwimlaneData}
+                  filterActive={filterActive}
+                  swimlaneContainerWidth={swimlaneContainerWidth}
+                  maskAll={maskAll}
+                  selectedCells={selectedCells}
+                  swimlaneCellClick={this.swimlaneCellClick}
+                  swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                />
               )}
             </div>
 
@@ -505,28 +484,23 @@ export class Explorer extends React.Component {
                       onMouseLeave={this.onSwimlaneLeaveHandler}
                       data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                     >
-                      <MlTooltipComponent>
-                        {(tooltipService) => (
-                          <ExplorerSwimlane
-                            chartWidth={swimlaneContainerWidth}
-                            filterActive={filterActive}
-                            maskAll={
-                              maskAll &&
-                              !hasMatchingPoints({
-                                filteredFields,
-                                swimlaneData: viewBySwimlaneData,
-                              })
-                            }
-                            timeBuckets={this.timeBuckets}
-                            swimlaneCellClick={this.swimlaneCellClick}
-                            swimlaneData={viewBySwimlaneData}
-                            swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                            selection={selectedCells}
-                            swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                            tooltipService={tooltipService}
-                          />
-                        )}
-                      </MlTooltipComponent>
+                      <SwimlanePanel
+                        jobIds={jobIds}
+                        swimlaneType={'viewBy'}
+                        swimlaneData={viewBySwimlaneData}
+                        filterActive={filterActive}
+                        swimlaneContainerWidth={swimlaneContainerWidth}
+                        maskAll={
+                          maskAll &&
+                          !hasMatchingPoints({
+                            filteredFields,
+                            swimlaneData: viewBySwimlaneData,
+                          })
+                        }
+                        selectedCells={selectedCells}
+                        swimlaneCellClick={this.swimlaneCellClick}
+                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                      />
                     </div>
                   </>
                 )}
