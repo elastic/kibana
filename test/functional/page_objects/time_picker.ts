@@ -21,6 +21,18 @@ import moment from 'moment';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
+export type CommonlyUsed =
+  | 'Today'
+  | 'This_week'
+  | 'Last_15 minutes'
+  | 'Last_30 minutes'
+  | 'Last_1 hour'
+  | 'Last_24 hours'
+  | 'Last_7 days'
+  | 'Last_30 days'
+  | 'Last_90 days'
+  | 'Last_1 year';
+
 export function TimePickerProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
@@ -28,18 +40,6 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const { header, common } = getPageObjects(['header', 'common']);
-
-  type CommonlyUsed =
-    | 'Today'
-    | 'This_week'
-    | 'Last_15 minutes'
-    | 'Last_30 minutes'
-    | 'Last_1 hour'
-    | 'Last_24 hours'
-    | 'Last_7 days'
-    | 'Last_30 days'
-    | 'Last_90 days'
-    | 'Last_1 year';
 
   class TimePicker {
     defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
