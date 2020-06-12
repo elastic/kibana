@@ -24,13 +24,13 @@ export const getApmMlJobCategory = (
       serviceName,
     ])
   );
-  const apmJobGroups = mlJob.groups.filter(
-    (groupName) => groupName !== APM_ML_JOB_GROUP_NAME
-  );
-  if (apmJobGroups.length === mlJob.groups.length) {
+  if (!mlJob.groups.includes(APM_ML_JOB_GROUP_NAME)) {
     // ML job missing "apm" group name
     return;
   }
+  const apmJobGroups = mlJob.groups.filter(
+    (groupName) => groupName !== APM_ML_JOB_GROUP_NAME
+  );
   const apmJobServiceNames = apmJobGroups.map(
     (groupName) => serviceByGroupNameMap.get(groupName) || groupName
   );
