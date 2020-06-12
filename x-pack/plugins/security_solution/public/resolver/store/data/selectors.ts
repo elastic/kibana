@@ -407,35 +407,6 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
   return indexedProcessTreeFactory(graphableProcesses);
 });
 
-/**
- * Statistics for each node in the resolver tree.
- */
-/* export const relatedEventsStats = function (data: DataState) {
-  return data.relatedEventsStats;
-};*/
-
-/**
- * This selects `RelatedEventData` maps specifically for graphable processes
- * TODO does this HAVE to be for only graphable processes? it's just the stats does it matter?
- */
-/* export const relatedEvents = createSelector(
-  graphableProcesses,
-  relatedEventStats,
-  function getRelatedEvents(
-    graphableProcesses,
-    relatedEventStats
-  ) {
-    const eventsRelatedByProcess: RelatedEventData = new Map();
-    return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
-      const relatedEventDataEntry = relatedEventStats?.get(graphableProcess);
-      if (relatedEventDataEntry) {
-        relatedEvents.set(graphableProcess, relatedEventDataEntry);
-      }
-      return relatedEvents;
-    }, eventsRelatedByProcess);
-  }
-);*/
-
 // Heeeallp
 export const relatedEventsStats = createSelector(
   (data: DataState) => data.relatedEventsStats,

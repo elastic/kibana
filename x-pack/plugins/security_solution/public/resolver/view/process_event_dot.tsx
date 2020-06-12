@@ -393,7 +393,7 @@ const ProcessEventDotComponents = React.memo(
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
-      return Object.entries(relatedEventsStats).map(([category, total]) => {
+      return Object.entries(relatedEventsStats.events.byCategory).map(([category, total]) => {
         const displayName = getDisplayName(category);
         return {
           prefix: <EuiI18nNumber value={total || 0} />,
@@ -414,6 +414,10 @@ const ProcessEventDotComponents = React.memo(
     const relatedEventStatusOrOptions = (() => {
       // TODO make the drop down visible immediately if there are stats
       // Heeeallp TODO
+      if (!relatedEventsStats) {
+        return subMenuAssets.initialMenuStatus;
+      }
+
       return relatedEventOptions;
     })();
 
