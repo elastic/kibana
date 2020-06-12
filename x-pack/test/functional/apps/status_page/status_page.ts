@@ -18,6 +18,7 @@ export default function statusPageFunctonalTests({
     after(async () => await esArchiver.unload('empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
+      this.tags(['skipCloud']);
       await PageObjects.security.forceLogout();
       await PageObjects.statusPage.navigateToPage();
       await PageObjects.statusPage.expectStatusPage();
