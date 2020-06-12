@@ -8,8 +8,9 @@ import {
   COMMENTS,
   DESCRIPTION,
   ENTRIES,
+  ID,
   ITEM_TYPE,
-  LIST_ID,
+  LIST_ITEM_ID,
   META,
   NAME,
   NAMESPACE_TYPE,
@@ -17,15 +18,15 @@ import {
   _TAGS,
 } from '../../constants.mock';
 
-import { CreateExceptionListItemSchema } from './create_exception_list_item_schema';
+import { UpdateExceptionListItemSchema } from './update_exception_list_item_schema';
 
-export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
+export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _tags: _TAGS,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
-  item_id: undefined,
-  list_id: LIST_ID,
+  id: ID,
+  item_id: LIST_ITEM_ID,
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
