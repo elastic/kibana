@@ -26,6 +26,7 @@ const { makeUsageCollector } = new CollectorSet({
 
 interface MyObject {
   total: number;
+  type: boolean;
 }
 
 interface Usage {
@@ -51,12 +52,14 @@ export const myCollector = makeUsageCollector<Usage>({
         my_str: testString,
         my_objects: {
           total: SOME_NUMBER,
+          type: true,
         },
       };
     } catch (err) {
       return {
         my_objects: {
           total: 0,
+          type: true,
         },
       };
     }
@@ -72,6 +75,7 @@ export const myCollector = makeUsageCollector<Usage>({
       total: {
         type: 'number',
       },
+      type: { type: 'boolean' },
     },
   },
 });

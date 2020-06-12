@@ -14,7 +14,7 @@ import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
-import { reportingUsageMapping } from './cg_usage_mapping';
+import { reportingUsageMapping } from './reporting_usage_mapping';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
