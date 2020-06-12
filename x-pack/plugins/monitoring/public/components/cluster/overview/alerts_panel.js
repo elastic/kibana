@@ -104,7 +104,8 @@ export function AlertsPanel({ alerts, changeUrl }) {
           changeUrl={changeUrl}
         />
         <EuiText size="xs">
-          <p data-test-subj="alertMeta" className="monCallout--meta">
+          <EuiSpacer size="m" />
+          <p data-test-subj="alertMeta">
             <FormattedMessage
               id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
               defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
@@ -144,7 +145,8 @@ export function AlertsPanel({ alerts, changeUrl }) {
             <EuiCallOut {...callOutProps}>
               <p>{message}</p>
               <EuiText size="xs">
-                <p data-test-subj="alertMeta" className="monCallout--meta">
+                <EuiSpacer size="m" />
+                <p data-test-subj="alertMeta">
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
                     defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
