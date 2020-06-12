@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiButton,
   EuiTableFieldDataColumnType,
+  EuiHideFor,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -21,11 +22,11 @@ import { getEmptyValue } from '../../../empty_value';
 import * as i18n from '../../translations';
 import { FormattedEntry } from '../../types';
 
-const EntriesDetails = styled(EuiFlexItem)`
+const MyEntriesDetails = styled(EuiFlexItem)`
   padding: ${({ theme }) => theme.eui.euiSize};
 `;
 
-const StyledEditButton = styled(EuiButton)`
+const MyEditButton = styled(EuiButton)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.9, theme.eui.euiColorPrimary)};
     border: none;
@@ -33,7 +34,7 @@ const StyledEditButton = styled(EuiButton)`
   `}
 `;
 
-const StyledRemoveButton = styled(EuiButton)`
+const MyRemoveButton = styled(EuiButton)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.9, theme.eui.euiColorDanger)};
     border: none;
@@ -41,22 +42,22 @@ const StyledRemoveButton = styled(EuiButton)`
   `}
 `;
 
-const AndOrBadgeContainer = styled(EuiFlexItem)`
+const MyAndOrBadgeContainer = styled(EuiFlexItem)`
   padding-top: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
   disableDelete: boolean;
-  handleDelete: () => void;
-  handleEdit: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
 }
 
 const ExceptionEntriesComponent = ({
   entries,
   disableDelete,
-  handleDelete,
-  handleEdit,
+  onDelete,
+  onEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
   const columns = useMemo(
     (): Array<EuiTableFieldDataColumnType<FormattedEntry>> => [
@@ -65,6 +66,7 @@ const ExceptionEntriesComponent = ({
         name: 'Field',
         sortable: false,
         truncateText: true,
+        textOnly: true,
         'data-test-subj': 'exceptionFieldNameCell',
         width: '30%',
         render: (value: string | null, data: FormattedEntry) => {
@@ -116,14 +118,20 @@ const ExceptionEntriesComponent = ({
   );
 
   return (
-    <EntriesDetails grow={5}>
+    <MyEntriesDetails grow={5}>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="none">
             {entries.length > 1 && (
-              <AndOrBadgeContainer grow={false}>
-                <AndOrBadge type="and" includeAntennas data-test-subj="exceptionsViewerAndBadge" />
-              </AndOrBadgeContainer>
+              <EuiHideFor sizes={['xs', 's']}>
+                <MyAndOrBadgeContainer grow={false}>
+                  <AndOrBadge
+                    type="and"
+                    includeAntennas
+                    data-test-subj="exceptionsViewerAndBadge"
+                  />
+                </MyAndOrBadgeContainer>
+              </EuiHideFor>
             )}
             <EuiFlexItem grow={1}>
               <EuiBasicTable
@@ -136,34 +144,34 @@ const ExceptionEntriesComponent = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <StyledEditButton
+              <MyEditButton
                 size="s"
                 color="primary"
-                onClick={handleEdit}
+                onClick={onEdit}
                 isDisabled={disableDelete}
                 data-test-subj="exceptionsViewerEditBtn"
               >
                 {i18n.EDIT}
-              </StyledEditButton>
+              </MyEditButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <StyledRemoveButton
+              <MyRemoveButton
                 size="s"
                 color="danger"
-                onClick={handleDelete}
+                onClick={onDelete}
                 isLoading={disableDelete}
                 data-test-subj="exceptionsViewerDeleteBtn"
               >
                 {i18n.REMOVE}
-              </StyledRemoveButton>
+              </MyRemoveButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EntriesDetails>
+    </MyEntriesDetails>
   );
 };
 
