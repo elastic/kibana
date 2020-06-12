@@ -91,6 +91,8 @@ export const CreateTransformWizardContext = createContext<{ indexPattern: IndexP
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+  const { indexPattern } = searchItems;
+
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
@@ -110,6 +112,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         onChange={setStepDetailsState}
         overrides={stepDetailsState}
         searchItems={searchItems}
+        stepDefineState={stepDefineState}
       />
     ) : (
       <StepDetailsSummary {...stepDetailsState} />
@@ -146,8 +149,6 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     }
   }, []);
 
-  const { indexPattern } = searchItems;
-
   const transformConfig = getCreateRequestBody(
     indexPattern.title,
     stepDefineState,
@@ -162,6 +163,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         transformConfig={transformConfig}
         onChange={setStepCreateState}
         overrides={stepCreateState}
+        timeFieldName={stepDetailsState.indexPatternDateField}
       />
     ) : (
       <StepCreateSummary />

@@ -7,7 +7,7 @@
 import { defaults } from 'lodash/fp';
 import { PartialAlert } from '../../../../../alerts/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PatchRuleParams } from './types';
+import { PatchRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
@@ -27,7 +27,6 @@ export const patchRules = async ({
   meta,
   filters,
   from,
-  immutable,
   index,
   interval,
   maxSignals,
@@ -42,11 +41,11 @@ export const patchRules = async ({
   references,
   note,
   version,
-  exceptions_list,
+  exceptionsList,
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRuleParams): Promise<PartialAlert | null> => {
+}: PatchRulesOptions): Promise<PartialAlert | null> => {
   if (rule == null) {
     return null;
   }
@@ -76,7 +75,7 @@ export const patchRules = async ({
     references,
     version,
     note,
-    exceptions_list,
+    exceptionsList,
     anomalyThreshold,
     machineLearningJobId,
   });
@@ -89,7 +88,6 @@ export const patchRules = async ({
       description,
       falsePositives,
       from,
-      immutable,
       query,
       language,
       outputIndex,
@@ -108,7 +106,7 @@ export const patchRules = async ({
       references,
       note,
       version: calculatedVersion,
-      exceptions_list,
+      exceptionsList,
       anomalyThreshold,
       machineLearningJobId,
     }
@@ -117,7 +115,7 @@ export const patchRules = async ({
   const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
+      tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
       throttle: null,
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {

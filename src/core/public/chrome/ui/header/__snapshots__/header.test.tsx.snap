@@ -42,6 +42,25 @@ exports[`Header renders 1`] = `
       },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
+      "history": Object {
+        "action": "PUSH",
+        "block": [MockFunction],
+        "createHref": [MockFunction],
+        "go": [MockFunction],
+        "goBack": [MockFunction],
+        "goForward": [MockFunction],
+        "length": 1,
+        "listen": [MockFunction],
+        "location": Object {
+          "hash": "",
+          "key": "",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [MockFunction],
+        "replace": [MockFunction],
+      },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
@@ -657,6 +676,25 @@ exports[`Header renders 2`] = `
       },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
+      "history": Object {
+        "action": "PUSH",
+        "block": [MockFunction],
+        "createHref": [MockFunction],
+        "go": [MockFunction],
+        "goBack": [MockFunction],
+        "goForward": [MockFunction],
+        "length": 1,
+        "listen": [MockFunction],
+        "location": Object {
+          "hash": "",
+          "key": "",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [MockFunction],
+        "replace": [MockFunction],
+      },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
@@ -2178,7 +2216,7 @@ exports[`Header renders 2`] = `
       position="fixed"
     >
       <div
-        className="euiHeader euiHeader--fixed"
+        className="euiHeader euiHeader--default euiHeader--fixed"
       >
         <EuiHeaderSection
           grow={false}
@@ -4741,6 +4779,25 @@ exports[`Header renders 3`] = `
       },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
+      "history": Object {
+        "action": "PUSH",
+        "block": [MockFunction],
+        "createHref": [MockFunction],
+        "go": [MockFunction],
+        "goBack": [MockFunction],
+        "goForward": [MockFunction],
+        "length": 1,
+        "listen": [MockFunction],
+        "location": Object {
+          "hash": "",
+          "key": "",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [MockFunction],
+        "replace": [MockFunction],
+      },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
@@ -6262,7 +6319,7 @@ exports[`Header renders 3`] = `
       position="fixed"
     >
       <div
-        className="euiHeader euiHeader--fixed"
+        className="euiHeader euiHeader--default euiHeader--fixed"
       >
         <EuiHeaderSection
           grow={false}
@@ -8984,7 +9041,7 @@ exports[`Header renders 3`] = `
                               </div>
                             </div>
                             <button
-                              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiCollapsibleNav__closeButton"
+                              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
                               type="button"
                             >
                               <span
@@ -8996,13 +9053,9 @@ exports[`Header renders 3`] = `
                                   data-euiicon-type="cross"
                                 />
                                 <span
-                                  class="euiButtonEmpty__text"
+                                  class="euiButtonEmpty__text euiCollapsibleNav__closeButtonText"
                                 >
-                                  <span
-                                    class="euiCollapsibleNav__closeButtonLabel"
-                                  >
-                                    close
-                                  </span>
+                                  close
                                 </span>
                               </span>
                             </button>
@@ -9220,7 +9273,7 @@ exports[`Header renders 3`] = `
                                 </div>
                               </div>
                               <button
-                                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiCollapsibleNav__closeButton"
+                                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
                                 type="button"
                               >
                                 <span
@@ -9232,13 +9285,9 @@ exports[`Header renders 3`] = `
                                     data-euiicon-type="cross"
                                   />
                                   <span
-                                    class="euiButtonEmpty__text"
+                                    class="euiButtonEmpty__text euiCollapsibleNav__closeButtonText"
                                   >
-                                    <span
-                                      class="euiCollapsibleNav__closeButtonLabel"
-                                    >
-                                      close
-                                    </span>
+                                    close
                                   </span>
                                 </span>
                               </button>
@@ -9707,38 +9756,43 @@ exports[`Header renders 3`] = `
                           </EuiShowFor>
                         </div>
                       </EuiFlexItem>
-                      <EuiButtonEmpty
-                        className="euiCollapsibleNav__closeButton"
-                        iconType="cross"
-                        onClick={[Function]}
-                        size="xs"
+                      <EuiScreenReaderOnly
+                        showOnFocus={true}
                       >
-                        <button
-                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiCollapsibleNav__closeButton"
+                        <EuiButtonEmpty
+                          className="euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                          iconType="cross"
                           onClick={[Function]}
-                          type="button"
+                          size="xs"
+                          textProps={
+                            Object {
+                              "className": "euiCollapsibleNav__closeButtonText",
+                            }
+                          }
                         >
-                          <span
-                            className="euiButtonEmpty__content"
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                            onClick={[Function]}
+                            type="button"
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonEmpty__icon"
-                              size="m"
-                              type="cross"
+                            <span
+                              className="euiButtonEmpty__content"
                             >
-                              <div
+                              <EuiIcon
                                 aria-hidden="true"
                                 className="euiButtonEmpty__icon"
-                                data-euiicon-type="cross"
                                 size="m"
-                              />
-                            </EuiIcon>
-                            <span
-                              className="euiButtonEmpty__text"
-                            >
+                                type="cross"
+                              >
+                                <div
+                                  aria-hidden="true"
+                                  className="euiButtonEmpty__icon"
+                                  data-euiicon-type="cross"
+                                  size="m"
+                                />
+                              </EuiIcon>
                               <span
-                                className="euiCollapsibleNav__closeButtonLabel"
+                                className="euiButtonEmpty__text euiCollapsibleNav__closeButtonText"
                               >
                                 <EuiI18n
                                   default="close"
@@ -9748,9 +9802,9 @@ exports[`Header renders 3`] = `
                                 </EuiI18n>
                               </span>
                             </span>
-                          </span>
-                        </button>
-                      </EuiButtonEmpty>
+                          </button>
+                        </EuiButtonEmpty>
+                      </EuiScreenReaderOnly>
                     </nav>
                   </div>
                   <div
@@ -9897,6 +9951,25 @@ exports[`Header renders 4`] = `
       },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
+      "history": Object {
+        "action": "PUSH",
+        "block": [MockFunction],
+        "createHref": [MockFunction],
+        "go": [MockFunction],
+        "goBack": [MockFunction],
+        "goForward": [MockFunction],
+        "length": 1,
+        "listen": [MockFunction],
+        "location": Object {
+          "hash": "",
+          "key": "",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [MockFunction],
+        "replace": [MockFunction],
+      },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
@@ -11418,7 +11491,7 @@ exports[`Header renders 4`] = `
       position="fixed"
     >
       <div
-        className="euiHeader euiHeader--fixed"
+        className="euiHeader euiHeader--default euiHeader--fixed"
       >
         <EuiHeaderSection
           grow={false}
@@ -14097,6 +14170,7 @@ exports[`Header renders 4`] = `
                                 >
                                   <span
                                     className="euiToolTipAnchor euiListGroupItem__tooltip"
+                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -14226,6 +14300,7 @@ exports[`Header renders 4`] = `
                                 >
                                   <span
                                     className="euiToolTipAnchor euiListGroupItem__tooltip"
+                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
