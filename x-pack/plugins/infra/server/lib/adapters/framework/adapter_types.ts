@@ -59,6 +59,7 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
     skipped: number;
     failed: number;
   };
+  timed_out: boolean;
   aggregations?: Aggregations;
   hits: {
     total: {

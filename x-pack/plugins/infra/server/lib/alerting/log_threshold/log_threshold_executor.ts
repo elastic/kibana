@@ -11,16 +11,17 @@ import {
   Comparator,
   LogDocumentCountAlertParams,
   Criterion,
-  Aggregations,
+  UngroupedSearchQueryResponse,
+  GroupedSearchQueryResponse,
+  LogDocumentCountAlertParamsRT,
 } from '../../../../common/alerting/logs/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
-import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
-
-const GROUP_BY_KEY = 'groups';
+import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const UNGROUPED_NAME = i18n.translate(
   'xpack.infra.logs.alerting.threshold.alerting.ungroupedGroupName',
@@ -44,25 +45,30 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
   async function ({ services, params }: AlertExecutorOptions) {
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
-    const castParams = params as LogDocumentCountAlertParams;
-    const { groupBy } = castParams;
+    const { groupBy } = params;
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const indexPattern = sourceConfiguration.configuration.logAlias;
     const alertInstance = alertInstanceFactory(alertId);
 
     try {
-      const query = getESQuery(castParams, sourceConfiguration.configuration);
-
-      const results =
-        groupBy && groupBy.length > 0
-          ? await getGroupedResults(query, indexPattern, callCluster, GROUP_BY_KEY)
-          : await getUngroupedResults(query, indexPattern, callCluster);
+      const validatedParams = decodeOrThrow(LogDocumentCountAlertParamsRT)(params);
+      const query = getESQuery(validatedParams, sourceConfiguration.configuration, indexPattern);
 
       if (groupBy && groupBy.length > 0) {
-        processGroupByResults({ results, params: castParams, alertInstanceFactory, alertId });
+        processGroupByResults(
+          await getGroupedResults(query, indexPattern, callCluster),
+          validatedParams,
+          alertInstanceFactory,
+          alertId
+        );
       } else {
-        processUngroupedResults({ results, params: castParams, alertInstanceFactory, alertId });
+        processUngroupedResults(
+          await getUngroupedResults(query, indexPattern, callCluster),
+          validatedParams,
+          alertInstanceFactory,
+          alertId
+        );
       }
     } catch (e) {
       alertInstance.replaceState({
@@ -73,29 +79,12 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
     }
   };
 
-interface ProcessingParams<Results> {
-  results: Results;
-  params: LogDocumentCountAlertParams;
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'];
-  alertId: string;
-}
-
-interface GroupBucket {
-  key: Record<string, string>;
-  doc_count: number;
-}
-
-interface ReducedGroupBucket {
-  name: string;
-  documentCount: number;
-}
-
-const processUngroupedResults = ({
-  results,
-  params,
-  alertInstanceFactory,
-  alertId,
-}: ProcessingParams<InfraDatabaseSearchResponse<{}, Aggregations>>) => {
+const processUngroupedResults = (
+  results: UngroupedSearchQueryResponse,
+  params: LogDocumentCountAlertParams,
+  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
+  alertId: string
+) => {
   const { count, criteria } = params;
 
   const alertInstance = alertInstanceFactory(`${alertId}-${UNGROUPED_FACTORY_KEY}`);
@@ -118,19 +107,24 @@ const processUngroupedResults = ({
   }
 };
 
-const processGroupByResults = ({
-  results,
-  params,
-  alertInstanceFactory,
-  alertId,
-}: ProcessingParams<GroupBucket[]>) => {
+interface ReducedGroupByResults {
+  name: string;
+  documentCount: number;
+}
+
+const processGroupByResults = (
+  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
+  params: LogDocumentCountAlertParams,
+  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
+  alertId: string
+) => {
   const { count, criteria } = params;
 
-  const groupResults: ReducedGroupBucket[] = results.reduce((acc, groupBucket) => {
+  const groupResults = results.reduce<ReducedGroupByResults[]>((acc, groupBucket) => {
     const groupName = Object.values(groupBucket.key).join(', ');
     const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
     return [...acc, groupResult];
-  }, [] as ReducedGroupBucket[]);
+  }, []);
 
   groupResults.forEach((group) => {
     const alertInstance = alertInstanceFactory(`${alertId}-${group.name}`);
@@ -156,9 +150,10 @@ const processGroupByResults = ({
 
 const getESQuery = (
   params: LogDocumentCountAlertParams,
-  sourceConfiguration: InfraSource['configuration']
+  sourceConfiguration: InfraSource['configuration'],
+  index: string
 ): object => {
-  const { timeSize, timeUnit, criteria, groupBy } = params;
+  const { timeSize, timeUnit, criteria, groupBy, count } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const to = Date.now();
@@ -189,45 +184,42 @@ const getESQuery = (
     },
   ];
 
-  const sharedSubLevelAggregations = {
-    interval_buckets: {
-      date_histogram: {
-        field: sourceConfiguration.fields.timestamp,
-        fixed_interval: interval,
-      },
-    },
-  };
-
   const aggregations =
     groupBy && groupBy.length > 0
       ? {
           groups: {
             composite: {
-              size: 20,
-              sources: groupBy.map((field, index) => ({
-                [`group-${index}-${field}`]: {
+              size: 40,
+              sources: groupBy.map((field, groupIndex) => ({
+                [`group-${groupIndex}-${field}`]: {
                   terms: { field },
                 },
               })),
             },
-            aggs: sharedSubLevelAggregations,
           },
         }
-      : sharedSubLevelAggregations;
+      : null;
 
-  const query = {
+  const body = {
+    // Ensure we accurately track the hit count for the ungrouped case, up to the count specified on the alert, otherwise we
+    // can only ensure accuracy up to 10,000 results.
+    ...(!groupBy && { track_total_hits: count.value }),
     query: {
       bool: {
-        filter: [...rangeFilters],
-        ...(mustFilters.length > 0 && { must: mustFilters }),
+        filter: [...rangeFilters, ...mustFilters],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
-    aggs: aggregations,
+    ...(aggregations && aggregations),
     size: 0,
   };
 
-  return query;
+  return {
+    index,
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+    body,
+  };
 };
 
 type SupportedESQueryTypes = 'term' | 'match' | 'match_phrase' | 'range';
@@ -342,37 +334,30 @@ const getUngroupedResults = async (
   index: string,
   callCluster: AlertServices['callCluster']
 ) => {
-  return await callCluster('search', {
-    body: query,
-    index,
-  });
+  return await callCluster('search', query);
 };
 
 const getGroupedResults = async (
   query: object,
   index: string,
-  callCluster: AlertServices['callCluster'],
-  groupingsKey: string
+  callCluster: AlertServices['callCluster']
 ) => {
-  const bucketSelector = (response: InfraDatabaseSearchResponse<{}, Aggregations>) => {
-    const aggs = response.aggregations;
-    return aggs ? aggs[groupingsKey]?.buckets : [];
+  const bucketSelector = (
+    response: InfraDatabaseSearchResponse<any, GroupedSearchQueryResponse['aggregations']>
+  ) => {
+    return response.aggregations?.groups?.buckets || [];
   };
 
-  const afterKeyHandler = createAfterKeyHandler(
-    `aggs.${groupingsKey}.composite.after`,
-    (response) => {
-      const aggs = response.aggregations;
-      return aggs[groupingsKey]?.after_key;
-    }
-  );
+  const afterKeyHandler = createAfterKeyHandler('aggs.groups.composite.after', (response) => {
+    return response.aggregations?.groups?.after_key;
+  });
 
-  const compositeBuckets = (await getAllCompositeData(
-    (body) => callCluster('search', { body: query, index }),
+  const compositeBuckets = await getAllCompositeData(
+    (body) => callCluster('search', query),
     query,
     bucketSelector,
     afterKeyHandler
-  )) as Aggregations[];
+  );
 
   return compositeBuckets;
 };
