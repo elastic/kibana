@@ -14,7 +14,7 @@ import { ElasticsearchConfigType } from '../../../../src/core/server/elasticsear
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
-const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.extends({
+export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.extends({
   logFetchCount: schema.number({ defaultValue: 10 }),
   hosts: schema.maybe(schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })])),
 });

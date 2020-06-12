@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Logger, ElasticsearchClientConfig, ICustomClusterClient } from 'kibana/server';
+import { ConfigOptions } from 'elasticsearch';
+import { TypeOf } from '@kbn/config-schema';
+import { Logger, ICustomClusterClient } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
-import { MonitoringElasticsearchConfig } from '../types';
+import { monitoringElasticsearchConfigSchema } from '../config';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
@@ -15,13 +16,12 @@ import { MonitoringElasticsearchConfig } from '../types';
  * Kibana itself is connected to a production cluster.
  */
 
+type ESConfig = TypeOf<typeof monitoringElasticsearchConfigSchema> & Pick<ConfigOptions, 'plugins'>;
+
 export function instantiateClient(
-  elasticsearchConfig: any,
+  elasticsearchConfig: ESConfig,
   log: Logger,
-  createClient: (
-    type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ICustomClusterClient
+  createClient: (type: string, clientConfig?: Partial<ESConfig>) => ICustomClusterClient
 ) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = createClient('monitoring', {
@@ -35,6 +35,6 @@ export function instantiateClient(
   return cluster;
 }
 
-export function hasMonitoringCluster(config: MonitoringElasticsearchConfig) {
+export function hasMonitoringCluster(config: ESConfig) {
   return Boolean(config.hosts && config.hosts[0]);
 }
