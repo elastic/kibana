@@ -20,14 +20,11 @@
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
-
-// @ts-ignore
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
-import { getData } from './services';
-import { getInjectedMetadata } from 'src/plugins/data/public/services';
+import { getData, getInjectedMetadata } from './services';
 
 interface VegaRequestHandlerParams {
   query: Query;
