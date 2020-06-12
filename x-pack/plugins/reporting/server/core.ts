@@ -60,36 +60,6 @@ export class ReportingCore {
     this.pluginStart$.next(reportingStartDeps);
   }
 
-  public setConfig(config: ReportingConfig) {
-    this.config = config;
-    this.pluginSetup$.next(true);
-  }
-
-  /*
-   * High-level module dependencies
-   */
-
-  public getConfig(): ReportingConfig {
-    if (!this.config) {
-      throw new Error('Config is not yet initialized');
-    }
-    return this.config;
-  }
-
-  public getPluginSetupDeps() {
-    if (!this.pluginSetupDeps) {
-      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
-    }
-    return this.pluginSetupDeps;
-  }
-
-  private async getPluginStartDeps() {
-    if (this.pluginStartDeps) {
-      return this.pluginStartDeps;
-    }
-    return await this.pluginStart$.pipe(first()).toPromise();
-  }
-
   public async pluginIsSetup(): Promise<boolean> {
     // use deps and config as a cached resolver
     if (this.pluginSetupDeps && this.config) {
@@ -98,21 +68,17 @@ export class ReportingCore {
     return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
-  public async pluginIsStarted(): Promise<boolean> {
+  public async pluginHasStarted(): Promise<boolean> {
     return await this.getPluginStartDeps().then(() => true);
   }
 
-  /*
-   * Downstream dependencies
-   */
+  public setConfig(config: ReportingConfig) {
+    this.config = config;
+    this.pluginSetup$.next(true);
+  }
 
   public getExportTypesRegistry() {
     return this.exportTypesRegistry;
-  }
-
-  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
-    const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
   }
 
   public async getEsqueue() {
@@ -133,9 +99,45 @@ export class ReportingCore {
       .toPromise();
   }
 
+  public getConfig(): ReportingConfig {
+    if (!this.config) {
+      throw new Error('Config is not yet initialized');
+    }
+    return this.config;
+  }
+
   public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
     const config = this.getConfig();
     const { browserDriverFactory } = await this.getPluginStartDeps();
     return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
+  }
+
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
+    }
+    return this.pluginSetupDeps;
+  }
+
+  private async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
+    }
+    return await this.pluginStart$.pipe(first()).toPromise();
+  }
+
+  public getElasticsearchService() {
+    return this.getPluginSetupDeps().elasticsearch;
+  }
+
+  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
+  }
+
+  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
+    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
+    return scopedUiSettingsService;
   }
 }

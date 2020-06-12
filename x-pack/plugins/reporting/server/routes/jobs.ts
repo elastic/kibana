@@ -45,8 +45,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
-      const queryProvider = jobsQueryFactory(reporting);
-      const results = await queryProvider.list(jobTypes, user, page, size, jobIds);
+      const jobsQuery = jobsQueryFactory(reporting);
+      const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
 
       return res.ok({
         body: results,
@@ -68,8 +68,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const queryProvider = jobsQueryFactory(reporting);
-      const count = await queryProvider.count(jobTypes, user);
+      const jobsQuery = jobsQueryFactory(reporting);
+      const count = await jobsQuery.count(jobTypes, user);
 
       return res.ok({
         body: count.toString(),
@@ -96,8 +96,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const queryProvider = jobsQueryFactory(reporting);
-      const result = await queryProvider.get(user, docId, { includeContent: true });
+      const jobsQuery = jobsQueryFactory(reporting);
+      const result = await jobsQuery.get(user, docId, { includeContent: true });
 
       if (!result) {
         throw Boom.notFound();
@@ -136,8 +136,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const queryProvider = jobsQueryFactory(reporting);
-      const result = await queryProvider.get(user, docId);
+      const jobsQuery = jobsQueryFactory(reporting);
+      const result = await jobsQuery.get(user, docId);
 
       if (!result) {
         throw Boom.notFound();
