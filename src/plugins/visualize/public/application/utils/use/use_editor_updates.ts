@@ -77,7 +77,8 @@ export const useEditorUpdates = (
       const subscriptions = merge(
         timefilter.getTimeUpdate$(),
         timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$()
+        timefilter.getFetch$(),
+        filterManager.getFetches$()
       ).subscribe({
         next: reloadVisualization,
         error: services.fatalErrors.add,
