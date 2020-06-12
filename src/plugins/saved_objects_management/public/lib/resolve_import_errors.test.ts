@@ -55,12 +55,12 @@ describe('resolveImportErrors', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "failedImports": Array [],
-  "importCount": 0,
-  "status": "success",
-}
-`);
+      Object {
+        "failedImports": Array [],
+        "importCount": 0,
+        "status": "success",
+      }
+    `);
   });
 
   test(`doesn't retry if only unknown failures are passed in`, async () => {
@@ -84,23 +84,23 @@ Object {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "failedImports": Array [
-    Object {
-      "error": Object {
-        "type": "unknown",
-      },
-      "obj": Object {
-        "id": "1",
-        "meta": Object {},
-        "type": "a",
-      },
-    },
-  ],
-  "importCount": 0,
-  "status": "success",
-}
-`);
+      Object {
+        "failedImports": Array [
+          Object {
+            "error": Object {
+              "type": "unknown",
+            },
+            "obj": Object {
+              "id": "1",
+              "meta": Object {},
+              "type": "a",
+            },
+          },
+        ],
+        "importCount": 0,
+        "status": "success",
+      }
+    `);
   });
 
   test('resolves conflicts', async () => {
@@ -129,40 +129,40 @@ Object {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "failedImports": Array [],
-  "importCount": 1,
-  "status": "success",
-}
-`);
+      Object {
+        "failedImports": Array [],
+        "importCount": 1,
+        "status": "success",
+      }
+    `);
 
     const formData = getFormData(extractBodyFromCall(0));
     expect(formData).toMatchInlineSnapshot(`
-Object {
-  "file": "undefined",
-  "retries": Array [
-    Object {
-      "id": "1",
-      "overwrite": true,
-      "replaceReferences": Array [],
-      "type": "a",
-    },
-    Object {
-      "id": "2",
-      "idToOverwrite": "x",
-      "overwrite": true,
-      "replaceReferences": Array [],
-      "type": "a",
-    },
-  ],
-}
-`);
+      Object {
+        "file": "undefined",
+        "retries": Array [
+          Object {
+            "id": "1",
+            "overwrite": true,
+            "replaceReferences": Array [],
+            "type": "a",
+          },
+          Object {
+            "id": "2",
+            "idToOverwrite": "x",
+            "overwrite": true,
+            "replaceReferences": Array [],
+            "type": "a",
+          },
+        ],
+      }
+    `);
   });
 
-  test('resolves missing references', async () => {
+  test('resolves missing references without duplicating retries', async () => {
     httpMock.post.mockResolvedValueOnce({
       success: true,
-      successCount: 2,
+      successCount: 3,
     });
     getConflictResolutions.mockResolvedValueOnce({});
     const result = await resolveImportErrors({
@@ -170,12 +170,7 @@ Object {
       getConflictResolutions,
       state: {
         importCount: 0,
-        unmatchedReferences: [
-          {
-            existingIndexPatternId: '2',
-            newIndexPatternId: '3',
-          },
-        ],
+        unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3' }],
         failedImports: [
           {
             obj: { type: 'a', id: '1', meta: {} },
@@ -185,13 +180,21 @@ Object {
               blocking: [{ type: 'a', id: '2' }],
             },
           },
+          {
+            obj: { type: 'a', id: '3', meta: {} },
+            error: {
+              type: 'missing_references',
+              references: [{ type: 'index-pattern', id: '2' }],
+              blocking: [{ type: 'a', id: '2' }], // this is blocking the same object, it should not result in a duplicate retry
+            },
+          },
         ],
       },
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
   "failedImports": Array [],
-  "importCount": 2,
+  "importCount": 3,
   "status": "success",
 }
 `);
@@ -202,6 +205,17 @@ Object {
   "retries": Array [
     Object {
       "id": "1",
+      "replaceReferences": Array [
+        Object {
+          "from": "2",
+          "to": "3",
+          "type": "index-pattern",
+        },
+      ],
+      "type": "a",
+    },
+    Object {
+      "id": "3",
       "replaceReferences": Array [
         Object {
           "from": "2",
@@ -260,12 +274,12 @@ Object {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "failedImports": Array [],
-  "importCount": 0,
-  "status": "success",
-}
-`);
+      Object {
+        "failedImports": Array [],
+        "importCount": 0,
+        "status": "success",
+      }
+    `);
   });
 
   test('handles missing references then conflicts on the same errored objects', async () => {
@@ -301,50 +315,50 @@ Object {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "failedImports": Array [],
-  "importCount": 1,
-  "status": "success",
-}
-`);
+      Object {
+        "failedImports": Array [],
+        "importCount": 1,
+        "status": "success",
+      }
+    `);
     const formData1 = getFormData(extractBodyFromCall(0));
     expect(formData1).toMatchInlineSnapshot(`
-Object {
-  "file": "undefined",
-  "retries": Array [
-    Object {
-      "id": "1",
-      "replaceReferences": Array [
-        Object {
-          "from": "2",
-          "to": "3",
-          "type": "index-pattern",
-        },
-      ],
-      "type": "a",
-    },
-  ],
-}
-`);
+      Object {
+        "file": "undefined",
+        "retries": Array [
+          Object {
+            "id": "1",
+            "replaceReferences": Array [
+              Object {
+                "from": "2",
+                "to": "3",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "a",
+          },
+        ],
+      }
+    `);
     const formData2 = getFormData(extractBodyFromCall(1));
     expect(formData2).toMatchInlineSnapshot(`
-Object {
-  "file": "undefined",
-  "retries": Array [
-    Object {
-      "id": "1",
-      "overwrite": true,
-      "replaceReferences": Array [
-        Object {
-          "from": "2",
-          "to": "3",
-          "type": "index-pattern",
-        },
-      ],
-      "type": "a",
-    },
-  ],
-}
-`);
+      Object {
+        "file": "undefined",
+        "retries": Array [
+          Object {
+            "id": "1",
+            "overwrite": true,
+            "replaceReferences": Array [
+              Object {
+                "from": "2",
+                "to": "3",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "a",
+          },
+        ],
+      }
+    `);
   });
 });

@@ -184,7 +184,9 @@ export async function resolveImportErrors({
         continue;
       }
       for (const { type, id } of error.blocking || []) {
-        retries.push({ type, id });
+        if (!retries.some((r) => r.type === type && r.id === id)) {
+          retries.push({ type, id });
+        }
       }
     }
 
