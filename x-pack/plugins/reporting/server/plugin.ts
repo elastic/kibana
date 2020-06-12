@@ -16,7 +16,7 @@ import { registerReportingUsageCollector } from './usage';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    reporting?: ReportingCore | null;
+    reporting?: ReportingStart | null;
   }
 }
 
@@ -33,9 +33,10 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    // prevent throwing errors in route handlers about async deps not being initialized
     core.http.registerRouteHandlerContext('reporting', () => {
       if (this.reportingCore.pluginIsStarted()) {
-        return this.reportingCore;
+        return {}; // ReportingStart contract
       } else {
         return null;
       }
