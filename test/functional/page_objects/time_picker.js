@@ -26,8 +26,22 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
+  const kibanaServer = getService('kibanaServer');
 
   class TimePickerPage {
+    /**
+     * the provides a quicker way to set the timepicker to the default range, saves a few seconds
+     */
+    async setDefaultAbsoluteRangeViaUiSettings() {
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': `{ "from": "2015-09-18T06:31:44.000Z", "to": "2015-09-23T18:31:44.000Z"}`,
+      });
+    }
+
+    async resetDefaultAbsoluteRangeViaUiSettings() {
+      await kibanaServer.uiSettings.replace({});
+    }
+
     async timePickerExists() {
       return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
     }
