@@ -6,11 +6,9 @@
 
 import { createContext } from 'react';
 import { AppMountContext } from 'kibana/public';
-import { ObservabilityDataAccessService } from '../data_access_service';
 
 export interface PluginContextValue {
   core: AppMountContext['core'];
-  observabilityData: ObservabilityDataAccessService;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

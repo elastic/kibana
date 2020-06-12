@@ -9,21 +9,12 @@ import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_component
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { Home } from '../pages/home';
 import { PluginContext } from '../context/plugin_context';
-import { ObservabilityDataAccessService } from '../data_access_service';
 
-interface Dependencies {
-  observabilityData: ObservabilityDataAccessService;
-}
-
-export const renderApp = (
-  core: CoreStart,
-  { element }: AppMountParameters,
-  { observabilityData }: Dependencies
-) => {
+export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
   ReactDOM.render(
-    <PluginContext.Provider value={{ core, observabilityData }}>
+    <PluginContext.Provider value={{ core }}>
       <EuiThemeProvider darkMode={isDarkMode}>
         <i18nCore.Context>
           <Home />

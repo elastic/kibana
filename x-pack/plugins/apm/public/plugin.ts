@@ -38,10 +38,6 @@ import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
-import {
-  getObservabilityChartData,
-  getChartData,
-} from './services/rest/get_observability_chart_data';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -76,19 +72,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     pluginSetupDeps.home.environment.update({ apmUi: true });
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
-
-    if (plugins.observability) {
-      plugins.observability.dataAccess.registerProvider({
-        pluginOpaqueId: this.initializerContext.opaqueId,
-        dataType: 'apm',
-        handler: getObservabilityChartData,
-      });
-
-      plugins.observability.dataFetcherRegistry({
-        name: 'apm',
-        dataFetcher: getChartData,
-      });
-    }
 
     core.application.register({
       id: 'apm',
