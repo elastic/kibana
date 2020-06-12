@@ -19,27 +19,28 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract, OverlayStart } from 'kibana/public';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import {
-  IContainer,
   EmbeddableFactoryDefinition,
   EmbeddableStart,
   ErrorEmbeddable,
+  IContainer,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
   BookEmbeddableInput,
   BookEmbeddableOutput,
+  BookByValueInput,
+  BookByReferenceInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { AttributeUnwrapService } from './attribute_unwrap';
+import { OverlayStart } from '../../../../src/core/public';
 
 interface StartServices {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  savedObjectsClient: SavedObjectsClientContract;
+  getAttributeService: EmbeddableStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
 }
 
@@ -59,7 +60,11 @@ export class BookEmbeddableFactory
     getIconForSavedObject: () => 'pencil',
   };
 
-  private unwrapService?: AttributeUnwrapService;
+  private attributeService?: AttributeService<
+    BookSavedObjectAttributes,
+    BookByValueInput,
+    BookByReferenceInput
+  >;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -76,13 +81,8 @@ export class BookEmbeddableFactory
   };
 
   public async create(input: BookEmbeddableInput, parent?: IContainer) {
-    if (!this.unwrapService) {
-      const { savedObjectsClient } = await this.getStartServices();
-      this.unwrapService = new AttributeUnwrapService(this.type, savedObjectsClient);
-    }
-    return new BookEmbeddable(input, {
+    return new BookEmbeddable(input, await this.getAttributeService(), {
       parent,
-      unwrapService: this.unwrapService,
     });
   }
 
@@ -92,20 +92,15 @@ export class BookEmbeddableFactory
     });
   }
 
-  /**
-   * This function is used when dynamically creating a new embeddable to add to a
-   * container that is not neccessarily backed by a saved object.
-   */
   public async getExplicitInput(): Promise<Omit<BookEmbeddableInput, 'id'>> {
-    const { openModal, savedObjectsClient } = await this.getStartServices();
+    const { openModal } = await this.getStartServices();
     return new Promise<Omit<BookEmbeddableInput, 'id'>>((resolve) => {
       const onSave = async (attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
-        if (includeInLibrary) {
-          const savedItem = await savedObjectsClient.create(BOOK_SAVED_OBJECT, attributes);
-          resolve({ savedObjectId: savedItem.id });
-        } else {
-          resolve({ attributes });
-        }
+        const wrappedAttributes = (await this.getAttributeService()).wrapAttributes(
+          attributes,
+          includeInLibrary
+        );
+        resolve(wrappedAttributes);
       };
       const overlay = openModal(
         toMountPoint(
@@ -118,5 +113,16 @@ export class BookEmbeddableFactory
         )
       );
     });
+  }
+
+  private async getAttributeService() {
+    if (!this.attributeService) {
+      this.attributeService = await (await this.getStartServices()).getAttributeService<
+        BookSavedObjectAttributes,
+        BookByValueInput,
+        BookByReferenceInput
+      >(this.type);
+    }
+    return this.attributeService;
   }
 }

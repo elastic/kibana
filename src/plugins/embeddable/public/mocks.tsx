@@ -88,6 +88,7 @@ const createStartContract = (): Start => {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     EmbeddablePanel: jest.fn(),
+    getAttributeService: jest.fn(),
   };
   return startContract;
 };

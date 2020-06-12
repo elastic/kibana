@@ -118,20 +118,17 @@ export class EmbeddableExamplesPlugin
         getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
       }))
     );
-
     deps.embeddable.registerEmbeddableFactory<BookEmbeddableInput, BookEmbeddableOutput>(
       BOOK_EMBEDDABLE,
       new BookEmbeddableFactory(async () => ({
-        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
         openModal: (await core.getStartServices())[0].overlays.openModal,
       }))
     );
 
     const editBookAction = createEditBookAction(async () => ({
+      getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
       openModal: (await core.getStartServices())[0].overlays.openModal,
-      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-      getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
     }));
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);

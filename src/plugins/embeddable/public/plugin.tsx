@@ -30,8 +30,10 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
+  SavedObjectEmbeddableInput,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
+import { AttributeService } from './lib/embeddables/attribute_service';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -59,6 +61,13 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
+  getAttributeService: <
+    A,
+    V extends EmbeddableInput & { attributes: A },
+    R extends SavedObjectEmbeddableInput
+  >(
+    type: string
+  ) => AttributeService<A, V, R>;
   EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
 }
 
@@ -103,6 +112,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
+      getAttributeService: (type: string) => new AttributeService(type, core.savedObjects.client),
       EmbeddablePanel: ({
         embeddable,
         hideHeader,

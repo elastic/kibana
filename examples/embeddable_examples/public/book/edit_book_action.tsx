@@ -17,18 +17,27 @@
  * under the License.
  */
 import React from 'react';
-import { OverlayStart, SavedObjectsClientContract } from 'kibana/public';
+import { OverlayStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { createAction } from '../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { ViewMode } from '../../../../src/plugins/embeddable/public';
-import { BookEmbeddable, BOOK_EMBEDDABLE, BookByReferenceInput } from './book_embeddable';
+import {
+  ViewMode,
+  EmbeddableStart,
+  SavedObjectEmbeddableInput,
+} from '../../../../src/plugins/embeddable/public';
+import {
+  BookEmbeddable,
+  BOOK_EMBEDDABLE,
+  BookByReferenceInput,
+  BookByValueInput,
+} from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
-  savedObjectsClient: SavedObjectsClientContract;
+  getAttributeService: EmbeddableStart['getAttributeService'];
 }
 
 interface ActionContext {
@@ -50,30 +59,29 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
       );
     },
     execute: async ({ embeddable }: ActionContext) => {
-      const { openModal, savedObjectsClient } = await getStartServices();
+      const { openModal, getAttributeService } = await getStartServices();
+      const attributeService = getAttributeService<
+        BookSavedObjectAttributes,
+        BookByValueInput,
+        BookByReferenceInput
+      >(BOOK_SAVED_OBJECT);
       const onSave = async (attributes: BookSavedObjectAttributes, includeInLibrary: boolean) => {
+        const newInput = await attributeService.wrapAttributes(
+          attributes,
+          includeInLibrary,
+          embeddable
+        );
+        if (
+          !includeInLibrary &&
+          (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId
+        ) {
+          // Remove the savedObejctId when un-linking
+          newInput.savedObjectId = null;
+        }
+        embeddable.updateInput(newInput);
         if (includeInLibrary) {
-          if ((embeddable.getInput() as BookByReferenceInput).savedObjectId) {
-            embeddable.updateInput({ attributes: null });
-            await savedObjectsClient.update(
-              BOOK_SAVED_OBJECT,
-              (embeddable.getInput() as BookByReferenceInput).savedObjectId!,
-              attributes
-            );
-            embeddable.reload();
-          } else {
-            const savedItem = await savedObjectsClient.create(BOOK_SAVED_OBJECT, attributes);
-            embeddable.updateInput({ savedObjectId: savedItem.id });
-          }
-
-          // Ensures that any duplicate embeddables also register the changes.
+          // Ensures that any duplicate embeddables also register the changes. This mirrors the behavior of going back and forth between apps
           embeddable.getRoot().reload();
-        } else {
-          if ((embeddable.getInput() as BookByReferenceInput).savedObjectId) {
-            embeddable.updateInput({ savedObjectId: null, attributes });
-          } else {
-            embeddable.updateInput({ attributes });
-          }
         }
       };
       const overlay = openModal(

@@ -29,6 +29,7 @@ export {
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
+  AttributeService,
   Container,
   ContainerInput,
   ContainerOutput,

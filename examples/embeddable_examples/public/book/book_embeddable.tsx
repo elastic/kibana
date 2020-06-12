@@ -25,10 +25,10 @@ import {
   IContainer,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
-import { AttributeUnwrapService } from './attribute_unwrap';
 
 export const BOOK_EMBEDDABLE = 'book';
 export type BookEmbeddableInput = BookByValueInput | BookByReferenceInput;
@@ -66,20 +66,20 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   private savedObjectId?: string;
   private attributes?: BookSavedObjectAttributes;
 
-  private unwrapService: AttributeUnwrapService;
-
   constructor(
     initialInput: BookEmbeddableInput,
+    private attributeService: AttributeService<
+      BookSavedObjectAttributes,
+      BookByValueInput,
+      BookByReferenceInput
+    >,
     {
       parent,
-      unwrapService,
     }: {
       parent?: IContainer;
-      unwrapService: AttributeUnwrapService;
     }
   ) {
     super(initialInput, {} as BookEmbeddableOutput, parent);
-    this.unwrapService = unwrapService;
 
     this.subscription = this.getInput$().subscribe(async () => {
       const savedObjectId = (this.getInput() as BookByReferenceInput).savedObjectId;
@@ -105,11 +105,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   }
 
   public async reload() {
-    this.attributes = await this.unwrapService.unwrapAttributes<
-      BookSavedObjectAttributes,
-      BookByValueInput,
-      BookByReferenceInput
-    >(this.input);
+    this.attributes = await this.attributeService.unwrapAttributes(this.input);
 
     this.updateOutput({
       attributes: this.attributes,
