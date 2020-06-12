@@ -26,7 +26,16 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
   cancelOnClick?: React.ReactEventHandler;
   agentConfig?: AgentConfig;
   packageInfo?: PackageInfo;
-}> = ({ from, cancelUrl, cancelOnClick, agentConfig, packageInfo, children }) => {
+  'data-test-subj'?: string;
+}> = ({
+  from,
+  cancelUrl,
+  cancelOnClick,
+  agentConfig,
+  packageInfo,
+  children,
+  'data-test-subj': dataTestSubj,
+}) => {
   const leftColumn = (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
@@ -138,6 +147,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
       leftColumn={leftColumn}
       rightColumn={rightColumn}
       rightColumnGrow={false}
+      data-test-subj={dataTestSubj}
     >
       {children}
     </WithHeaderLayout>

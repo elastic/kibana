@@ -333,7 +333,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   ];
 
   return (
-    <CreateDatasourcePageLayout {...layoutProps}>
+    <CreateDatasourcePageLayout {...layoutProps} data-test-subj="createDataSource">
       {formState === 'CONFIRM' && agentConfig && (
         <ConfirmDeployConfigModal
           agentCount={agentCount}
