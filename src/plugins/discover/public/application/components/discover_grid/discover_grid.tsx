@@ -262,14 +262,6 @@ export const DiscoverGrid = function DiscoverGridInner({
         return '-';
       }
 
-      const createFilter = (fieldName: string, type: '-' | '+') => {
-        return onFilter(
-          indexPattern.fields.getByName(fieldName),
-          indexPattern.flattenHit(row)[fieldName],
-          type
-        );
-      };
-
       const value = (
         // TODO Field formatters need to be fixed
         // eslint-disable-next-line react/no-danger
@@ -277,6 +269,13 @@ export const DiscoverGrid = function DiscoverGridInner({
       );
 
       if (isDetails && indexPattern.fields.getByName(columnId)?.filterable) {
+        const createFilter = (fieldName: string, type: '-' | '+') => {
+          return onFilter(
+            indexPattern.fields.getByName(fieldName),
+            indexPattern.flattenHit(row)[fieldName],
+            type
+          );
+        };
         return (
           <CellPopover
             value={value}
@@ -352,7 +351,6 @@ export const DiscoverGrid = function DiscoverGridInner({
       <EuiDataGrid
         aria-labelledby={ariaLabelledBy}
         aria-describedby={randomId}
-        inMemory={{ level: 'pagination' }}
         sorting={{ columns: sortingColumns, onSort: onTableSort }}
         rowCount={rowCount}
         columns={getColumns()}
