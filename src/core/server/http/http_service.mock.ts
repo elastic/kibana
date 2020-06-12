@@ -166,10 +166,12 @@ type HttpServiceContract = PublicMethodsOf<HttpService>;
 const createHttpServiceMock = () => {
   const mocked: jest.Mocked<HttpServiceContract> = {
     setup: jest.fn(),
+    getStartContract: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.getStartContract.mockReturnValue(createInternalStartContractMock());
   mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };

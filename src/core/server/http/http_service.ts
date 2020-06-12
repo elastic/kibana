@@ -120,6 +120,15 @@ export class HttpService
     return this.internalSetup;
   }
 
+  // this method exists because we need the start contract to create the `CoreStart` used to start
+  // the `plugin` and `legacy` services.
+  public getStartContract(): InternalHttpServiceStart {
+    return {
+      ...pick(this.internalSetup!, ['auth', 'basePath', 'isTlsEnabled', 'getServerInfo']),
+      isListening: () => this.httpServer.isListening(),
+    };
+  }
+
   public async start() {
     const config = await this.config$.pipe(first()).toPromise();
     if (this.shouldListen(config)) {
@@ -137,10 +146,7 @@ export class HttpService
       await this.httpServer.start();
     }
 
-    return {
-      ...pick(this.internalSetup!, ['auth', 'basePath', 'isTlsEnabled', 'getServerInfo']),
-      isListening: () => this.httpServer.isListening(),
-    };
+    return this.getStartContract();
   }
 
   /**

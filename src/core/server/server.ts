@@ -202,7 +202,7 @@ export class Server {
     });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-    const httpStart = await this.http.start();
+    const httpStart = this.http.getStartContract();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -221,6 +221,8 @@ export class Server {
       },
       plugins: mapToObject(pluginsStart.contracts),
     });
+
+    await this.http.start();
 
     await this.rendering.start({
       legacy: this.legacy,
