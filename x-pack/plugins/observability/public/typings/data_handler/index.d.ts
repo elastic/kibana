@@ -10,9 +10,9 @@ interface Stat {
   color?: string;
 }
 
-interface Coordinates {
+export interface Coordinates {
   x: number;
-  y: number;
+  y?: number;
 }
 
 interface Series {
@@ -30,13 +30,13 @@ interface FetchDataResponse {
 }
 interface FetchDataParams {
   // The start timestamp in milliseconds of the queried time interval
-  startTime: number;
+  startTime: string;
   // The end timestamp in milliseconds of the queried time interval
-  endTime: number;
+  endTime: string;
   // The aggregation bucket size in milliseconds if applicable to the data source
-  bucketSize: number;
+  bucketSize: string;
 }
 
-export type FetchData = (fetchDataParams: FetchDataParams) => Promise<FetchDataResponse[] | []>;
+export type FetchData = (fetchDataParams: FetchDataParams) => Promise<FetchDataResponse>;
 
 export type HasData = () => Promise<boolean>;
