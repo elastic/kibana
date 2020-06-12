@@ -202,7 +202,7 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  make = async (id?: string): Promise<IndexPattern> => {
+  make = (id?: string): Promise<IndexPattern> => {
     const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
