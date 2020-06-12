@@ -350,9 +350,7 @@ const ProcessEventDotComponents = React.memo(
 
     const history = useHistory();
     const urlSearch = history.location.search;
-    const queryParams: CrumbInfo = useMemo(() => {
-      return { crumbId: '', crumbEvent: '', ...querystring.parse(urlSearch.slice(1)) };
-    }, [urlSearch]);
+    
     /**
      * This updates the breadcrumb nav, the table view
      */
@@ -659,7 +657,15 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
 
 function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
-
+  //dd
+  const nm = eventModel.eventName(processEvent)
+  if(nm.match(/explorer/)){
+    return 'terminatedProcessCube'
+  }
+  if(nm.match(/mimi/)){
+    return 'runningTriggerCube'
+  }
+  //dd
   if (processType in processTypeToCube) {
     return processTypeToCube[processType];
   }
