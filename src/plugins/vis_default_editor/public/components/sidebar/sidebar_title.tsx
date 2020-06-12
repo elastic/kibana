@@ -36,17 +36,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedSearch;
+  savedSearch: SavedObject;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedObject | null;
   vis: Vis;
   eventEmitter: EventEmitter;
 }

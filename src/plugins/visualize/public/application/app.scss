@@ -5,6 +5,8 @@
 //   visChart__legend--small
 //   visChart__legend-isLoading
 
-@import 'app';
-@import 'editor/index';
-@import 'listing/index';
+.visAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

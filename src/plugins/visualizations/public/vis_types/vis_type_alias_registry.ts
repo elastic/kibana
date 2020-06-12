@@ -27,6 +27,8 @@ export interface VisualizationListItem {
   title: string;
   description?: string;
   typeTitle: string;
+  image?: string;
+  description?: string;
 }
 
 export interface VisualizationsAppExtension {

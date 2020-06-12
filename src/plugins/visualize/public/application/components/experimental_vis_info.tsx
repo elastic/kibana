@@ -17,10 +17,33 @@
  * under the License.
  */
 
-import { defaultFeedbackMessage } from './default_feedback_message';
+import React, { memo } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-test('default feedback message with link', () => {
-  expect(defaultFeedbackMessage).toMatchInlineSnapshot(
-    `"Have feedback? Please create an issue in <a href=\\"https://github.com/elastic/kibana/issues/new/choose\\" rel=\\"noopener noreferrer\\" target=\\"_blank\\">GitHub</a>."`
+export const InfoComponent = () => {
+  const title = (
+    <>
+      <FormattedMessage
+        id="visualize.experimentalVisInfoText"
+        defaultMessage="This visualization is marked as experimental. Have feedback? Please create an issue in"
+      />{' '}
+      <EuiLink external href="https://github.com/elastic/kibana/issues/new/choose" target="_blank">
+        GitHub
+      </EuiLink>
+      {'.'}
+    </>
   );
-});
+
+  return (
+    <EuiCallOut
+      className="hide-for-sharing"
+      data-test-subj="experimentalVisInfo"
+      size="s"
+      title={title}
+      iconType="beaker"
+    />
+  );
+};
+
+export const ExperimentalVisInfo = memo(InfoComponent);

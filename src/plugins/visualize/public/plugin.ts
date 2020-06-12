@@ -20,7 +20,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-
+import { createHashHistory } from 'history';
 import {
   AppMountParameters,
   AppUpdater,
@@ -31,15 +31,15 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
-import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
+import { Storage, createKbnUrlTracker, createKbnUrlStateStorage } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart } from '../../share/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
-import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { VisualizeServices } from './application/types';
 import { DashboardStart } from '../../dashboard/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
@@ -112,39 +112,51 @@ export class VisualizePlugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
 
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and visualize won't be rendered
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern(params.history);
+
         appMounted();
 
-        const deps: VisualizeKibanaServices = {
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
+        const history = createHashHistory();
+
+        const services: VisualizeServices = {
+          ...coreStart,
+          history,
+          kbnUrlStateStorage: createKbnUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          }),
           pluginInitializerContext: this.initializerContext,
-          addBasePath: coreStart.http.basePath.prepend,
-          core: coreStart,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
-          savedObjectsClient: coreStart.savedObjects.client,
           savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
-          I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
           dashboard: pluginsStart.dashboard,
-          scopedHistory: () => this.currentHistory!,
-          savedObjects: pluginsStart.savedObjects,
+          savedObjectsPublic: pluginsStart.savedObjects,
         };
-        setServices(deps);
 
-        // make sure the index pattern list is up to date
-        await pluginsStart.data.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
         params.element.classList.add('visAppWrapper');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params, services);
         return () => {
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };

@@ -18,7 +18,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { VisualizeAppState } from '../../types';
+import { VisualizeAppState } from '../types';
 
 /**
  * Creates a new instance of AppState based on the table vis state.

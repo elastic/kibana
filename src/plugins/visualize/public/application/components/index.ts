@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { useVisualizeAppState } from './visualize_app_state';
-export { makeStateful } from './make_stateful';
-export { addEmbeddableToDashboardUrl } from '../../../../../dashboard/public/';
+export { VisualizeListing } from './visualize_listing';
+export { VisualizeEditor } from './visualize_editor';

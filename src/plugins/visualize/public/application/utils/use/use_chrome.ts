@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { useState, useEffect } from 'react';
+import { ChromeStart } from 'kibana/public';
 
-export const defaultFeedbackMessage = i18n.translate('kibana_utils.defaultFeedbackMessage', {
-  defaultMessage: 'Have feedback? Please create an issue in {link}.',
-  values: {
-    link:
-      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
-  },
-});
+export const useChrome = (chrome: ChromeStart) => {
+  const [isVisible, setIsVisible] = useState<boolean>();
+
+  useEffect(() => {
+    const subscription = chrome.getIsVisible$().subscribe((value: boolean) => {
+      setIsVisible(value);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [chrome]);
+
+  return isVisible;
+};

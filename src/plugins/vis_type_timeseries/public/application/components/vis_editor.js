@@ -80,7 +80,7 @@ export class VisEditor extends Component {
 
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
-    this.props.eventEmitter.emit('updateVis');
+    this.props.embeddableHandler.reload();
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
@@ -187,6 +187,7 @@ export class VisEditor extends Component {
               autoApply={this.state.autoApply}
               model={model}
               embeddableHandler={this.props.embeddableHandler}
+              eventEmitter={this.props.eventEmitter}
               vis={this.props.vis}
               timeRange={this.props.timeRange}
               uiState={this.uiState}

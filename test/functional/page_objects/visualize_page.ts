@@ -248,11 +248,6 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await find.clickByCssSelector('[href="#/"]');
     }
 
-    public async clickVisualizationByName(vizName: string) {
-      log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      await find.clickByPartialLinkText(vizName);
-    }
-
     public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
       if (navigateToVisualize) {
         await this.clickLoadSavedVisButton();
@@ -261,7 +256,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async openSavedVisualization(vizName: string) {
-      await this.clickVisualizationByName(vizName);
+      const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
+      await testSubjects.click(dataTestSubj);
       await header.waitUntilLoadingHasFinished();
     }
 

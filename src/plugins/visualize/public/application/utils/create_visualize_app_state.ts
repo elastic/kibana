@@ -24,8 +24,8 @@ import {
   createStateContainer,
   syncState,
   IKbnUrlStateStorage,
-} from '../../../../../kibana_utils/public';
-import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
+} from '../../../../kibana_utils/public';
+import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../types';
 
 const STATE_STORAGE_KEY = '_a';
 
@@ -40,7 +40,7 @@ function toObject(state: PureVisState): PureVisState {
   });
 }
 
-export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
+export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
   const urlState = kbnUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
   const initialState = migrateAppState({
     ...stateDefaults,
@@ -67,14 +67,6 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
           ...vis,
         },
       }),
-      removeSavedQuery: (state) => (defaultQuery) => {
-        const { savedQuery, ...rest } = state;
-
-        return {
-          ...rest,
-          query: defaultQuery,
-        };
-      },
       unlinkSavedSearch: (state) => ({ query, parentFilters = [] }) => ({
         ...state,
         query: query || state.query,
@@ -82,11 +74,18 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
         linked: false,
       }),
       updateVisState: (state) => (newVisState) => ({ ...state, vis: toObject(newVisState) }),
-      updateFromSavedQuery: (state) => (savedQuery) => ({
-        ...state,
-        savedQuery: savedQuery.id,
-        query: savedQuery.attributes.query,
-      }),
+      updateSavedQuery: (state) => (savedQueryId) => {
+        const updatedState = {
+          ...state,
+          savedQuery: savedQueryId,
+        };
+
+        if (!savedQueryId) {
+          delete updatedState.savedQuery;
+        }
+
+        return updatedState;
+      },
     }
   );
 
