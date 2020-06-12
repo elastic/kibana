@@ -38,6 +38,7 @@ import { getManagementUrl } from '../../../common/routing';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import { useEndpointPackageInfo } from './ingest_hooks';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -110,6 +111,7 @@ export const PolicyList = React.memo(() => {
   const location = useLocation();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
+  const [packageInfo, isFetchingPackageInfo] = useEndpointPackageInfo();
   const {
     selectPolicyItems: policyItems,
     selectPageIndex: pageIndex,
@@ -122,7 +124,12 @@ export const PolicyList = React.memo(() => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
     'ingestManager',
     {
-      path: '#/integrations/endpoint-0.3.0/add-datasource',
+      // We redirect to Ingest's Integaration page if we can't get the package version, and
+      // to the Integration Endpoint Package Add Datasource if we have package information.
+      // Also,
+      // We pass along soem state information so that the Ingest page can change the behaviour
+      // of the cancel and submit buttons and redirect the user back to endpoint policy
+      path: `#/integrations${packageInfo ? `/endpoint-${packageInfo.version}/add-datasource` : ''}`,
       state: {
         onCancelNavigateTo: [
           'securitySolution',
@@ -287,7 +294,11 @@ export const PolicyList = React.memo(() => {
         defaultMessage: 'Policies',
       })}
       headerRight={
-        <EuiButton iconType="plusInCircle" onClick={handleCreatePolicyClick}>
+        <EuiButton
+          iconType="plusInCircle"
+          onClick={handleCreatePolicyClick}
+          isDisabled={isFetchingPackageInfo}
+        >
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyList.createNewButton"
             defaultMessage="Create new policy"
