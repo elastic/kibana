@@ -36,7 +36,7 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON } from '../common/constants';
+import { APP_ID, APP_ICON, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerAlertRoutes } from './endpoint/alerts/routes';
@@ -125,7 +125,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerPolicyRoutes(router, endpointContext);
 
     plugins.features.registerFeature({
-      id: 'siem',
+      id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
         defaultMessage: 'Security',
       }),
