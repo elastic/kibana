@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "embeddable", "discover"]
+  "requiredPlugins": ["uiActions", "embeddable", "discover"],
+  "optionalPlugins": ["share"]
 }
