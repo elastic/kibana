@@ -6,6 +6,11 @@
 
 import { DurationDetails, DurationTypes } from '../types';
 
+/*
+ * Given two unix timestamps, it will return an object containing the time difference and properly pluralized friendly version of the time difference.
+ * i.e. a time difference of 1000ms will yield => { duration: 1, durationType: 'second' } and 10000ms will yield => { duration: 10, durationType: 'seconds' }
+ *
+ */
 export const getFriendlyElapsedTime = (
   from: number | string,
   to: number | string
