@@ -479,11 +479,29 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<R>(
-      fn: string | ((...args: any[]) => Promise<R>),
+    public async executeAsync<T = any>(
+      fn: (cb: (value?: T) => void) => void | Promise<void>
+    ): Promise<T>;
+    public async executeAsync<T = any, A1 = any>(
+      fn: (a1: A1, cb: (value?: T) => void) => void | Promise<void>,
+      a1: A1
+    ): Promise<T>;
+    public async executeAsync<T = any, A1 = any, A2 = any>(
+      fn: (a1: A1, a2: A2, cb: (value?: T) => void) => void | Promise<void>,
+      a1: A1,
+      a2: A2
+    ): Promise<T>;
+    public async executeAsync<T = any, A1 = any, A2 = any, A3 = any>(
+      fn: (a1: A1, a2: A2, a3: A3, cb: (value?: T) => void) => void | Promise<void>,
+      a1: A1,
+      a2: A2,
+      a3: A3
+    ): Promise<T>;
+    public async executeAsync<T = any>(
+      fn: (...args: any[]) => void | Promise<void>,
       ...args: any[]
-    ): Promise<R> {
-      return await driver.executeAsyncScript(
+    ): Promise<T> {
+      return await driver.executeAsyncScript<T>(
         fn,
         ...cloneDeep<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {
