@@ -30,13 +30,18 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { BundleRefsResolver } from './bundle_refs_resolver';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig, bundleRefs: BundleRefs) {
+export function getWebpackConfig(
+  bundle: Bundle,
+  worker: WorkerConfig,
+  refResolver: BundleRefsResolver
+) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
@@ -69,7 +74,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig, bundleRef
       UiSharedDeps.externals,
       function (context, request, cb) {
         try {
-          bundleRefs.checkForBundleRef(bundle, context, request).then(
+          refResolver.resolveExternal(bundle, context, request).then(
             (resp) => {
               cb(undefined, resp);
             },

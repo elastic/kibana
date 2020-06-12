@@ -58,7 +58,6 @@ const testBundle = (id: string) =>
   new Bundle({
     contextDir: `/repo/plugin/${id}/public`,
     publicDirNames: ['public'],
-    dependencies: [],
     id,
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,

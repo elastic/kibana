@@ -85,7 +85,8 @@ it('emits "bundle cached" event when everything is updated', async () => {
     Array [
       Object {
         "bundle": <Bundle>,
-        "type": "bundle cached",
+        "reason": "bundle references missing",
+        "type": "bundle not cached",
       },
     ]
   `);
@@ -288,12 +289,7 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
     Array [
       Object {
         "bundle": <Bundle>,
-        "diff": "[32m- Expected[39m
-    [31m+ Received[39m
-
-    [32m- \\"old\\"[39m
-    [31m+ \\"new\\"[39m",
-        "reason": "cache key mismatch",
+        "reason": "bundle references missing",
         "type": "bundle not cached",
       },
     ]

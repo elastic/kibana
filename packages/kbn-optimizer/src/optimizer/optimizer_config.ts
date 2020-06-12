@@ -20,7 +20,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, BundleRefs, WorkerConfig, CacheableWorkerConfig } from '../common';
+import { Bundle, WorkerConfig, CacheableWorkerConfig } from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
@@ -184,8 +184,6 @@ export class OptimizerConfig {
       options.profileWebpack
     );
   }
-
-  public readonly bundleRefsSpecJson = JSON.stringify(BundleRefs.getSpecFromBundles(this.bundles));
 
   constructor(
     public readonly bundles: Bundle[],

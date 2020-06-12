@@ -35,8 +35,8 @@ import {
   WorkerConfig,
   ascending,
   parseFilePath,
-  BundleRefs,
 } from '../common';
+import { BundleRefsResolver } from './bundle_refs_resolver';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -56,7 +56,7 @@ const PLUGIN_NAME = '@kbn/optimizer';
 const observeCompiler = (
   workerConfig: WorkerConfig,
   bundle: Bundle,
-  bundleRefs: BundleRefs,
+  refResolver: BundleRefsResolver,
   compiler: webpack.Compiler
 ): Rx.Observable<CompilerMsg> => {
   const compilerMsgs = new CompilerMsgs(bundle.id);
@@ -152,7 +152,7 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        bundleRefExportIds: bundleRefs.getReferencedExportIds(bundle),
+        bundleRefExportIds: refResolver.getReferencedExportIds(bundle),
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModules.length,
@@ -191,10 +191,10 @@ const observeCompiler = (
 export const runCompilers = (
   workerConfig: WorkerConfig,
   bundles: Bundle[],
-  bundleRefs: BundleRefs
+  refResolver: BundleRefsResolver
 ) => {
   const multiCompiler = webpack(
-    bundles.map((def) => getWebpackConfig(def, workerConfig, bundleRefs))
+    bundles.map((def) => getWebpackConfig(def, workerConfig, refResolver))
   );
 
   return Rx.merge(
@@ -208,7 +208,7 @@ export const runCompilers = (
     Rx.from(multiCompiler.compilers.entries()).pipe(
       mergeMap(([compilerIndex, compiler]) => {
         const bundle = bundles[compilerIndex];
-        return observeCompiler(workerConfig, bundle, bundleRefs, compiler);
+        return observeCompiler(workerConfig, bundle, refResolver, compiler);
       })
     ),
 

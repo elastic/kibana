@@ -54,7 +54,7 @@ export function getBundleCacheEvent$(
   return Rx.defer(async () => {
     const events: BundleCacheEvent[] = [];
     const eligibleBundles: Bundle[] = [];
-    const bundleRefs = BundleRefs.parseSpec(config.bundleRefsSpecJson);
+    const bundleRefs = BundleRefs.fromBundles(config.bundles);
 
     for (const bundle of config.bundles) {
       if (!config.cache) {

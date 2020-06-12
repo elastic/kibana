@@ -77,7 +77,7 @@ function usingWorkerProc<T>(
       const args = [
         JSON.stringify(workerConfig),
         JSON.stringify(bundles.map((b) => b.toSpec())),
-        config.bundleRefsSpecJson,
+        BundleRefs.fromBundles(config.bundles).toSpecJson(),
       ];
 
       const proc = execa.node(require.resolve('../worker/run_worker'), args, {
