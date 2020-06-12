@@ -121,7 +121,7 @@ export const LogDocumentCountAlertParamsRT = rt.intersection([
 
 export type LogDocumentCountAlertParams = rt.TypeOf<typeof LogDocumentCountAlertParamsRT>;
 
-const UngroupedSearchQueryResponseRT = rt.intersection([
+export const UngroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({
     hits: rt.type({
@@ -134,7 +134,7 @@ const UngroupedSearchQueryResponseRT = rt.intersection([
 
 export type UngroupedSearchQueryResponse = rt.TypeOf<typeof UngroupedSearchQueryResponseRT>;
 
-const GroupedSearchQueryResponseRT = rt.intersection([
+export const GroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.type({
     aggregations: rt.type({

@@ -11,6 +11,8 @@ import {
   Comparator,
   LogDocumentCountAlertParams,
   Criterion,
+  GroupedSearchQueryResponseRT,
+  UngroupedSearchQueryResponseRT,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
   LogDocumentCountAlertParamsRT,
@@ -324,7 +326,7 @@ const getUngroupedResults = async (
   index: string,
   callCluster: AlertServices['callCluster']
 ) => {
-  return await callCluster('search', query);
+  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await callCluster('search', query));
 };
 
 const getGroupedResults = async (
@@ -338,9 +340,8 @@ const getGroupedResults = async (
   while (true) {
     const queryWithAfterKey = { ...query };
     queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
-    const groupResponse: GroupedSearchQueryResponse = await callCluster(
-      'search',
-      queryWithAfterKey
+    const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
+      await callCluster('search', queryWithAfterKey)
     );
     compositeGroupBuckets = [
       ...compositeGroupBuckets,
