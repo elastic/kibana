@@ -71,7 +71,9 @@ export class PluginsSystem {
         .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
         .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
     );
-    this.log.info(`Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()]}]`);
+    this.log.info(
+      `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
+    );
 
     for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
