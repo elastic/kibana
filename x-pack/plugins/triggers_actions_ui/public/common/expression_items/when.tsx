@@ -29,12 +29,14 @@ interface WhenExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const WhenExpression = ({
   aggType,
   customAggTypesOptions,
   onChangeSelectedAggType,
+  display = 'inline',
   popupPosition,
 }: WhenExpressionProps) => {
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
@@ -53,6 +55,7 @@ export const WhenExpression = ({
           )}
           value={aggregationTypes[aggType].text}
           isActive={aggTypePopoverOpen}
+          display={display === 'inline' ? 'inline' : 'columns'}
           onClick={() => {
             setAggTypePopoverOpen(true);
           }}
@@ -63,7 +66,7 @@ export const WhenExpression = ({
         setAggTypePopoverOpen(false);
       }}
       ownFocus
-      display="block"
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >

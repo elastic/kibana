@@ -261,11 +261,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
   );
 
   const renderIndices = (indices) => {
-    const rows = indices.map((s: string, index: number) => {
+    const rows = indices.map((s: string, i: number) => {
       return (
-        <p key={index}>
+        <p key={i}>
           {s}
-          {index < indices.length - 1 ? ',' : null}
+          {i < indices.length - 1 ? ',' : null}
         </p>
       );
     });
@@ -351,6 +351,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         </div>
       </EuiPopover>
       <WhenExpression
+        display="fullWidth"
         aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
         onChangeSelectedAggType={(selectedAggType: string) =>
           setAlertParams('aggType', selectedAggType)
@@ -362,6 +363,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
           fields={esFields}
           aggType={aggType}
           errors={errors}
+          display="fullWidth"
           onChangeSelectedAggField={(selectedAggField?: string) =>
             setAlertParams('aggField', selectedAggField)
           }
@@ -373,6 +375,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         termSize={termSize}
         errors={errors}
         fields={esFields}
+        display="fullWidth"
         onChangeSelectedGroupBy={(selectedGroupBy) => setAlertParams('groupBy', selectedGroupBy)}
         onChangeSelectedTermField={(selectedTermField) =>
           setAlertParams('termField', selectedTermField)
@@ -395,6 +398,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold}
         errors={errors}
+        display="fullWidth"
         popupPosition={'upLeft'}
         onChangeSelectedThreshold={(selectedThresholds) =>
           setAlertParams('threshold', selectedThresholds)
@@ -407,6 +411,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         popupPosition={'upLeft'}
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
+        display="fullWidth"
         errors={errors}
         onChangeWindowSize={(selectedWindowSize: any) =>
           setAlertParams('timeWindowSize', selectedWindowSize)
