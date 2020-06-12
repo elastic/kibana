@@ -68,7 +68,7 @@ export async function GetFullEndpointExceptionList(
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exc
  */
-function translateToEndpointExceptions(exc: FoundExceptionListItemSchema): ExceptionsList[] {
+export function translateToEndpointExceptions(exc: FoundExceptionListItemSchema): ExceptionsList[] {
   const translated: ExceptionsList[] = [];
   // Transform to endpoint format
   exc.data.forEach((item) => {
