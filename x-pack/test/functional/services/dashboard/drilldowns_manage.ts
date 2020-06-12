@@ -27,10 +27,12 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
 
     async loadData() {
+      log.debug('loadData');
       await esArchiver.load('dashboard/drilldowns');
     }
 
     async unloadData() {
+      log.debug('unloadData');
       await esArchiver.unload('dashboard/drilldowns');
     }
 
