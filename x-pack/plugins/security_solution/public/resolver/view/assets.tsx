@@ -430,7 +430,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       backingFill: colorMap.processBackingFill,
       cubeSymbol: `#${SymbolIds.runningProcessCube}`,
       descriptionFill: colorMap.descriptionText,
-      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.runningProcess', {
+      descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.runningProcess', {
         defaultMessage: 'Running Process',
       }),
       isLabelFilled: true,
@@ -441,7 +441,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       backingFill: colorMap.triggerBackingFill,
       cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
       descriptionFill: colorMap.descriptionText,
-      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.runningTrigger', {
+      descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.runningTrigger', {
         defaultMessage: 'Running Trigger',
       }),
       isLabelFilled: true,
@@ -452,9 +452,12 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       backingFill: colorMap.processBackingFill,
       cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
       descriptionFill: colorMap.descriptionText,
-      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.terminatedProcess', {
-        defaultMessage: 'Terminated Process',
-      }),
+      descriptionText: i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.terminatedProcess',
+        {
+          defaultMessage: 'Terminated Process',
+        }
+      ),
       isLabelFilled: false,
       labelButtonFill: 'primary',
       strokeColor: `${theme.euiColorPrimary}33`, // 33 = 20% opacity
@@ -463,9 +466,12 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
       backingFill: colorMap.triggerBackingFill,
       cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
       descriptionFill: colorMap.descriptionText,
-      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.terminatedTrigger', {
-        defaultMessage: 'Terminated Trigger',
-      }),
+      descriptionText: i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.terminatedTrigger',
+        {
+          defaultMessage: 'Terminated Trigger',
+        }
+      ),
       isLabelFilled: false,
       labelButtonFill: 'danger',
       strokeColor: `${theme.euiColorDanger}33`,

@@ -138,7 +138,7 @@ const EdgeLineComponent = React.memo(
             textColor={colorMap.resolverEdgeText}
           >
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.edgeLineElapsedTime"
+              id="xpack.securitySolution.endpoint.resolver.elapsedTime"
               defaultMessage="{duration} {durationType}"
               values={{
                 duration: elapsedTime.duration,
