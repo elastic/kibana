@@ -13,7 +13,7 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { ComponentTemplateDeserialized } from '../types';
+import { ComponentTemplateDeserialized } from '../shared_imports';
 
 export interface ManageAction {
   name: string;

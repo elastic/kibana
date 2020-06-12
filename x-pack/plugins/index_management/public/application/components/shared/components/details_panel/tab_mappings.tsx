@@ -7,18 +7,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-
-import { ComponentTemplateDeserialized } from '../../types';
+import { Mappings } from '../../../../../../common';
 
 interface Props {
-  componentTemplateDetails: ComponentTemplateDeserialized;
+  mappings: Mappings | undefined;
 }
 
-export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
-  const {
-    template: { mappings },
-  } = componentTemplateDetails;
-
+export const TabMappings: React.FunctionComponent<Props> = ({ mappings }) => {
   if (mappings && Object.keys(mappings).length) {
     return (
       <div data-test-subj="mappingsTabContent">
@@ -31,7 +26,7 @@ export const TabMappings: React.FunctionComponent<Props> = ({ componentTemplateD
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.idxMgmt.componentTemplateDetails.mappingsTab.noMappingsTitle"
+          id="xpack.idxMgmt.mappingsTab.noMappingsTitle"
           defaultMessage="No mappings defined."
         />
       }

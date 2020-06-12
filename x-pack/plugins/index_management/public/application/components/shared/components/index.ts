@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TabSummary } from './tab_summary';
-export { TabAliases } from './tab_aliases';
-export { TabMappings } from './tab_mappings';
-export { TabSettings } from './tab_settings';
+export { TabAliases, TabMappings, TabSettings } from './details_panel';

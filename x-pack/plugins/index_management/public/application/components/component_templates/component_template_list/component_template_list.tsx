@@ -12,7 +12,7 @@ import { ScopedHistory } from 'kibana/public';
 
 import { SectionLoading } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
-import { ComponentTemplateDeserialized } from '../types';
+import { ComponentTemplateDeserialized } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplateDetailsFlyout } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
@@ -20,14 +20,13 @@ import { ComponentTable } from './table';
 import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
 
-interface MatchParams {
+interface Props {
   componentTemplateName?: string;
+  history: RouteComponentProps['history'];
 }
 
-export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { componentTemplateName },
-  },
+export const ComponentTemplateList: React.FunctionComponent<Props> = ({
+  componentTemplateName,
   history,
 }) => {
   const { api, trackMetric } = useComponentTemplatesContext();

@@ -8,17 +8,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
-import { ComponentTemplateDeserialized } from '../../types';
+import { Aliases } from '../../../../../../common';
 
 interface Props {
-  componentTemplateDetails: ComponentTemplateDeserialized;
+  aliases: Aliases | undefined;
 }
 
-export const TabAliases: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
-  const {
-    template: { aliases },
-  } = componentTemplateDetails;
-
+export const TabAliases: React.FunctionComponent<Props> = ({ aliases }) => {
   if (aliases && Object.keys(aliases).length) {
     return (
       <div data-test-subj="aliasesTabContent">
@@ -31,7 +27,7 @@ export const TabAliases: React.FunctionComponent<Props> = ({ componentTemplateDe
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.idxMgmt.componentTemplateDetails.aliasesTab.noAliasesTitle"
+          id="xpack.idxMgmt.aliasesTab.noAliasesTitle"
           defaultMessage="No aliases defined."
         />
       }

@@ -7,18 +7,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-
-import { ComponentTemplateDeserialized } from '../../types';
+import { IndexSettings } from '../../../../../../common';
 
 interface Props {
-  componentTemplateDetails: ComponentTemplateDeserialized;
+  settings: IndexSettings | undefined;
 }
 
-export const TabSettings: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
-  const {
-    template: { settings },
-  } = componentTemplateDetails;
-
+export const TabSettings: React.FunctionComponent<Props> = ({ settings }) => {
   if (settings && Object.keys(settings).length) {
     return (
       <div data-test-subj="settingsTabContent">
@@ -31,7 +26,7 @@ export const TabSettings: React.FunctionComponent<Props> = ({ componentTemplateD
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.idxMgmt.componentTemplateDetails.settingsTab.noSettingsTitle"
+          id="xpack.idxMgmt.settingsTab.noIndexSettingsTitle"
           defaultMessage="No settings defined."
         />
       }

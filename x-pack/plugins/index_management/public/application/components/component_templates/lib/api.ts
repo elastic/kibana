@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ComponentTemplateListItem, ComponentTemplateDeserialized } from '../types';
-import { UseRequestHook, SendRequestHook } from './request';
+import { ComponentTemplateListItem, ComponentTemplateDeserialized } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DELETE_MANY, UIM_COMPONENT_TEMPLATE_DELETE } from '../constants';
+import { UseRequestHook, SendRequestHook } from './request';
 
 export const getApi = (
   useRequest: UseRequestHook,

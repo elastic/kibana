@@ -19,23 +19,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { SectionLoading } from '../shared_imports';
-import { ComponentTemplateDeserialized } from '../types';
+import { SectionLoading, TabSettings, TabAliases, TabMappings } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
-import { TabSummary, TabSettings, TabAliases, TabMappings } from './tab_content';
+import { TabSummary } from './tab_summary';
 import { ComponentTemplateTabs, TabType, Tab } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
-
-const tabToComponentMap: {
-  [key: string]: React.FunctionComponent<{
-    componentTemplateDetails: ComponentTemplateDeserialized;
-  }>;
-} = {
-  [TabType.Summary]: TabSummary,
-  [TabType.Settings]: TabSettings,
-  [TabType.Mappings]: TabMappings,
-  [TabType.Aliases]: TabAliases,
-};
 
 interface Props {
   componentTemplateName: string;
@@ -85,7 +73,20 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
       </EuiCallOut>
     );
   } else if (componentTemplateDetails) {
-    const TabContent = tabToComponentMap[activeTab];
+    const {
+      template: { settings, mappings, aliases },
+    } = componentTemplateDetails;
+
+    const tabToComponentMap: {
+      [key: string]: React.ReactNode;
+    } = {
+      [TabType.Summary]: <TabSummary componentTemplateDetails={componentTemplateDetails} />,
+      [TabType.Settings]: <TabSettings settings={settings} />,
+      [TabType.Mappings]: <TabMappings mappings={mappings} />,
+      [TabType.Aliases]: <TabAliases aliases={aliases} />,
+    };
+
+    const tabContent = tabToComponentMap[activeTab];
 
     content = (
       <>
@@ -93,7 +94,7 @@ export const ComponentTemplateDetailsFlyout: React.FunctionComponent<Props> = ({
 
         <EuiSpacer size="l" />
 
-        <TabContent componentTemplateDetails={componentTemplateDetails} />
+        {tabContent}
       </>
     );
   }

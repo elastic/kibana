@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ComponentTemplatesProvider } from './component_templates_context';
-
-export { ComponentTemplateList } from './component_template_list';
-
-export { ComponentTemplateDetailsFlyout } from './component_template_details';
+export { TabAliases } from './tab_aliases';
+export { TabMappings } from './tab_mappings';
+export { TabSettings } from './tab_settings';

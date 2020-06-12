@@ -17,7 +17,7 @@ import {
 import { ScopedHistory } from 'kibana/public';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ComponentTemplateListItem } from '../types';
+import { ComponentTemplateListItem } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
