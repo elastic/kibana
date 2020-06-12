@@ -302,21 +302,28 @@ export class EndpointDocGenerator {
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     const processName = options.processName ? options.processName : randomProcessName();
-    const detailRecordForEventType = options.extensions || ((eventCategory) => {
-      if(eventCategory === 'registry'){
-        return {registry: {key: `HKLM/Windows/Software/${this.randomString(5)}`}}
-      }
-      if(eventCategory === 'network'){
-        return {network: {direction: this.randomChoice(['inbound','outbound']), forwarded_ip: `${this.randomIP()}`}}
-      }
-      if(eventCategory === 'file'){
-        return {file: {path: 'C:\\My Documents\\business\\January\\processName'}} 
-      }
-      if(eventCategory === 'dns'){
-        return {dns: {question: {name: `${this.randomIP()}`}}} 
-      }
-      return {};
-    })(options.eventCategory)
+    const detailRecordForEventType =
+      options.extensions ||
+      ((eventCategory) => {
+        if (eventCategory === 'registry') {
+          return { registry: { key: `HKLM/Windows/Software/${this.randomString(5)}` } };
+        }
+        if (eventCategory === 'network') {
+          return {
+            network: {
+              direction: this.randomChoice(['inbound', 'outbound']),
+              forwarded_ip: `${this.randomIP()}`,
+            },
+          };
+        }
+        if (eventCategory === 'file') {
+          return { file: { path: 'C:\\My Documents\\business\\January\\processName' } };
+        }
+        if (eventCategory === 'dns') {
+          return { dns: { question: { name: `${this.randomIP()}` } } };
+        }
+        return {};
+      })(options.eventCategory);
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
@@ -339,15 +346,20 @@ export class EndpointDocGenerator {
           status: 'trusted',
           subject_name: 'Microsoft',
         },
-        hash: { md5: this.seededUUIDv4()},
+        hash: { md5: this.seededUUIDv4() },
         entity_id: options.entityID ? options.entityID : this.randomString(10),
-        parent: options.parentEntityID ? { entity_id: options.parentEntityID, pid: options.parentPid ? options.parentPid : this.randomN(5000) } : undefined,
+        parent: options.parentEntityID
+          ? {
+              entity_id: options.parentEntityID,
+              pid: options.parentPid ? options.parentPid : this.randomN(5000),
+            }
+          : undefined,
         name: processName,
       },
       user: {
         domain: this.randomString(10),
         name: this.randomString(10),
-      }
+      },
     };
   }
 
