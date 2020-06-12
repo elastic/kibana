@@ -10,29 +10,19 @@ import { LibStrings } from '../../i18n';
 const { Palettes: strings } = LibStrings;
 
 /**
- * This type contains a unions of all supported palette labels, or the the name of
- * the palette the user would see in a UI.
+ * This type contains a unions of all supported palette ids.
  */
-export type PaletteLabel = typeof palettes[number]['label'];
-
-/**
- * This type contains a union of all supported palette values, or the collection of colors.
- */
-export type PaletteValue = typeof palettes[number]['colors'];
-
-/**
- *
- */
-export type PaletteGradient = typeof palettes[number]['gradient'];
+export type PaletteID = typeof palettes[number]['id'];
 
 /**
  * An interface representing a font in Canvas, with a textual label and the CSS
  * `font-value`.
  */
 export interface Palette {
-  label: PaletteLabel;
-  colors: PaletteValue;
-  gradient: PaletteGradient;
+  id: PaletteID;
+  label: string;
+  colors: string[];
+  gradient: boolean;
 }
 
 // This function allows one to create a strongly-typed palette for inclusion in
@@ -41,18 +31,20 @@ export interface Palette {
 // time.
 function createPalette<
   RawPalette extends {
-    colors: RawPaletteColors;
-    gradient: RawPaletteGradient;
-    label: RawPaletteLabel;
+    id: RawPaletteID;
   },
-  RawPaletteColors extends string[],
-  RawPaletteLabel extends string,
-  RawPaletteGradient extends boolean
+  RawPaletteID extends string
 >(palette: RawPalette) {
   return palette;
 }
 
-export const findPalette = (input: Pick<Palette, 'colors' | 'gradient'>): Palette | undefined => {
+/**
+ * Return a palette given a set of colors and gradient.  Returns undefined if the
+ * palette doesn't match.
+ */
+export const identifyPalette = (
+  input: Pick<Palette, 'colors' | 'gradient'>
+): Palette | undefined => {
   return palettes.find((palette) => {
     const { colors, gradient } = palette;
     return gradient === input.gradient && isEqual(colors, input.colors);
@@ -60,6 +52,7 @@ export const findPalette = (input: Pick<Palette, 'colors' | 'gradient'>): Palett
 };
 
 export const paulTor14 = createPalette({
+  id: 'paul_tor_14',
   label: 'Paul Tor 14',
   colors: [
     '#882E72',
@@ -81,6 +74,7 @@ export const paulTor14 = createPalette({
 });
 
 export const paulTor21 = createPalette({
+  id: 'paul_tor_21',
   label: 'Paul Tor 21',
   colors: [
     '#771155',
@@ -109,6 +103,7 @@ export const paulTor21 = createPalette({
 });
 
 export const earthTones = createPalette({
+  id: 'earth_tones',
   label: strings.getEarthTones(),
   colors: [
     '#842113',
@@ -128,6 +123,7 @@ export const earthTones = createPalette({
 });
 
 export const canvas = createPalette({
+  id: 'canvas',
   label: strings.getCanvas(),
   colors: [
     '#01A4A4',
@@ -145,6 +141,7 @@ export const canvas = createPalette({
 });
 
 export const colorBlind = createPalette({
+  id: 'color_blind',
   label: strings.getColorBlind(),
   colors: [
     '#1ea593',
@@ -162,72 +159,84 @@ export const colorBlind = createPalette({
 });
 
 export const elasticTeal = createPalette({
+  id: 'elastic_teal',
   label: strings.getElasticTeal(),
   colors: ['#7ECAE3', '#003A4D'],
   gradient: true,
 });
 
 export const elasticBlue = createPalette({
+  id: 'elastic_blue',
   label: strings.getElasticBlue(),
   colors: ['#C5FAF4', '#0F6259'],
   gradient: true,
 });
 
 export const elasticYellow = createPalette({
+  id: 'elastic_yellow',
   label: strings.getElasticYellow(),
   colors: ['#FFE674', '#4D3F00'],
   gradient: true,
 });
 
 export const elasticPink = createPalette({
+  id: 'elastic_pink',
   label: strings.getElasticPink(),
   colors: ['#FEA8D5', '#531E3A'],
   gradient: true,
 });
 
 export const elasticGreen = createPalette({
+  id: 'elastic_green',
   label: strings.getElasticGreen(),
   colors: ['#D3FB71', '#131A00'],
   gradient: true,
 });
 
 export const elasticOrange = createPalette({
+  id: 'elastic_orange',
   label: strings.getElasticOrange(),
   colors: ['#FFC68A', '#7B3F00'],
   gradient: true,
 });
 
 export const elasticPurple = createPalette({
+  id: 'elastic_purple',
   label: strings.getElasticPurple(),
   colors: ['#CCC7DF', '#130351'],
   gradient: true,
 });
 
 export const greenBlueRed = createPalette({
+  id: 'green_blue_red',
   label: strings.getGreenBlueRed(),
   colors: ['#D3FB71', '#7ECAE3', '#f03b20'],
   gradient: true,
 });
 
 export const yellowGreen = createPalette({
+  id: 'yellow_green',
   label: strings.getYellowGreen(),
   colors: ['#f7fcb9', '#addd8e', '#31a354'],
   gradient: true,
 });
 
 export const yellowBlue = createPalette({
+  id: 'yellow_blue',
   label: strings.getYellowBlue(),
   colors: ['#edf8b1', '#7fcdbb', '#2c7fb8'],
   gradient: true,
 });
 
 export const yellowRed = createPalette({
+  id: 'yellow_red',
   label: strings.getYellowRed(),
   colors: ['#ffeda0', '#feb24c', '#f03b20'],
   gradient: true,
 });
 
 export const instagram = createPalette({
+  id: 'instagram',
   label: strings.getInstagram(),
   colors: ['#833ab4', '#fd1d1d', '#fcb045'],
   gradient: true,

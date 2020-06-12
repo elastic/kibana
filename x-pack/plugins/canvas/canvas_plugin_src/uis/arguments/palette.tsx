@@ -12,7 +12,7 @@ import { ExpressionAstFunction, ExpressionAstExpression } from 'src/plugins/expr
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
-import { findPalette, Palette } from '../../../common/lib';
+import { identifyPalette, Palette } from '../../../common/lib';
 
 const { Palette: strings } = ArgumentStrings;
 
@@ -40,13 +40,18 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argValue, renderErro
       }) as string[];
 
       const gradient = get<boolean>(chain[0].arguments.gradient, '[0]');
-      const palette = findPalette({ colors, gradient });
+      const palette = identifyPalette({ colors, gradient });
 
       if (palette) {
         return palette;
       }
 
-      return ({ label: 'Custom', colors, gradient } as any) as Palette;
+      return ({
+        id: 'custom',
+        label: strings.getCustomPaletteLabel(),
+        colors,
+        gradient,
+      } as any) as Palette;
     } catch (e) {
       renderError();
     }
