@@ -150,3 +150,8 @@ export interface CacheOptions {
   max: number;
   maxAge: number;
 }
+
+export interface CacheBounds {
+  min: number;
+  max: number;
+}

@@ -273,9 +273,7 @@ export class EsQueryParser {
               );
             }
             const bounds = this._timeCache.getTimeBounds();
-            obj.interval = EsQueryParser._roundInterval(
-              (bounds.max!.valueOf() - bounds.min!.valueOf()) / size
-            );
+            obj.interval = EsQueryParser._roundInterval((bounds.max - bounds.min) / size);
             continue;
           }
 

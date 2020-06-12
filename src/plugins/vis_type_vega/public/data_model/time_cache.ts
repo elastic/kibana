@@ -19,6 +19,7 @@
 
 import { TimefilterContract, TimeRangeBounds } from '../../../data/public';
 import { TimeRange } from '../../../data/common';
+import { CacheBounds } from './types';
 
 /**
  * Optimization caching - always return the same value if queried within this time
@@ -33,7 +34,7 @@ const AlwaysCacheMaxAge: number = 40;
 export class TimeCache {
   _timefilter: TimefilterContract;
   _maxAge: number;
-  _cachedBounds?: TimeRangeBounds;
+  _cachedBounds?: CacheBounds;
   _cacheTS: number;
   _timeRange?: TimeRange;
 
@@ -53,10 +54,10 @@ export class TimeCache {
    * Get cached time range values
    * @returns {{min: number, max: number}}
    */
-  getTimeBounds(): TimeRangeBounds {
+  getTimeBounds(): CacheBounds {
     const ts = this._now();
 
-    let bounds: TimeRangeBounds | null = null;
+    let bounds: CacheBounds | null = null;
     if (this._cachedBounds) {
       const diff = ts - this._cacheTS;
 
@@ -71,8 +72,8 @@ export class TimeCache {
       if (diff < this._maxAge) {
         bounds = this._getBounds();
         if (
-          Math.abs(bounds.min!.valueOf() - this._cachedBounds.min!.valueOf()) < this._maxAge &&
-          Math.abs(bounds.max!.valueOf() - this._cachedBounds.max!.valueOf()) < this._maxAge
+          Math.abs(bounds.min - this._cachedBounds.min) < this._maxAge &&
+          Math.abs(bounds.max - this._cachedBounds.max) < this._maxAge
         ) {
           return this._cachedBounds;
         }
@@ -94,11 +95,11 @@ export class TimeCache {
    * @returns {{min: number, max: number}}
    * @private
    */
-  _getBounds(): TimeRangeBounds {
+  _getBounds(): CacheBounds {
     const bounds = this._timefilter.calculateBounds(this._timeRange!);
     return {
-      min: bounds.min,
-      max: bounds.max,
+      min: bounds.min!.valueOf(),
+      max: bounds.max!.valueOf(),
     };
   }
 }
