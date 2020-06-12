@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Readable } from 'stream';
+
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
@@ -13,14 +15,22 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import {
-  ImportListItemHapiFileSchema,
-  importListItemQuerySchema,
-  importListItemSchema,
-  listSchema,
-} from '../../common/schemas';
+import { importListItemQuerySchema, importListItemSchema, listSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
+
+export interface HapiReadableStream extends Readable {
+  hapi: {
+    filename: string;
+  };
+}
+
+/**
+ * Special interface since we are streaming in a file through a reader
+ */
+export interface ImportListItemHapiFileSchema {
+  file: HapiReadableStream;
+}
 
 export const importListItemRoute = (router: IRouter): void => {
   router.post(
