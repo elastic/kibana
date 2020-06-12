@@ -733,7 +733,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiGroup JobService
    *
    * @api {post} /api/ml/jobs/revert_model_snapshot Revert model snapshot
-   * @apiName TopCategories
+   * @apiName RevertModelSnapshot
    * @apiDescription Reverts a job to a specified snapshot. Also allows the job to replayed to a specified date and to auto create calendars to skip analysis of specified date ranges
    *
    * @apiSchema (body) revertModelSnapshotSchema

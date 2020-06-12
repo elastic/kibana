@@ -178,16 +178,16 @@ export const getOverallBucketsSchema = schema.object({
 });
 
 export const getCategoriesSchema = schema.object({
-  /** Category id */
+  /** Category ID */
   categoryId: schema.string(),
-  /** Job id */
+  /** Job ID */
   jobId: schema.string(),
 });
 
 export const getModelSnapshotsSchema = schema.object({
-  /** Snapshot id */
+  /** Snapshot ID */
   snapshotId: schema.maybe(schema.string()),
-  /** Job id */
+  /** Job ID */
   jobId: schema.string(),
 });
 

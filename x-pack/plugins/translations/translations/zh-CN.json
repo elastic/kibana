@@ -10459,7 +10459,6 @@
     "xpack.ml.navMenu.dataVisualizerTabLinkText": "数据可视化工具",
     "xpack.ml.navMenu.overviewTabLinkText": "概览",
     "xpack.ml.navMenu.settingsTabLinkText": "设置",
-    "xpack.ml.newJi18n(ob.recognize.jobsCreationFailed.resetButtonAriaLabel": "重置",
     "xpack.ml.newJob.page.createJob": "创建作业",
     "xpack.ml.newJob.recognize.advancedLabel": "高级",
     "xpack.ml.newJob.recognize.advancedSettingsAriaLabel": "高级设置",

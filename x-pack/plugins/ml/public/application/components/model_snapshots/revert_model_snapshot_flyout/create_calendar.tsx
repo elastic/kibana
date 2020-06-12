@@ -18,6 +18,7 @@
 
 import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -131,7 +132,12 @@ export const CreateCalendar: FC<Props> = ({
   return (
     <>
       <EuiSpacer size="l" />
-      <div>Select time range for calendar event.</div>
+      <div>
+        <FormattedMessage
+          id="xpack.ml.revertModelSnapshotFlyout.createCalendar.title"
+          defaultMessage="Select time range for calendar event."
+        />
+      </div>
       <EuiSpacer size="m" />
       <Chart
         eventRateData={eventRateData}

@@ -120,7 +120,8 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
                 >
                   <FormattedMessage
                     id="xpack.ml.editModelSnapshotFlyout.calloutText"
-                    defaultMessage="This is the current snapshot being used by job THING and so cannot be deleted."
+                    defaultMessage="This is the current snapshot being used by job {jobId} and so cannot be deleted."
+                    values={{ jobId: job.job_id }}
                   />
                 </EuiCallOut>
               </>

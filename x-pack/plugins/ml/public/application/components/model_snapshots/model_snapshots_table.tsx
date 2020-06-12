@@ -69,9 +69,13 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   async function checkJobIsClosed(snapshot: ModelSnapshot) {
     const state = await getCombinedJobState(job.job_id);
     if (state === COMBINED_JOB_STATE.UNKNOWN) {
-      // show toast
+      // this will only happen if the job has been deleted by another user
+      // between the time the row has been expended and now
+      // eslint-disable-next-line no-console
+      console.error(`Error retrieving state for job ${job.job_id}`);
       return;
     }
+
     setCombinedJobState(state);
 
     if (state === COMBINED_JOB_STATE.CLOSED) {
@@ -168,7 +172,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
             defaultMessage: 'Revert',
           }),
           description: i18n.translate('xpack.ml.modelSnapshotTable.actions.revert.description', {
-            defaultMessage: 'Revert this snapshot',
+            defaultMessage: 'Revert to this snapshot',
           }),
           enabled: () => canCreateJob && canStartStopDatafeed,
           type: 'icon',
@@ -268,9 +272,22 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
             defaultFocusedButton="confirm"
           >
             <p>
+              {combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING && (
+                <FormattedMessage
+                  id="xpack.ml.modelSnapshotTable.closeJobConfirm.contentOpenAndRunning"
+                  defaultMessage="Job is currently open and running."
+                />
+              )}
+              {combinedJobState === COMBINED_JOB_STATE.OPEN_AND_STOPPED && (
+                <FormattedMessage
+                  id="xpack.ml.modelSnapshotTable.closeJobConfirm.contentOpen"
+                  defaultMessage="Job is currently open."
+                />
+              )}
+              <br />
               <FormattedMessage
                 id="xpack.ml.modelSnapshotTable.closeJobConfirm.content"
-                defaultMessage="Job is currently "
+                defaultMessage="Snapshot revert can only happen on jobs which are closed."
               />
             </p>
           </EuiConfirmModal>

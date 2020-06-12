@@ -170,7 +170,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <h5>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.title"
-                defaultMessage="Revert snapshot {ssId}"
+                defaultMessage="Revert to model snapshot {ssId}"
                 values={{ ssId: currentSnapshot.snapshot_id }}
               />
             </h5>
@@ -260,7 +260,12 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
 
           <EuiFormRow
             fullWidth
-            helpText="Reopen job and replay analysis after the revert has been applied."
+            helpText={i18n.translate(
+              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.replaySwitchHelp',
+              {
+                defaultMessage: 'Reopen job and replay analysis after the revert has been applied.',
+              }
+            )}
           >
             <EuiSwitch
               id="replaySwitch"
@@ -279,14 +284,13 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <>
               <EuiFormRow
                 fullWidth
-                helpText={
-                  runInRealTime
-                    ? 'Job will continue to run until manually stopped. All new data added to the index will be analyzed.'
-                    : `Job will run for the same length of time as it is currently (${formatDate(
-                        job.data_counts.latest_record_timestamp,
-                        TIME_FORMAT
-                      )}). It will then stop and close.`
-                }
+                helpText={i18n.translate(
+                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchHelp',
+                  {
+                    defaultMessage:
+                      'Job will continue to run until manually stopped. All new data added to the index will be analyzed.',
+                  }
+                )}
               >
                 <EuiSwitch
                   id="realTimeSwitch"
@@ -303,8 +307,13 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
 
               <EuiFormRow
                 fullWidth
-                helpText="Create a new calendar and event to skip over a period of time when analyzing the data."
-                // helpText="Create a new calendar and event to skip over a period of time when analyzing the data. To use an existing calendar, do not use this setting and ensure the existing calendar is attached to the job before rerunning it."
+                helpText={i18n.translate(
+                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchHelp',
+                  {
+                    defaultMessage:
+                      'Create a new calendar and event to skip over a period of time when analyzing the data.',
+                  }
+                )}
               >
                 <EuiSwitch
                   id="createCalendarSwitch"
