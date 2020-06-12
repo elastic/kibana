@@ -1,7 +1,7 @@
 [[whats-new]]
 == What's new in {kib} {minor-version}
 ++++
-<titleabbrev>What's new in 7.8</titleabbrev>
+<titleabbrev>What's new in {minor-version}</titleabbrev>
 ++++
 
 
@@ -10,25 +10,9 @@ coming[7.8.0]
 Each release of Kibana brings new features and product improvements.
 Here are the highlights of the feature and user experience changes in 7.8.
 
-* <<navigation-7-8, Side navigation organized around use cases>>
-* <<file-upload-7-8, Increased limit for file upload>>
-* <<dashboard-first-7-8, Dashboard first experience>>
-* <<dashboard-clone-7-8, Clone a dashboard>>
-* <<dashboard-to-dashboard-7-8, Dashboard-to-dashboard drilldowns>>
-* <<lens-7-8, New visualizations for Lens>>
-* <<canvas-7-8, Menu updates for Canvas>>
-* <<maps-7-8, Dedicated solution layer for Maps>>
-* <<ingest-node-pipeline-7-8, Ingest node pipeline builder>>
-
-
-Previous highlights
-
-{kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+Other versions: {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
 {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
 | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-
-
 
 
 //NOTE: The notable-highlights tagged regions are re-used in the
@@ -38,67 +22,73 @@ Previous highlights
 
 [float]
 [[navigation-7-8]]
-=== Side navigation organized around use cases
+=== Side navigation organized by use cases
 
-{kib} has a simpler, more organized navigation for guiding you
-through the apps and completing your tasks.  The new nav bar groups
-solutions by category. For example, the Observability category
-includes Logs, Metrics, APM, and Uptime . The nav also includes
-Recently viewed to easily
-access to previous projects. Hidden by default, the nav bar is accessible
-with a single click on the hamburger menu.
+{kib} has a cleaner, more organized navigation for guiding you
+through the apps and completing your tasks.  The new sidebar groups
+solutions by category. For example, the *Observability* category
+includes Logs, Metrics, APM, and Uptime. The sidebar also includes
+*Recently viewed* to easily
+access previous projects.
+
+Hidden by default, the sidebar is accessible
+with a single click on the hamburger menu.  The *Dock Navigation* button
+at the bottom of the sidebar will keep things in plain sight, if that is what you prefer.
 
 [role="screenshot"]
 image:images/whats-new/7-8-navigation.png[Kibana side navigation organized by category]
-
-
-[float]
-[[file-upload-7-8]]
-=== Increased limit for file upload
-
-The File Data Visualizer now enables you to ingest larger CSV, JSON, and log files.
-The upload limit increased from 100 MB to 1 GB. You can configure this value in
-{kibana-ref}/advanced-options.html[Advanced Settings].
-
 
 [float]
 [[dashboard-first-7-8]]
 === Dashboard first experience
 
-This release simplifies the workflow for updating the visualizations in a dashboard.
-You can open a visualization editor directly from the dashboard and then
+In 7.7, {kibana-ref}/dashboard-create-new-dashboard.html[dashboards] became a starting point for
+creating visualizations.
+Building on that experience, the 7.8 release introduces a simplified workflow
+for editing a dashboard.
+You can now open the visualization editor directly from the dashboard, and then
 automatically return to the dashboard when you save the changes.
-Your focus remains on analyzing the data instead of moving between applications.
+This keeps you focused on analyzing the data.
 
+[role="screenshot"]
+image:images/whats-new/7-8-dashboard-first.png[Edit visualization from dashboard]
 
 [float]
 [[dashboard-clone-7-8]]
-=== Clone a Dashboard
-You can clone a dashboard and then look at that data
-in a different chart.  Clone enables you to quickly view your data from a
-different angle.
+=== Cloning of dashboard elements
+{kib} now lets you {kibana-ref}/dashboard-create-new-dashboard.html#cloning-a-panel[create an identical copy] of
+any panel on the dashboard.
+You can modify the visualization in the new panel as needed, and then save your changes.
+This enables you to quickly view your data from a
+new angle.
 
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
 
 [float]
 [[dashboard-to-dashboard-7-8]]
 === Dashboard-to-dashboard drilldowns
 
-Drilldowns allow you to configure a custom
-workflow for analyzing and troubleshooting your data. Using a drilldown,
-you can navigate from one dashboard to another, taking the current time range,
-filters, and other parameters with you. The context remains the same, so
-you can continue your analysis from a new perspective.  For example, you might
-Have an Uptime monitoring dashboard and provide drill downs from a a high-level
-Dashboard to a more granular analyses that incorporates data like APM, logs, or infrastructure.
+With 7.8, {kib} delivers {kibana-ref}/drilldowns.html[drilldowns], which enable you to create
+custom navigation paths between dashboards. Drilldowns
+work well when you have multiple dashboards that support different audiences
+or provide different levels of analysis. For example, you might
+have a dashboard that shows the overall status of multiple data centers
+and create a drilldown that navigates to a dashboard for a single data center or server.
+Drilldown paths are available to all users who view the dashboard.
+
+[role="screenshot"]
+image::drilldowns/images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+
 
 [float]
 [[lens-7-8]]
 === New visualizations for Lens
 
-Lens introduces three new visualization types: pie charts, donut charts, and treemaps.  New
-to Kibana, a treemap provides a hierarchical view of your data and works well
-for visualizing part-to-whole relationships when there
-is a large amount of categories.
+{kibana-ref}/lens.html[Lens] introduces three new visualization types: pie chart, donut chart, and treemap.  New
+to {kib}, a treemap provides a hierarchical view of your data.
+This visualization type works well
+for showing part-to-whole relationships.
 
 [role="screenshot"]
 image:images/whats-new/7-8-treemap.png[Treemap visualization]
@@ -108,46 +98,89 @@ image:images/whats-new/7-8-treemap.png[Treemap visualization]
 [[canvas-7-8]]
 === Menu updates for Canvas
 
-Canvas has a new top-level menu that makes it easier for you to find the actions you need.
-The updated menu gives you access to charts and maps so you can easily embed them in your workload.
-The updated menu also makes it easier to find new capabilities added to Kibana, such as
-the addition of Lens to Canvas.
+{kibana-ref}/lens.html[Canvas] has a new top-level menu that makes it easier for you to find the actions you need.
+This menu provides access to charts and maps,
+so you can quickly embed them in your workload.
+The menu also includes actions for viewing, editing, and sharing your data.
 
 [role="screenshot"]
 image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
-
 
 [float]
 [[maps-7-8]]
 === Dedicated solution layer for Maps
 
-When adding a layer to a map, you are now present with an Observability layer if you have APM indices
-In the Elastic Common Schema.  You can select either APM RUM Performance or APM RUN traffic
+Elastic Maps has a new feature that supports Observability
+practitioners who work with real user monitoring (RUM) data.
+If the {ecs-ref}/ecs-reference.html[Elastic Common Schema] includes APM indices,
+you are presented with an
+option to create an Observability layer.
+You can select
+APM RUM Performance or APM RUM Traffic, and Elastic Maps
+overlays it on your geoanalysis.
 
-Elastic Maps now has a solution layer for Observability. With two clicks, you
-get a meaningful layer of your APM data so you can look at APM RUM performance
-and traffic.
+[role="screenshot"]
+image:images/whats-new/7-8-maps.png[Observability layer for Maps]
+
 
 [float]
 [[ingest-node-pipeline-7-8]]
 === Ingest Node pipeline builder
 
-With the Ingest Node pipeline builder, you can
-create and manage Elasticsearch pipelines
-that perform common transformations and enrichments on your data.
-For example, you might remove a field, rename an existing field,
-or set a new field.you to view all of your data pipelines.
-You can create, delete, and edit pipelines
-using a JSON editor. view a  You can test how a pipeline and its processors
+Ingesting data into the Elastic Stack
+is easier with the new {kibana-ref}/ingest-node-pipelines.html[Ingest Node Pipeline builder].
+This UI shows all your
+data piplelines in a single view and enables you to drill down into detais.
+You can create a pipeline and define the tasks it performs, such
+as renaming an existing field or setting a new field.
+You can also test how a pipeline and its processors
 transform data before putting it into production.
 
 [role="screenshot"]
-image:images/whats-new/7-8-ingest-node.png[Ingest Node Pipeline UI]
+image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processors for Ingest Node Pipelines"]
+
+[float]
+[[alerting-7-8]]
+=== Preconfigured connectors for alerting
+
+The 7.7 release introduced a new system fo handing alerting.  This release adds support for
+{kibana-ref}/pre-configured-action-types-and-connectors.html[preconfiguring a connector]
+to automatically start up with {kib}.
+Preconfigured connectors are available in every {kib} space, and require no additional
+configuration after initialization.
+This capability allows you to pre-plumb alert connections
+directly into Slack channels or designated email services.
+
+[role="screenshot"]
+image::user/alerting/images/pre-configured-connectors-managing.png[Connectors managing tab with pre-cofigured]
+
+[float]
+[[file-upload-7-8]]
+=== Increased limit for file upload
+
+The upload limit for the File Data Visualizer increased from 100 MB to 1 GB,
+so you can ingest even larger CSV, JSON, and log files.
+To configure this value, go to
+{kibana-ref}/advanced-options.html[Advanced Settings].
+
+[role="screenshot"]
+image::images/add-data-fv.png[File Data Visualizer]
 
 
 // end::notable-highlights[]
 
 [float]
-=== Release notes and breaking changes
-Check out the <<release-notes>> and
-<<breaking-changes>> for the full list of changes in {minor-version}.
+=== Learn more
+Get details on these release highlights and more in the Kibana {minor-version} release blog.
+For a complete list of enhancements and other changes in {minor-version}, check out the <<release-notes>> and
+<<breaking-changes>>.
+
+
+[float]
+=== Give {minor-version} a try
+
+Try {minor-version} now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].
