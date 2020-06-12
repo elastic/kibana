@@ -18,7 +18,7 @@ import {
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
 import { SymbolIds, useResolverTheme, NodeStyleMap, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -433,27 +433,33 @@ const ProcessEventDotComponents = React.memo(
      * e.g. "10 DNS", "230 File"
      */
     const relatedEventOptions = useMemo(() => {
+      const relatedStatsList = [];
+
       if (!relatedEventsStats) {
         // Return an empty set of options if there are no stats to report
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
-      return Object.entries(relatedEventsStats.events.byCategory).map(([category, total]) => {
-        const displayName = getDisplayName(category);
-        return {
-          prefix: <EuiI18nNumber value={total || 0} />,
-          optionTitle: `${displayName}`,
-          action: () => {
-            dispatch({
-              type: 'userSelectedRelatedEventCategory',
-              payload: {
-                subject: event,
-                category,
-              },
-            });
-          },
-        };
-      });
+      for (const category in relatedEventsStats.events.byCategory) {
+        if (Object.hasOwnProperty.call(relatedEventsStats.events.byCategory, category)) {
+          const total = relatedEventsStats.events.byCategory[category];
+          const displayName = getDisplayName(category);
+          relatedStatsList.push({
+            prefix: <EuiI18nNumber value={total || 0} />,
+            optionTitle: `${displayName}`,
+            action: () => {
+              dispatch({
+                type: 'userSelectedRelatedEventCategory',
+                payload: {
+                  subject: event,
+                  category,
+                },
+              });
+            },
+          });
+        }
+      }
+      return relatedStatsList;
     }, [relatedEventsStats, dispatch, event]);
 
     const relatedEventStatusOrOptions = (() => {
