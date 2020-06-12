@@ -107,6 +107,7 @@ describe('state selectors', () => {
         loading: false,
       },
     },
+    selectedFilters: null,
   };
 
   it('selects base path from state', () => {

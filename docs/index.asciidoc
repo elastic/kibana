@@ -26,8 +26,6 @@ include::accessibility.asciidoc[]
 
 include::limitations.asciidoc[]
 
-include::release-notes/highlights.asciidoc[]
-
 include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
