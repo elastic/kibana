@@ -14,6 +14,12 @@ import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
 import { registerReportingUsageCollector } from './usage';
 
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    reporting?: ReportingCore | null;
+  }
+}
+
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
   private readonly initializerContext: PluginInitializerContext<ReportingConfigType>;
@@ -27,6 +33,14 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    core.http.registerRouteHandlerContext('reporting', () => {
+      if (this.reportingCore.pluginIsStarted()) {
+        return this.reportingCore;
+      } else {
+        return null;
+      }
+    });
+
     const { elasticsearch, http } = core;
     const { licensing, security } = plugins;
     const { initializerContext: initContext, reportingCore } = this;
@@ -67,7 +81,7 @@ export class ReportingPlugin
 
     // async background start
     (async () => {
-      await this.reportingCore.pluginIsSetup();
+      await this.reportingCore.pluginSetsUp();
       const config = reportingCore.getConfig();
 
       const browserDriverFactory = await initializeBrowserDriverFactory(config, logger);

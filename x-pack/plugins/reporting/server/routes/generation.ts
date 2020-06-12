@@ -27,6 +27,11 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
    * Generates enqueued job details to use in responses
    */
   const handler: HandlerFunction = async (user, exportTypeId, jobParams, context, req, res) => {
+    // ensure the async dependencies are loaded
+    if (!context.reporting) {
+      return res.custom({ statusCode: 503, body: 'Not Available' });
+    }
+
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 

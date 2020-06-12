@@ -22,6 +22,10 @@ interface ListQuery {
 }
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
+const handleUnavailable = (res: any) => {
+  return res.custom({ statusCode: 503, body: 'Not Available' });
+};
+
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
@@ -34,6 +38,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       validate: false,
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
@@ -64,6 +73,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       validate: false,
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
@@ -91,6 +105,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
@@ -131,6 +150,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return res.custom({ statusCode: 503 });
+      }
+
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
@@ -178,6 +202,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
@@ -199,6 +228,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },

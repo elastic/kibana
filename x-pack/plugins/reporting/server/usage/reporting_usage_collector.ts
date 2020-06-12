@@ -78,7 +78,7 @@ export function registerReportingUsageCollector(
       )
       .toPromise();
   };
-  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
+  const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
 
   const collector = getReportingUsageCollector(
     reporting,

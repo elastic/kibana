@@ -60,7 +60,7 @@ export class ReportingCore {
     this.pluginStart$.next(reportingStartDeps);
   }
 
-  public async pluginIsSetup(): Promise<boolean> {
+  public async pluginSetsUp(): Promise<boolean> {
     // use deps and config as a cached resolver
     if (this.pluginSetupDeps && this.config) {
       return true;
@@ -68,8 +68,12 @@ export class ReportingCore {
     return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
-  public async pluginHasStarted(): Promise<boolean> {
+  public async pluginStartsUp(): Promise<boolean> {
     return await this.getPluginStartDeps().then(() => true);
+  }
+
+  public pluginIsStarted() {
+    return this.pluginStartDeps !== undefined;
   }
 
   public setConfig(config: ReportingConfig) {
