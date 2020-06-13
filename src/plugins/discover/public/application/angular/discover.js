@@ -66,7 +66,6 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
   esFilters,
-  fieldFormats,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
@@ -848,7 +847,7 @@ function discoverController(
       x: {
         accessor: 0,
         label: agg.makeLabel(),
-        format: fieldFormats.serialize(agg),
+        format: agg.toSerializedFieldFormat(),
         params: {
           date: true,
           interval: moment.duration(esValue, esUnit),
@@ -860,7 +859,7 @@ function discoverController(
       },
       y: {
         accessor: 1,
-        format: fieldFormats.serialize(metric),
+        format: metric.toSerializedFieldFormat(),
         label: metric.makeLabel(),
       },
     };
