@@ -13,7 +13,43 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
+import { useResolverTheme } from './assets';
 
+interface StyledGraphControls {
+  graphControlsBackground: string;
+  graphControlsIconColor: string;
+}
+
+const StyledGraphControls = styled.div<StyledGraphControls>`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: ${(props) => props.graphControlsBackground};
+  color: ${(props) => props.graphControlsIconColor};
+
+  .zoom-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 0px;
+
+    .zoom-slider {
+      width: 20px;
+      height: 150px;
+      margin: 5px 0px 2px 0px;
+
+      input[type='range'] {
+        width: 150px;
+        height: 20px;
+        transform-origin: 75px 75px;
+        transform: rotate(-90deg);
+      }
+    }
+  }
+  .panning-controls {
+    text-align: center;
+  }
+`;
 /**
  * Controls for zooming, panning, and centering in Resolver
  */
@@ -29,6 +65,7 @@ const GraphControlsComponent = React.memo(
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const scalingFactor = useSelector(selectors.scalingFactor);
     const { timestamp } = useContext(SideEffectContext);
+    const { colorMap } = useResolverTheme();
 
     const handleZoomAmountChange = useCallback(
       (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
@@ -83,7 +120,11 @@ const GraphControlsComponent = React.memo(
     }, [dispatch, timestamp]);
 
     return (
-      <div className={className}>
+      <StyledGraphControls
+        className={className}
+        graphControlsBackground={colorMap.graphControlsBackground}
+        graphControlsIconColor={colorMap.graphControls}
+      >
         <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
           <div className="panning-controls-top">
             <button
@@ -149,40 +190,11 @@ const GraphControlsComponent = React.memo(
             <EuiIcon type="minusInCircle" />
           </button>
         </EuiPanel>
-      </div>
+      </StyledGraphControls>
     );
   }
 );
 
 GraphControlsComponent.displayName = 'GraphControlsComponent';
 
-export const GraphControls = styled(GraphControlsComponent)`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: #d4d4d4;
-  color: #333333;
-
-  .zoom-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 5px 0px;
-
-    .zoom-slider {
-      width: 20px;
-      height: 150px;
-      margin: 5px 0px 2px 0px;
-
-      input[type='range'] {
-        width: 150px;
-        height: 20px;
-        transform-origin: 75px 75px;
-        transform: rotate(-90deg);
-      }
-    }
-  }
-  .panning-controls {
-    text-align: center;
-  }
-`;
+export const GraphControls = GraphControlsComponent;
