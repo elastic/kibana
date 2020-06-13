@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiButton, EuiPopover, ButtonColor, htmlIdGenerator } from '@elastic/eui';
+import { EuiI18nNumber, EuiSelectable, EuiButton, EuiPopover, ButtonColor, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
@@ -201,7 +201,7 @@ const NodeSubMenuComponents = React.memo(
         iconSide="right"
         tabIndex={-1}
       >
-        {menuTitle}
+        {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
       </EuiButton>
     );
 
