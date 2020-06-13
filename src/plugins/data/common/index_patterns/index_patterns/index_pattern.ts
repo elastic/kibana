@@ -414,7 +414,7 @@ export class IndexPattern implements IIndexPattern {
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {
-        const duplicatePattern = new IndexPattern(this.id, {
+        const duplicatePattern = new IndexPattern(duplicateId, {
           getConfig: this.getConfig,
           savedObjectsClient: this.savedObjectsClient,
           apiClient: this.apiClient,
