@@ -11,6 +11,9 @@ start(core: CoreStart): {
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("kibana/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
+        indexPatterns: {
+            IndexPatternsServiceFactory: (kibanaRequest: import("kibana/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
+        };
     };
 ```
 
@@ -25,6 +28,9 @@ start(core: CoreStart): {
 `{
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("kibana/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
+        };
+        indexPatterns: {
+            IndexPatternsServiceFactory: (kibanaRequest: import("kibana/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
         };
     }`
 

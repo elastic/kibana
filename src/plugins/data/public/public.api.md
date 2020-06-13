@@ -67,7 +67,6 @@ import { GetTemplateParams } from 'elasticsearch';
 import { History } from 'history';
 import { Href } from 'history';
 import { HttpSetup } from 'src/core/public';
-import { HttpStart } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IndexDocumentParams } from 'elasticsearch';
 import { IndicesAnalyzeParams } from 'elasticsearch';
@@ -979,7 +978,7 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, }: IndexPatternDeps);
+    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, uiSettingsValues, }: IndexPatternDeps);
     // (undocumented)
     [key: string]: any;
     // (undocumented)

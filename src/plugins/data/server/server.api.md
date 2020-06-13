@@ -628,6 +628,9 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("kibana/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
+        indexPatterns: {
+            IndexPatternsServiceFactory: (kibanaRequest: import("kibana/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
+        };
     };
     // (undocumented)
     stop(): void;
