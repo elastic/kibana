@@ -61,13 +61,7 @@ export class BundleRefModule extends Module {
     return `
       __webpack_require__.r(__webpack_exports__);
       var ns = __kbnBundles__.get('${this.exportId}');
-      var descriptor = Object.getOwnPropertyDescriptors(ns);
-      Object.keys(descriptor).forEach(function (key) {
-        var desc = descriptor[key]
-        if (desc.get) {
-          __webpack_require__.d(__webpack_exports__, key, desc.get)
-        }
-      })
+      Object.defineProperties(__webpack_exports__, Object.getOwnPropertyDescriptors(ns))
     `;
   }
 

@@ -7,7 +7,7 @@ window.__kbnBundles__ = (function () {
   var modules = {};
 
   function has(prop) {
-    return Object.prototype.hasOwnProperty.call(modules, prop)
+    return Object.prototype.hasOwnProperty.call(modules, prop);
   }
 
   function define(key, bundleRequire, bundleModuleKey) {
@@ -26,7 +26,7 @@ window.__kbnBundles__ = (function () {
       throw new Error('__kbnBundles__ does not have a module defined for "' + key + '"');
     }
 
-    return modules[key].bundleRequire(modules[key].bundleModuleKey)
+    return modules[key].bundleRequire(modules[key].bundleModuleKey);
   }
 
   return { has: has, define: define, get: get };
