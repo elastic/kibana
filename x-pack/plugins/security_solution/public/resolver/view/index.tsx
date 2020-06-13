@@ -53,9 +53,9 @@ const StyledResolver = styled.div<StyledResolver>`
 
 const StyledPanel = styled(Panel)`
   position: absolute;
-  left: 1em;
-  top: 1em;
-  max-height: calc(100% - 2em);
+  left: 0;
+  top: 0;
+  bottom: 0;
   overflow: auto;
   width: 25em;
   max-width: 50%;
