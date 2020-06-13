@@ -24,9 +24,9 @@ import {
   md5HashForProcess,
   argsForProcess,
 } from '../../models/process_event';
-import { cubeAssetsForNode } from '../process_event_dot';
 import { CubeForProcess } from './process_cube_icon';
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import { useResolverTheme } from '../assets';
 
 const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -110,6 +110,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       },
     ];
   }, [processName, pushToQueryParams]);
+  const { cubeAssetsForNode } = useResolverTheme();
   const { descriptionText } = useMemo(() => {
     if (!processEvent) {
       return { descriptionText: '' };
