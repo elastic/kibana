@@ -462,12 +462,14 @@ const ProcessEventDotComponents = React.memo(
                   category,
                 },
               });
+
+              pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
             },
           });
         }
       }
       return [relatedStatsList, runningTotal];
-    }, [relatedEventsStats, dispatch, event]);
+    }, [relatedEventsStats, dispatch, event, pushToQueryParams, selfEntityId]);
 
     const relatedEventStatusOrOptions = (() => {
       if (!relatedEventsStats) {

@@ -40,11 +40,16 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     };
   } else if (action.type === 'userRequestedRelatedEventData') {
     state.relatedEventsReady.set(action.payload, false);
-    return state;
+    return {
+      ...state,
+      relatedEventsReady: new Map(state.relatedEventsReady.set(action.payload, false)),
+    };
   } else if (action.type === 'serverReturnedRelatedEventData') {
-    state.relatedEventsReady.set(action.payload.entityID, true);
-    state.relatedEvents.set(action.payload.entityID, action.payload);
-    return state;
+    return {
+      ...state,
+      relatedEventsReady: new Map(state.relatedEventsReady.set(action.payload.entityID, true)),
+      relatedEvents: new Map(state.relatedEvents.set(action.payload.entityID, action.payload)),
+    };
   } else {
     return state;
   }

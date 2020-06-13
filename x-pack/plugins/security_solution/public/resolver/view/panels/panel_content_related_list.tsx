@@ -98,7 +98,9 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     }
   );
 
-  const relatedsReady = useSelector(selectors.relatedEventsReady).get(processEntityId);
+  const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
+  const relatedsReady = relatedsReadyMap.get(processEntityId);
+
   const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
     processEntityId
   );
@@ -132,9 +134,9 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
    * A list entry will be displayed for each of these
    */
   const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
-    return relatedEventsToDisplay
+    const relateds = relatedEventsToDisplay
       .reduce((a: ResolverEvent[], candidate) => {
-        if (event.ecsEventType(candidate) === eventType) {
+        if (event.eventType(candidate) === eventType) {
           a.push(candidate);
         }
         return a;
@@ -153,6 +155,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
           },
         };
       });
+    return relateds;
   }, [relatedEventsToDisplay, eventType, processEntityId, pushToQueryParams]);
 
   const crumbs = useMemo(() => {

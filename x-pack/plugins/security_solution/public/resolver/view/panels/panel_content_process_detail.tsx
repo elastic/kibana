@@ -116,7 +116,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       return { descriptionText: '' };
     }
     return cubeAssetsForNode(processEvent);
-  }, [processEvent]);
+  }, [processEvent, cubeAssetsForNode]);
 
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
