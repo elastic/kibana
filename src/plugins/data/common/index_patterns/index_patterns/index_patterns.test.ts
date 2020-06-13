@@ -62,16 +62,16 @@ describe('IndexPatterns', () => {
         }) as Promise<SavedObjectsFindResponsePublic<any>>
     );
 
-    indexPatterns = new IndexPatternsService(
-      core.uiSettings,
+    indexPatterns = new IndexPatternsService({
+      uiSettings: core.uiSettings,
       savedObjectsClient,
       http,
       fieldFormats,
-      () => {},
-      () => {},
-      () => {},
-      () => {}
-    );
+      onNotification: () => {},
+      onError: () => {},
+      onRedirectNoIndexPattern: () => {},
+      onUnsupportedTimePattern: () => {},
+    });
   });
 
   test('does cache gets for the same id', async () => {
