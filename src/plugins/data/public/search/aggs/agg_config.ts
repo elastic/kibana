@@ -304,7 +304,7 @@ export class AggConfig {
       enabled: this.enabled,
       type: this.type && this.type.name,
       params: outParams as SerializableState,
-      format: {},
+      format: this.toSerializedFieldFormat(),
       ...(this.schema && { schema: this.schema }),
     };
   }
@@ -314,6 +314,17 @@ export class AggConfig {
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
+  }
+
+  /**
+   * Returns a serialized field format for the field used in this agg.
+   * This can be passed to fieldFormats.deserialize to get the field
+   * format instance.
+   *
+   * @public
+   */
+  toSerializedFieldFormat(): AggConfigSerialized['format'] {
+    return this.type.getSerializedFormat(this);
   }
 
   /**
