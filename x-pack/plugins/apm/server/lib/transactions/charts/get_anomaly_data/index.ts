@@ -42,6 +42,17 @@ export async function getAnomalySeries({
     return;
   }
 
+  // don't fetch anomalies if the ML plugin is not setup
+  if (!setup.ml) {
+    return;
+  }
+
+  // don't fetch anomalies if required license is not satisfied
+  const mlCapabilities = await setup.ml.mlSystem.mlCapabilities();
+  if (!mlCapabilities.isPlatinumOrTrialLicense) {
+    return;
+  }
+
   const mlBucketSize = await getMlBucketSize({
     serviceName,
     transactionType,

@@ -49,6 +49,7 @@ describe('getAnomalySeries', () => {
         ml: {
           mlSystem: {
             mlAnomalySearch: clientSpy,
+            mlCapabilities: async () => ({ isPlatinumOrTrialLicense: true }),
           },
         } as any,
       },
