@@ -979,15 +979,9 @@ export type IMetricAggType = MetricAggType;
 // Warning: (ae-missing-release-tag) "IndexPattern" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class IndexPattern implements IIndexPattern {
-    // Warning: (ae-forgotten-export) The symbol "IIndexPatternsApiClient" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "PatternCache" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "FieldFormatsStartCommon" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnError" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnUnsupportedTimePattern" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: PatternCache, fieldFormats: FieldFormatsStartCommon, onNotification: OnNotification, onError: OnError, onUnsupportedTimePattern: OnUnsupportedTimePattern);
-    // (undocumented)
+export class IndexPattern implements IIndexPattern {s
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern,}: IndexPatternDeps);
     [key: string]: any;
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
