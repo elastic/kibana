@@ -167,9 +167,12 @@ const PanelContent = memo(function PanelContent() {
 
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
-  const relatedStatsForCrumbId = useMemo(() => {
-    return relatedEventStats.get(crumbId);
-  }, [relatedEventStats, crumbId]);
+  const relatedStatsForIdFromParams = useMemo(() => {
+    if(idFromParams){
+      return relatedEventStats.get(idFromParams);
+    }
+    return undefined;
+  }, [relatedEventStats, idFromParams]);
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
@@ -209,7 +212,7 @@ const PanelContent = memo(function PanelContent() {
           <EventCountsForProcess
             processEvent={uiSelectedEvent}
             pushToQueryParams={pushToQueryParams}
-            relatedStats={relatedStatsForCrumbId!}
+            relatedStats={relatedStatsForIdFromParams!}
           />
         );
       }
@@ -225,12 +228,13 @@ const PanelContent = memo(function PanelContent() {
           <ProcessEventListNarrowedByType
             processEvent={uiSelectedEvent}
             pushToQueryParams={pushToQueryParams}
-            relatedStats={relatedStatsForCrumbId!}
+            relatedStats={relatedStatsForIdFromParams!}
             eventType={crumbEvent}
           />
         );
       }
     }
+
     if (graphableProcessEntityIds.has(crumbEvent)) {
       /**
        * | Crumb/Table            | &crumbId                   | &crumbEvent              |
@@ -242,7 +246,7 @@ const PanelContent = memo(function PanelContent() {
           relatedEventId={crumbId}
           parentEvent={uiSelectedEvent!}
           pushToQueryParams={pushToQueryParams}
-          countForParent={relatedStatsForCrumbId?.events.total}
+          countForParent={relatedStatsForIdFromParams?.events.total}
         />
       );
     }
@@ -254,7 +258,7 @@ const PanelContent = memo(function PanelContent() {
     crumbEvent,
     crumbId,
     pushToQueryParams,
-    relatedStatsForCrumbId,
+    relatedStatsForIdFromParams,
     graphableProcessEntityIds,
   ]);
 

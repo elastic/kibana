@@ -74,9 +74,10 @@ const StyledDescriptionList = memo(styled(EuiDescriptionList)`
 `);
 
 // Styling subtitles, per UX review:
-const StyledFlexTitle = memo(styled('h4')`
+const StyledFlexTitle = memo(styled('h3')`
   display: flex;
   flex-flow: row;
+  font-size: 1.2em;
 `);
 const StyledTitleRule = memo(styled('hr')`
   &.euiHorizontalRule.euiHorizontalRule--full.euiHorizontalRule--marginSmall.override {
@@ -291,7 +292,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     <>
       <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
-      <EuiText>
+      <EuiText size="s">
         <BoldCode>{`${relatedEventCategory} ${event.ecsEventType(
           relatedEventToShowDetailsFor
         )}`}</BoldCode>
@@ -304,8 +305,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       {sections.map(({ sectionTitle, entries }, index) => {
         return (
           <>
+            {index === 0 ? null : <EuiSpacer size="m" />}
             <EuiTitle size="xs">
-              <EuiTextColor color="subdued">
+              <EuiTextColor color="secondary">
                 <StyledFlexTitle>
                   {sectionTitle}
                   <TitleHr />
@@ -319,7 +321,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
               compressed
               listItems={entries}
             />
-            {index === sections.length - 1 ? null : <EuiSpacer size="s" />}
+            {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
           </>
         );
       })}
