@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
-import { cubeAssetsForNode } from '../process_event_dot';
+import React, { memo } from 'react';
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import { useResolverTheme } from '../assets';
 
 /**
  * During user testing, one user indicated they wanted to see stronger visual relationships between
@@ -17,12 +17,8 @@ export const CubeForProcess = memo(function CubeForProcess({
 }: {
   processEvent: ResolverEvent;
 }) {
-  const { cubeSymbol, descriptionText } = useMemo(() => {
-    if (!processEvent) {
-      return { cubeSymbol: undefined, descriptionText: undefined };
-    }
-    return cubeAssetsForNode(processEvent);
-  }, [processEvent]);
+  const { cubeAssetsForNode } = useResolverTheme();
+  const { cubeSymbol, descriptionText } = cubeAssetsForNode(processEvent);
 
   return (
     <>
