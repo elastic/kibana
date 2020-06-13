@@ -39,6 +39,6 @@ describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
       <CreateAnalyticsButton {...props} setIsSourceIndexModalVisible={jest.fn()} />
     );
 
-    expect(wrapper.find('EuiButton').text()).toBe('Create analytics job');
+    expect(wrapper.find('EuiButton').text()).toBe('Create job');
   });
 });

@@ -234,15 +234,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   onContainerLoading = () => {
     this.domNode.setAttribute('data-render-complete', 'false');
-    this.domNode.setAttribute('data-loading', '');
-    this.domNode.removeAttribute('data-error');
-    ReactDOM.render(<EmbeddableErrorLabel />, this.labelNode!);
+    this.updateOutput({ loading: true, error: undefined });
   };
 
   onContainerRender = (count: number) => {
-    this.domNode.removeAttribute('data-loading');
     this.domNode.setAttribute('data-render-complete', 'true');
     this.domNode.setAttribute('data-rendering-count', count.toString());
+    this.updateOutput({ loading: false, error: undefined });
     dispatchRenderComplete(this.domNode);
   };
 
@@ -250,11 +248,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.abortController) {
       this.abortController.abort();
     }
-    this.domNode.removeAttribute('data-loading');
-    this.domNode.setAttribute('data-error', '');
+    this.domNode.setAttribute(
+      'data-rendering-count',
+      this.domNode.getAttribute('data-rendering-count') + 1
+    );
     this.domNode.setAttribute('data-render-complete', 'false');
-
-    ReactDOM.render(<EmbeddableErrorLabel error={error} />, this.labelNode!);
+    this.updateOutput({ loading: false, error });
   };
 
   /**
@@ -262,6 +261,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
+    super.render(domNode);
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();

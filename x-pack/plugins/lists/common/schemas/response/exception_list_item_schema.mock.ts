@@ -8,7 +8,7 @@ import { ExceptionListItemSchema } from './exception_list_item_schema';
 
 export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   _tags: ['endpoint', 'process', 'malware', 'os:linux'],
-  comment: [],
+  comments: [],
   created_at: '2020-04-23T00:19:13.289Z',
   created_by: 'user_name',
   description: 'This is a sample endpoint type exception',
