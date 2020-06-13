@@ -158,7 +158,7 @@ export interface PluginManifest {
    * Specifies directory names that can be imported by other plugins sharing
    * the same instance of the @kbn/optimizer.
    */
-  readonly extraPublicDirs: string[];
+  readonly extraPublicDirs?: string[];
 }
 
 /**

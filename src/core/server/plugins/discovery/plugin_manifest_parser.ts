@@ -71,7 +71,11 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo, log: Logger) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo,
+  log: Logger
+): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -127,6 +131,19 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
       manifestPath,
       new Error(
         `The "configPath" in plugin manifest for "${manifest.id}" should either be a string or an array of strings.`
+      )
+    );
+  }
+
+  if (
+    manifest.extraPublicDirs &&
+    (!Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((dir) => typeof dir === 'string'))
+  ) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "extraPublicDirs" in plugin manifest for "${manifest.id}" should be an array of strings.`
       )
     );
   }
