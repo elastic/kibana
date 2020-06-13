@@ -30,18 +30,14 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
-import { BundleRefsResolver } from './bundle_refs_resolver';
+import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-export function getWebpackConfig(
-  bundle: Bundle,
-  worker: WorkerConfig,
-  refResolver: BundleRefsResolver
-) {
+export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
@@ -70,25 +66,13 @@ export function getWebpackConfig(
       noEmitOnErrors: true,
     },
 
-    externals: [
-      UiSharedDeps.externals,
-      function (context, request, cb) {
-        try {
-          refResolver.resolveExternal(bundle, context, request).then(
-            (resp) => {
-              cb(undefined, resp);
-            },
-            (error) => {
-              cb(error, undefined);
-            }
-          );
-        } catch (error) {
-          cb(error, undefined);
-        }
-      },
-    ],
+    externals: [UiSharedDeps.externals],
 
-    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
+    plugins: [
+      new CleanWebpackPlugin(),
+      new DisallowedSyntaxPlugin(),
+      new BundleRefsPlugin(bundle, bundleRefs),
+    ],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements

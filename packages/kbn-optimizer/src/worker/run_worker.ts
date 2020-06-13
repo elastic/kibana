@@ -28,7 +28,6 @@ import {
   BundleRefs,
 } from '../common';
 
-import { BundleRefsResolver } from './bundle_refs_resolver';
 import { runCompilers } from './run_compilers';
 
 /**
@@ -84,12 +83,12 @@ setInterval(() => {
 Rx.defer(() => {
   const workerConfig = parseWorkerConfig(process.argv[2]);
   const bundles = parseBundles(process.argv[3]);
-  const refResolver = new BundleRefsResolver(BundleRefs.parseSpec(process.argv[4]));
+  const bundleRefs = BundleRefs.parseSpec(process.argv[4]);
 
   // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
   process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
 
-  return runCompilers(workerConfig, bundles, refResolver);
+  return runCompilers(workerConfig, bundles, bundleRefs);
 }).subscribe(
   (msg) => {
     send(msg);

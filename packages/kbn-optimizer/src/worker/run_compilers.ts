@@ -35,8 +35,9 @@ import {
   WorkerConfig,
   ascending,
   parseFilePath,
+  BundleRefs,
 } from '../common';
-import { BundleRefsResolver } from './bundle_refs_resolver';
+import { BundleRefModule } from './bundle_ref_module';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -44,7 +45,6 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
-  WebpackNormalModule,
   getModulePath,
 } from './webpack_helpers';
 
@@ -56,7 +56,6 @@ const PLUGIN_NAME = '@kbn/optimizer';
 const observeCompiler = (
   workerConfig: WorkerConfig,
   bundle: Bundle,
-  refResolver: BundleRefsResolver,
   compiler: webpack.Compiler
 ): Rx.Observable<CompilerMsg> => {
   const compilerMsgs = new CompilerMsgs(bundle.id);
@@ -100,40 +99,43 @@ const observeCompiler = (
         });
       }
 
-      const normalModules = stats.compilation.modules.filter(
-        (module): module is WebpackNormalModule => {
-          if (isNormalModule(module)) {
-            return true;
-          }
-
-          if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
-            return false;
-          }
-
-          throw new Error(`Unexpected module type: ${inspect(module)}`);
-        }
-      );
-
+      const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
+      let normalModuleCount = 0;
 
-      for (const module of normalModules) {
-        const path = getModulePath(module);
-        const parsedPath = parseFilePath(path);
+      for (const module of stats.compilation.modules) {
+        if (isNormalModule(module)) {
+          normalModuleCount += 1;
+          const path = getModulePath(module);
+          const parsedPath = parseFilePath(path);
 
-        if (!parsedPath.dirs.includes('node_modules')) {
-          referencedFiles.add(path);
+          if (!parsedPath.dirs.includes('node_modules')) {
+            referencedFiles.add(path);
+            continue;
+          }
+
+          const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
+          const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
+          referencedFiles.add(
+            Path.join(
+              parsedPath.root,
+              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+              'package.json'
+            )
+          );
           continue;
         }
 
-        const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
-        const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-        referencedFiles.add(
-          Path.join(
-            parsedPath.root,
-            ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-            'package.json'
-          )
-        );
+        if (module instanceof BundleRefModule) {
+          bundleRefExportIds.push(module.exportId);
+          continue;
+        }
+
+        if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
+          continue;
+        }
+
+        throw new Error(`Unexpected module type: ${inspect(module)}`);
       }
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
@@ -152,15 +154,15 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        bundleRefExportIds: refResolver.getReferencedExportIds(bundle),
+        bundleRefExportIds,
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
-        moduleCount: normalModules.length,
+        moduleCount: normalModuleCount,
         files,
       });
 
       return compilerMsgs.compilerSuccess({
-        moduleCount: normalModules.length,
+        moduleCount: normalModuleCount,
       });
     })
   );
@@ -191,10 +193,10 @@ const observeCompiler = (
 export const runCompilers = (
   workerConfig: WorkerConfig,
   bundles: Bundle[],
-  refResolver: BundleRefsResolver
+  bundleRefs: BundleRefs
 ) => {
   const multiCompiler = webpack(
-    bundles.map((def) => getWebpackConfig(def, workerConfig, refResolver))
+    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
   );
 
   return Rx.merge(
@@ -208,7 +210,7 @@ export const runCompilers = (
     Rx.from(multiCompiler.compilers.entries()).pipe(
       mergeMap(([compilerIndex, compiler]) => {
         const bundle = bundles[compilerIndex];
-        return observeCompiler(workerConfig, bundle, refResolver, compiler);
+        return observeCompiler(workerConfig, bundle, compiler);
       })
     ),
 

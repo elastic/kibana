@@ -18,16 +18,60 @@
  */
 
 import Path from 'path';
+import webpack from 'webpack';
 
 import { Bundle, BundleRefs, BundleRef } from '../common';
+import { BundleRefModule } from './bundle_ref_module';
 
 const RESOLVE_EXTENSIONS = ['.js', '.ts', '.tsx'];
 
-export class BundleRefsResolver {
-  private refsInBundle = new Map<Bundle, Set<BundleRef>>();
+interface RequestData {
+  context: string;
+  dependencies: Array<{ request: string }>;
+}
+
+type Callback<T> = (error?: any, result?: T) => void;
+type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) => void;
+
+function compileHook(
+  compiler: webpack.Compiler,
+  handler: (context: string, request: string) => Promise<BundleRefModule | undefined>
+) {
+  compiler.hooks.compile.tap('BundleRefsPlugin', (args: any) => {
+    args.normalModuleFactory.hooks.factory.tap(
+      'BundleRefsPlugin/normalModuleFactory/factory',
+      (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
+        const context = data.context;
+        const dep = data.dependencies[0];
+
+        handler(context, dep.request).then(
+          (result) => {
+            if (!result) {
+              wrappedFactory(data, callback);
+            } else {
+              callback(undefined, result);
+            }
+          },
+          (error) => callback(error)
+        );
+      }
+    );
+  });
+}
+
+export class BundleRefsPlugin {
   private resolvedRequestCache = new Map<string, Promise<string | undefined>>();
 
-  constructor(public readonly bundleRefs: BundleRefs) {}
+  constructor(private readonly bundle: Bundle, public readonly bundleRefs: BundleRefs) {}
+
+  apply(compiler: webpack.Compiler) {
+    compileHook(compiler, async (context, request) => {
+      const exportId = await this.resolveExternal(context, request);
+      if (exportId) {
+        return new BundleRefModule(exportId);
+      }
+    });
+  }
 
   private cachedResolveRequest(context: string, request: string) {
     const absoluteRequest = Path.resolve(context, request);
@@ -62,7 +106,7 @@ export class BundleRefsResolver {
    * @param context the directory containing the module which made `request`
    * @param request the request for a module from a commonjs require() call or import statement
    */
-  async resolveExternal(bundle: Bundle, context: string, request: string) {
+  async resolveExternal(context: string, request: string) {
     // ignore imports that have loaders defined or are not relative seeming
     if (request.includes('!') || !request.startsWith('.')) {
       return;
@@ -80,7 +124,7 @@ export class BundleRefsResolver {
       return;
     }
 
-    const eligibleRefs = this.bundleRefs.filterByContextPrefix(bundle, resolved);
+    const eligibleRefs = this.bundleRefs.filterByContextPrefix(this.bundle, resolved);
     if (!eligibleRefs.length) {
       // import doesn't match a bundle context
       return;
@@ -102,22 +146,6 @@ export class BundleRefsResolver {
       );
     }
 
-    const refsInBundle = this.refsInBundle.get(bundle) || new Set();
-    refsInBundle.add(matchingRef);
-    this.refsInBundle.set(bundle, refsInBundle);
-
-    return `__kbnBundles__.get('${matchingRef.exportId}')`;
-  }
-
-  getReferencedExportIds(bundle: Bundle) {
-    const refsInBundle = this.refsInBundle.get(bundle);
-
-    if (!refsInBundle) {
-      return [];
-    }
-
-    return Array.from(refsInBundle)
-      .map((ref) => ref.exportId)
-      .sort((a, b) => a.localeCompare(b));
+    return matchingRef.exportId;
   }
 }
