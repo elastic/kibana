@@ -17,13 +17,11 @@
  * under the License.
  */
 
-export let L;
-
 if (!window.hasOwnProperty('L')) {
   require('leaflet/dist/leaflet.css');
-  L = window.L = require('leaflet/dist/leaflet.js');
-  L.Browser.touch = false;
-  L.Browser.pointer = false;
+  window.L = require('leaflet/dist/leaflet.js');
+  window.L.Browser.touch = false;
+  window.L.Browser.pointer = false;
 
   require('leaflet-vega');
   require('leaflet.heat/dist/leaflet-heat.js');
@@ -31,6 +29,6 @@ if (!window.hasOwnProperty('L')) {
   require('leaflet-draw/dist/leaflet.draw.js');
   require('leaflet-responsive-popup/leaflet.responsive.popup.css');
   require('leaflet-responsive-popup/leaflet.responsive.popup.js');
-} else {
-  L = window.L;
 }
+
+export const L = window.L;
