@@ -73,18 +73,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.environment.update({ apmUi: true });
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
-    if (plugins.observability) {
-      plugins.observability.dashboard.register({
-        appName: 'apm',
-        fetchData: ({ startTime, endTime, bucketSize }) => {
-          return Promise.resolve([]);
-        },
-        hasData: () => {
-          return Promise.resolve(true);
-        },
-      });
-    }
-
     core.application.register({
       id: 'apm',
       title: 'APM',
