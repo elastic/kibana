@@ -470,7 +470,7 @@ export class IndexPattern implements IIndexPattern {
           fieldFormats: this.fieldFormats,
           onNotification: this.onNotification,
           onError: this.onError,
-          onUnsupportedTimePattern: this.this.onUnsupportedTimePattern,
+          onUnsupportedTimePattern: this.onUnsupportedTimePattern,
         });
 
         await duplicatePattern.destroy();
@@ -523,7 +523,7 @@ export class IndexPattern implements IIndexPattern {
             fieldFormats: this.fieldFormats,
             onNotification: this.onNotification,
             onError: this.onError,
-            onUnsupportedTimePattern: this.this.onUnsupportedTimePattern,
+            onUnsupportedTimePattern: this.onUnsupportedTimePattern,
           });
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
