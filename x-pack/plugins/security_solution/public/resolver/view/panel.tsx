@@ -168,7 +168,7 @@ const PanelContent = memo(function PanelContent() {
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
   const relatedStatsForIdFromParams = useMemo(() => {
-    if(idFromParams){
+    if (idFromParams) {
       return relatedEventStats.get(idFromParams);
     }
     return undefined;

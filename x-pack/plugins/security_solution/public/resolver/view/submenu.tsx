@@ -6,7 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
-import { EuiI18nNumber, EuiSelectable, EuiButton, EuiPopover, ButtonColor, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiI18nNumber,
+  EuiSelectable,
+  EuiButton,
+  EuiPopover,
+  ButtonColor,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
