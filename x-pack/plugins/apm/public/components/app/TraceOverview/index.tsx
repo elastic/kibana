@@ -12,11 +12,19 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+
+type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
+const DEFAULT_RESPONSE: TracesAPIResponse = {
+  transactionGroups: [],
+  isAggregationAccurate: true,
+  bucketSize: 0,
+};
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
-  const { status, data = [] } = useFetcher(
+  const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -56,7 +64,7 @@ export function TraceOverview() {
         <EuiFlexItem grow={7}>
           <EuiPanel>
             <TraceList
-              items={data}
+              items={data.transactionGroups}
               isLoading={status === FETCH_STATUS.LOADING}
             />
           </EuiPanel>

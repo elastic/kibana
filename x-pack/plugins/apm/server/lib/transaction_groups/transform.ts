@@ -60,11 +60,17 @@ export function transactionGroupsTransformer({
   response,
   start,
   end,
+  bucketSize,
 }: {
   response: ESResponse;
   start: number;
   end: number;
-}): ITransactionGroup[] {
+  bucketSize: number;
+}): {
+  transactionGroups: ITransactionGroup[];
+  isAggregationAccurate: boolean;
+  bucketSize: number;
+} {
   const buckets = getBuckets(response);
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
@@ -72,5 +78,16 @@ export function transactionGroupsTransformer({
     getTransactionGroup(bucket, minutes)
   );
 
-  return calculateRelativeImpacts(transactionGroups);
+  const transactionGroupsWithRelativeImpact = calculateRelativeImpacts(
+    transactionGroups
+  );
+
+  return {
+    transactionGroups: transactionGroupsWithRelativeImpact,
+
+    // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
+    // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
+    isAggregationAccurate: bucketSize >= buckets.length,
+    bucketSize,
+  };
 }

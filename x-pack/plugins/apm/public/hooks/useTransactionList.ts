@@ -8,8 +8,7 @@ import { useMemo } from 'react';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
+import { APIReturnType } from '../services/rest/createCallApmApi';
 
 const getRelativeImpact = (
   impact: number,
@@ -21,7 +20,13 @@ const getRelativeImpact = (
     1
   );
 
-function getWithRelativeImpact(items: TransactionGroupListAPIResponse) {
+type TransactionsAPIResponse = APIReturnType<
+  '/api/apm/services/{serviceName}/transaction_groups'
+>;
+
+function getWithRelativeImpact(
+  items: TransactionsAPIResponse['transactionGroups']
+) {
   const impacts = items
     .map(({ impact }) => impact)
     .filter((impact) => impact !== null) as number[];
@@ -40,10 +45,16 @@ function getWithRelativeImpact(items: TransactionGroupListAPIResponse) {
   });
 }
 
+const DEFAULT_RESPONSE: TransactionsAPIResponse = {
+  transactionGroups: [],
+  isAggregationAccurate: true,
+  bucketSize: 0,
+};
+
 export function useTransactionList(urlParams: IUrlParams) {
   const { serviceName, transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
-  const { data = [], error, status } = useFetcher(
+  const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
@@ -63,7 +74,14 @@ export function useTransactionList(urlParams: IUrlParams) {
     [serviceName, start, end, transactionType, uiFilters]
   );
 
-  const memoizedData = useMemo(() => getWithRelativeImpact(data), [data]);
+  const memoizedData = useMemo(
+    () => ({
+      transactionGroups: getWithRelativeImpact(data.transactionGroups),
+      isAggregationAccurate: data.isAggregationAccurate,
+      bucketSize: data.bucketSize,
+    }),
+    [data]
+  );
   return {
     data: memoizedData,
     status,

@@ -18,6 +18,7 @@ import {
 import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
@@ -157,23 +158,34 @@ export function TransactionOverview() {
               <h3>Transactions</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiCallOut
-              title="This view shows a subset of reported transactions."
-              color="danger"
-              iconType="alert"
-            >
-              <p>
-                The number of unique transaction names exceeds the configured
-                value of 200. Try reconfiguring your agents to group similar
-                transactions or increase the value of
-                <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>.{' '}
-                <EuiLink href="#">Learn more in the docs.</EuiLink>.
-              </p>
-            </EuiCallOut>
+            {!transactionListData.isAggregationAccurate && (
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.apm.transactionCardinalityWarning',
+                  {
+                    defaultMessage:
+                      'This view shows a subset of reported transactions.',
+                  }
+                )}
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  The number of unique transaction names exceeds the configured
+                  value of {transactionListData.bucketSize}. Try reconfiguring
+                  your agents to group similar transactions or increase the
+                  value of
+                  <EuiCode>
+                    xpack.apm.ui.transactionGroupBucketSize
+                  </EuiCode>.{' '}
+                  <EuiLink href="#">Learn more in the docs.</EuiLink>.
+                </p>
+              </EuiCallOut>
+            )}
             <EuiSpacer size="s" />
             <TransactionList
               isLoading={transactionListStatus === 'loading'}
-              items={transactionListData}
+              items={transactionListData.transactionGroups}
             />
           </EuiPanel>
         </EuiFlexItem>

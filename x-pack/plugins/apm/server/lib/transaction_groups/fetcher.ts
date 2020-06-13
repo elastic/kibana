@@ -36,9 +36,10 @@ interface TopTraceOptions {
 export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
-export function transactionGroupsFetcher(
+export async function transactionGroupsFetcher(
   options: Options,
-  setup: Setup & SetupTimeRange & SetupUIFilters
+  setup: Setup & SetupTimeRange & SetupUIFilters,
+  bucketSize: number
 ) {
   const { client } = setup;
 
@@ -71,7 +72,7 @@ export function transactionGroupsFetcher(
       aggs: {
         transaction_groups: {
           composite: {
-            size: 10000,
+            size: bucketSize + 1, // 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
             sources: [
               ...(isTopTraces
                 ? [{ service: { terms: { field: SERVICE_NAME } } }]

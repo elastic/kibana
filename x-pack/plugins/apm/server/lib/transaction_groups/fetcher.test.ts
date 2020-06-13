@@ -39,7 +39,8 @@ describe('transactionGroupsFetcher', () => {
   describe('type: top_traces', () => {
     it('should call client.search with correct query', async () => {
       const setup = getSetup();
-      await transactionGroupsFetcher({ type: 'top_traces' }, setup);
+      const bucketSize = 100;
+      await transactionGroupsFetcher({ type: 'top_traces' }, setup, bucketSize);
       expect(setup.client.search.mock.calls).toMatchSnapshot();
     });
   });
@@ -47,13 +48,15 @@ describe('transactionGroupsFetcher', () => {
   describe('type: top_transactions', () => {
     it('should call client.search with correct query', async () => {
       const setup = getSetup();
+      const bucketSize = 100;
       await transactionGroupsFetcher(
         {
           type: 'top_transactions',
           serviceName: 'opbeans-node',
           transactionType: 'request',
         },
-        setup
+        setup,
+        bucketSize
       );
       expect(setup.client.search.mock.calls).toMatchSnapshot();
     });
