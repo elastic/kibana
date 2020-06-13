@@ -37,6 +37,12 @@ export interface PolicyListState {
   isLoading: boolean;
   /** current location information */
   location?: Immutable<AppLocation>;
+  /** policy is being deleted */
+  isDeleting: boolean;
+  /** Deletion status */
+  deleteStatus?: boolean;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary?: GetAgentStatusResponse['results'];
 }
 
 /**
