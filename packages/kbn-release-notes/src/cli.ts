@@ -28,7 +28,7 @@ import {
   iterRelevantPullRequests,
   getPr,
   Version,
-  PullRequest,
+  ClassifiedPr,
   streamFromIterable,
   asyncPipeline,
   IrrelevantPrSummary,
@@ -100,13 +100,13 @@ export function runReleaseNotesCli() {
       log.info(`Loading all PRs with label [${version.label}] to build release notes...`);
 
       const summary = new IrrelevantPrSummary(log);
-      const prsToReport: PullRequest[] = [];
+      const prsToReport: ClassifiedPr[] = [];
       const prIterable = iterRelevantPullRequests(token, version, log);
       for await (const pr of prIterable) {
         if (!isPrRelevant(pr, version, includeVersions, summary)) {
           continue;
         }
-        prsToReport.push(pr);
+        prsToReport.push(classifyPr(pr, log));
       }
       summary.logStats();
 
@@ -117,10 +117,9 @@ export function runReleaseNotesCli() {
       }
 
       log.info(`Found ${prsToReport.length} prs to report on`);
-      const classifiedPrs = prsToReport.map((pr) => classifyPr(pr, log));
 
       for (const Format of Formats) {
-        const format = new Format(version, classifiedPrs, log);
+        const format = new Format(version, prsToReport, log);
         const outputPath = Path.resolve(`${filename}.${Format.extension}`);
         await asyncPipeline(streamFromIterable(format.print()), Fs.createWriteStream(outputPath));
         log.success(`[${Format.extension}] report written to ${outputPath}`);
