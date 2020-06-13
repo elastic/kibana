@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState, useMemo, useCallback, EuiI18nNumber } from 'react';
-import { EuiSelectable, EuiButton } from '@elastic/eui';
+import React, { ReactNode, useState, useMemo, useCallback } from 'react';
+import { EuiSelectable, EuiButton, EuiI18nNumber } from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
