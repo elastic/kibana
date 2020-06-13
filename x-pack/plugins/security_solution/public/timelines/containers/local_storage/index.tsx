@@ -10,17 +10,34 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TimelineModel } from '../../store/timeline/model';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
+const EMPTY_TIMELINE = {} as {
+  [K in TimelineId]: TimelineModel;
+};
 
-export const getTimelineInStorageById = (storage: Storage, id: TimelineId) => {
-  const timelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
-  if (timelines != null) {
-    return timelines[id];
+export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: TimelineId[]) => {
+  const allTimelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+
+  if (!allTimelines) {
+    return EMPTY_TIMELINE;
   }
-  return null;
+
+  return timelineIds.reduce((acc, timelineId) => {
+    const timelineModel = allTimelines[timelineId];
+    if (!timelineModel) {
+      return {
+        ...acc,
+      };
+    }
+
+    return {
+      ...acc,
+      [timelineId]: timelineModel,
+    };
+  }, {} as { [K in TimelineId]: TimelineModel });
 };
 
 export const getAllTimelinesInStorage = (storage: Storage) =>
-  storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+  storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? {};
 
 export const addTimelineInStorage = (storage: Storage, id: TimelineId, timeline: TimelineModel) => {
   const timelines = getAllTimelinesInStorage(storage);
@@ -37,7 +54,7 @@ export const useTimelinesStorage = (): TimelinesStorage => {
     getAllTimelinesInStorage(storage);
 
   const getTimelineById: TimelinesStorage['getTimelineById'] = (id: TimelineId) =>
-    getTimelineInStorageById(storage, id);
+    getTimelinesInStorageByIds(storage, [id])[id] ?? null;
 
   const addTimeline: TimelinesStorage['addTimeline'] = (id, timeline) =>
     addTimelineInStorage(storage, id, timeline);

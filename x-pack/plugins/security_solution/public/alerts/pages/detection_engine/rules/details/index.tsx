@@ -74,7 +74,7 @@ import { useMlCapabilities } from '../../../../../common/components/ml_popover/h
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import { ExceptionListType } from '../../../../../common/components/exceptions/types';
-import { SINGLE_RULE_ALERTS_TIMELINE_ID } from '../../../../constants';
+import { ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID } from '../../../../constants';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -387,7 +387,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <EuiSpacer />
                         {ruleId != null && (
                           <AlertsTable
-                            timelineId={SINGLE_RULE_ALERTS_TIMELINE_ID}
+                            timelineId={ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID}
                             canUserCRUD={canUserCRUD ?? false}
                             defaultFilters={alertDefaultFilters}
                             hasIndexWrite={hasIndexWrite ?? false}

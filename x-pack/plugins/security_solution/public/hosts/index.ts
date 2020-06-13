@@ -6,7 +6,7 @@
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getTimelineInStorageById } from '../timelines/containers/local_storage';
+import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
 import { TimelineId } from '../timelines/containers/local_storage/types';
 import { getHostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
@@ -18,29 +18,11 @@ export class Hosts {
   public setup() {}
 
   public start(storage: Storage): SecuritySubPluginWithStore<'hosts', HostsState> {
-    const hostTimelines = HOST_TIMELINE_IDS.reduce(
-      (acc, timelineId) => {
-        const timelineModel = getTimelineInStorageById(storage, timelineId);
-        if (!timelineModel) {
-          return {
-            ...acc,
-          };
-        }
-
-        return {
-          ...acc,
-          timelineById: {
-            ...acc.timelineById,
-            [timelineId]: timelineModel,
-          },
-        };
-      },
-      { timelineById: {} }
-    );
-
     return {
       routes: getHostsRoutes(),
-      storageTimelines: hostTimelines,
+      storageTimelines: {
+        timelineById: getTimelinesInStorageByIds(storage, HOST_TIMELINE_IDS),
+      },
       store: {
         initialState: { hosts: initialHostsState },
         reducer: { hosts: hostsReducer },

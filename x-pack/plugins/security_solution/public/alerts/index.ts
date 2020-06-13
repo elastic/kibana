@@ -5,40 +5,26 @@
  */
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { getTimelineInStorageById } from '../timelines/containers/local_storage';
+import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
 import { TimelineId } from '../timelines/containers/local_storage/types';
 import { getAlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
-import { SINGLE_RULE_ALERTS_TIMELINE_ID, ALERTS_TIMELINE_ID } from './constants';
+import { ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID, ALERTS_TIMELINE_ID } from './constants';
 
-const ALERTS_TIMELINE_IDS: TimelineId[] = [SINGLE_RULE_ALERTS_TIMELINE_ID, ALERTS_TIMELINE_ID];
+const ALERTS_TIMELINE_IDS: TimelineId[] = [
+  ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID,
+  ALERTS_TIMELINE_ID,
+];
 
 export class Alerts {
   public setup() {}
 
   public start(storage: Storage): SecuritySubPlugin {
-    const alertsTimelines = ALERTS_TIMELINE_IDS.reduce(
-      (acc, timelineId) => {
-        const timelineModel = getTimelineInStorageById(storage, timelineId);
-        if (!timelineModel) {
-          return {
-            ...acc,
-          };
-        }
-
-        return {
-          ...acc,
-          timelineById: {
-            ...acc.timelineById,
-            [timelineId]: timelineModel,
-          },
-        };
-      },
-      { timelineById: {} }
-    );
     return {
       routes: getAlertsRoutes(),
-      storageTimelines: alertsTimelines,
+      storageTimelines: {
+        timelineById: getTimelinesInStorageByIds(storage, ALERTS_TIMELINE_IDS),
+      },
     };
   }
 }

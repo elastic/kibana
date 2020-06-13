@@ -29,7 +29,7 @@ import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 import {
   ALERTS_TIMELINE_ID as DETECTION_ENGINE_TIMELINE_ID,
-  SINGLE_RULE_ALERTS_TIMELINE_ID as DETECTION_ENGINE_RULES_TIMELINE_ID,
+  ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID as DETECTION_ENGINE_RULES_TIMELINE_ID,
 } from '../../alerts/constants';
 
 const timelineIds = [DETECTION_ENGINE_TIMELINE_ID, DETECTION_ENGINE_RULES_TIMELINE_ID];

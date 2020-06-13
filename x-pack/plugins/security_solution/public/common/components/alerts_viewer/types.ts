@@ -7,6 +7,7 @@
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
+import { TimelineId } from '../../../timelines/containers/local_storage/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
@@ -16,7 +17,7 @@ export interface AlertsComponentsProps
     CommonQueryProps,
     'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate' | 'type'
   > {
-  timelineId: string;
+  timelineId: TimelineId;
   pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];

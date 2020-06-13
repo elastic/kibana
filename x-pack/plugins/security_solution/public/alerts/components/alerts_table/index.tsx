@@ -47,6 +47,7 @@ import {
   UpdateAlertsStatusProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
+import { TimelineId } from '../../../timelines/containers/local_storage/types';
 import {
   useStateToaster,
   displaySuccessToast,
@@ -54,7 +55,7 @@ import {
 } from '../../../common/components/toasters';
 
 interface OwnProps {
-  timelineId: string;
+  timelineId: TimelineId;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;

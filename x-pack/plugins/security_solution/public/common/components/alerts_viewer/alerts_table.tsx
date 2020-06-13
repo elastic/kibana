@@ -10,6 +10,7 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { TimelineId } from '../../../timelines/containers/local_storage/types';
 import * as i18n from './translations';
 export interface OwnProps {
   end: number;
@@ -51,7 +52,7 @@ const defaultAlertsFilters: Filter[] = [
 ];
 
 interface Props {
-  timelineId: string;
+  timelineId: TimelineId;
   endDate: number;
   startDate: number;
   pageFilters?: Filter[];
