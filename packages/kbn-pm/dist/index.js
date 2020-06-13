@@ -8810,13 +8810,13 @@ const BootstrapCommand = {
 
         if (valid) {
           _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(`[${project.name}] cache up to date`);
+          cachedProjectCount += 1;
         }
 
         caches.set(project, {
           file,
           valid
         });
-        cachedProjectCount += 1;
       }
     }
 

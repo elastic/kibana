@@ -74,10 +74,10 @@ export const BootstrapCommand: ICommand = {
 
         if (valid) {
           log.debug(`[${project.name}] cache up to date`);
+          cachedProjectCount += 1;
         }
 
         caches.set(project, { file, valid });
-        cachedProjectCount += 1;
       }
     }
 
