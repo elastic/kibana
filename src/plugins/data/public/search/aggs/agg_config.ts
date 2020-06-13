@@ -47,10 +47,6 @@ export type AggConfigSerialized = Ensure<
     enabled?: boolean;
     id?: string;
     params?: {} | SerializableState;
-<<<<<<< HEAD
-=======
-    format?: {} | Ensure<SerializedFieldFormat<SerializableState>, SerializableState>;
->>>>>>> Add format to serialized agg config.
     schema?: string;
   },
   SerializableState
@@ -307,10 +303,6 @@ export class AggConfig {
       enabled: this.enabled,
       type: this.type && this.type.name,
       params: outParams as SerializableState,
-<<<<<<< HEAD
-=======
-      format: {},
->>>>>>> Add format to serialized agg config.
       ...(this.schema && { schema: this.schema }),
     };
   }
