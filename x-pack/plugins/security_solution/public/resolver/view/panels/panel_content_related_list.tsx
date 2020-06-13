@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiI18nNumber, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiI18nNumber,
+  EuiSpacer,
+  EuiText,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
-import { RelatedEventDataEntryWithStats } from '../../types';
 import * as event from '../../../../common/endpoint/models/event';
 import { BoldCode } from './panel_content_related_detail';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import * as selectors from '../../store/selectors';
+import { useResolverDispatch } from '../use_resolver_dispatch';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -22,37 +31,111 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
  * | **registry deletion** @ *3:32PM..* *HKLM/software...*  |
  * | **file creation** @ *3:34PM..* *C:/directory/file.exe* |
  */
+
+interface MatchingEventEntry {
+  formattedDate: string;
+  eventType: string;
+  name: string;
+  entityId: string;
+  setQueryParams: () => void;
+}
+
+const DisplayList = memo(function DisplayList({
+  crumbs,
+  matchingEventEntries,
+}: {
+  crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
+  matchingEventEntries: MatchingEventEntry[];
+}) {
+  return (
+    <>
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <EuiSpacer size="l" />
+      <>
+        {matchingEventEntries.map((eventView, index) => {
+          return (
+            <>
+              <EuiText>
+                <BoldCode>{eventView.eventType}</BoldCode>
+                {' @ '}
+                {eventView.formattedDate}
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
+              {index === matchingEventEntries.length - 1 ? null : <EuiHorizontalRule margin="m" />}
+            </>
+          );
+        })}
+      </>
+    </>
+  );
+});
+
 export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByType({
   processEvent,
   eventType,
-  relatedEventsState,
+  relatedStats,
   pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
   pushToQueryParams: (arg0: CrumbInfo) => unknown;
   eventType: string;
-  relatedEventsState: RelatedEventDataEntryWithStats;
+  relatedStats: ResolverNodeStats;
 }) {
   const processName = processEvent && event.eventName(processEvent);
   const processEntityId = event.entityId(processEvent);
-  const totalCount = Object.values(relatedEventsState.stats).reduce((a, v) => {
-    return a + v;
-  }, 0);
+  const totalCount = relatedStats.events.total;
   const eventsString = i18n.translate(
     'xpack.siem.endpoint.resolver.panel.processEventListByType.events',
     {
       defaultMessage: 'Events',
     }
   );
+  const waitingString = i18n.translate(
+    'xpack.siem.endpoint.resolver.panel.processEventListByType.wait',
+    {
+      defaultMessage: 'Waiting For Events...',
+    }
+  );
+
+  const relatedsReady = useSelector(selectors.relatedEventsReady).get(processEntityId);
+  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
+    processEntityId
+  );
+  const dispatch = useResolverDispatch();
+
+  useEffect(() => {
+    if (typeof relatedsReady === 'undefined') {
+      dispatch({
+        type: 'userRequestedRelatedEventData',
+        payload: processEntityId,
+      });
+    }
+  }, [relatedsReady, dispatch, processEntityId]);
+
+  const waitCrumbs = useMemo(() => {
+    return [
+      {
+        text: eventsString,
+        onClick: () => {
+          pushToQueryParams({ crumbId: '', crumbEvent: '' });
+        },
+      },
+    ];
+  }, [pushToQueryParams, eventsString]);
+
+  const relatedEventsToDisplay = useMemo(() => {
+    return relatedEventsForThisProcess?.events || [];
+  }, [relatedEventsForThisProcess?.events]);
 
   /**
    * A list entry will be displayed for each of these
    */
-  const matchingEventEntries = useMemo(() => {
-    return relatedEventsState.relatedEvents
-      .reduce((a: ResolverEvent[], { relatedEvent, relatedEventType }) => {
-        if (relatedEventType === eventType) {
-          a.push(relatedEvent);
+  const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
+    return relatedEventsToDisplay
+      .reduce((a: ResolverEvent[], candidate) => {
+        if (event.ecsEventType(candidate) === eventType) {
+          a.push(candidate);
         }
         return a;
       }, [])
@@ -70,7 +153,7 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
           },
         };
       });
-  }, [relatedEventsState, eventType, processEntityId, pushToQueryParams]);
+  }, [relatedEventsToDisplay, eventType, processEntityId, pushToQueryParams]);
 
   const crumbs = useMemo(() => {
     return [
@@ -116,27 +199,22 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     pushToQueryParams,
     totalCount,
   ]);
-  return (
-    <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
-      <EuiSpacer size="l" />
+
+  /**
+   * Wait here until the effect resolves...
+   */
+  if (!relatedsReady) {
+    return (
       <>
-        {matchingEventEntries.map((eventView, index) => {
-          return (
-            <>
-              <EuiText>
-                <BoldCode>{eventView.eventType}</BoldCode>
-                {' @ '}
-                {eventView.formattedDate}
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
-              {index === matchingEventEntries.length - 1 ? null : <EuiHorizontalRule margin="m" />}
-            </>
-          );
-        })}
+        <StyledBreadcrumbs breadcrumbs={waitCrumbs} />
+        <EuiSpacer size="l" />
+        <EuiTitle>
+          <h4>{waitingString}</h4>
+        </EuiTitle>
       </>
-    </>
-  );
+    );
+  }
+
+  return <DisplayList crumbs={crumbs} matchingEventEntries={matchingEventEntries} />;
 });
 ProcessEventListNarrowedByType.displayName = 'ProcessEventListNarrowedByType';

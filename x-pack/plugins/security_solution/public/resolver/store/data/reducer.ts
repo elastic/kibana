@@ -11,6 +11,8 @@ function initialState(): DataState {
   return {
     results: [],
     relatedEventsStats: new Map(),
+    relatedEvents: new Map(),
+    relatedEventsReady: new Map(),
     isLoading: false,
     hasError: false,
   };
@@ -36,6 +38,13 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       hasError: true,
     };
+  } else if (action.type === 'userRequestedRelatedEventData') {
+    state.relatedEventsReady.set(action.payload, false);
+    return state;
+  } else if (action.type === 'serverReturnedRelatedEventData') {
+    state.relatedEventsReady.set(action.payload.entityID, true);
+    state.relatedEvents.set(action.payload.entityID, action.payload);
+    return state;
   } else {
     return state;
   }

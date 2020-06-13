@@ -8,7 +8,11 @@ import { Store } from 'redux';
 
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
-import { ResolverEvent, ResolverNodeStats } from '../../common/endpoint/types';
+import {
+  ResolverEvent,
+  ResolverNodeStats,
+  ResolverRelatedEvents,
+} from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -140,6 +144,8 @@ export type CameraState = {
 export interface DataState {
   readonly results: readonly ResolverEvent[];
   readonly relatedEventsStats: Map<string, ResolverNodeStats>;
+  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
+  readonly relatedEventsReady: Map<string, boolean>;
   isLoading: boolean;
   hasError: boolean;
 }

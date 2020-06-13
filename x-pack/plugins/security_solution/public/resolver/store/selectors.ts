@@ -69,6 +69,22 @@ export const relatedEventsStats = composeSelectors(
 );
 
 /**
+ * Map of related events... by entity id
+ */
+export const relatedEventsByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByEntityId
+);
+
+/**
+ * Entity ids to booleans for waiting status
+ */
+export const relatedEventsReady = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsReady
+);
+
+/**
  * Returns the id of the "current" tree node (fake-focused)
  */
 export const uiActiveDescendantId = composeSelectors(

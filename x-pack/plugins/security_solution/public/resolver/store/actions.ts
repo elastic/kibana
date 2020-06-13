@@ -45,12 +45,12 @@ interface AppRequestedResolverData {
 }
 
 /**
- * The action dispatched when the app requests related event data for one or more
- * subjects (whose ids should be included as an array @ `payload`)
+ * The action dispatched when the app requests related event data for one
+ * subject (whose entity_id should be included as `payload`)
  */
 interface UserRequestedRelatedEventData {
   readonly type: 'userRequestedRelatedEventData';
-  readonly payload: ResolverEvent;
+  readonly payload: string;
 }
 
 /**

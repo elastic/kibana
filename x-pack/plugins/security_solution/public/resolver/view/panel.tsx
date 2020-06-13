@@ -19,9 +19,6 @@ import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
-import { TableServiceError } from './panels/panel_content_error';
-import { WaitForRelatedEvents } from './panels/panel_content_wait';
-import { RelatedEventDetail } from './panels/panel_content_related_detail';
 import { ProcessEventListNarrowedByType } from './panels/panel_content_related_list';
 import { EventCountsForProcess } from './panels/panel_content_related_counts';
 import { ProcessDetails } from './panels/panel_content_process_detail';
@@ -165,129 +162,100 @@ const PanelContent = memo(function PanelContent() {
     [history, urlSearch]
   );
 
-  const relatedEvents = useSelector(selectors.relatedEvents);
+  const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
+  const relatedStatsForCrumbId = useMemo(() => {
+    return relatedEventStats.get(crumbId);
+  }, [relatedEventStats, crumbId]);
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
    * for the table & breadcrumb nav.
    *
-   * "Take query parameters -> return the right component".
    */
   const whichTableViewAndBreadcrumbsToRender = useMemo(() => {
+    if (crumbEvent === '' && crumbId === '') {
+      /**
+       * | Crumb/Table            | &crumbId                   | &crumbEvent              |
+       * | :--------------------- | :------------------------- | :----------------------  |
+       * | all processes/default  | null                       | null                     |
+       */
+      return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
+    }
+
     const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
-    const relatedEventsState = uiSelectedEvent && relatedEvents.get(uiSelectedEvent);
-
-    const fetchingErrorMessage = i18n.translate('xpack.siem.endpoint.resolver.panel.fetchError', {
-      defaultMessage: 'Error: Fetching requested related event data failed.',
-    });
-    const relatedEventDNEMessage = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedDNE', {
-      defaultMessage: 'Error: The requested event is not available in this view.',
-    });
-
-    if (graphableProcessEntityIds.has(crumbEvent)) {
-      if (!relatedEventsState || relatedEventsState === 'waitingForRelatedEventData') {
-        // Related event data hasn't been fetched for this process yet:
-        // The UI around the menu should dispatch the /events effect for this.
-        if (uiSelectedEvent) {
-          return (
-            <WaitForRelatedEvents
-              relatedEventsState={relatedEventsState}
-              processEvent={uiSelectedEvent}
-            />
-          );
-        }
-      }
-      if (relatedEventsState === 'error') {
-        // return as error if there was a service error requesting the /events
-        return (
-          <TableServiceError
-            errorMessage={fetchingErrorMessage}
-            pushToQueryParams={pushToQueryParams}
-          />
-        );
-      }
-      if (typeof relatedEventsState === 'object') {
-        const eventFromCrumbId = relatedEventsState.relatedEvents.find(({ relatedEvent }) => {
-          return event.eventId(relatedEvent) === crumbId;
-        });
-        if (!eventFromCrumbId) {
-          // Return an indication that it no longer exists (it may have been removed/purged/etc.)
-          return (
-            <TableServiceError
-              errorMessage={relatedEventDNEMessage}
-              pushToQueryParams={pushToQueryParams}
-            />
-          );
-        }
-        return (
-          <RelatedEventDetail
-            relatedEvent={eventFromCrumbId.relatedEvent}
-            parentEvent={uiSelectedEvent}
-            pushToQueryParams={pushToQueryParams}
-            relatedEventsState={relatedEventsState}
-            eventType={event.eventType(eventFromCrumbId.relatedEvent)}
-          />
-        );
-      }
-    } else if (graphableProcessEntityIds.has(crumbId)) {
-      if (!uiSelectedEvent) {
-        // should never happen, but bail out to default
-        return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
-      }
-      if (crumbEvent === '') {
-        // If there is no crumbEvent param, it's for the process detail
-        // Note: this view should handle its own effect for requesting /events
+    if (graphableProcessEntityIds.has(crumbId)) {
+      /**
+       * | Crumb/Table            | &crumbId                   | &crumbEvent              |
+       * | :--------------------- | :------------------------- | :----------------------  |
+       * | process detail         | entity_id of process       | null                     |
+       */
+      if (crumbEvent === '' && uiSelectedEvent) {
         return (
           <ProcessDetails processEvent={uiSelectedEvent} pushToQueryParams={pushToQueryParams} />
         );
       }
-      if (!relatedEventsState || relatedEventsState === 'waitingForRelatedEventData') {
-        // Related event data hasn't been fetched for this process yet:
-        // All the components below this one _require_ related event data, so issue a request
-        // and display a waiting state.
-        return (
-          <WaitForRelatedEvents
-            relatedEventsState={relatedEventsState}
-            processEvent={uiSelectedEvent}
-          />
-        );
-      }
-      if (relatedEventsState === 'error') {
-        // return as error if there was a service error requesting the /events
-        return (
-          <TableServiceError
-            errorMessage={fetchingErrorMessage}
-            pushToQueryParams={pushToQueryParams}
-          />
-        );
-      }
-      if (crumbEvent === 'all' && relatedEventsState) {
-        // If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
-        // Note: this view should handle its own effect for requesting /events
+
+      /**
+       * | Crumb/Table            | &crumbId                   | &crumbEvent              |
+       * | :--------------------- | :------------------------- | :----------------------  |
+       * | relateds count by type | entity_id of process       | 'all'                    |
+       */
+
+      if (crumbEvent === 'all' && uiSelectedEvent) {
         return (
           <EventCountsForProcess
             processEvent={uiSelectedEvent}
             pushToQueryParams={pushToQueryParams}
-            relatedEventsState={relatedEventsState}
+            relatedStats={relatedStatsForCrumbId!}
           />
         );
       }
-      if (crumbEvent in displayNameRecord) {
-        // If crumbEvent is one of the known event types, it's for a related event view narrowed by that type
+
+      /**
+       * | Crumb/Table            | &crumbId                   | &crumbEvent              |
+       * | :--------------------- | :------------------------- | :----------------------  |
+       * | relateds list 1 type   | entity_id of process       | valid related event type |
+       */
+
+      if (crumbEvent in displayNameRecord && uiSelectedEvent) {
         return (
           <ProcessEventListNarrowedByType
             processEvent={uiSelectedEvent}
             pushToQueryParams={pushToQueryParams}
-            relatedEventsState={relatedEventsState}
+            relatedStats={relatedStatsForCrumbId!}
             eventType={crumbEvent}
           />
         );
       }
     }
+    if (graphableProcessEntityIds.has(crumbEvent)) {
+      /**
+       * | Crumb/Table            | &crumbId                   | &crumbEvent              |
+       * | :--------------------- | :------------------------- | :----------------------  |
+       * | related event detail   | event_id of related event  | entity_id of process     |
+       */
+      // return (
+      //   <RelatedEventDetail
+      //     relatedEvent={eventFromCrumbId.relatedEvent}
+      //     parentEvent={uiSelectedEvent}
+      //     pushToQueryParams={pushToQueryParams}
+      //     relatedEventsState={relatedEventsState}
+      //     eventType={event.eventType(eventFromCrumbId.relatedEvent)}
+      //   />
+      // );
+    }
+
     // The default 'Event List' / 'List of all processes' view
     return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
-  }, [graphableProcesses, relatedEvents, uiSelectedEvent, crumbEvent, crumbId, pushToQueryParams]);
+  }, [
+    graphableProcesses,
+    uiSelectedEvent,
+    crumbEvent,
+    crumbId,
+    pushToQueryParams,
+    relatedStatsForCrumbId,
+  ]);
 
   return <>{whichTableViewAndBreadcrumbsToRender}</>;
 });

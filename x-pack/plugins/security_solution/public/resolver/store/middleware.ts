@@ -14,6 +14,7 @@ import {
   ResolverAncestry,
   LifecycleNode,
   ResolverNodeStats,
+  ResolverRelatedEvents,
 } from '../../../common/endpoint/types';
 import * as event from '../../../common/endpoint/models/event';
 
@@ -91,6 +92,26 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
             type: 'serverFailedToReturnResolverData',
           });
         }
+      }
+    } else if (action.type === 'userRequestedRelatedEventData' && context) {
+      const entityIdToFetchFor = action.payload;
+      let result: ResolverRelatedEvents;
+      try {
+        result = await context.services.http.get(
+          `/api/endpoint/resolver/${entityIdToFetchFor}/events`,
+          {
+            query: { events: 100 },
+          }
+        );
+        api.dispatch({
+          type: 'serverReturnedRelatedEventData',
+          payload: result,
+        });
+      } catch (e) {
+        api.dispatch({
+          type: 'serverFailedToReturnRelatedEventData',
+          payload: action.payload,
+        });
       }
     }
   };

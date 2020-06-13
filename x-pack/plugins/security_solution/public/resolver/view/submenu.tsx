@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState, useMemo, useCallback } from 'react';
+import React, { ReactNode, useState, useMemo, useCallback, EuiI18nNumber } from 'react';
 import { EuiSelectable, EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -121,11 +121,12 @@ OptionList.displayName = 'OptionList';
  */
 const NodeSubMenuComponents = React.memo(
   ({
+    count,
     menuTitle,
     menuAction,
     optionsWithActions,
     className,
-  }: { menuTitle: string; className?: string; menuAction: () => unknown } & {
+  }: { menuTitle: string; count?: number; className?: string; menuAction: () => unknown } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
     const [menuIsOpen, setMenuOpen] = useState(false);
@@ -180,7 +181,8 @@ const NodeSubMenuComponents = React.memo(
           iconSide="right"
           tabIndex={-1}
         >
-          {menuTitle}
+          <EuiI18nNumber value={count || 0} />
+          {` ${menuTitle}`}
         </EuiButton>
         {menuIsOpen && typeof optionsWithActions === 'object' && (
           <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />

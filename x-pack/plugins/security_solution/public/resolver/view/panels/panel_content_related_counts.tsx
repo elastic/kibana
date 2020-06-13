@@ -14,9 +14,9 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { CrumbInfo, StyledBreadcrumbs } from '../panel';
-import { RelatedEventDataEntryWithStats } from '../../types';
+
 import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 
 /**
  * This view gives counts for all the related events of a process grouped by related event type.
@@ -32,22 +32,21 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
 export const EventCountsForProcess = memo(function EventCountsForProcess({
   processEvent,
   pushToQueryParams,
-  relatedEventsState,
+  relatedStats,
 }: {
   processEvent: ResolverEvent;
   pushToQueryParams: (arg0: CrumbInfo) => unknown;
-  relatedEventsState: RelatedEventDataEntryWithStats;
+  relatedStats: ResolverNodeStats;
 }) {
   interface EventCountsTableView {
     name: string;
     count: number;
   }
 
+  const relatedEventsState = { stats: relatedStats.events.byCategory };
   const processName = processEvent && event.eventName(processEvent);
   const processEntityId = event.entityId(processEvent);
-  const totalCount = Object.values(relatedEventsState.stats).reduce((a, v) => {
-    return a + v;
-  }, 0);
+  const totalCount = relatedStats.events.total;
   const eventsString = i18n.translate(
     'xpack.siem.endpoint.resolver.panel.processEventCounts.events',
     {

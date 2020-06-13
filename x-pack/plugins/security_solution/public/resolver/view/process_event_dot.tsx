@@ -330,9 +330,9 @@ const ProcessEventDotComponents = React.memo(
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
-        payload: event,
+        payload: selfId,
       });
-    }, [dispatch, event]);
+    }, [dispatch, selfId]);
 
     const handleRelatedAlertsRequest = useCallback(() => {
       dispatch({
@@ -343,7 +343,7 @@ const ProcessEventDotComponents = React.memo(
 
     const history = useHistory();
     const urlSearch = history.location.search;
-    
+
     /**
      * This updates the breadcrumb nav, the table view
      */
@@ -391,29 +391,36 @@ const ProcessEventDotComponents = React.memo(
      * generally in the form `number of related events in category` `category title`
      * e.g. "10 DNS", "230 File"
      */
-    const relatedEventOptions = useMemo(() => {
+    const { relatedEventOptions, grandTotal } = useMemo(() => {
       if (!relatedEventsStats) {
         // Return an empty set of options if there are no stats to report
-        return [];
+        return { relatedEventOptions: [], grandTotal: 0 };
       }
+      let runningTotal = 0;
       // If we have entries to show, map them into options to display in the selectable list
-      return Object.entries(relatedEventsStats.events.byCategory).map(([category, total]) => {
-        const displayName = getDisplayName(category);
-        return {
-          prefix: <EuiI18nNumber value={total || 0} />,
-          optionTitle: `${displayName}`,
-          action: () => {
-            dispatch({
-              type: 'userSelectedRelatedEventCategory',
-              payload: {
-                subject: event,
-                category,
+      return {
+        relatedEventOptions: Object.entries(relatedEventsStats.events.byCategory).map(
+          ([category, total]) => {
+            const displayName = getDisplayName(category);
+            runningTotal += total;
+            return {
+              prefix: <EuiI18nNumber value={total || 0} />,
+              optionTitle: `${displayName}`,
+              action: () => {
+                dispatch({
+                  type: 'userSelectedRelatedEventCategory',
+                  payload: {
+                    subject: event,
+                    category,
+                  },
+                });
+                pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
               },
-            });
-            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
-          },
-        };
-      });
+            };
+          }
+        ),
+        grandTotal: runningTotal,
+      };
     }, [relatedEventsStats, dispatch, event, pushToQueryParams, selfEntityId]);
 
     const relatedEventStatusOrOptions = (() => {
@@ -555,6 +562,7 @@ const ProcessEventDotComponents = React.memo(
               <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false} className="related-dropdown">
                   <NodeSubMenu
+                    count={grandTotal}
                     menuTitle={subMenuAssets.relatedEvents.title}
                     optionsWithActions={relatedEventStatusOrOptions}
                     menuAction={handleRelatedEventRequest}
