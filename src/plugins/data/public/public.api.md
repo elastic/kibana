@@ -979,9 +979,10 @@ export type IMetricAggType = MetricAggType;
 // Warning: (ae-missing-release-tag) "IndexPattern" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class IndexPattern implements IIndexPattern {s
+export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern,}: IndexPatternDeps);
+    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern, }: IndexPatternDeps);
+    // (undocumented)
     [key: string]: any;
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
