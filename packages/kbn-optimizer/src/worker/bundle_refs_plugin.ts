@@ -18,12 +18,29 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
+import { promisify } from 'util';
+
 import webpack from 'webpack';
 
 import { Bundle, BundleRefs, BundleRef } from '../common';
 import { BundleRefModule } from './bundle_ref_module';
 
 const RESOLVE_EXTENSIONS = ['.js', '.ts', '.tsx'];
+
+function safeStat(path: string): Promise<Fs.Stats | undefined> {
+  return new Promise((resolve, reject) => {
+    Fs.stat(path, (error, stat) => {
+      if (error?.code === 'ENOENT') {
+        resolve(undefined);
+      } else if (error) {
+        reject(error);
+      } else {
+        resolve(stat);
+      }
+    });
+  });
+}
 
 interface RequestData {
   context: string;
@@ -33,12 +50,15 @@ interface RequestData {
 type Callback<T> = (error?: any, result?: T) => void;
 type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) => void;
 
-function compileHook(
+/**
+ * Isolate the weired type juggling we have to do to add a hook to the webpack compiler
+ */
+function hookIntoCompiler(
   compiler: webpack.Compiler,
   handler: (context: string, request: string) => Promise<BundleRefModule | undefined>
 ) {
-  compiler.hooks.compile.tap('BundleRefsPlugin', (args: any) => {
-    args.normalModuleFactory.hooks.factory.tap(
+  compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams: any) => {
+    compilationParams.normalModuleFactory.hooks.factory.tap(
       'BundleRefsPlugin/normalModuleFactory/factory',
       (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
         const context = data.context;
@@ -65,7 +85,7 @@ export class BundleRefsPlugin {
   constructor(private readonly bundle: Bundle, public readonly bundleRefs: BundleRefs) {}
 
   apply(compiler: webpack.Compiler) {
-    compileHook(compiler, async (context, request) => {
+    hookIntoCompiler(compiler, async (context, request) => {
       const exportId = await this.resolveExternal(context, request);
       if (exportId) {
         return new BundleRefModule(exportId);
@@ -86,13 +106,23 @@ export class BundleRefsPlugin {
     return promise;
   }
 
-  // TODO: Implement actual but fast resolver
   private async resolveRequest(absoluteRequest: string) {
-    if (absoluteRequest.endsWith('index.ts')) {
+    const stats = await safeStat(absoluteRequest);
+    if (stats && stats.isFile()) {
       return absoluteRequest;
     }
 
-    return Path.resolve(absoluteRequest, 'index.ts');
+    if (stats?.isDirectory()) {
+      for (const ext of RESOLVE_EXTENSIONS) {
+        const indexPath = Path.resolve(absoluteRequest, `index${ext}`);
+        const indexStats = await safeStat(indexPath);
+        if (indexStats?.isFile()) {
+          return indexPath;
+        }
+      }
+    }
+
+    return;
   }
 
   /**
@@ -118,8 +148,6 @@ export class BundleRefsPlugin {
     }
 
     const resolved = await this.cachedResolveRequest(context, request);
-
-    // the path was not resolved because it should be ignored, failed resolves throw
     if (!resolved) {
       return;
     }
