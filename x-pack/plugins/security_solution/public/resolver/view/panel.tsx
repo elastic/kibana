@@ -23,6 +23,7 @@ import { ProcessEventListNarrowedByType } from './panels/panel_content_related_l
 import { EventCountsForProcess } from './panels/panel_content_related_counts';
 import { ProcessDetails } from './panels/panel_content_process_detail';
 import { ProcessListWithCounts } from './panels/panel_content_process_list';
+import { RelatedEventDetail } from './panels/panel_content_related_detail';
 
 /**
  * The two query parameters we read/write on to control which view the table presents:
@@ -89,15 +90,17 @@ const PanelContent = memo(function PanelContent() {
   }, [urlSearch]);
 
   const graphableProcesses = useSelector(selectors.graphableProcesses);
+  const graphableProcessEntityIds = useMemo(() => {
+    return new Set(graphableProcesses.map(event.entityId));
+  }, [graphableProcesses]);
   // The entity id in query params of a graphable process (or false if none is found)
   // For 1 case (the related detail, see below), the process id will be in crumbEvent instead of crumbId
   const idFromParams = useMemo(() => {
-    const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
     return (
       (graphableProcessEntityIds.has(queryParams.crumbId) && queryParams.crumbId) ||
       (graphableProcessEntityIds.has(queryParams.crumbEvent) && queryParams.crumbEvent)
     );
-  }, [graphableProcesses, queryParams]);
+  }, [queryParams, graphableProcessEntityIds]);
 
   // The "selected" node in the tree control. It will sometimes, but not always, correspond with the "active" node
   const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
@@ -183,7 +186,6 @@ const PanelContent = memo(function PanelContent() {
       return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
     }
 
-    const graphableProcessEntityIds = new Set(graphableProcesses.map(event.entityId));
     if (graphableProcessEntityIds.has(crumbId)) {
       /**
        * | Crumb/Table            | &crumbId                   | &crumbEvent              |
@@ -235,26 +237,25 @@ const PanelContent = memo(function PanelContent() {
        * | :--------------------- | :------------------------- | :----------------------  |
        * | related event detail   | event_id of related event  | entity_id of process     |
        */
-      // return (
-      //   <RelatedEventDetail
-      //     relatedEvent={eventFromCrumbId.relatedEvent}
-      //     parentEvent={uiSelectedEvent}
-      //     pushToQueryParams={pushToQueryParams}
-      //     relatedEventsState={relatedEventsState}
-      //     eventType={event.eventType(eventFromCrumbId.relatedEvent)}
-      //   />
-      // );
+      return (
+        <RelatedEventDetail
+          relatedEventId={crumbId}
+          parentEvent={uiSelectedEvent!}
+          pushToQueryParams={pushToQueryParams}
+          countForParent={relatedStatsForCrumbId?.events.total}
+        />
+      );
     }
 
     // The default 'Event List' / 'List of all processes' view
     return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
   }, [
-    graphableProcesses,
     uiSelectedEvent,
     crumbEvent,
     crumbId,
     pushToQueryParams,
     relatedStatsForCrumbId,
+    graphableProcessEntityIds,
   ]);
 
   return <>{whichTableViewAndBreadcrumbsToRender}</>;

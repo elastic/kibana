@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiI18nNumber,
@@ -16,10 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { RelatedEventDataEntryWithStats } from '../../types';
+import { useSelector } from 'react-redux';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import * as selectors from '../../store/selectors';
+import { useResolverDispatch } from '../use_resolver_dispatch';
+import { PanelContentError } from './panel_content_error';
 
 export const BoldCode = styled(EuiCode)`
   &.euiCodeBlock code.euiCodeBlock__code {
@@ -95,44 +98,77 @@ TitleHr.displayName = 'TitleHR';
  * it appears in the underlying ResolverEvent
  */
 export const RelatedEventDetail = memo(function RelatedEventDetail({
-  relatedEvent,
+  relatedEventId,
   parentEvent,
   pushToQueryParams,
-  relatedEventsState,
-  eventType,
+  countForParent,
 }: {
-  relatedEvent: ResolverEvent;
-  parentEvent?: ResolverEvent;
+  relatedEventId: string;
+  parentEvent: ResolverEvent;
   pushToQueryParams: (arg0: CrumbInfo) => unknown;
-  relatedEventsState: RelatedEventDataEntryWithStats;
-  eventType: string;
+  countForParent: number | undefined;
 }) {
   const processName = (parentEvent && event.eventName(parentEvent)) || '*';
-  const processEntityId = event.entityId(relatedEvent);
-  const totalCount = Object.values(relatedEventsState.stats).reduce((a, v) => {
-    return a + v;
-  }, 0);
+  const processEntityId = parentEvent && event.entityId(parentEvent);
+  const totalCount = countForParent || 0;
   const eventsString = i18n.translate(
     'xpack.siem.endpoint.resolver.panel.relatedEventDetail.events',
     {
       defaultMessage: 'Events',
     }
   );
+  const naString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedEventDetail.NA', {
+    defaultMessage: 'N/A',
+  });
 
-  const matchingEvents = useMemo(() => {
-    return relatedEventsState.relatedEvents.reduce(
-      (matchingSet: ResolverEvent[], { relatedEvent: candidateEvent, relatedEventType }) => {
-        if (relatedEventType === eventType) {
-          matchingSet.push(candidateEvent);
-        }
-        return matchingSet;
-      },
-      []
+  const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
+  const relatedsReady = relatedsReadyMap.get(processEntityId!);
+  const dispatch = useResolverDispatch();
+
+  /**
+   * If we don't have the related events for the parent yet, use this effect
+   * to request them.
+   */
+  useEffect(() => {
+    if (typeof relatedsReady === 'undefined') {
+      dispatch({
+        type: 'userRequestedRelatedEventData',
+        payload: processEntityId,
+      });
+    }
+  }, [relatedsReady, dispatch, processEntityId]);
+
+  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
+    processEntityId!
+  );
+
+  const [relatedEventToShowDetailsFor, countBySameCategory, relatedEventCategory] = useMemo(() => {
+    if (!relatedEventsForThisProcess) {
+      return [undefined, 0];
+    }
+    const specificEvent = relatedEventsForThisProcess.events.find(
+      (evt) => event.eventId(evt) === relatedEventId
     );
-  }, [relatedEventsState, eventType]);
+    // For breadcrumbs:
+    const specificCategory = specificEvent && event.eventType(specificEvent);
+    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
+      return event.eventType(evt) === specificCategory ? sumtotal + 1 : sumtotal;
+    }, 0);
+    return [specificEvent, countOfCategory, specificCategory || naString];
+  }, [relatedEventsForThisProcess, naString, relatedEventId]);
 
   const [sections, formattedDate] = useMemo(() => {
-    const { agent, ecs, process, ...relevantData } = relatedEvent as ResolverEvent & {
+    if (!relatedEventToShowDetailsFor) {
+      // This could happen if user relaods from URL param and requests an eventId that no longer exists
+      return [[], naString];
+    }
+    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
+    const {
+      agent,
+      ecs,
+      process,
+      ...relevantData
+    } = relatedEventToShowDetailsFor as ResolverEvent & {
       ecs: unknown;
     };
     let displayDate = '';
@@ -152,7 +188,18 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       })
       .filter((v) => v.sectionTitle !== '' && v.entries.length);
     return [sectionData, displayDate];
-  }, [relatedEvent]);
+  }, [relatedEventToShowDetailsFor, naString]);
+
+  const waitCrumbs = useMemo(() => {
+    return [
+      {
+        text: eventsString,
+        onClick: () => {
+          pushToQueryParams({ crumbId: '', crumbEvent: '' });
+        },
+      },
+    ];
+  }, [pushToQueryParams, eventsString]);
 
   const crumbs = useMemo(() => {
     return [
@@ -165,7 +212,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       {
         text: processName,
         onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
+          pushToQueryParams({ crumbId: processEntityId!, crumbEvent: '' });
         },
       },
       {
@@ -176,47 +223,83 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
           </>
         ),
         onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: 'all' });
+          pushToQueryParams({ crumbId: processEntityId!, crumbEvent: 'all' });
         },
       },
       {
         text: (
           <>
-            <EuiI18nNumber value={matchingEvents.length} />
-            {/* Non-breaking space->*/ ` ${eventType}`}
+            <EuiI18nNumber value={countBySameCategory} />
+            {/* Non-breaking space->*/ ` ${relatedEventCategory}`}
           </>
         ),
         onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: eventType });
+          pushToQueryParams({
+            crumbId: processEntityId!,
+            crumbEvent: relatedEventCategory || 'all',
+          });
         },
       },
       {
-        text: event.descriptiveName(relatedEvent),
+        text: relatedEventToShowDetailsFor
+          ? event.descriptiveName(relatedEventToShowDetailsFor)
+          : naString,
         onClick: () => {},
       },
     ];
   }, [
     processName,
     processEntityId,
-    matchingEvents,
-    eventType,
     eventsString,
     pushToQueryParams,
-    relatedEvent,
     totalCount,
+    countBySameCategory,
+    naString,
+    relatedEventCategory,
+    relatedEventToShowDetailsFor,
   ]);
+
+  /**
+   * If the ship hasn't come in yet, wait on the dock
+   */
+  if (!relatedsReady) {
+    const waitingString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedDetail.wait', {
+      defaultMessage: 'Waiting For Events...',
+    });
+    return (
+      <>
+        <StyledBreadcrumbs breadcrumbs={waitCrumbs} />
+        <EuiSpacer size="l" />
+        <EuiTitle>
+          <h4>{waitingString}</h4>
+        </EuiTitle>
+      </>
+    );
+  }
+
+  /**
+   * Could happen if user e.g. loads a URL with a bad crumbEvent
+   */
+  if (!relatedEventToShowDetailsFor) {
+    const errString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedDetail.missing', {
+      defaultMessage: 'Related event not found.',
+    });
+    return <PanelContentError errorMessage={errString} pushToQueryParams={pushToQueryParams} />;
+  }
 
   return (
     <>
       <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText>
-        <BoldCode>{`${eventType} ${event.ecsEventType(relatedEvent)}`}</BoldCode>
+        <BoldCode>{`${relatedEventCategory} ${event.ecsEventType(
+          relatedEventToShowDetailsFor
+        )}`}</BoldCode>
         {' @ '}
         {formattedDate}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiText>{event.descriptiveName(relatedEvent)}</EuiText>
+      <EuiText>{event.descriptiveName(relatedEventToShowDetailsFor)}</EuiText>
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
         return (

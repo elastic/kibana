@@ -15,7 +15,7 @@ import { CrumbInfo, StyledBreadcrumbs } from '../panel';
  * @param {function} pushToQueryparams A function to update the hash value in the URL to control panel state
  * @param {string} errorMessage The message to display in the panel when something goes wrong
  */
-export const TableServiceError = memo(function ({
+export const PanelContentError = memo(function ({
   errorMessage,
   pushToQueryParams,
 }: {
@@ -58,4 +58,4 @@ export const TableServiceError = memo(function ({
     </>
   );
 });
-TableServiceError.displayName = 'TableServiceError';
+PanelContentError.displayName = 'TableServiceError';
