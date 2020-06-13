@@ -259,7 +259,6 @@ const ProcessEventDotComponents = React.memo(
     // Entity ID of self
     const selfEntityId = eventModel.entityId(event);
 
-    
     const isShowingEventActions = magFactorX > 0.8;
     const isShowingDescriptionText = magFactorX >= 0.55;
 
@@ -437,13 +436,13 @@ const ProcessEventDotComponents = React.memo(
      * generally in the form `number of related events in category` `category title`
      * e.g. "10 DNS", "230 File"
      */
-    
+
     const [relatedEventOptions, grandTotal] = useMemo(() => {
       const relatedStatsList = [];
 
       if (!relatedEventsStats) {
         // Return an empty set of options if there are no stats to report
-        return [[],0];
+        return [[], 0];
       }
       let runningTotal = 0;
       // If we have entries to show, map them into options to display in the selectable list

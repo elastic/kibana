@@ -110,7 +110,7 @@ const OptionList = React.memo(
         {...selectableProps}
         isLoading={isLoading}
       >
-         {(list) => <OptionListItem>{list}</OptionListItem>}
+        {(list) => <OptionListItem>{list}</OptionListItem>}
       </EuiSelectable>
     );
   }

@@ -13,9 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { nodeType } from './process_event_dot';
-import { ResolverEvent } from 'x-pack/plugins/security_solution/common/endpoint/types';
-
-
+import { ResolverEvent } from '../../../common/endpoint/types';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -409,7 +407,11 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   height: 0;
 `;
 
-export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap, cubeAssetsForNode: (arg0: ResolverEvent)=>NodeStyleConfig } => {
+export const useResolverTheme = (): {
+  colorMap: ColorMap;
+  nodeAssets: NodeStyleMap;
+  cubeAssetsForNode: (arg0: ResolverEvent) => NodeStyleConfig;
+} => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
