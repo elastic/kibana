@@ -23,8 +23,6 @@ import { ProcessListWithCounts } from './panels/panel_content_process_list';
 import { RelatedEventDetail } from './panels/panel_content_related_detail';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
-
-
 /**
  * The team decided to use this determinant to express how we comport state in the UI with the values of the two query params:
  *
