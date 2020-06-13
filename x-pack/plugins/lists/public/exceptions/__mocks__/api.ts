@@ -6,6 +6,7 @@
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -16,6 +17,8 @@ import {
   AddExceptionListProps,
   ApiCallByIdProps,
   ApiCallByListIdProps,
+  UpdateExceptionListItemProps,
+  UpdateExceptionListProps,
 } from '../types';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -33,6 +36,20 @@ export const addExceptionListItem = async ({
 }: AddExceptionListItemProps): Promise<ExceptionListItemSchema> =>
   Promise.resolve(getExceptionListItemSchemaMock());
 
+export const updateExceptionList = async ({
+  http,
+  list,
+  signal,
+}: UpdateExceptionListProps): Promise<ExceptionListSchema> =>
+  Promise.resolve(getExceptionListSchemaMock());
+
+export const updateExceptionListItem = async ({
+  http,
+  listItem,
+  signal,
+}: UpdateExceptionListItemProps): Promise<ExceptionListItemSchema> =>
+  Promise.resolve(getExceptionListItemSchemaMock());
+
 export const fetchExceptionListById = async ({
   http,
   id,
@@ -46,7 +63,7 @@ export const fetchExceptionListItemsByListId = async ({
   pagination,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> =>
-  Promise.resolve({ data: [getExceptionListItemSchemaMock()], page: 1, per_page: 20, total: 1 });
+  Promise.resolve(getFoundExceptionListItemSchemaMock());
 
 export const fetchExceptionListItemById = async ({
   http,

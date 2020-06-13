@@ -9,4 +9,3 @@ export { usePersistExceptionItem } from './exceptions/hooks/persist_exception_it
 export { usePersistExceptionList } from './exceptions/hooks/persist_exception_list';
 export { useExceptionList } from './exceptions/hooks/use_exception_list';
 export { ExceptionList, ExceptionIdentifiers } from './exceptions/types';
-export { mockNewExceptionItem, mockNewExceptionList } from './exceptions/mock';

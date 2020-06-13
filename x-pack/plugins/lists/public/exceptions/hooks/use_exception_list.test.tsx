@@ -83,7 +83,7 @@ describe('useExceptionList', () => {
       const expectedResult: UseExceptionListSuccess = {
         exceptions: expectedListItemsResult,
         lists: expectedListResult,
-        pagination: { page: 1, perPage: 20, total: 1 },
+        pagination: { page: 1, perPage: 1, total: 1 },
       };
 
       expect(result.current).toEqual([
@@ -92,7 +92,7 @@ describe('useExceptionList', () => {
         expectedListItemsResult,
         {
           page: 1,
-          perPage: 20,
+          perPage: 1,
           total: 1,
         },
         result.current[4],
