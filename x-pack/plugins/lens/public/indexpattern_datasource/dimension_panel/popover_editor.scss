@@ -1,0 +1,23 @@
+.lnsIndexPatternDimensionEditor {
+  flex-grow: 1;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.lnsIndexPatternDimensionEditor__left,
+.lnsIndexPatternDimensionEditor__right {
+  padding: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor__left {
+  background-color: $euiPageBackgroundColor;
+}
+
+.lnsIndexPatternDimensionEditor__right {
+  width: $euiSize * 20;
+}
+
+.lnsIndexPatternDimensionEditor__operation > button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
