@@ -20,11 +20,12 @@
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatternsService } from './index_patterns';
 import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
-import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
+// import { httpServiceMock } from '../../../../../core/public/mocks';
 import { fieldFormatsMock } from '../../field_formats/mocks';
+import { UiSettingsCommon } from '../types';
+import { IndexPatternsApiClient as IndexPatternsApiClientType } from '.';
 
-const core = coreMock.createStart();
-const http = httpServiceMock.createStartContract();
+// const http = httpServiceMock.createStartContract();
 const fieldFormats = fieldFormatsMock;
 
 jest.mock('./index_pattern', () => {
@@ -62,15 +63,15 @@ describe('IndexPatterns', () => {
         }) as Promise<SavedObjectsFindResponsePublic<any>>
     );
 
-    indexPatterns = new IndexPatternsService(
-      core.uiSettings,
+    indexPatterns = new IndexPatternsService({
+      uiSettings: {} as UiSettingsCommon,
       savedObjectsClient,
-      http,
+      apiClient: {} as IndexPatternsApiClientType,
       fieldFormats,
-      () => {},
-      () => {},
-      () => {}
-    );
+      onNotification: () => {},
+      onError: () => {},
+      onRedirectNoIndexPattern: () => {},
+    });
   });
 
   test('does cache gets for the same id', async () => {

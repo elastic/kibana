@@ -54,25 +54,15 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
         // todo - separate out client api, uiSettings compat
 
-        return new IndexPatternsCommonService(
-          new UiSettingsServerToCommon(uiSettingsClient),
-          (savedObjectsClient as unknown) as SavedObjectsClient,
-          // savedObjectsClient,
-          // IndexPatterns
-          // refreshSavedObjectsCache
-          //
-          // Index Pattern
-          // get (via init)
-          // update (via popularize, save)
-          // create (via create)
-          // delete (via destroy)
-          // findByTitle
-          {} as IndexPatternsApiClient, // hoooow
-          formats,
-          () => {},
-          () => {},
-          () => {}
-        );
+        return new IndexPatternsCommonService({
+          uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+          savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClient,
+          apiClient: {} as IndexPatternsApiClient,
+          fieldFormats: formats,
+          onError: () => {},
+          onNotification: () => {},
+          onRedirectNoIndexPattern: () => {},
+        });
       },
     };
   }

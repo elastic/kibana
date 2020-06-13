@@ -29,7 +29,7 @@ import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { IIndexPatternsApiClient } from '.';
+import type { IIndexPatternsApiClient } from '.';
 import { TypeMeta } from '.';
 import { OnNotification, OnError, UiSettingsCommon } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -42,6 +42,17 @@ interface IUiSettingsValues {
   [key: string]: any;
   shortDotsEnable: any;
   metaFields: any;
+}
+
+interface IndexPatternDeps {
+  getConfig: UiSettingsCommon['get'];
+  savedObjectsClient: SavedObjectsClientContract;
+  apiClient: IIndexPatternsApiClient;
+  patternCache: PatternCache;
+  fieldFormats: FieldFormatsStartCommon;
+  onNotification: OnNotification;
+  onError: OnError;
+  uiSettingsValues: IUiSettingsValues;
 }
 
 export class IndexPattern implements IIndexPattern {
@@ -97,14 +108,16 @@ export class IndexPattern implements IIndexPattern {
 
   constructor(
     id: string | undefined,
-    getConfig: UiSettingsCommon['get'],
-    savedObjectsClient: SavedObjectsClientContract,
-    apiClient: IIndexPatternsApiClient,
-    patternCache: PatternCache,
-    fieldFormats: FieldFormatsStartCommon,
-    onNotification: OnNotification,
-    onError: OnError,
-    uiSettingsValues: IUiSettingsValues
+    {
+      getConfig,
+      savedObjectsClient,
+      apiClient,
+      patternCache,
+      fieldFormats,
+      onNotification,
+      onError,
+      uiSettingsValues,
+    }: IndexPatternDeps
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -401,20 +414,19 @@ export class IndexPattern implements IIndexPattern {
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {
-        const duplicatePattern = new IndexPattern(
-          duplicateId,
-          this.getConfig,
-          this.savedObjectsClient,
-          this.apiClient,
-          this.patternCache,
-          this.fieldFormats,
-          this.onNotification,
-          this.onError,
-          {
+        const duplicatePattern = new IndexPattern(this.id, {
+          getConfig: this.getConfig,
+          savedObjectsClient: this.savedObjectsClient,
+          apiClient: this.apiClient,
+          patternCache: this.patternCache,
+          fieldFormats: this.fieldFormats,
+          onNotification: this.onNotification,
+          onError: this.onError,
+          uiSettingsValues: {
             shortDotsEnable: this.shortDotsEnable,
             metaFields: this.metaFields,
-          }
-        );
+          },
+        });
 
         await duplicatePattern.destroy();
       }
@@ -458,20 +470,20 @@ export class IndexPattern implements IIndexPattern {
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
-          const samePattern = new IndexPattern(
-            this.id,
-            this.getConfig,
-            this.savedObjectsClient,
-            this.apiClient,
-            this.patternCache,
-            this.fieldFormats,
-            this.onNotification,
-            this.onError,
-            {
+          const samePattern = new IndexPattern(this.id, {
+            getConfig: this.getConfig,
+            savedObjectsClient: this.savedObjectsClient,
+            apiClient: this.apiClient,
+            patternCache: this.patternCache,
+            fieldFormats: this.fieldFormats,
+            onNotification: this.onNotification,
+            onError: this.onError,
+            uiSettingsValues: {
               shortDotsEnable: this.shortDotsEnable,
               metaFields: this.metaFields,
-            }
-          );
+            },
+          });
+
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
             const updatedBody = samePattern.prepBody();

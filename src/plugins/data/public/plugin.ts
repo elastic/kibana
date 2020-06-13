@@ -169,17 +169,21 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(
-      new UiSettingsPublicToCommon(uiSettings),
-      savedObjects.client,
-      new IndexPatternsApiClient(http),
+    const indexPatterns = new IndexPatternsService({
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: savedObjects.client,
+      apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
-      (toastInputFields) => {
+      onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
       },
-      notifications.toasts.addError,
-      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
-    );
+      onError: notifications.toasts.addError,
+      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+    });
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
