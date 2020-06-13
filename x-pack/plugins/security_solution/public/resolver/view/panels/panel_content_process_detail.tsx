@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as event from '../../../../common/endpoint/models/event';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
+import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
   hostPathForProcess,
   hostPidForProcess,

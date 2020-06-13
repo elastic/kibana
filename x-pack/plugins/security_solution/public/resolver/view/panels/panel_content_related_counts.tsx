@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiInMemoryTable,
 } from '@elastic/eui';
-import { CrumbInfo, StyledBreadcrumbs } from '../panel';
+import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
 
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';

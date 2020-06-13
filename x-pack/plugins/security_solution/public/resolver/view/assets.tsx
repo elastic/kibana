@@ -12,8 +12,9 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
-import { nodeType } from './process_event_dot';
 import { ResolverEvent } from '../../../common/endpoint/types';
+import * as processModel from '../models/process_event';
+import { ResolverProcessType } from '../types';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -406,6 +407,23 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   width: 0;
   height: 0;
 `;
+
+const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
+  processCreated: 'runningProcessCube',
+  processRan: 'runningProcessCube',
+  processTerminated: 'terminatedProcessCube',
+  unknownProcessEvent: 'runningProcessCube',
+  processCausedAlert: 'runningTriggerCube',
+  unknownEvent: 'runningProcessCube',
+};
+
+export function nodeType(processEvent: ResolverEvent): keyof NodeStyleMap {
+  const processType = processModel.eventType(processEvent);
+  if (processType in processTypeToCube) {
+    return processTypeToCube[processType];
+  }
+  return 'runningProcessCube';
+}
 
 export const useResolverTheme = (): {
   colorMap: ColorMap;

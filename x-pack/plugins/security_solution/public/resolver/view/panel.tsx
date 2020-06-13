@@ -6,13 +6,10 @@
 
 import React, { memo, useCallback, useMemo, useContext, useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-
-import { EuiPanel, EuiBreadcrumbs } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiPanel } from '@elastic/eui';
 import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -24,46 +21,9 @@ import { EventCountsForProcess } from './panels/panel_content_related_counts';
 import { ProcessDetails } from './panels/panel_content_process_detail';
 import { ProcessListWithCounts } from './panels/panel_content_process_list';
 import { RelatedEventDetail } from './panels/panel_content_related_detail';
+import { CrumbInfo } from './panels/panel_content_utilities';
 
-/**
- * The two query parameters we read/write on to control which view the table presents:
- */
-export interface CrumbInfo {
-  readonly crumbId: string;
-  readonly crumbEvent: string;
-}
 
-/**
- * Breadcrumb menu with adjustments per direction from UX team
- */
-export const StyledBreadcrumbs = styled(EuiBreadcrumbs)`
-  &.euiBreadcrumbs.euiBreadcrumbs--responsive {
-    background-color: #f5f5fa;
-    padding: 1em;
-  }
-`;
-
-export const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-});
-
-/**
- * @param {ConstructorParameters<typeof Date>[0]} timestamp To be passed through Date->Intl.DateTimeFormat
- * @returns {string} A nicely formatted string for a date
- */
-export function formatDate(timestamp: ConstructorParameters<typeof Date>[0]) {
-  const date = new Date(timestamp);
-  if (isFinite(date.getTime())) {
-    return formatter.format(date);
-  } else {
-    return 'Invalid Date';
-  }
-}
 
 /**
  * The team decided to use this determinant to express how we comport state in the UI with the values of the two query params:

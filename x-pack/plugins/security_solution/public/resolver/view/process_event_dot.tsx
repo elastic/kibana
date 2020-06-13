@@ -21,14 +21,13 @@ import { useHistory } from 'react-router-dom';
 import querystring from 'querystring';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, useResolverTheme, NodeStyleMap, calculateResolverFontSize } from './assets';
+import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { SymbolIds, useResolverTheme, calculateResolverFontSize, nodeType } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
-import * as processModel from '../models/process_event';
 import * as selectors from '../store/selectors';
-import { CrumbInfo } from './panel';
+import { CrumbInfo } from './panels/panel_content_utilities';
 
 /**
  * A map of all known event types (in ugly schema format) to beautifully i18n'd display names
@@ -686,20 +685,3 @@ export const ProcessEventDot = styled(ProcessEventDotComponents)`
     color: white;
   }
 `;
-
-const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
-  processCreated: 'runningProcessCube',
-  processRan: 'runningProcessCube',
-  processTerminated: 'terminatedProcessCube',
-  unknownProcessEvent: 'runningProcessCube',
-  processCausedAlert: 'runningTriggerCube',
-  unknownEvent: 'runningProcessCube',
-};
-
-export function nodeType(processEvent: ResolverEvent): keyof NodeStyleMap {
-  const processType = processModel.eventType(processEvent);
-  if (processType in processTypeToCube) {
-    return processTypeToCube[processType];
-  }
-  return 'runningProcessCube';
-}

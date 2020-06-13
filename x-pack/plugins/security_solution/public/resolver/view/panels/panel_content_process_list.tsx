@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { CrumbInfo, formatter, StyledBreadcrumbs } from '../panel';
+import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './process_cube_icon';

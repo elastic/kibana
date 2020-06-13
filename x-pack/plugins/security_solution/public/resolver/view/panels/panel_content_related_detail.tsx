@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
+import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
