@@ -26,10 +26,6 @@ export function getMlJobServiceName(jobId: string) {
   return jobId.split('-').slice(0, -2).join('-');
 }
 
-export function getMlIndex(serviceName: string, transactionType?: string) {
-  return `.ml-anomalies-${getMlJobId(serviceName, transactionType)}`;
-}
-
 export function encodeForMlApi(value: string) {
   return value.replace(/\s+/g, '_').toLowerCase();
 }

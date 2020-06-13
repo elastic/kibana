@@ -26,8 +26,8 @@ describe('getAnomalySeries', () => {
       setup: {
         start: 0,
         end: 500000,
-        client: { search: clientSpy } as any,
-        internalClient: { search: clientSpy } as any,
+        client: { search: () => {} } as any,
+        internalClient: { search: () => {} } as any,
         config: new Proxy(
           {},
           {
@@ -46,6 +46,11 @@ describe('getAnomalySeries', () => {
           apmCustomLinkIndex: 'myIndex',
         },
         dynamicIndexPattern: null as any,
+        ml: {
+          mlSystem: {
+            mlAnomalySearch: clientSpy,
+          },
+        } as any,
       },
     });
   });

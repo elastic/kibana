@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMlIndex } from '../../../../../common/ml_job_constants';
+import { getMlJobId } from '../../../../../common/ml_job_constants';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
@@ -26,19 +26,23 @@ export async function anomalySeriesFetcher({
   mlBucketSize: number;
   setup: Setup & SetupTimeRange;
 }) {
-  const { client, start, end } = setup;
+  const { ml, start, end } = setup;
+  if (!ml) {
+    return;
+  }
 
   // move the start back with one bucket size, to ensure to get anomaly data in the beginning
   // this is required because ML has a minimum bucket size (default is 900s) so if our buckets are smaller, we might have several null buckets in the beginning
   const newStart = start - mlBucketSize * 1000;
+  const jobId = getMlJobId(serviceName, transactionType);
 
   const params = {
-    index: getMlIndex(serviceName, transactionType),
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
+            { term: { job_id: jobId } },
             { exists: { field: 'bucket_span' } },
             {
               range: {
@@ -74,7 +78,7 @@ export async function anomalySeriesFetcher({
   };
 
   try {
-    const response = await client.search(params);
+    const response = await ml.mlSystem.mlAnomalySearch(params);
     return response;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
