@@ -22,7 +22,7 @@ import { inspect } from 'util';
 import Axios from 'axios';
 import gql from 'graphql-tag';
 import * as GraphqlPrinter from 'graphql/language/printer';
-import { ASTNode } from 'graphql/language/ast';
+import { DocumentNode } from 'graphql/language/ast';
 import makeTerminalLink from 'terminal-link';
 import { ToolingLog } from '@kbn/dev-utils';
 
@@ -75,7 +75,11 @@ export interface PullRequest {
 /**
  * Send a single request to the Github v4 GraphQL API
  */
-async function gqlRequest(token: string, query: ASTNode, variables: Record<string, unknown> = {}) {
+async function gqlRequest(
+  token: string,
+  query: DocumentNode,
+  variables: Record<string, unknown> = {}
+) {
   const resp = await Axios.request({
     url: 'https://api.github.com/graphql',
     method: 'POST',
@@ -113,8 +117,8 @@ function parsePullRequestNode(node: any): PullRequest {
     labels,
     fixes: getFixReferences(node.bodyText),
     user: {
-      login: node.author.login,
-      name: node.author.name,
+      login: node.author?.login || 'deleted user',
+      name: node.author?.name,
     },
     versions: labels
       .map((l) => Version.fromLabel(l))
