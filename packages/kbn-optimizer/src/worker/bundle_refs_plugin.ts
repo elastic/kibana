@@ -19,7 +19,6 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { promisify } from 'util';
 
 import webpack from 'webpack';
 
