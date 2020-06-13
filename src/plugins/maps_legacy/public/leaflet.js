@@ -21,9 +21,9 @@ export let L;
 
 if (!window.hasOwnProperty('L')) {
   require('leaflet/dist/leaflet.css');
-  window.L = require('leaflet/dist/leaflet.js');
-  window.L.Browser.touch = false;
-  window.L.Browser.pointer = false;
+  L = window.L = require('leaflet/dist/leaflet.js');
+  L.Browser.touch = false;
+  L.Browser.pointer = false;
 
   require('leaflet-vega');
   require('leaflet.heat/dist/leaflet-heat.js');
