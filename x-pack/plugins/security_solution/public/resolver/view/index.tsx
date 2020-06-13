@@ -18,6 +18,7 @@ import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
+import * as eventModel from '../../../common/endpoint/models/event';
 
 interface StyledResolver {
   backgroundColor: string;
