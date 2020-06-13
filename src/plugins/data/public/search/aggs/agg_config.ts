@@ -20,7 +20,11 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
-import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
+import {
+  ExpressionAstFunction,
+  ExpressionAstArgument,
+  SerializedFieldFormat,
+} from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -42,7 +46,8 @@ export type AggConfigSerialized = Ensure<
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: SerializableState;
+    params?: {} | SerializableState;
+    format?: {} | Ensure<SerializedFieldFormat<SerializableState>, SerializableState>;
     schema?: string;
   },
   SerializableState
@@ -298,8 +303,9 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      schema: this.schema,
       params: outParams as SerializableState,
+      format: {},
+      ...(this.schema && { schema: this.schema }),
     };
   }
 
