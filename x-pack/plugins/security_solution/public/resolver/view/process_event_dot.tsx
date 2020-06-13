@@ -20,15 +20,9 @@ import { useHistory } from 'react-router-dom';
 import querystring from 'querystring';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
-import {
-  Vector2,
-  Matrix3,
-  AdjacentProcessMap,
-  ResolverProcessType,
-  RelatedEventEntryWithStatsOrWaiting,
-} from '../types';
+import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
 import { SymbolIds, NamedColors } from './defs';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as processModel from '../models/process_event';
@@ -216,7 +210,7 @@ const ProcessEventDotComponents = React.memo(
     event,
     projectionMatrix,
     adjacentNodeMap,
-    relatedEvents,
+    relatedEventsStats,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -239,10 +233,9 @@ const ProcessEventDotComponents = React.memo(
      */
     adjacentNodeMap: AdjacentProcessMap;
     /**
-     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
-     * to provide the user some visibility regarding the contents thereof.
+     * Statistics for the number of related events and alerts for this process node
      */
-    relatedEvents?: RelatedEventEntryWithStatsOrWaiting;
+    relatedEventsStats?: ResolverNodeStats;
   }) => {
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -399,50 +392,35 @@ const ProcessEventDotComponents = React.memo(
      * e.g. "10 DNS", "230 File"
      */
     const relatedEventOptions = useMemo(() => {
-      if (relatedEvents === 'error') {
-        // Return an empty set of options if there was an error requesting them
-        return [];
-      }
-      const relatedStats = typeof relatedEvents === 'object' && relatedEvents.stats;
-      if (!relatedStats) {
+      if (!relatedEventsStats) {
         // Return an empty set of options if there are no stats to report
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
-      return Object.entries(relatedStats).map((statsEntry) => {
-        const [schemaNameForCategory, countForCategory] = statsEntry;
-        const displayName = getDisplayName(schemaNameForCategory);
+      return Object.entries(relatedEventsStats.events.byCategory).map(([category, total]) => {
+        const displayName = getDisplayName(category);
         return {
-          prefix: <EuiI18nNumber value={countForCategory || 0} />,
+          prefix: <EuiI18nNumber value={total || 0} />,
           optionTitle: `${displayName}`,
           action: () => {
             dispatch({
               type: 'userSelectedRelatedEventCategory',
               payload: {
                 subject: event,
-                category: schemaNameForCategory,
+                category,
               },
             });
-            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: schemaNameForCategory });
+            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
           },
         };
       });
-    }, [relatedEvents, dispatch, event, pushToQueryParams, selfEntityId]);
+    }, [relatedEventsStats, dispatch, event, pushToQueryParams, selfEntityId]);
 
     const relatedEventStatusOrOptions = (() => {
-      if (!relatedEvents) {
-        // If related events have not yet been requested
+      if (!relatedEventsStats) {
         return subMenuAssets.initialMenuStatus;
       }
-      if (relatedEvents === 'error') {
-        // If there was an error when we tried to request the events
-        return subMenuAssets.menuError;
-      }
-      if (relatedEvents === 'waitingForRelatedEventData') {
-        // If we're waiting for events to be returned
-        // Pass on the waiting symbol
-        return relatedEvents;
-      }
+
       return relatedEventOptions;
     })();
 
@@ -657,15 +635,6 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
 
 function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
-  //dd
-  const nm = eventModel.eventName(processEvent)
-  if(nm.match(/explorer/)){
-    return 'terminatedProcessCube'
-  }
-  if(nm.match(/mimi/)){
-    return 'runningTriggerCube'
-  }
-  //dd
   if (processType in processTypeToCube) {
     return processTypeToCube[processType];
   }

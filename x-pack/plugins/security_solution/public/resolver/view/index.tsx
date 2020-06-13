@@ -18,6 +18,7 @@ import { useCamera } from './use_camera';
 import { SymbolDefinitions, NamedColors } from './defs';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
+import * as eventModel from '../../../common/endpoint/models/event';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -56,7 +57,7 @@ export const Resolver = styled(
 
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
-    const relatedEvents = useSelector(selectors.relatedEvents);
+    const relatedEventsStats = useSelector(selectors.relatedEventsStats);
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
     const hasError = useSelector(selectors.hasError);
@@ -115,7 +116,7 @@ export const Resolver = styled(
                   projectionMatrix={projectionMatrix}
                   event={processEvent}
                   adjacentNodeMap={adjacentNodeMap}
-                  relatedEvents={relatedEvents.get(processEvent)}
+                  relatedEventsStats={relatedEventsStats.get(eventModel.entityId(processEvent))}
                 />
               );
             })}
