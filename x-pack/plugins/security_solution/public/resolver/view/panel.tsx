@@ -206,7 +206,7 @@ const PanelContent = memo(function PanelContent() {
        * | :--------------------- | :------------------------- | :----------------------  |
        * | related event detail   | event_id of related event  | entity_id of process     |
        */
-      const parentCount: number = Object.values(relatedStatsForIdFromParams || {}).reduce(
+      const parentCount: number = Object.values(relatedStatsForIdFromParams?.events.byCategory || {}).reduce(
         (sum, val) => sum + val,
         0
       );
