@@ -25,7 +25,7 @@ export const PanelContentError = memo(function ({
   const crumbs = useMemo(() => {
     return [
       {
-        text: i18n.translate('xpack.siem.endpoint.resolver.panel.error.events', {
+        text: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.error.events', {
           defaultMessage: 'Events',
         }),
         onClick: () => {
@@ -33,7 +33,7 @@ export const PanelContentError = memo(function ({
         },
       },
       {
-        text: i18n.translate('xpack.siem.endpoint.resolver.panel.error.error', {
+        text: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.error.error', {
           defaultMessage: 'Error',
         }),
         onClick: () => {},
@@ -51,7 +51,7 @@ export const PanelContentError = memo(function ({
           pushToQueryParams({ crumbId: '', crumbEvent: '' });
         }}
       >
-        {i18n.translate('xpack.siem.endpoint.resolver.panel.error.goBack', {
+        {i18n.translate('xpack.securitySolution.enpoint.resolver.panel.error.goBack', {
           defaultMessage: 'Click this link to return to the list of all processes.',
         })}
       </EuiButtonEmpty>

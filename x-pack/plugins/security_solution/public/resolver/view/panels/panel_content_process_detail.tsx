@@ -55,30 +55,36 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const processInfo = processEvent
       ? {
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.created', {
+          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.created', {
             defaultMessage: 'Created',
           })]: dateTime,
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.path', {
+          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.path', {
             defaultMessage: 'Path',
           })]: hostPathForProcess(processEvent),
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.pid', {
+          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.pid', {
             defaultMessage: 'PID',
           })]: hostPidForProcess(processEvent),
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.user', {
+          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.user', {
             defaultMessage: 'User',
           })]: (userInfoForProcess(processEvent) as { name: string; domain: string }).name,
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.domain', {
+          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.domain', {
             defaultMessage: 'Domain',
-            [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.parentPid', {
-              defaultMessage: 'Parent PID',
-            })]: hostParentPidForProcess(processEvent),
+            [i18n.translate(
+              'xpack.securitySolution.enpoint.resolver.panel.processDescList.parentPid',
+              {
+                defaultMessage: 'Parent PID',
+              }
+            )]: hostParentPidForProcess(processEvent),
           })]: (userInfoForProcess(processEvent) as { name: string; domain: string }).domain,
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.md5hash', {
+          [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.md5hash', {
             defaultMessage: 'MD5',
           })]: md5HashForProcess(processEvent),
-          [i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.commandLine', {
-            defaultMessage: 'Command Line',
-          })]: argsForProcess(processEvent),
+          [i18n.translate(
+            'xpack.securitySolution.enpoint.resolver.panel.processDescList.commandLine',
+            {
+              defaultMessage: 'Command Line',
+            }
+          )]: argsForProcess(processEvent),
         }
       : {};
 
@@ -94,16 +100,19 @@ export const ProcessDetails = memo(function ProcessDetails({
   const crumbs = useMemo(() => {
     return [
       {
-        text: i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.events', {
-          defaultMessage: 'Events',
-        }),
+        text: i18n.translate(
+          'xpack.securitySolution.enpoint.resolver.panel.processDescList.events',
+          {
+            defaultMessage: 'Events',
+          }
+        ),
         onClick: () => {
           pushToQueryParams({ crumbId: '', crumbEvent: '' });
         },
       },
       {
         text:
-          i18n.translate('xpack.siem.endpoint.resolver.panel.processDescList.details', {
+          i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.details', {
             defaultMessage: 'Details for: ',
           }) + processName,
         onClick: () => {},

@@ -57,16 +57,19 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.processNameTitle', {
-          defaultMessage: 'Process Name',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.enpoint.resolver.panel.table.row.processNameTitle',
+          {
+            defaultMessage: 'Process Name',
+          }
+        ),
         sortable: true,
         truncateText: true,
         render(name: string, item: ProcessTableView) {
           return name === '' ? (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.siem.endpoint.resolver.panel.table.row.valueMissingDescription',
+                'xpack.securitySolution.enpoint.resolver.panel.table.row.valueMissingDescription',
                 {
                   defaultMessage: 'Value is missing',
                 }
@@ -87,9 +90,12 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
       },
       {
         field: 'timestamp',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.timestampTitle', {
-          defaultMessage: 'Timestamp',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.enpoint.resolver.panel.table.row.timestampTitle',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
         dataType: 'date',
         sortable: true,
         render(eventDate?: Date) {
@@ -98,7 +104,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
           ) : (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.siem.endpoint.resolver.panel.table.row.timestampInvalidLabel',
+                'xpack.securitySolution.enpoint.resolver.panel.table.row.timestampInvalidLabel',
                 {
                   defaultMessage: 'invalid',
                 }
@@ -136,9 +142,12 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const crumbs = useMemo(() => {
     return [
       {
-        text: i18n.translate('xpack.siem.endpoint.resolver.panel.processListWithCounts.events', {
-          defaultMessage: 'All Process Events',
-        }),
+        text: i18n.translate(
+          'xpack.securitySolution.enpoint.resolver.panel.processListWithCounts.events',
+          {
+            defaultMessage: 'All Process Events',
+          }
+        ),
         onClick: () => {},
       },
     ];

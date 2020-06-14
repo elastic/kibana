@@ -89,13 +89,13 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     0
   );
   const eventsString = i18n.translate(
-    'xpack.siem.endpoint.resolver.panel.processEventListByType.events',
+    'xpack.securitySolution.enpoint.resolver.panel.processEventListByType.events',
     {
       defaultMessage: 'Events',
     }
   );
   const waitingString = i18n.translate(
-    'xpack.siem.endpoint.resolver.panel.processEventListByType.wait',
+    'xpack.securitySolution.enpoint.resolver.panel.processEventListByType.wait',
     {
       defaultMessage: 'Waiting For Events...',
     }

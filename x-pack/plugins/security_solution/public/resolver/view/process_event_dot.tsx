@@ -33,118 +33,139 @@ import { CrumbInfo } from './panels/panel_content_utilities';
  * A map of all known event types (in ugly schema format) to beautifully i18n'd display names
  */
 export const displayNameRecord = {
-  application: i18n.translate('xpack.siem.endpoint.resolver.applicationEventTypeDisplayName', {
-    defaultMessage: 'Application',
-  }),
-  apm: i18n.translate('xpack.siem.endpoint.resolver.apmEventTypeDisplayName', {
+  application: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.applicationEventTypeDisplayName',
+    {
+      defaultMessage: 'Application',
+    }
+  ),
+  apm: i18n.translate('xpack.securitySolution.enpoint.resolver.apmEventTypeDisplayName', {
     defaultMessage: 'APM',
   }),
-  audit: i18n.translate('xpack.siem.endpoint.resolver.auditEventTypeDisplayName', {
+  audit: i18n.translate('xpack.securitySolution.enpoint.resolver.auditEventTypeDisplayName', {
     defaultMessage: 'Audit',
   }),
   authentication: i18n.translate(
-    'xpack.siem.endpoint.resolver.authenticationEventTypeDisplayName',
+    'xpack.securitySolution.enpoint.resolver.authenticationEventTypeDisplayName',
     {
       defaultMessage: 'Authentication',
     }
   ),
-  certificate: i18n.translate('xpack.siem.endpoint.resolver.certificateEventTypeDisplayName', {
-    defaultMessage: 'Certificate',
-  }),
-  cloud: i18n.translate('xpack.siem.endpoint.resolver.cloudEventTypeDisplayName', {
+  certificate: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.certificateEventTypeDisplayName',
+    {
+      defaultMessage: 'Certificate',
+    }
+  ),
+  cloud: i18n.translate('xpack.securitySolution.enpoint.resolver.cloudEventTypeDisplayName', {
     defaultMessage: 'Cloud',
   }),
-  database: i18n.translate('xpack.siem.endpoint.resolver.databaseEventTypeDisplayName', {
+  database: i18n.translate('xpack.securitySolution.enpoint.resolver.databaseEventTypeDisplayName', {
     defaultMessage: 'Database',
   }),
-  driver: i18n.translate('xpack.siem.endpoint.resolver.driverEventTypeDisplayName', {
+  driver: i18n.translate('xpack.securitySolution.enpoint.resolver.driverEventTypeDisplayName', {
     defaultMessage: 'Driver',
   }),
-  email: i18n.translate('xpack.siem.endpoint.resolver.emailEventTypeDisplayName', {
+  email: i18n.translate('xpack.securitySolution.enpoint.resolver.emailEventTypeDisplayName', {
     defaultMessage: 'Email',
   }),
-  file: i18n.translate('xpack.siem.endpoint.resolver.fileEventTypeDisplayName', {
+  file: i18n.translate('xpack.securitySolution.enpoint.resolver.fileEventTypeDisplayName', {
     defaultMessage: 'File',
   }),
-  host: i18n.translate('xpack.siem.endpoint.resolver.hostEventTypeDisplayName', {
+  host: i18n.translate('xpack.securitySolution.enpoint.resolver.hostEventTypeDisplayName', {
     defaultMessage: 'Host',
   }),
-  iam: i18n.translate('xpack.siem.endpoint.resolver.iamEventTypeDisplayName', {
+  iam: i18n.translate('xpack.securitySolution.enpoint.resolver.iamEventTypeDisplayName', {
     defaultMessage: 'IAM',
   }),
-  iam_group: i18n.translate('xpack.siem.endpoint.resolver.iam_groupEventTypeDisplayName', {
-    defaultMessage: 'IAM Group',
-  }),
+  iam_group: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.iam_groupEventTypeDisplayName',
+    {
+      defaultMessage: 'IAM Group',
+    }
+  ),
   intrusion_detection: i18n.translate(
-    'xpack.siem.endpoint.resolver.intrusion_detectionEventTypeDisplayName',
+    'xpack.securitySolution.enpoint.resolver.intrusion_detectionEventTypeDisplayName',
     {
       defaultMessage: 'Intrusion Detection',
     }
   ),
-  malware: i18n.translate('xpack.siem.endpoint.resolver.malwareEventTypeDisplayName', {
+  malware: i18n.translate('xpack.securitySolution.enpoint.resolver.malwareEventTypeDisplayName', {
     defaultMessage: 'Malware',
   }),
-  network_flow: i18n.translate('xpack.siem.endpoint.resolver.network_flowEventTypeDisplayName', {
-    defaultMessage: 'Network Flow',
-  }),
-  network: i18n.translate('xpack.siem.endpoint.resolver.networkEventTypeDisplayName', {
+  network_flow: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.network_flowEventTypeDisplayName',
+    {
+      defaultMessage: 'Network Flow',
+    }
+  ),
+  network: i18n.translate('xpack.securitySolution.enpoint.resolver.networkEventTypeDisplayName', {
     defaultMessage: 'Network',
   }),
-  package: i18n.translate('xpack.siem.endpoint.resolver.packageEventTypeDisplayName', {
+  package: i18n.translate('xpack.securitySolution.enpoint.resolver.packageEventTypeDisplayName', {
     defaultMessage: 'Package',
   }),
-  process: i18n.translate('xpack.siem.endpoint.resolver.processEventTypeDisplayName', {
+  process: i18n.translate('xpack.securitySolution.enpoint.resolver.processEventTypeDisplayName', {
     defaultMessage: 'Process',
   }),
-  registry: i18n.translate('xpack.siem.endpoint.resolver.registryEventTypeDisplayName', {
+  registry: i18n.translate('xpack.securitySolution.enpoint.resolver.registryEventTypeDisplayName', {
     defaultMessage: 'Registry',
   }),
-  session: i18n.translate('xpack.siem.endpoint.resolver.sessionEventTypeDisplayName', {
+  session: i18n.translate('xpack.securitySolution.enpoint.resolver.sessionEventTypeDisplayName', {
     defaultMessage: 'Session',
   }),
-  service: i18n.translate('xpack.siem.endpoint.resolver.serviceEventTypeDisplayName', {
+  service: i18n.translate('xpack.securitySolution.enpoint.resolver.serviceEventTypeDisplayName', {
     defaultMessage: 'Service',
   }),
-  socket: i18n.translate('xpack.siem.endpoint.resolver.socketEventTypeDisplayName', {
+  socket: i18n.translate('xpack.securitySolution.enpoint.resolver.socketEventTypeDisplayName', {
     defaultMessage: 'Socket',
   }),
-  vulnerability: i18n.translate('xpack.siem.endpoint.resolver.vulnerabilityEventTypeDisplayName', {
-    defaultMessage: 'Vulnerability',
-  }),
-  web: i18n.translate('xpack.siem.endpoint.resolver.webEventTypeDisplayName', {
+  vulnerability: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.vulnerabilityEventTypeDisplayName',
+    {
+      defaultMessage: 'Vulnerability',
+    }
+  ),
+  web: i18n.translate('xpack.securitySolution.enpoint.resolver.webEventTypeDisplayName', {
     defaultMessage: 'Web',
   }),
-  alert: i18n.translate('xpack.siem.endpoint.resolver.alertEventTypeDisplayName', {
+  alert: i18n.translate('xpack.securitySolution.enpoint.resolver.alertEventTypeDisplayName', {
     defaultMessage: 'Alert',
   }),
-  security: i18n.translate('xpack.siem.endpoint.resolver.securityEventTypeDisplayName', {
+  security: i18n.translate('xpack.securitySolution.enpoint.resolver.securityEventTypeDisplayName', {
     defaultMessage: 'Security',
   }),
-  dns: i18n.translate('xpack.siem.endpoint.resolver.dnsEventTypeDisplayName', {
+  dns: i18n.translate('xpack.securitySolution.enpoint.resolver.dnsEventTypeDisplayName', {
     defaultMessage: 'DNS',
   }),
-  clr: i18n.translate('xpack.siem.endpoint.resolver.clrEventTypeDisplayName', {
+  clr: i18n.translate('xpack.securitySolution.enpoint.resolver.clrEventTypeDisplayName', {
     defaultMessage: 'CLR',
   }),
-  image_load: i18n.translate('xpack.siem.endpoint.resolver.image_loadEventTypeDisplayName', {
-    defaultMessage: 'Image Load',
-  }),
-  powershell: i18n.translate('xpack.siem.endpoint.resolver.powershellEventTypeDisplayName', {
-    defaultMessage: 'Powershell',
-  }),
-  wmi: i18n.translate('xpack.siem.endpoint.resolver.wmiEventTypeDisplayName', {
+  image_load: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.image_loadEventTypeDisplayName',
+    {
+      defaultMessage: 'Image Load',
+    }
+  ),
+  powershell: i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.powershellEventTypeDisplayName',
+    {
+      defaultMessage: 'Powershell',
+    }
+  ),
+  wmi: i18n.translate('xpack.securitySolution.enpoint.resolver.wmiEventTypeDisplayName', {
     defaultMessage: 'WMI',
   }),
-  api: i18n.translate('xpack.siem.endpoint.resolver.apiEventTypeDisplayName', {
+  api: i18n.translate('xpack.securitySolution.enpoint.resolver.apiEventTypeDisplayName', {
     defaultMessage: 'API',
   }),
-  user: i18n.translate('xpack.siem.endpoint.resolver.userEventTypeDisplayName', {
+  user: i18n.translate('xpack.securitySolution.enpoint.resolver.userEventTypeDisplayName', {
     defaultMessage: 'User',
   }),
 } as const;
 
 const unknownEventTypeMessage = i18n.translate(
-  'xpack.siem.endpoint.resolver.userEventTypeDisplayUnknown',
+  'xpack.securitySolution.enpoint.resolver.userEventTypeDisplayUnknown',
   {
     defaultMessage: 'Unknown',
   }

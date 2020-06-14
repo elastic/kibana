@@ -51,7 +51,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
     0
   );
   const eventsString = i18n.translate(
-    'xpack.siem.endpoint.resolver.panel.processEventCounts.events',
+    'xpack.securitySolution.enpoint.resolver.panel.processEventCounts.events',
     {
       defaultMessage: 'Events',
     }
@@ -97,7 +97,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
     () => [
       {
         field: 'count',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.count', {
+        name: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.table.row.count', {
           defaultMessage: 'Count',
         }),
         width: '20%',
@@ -105,7 +105,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
       },
       {
         field: 'name',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.table.row.eventType', {
+        name: i18n.translate('xpack.securitySolution.enpoint.resolver.panel.table.row.eventType', {
           defaultMessage: 'Event Type',
         }),
         width: '80%',

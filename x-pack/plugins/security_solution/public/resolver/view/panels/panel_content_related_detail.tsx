@@ -113,14 +113,17 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
   const processEntityId = parentEvent && event.entityId(parentEvent);
   const totalCount = countForParent || 0;
   const eventsString = i18n.translate(
-    'xpack.siem.endpoint.resolver.panel.relatedEventDetail.events',
+    'xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.events',
     {
       defaultMessage: 'Events',
     }
   );
-  const naString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedEventDetail.NA', {
-    defaultMessage: 'N/A',
-  });
+  const naString = i18n.translate(
+    'xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.NA',
+    {
+      defaultMessage: 'N/A',
+    }
+  );
 
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId!);
@@ -264,9 +267,12 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
    * If the ship hasn't come in yet, wait on the dock
    */
   if (!relatedsReady) {
-    const waitingString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedDetail.wait', {
-      defaultMessage: 'Waiting For Events...',
-    });
+    const waitingString = i18n.translate(
+      'xpack.securitySolution.enpoint.resolver.panel.relatedDetail.wait',
+      {
+        defaultMessage: 'Waiting For Events...',
+      }
+    );
     return (
       <>
         <StyledBreadcrumbs breadcrumbs={waitCrumbs} />
@@ -282,9 +288,12 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
    * Could happen if user e.g. loads a URL with a bad crumbEvent
    */
   if (!relatedEventToShowDetailsFor) {
-    const errString = i18n.translate('xpack.siem.endpoint.resolver.panel.relatedDetail.missing', {
-      defaultMessage: 'Related event not found.',
-    });
+    const errString = i18n.translate(
+      'xpack.securitySolution.enpoint.resolver.panel.relatedDetail.missing',
+      {
+        defaultMessage: 'Related event not found.',
+      }
+    );
     return <PanelContentError errorMessage={errString} pushToQueryParams={pushToQueryParams} />;
   }
 
