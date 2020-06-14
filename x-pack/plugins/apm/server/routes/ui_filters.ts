@@ -29,6 +29,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../../common/projections/service_nodes';
+import { getRumOverviewProjection } from '../../common/projections/rum_overview';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -219,6 +220,16 @@ export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
   queryRt: t.type({
     serviceName: t.string,
   }),
+});
+
+export const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
+  path: '/api/apm/ui_filters/local_filters/rumOverview',
+  getProjection: ({ setup }) => {
+    return getRumOverviewProjection({
+      setup,
+    });
+  },
+  queryRt: t.type({}),
 });
 
 type BaseQueryType = typeof localUiBaseQueryRt;

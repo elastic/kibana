@@ -25,6 +25,9 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
+import { RumOverview } from '../RumDashboard';
+import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
+import { EndUserExperienceLabel } from '../RumDashboard/translations';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -70,14 +73,27 @@ function getHomeTabs({
     });
   }
 
+  homeTabs.push({
+    link: (
+      <RumOverviewLink>
+        {i18n.translate('xpack.apm.home.rumTabLabel', {
+          defaultMessage: 'Real User Monitoring',
+        })}
+      </RumOverviewLink>
+    ),
+    render: () => <RumOverview />,
+    name: 'rum-overview',
+  });
+
   return homeTabs;
 }
+
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
 
 interface Props {
-  tab: 'traces' | 'services' | 'service-map';
+  tab: 'traces' | 'services' | 'service-map' | 'rum-overview';
 }
 
 export function Home({ tab }: Props) {
@@ -93,7 +109,11 @@ export function Home({ tab }: Props) {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>APM</h1>
+              <h1>
+                {selectedTab.name === 'rum-overview'
+                  ? EndUserExperienceLabel
+                  : 'APM'}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

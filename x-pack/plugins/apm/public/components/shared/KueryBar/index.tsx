@@ -76,10 +76,10 @@ export function KueryBar() {
   });
 
   // The bar should be disabled when viewing the service map
-  const disabled = /\/service-map$/.test(location.pathname);
+  const disabled = /\/(service-map|rum-overview)$/.test(location.pathname);
   const disabledPlaceholder = i18n.translate(
     'xpack.apm.kueryBar.disabledPlaceholder',
-    { defaultMessage: 'Search is not available for service map' }
+    { defaultMessage: 'Search is not available here' }
   );
 
   async function onChange(inputValue: string, selectionStart: number) {

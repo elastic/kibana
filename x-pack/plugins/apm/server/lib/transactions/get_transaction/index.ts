@@ -10,7 +10,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,
