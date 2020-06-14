@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct data', function () {
+    it.skip('should show correct data', function () {
       const expectedChartData = [
         ['0B', '2,088'],
         ['1.953KB', '2,748'],
