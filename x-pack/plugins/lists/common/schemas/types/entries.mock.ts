@@ -24,43 +24,43 @@ import {
   EntryNested,
 } from './entries';
 
-export const getEntryMatch = (): EntryMatch => ({
+export const getEntryMatchMock = (): EntryMatch => ({
   field: FIELD,
   operator: OPERATOR,
   type: MATCH,
   value: ENTRY_VALUE,
 });
 
-export const getEntryMatchAny = (): EntryMatchAny => ({
+export const getEntryMatchAnyMock = (): EntryMatchAny => ({
   field: FIELD,
   operator: OPERATOR,
   type: MATCH_ANY,
   value: [ENTRY_VALUE],
 });
 
-export const getEntryList = (): EntryList => ({
+export const getEntryListMock = (): EntryList => ({
   field: FIELD,
   operator: OPERATOR,
   type: LIST,
   value: [ENTRY_VALUE],
 });
 
-export const getEntryExists = (): EntryExists => ({
+export const getEntryExistsMock = (): EntryExists => ({
   field: FIELD,
   operator: OPERATOR,
   type: EXISTS,
 });
 
-export const getEntryNested = (): EntryNested => ({
-  entries: [getEntryMatch(), getEntryExists()],
+export const getEntryNestedMock = (): EntryNested => ({
+  entries: [getEntryMatchMock(), getEntryExistsMock()],
   field: FIELD,
   type: NESTED,
 });
 
-export const getEntriesArray = (): EntriesArray => [
-  getEntryMatch(),
-  getEntryMatchAny(),
-  getEntryList(),
-  getEntryExists(),
-  getEntryNested(),
+export const getEntriesArrayMock = (): EntriesArray => [
+  getEntryMatchMock(),
+  getEntryMatchAnyMock(),
+  getEntryListMock(),
+  getEntryExistsMock(),
+  getEntryNestedMock(),
 ];

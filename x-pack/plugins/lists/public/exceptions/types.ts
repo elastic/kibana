@@ -10,6 +10,9 @@ import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   NamespaceType,
+  Page,
+  PerPage,
+  TotalOrUndefined,
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '../../common/schemas';
@@ -21,9 +24,9 @@ export interface FilterExceptionsOptions {
 }
 
 export interface Pagination {
-  page: number;
-  perPage: number;
-  total: number;
+  page: Page;
+  perPage: PerPage;
+  total: TotalOrUndefined;
 }
 
 export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSchema;
@@ -42,7 +45,7 @@ export interface ExceptionList extends ExceptionListSchema {
 export interface UseExceptionListSuccess {
   lists: ExceptionList[];
   exceptions: ExceptionListItemSchema[];
-  pagination: Partial<Pagination>;
+  pagination: Pagination;
 }
 
 export interface UseExceptionListProps {

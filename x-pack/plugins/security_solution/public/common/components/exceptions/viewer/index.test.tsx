@@ -12,8 +12,11 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { ExceptionsViewer } from './';
 import { ExceptionListType } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useExceptionList, useApi } from '../../../../../public/lists_plugin_deps';
-import { getExceptionListMock } from '../mocks';
+import {
+  useExceptionList,
+  useApi,
+  getExceptionListSchemaMock,
+} from '../../../../../public/lists_plugin_deps';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');
@@ -96,7 +99,7 @@ describe('ExceptionsViewer', () => {
   it('it renders empty prompt if no exception items exist', () => {
     (useExceptionList as jest.Mock).mockReturnValue([
       false,
-      [getExceptionListMock()],
+      [getExceptionListSchemaMock()],
       [],
       {
         page: 1,

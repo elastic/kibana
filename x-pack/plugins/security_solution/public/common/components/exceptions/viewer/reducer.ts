@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FilterOptions, ExceptionsPagination } from '../types';
 import {
-  ApiProps,
-  FilterOptions,
-  ExceptionsPagination,
+  ExceptionList,
   ExceptionListItemSchema,
+  ExceptionIdentifiers,
   Pagination,
-} from '../types';
-import { ExceptionList, ExceptionIdentifiers } from '../../../../../public/lists_plugin_deps';
+} from '../../../../../public/lists_plugin_deps';
 
 export interface State {
   filterOptions: FilterOptions;
@@ -21,7 +20,7 @@ export interface State {
   exceptions: ExceptionListItemSchema[];
   exceptionToEdit: ExceptionListItemSchema | null;
   loadingLists: ExceptionIdentifiers[];
-  loadingItemIds: ApiProps[];
+  loadingItemIds: ExceptionIdentifiers[];
   isInitLoading: boolean;
   isModalOpen: boolean;
 }
@@ -42,7 +41,7 @@ export type Action =
   | { type: 'updateIsInitLoading'; loading: boolean }
   | { type: 'updateModalOpen'; isOpen: boolean }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
-  | { type: 'updateLoadingItemIds'; items: ApiProps[] };
+  | { type: 'updateLoadingItemIds'; items: ExceptionIdentifiers[] };
 
 export const allExceptionItemsReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
@@ -62,7 +61,7 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
           ...state.pagination,
           pageIndex: action.pagination.page - 1,
           pageSize: action.pagination.perPage,
-          totalItemCount: action.pagination.total,
+          totalItemCount: action.pagination.total ?? 0,
         },
         allExceptions: action.exceptions,
         exceptions: action.exceptions,

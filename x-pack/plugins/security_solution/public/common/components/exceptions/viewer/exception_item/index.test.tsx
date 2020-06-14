@@ -10,11 +10,11 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
-import { getExceptionItemMock } from '../../mocks';
+import { getCommentsMock, getExceptionListItemSchemaMock } from '../../../../../lists_plugin_deps';
 
 describe('ExceptionItem', () => {
   it('it renders ExceptionDetails and ExceptionEntries', () => {
-    const exceptionItem = getExceptionItemMock();
+    const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -34,7 +34,7 @@ describe('ExceptionItem', () => {
 
   it('it invokes "onEditException" when edit button clicked', () => {
     const mockOnEditException = jest.fn();
-    const exceptionItem = getExceptionItemMock();
+    const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -51,12 +51,12 @@ describe('ExceptionItem', () => {
     const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
     editBtn.simulate('click');
 
-    expect(mockOnEditException).toHaveBeenCalledWith(getExceptionItemMock());
+    expect(mockOnEditException).toHaveBeenCalledWith(getExceptionListItemSchemaMock());
   });
 
   it('it invokes "onDeleteException" when delete button clicked', () => {
     const mockOnDeleteException = jest.fn();
-    const exceptionItem = getExceptionItemMock();
+    const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -74,15 +74,15 @@ describe('ExceptionItem', () => {
     editBtn.simulate('click');
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
-      id: 'uuid_here',
+      id: '1',
       namespaceType: 'single',
     });
   });
 
   it('it renders comment accordion closed to begin with', () => {
     const mockOnDeleteException = jest.fn();
-    const exceptionItem = getExceptionItemMock();
-
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.comments = getCommentsMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
@@ -100,8 +100,8 @@ describe('ExceptionItem', () => {
 
   it('it renders comment accordion open when showComments is true', () => {
     const mockOnDeleteException = jest.fn();
-    const exceptionItem = getExceptionItemMock();
-
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.comments = getCommentsMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem

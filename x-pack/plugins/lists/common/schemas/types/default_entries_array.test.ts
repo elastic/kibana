@@ -11,7 +11,7 @@ import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
 import { DefaultEntryArray } from './default_entries_array';
 import { EntriesArray } from './entries';
-import { getEntriesArray, getEntryMatch, getEntryNested } from './entries.mock';
+import { getEntriesArrayMock, getEntryMatchMock, getEntryNestedMock } from './entries.mock';
 
 describe('default_entries_array', () => {
   test('it should validate an empty array', () => {
@@ -24,7 +24,7 @@ describe('default_entries_array', () => {
   });
 
   test('it should validate an array of regular and nested entries', () => {
-    const payload: EntriesArray = getEntriesArray();
+    const payload: EntriesArray = getEntriesArrayMock();
     const decoded = DefaultEntryArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -33,7 +33,7 @@ describe('default_entries_array', () => {
   });
 
   test('it should validate an array of nested entries', () => {
-    const payload: EntriesArray = [{ ...getEntryNested() }];
+    const payload: EntriesArray = [{ ...getEntryNestedMock() }];
     const decoded = DefaultEntryArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -42,7 +42,7 @@ describe('default_entries_array', () => {
   });
 
   test('it should validate an array of non nested entries', () => {
-    const payload: EntriesArray = [{ ...getEntryMatch() }];
+    const payload: EntriesArray = [{ ...getEntryMatchMock() }];
     const decoded = DefaultEntryArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 

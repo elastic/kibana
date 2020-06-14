@@ -10,11 +10,11 @@ import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
 import {
-  getEntryExists,
-  getEntryList,
-  getEntryMatch,
-  getEntryMatchAny,
-  getEntryNested,
+  getEntryExistsMock,
+  getEntryListMock,
+  getEntryMatchAnyMock,
+  getEntryMatchMock,
+  getEntryNestedMock,
 } from './entries.mock';
 import {
   EntryExists,
@@ -32,7 +32,7 @@ import {
 describe('Entries', () => {
   describe('entriesMatch', () => {
     test('it should validate an entry', () => {
-      const payload = getEntryMatch();
+      const payload = getEntryMatchMock();
       const decoded = entriesMatch.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -41,7 +41,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when operator is "included"', () => {
-      const payload = getEntryMatch();
+      const payload = getEntryMatchMock();
       const decoded = entriesMatch.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -50,7 +50,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when "operator" is "excluded"', () => {
-      const payload = getEntryMatch();
+      const payload = getEntryMatchMock();
       payload.operator = 'excluded';
       const decoded = entriesMatch.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -61,7 +61,7 @@ describe('Entries', () => {
 
     test('it should not validate when "value" is not string', () => {
       const payload: Omit<EntryMatch, 'value'> & { value: string[] } = {
-        ...getEntryMatch(),
+        ...getEntryMatchMock(),
         value: ['some value'],
       };
       const decoded = entriesMatch.decode(payload);
@@ -75,7 +75,7 @@ describe('Entries', () => {
 
     test('it should not validate when "type" is not "match"', () => {
       const payload: Omit<EntryMatch, 'type'> & { type: string } = {
-        ...getEntryMatch(),
+        ...getEntryMatchMock(),
         type: 'match_any',
       };
       const decoded = entriesMatch.decode(payload);
@@ -90,19 +90,19 @@ describe('Entries', () => {
     test('it should strip out extra keys', () => {
       const payload: EntryMatch & {
         extraKey?: string;
-      } = getEntryMatch();
+      } = getEntryMatchMock();
       payload.extraKey = 'some value';
       const decoded = entriesMatch.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(getEntryMatch());
+      expect(message.schema).toEqual(getEntryMatchMock());
     });
   });
 
   describe('entriesMatchAny', () => {
     test('it should validate an entry', () => {
-      const payload = getEntryMatchAny();
+      const payload = getEntryMatchAnyMock();
       const decoded = entriesMatchAny.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -111,7 +111,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when operator is "included"', () => {
-      const payload = getEntryMatchAny();
+      const payload = getEntryMatchAnyMock();
       const decoded = entriesMatchAny.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -120,7 +120,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when operator is "excluded"', () => {
-      const payload = getEntryMatchAny();
+      const payload = getEntryMatchAnyMock();
       payload.operator = 'excluded';
       const decoded = entriesMatchAny.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -131,7 +131,7 @@ describe('Entries', () => {
 
     test('it should not validate when value is not string array', () => {
       const payload: Omit<EntryMatchAny, 'value'> & { value: string } = {
-        ...getEntryMatchAny(),
+        ...getEntryMatchAnyMock(),
         value: 'some string',
       };
       const decoded = entriesMatchAny.decode(payload);
@@ -145,7 +145,7 @@ describe('Entries', () => {
 
     test('it should not validate when "type" is not "match_any"', () => {
       const payload: Omit<EntryMatchAny, 'type'> & { type: string } = {
-        ...getEntryMatchAny(),
+        ...getEntryMatchAnyMock(),
         type: 'match',
       };
       const decoded = entriesMatchAny.decode(payload);
@@ -158,19 +158,19 @@ describe('Entries', () => {
     test('it should strip out extra keys', () => {
       const payload: EntryMatchAny & {
         extraKey?: string;
-      } = getEntryMatchAny();
+      } = getEntryMatchAnyMock();
       payload.extraKey = 'some extra key';
       const decoded = entriesMatchAny.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(getEntryMatchAny());
+      expect(message.schema).toEqual(getEntryMatchAnyMock());
     });
   });
 
   describe('entriesExists', () => {
     test('it should validate an entry', () => {
-      const payload = getEntryExists();
+      const payload = getEntryExistsMock();
       const decoded = entriesExists.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -179,7 +179,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when "operator" is "included"', () => {
-      const payload = getEntryExists();
+      const payload = getEntryExistsMock();
       const decoded = entriesExists.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -188,7 +188,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when "operator" is "excluded"', () => {
-      const payload = getEntryExists();
+      const payload = getEntryExistsMock();
       payload.operator = 'excluded';
       const decoded = entriesExists.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -200,18 +200,18 @@ describe('Entries', () => {
     test('it should strip out extra keys', () => {
       const payload: EntryExists & {
         extraKey?: string;
-      } = getEntryExists();
+      } = getEntryExistsMock();
       payload.extraKey = 'some extra key';
       const decoded = entriesExists.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(getEntryExists());
+      expect(message.schema).toEqual(getEntryExistsMock());
     });
 
     test('it should not validate when "type" is not "exists"', () => {
       const payload: Omit<EntryExists, 'type'> & { type: string } = {
-        ...getEntryExists(),
+        ...getEntryExistsMock(),
         type: 'match',
       };
       const decoded = entriesExists.decode(payload);
@@ -224,7 +224,7 @@ describe('Entries', () => {
 
   describe('entriesList', () => {
     test('it should validate an entry', () => {
-      const payload = getEntryList();
+      const payload = getEntryListMock();
       const decoded = entriesList.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -233,7 +233,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when operator is "included"', () => {
-      const payload = getEntryList();
+      const payload = getEntryListMock();
       const decoded = entriesList.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -242,7 +242,7 @@ describe('Entries', () => {
     });
 
     test('it should validate when "operator" is "excluded"', () => {
-      const payload = getEntryList();
+      const payload = getEntryListMock();
       payload.operator = 'excluded';
       const decoded = entriesList.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -253,7 +253,7 @@ describe('Entries', () => {
 
     test('it should not validate when "value" is not string array', () => {
       const payload: Omit<EntryList, 'value'> & { value: string } = {
-        ...getEntryList(),
+        ...getEntryListMock(),
         value: 'someListId',
       };
       const decoded = entriesList.decode(payload);
@@ -265,7 +265,7 @@ describe('Entries', () => {
 
     test('it should not validate when "type" is not "lists"', () => {
       const payload: Omit<EntryList, 'type'> & { type: 'match_any' } = {
-        ...getEntryList(),
+        ...getEntryListMock(),
         type: 'match_any',
       };
       const decoded = entriesList.decode(payload);
@@ -280,19 +280,19 @@ describe('Entries', () => {
     test('it should strip out extra keys', () => {
       const payload: EntryList & {
         extraKey?: string;
-      } = getEntryList();
+      } = getEntryListMock();
       payload.extraKey = 'some extra key';
       const decoded = entriesList.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(getEntryList());
+      expect(message.schema).toEqual(getEntryListMock());
     });
   });
 
   describe('entriesNested', () => {
     test('it should validate a nested entry', () => {
-      const payload = getEntryNested();
+      const payload = getEntryNestedMock();
       const decoded = entriesNested.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -302,7 +302,7 @@ describe('Entries', () => {
 
     test('it should NOT validate when "type" is not "nested"', () => {
       const payload: Omit<EntryNested, 'type'> & { type: 'match' } = {
-        ...getEntryNested(),
+        ...getEntryNestedMock(),
         type: 'match',
       };
       const decoded = entriesNested.decode(payload);
@@ -315,7 +315,7 @@ describe('Entries', () => {
     test('it should NOT validate when "field" is not a string', () => {
       const payload: Omit<EntryNested, 'field'> & {
         field: number;
-      } = { ...getEntryNested(), field: 1 };
+      } = { ...getEntryNestedMock(), field: 1 };
       const decoded = entriesNested.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -326,7 +326,7 @@ describe('Entries', () => {
     test('it should NOT validate when "entries" is not a an array', () => {
       const payload: Omit<EntryNested, 'entries'> & {
         entries: string;
-      } = { ...getEntryNested(), entries: 'im a string' };
+      } = { ...getEntryNestedMock(), entries: 'im a string' };
       const decoded = entriesNested.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -339,13 +339,13 @@ describe('Entries', () => {
     test('it should strip out extra keys', () => {
       const payload: EntryNested & {
         extraKey?: string;
-      } = getEntryNested();
+      } = getEntryNestedMock();
       payload.extraKey = 'some extra key';
       const decoded = entriesNested.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(getEntryNested());
+      expect(message.schema).toEqual(getEntryNestedMock());
     });
   });
 });

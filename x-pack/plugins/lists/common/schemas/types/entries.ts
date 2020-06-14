@@ -59,6 +59,8 @@ export const entriesNested = t.exact(
 );
 export type EntryNested = t.TypeOf<typeof entriesNested>;
 
+export const entry = t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists]);
+export type Entry = t.TypeOf<typeof entry>;
 export const entriesArray = t.array(
   t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists, entriesNested])
 );
