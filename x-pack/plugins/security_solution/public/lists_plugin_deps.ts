@@ -11,12 +11,11 @@ export {
   usePersistExceptionList,
   ExceptionIdentifiers,
   ExceptionList,
-  mockNewExceptionItem,
-  mockNewExceptionList,
 } from '../../lists/public';
 export {
   ExceptionListSchema,
   ExceptionListItemSchema,
   Entries,
   NamespaceType,
+  Operator,
 } from '../../lists/common/schemas';

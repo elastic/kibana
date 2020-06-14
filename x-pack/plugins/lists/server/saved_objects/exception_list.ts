@@ -81,16 +81,42 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
     },
     entries: {
       properties: {
+        entries: {
+          properties: {
+            field: {
+              type: 'keyword',
+            },
+            operator: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+            value: {
+              fields: {
+                text: {
+                  type: 'text',
+                },
+              },
+              type: 'keyword',
+            },
+          },
+        },
         field: {
           type: 'keyword',
         },
-        match: {
-          type: 'keyword',
-        },
-        match_any: {
-          type: 'keyword',
-        },
         operator: {
+          type: 'keyword',
+        },
+        type: {
+          type: 'keyword',
+        },
+        value: {
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
           type: 'keyword',
         },
       },

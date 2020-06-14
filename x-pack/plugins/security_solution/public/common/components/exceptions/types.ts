@@ -9,6 +9,7 @@ import {
   NamespaceType,
   ExceptionList,
   ExceptionListItemSchema as ExceptionItem,
+  Operator,
 } from '../../../lists_plugin_deps';
 
 export interface OperatorOption {
@@ -16,11 +17,6 @@ export interface OperatorOption {
   value: string;
   operator: Operator;
   type: OperatorType;
-}
-
-export enum Operator {
-  INCLUSION = 'included',
-  EXCLUSION = 'excluded',
 }
 
 export enum OperatorType {
