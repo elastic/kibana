@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from '../panel';
+import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { BoldCode } from './panel_content_related_detail';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';

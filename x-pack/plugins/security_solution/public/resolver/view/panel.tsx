@@ -60,13 +60,16 @@ const PanelContent = memo(function PanelContent() {
     );
   }, [queryParams, graphableProcessEntityIds]);
 
-  // The "selected" node in the tree control. It will sometimes, but not always, correspond with the "active" node
+  // The "selected" node (and its corresponding event) in the tree control.
+  // It may need to be synchronized with the ID indicated as selected via the `idFromParams`
+  // memo above. When this is the case, it is handled by the layout effect below.
   const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
   const uiSelectedEvent = useMemo(() => {
     return graphableProcesses.find((evt) => event.entityId(evt) === selectedDescendantProcessId);
   }, [graphableProcesses, selectedDescendantProcessId]);
 
-  // Until an event is dispatched during update, the event indicated as selected by params may be different than the one in state
+  // Until an event is dispatched during update, the event indicated as selected by params may
+  // be different than the one in state.
   const paramsSelectedEvent = useMemo(() => {
     return graphableProcesses.find((evt) => event.entityId(evt) === idFromParams);
   }, [graphableProcesses, idFromParams]);
@@ -75,8 +78,9 @@ const PanelContent = memo(function PanelContent() {
 
   /**
    * When the ui-selected node is _not_ the one indicated by the query params, but the id from params _is_ in the current tree,
-   * dispatch a selection action to repair the UI to hold the query id as "selected".
-   * This is to cover cases where users e.g. share links to reconstitute a Resolver state and it _should never run otherwise_ under the assumption that the query parameters are updated along with the selection in state
+   * dispatch a selection action to amend the UI state to hold the query id as "selected".
+   * This is to cover cases where users e.g. share links to reconstitute a Resolver state or
+   * an effect pushes a new process id to the query params.
    */
   useLayoutEffect(() => {
     if (
@@ -97,7 +101,8 @@ const PanelContent = memo(function PanelContent() {
   }, [dispatch, uiSelectedEvent, paramsSelectedEvent, lastUpdatedProcess, timestamp]);
 
   /**
-   * This updates the breadcrumb nav, the table view
+   * This updates the breadcrumb nav and the panel view. It's supplied to each
+   * panel content view to allow them to dispatch transitions to each other.
    */
   const pushToQueryParams = useCallback(
     (newCrumbs: CrumbInfo) => {
@@ -117,12 +122,14 @@ const PanelContent = memo(function PanelContent() {
       }
 
       const relativeURL = { search: querystring.stringify(crumbsToPass) };
-
+      // We probably don't want to nuke the user's history with a huge
+      // trail of these, thus `.replace` instead of `.push`
       return history.replace(relativeURL);
     },
     [history, urlSearch]
   );
 
+  // GO JONNY GO
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
   const relatedStatsForIdFromParams = useMemo(() => {
