@@ -124,9 +124,8 @@ What other designs have been considered? What is the impact of not doing this?
 
 # Adoption strategy
 
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
+Any solution using the `data` plugin, can opt into using BackgroundSessions by starting to manage sessions.
+As long as there's an open session, all of the capabilities mentioned above will be enabled.
 
 # How we teach this
 
