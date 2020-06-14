@@ -111,10 +111,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('should redirect user back to Policy List if Cancel button is clicked', async () => {
         await (await pageObjects.ingestManagerCreateDatasource.findCancelButton()).click();
+
         // FIXME: need method to chec that is on policy list page.
       });
-      it('should redirect user back to Policy List if Back link is clicked', async () => {});
-      it('should redirect user back to Policy List after a successful save', async () => {});
+      it('should redirect user back to Policy List if Back link is clicked', async () => {
+        await (await pageObjects.ingestManagerCreateDatasource.findBackLink()).click();
+
+        // FIXME: need method to chec that is on policy list page.
+        // TODO test case
+        expect(true).to.be(false);
+      });
+      it('should display custom endpoint configuration message', async () => {
+        await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
+        const endpointConfig = await pageObjects.policy.findDatasourceEndpointCustomConfiguration();
+        expect(endpointConfig).not.to.be(undefined);
+      });
+      it('should redirect user back to Policy List after a successful save', async () => {
+        // TODO test case
+        expect(true).to.be(false);
+      });
     });
   });
 }
