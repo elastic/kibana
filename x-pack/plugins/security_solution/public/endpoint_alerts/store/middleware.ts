@@ -18,10 +18,28 @@ import {
   isOnAlertPage,
   apiQueryParams,
   uiQueryParams,
-  selectedAlertHasChanged,
   hasSelectedAlert,
   isAlertPageTabChange,
 } from './selectors';
+
+let lastSelectedAlert: string | null = null;
+/**
+ * @returns <boolean> true once per change of `selectedAlert` in query params.
+ *
+ * As opposed to `hasSelectedAlert` which always returns true if the alert is present
+ * query params, which can cause unnecessary requests and re-renders in some cases.
+ */
+const selectedAlertHasChanged = (params: ReturnType<typeof uiQueryParams>): boolean => {
+  const { selected_alert: selectedAlert } = params;
+  if (typeof selectedAlert !== 'string') {
+    return false;
+  }
+  if (selectedAlert === lastSelectedAlert) {
+    return false;
+  }
+  lastSelectedAlert = selectedAlert;
+  return true;
+};
 
 export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
   coreStart,
@@ -55,7 +73,7 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> 
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: listResponse });
 
-      if (hasSelectedAlert(state) && selectedAlertHasChanged(state)) {
+      if (hasSelectedAlert(state) && selectedAlertHasChanged(uiQueryParams(state))) {
         const uiParams = uiQueryParams(state);
         const detailsResponse: AlertDetails = await coreStart.http.get(
           `/api/endpoint/alerts/${uiParams.selected_alert}`
