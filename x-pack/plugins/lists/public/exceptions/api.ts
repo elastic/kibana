@@ -26,8 +26,8 @@ import {
   updateExceptionListItemSchema,
   updateExceptionListSchema,
 } from '../../common/schemas';
-import { validate } from '../siem_deps';
 
+import { validate } from './validate';
 import {
   AddExceptionListItemProps,
   AddExceptionListProps,
