@@ -64,7 +64,7 @@ If the `sessionId` is not found, the request parameters don't match or the store
 
 ### Embeddable integration
 
-??
+TBD 
 
 ## Background Session Service
 
@@ -100,7 +100,7 @@ The service offers three public APIs:
    const searchId = await data_enhanced.search.session.get(request: KibanaRequest, sessionId: string)
 ```
 
-## Tracking Background Session Progress
+## Tracking Background Session Progress and Completion
 
 While the Background Session Service is responsible for storing a `BackgroundSession` in a `BackgroundSessionObject`, it does **not** track it's progress. Instead, tracking the progress is the responsibility of the monitoring flow. 
 
@@ -108,13 +108,15 @@ During setup, the `data_enhanced` plugin will register a task into the Kibana Ta
 
 ## Search Service
 
-The way 
+Any request executed using `async_search_strategy`, with a sessionId specified, is automatically being tracked by the Background Search Service.
+If that sessionId exists, it will be automatically restored from ElasticSearch, instead of being executed again.
 
 # Drawbacks
 
 - Background Session keys are stored in memory until a session is actually stored.    
    - This opens us to a possibility of data loss in case of server failure. (This data is not critical and will result in a user having to re-run a dashboard) 
    - Increased memory consumption on the server. (However, each object stored in memory is ~ bytes or ~ active sessions per 1MB and we'll have this tracked with telemetry). 
+- Users might send a request to run in the background, even if they only need to view the results one time. Results will be stored for a significant amount of time.
 
 There are tradeoffs to choosing any path. Attempt to identify them here.
 
@@ -124,7 +126,7 @@ What other designs have been considered? What is the impact of not doing this?
 
 # Adoption strategy
 
-Any solution using the `data` plugin, can opt into using BackgroundSessions by starting to manage sessions.
+Any solution using the `data` plugin, can opt into using BackgroundSessions by starting to manage sessions ().
 As long as there's an open session, all of the capabilities mentioned above will be enabled.
 
 # How we teach this
