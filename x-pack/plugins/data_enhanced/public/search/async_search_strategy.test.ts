@@ -92,6 +92,7 @@ describe('Async search strategy', () => {
 
     await asyncSearch.search(mockRequest, mockOptions).toPromise();
 
+    expect(mockDataStart.search.getSearchStrategy).toBeCalledTimes(1);
     expect(mockSearch).toBeCalledTimes(2);
     expect(mockSearch.mock.calls[0][0]).toEqual(mockRequest);
     expect(mockSearch.mock.calls[1][0]).toEqual({ id: 1, serverStrategy: 'foo' });
