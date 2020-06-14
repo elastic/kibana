@@ -15,12 +15,16 @@ import {
 import { BackgroundSessionSavedObjectAttributes } from '../../../common/background_session';
 import { BackgroundSessionParams } from './types';
 
+const paramSchema = schema.object({
+  sessionId: schema.string(),
+});
+
 export function registerBackgroundSessionSaveRoute(router: IRouter): void {
   router.post(
     {
       path: '/internal/session/{sessionId}/save',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: paramSchema,
       },
     },
     async (

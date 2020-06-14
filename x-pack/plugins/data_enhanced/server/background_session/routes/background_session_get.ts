@@ -13,12 +13,16 @@ import {
 } from 'kibana/server';
 import { BackgroundSessionParams } from './types';
 
+const paramSchema = schema.object({
+  sessionId: schema.string(),
+});
+
 export function registerBackgroundSessionGetRoute(router: IRouter): void {
   router.get(
     {
       path: '/internal/session/{sessionId}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: paramSchema,
       },
     },
     async (
