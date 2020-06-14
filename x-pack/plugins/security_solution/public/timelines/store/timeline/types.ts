@@ -16,6 +16,12 @@ export interface TimelineById {
   [id: string]: TimelineModel;
 }
 
+export interface InsertTimeline {
+  timelineId: string;
+  timelineSavedObjectId: string | null;
+  timelineTitle: string;
+}
+
 export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
 /** The state of all timelines is stored here */
@@ -23,6 +29,7 @@ export interface TimelineState {
   timelineById: TimelineById;
   autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
+  insertTimeline: InsertTimeline | null;
 }
 
 export interface ActionTimeline extends Action<string> {
