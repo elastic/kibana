@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { RefObject, useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import { tint } from 'polished';
@@ -19,7 +19,6 @@ const List = styled.ul`
   border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${px(units.quarter)};
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${tint(0.1, theme.euiColorFullShade)};
-  position: absolute;
   background: #fff;
   z-index: 10;
   left: 0;
@@ -44,14 +43,14 @@ export const Suggestions: React.FC<SuggestionsProps> = ({
   onMouseEnter,
   loadMore,
 }) => {
-  const [childNodes, setChildNodes] = useState<Array<RefObject<HTMLLIElement>>>([]);
+  const [childNodes, setChildNodes] = useState<HTMLDivElement[]>([]);
 
   const parentNode = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const scrollIntoView = () => {
       const parent = parentNode.current;
-      const child = childNodes[index]?.current;
+      const child = childNodes[index];
 
       if (index == null || !parent || !child) {
         return;

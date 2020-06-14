@@ -4,97 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, RefObject } from 'react';
 import styled from 'styled-components';
-import { EuiIcon } from '@elastic/eui';
-import { tint } from 'polished';
+import { EuiSuggestItem } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  fontFamilyCode,
-  px,
-  units,
-  fontSizes,
-  unit,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../apm/public/style/variables';
 
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+
+const SuggestionItem = styled<{ selected: boolean }>(EuiSuggestItem)`
+  background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
+`;
 
 function getIconColor(type: string) {
   switch (type) {
     case 'field':
-      return theme.euiColorVis7;
+      return 'tint5';
     case 'value':
-      return theme.euiColorVis0;
+      return 'tint0';
     case 'operator':
-      return theme.euiColorVis1;
+      return 'tint1';
     case 'conjunction':
-      return theme.euiColorVis3;
+      return 'tint3';
     case 'recentSearch':
-      return theme.euiColorMediumShade;
+      return 'tint10';
   }
 }
-
-const Description = styled.div`
-  color: ${theme.euiColorDarkShade};
-
-  p {
-    display: inline;
-
-    span {
-      font-family: ${fontFamilyCode};
-      color: ${theme.euiColorFullShade};
-      padding: 0 ${px(units.quarter)};
-      display: inline-block;
-    }
-  }
-`;
-
-const ListItem = styled.button<{ selected: boolean }>`
-  width: inherit;
-  font-size: ${fontSizes.small};
-  height: ${px(units.double)};
-  align-items: center;
-  display: flex;
-  background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
-  cursor: pointer;
-  border-radius: ${px(units.quarter)};
-
-  ${Description} {
-    p span {
-      background: ${(props) =>
-        props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
-    }
-    @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
-      margin-left: auto;
-      text-align: end;
-    }
-  }
-`;
-
-const Icon = styled.div<{ type: string }>`
-  flex: 0 0 ${px(units.double)};
-  background: ${(props) => tint(0.1, getIconColor(props.type) as string)};
-  color: ${(props) => getIconColor(props.type)};
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  line-height: ${px(units.double)};
-`;
-
-const TextValue = styled.div`
-  text-align: left;
-  flex: 0 0 ${px(unit * 12)};
-  color: ${theme.euiColorDarkestShade};
-  padding: 0 ${px(units.half)};
-
-  @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
-    flex: 0 0 ${px(unit * 8)};
-  }
-  @media only screen and (min-width: 1300px) {
-    flex: 0 0 ${px(unit * 16)};
-  }
-`;
 
 function getEuiIconType(type: string) {
   switch (type) {
@@ -128,7 +62,7 @@ export const Suggestion: React.FC<SuggestionProps> = ({
   onClick,
   onMouseEnter,
 }) => {
-  const childNode = useRef<HTMLLIElement>(null);
+  const childNode: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (childNode.current) {
@@ -138,18 +72,21 @@ export const Suggestion: React.FC<SuggestionProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [childNode]);
 
+  let descr: string = '';
+  if (typeof suggestion.description === 'string') {
+    descr = suggestion.description;
+  }
+
   return (
-    <ListItem
-      ref={childNode}
-      selected={selected}
-      onClick={() => onClick(suggestion)}
-      onMouseEnter={onMouseEnter}
-    >
-      <Icon type={suggestion.type as string}>
-        <EuiIcon type={getEuiIconType(suggestion.type)} />
-      </Icon>
-      <TextValue>{suggestion.text}</TextValue>
-      <Description>{suggestion.description}</Description>
-    </ListItem>
+    <div ref={childNode}>
+      <SuggestionItem
+        type={{ iconType: getEuiIconType(suggestion.type), color: getIconColor(suggestion.type) }}
+        label={suggestion.text}
+        onClick={() => onClick(suggestion)}
+        onMouseEnter={onMouseEnter}
+        // selected={selected}
+        description={descr}
+      />
+    </div>
   );
 };
