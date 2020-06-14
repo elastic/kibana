@@ -20,7 +20,7 @@ The motivation of this RFC is to allow users to:
 
 # Detailed design
 
-From the perspective of a user, when he runs a view that takes a long time (A dashboard, a discover search, a SIEM timeline, etc.), he will recieve a notification stating that it can be sent to background, and returned to later. If he chooses to do so, that view will be treated as a "Background Session": It will be stored and tracked for progress, allowing the user to come back and retrive the results in the future.
+From the perspective of a user, when they run a view that takes a long time (A dashboard, a discover search, a SIEM timeline, etc.), they will recieve a notification stating that it can be sent to background, and returned to later. If they choose to do so, that view will be treated as a "Background Session": It will be stored and tracked for progress, allowing the user to come back and retrive the results in the future.
 
 ## Session Management
 
@@ -104,11 +104,11 @@ The service offers three public APIs:
 
 While the Background Session Service is responsible for storing a `BackgroundSession` in a `BackgroundSessionObject`, it does **not** track it's progress. Instead, tracking the progress is the responsibility of the monitoring flow. 
 
-During setup, the `data_enhanced` plugin should register a task into the Kibana Task Mananger. The task will run in a configurable interval, fetching all Background Sessions with a `RUNNING` state,  This task will 
+During setup, the `data_enhanced` plugin will register a task into the Kibana Task Mananger. The task will run in a configurable interval, fetching all Background Sessions with a `RUNNING` state, checking their state with ElasticSearch than updating the state to 'COMPLETE', 'ERROR' or 'EXPIRED' in case the data stored in ElasticSearch was expired. 
 
 ## Search Service
 
-
+The way 
 
 # Drawbacks
 
