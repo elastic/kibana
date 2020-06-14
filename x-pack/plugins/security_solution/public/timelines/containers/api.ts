@@ -33,6 +33,8 @@ import {
 interface RequestPostTimeline {
   timeline: TimelineInput;
   signal?: AbortSignal;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }
 
 interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
@@ -74,17 +76,32 @@ export const persistTimeline = async ({
   timelineId,
   timeline,
   version,
+  templateTimelineId,
+  templateTimelineVersion,
 }: RequestPersistTimeline): Promise<TimelineResponse> => {
   if (timelineId == null && timeline.status === TimelineStatus.draft) {
-    const draftTimeline = await cleanDraftTimeline({ timelineType: timeline.timelineType! });
+    const draftTimeline = await cleanDraftTimeline({
+      timelineType: timeline.timelineType!,
+      templateTimelineId,
+      templateTimelineVersion,
+    });
+
+    const templateTimelineInfo =
+      timeline.timelineType! === TimelineType.template
+        ? {
+            templateTimelineId:
+              draftTimeline.data.persistTimeline.timeline.templateTimelineId ?? templateTimelineId,
+            templateTimelineVersion:
+              draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
+              templateTimelineVersion,
+          }
+        : {};
 
     return patchTimeline({
       timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
       timeline: {
         ...timeline,
-        templateTimelineId: draftTimeline.data.persistTimeline.timeline.templateTimelineId,
-        templateTimelineVersion:
-          draftTimeline.data.persistTimeline.timeline.templateTimelineVersion,
+        ...templateTimelineInfo,
       },
       version: draftTimeline.data.persistTimeline.timeline.version ?? '',
     });
@@ -155,12 +172,24 @@ export const getDraftTimeline = async ({
 
 export const cleanDraftTimeline = async ({
   timelineType,
+  templateTimelineId,
+  templateTimelineVersion,
 }: {
   timelineType: TimelineType;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }): Promise<TimelineResponse> => {
+  const templateTimelineInfo =
+    timelineType === TimelineType.template
+      ? {
+          templateTimelineId,
+          templateTimelineVersion,
+        }
+      : {};
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
     body: JSON.stringify({
       timelineType,
+      ...templateTimelineInfo,
     }),
   });
 

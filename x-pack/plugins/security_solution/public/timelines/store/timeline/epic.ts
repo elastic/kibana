@@ -240,6 +240,7 @@ export const createTimelineEpic = <State>(): Epic<
               if (allTimelineQuery.refetch != null) {
                 (allTimelineQuery.refetch as inputsModel.Refetch)();
               }
+
               return [
                 response.code === 409
                   ? updateAutoSaveMsg({

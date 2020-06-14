@@ -5,6 +5,7 @@
  */
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import uuid from 'uuid';
 import {
   addHistory,
   addNote,
@@ -135,24 +136,34 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         timelineType = TimelineType.default,
         filters,
       }
-    ) => ({
-      ...state,
-      timelineById: addNewTimeline({
-        columns,
-        dataProviders,
-        dateRange,
-        filters,
-        id,
-        itemsPerPage,
-        kqlQuery,
-        sort,
-        show,
-        showCheckboxes,
-        showRowRenderers,
-        timelineById: state.timelineById,
-        timelineType,
-      }),
-    })
+    ) => {
+      const templateTimelineInfo =
+        timelineType === TimelineType.template
+          ? {
+              templateTimelineId: uuid.v4(),
+              templateTimelineVersion: 1,
+            }
+          : {};
+      return {
+        ...state,
+        timelineById: addNewTimeline({
+          columns,
+          dataProviders,
+          dateRange,
+          filters,
+          id,
+          itemsPerPage,
+          kqlQuery,
+          sort,
+          show,
+          showCheckboxes,
+          showRowRenderers,
+          timelineById: state.timelineById,
+          timelineType,
+          ...templateTimelineInfo,
+        }),
+      };
+    }
   )
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,

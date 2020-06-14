@@ -150,3 +150,4 @@ export const showAllOthersBucket: string[] = [
  * Remove the comment here to enable template timeline
  */
 export const disableTemplate = false;
+export const enableElasticFilter = false;

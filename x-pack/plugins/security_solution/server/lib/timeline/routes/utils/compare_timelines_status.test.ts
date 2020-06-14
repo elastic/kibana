@@ -515,8 +515,8 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  describe(`Throw error if given status is updated`, () => {
-    describe('timeline', () => {
+  describe(`Throw error if timeline status is updated`, () => {
+    describe('immutable timeline', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
       let timelineObj: TimelinesStatusType;
@@ -536,7 +536,10 @@ describe('CompareTimelinesStatus', () => {
       beforeEach(async () => {
         jest.doMock('../../saved_object', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+            getTimeline: mockGetTimeline.mockReturnValue({
+              ...mockGetTimelineValue,
+              status: TimelineStatus.immutable,
+            }),
             getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
               timeline: [],
             }),
@@ -554,7 +557,7 @@ describe('CompareTimelinesStatus', () => {
           },
           timelineType: TimelineType.default,
           title: 'mock title',
-          status: TimelineStatus.active,
+          status: TimelineStatus.immutable,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
             type: TimelineType.template,
@@ -566,17 +569,28 @@ describe('CompareTimelinesStatus', () => {
         await timelineObj.init();
       });
 
-      test(`should be updatable`, () => {
-        expect(timelineObj.isUpdatable).toBe(true);
+      test(`should not be updatable if existing status is immutable`, () => {
+        expect(timelineObj.isUpdatable).toBe(false);
       });
 
-      test(`should throw no error when update`, () => {
+      test(`should throw error when update`, () => {
         const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
-        expect(error?.body).toBeUndefined();
+        expect(error?.body).toEqual(UPDATE_STATUS_ERROR_MESSAGE);
+      });
+
+      test(`should not be updatable via import if existing status is immutable`, () => {
+        expect(timelineObj.isUpdatableViaImport).toBe(false);
+      });
+
+      test(`should throw error when update via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
+        expect(error?.body).toEqual(
+          getImportExistingTimelineError(mockUniqueParsedObjects[0].savedObjectId)
+        );
       });
     });
 
-    describe('template timeline', () => {
+    describe('immutable template timeline', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
       let timelineObj: TimelinesStatusType;
@@ -596,9 +610,12 @@ describe('CompareTimelinesStatus', () => {
       beforeEach(async () => {
         jest.doMock('../../saved_object', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+            getTimeline: mockGetTimeline.mockReturnValue({
+              ...mockGetTemplateTimelineValue,
+              status: TimelineStatus.immutable,
+            }),
             getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
-              timeline: [mockGetTemplateTimelineValue],
+              timeline: [{ ...mockGetTemplateTimelineValue, status: TimelineStatus.immutable }],
             }),
           };
         });
@@ -630,18 +647,18 @@ describe('CompareTimelinesStatus', () => {
         expect(timelineObj.isUpdatable).toEqual(false);
       });
 
-      test(`should throw error when update`, () => {
+      test(`should not throw error when update`, () => {
         const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
         expect(error?.body).toEqual(UPDATE_STATUS_ERROR_MESSAGE);
       });
 
       test(`should not be able to update via import`, () => {
-        expect(timelineObj.isUpdatableViaImport).toEqual(false);
+        expect(timelineObj.isUpdatableViaImport).toEqual(true);
       });
 
-      test(`should throw error when update via import`, () => {
+      test(`should not throw error when update via import`, () => {
         const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
-        expect(error?.body).toEqual(UPDATE_STATUS_ERROR_MESSAGE);
+        expect(error?.body).toBeUndefined();
       });
     });
   });

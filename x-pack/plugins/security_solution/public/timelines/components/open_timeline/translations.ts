@@ -223,14 +223,14 @@ export const TAB_TEMPLATES = i18n.translate(
 export const FILTER_ELASTIC_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.templateFilter.elasticTitle',
   {
-    defaultMessage: 'Elastic',
+    defaultMessage: 'Elastic template',
   }
 );
 
 export const FILTER_CUSTOM_TIMELINES = i18n.translate(
   'xpack.securitySolution.timelines.components.templateFilter.customizedTitle',
   {
-    defaultMessage: 'Custom',
+    defaultMessage: 'Custom template',
   }
 );
 

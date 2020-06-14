@@ -113,7 +113,6 @@ const commonUpdateCases = (
         statusCode: 405,
       };
     }
-
     if (existTimeline?.version !== version) {
       // throw error 409 conflict timeline
       return {
@@ -135,6 +134,13 @@ export const checkIsUpdateViaImportFailureCases = (
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
+  if (!isHandlingTemplateTimeline && existTimeline != null) {
+    return {
+      body: getImportExistingTimelineError(existTimeline!.savedObjectId),
+      statusCode: 405,
+    };
+  }
+
   const error = commonUpdateCases(
     isHandlingTemplateTimeline,
     status,
@@ -256,11 +262,6 @@ export const checkIsCreateViaImportFailureCases = (
   } else if (existTimeline == null && status === TimelineStatus.draft) {
     return {
       body: CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
-      statusCode: 405,
-    };
-  } else if (existTimeline != null && status !== existTimeline.status) {
-    return {
-      body: NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
       statusCode: 405,
     };
   } else {

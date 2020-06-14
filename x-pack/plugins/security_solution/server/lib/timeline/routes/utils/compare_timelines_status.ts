@@ -83,13 +83,13 @@ export class CompareTimelinesStatus {
 
   public get isCreatableViaImport() {
     return (
-      this.isStatusValid &&
+      this.isCreatedStatusValid &&
       ((this.isCreatable && !this.isHandlingTemplateTimeline) ||
         (this.isCreatable && this.isHandlingTemplateTimeline && this.isTemplateVersionValid))
     );
   }
 
-  private get isStatusValid() {
+  private get isCreatedStatusValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
     return obj.isExists
       ? this.status === obj.getData?.status && this.status !== TimelineStatus.draft
@@ -106,13 +106,15 @@ export class CompareTimelinesStatus {
 
   private get isTimelineTypeValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    return obj.isExists ? this.timelineType === obj.getData?.timelineType : true;
+    const existintTimelineType = obj.getData?.timelineType ?? TimelineType.default;
+    return obj.isExists ? this.timelineType === existintTimelineType : true;
   }
 
   public get isUpdatableViaImport() {
     return (
       this.isTimelineTypeValid &&
       !this.isSavedObjectVersionConflict &&
+      this.isUpdatedTimelineStatusValid &&
       (this.timelineObject.isUpdatableViaImport ||
         (this.templateTimelineObject.isUpdatableViaImport &&
           this.isTemplateVersionValid &&
@@ -204,6 +206,18 @@ export class CompareTimelinesStatus {
   private get isTemplateVersionValid() {
     const version = this.templateTimelineObject?.getVersion;
     return typeof version === 'number' && !this.isTemplateVersionConflict;
+  }
+
+  private get isUpdatedTimelineStatusValid() {
+    const status = this.status;
+    const existingStatus = this.isHandlingTemplateTimeline
+      ? this.templateTimelineInput.data?.status
+      : this.timelineInput.data?.status;
+    return (
+      ((existingStatus == null || existingStatus === TimelineStatus.active) &&
+        (status == null || status === TimelineStatus.active)) ||
+      (existingStatus != null && status === existingStatus)
+    );
   }
 
   public get timelineId() {

@@ -7,7 +7,11 @@
 import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
-import { UNAUTHENTICATED_USER, disableTemplate } from '../../../common/constants';
+import {
+  UNAUTHENTICATED_USER,
+  disableTemplate,
+  enableElasticFilter,
+} from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
 import {
@@ -154,9 +158,10 @@ const getTimelineTypeFilter = (
       ? `siem-ui-timeline.attributes.createdBy: "Elsatic"`
       : `not siem-ui-timeline.attributes.createdBy: "Elastic"`;
 
-  const filters = disableTemplate
-    ? [typeFilter, draftFilter, immutableFilter]
-    : [typeFilter, draftFilter, immutableFilter /* templateTimelineTypeFilter*/];
+  const filters =
+    !disableTemplate && enableElasticFilter
+      ? [typeFilter, draftFilter, immutableFilter, templateTimelineTypeFilter]
+      : [typeFilter, draftFilter, immutableFilter];
   return filters.filter((f) => f != null).join(' and ');
 };
 
