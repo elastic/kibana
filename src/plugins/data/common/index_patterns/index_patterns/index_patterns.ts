@@ -201,7 +201,7 @@ export class IndexPatternsService {
   make = async (id?: string): Promise<IndexPattern> => {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll();
+    const uiSettingsValues = await this.config.getAll(); // could map to values
 
     const indexPattern = new IndexPattern(id, {
       getConfig: (cfg: any) => this.config.get(cfg),

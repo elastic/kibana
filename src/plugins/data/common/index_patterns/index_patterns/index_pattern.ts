@@ -160,7 +160,8 @@ export class IndexPattern implements IIndexPattern {
 
     // return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
     return (
-      FieldFormat && new FieldFormat(mapping.params, (key: string) => this.uiSettingsValues[key])
+      FieldFormat &&
+      new FieldFormat(mapping.params, (key: string) => this.uiSettingsValues[key].value)
     );
   }
 
