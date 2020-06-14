@@ -123,11 +123,13 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             algorithm: 'brotliCompress',
             filename: '[path].br',
             test: /\.(js|css)$/,
+            cache: false,
           }),
           new CompressionPlugin({
             algorithm: 'gzip',
             filename: '[path].gz',
             test: /\.(js|css)$/,
+            cache: false,
           }),
         ]),
   ],
