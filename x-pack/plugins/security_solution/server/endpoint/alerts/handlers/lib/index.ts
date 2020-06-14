@@ -6,7 +6,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { AlertEvent } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { esQuery } from '../../../../../../../../src/plugins/data/server';
 import {
   AlertAPIOrdering,
