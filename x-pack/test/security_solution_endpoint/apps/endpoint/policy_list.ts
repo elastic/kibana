@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'endpoint',
     'policy',
     'endpointPageUtils',
-    'ingestManager',
+    'ingestManagerCreateDatasource',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -103,14 +103,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('and user clicks on page header create button', () => {
       beforeEach(async () => {
         await pageObjects.policy.navigateToPolicyList();
+        await (await pageObjects.policy.findHeaderCreateNewButton()).click();
       });
 
       it('should redirect to ingest management integrations add datasource', async () => {
-        const headerCreateButton = await pageObjects.policy.findHeaderCreateNewButton();
-        await headerCreateButton.click();
-        await pageObjects.ingestManager.ensureDatasourceCratePageOrFail();
+        await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
       });
-      it('should redirect user back to Policy List if Cancel button is clicked', async () => {});
+      it('should redirect user back to Policy List if Cancel button is clicked', async () => {
+        await (await pageObjects.ingestManagerCreateDatasource.findCancelButton()).click();
+        // FIXME: need method to chec that is on policy list page.
+      });
+      it('should redirect user back to Policy List if Back link is clicked', async () => {});
       it('should redirect user back to Policy List after a successful save', async () => {});
     });
   });

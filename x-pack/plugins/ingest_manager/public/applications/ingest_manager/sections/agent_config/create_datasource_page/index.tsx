@@ -367,7 +367,12 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty
+              color="ghost"
+              href={cancelUrl}
+              onClick={cancelClickHandler}
+              data-test-subj="createDatasourceCancelButton"
+            >
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.cancelButton"
                 defaultMessage="Cancel"
@@ -382,6 +387,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
               iconType="save"
               color="primary"
               fill
+              data-test-subj="createDatasourceSaveButton"
             >
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.saveButton"

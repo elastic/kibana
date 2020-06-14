@@ -46,6 +46,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           flush="left"
           href={cancelUrl}
           onClick={cancelOnClick}
+          data-test-subj={`${dataTestSubj}_cancelBackLink`}
         >
           <FormattedMessage
             id="xpack.ingestManager.createDatasource.cancelLinkText"
