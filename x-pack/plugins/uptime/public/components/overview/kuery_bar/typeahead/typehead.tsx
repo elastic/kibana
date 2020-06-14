@@ -26,6 +26,7 @@ interface TypeaheadState {
   value: string;
   inputIsPristine: boolean;
   lastSubmitted: string;
+  selected: QuerySuggestion | null;
 }
 
 interface TypeaheadProps {
@@ -38,6 +39,7 @@ interface TypeaheadProps {
   disabled?: boolean;
   dataTestSubj: string;
   ariaLabel: string;
+  loadMore: () => void;
 }
 
 export const Typeahead: React.FC<TypeaheadProps> = ({
@@ -49,6 +51,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
   ariaLabel,
   disabled,
   isLoading,
+  loadMore,
 }) => {
   const [state, setState] = useState<TypeaheadState>({
     isSuggestionsVisible: false,
@@ -56,22 +59,32 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     value: '',
     inputIsPristine: true,
     lastSubmitted: '',
+    selected: null,
   });
 
   const inputRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
     if (state.inputIsPristine && initialValue) {
-      setState({ ...state, value: initialValue });
+      setState((prevState) => ({
+        ...prevState,
+        value: initialValue,
+      }));
     }
-  }, [initialValue, state]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValue]);
 
   const incrementIndex = (currentIndex: number) => {
     let nextIndex = currentIndex + 1;
     if (currentIndex === null || nextIndex >= suggestions.length) {
       nextIndex = 0;
     }
-    setState({ ...state, index: nextIndex });
+
+    setState((prevState) => ({
+      ...prevState,
+      index: nextIndex,
+    }));
   };
 
   const decrementIndex = (currentIndex: number) => {
@@ -79,7 +92,11 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     if (previousIndex < 0) {
       previousIndex = null;
     }
-    setState({ ...state, index: previousIndex });
+
+    setState((prevState) => ({
+      ...prevState,
+      index: previousIndex,
+    }));
   };
 
   const onKeyUp = (event: KeyboardEvent<HTMLInputElement> & ChangeEvent<HTMLInputElement>) => {
@@ -87,11 +104,17 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
     const { value } = state;
     switch (event.keyCode) {
       case KEY_CODES.LEFT:
-        setState({ ...state, isSuggestionsVisible: true });
+        setState((prevState) => ({
+          ...prevState,
+          isSuggestionsVisible: true,
+        }));
         onChange(value, selectionStart);
         break;
       case KEY_CODES.RIGHT:
-        setState({ ...state, isSuggestionsVisible: true });
+        setState((prevState) => ({
+          ...prevState,
+          isSuggestionsVisible: true,
+        }));
         onChange(value, selectionStart);
         break;
     }
@@ -105,7 +128,11 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
         if (isSuggestionsVisible) {
           incrementIndex(index!);
         } else {
-          setState({ ...state, isSuggestionsVisible: true, index: 0 });
+          setState((prevState) => ({
+            ...prevState,
+            isSuggestionsVisible: true,
+            index: 0,
+          }));
         }
         break;
       case KEY_CODES.UP:
@@ -119,16 +146,28 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
         if (isSuggestionsVisible && suggestions[index!]) {
           selectSuggestion(suggestions[index!]);
         } else {
-          setState({ ...state, isSuggestionsVisible: false });
+          setState((prevState) => ({
+            ...prevState,
+            isSuggestionsVisible: false,
+          }));
+
           onSubmit(value);
         }
         break;
       case KEY_CODES.ESC:
         event.preventDefault();
-        setState({ ...state, isSuggestionsVisible: false });
+
+        setState((prevState) => ({
+          ...prevState,
+          isSuggestionsVisible: false,
+        }));
+
         break;
       case KEY_CODES.TAB:
-        setState({ ...state, isSuggestionsVisible: false });
+        setState((prevState) => ({
+          ...prevState,
+          isSuggestionsVisible: false,
+        }));
         break;
     }
   };
@@ -139,24 +178,38 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
       suggestion.text +
       state.value.substr(suggestion.end);
 
-    setState({ ...state, value: nextInputValue, index: null });
+    setState((prevState) => ({
+      ...prevState,
+      value: nextInputValue,
+      index: null,
+      selected: suggestion,
+    }));
+
     onChange(nextInputValue, nextInputValue.length);
   };
 
   const onClickOutside = () => {
-    setState({ ...state, isSuggestionsVisible: false });
+    if (state.isSuggestionsVisible) {
+      setState((prevState) => ({
+        ...prevState,
+        isSuggestionsVisible: false,
+      }));
+
+      onSuggestionSubmit();
+    }
   };
 
   const onChangeInputValue = (event: ChangeEvent<HTMLInputElement>) => {
     const { value, selectionStart } = event.target;
     const hasValue = Boolean(value.trim());
-    setState({
-      ...state,
+
+    setState((prevState) => ({
+      ...prevState,
       value,
       inputIsPristine: false,
       isSuggestionsVisible: hasValue,
       index: null,
-    });
+    }));
 
     if (!hasValue) {
       onSubmit(value);
@@ -165,8 +218,16 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
   };
 
   const onClickInput = (event: MouseEvent<HTMLInputElement> & ChangeEvent<HTMLInputElement>) => {
+    event.stopPropagation();
     const { selectionStart } = event.target;
     onChange(state.value, selectionStart!);
+  };
+
+  const onFocus = () => {
+    setState((prevState) => ({
+      ...prevState,
+      isSuggestionsVisible: true,
+    }));
   };
 
   const onClickSuggestion = (suggestion: QuerySuggestion) => {
@@ -176,19 +237,34 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
 
   const onMouseEnterSuggestion = (index: number) => {
     setState({ ...state, index });
+
+    setState((prevState) => ({
+      ...prevState,
+      index,
+    }));
   };
 
   const onSuggestionSubmit = () => {
-    if (state.lastSubmitted !== state.value) {
-      onSubmit(state.value);
-      setState({ ...state, lastSubmitted: state.value });
+    const { value, lastSubmitted, selected } = state;
+
+    if (
+      lastSubmitted !== value &&
+      selected &&
+      (selected.type === 'value' || selected.text.trim() === ': *')
+    ) {
+      onSubmit(value);
+
+      setState((prevState) => ({
+        ...prevState,
+        lastSubmitted: value,
+        selected: null,
+      }));
     }
-    setState({ ...state, isSuggestionsVisible: false });
   };
 
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
-      <>
+      <div>
         <div data-test-subj={dataTestSubj} style={{ position: 'relative' }}>
           <EuiFieldSearch
             aria-label={ariaLabel}
@@ -199,7 +275,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             placeholder={i18n.translate('xpack.uptime.kueryBar.searchPlaceholder', {
               defaultMessage: 'Search monitor IDs, names, and protocol types...',
             })}
-            inputRef={node => {
+            inputRef={(node) => {
               if (node) {
                 inputRef.current = node;
               }
@@ -208,7 +284,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             value={state.value}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            onBlur={onSuggestionSubmit}
+            onFocus={onFocus}
             onChange={onChangeInputValue}
             onClick={onClickInput}
             autoComplete="off"
@@ -234,8 +310,9 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
           index={state.index!}
           onClick={onClickSuggestion}
           onMouseEnter={onMouseEnterSuggestion}
+          loadMore={loadMore}
         />
-      </>
+      </div>
     </EuiOutsideClickDetector>
   );
 };

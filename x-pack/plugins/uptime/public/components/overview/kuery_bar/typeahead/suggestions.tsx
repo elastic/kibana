@@ -33,6 +33,7 @@ interface SuggestionsProps {
   onMouseEnter: (index: number) => void;
   show?: boolean;
   suggestions: QuerySuggestion[];
+  loadMore: () => void;
 }
 
 export const Suggestions: React.FC<SuggestionsProps> = ({
@@ -41,6 +42,7 @@ export const Suggestions: React.FC<SuggestionsProps> = ({
   onClick,
   suggestions,
   onMouseEnter,
+  loadMore,
 }) => {
   const [childNodes, setChildNodes] = useState<Array<RefObject<HTMLLIElement>>>([]);
 
@@ -69,11 +71,31 @@ export const Suggestions: React.FC<SuggestionsProps> = ({
     return null;
   }
 
+  const handleScroll = () => {
+    const parent = parentNode.current;
+
+    if (!loadMore || !parent) {
+      return;
+    }
+
+    const position = parent.scrollTop + parent.offsetHeight;
+    const height = parent.scrollHeight;
+    const remaining = height - position;
+    const margin = 50;
+
+    if (!height || !position) {
+      return;
+    }
+    if (remaining <= margin) {
+      loadMore();
+    }
+  };
+
   const suggestionsNodes = suggestions.map((suggestion, currIndex) => {
     const key = suggestion + '_' + currIndex;
     return (
       <Suggestion
-        innerRef={node => {
+        innerRef={(node) => {
           const nodes = childNodes;
           nodes[currIndex] = node;
           setChildNodes([...nodes]);
@@ -87,5 +109,9 @@ export const Suggestions: React.FC<SuggestionsProps> = ({
     );
   });
 
-  return <List ref={parentNode}>{suggestionsNodes}</List>;
+  return (
+    <List ref={parentNode} onScroll={handleScroll}>
+      {suggestionsNodes}
+    </List>
+  );
 };
