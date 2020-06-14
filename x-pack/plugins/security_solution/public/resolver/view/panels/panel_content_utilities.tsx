@@ -5,8 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs } from '@elastic/eui';
+import { EuiBreadcrumbs, Breadcrumb } from '@elastic/eui';
 import styled from 'styled-components';
+import React, { memo } from 'react';
+import { useResolverTheme } from '../assets';
 
 /**
  * The two query parameters we read/write on to control which view the table presents:
@@ -16,15 +18,36 @@ export interface CrumbInfo {
   readonly crumbEvent: string;
 }
 
-/**
- * Breadcrumb menu with adjustments per direction from UX team
- */
-export const StyledBreadcrumbs = styled(EuiBreadcrumbs)`
+const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ crumbsBackground: string; crumbText: string }>`
   &.euiBreadcrumbs.euiBreadcrumbs--responsive {
-    background-color: #f5f5fa;
+    background-color: ${(props) => props.crumbsBackground};
+    color: ${(props) => props.crumbText};
     padding: 1em;
   }
 `;
+
+/**
+ * Breadcrumb menu with adjustments per direction from UX team
+ */
+export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
+  breadcrumbs,
+  truncate,
+}: {
+  breadcrumbs: Breadcrumb[];
+  truncate?: boolean;
+}) {
+  const {
+    colorMap: { resolverEdge, resolverEdgeText },
+  } = useResolverTheme();
+  return (
+    <ThemedBreadcrumbs
+      crumbsBackground={resolverEdge}
+      crumbText={resolverEdgeText}
+      breadcrumbs={breadcrumbs}
+      truncate={truncate}
+    />
+  );
+});
 
 /**
  * Long formatter (to second) for DateTime
