@@ -46,17 +46,3 @@
     opacity: 1; /* 3 */
   }
 }
-
-.embPanel {
-  .visualize[data-loading],
-  .visualize[data-error] {
-    pointer-events: none;
-    filter: grayscale(100%);
-    filter: gray;
-  }
-
-  .embPanel-label {
-    position: absolute;
-    padding-left: $euiSizeS;
-  }
-}

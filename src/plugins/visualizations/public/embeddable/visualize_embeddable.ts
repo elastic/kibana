@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import ReactDOM from 'react-dom';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -48,7 +46,6 @@ import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { EmbeddableErrorLabel } from './embeddable_error_label';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -95,7 +92,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
-  private labelNode?: HTMLDivElement;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
@@ -265,10 +261,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
-
-    this.labelNode = document.createElement('div');
-    this.labelNode.className = `embPanel-label`;
-    domNode.appendChild(this.labelNode);
 
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
