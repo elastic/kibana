@@ -249,7 +249,7 @@ const ProcessEventDotComponents = React.memo(
     event,
     projectionMatrix,
     adjacentNodeMap,
-    relatedEvents,
+    relatedEventsStats,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -463,19 +463,10 @@ const ProcessEventDotComponents = React.memo(
     }, [relatedEventsStats, dispatch, event]);
 
     const relatedEventStatusOrOptions = (() => {
-      if (!relatedEvents) {
-        // If related events have not yet been requested
+      if (!relatedEventsStats) {
         return subMenuAssets.initialMenuStatus;
       }
-      if (relatedEvents === 'error') {
-        // If there was an error when we tried to request the events
-        return subMenuAssets.menuError;
-      }
-      if (relatedEvents === 'waitingForRelatedEventData') {
-        // If we're waiting for events to be returned
-        // Pass on the waiting symbol
-        return relatedEvents;
-      }
+
       return relatedEventOptions;
     })();
 
