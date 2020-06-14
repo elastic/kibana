@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
@@ -41,9 +42,9 @@ export function LogstashPanel(props) {
     return null;
   }
 
-  const goToLogstash = () => props.changeUrl('logstash');
-  const goToNodes = () => props.changeUrl('logstash/nodes');
-  const goToPipelines = () => props.changeUrl('logstash/pipelines');
+  const goToLogstash = () => getSafeForExternalLink('#/logstash');
+  const goToNodes = () => getSafeForExternalLink('#/logstash/nodes');
+  const goToPipelines = () => getSafeForExternalLink('#/logstash/pipelines');
 
   const setupModeData = get(setupMode.data, 'logstash');
   const setupModeTooltip =
@@ -51,7 +52,7 @@ export function LogstashPanel(props) {
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={LOGSTASH_SYSTEM_ID}
-        badgeClickAction={goToNodes}
+        badgeClickLink={goToNodes()}
       />
     ) : null;
 
@@ -71,7 +72,7 @@ export function LogstashPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToLogstash}
+                  href={goToLogstash()}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
                     {
@@ -117,7 +118,7 @@ export function LogstashPanel(props) {
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      onClick={goToNodes}
+                      href={goToNodes()}
                       data-test-subj="lsNodes"
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
@@ -179,7 +180,7 @@ export function LogstashPanel(props) {
                     <DisabledIfNoDataAndInSetupModeLink
                       setupModeEnabled={setupMode.enabled}
                       setupModeData={setupModeData}
-                      onClick={goToPipelines}
+                      href={goToPipelines()}
                       data-test-subj="lsPipelines"
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
