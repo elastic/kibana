@@ -25,8 +25,6 @@ uiRoutes.when('/logstash/nodes', {
   controllerAs: 'lsNodes',
   controller: class LsNodesList extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
-      const kbnUrl = $injector.get('kbnUrl');
-
       super({
         title: 'Logstash - Nodes',
         storageKey: 'logstash.nodes',
@@ -54,7 +52,6 @@ uiRoutes.when('/logstash/nodes', {
                     sorting={this.sorting}
                     pagination={this.pagination}
                     onTableChange={this.onTableChange}
-                    angular={{ kbnUrl, scope: $scope }}
                   />
                   {bottomBarComponent}
                 </Fragment>
