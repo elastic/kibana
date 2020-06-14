@@ -84,7 +84,10 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
 }) {
   const processName = processEvent && event.eventName(processEvent);
   const processEntityId = event.entityId(processEvent);
-  const totalCount = relatedStats.events.total;
+  const totalCount = Object.values(relatedStats.events.byCategory).reduce(
+    (sum, val) => sum + val,
+    0
+  );
   const eventsString = i18n.translate(
     'xpack.siem.endpoint.resolver.panel.processEventListByType.events',
     {

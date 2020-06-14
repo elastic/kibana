@@ -206,12 +206,16 @@ const PanelContent = memo(function PanelContent() {
        * | :--------------------- | :------------------------- | :----------------------  |
        * | related event detail   | event_id of related event  | entity_id of process     |
        */
+      const parentCount: number = Object.values(relatedStatsForIdFromParams || {}).reduce(
+        (sum, val) => sum + val,
+        0
+      );
       return (
         <RelatedEventDetail
           relatedEventId={crumbId}
           parentEvent={uiSelectedEvent!}
           pushToQueryParams={pushToQueryParams}
-          countForParent={relatedStatsForIdFromParams?.events.total}
+          countForParent={parentCount}
         />
       );
     }
