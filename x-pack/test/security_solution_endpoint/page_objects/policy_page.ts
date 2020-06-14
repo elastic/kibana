@@ -66,5 +66,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       await testSubjects.waitForEnabled('headerCreateNewPolicyButton');
       return await testSubjects.find('headerCreateNewPolicyButton');
     },
+
+    /**
+     * Used when looking a the Ingest create/edit datasource pages. Finds the endpoint
+     * custom configuaration component
+     * @param onEditPage
+     */
+    async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+    },
   };
 }
