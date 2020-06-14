@@ -18,10 +18,10 @@ export interface CrumbInfo {
   readonly crumbEvent: string;
 }
 
-const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ crumbsBackground: string; crumbText: string }>`
+const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
   &.euiBreadcrumbs.euiBreadcrumbs--responsive {
-    background-color: ${(props) => props.crumbsBackground};
-    color: ${(props) => props.crumbText};
+    background-color: ${(props) => props.background};
+    color: ${(props) => props.text};
     padding: 1em;
   }
 `;
@@ -41,8 +41,8 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   } = useResolverTheme();
   return (
     <ThemedBreadcrumbs
-      crumbsBackground={resolverEdge}
-      crumbText={resolverEdgeText}
+      background={resolverEdge}
+      text={resolverEdgeText}
       breadcrumbs={breadcrumbs}
       truncate={truncate}
     />

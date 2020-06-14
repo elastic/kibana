@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiI18nNumber,
@@ -313,7 +313,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
         return (
-          <>
+          <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
             <EuiTitle size="xs">
               <EuiTextColor color="secondary">
@@ -331,7 +331,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
               listItems={entries}
             />
             {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
-          </>
+          </Fragment>
         );
       })}
     </>

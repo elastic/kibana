@@ -7,14 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import {
-  htmlIdGenerator,
-  EuiButton,
-  EuiI18nNumber,
-  EuiKeyboardAccessible,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
@@ -504,148 +497,144 @@ const ProcessEventDotComponents = React.memo(
      * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
      */
     return (
-      <EuiKeyboardAccessible>
-        <div
-          data-test-subj={'resolverNode'}
-          className={`${className} kbn-resetFocusState`}
-          role="treeitem"
-          aria-level={adjacentNodeMap.level}
-          aria-flowto={
-            adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling
-          }
-          aria-labelledby={labelId}
-          aria-describedby={descriptionId}
-          aria-haspopup={'true'}
-          aria-current={isActiveDescendant ? 'true' : undefined}
-          aria-selected={isSelectedDescendant ? 'true' : undefined}
-          style={nodeViewportStyle}
-          id={nodeId}
-          tabIndex={-1}
+      <div
+        data-test-subj={'resolverNode'}
+        className={`${className} kbn-resetFocusState`}
+        role="treeitem"
+        aria-level={adjacentNodeMap.level}
+        aria-flowto={adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling}
+        aria-labelledby={labelId}
+        aria-describedby={descriptionId}
+        aria-haspopup={'true'}
+        aria-current={isActiveDescendant ? 'true' : undefined}
+        aria-selected={isSelectedDescendant ? 'true' : undefined}
+        style={nodeViewportStyle}
+        id={nodeId}
+        tabIndex={-1}
+      >
+        <svg
+          viewBox="-15 -15 90 30"
+          preserveAspectRatio="xMidYMid meet"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+          }}
         >
-          <svg
-            viewBox="-15 -15 90 30"
-            preserveAspectRatio="xMidYMid meet"
+          <g>
+            <use
+              xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+              fill={backingFill} // Only visible on hover
+              x={-15.35}
+              y={-15.35}
+              stroke={strokeColor}
+              width={markerSize * 1.5}
+              height={markerSize * 1.5}
+              className="backing"
+            />
+            <use
+              role="presentation"
+              xlinkHref={cubeSymbol}
+              x={markerPositionXOffset}
+              y={markerPositionYOffset}
+              width={markerSize}
+              height={markerSize}
+              opacity="1"
+              className="cube"
+            >
+              <animateTransform
+                attributeType="XML"
+                attributeName="transform"
+                type="scale"
+                values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
+                dur="0.2s"
+                repeatCount="1"
+                className="squish"
+                ref={animationTarget}
+              />
+            </use>
+          </g>
+        </svg>
+        <StyledActionsContainer
+          color={colorMap.full}
+          fontSize={scaledTypeSize}
+          topPct={actionableButtonsTopOffset}
+        >
+          <StyledDescriptionText
+            backgroundColor={colorMap.resolverBackground}
+            color={colorMap.descriptionText}
+            isDisplaying={isShowingDescriptionText}
+          >
+            {descriptionText}
+          </StyledDescriptionText>
+          <div
+            className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            data-test-subject="nodeLabel"
+            id={labelId}
+            onClick={handleClick}
+            onFocus={handleFocus}
+            tabIndex={-1}
             style={{
-              display: 'block',
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-              top: '0',
-              left: '0',
+              backgroundColor: colorMap.resolverBackground,
+              alignSelf: 'flex-start',
+              padding: 0,
             }}
           >
-            <g>
-              <use
-                xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
-                fill={backingFill} // Only visible on hover
-                x={-15.35}
-                y={-15.35}
-                stroke={strokeColor}
-                width={markerSize * 1.5}
-                height={markerSize * 1.5}
-                className="backing"
-              />
-              <use
-                role="presentation"
-                xlinkHref={cubeSymbol}
-                x={markerPositionXOffset}
-                y={markerPositionYOffset}
-                width={markerSize}
-                height={markerSize}
-                opacity="1"
-                className="cube"
-              >
-                <animateTransform
-                  attributeType="XML"
-                  attributeName="transform"
-                  type="scale"
-                  values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
-                  dur="0.2s"
-                  repeatCount="1"
-                  className="squish"
-                  ref={animationTarget}
-                />
-              </use>
-            </g>
-          </svg>
-          <StyledActionsContainer
-            color={colorMap.full}
-            fontSize={scaledTypeSize}
-            topPct={actionableButtonsTopOffset}
-          >
-            <StyledDescriptionText
-              backgroundColor={colorMap.resolverBackground}
-              color={colorMap.descriptionText}
-              isDisplaying={isShowingDescriptionText}
-            >
-              {descriptionText}
-            </StyledDescriptionText>
-            <div
-              className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            <EuiButton
+              color={labelButtonFill}
               data-test-subject="nodeLabel"
+              fill={isLabelFilled}
               id={labelId}
-              onClick={handleClick}
-              onFocus={handleFocus}
+              size="s"
+              style={{
+                maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
+                maxWidth: `${isShowingEventActions ? 400 : 210 * magFactorX}px`,
+              }}
               tabIndex={-1}
-              style={{
-                backgroundColor: colorMap.resolverBackground,
-                alignSelf: 'flex-start',
-                padding: 0,
-              }}
+              title={eventModel.eventName(event)}
             >
-              <EuiButton
-                color={labelButtonFill}
-                data-test-subject="nodeLabel"
-                fill={isLabelFilled}
-                id={labelId}
-                size="s"
-                style={{
-                  maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
-                  maxWidth: `${isShowingEventActions ? 400 : 210 * magFactorX}px`,
-                }}
-                tabIndex={-1}
-                title={eventModel.eventName(event)}
-              >
-                <span className="euiButton__content">
-                  <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                    {eventModel.eventName(event)}
-                  </span>
+              <span className="euiButton__content">
+                <span className="euiButton__text" data-test-subj={'euiButton__text'}>
+                  {eventModel.eventName(event)}
                 </span>
-              </EuiButton>
-            </div>
-            <EuiFlexGroup
-              justifyContent="flexStart"
-              gutterSize="xs"
-              style={{
-                alignSelf: 'flex-start',
-                background: colorMap.resolverBackground,
-                display: `${isShowingEventActions ? 'flex' : 'none'}`,
-                margin: 0,
-                padding: 0,
-              }}
-            >
-              <EuiFlexItem grow={false} className="related-dropdown">
-                <NodeSubMenu
-                  count={grandTotal}
-                  buttonBorderColor={labelButtonFill}
-                  buttonFill={colorMap.resolverBackground}
-                  menuAction={handleRelatedEventRequest}
-                  menuTitle={subMenuAssets.relatedEvents.title}
-                  optionsWithActions={relatedEventStatusOrOptions}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <NodeSubMenu
-                  buttonBorderColor={labelButtonFill}
-                  buttonFill={colorMap.resolverBackground}
-                  menuTitle={subMenuAssets.relatedAlerts.title}
-                  menuAction={handleRelatedAlertsRequest}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </StyledActionsContainer>
-        </div>
-      </EuiKeyboardAccessible>
+              </span>
+            </EuiButton>
+          </div>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            gutterSize="xs"
+            style={{
+              alignSelf: 'flex-start',
+              background: colorMap.resolverBackground,
+              display: `${isShowingEventActions ? 'flex' : 'none'}`,
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            <EuiFlexItem grow={false} className="related-dropdown">
+              <NodeSubMenu
+                count={grandTotal}
+                buttonBorderColor={labelButtonFill}
+                buttonFill={colorMap.resolverBackground}
+                menuAction={handleRelatedEventRequest}
+                menuTitle={subMenuAssets.relatedEvents.title}
+                optionsWithActions={relatedEventStatusOrOptions}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <NodeSubMenu
+                buttonBorderColor={labelButtonFill}
+                buttonFill={colorMap.resolverBackground}
+                menuTitle={subMenuAssets.relatedAlerts.title}
+                menuAction={handleRelatedAlertsRequest}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </StyledActionsContainer>
+      </div>
     );
     /* eslint-enable jsx-a11y/click-events-have-key-events */
   }

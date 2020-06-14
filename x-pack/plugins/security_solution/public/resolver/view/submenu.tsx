@@ -105,10 +105,10 @@ const OptionList = React.memo(
               actionToTake();
             }
           }
-          setOptions(options);
+          setOptions(newOptions);
         },
       };
-    }, [actionsByLabel, options]);
+    }, [actionsByLabel]);
 
     return (
       <EuiSelectable

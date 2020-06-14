@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
@@ -54,7 +54,7 @@ const DisplayList = memo(function DisplayList({
       <>
         {matchingEventEntries.map((eventView, index) => {
           return (
-            <>
+            <Fragment key={index}>
               <EuiText>
                 <BoldCode>{eventView.eventType}</BoldCode>
                 {' @ '}
@@ -63,7 +63,7 @@ const DisplayList = memo(function DisplayList({
               <EuiSpacer size="xs" />
               <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
               {index === matchingEventEntries.length - 1 ? null : <EuiHorizontalRule margin="m" />}
-            </>
+            </Fragment>
           );
         })}
       </>
