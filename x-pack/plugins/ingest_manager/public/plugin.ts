@@ -84,7 +84,10 @@ export class IngestManagerPlugin
 
       return { success: successPromise, registerDatasource };
     } else {
-      throw new Error(permissionsResponse.error);
+      return {
+        success: Promise.reject(permissionsResponse.error),
+        registerDatasource,
+      };
     }
   }
 
