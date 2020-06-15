@@ -172,6 +172,12 @@ export const requiredFieldsForActions = [
   'signal.rule.query',
   'signal.rule.to',
   'signal.rule.id',
+
+  // Endpoint exception fields
+  'file.path',
+  'file.code_signature.signer',
+  'file.code_signature.trusted',
+  'file.hash.sha1',
 ];
 
 interface AlertActionArgs {
@@ -188,6 +194,7 @@ interface AlertActionArgs {
   status: Status;
   timelineId: string;
   updateTimelineIsLoading: UpdateTimelineLoading;
+  openAddExceptionModal: ({ ecsData }: TimelineRowActionOnClick) => void;
 }
 
 export const getAlertActions = ({
@@ -289,5 +296,32 @@ export const getAlertActions = ({
     ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
     ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
     ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
+    // TODO: intl
+    // TODO: disable this option if the alert is not an Endpoint alert
+    {
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
+        openAddExceptionModal({ modalType: 'endpoint', ecsData, data });
+      },
+      id: 'addEndpointException',
+      iconType: 'documentEdit',
+      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      dataTestSubj: 'add-endpoint-exception-menu-item',
+      ariaLabel: 'Add Endpoint Exception',
+      content: 'Add Endpoint Exception',
+      displayType: 'contextMenu',
+    },
+    // TODO: intl
+    {
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
+        openAddExceptionModal({ modalType: 'detection', ecsData, data });
+      },
+      id: 'addException',
+      iconType: 'documentEdit',
+      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      dataTestSubj: 'add-exception-menu-item',
+      ariaLabel: 'Add Exception',
+      content: 'Add Exception',
+      displayType: 'contextMenu',
+    },
   ];
 };

@@ -50,6 +50,7 @@ import {
 } from '../../../common/components/toasters';
 import { Ecs } from '../../../graphql/types';
 import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
+import { AddExceptionModal } from '../add_exception';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -63,6 +64,13 @@ interface OwnProps {
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
+
+// TODO: type
+const addExceptionModalInitialState = {
+  modalType: 'detection',
+  ecsData: null,
+  data: null,
+}
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
@@ -92,6 +100,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [shouldShowAddExceptionModal, setShouldShowAddExceptionModal] = useState(false);
+  const [addExceptionModalState, setAddExceptionModalState] = useState(addExceptionModalInitialState);
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : []
   );
@@ -190,6 +200,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       displayErrorToast(title, [error.message], dispatchToaster);
     },
     [dispatchToaster]
+  );
+
+  // TODO: type
+  const openAddExceptionModalCallback = useCallback(
+    ({ modalType, ecsData, data }: any) => {
+      setShouldShowAddExceptionModal(true);
+      setAddExceptionModalState({ modalType, ecsData, data });
+    },
+    [setShouldShowAddExceptionModal, setAddExceptionModalState]
   );
 
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
@@ -306,6 +325,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         status: filterGroup,
         timelineId,
         updateTimelineIsLoading,
+        openAddExceptionModal: openAddExceptionModalCallback,
       }),
     [
       apolloClient,
@@ -320,6 +340,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       updateTimelineIsLoading,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      openAddExceptionModalCallback,
     ]
   );
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
@@ -360,6 +381,19 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [onFilterGroupChangedCallback]
   );
 
+  const closeAddExceptionModal = useCallback(() => {
+    setShouldShowAddExceptionModal(false);
+    setAddExceptionModalState(addExceptionModalInitialState);
+  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
+
+  const onAddExceptionCancel = useCallback(() => {
+    closeAddExceptionModal();
+  }, [closeAddExceptionModal]);
+
+  const onAddExceptionConfirm = useCallback(() => {
+    closeAddExceptionModal();
+  }, [closeAddExceptionModal]);
+
   if (loading || isEmpty(signalsIndex)) {
     return (
       <EuiPanel>
@@ -370,16 +404,27 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }
 
   return (
-    <StatefulEventsViewer
-      defaultIndices={defaultIndices}
-      pageFilters={defaultFiltersMemo}
-      defaultModel={alertsDefaultModel}
-      end={to}
-      headerFilterGroup={headerFilterGroup}
-      id={timelineId}
-      start={from}
-      utilityBar={utilityBarCallback}
-    />
+    <>
+      <StatefulEventsViewer
+        defaultIndices={defaultIndices}
+        pageFilters={defaultFiltersMemo}
+        defaultModel={alertsDefaultModel}
+        end={to}
+        headerFilterGroup={headerFilterGroup}
+        id={timelineId}
+        start={from}
+        utilityBar={utilityBarCallback}
+      />
+      {shouldShowAddExceptionModal === true && (
+        <AddExceptionModal
+          modalType={addExceptionModalState.modalType}
+          eventData={addExceptionModalState.data}
+          eventEcsData={addExceptionModalState.ecsData}
+          onCancel={onAddExceptionCancel}
+          onConfirm={onAddExceptionConfirm}
+        />
+      )}
+    </>
   );
 };
 

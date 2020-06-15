@@ -107,6 +107,7 @@ export const EventColumnView = React.memo<Props>(
       <EuiButtonIcon
         aria-label="context menu"
         data-test-subj="timeline-context-menu-button"
+        aria-label="Additional actions"
         size="s"
         iconType="boxesHorizontal"
         onClick={onButtonClick}
@@ -164,7 +165,7 @@ export const EventColumnView = React.memo<Props>(
                 }
                 icon={action.iconType}
                 key={action.id}
-                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData }))}
+                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData, data }))}
               >
                 {action.content}
               </EuiContextMenuItem>,

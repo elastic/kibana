@@ -29,6 +29,7 @@ export type ReturnPersistExceptionItem = [
 export const usePersistExceptionItem = ({
   http,
   onError,
+  onSuccess = () => {},
 }: PersistHookProps): ReturnPersistExceptionItem => {
   const [exceptionListItem, setExceptionItem] = useState<AddExceptionListItem | null>(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -61,14 +62,14 @@ export const usePersistExceptionItem = ({
 
           if (isSubscribed) {
             setIsSaved(true);
+            setIsLoading(false);
+            onSuccess();
           }
         } catch (error) {
           if (isSubscribed) {
+            setIsLoading(false);
             onError(error);
           }
-        }
-        if (isSubscribed) {
-          setIsLoading(false);
         }
       }
     };
