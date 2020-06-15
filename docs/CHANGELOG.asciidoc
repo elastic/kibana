@@ -143,7 +143,6 @@ SIEM::
 * Adds an error aggregator by error reason and a way to filter them {pull}63513[#63513]
 * Adds large list support using REST endpoints {pull}62552[#62552]
 * Server cutover to New Platform {pull}63430[#63430]
-* Adds template timeline UI {pull}64439[#64439]
 * Updates list values in REST interfaces {pull}62320[#62320]
 * Updates KQL/Lucene search to include lists exceptions {pull}63264[#63264]
 * Updates rule.lists to be rule.exceptions_list {pull}63717[#63717]
