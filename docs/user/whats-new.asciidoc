@@ -154,6 +154,18 @@ configuration after initialization.
 [role="screenshot"]
 image::user/alerting/images/pre-configured-connectors-managing.png[Connectors managing tab with pre-cofigured]
 
+[float]
+[[embed-swim-lanes-7-8]]
+=== Embeddable machine learning swim lanes
+
+In 7.8, you can view anomalies alongside your source data in a {kib} dashboard
+with embedded swim lanes. From the *Add panel* menu, you can select the jobs of
+interest, decide whether to view an overall score or split by job or influencer,
+and choose the number of lanes to display.
+
+[role="screenshot"]
+image:images/whats-new/7-8-swim-lane.png[Embed swim lanes in dashboards]
+
 // end::notable-highlights[]
 
 [float]
