@@ -54,10 +54,13 @@ const PanelContent = memo(function PanelContent() {
   // The entity id in query params of a graphable process (or false if none is found)
   // For 1 case (the related detail, see below), the process id will be in crumbEvent instead of crumbId
   const idFromParams = useMemo(() => {
-    return (
-      (graphableProcessEntityIds.has(queryParams.crumbId) && queryParams.crumbId) ||
-      (graphableProcessEntityIds.has(queryParams.crumbEvent) && queryParams.crumbEvent)
-    );
+    if (graphableProcessEntityIds.has(queryParams.crumbId)) {
+      return queryParams.crumbId;
+    }
+    if (graphableProcessEntityIds.has(queryParams.crumbEvent)) {
+      return queryParams.crumbEvent;
+    }
+    return '';
   }, [queryParams, graphableProcessEntityIds]);
 
   // The "selected" node (and its corresponding event) in the tree control.
