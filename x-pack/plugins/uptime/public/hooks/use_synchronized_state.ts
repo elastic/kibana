@@ -13,6 +13,7 @@ import { setDateRange, setUiState } from '../state/actions';
 import { getSupportedUrlParams, UptimeUrlParams } from '../lib/helper';
 import { useUrlParams } from './use_url_params';
 import { UiState } from '../state/reducers/ui';
+import { OverviewFiltersState } from '../state/reducers/overview_filters';
 
 const resolveUrlUpdates = (
   params: UptimeUrlParams,
@@ -39,6 +40,14 @@ const resolveUrlUpdates = (
     urlState.search = storeState.searchText;
   }
 
+  if (params.statusFilter !== storeState.statusFilter) {
+    urlState.statusFilter = storeState.statusFilter;
+  }
+
+  if (params.pagination !== storeState.currentMonitorListPage) {
+    urlState.pagination = storeState.currentMonitorListPage;
+  }
+
   return urlState;
 };
 
@@ -61,6 +70,14 @@ const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Part
 
   if (params.search !== storeState.searchText) {
     uiState.searchText = params.search;
+  }
+
+  if (params.statusFilter !== storeState.statusFilter) {
+    uiState.statusFilter = params.statusFilter;
+  }
+
+  if (params.pagination !== storeState.currentMonitorListPage) {
+    uiState.currentMonitorListPage = params.pagination;
   }
 
   return uiState;

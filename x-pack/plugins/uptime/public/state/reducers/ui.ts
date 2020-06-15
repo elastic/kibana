@@ -18,6 +18,8 @@ import {
   setSearchTextAction,
   setDateRange,
   setUiState,
+  setStatusFilter,
+  setCurrentPagination,
 } from '../actions';
 
 const {
@@ -33,12 +35,14 @@ export interface UiState {
   autorefreshInterval: number;
   autorefreshIsPaused: boolean;
   basePath: string;
+  currentMonitorListPage?: string;
   dateRange: {
     from: string;
     to: string;
   };
   esKuery: string;
   searchText: string;
+  statusFilter: string;
   integrationsPopoverOpen: PopoverState | null;
 }
 
@@ -47,12 +51,14 @@ const initialState: UiState = {
   autorefreshInterval: AUTOREFRESH_INTERVAL,
   autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
   basePath: '',
+  currentMonitorListPage: '',
   dateRange: {
     from: DATE_RANGE_START,
     to: DATE_RANGE_END,
   },
   esKuery: '',
   searchText: '',
+  statusFilter: '',
   integrationsPopoverOpen: null,
 };
 
@@ -101,6 +107,16 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setUiState)]: (state, action: Action<Partial<UiState>>) => ({
       ...state,
       ...action.payload,
+    }),
+
+    [String(setStatusFilter)]: (state, action: Action<string>) => ({
+      ...state,
+      statusFilter: action.payload,
+    }),
+
+    [String(setCurrentPagination)]: (state, action: Action<string>) => ({
+      ...state,
+      currentMonitorListPage: action.payload,
     }),
   },
   initialState

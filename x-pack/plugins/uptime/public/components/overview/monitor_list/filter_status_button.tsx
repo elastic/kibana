@@ -5,8 +5,13 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
-import React from 'react';
-import { useUrlParams } from '../../../hooks';
+import React, { useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { uiSelector } from '../../../state/selectors';
+import {
+  setStatusFilter as setStatusFilterAction,
+  setCurrentPagination,
+} from '../../../state/actions';
 
 export interface FilterStatusButtonProps {
   content: string | JSX.Element;
@@ -18,30 +23,52 @@ export interface FilterStatusButtonProps {
   color?: string;
 }
 
-export const FilterStatusButton = ({
-  content,
-  dataTestSubj,
-  isDisabled,
-  isActive,
-  value,
-  color,
-  withNext,
-}: FilterStatusButtonProps) => {
-  const [getUrlParams, setUrlParams] = useUrlParams();
-  const { statusFilter: urlValue } = getUrlParams();
+export const FilterStatusButton: React.FC<FilterStatusButtonProps> = (props) => {
+  const dispatch = useDispatch();
+  const setStatusFilterAndPagination = useCallback(
+    (nextValue: string) => {
+      dispatch(setStatusFilterAction(nextValue));
+      dispatch(setCurrentPagination(''));
+    },
+    [dispatch]
+  );
+  const { statusFilter } = useSelector(uiSelector);
+
   return (
+    <FilterStatusButtonComponent
+      {...props}
+      setStatusFilterAndPagination={setStatusFilterAndPagination}
+      statusFilter={statusFilter}
+    />
+  );
+};
+
+type Props = FilterStatusButtonProps & {
+  statusFilter: string;
+  setStatusFilterAndPagination: (nextValue: string) => void;
+};
+
+export const FilterStatusButtonComponent: React.FC<Props> = React.memo(
+  ({
+    content,
+    dataTestSubj,
+    isDisabled,
+    isActive,
+    value,
+    color,
+    setStatusFilterAndPagination: setStatusFilter,
+    statusFilter: urlValue,
+    withNext,
+  }) => (
     <EuiFilterButton
       color={(isActive ? color : undefined) as any}
       data-test-subj={dataTestSubj}
       hasActiveFilters={isActive}
       isDisabled={isDisabled}
-      onClick={() => {
-        const nextFilter = { statusFilter: urlValue === value ? '' : value, pagination: '' };
-        setUrlParams(nextFilter);
-      }}
+      onClick={() => setStatusFilter(urlValue === value ? '' : value)}
       withNext={withNext}
     >
       {content}
     </EuiFilterButton>
-  );
-};
+  )
+);
