@@ -16,15 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import * as React from 'react';
 import { DiscoverGrid } from './discover_grid';
 
+interface Props<P> {
+  [key: string]: any;
+}
+
+/**
+ * TODO remove when development is finished, helper component to detect property changes
+ * @param WrappedComponent
+ */
+export function withPropsChecker<P>(
+  WrappedComponent: React.ComponentType<P>
+): React.ComponentClass<Props<P>> {
+  // eslint-disable-next-line react/prefer-stateless-function
+  return class PropsChecker extends React.Component<Props<P>> {
+    /**
+    componentWillReceiveProps(nextProps: Props<P>) {
+      Object.keys(nextProps)
+        .filter((key) => nextProps[key] !== this.props[key])
+        .map((key) => {
+          console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
+        });
+    }
+     **/
+
+    render() {
+      // @ts-ignore
+      return <DiscoverGrid {...this.props} />;
+    }
+  };
+}
+
 export function createDiscoverGridDirective(reactDirective: any) {
-  return reactDirective(DiscoverGrid, [
+  return reactDirective(withPropsChecker(DiscoverGrid), [
     ['columns', { watchDepth: 'collection' }],
     ['rows', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['sort', { watchDepth: 'collection' }],
+    ['sort', { watchDepth: 'value' }],
     ['sampleSize', { watchDepth: 'reference' }],
     ['searchDescription', { watchDepth: 'reference' }],
     ['searchTitle', { watchDepth: 'reference' }],
@@ -35,6 +65,6 @@ export function createDiscoverGridDirective(reactDirective: any) {
     ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
     ['onSetColumns', { watchDepth: 'reference', wrapApply: false }],
     ['getContextAppHref', { watchDepth: 'reference', wrapApply: false }],
-    ['onSort', { watchDepth: 'reference' }],
+    ['onSort', { watchDepth: 'reference', wrapApply: false }],
   ]);
 }

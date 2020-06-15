@@ -1016,6 +1016,7 @@ function discoverController(
   };
 
   $scope.setColumns = function setColumns(columns) {
+    $scope.state = { ...$scope.state, columns };
     setAppState({ columns });
   };
 
