@@ -27,6 +27,60 @@ import { euiStyled } from '../../../../../observability/public';
 export const SubscriptionSplashContent: React.FC = () => {
   const { services } = useKibana();
 
+  const canStartTrial = true; // FIXME
+
+  let title;
+  let description;
+  let cta;
+
+  if (canStartTrial) {
+    title = (
+      <FormattedMessage
+        id="xpack.infra.logs.logAnalysis.splash.startTrialTitle"
+        defaultMessage="Start a free 14 day Platinum Subscription trial"
+      />
+    );
+
+    description = (
+      <FormattedMessage
+        id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
+        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack Subscription."
+      />
+    );
+
+    cta = (
+      <EuiButton fullWidth={false} fill onClick={() => {}}>
+        <FormattedMessage
+          id="xpack.infra.logs.logAnalysis.splash.startTrialCta"
+          defaultMessage="Start free trial"
+        />
+      </EuiButton>
+    );
+  } else {
+    title = (
+      <FormattedMessage
+        id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionTitle"
+        defaultMessage="Update to a Platinum Subscription"
+      />
+    );
+
+    description = (
+      <FormattedMessage
+        id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionDescription"
+        defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack Subscription."
+      />
+    );
+
+    cta = (
+      <EuiButton fullWidth={false} fill onClick={() => {}}>
+        <FormattedMessage
+          id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionCta"
+          defaultMessage="Update subscription"
+        />
+      </EuiButton>
+    );
+  }
+
   return (
     <SubscriptionPage>
       <EuiPageBody>
@@ -34,29 +88,14 @@ export const SubscriptionSplashContent: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiTitle size="m">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.infra.logs.logAnalysis.splash.startTrialTitle"
-                    defaultMessage="Start a free 14 day Platinum Subscription trial"
-                  />
-                </h2>
+                <h2>{title}</h2>
               </EuiTitle>
               <EuiSpacer size="xl" />
               <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
-                    defaultMessage="Run Machine Learning jobs to view detected anomalies in your logs with our anomaly detection feature—part of the Platinum Elastic Stack Subscription."
-                  />
-                </p>
+                <p>{description}</p>
               </EuiText>
               <EuiSpacer />
-              <EuiButton fullWidth={false} fill onClick={() => {}}>
-                <FormattedMessage
-                  id="xpack.infra.logs.logAnalysis.splash.startTrialCta"
-                  defaultMessage="Start free trial"
-                />
-              </EuiButton>
+              {cta}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiImage
