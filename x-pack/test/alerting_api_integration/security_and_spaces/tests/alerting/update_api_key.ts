@@ -204,7 +204,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .send(
               getTestAlertData({
                 alertTypeId: 'test.restricted-noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
               })
             )
             .expect(200);

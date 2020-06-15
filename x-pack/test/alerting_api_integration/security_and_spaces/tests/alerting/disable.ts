@@ -205,7 +205,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             .send(
               getTestAlertData({
                 alertTypeId: 'test.noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
                 enabled: true,
               })
             )

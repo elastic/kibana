@@ -204,7 +204,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .send(
               getTestAlertData({
                 alertTypeId: 'test.noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
                 enabled: false,
               })
             )

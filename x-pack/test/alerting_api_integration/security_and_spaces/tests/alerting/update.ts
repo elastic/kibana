@@ -295,7 +295,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.restricted-noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
               })
             )
             .expect(200);
@@ -340,7 +340,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 alertTypeId: 'test.restricted-noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
                 createdBy: 'elastic',
                 enabled: true,
                 updatedBy: user.username,

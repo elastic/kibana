@@ -225,7 +225,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               getTestAlertData({
                 enabled: false,
                 alertTypeId: 'test.restricted-noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
               })
             )
             .expect(200);

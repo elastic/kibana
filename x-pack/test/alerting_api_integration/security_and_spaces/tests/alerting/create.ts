@@ -228,7 +228,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.noop',
-                consumer: 'alerts',
+                consumer: 'alerting',
               })
             );
 
