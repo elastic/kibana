@@ -10,9 +10,8 @@ import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
 import { getServiceCount } from '../lib/observability_dashboard/get_service_count';
 import { getTransactionDistribution } from '../lib/observability_dashboard/get_transaction_distribution';
-import { getErrorRate } from '../lib/observability_dashboard/get_error_rate';
 
-export const hasDataRoute = createRoute(() => ({
+export const hasApmDataRoute = createRoute(() => ({
   path: '/api/apm/observability-dashboard/hasData',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -20,19 +19,19 @@ export const hasDataRoute = createRoute(() => ({
   },
 }));
 
-export const fetchDataRoute = createRoute(() => ({
+export const fetchObservabilityDashboardDataRoute = createRoute(() => ({
   path: '/api/apm/observability-dashboard',
   params: {
     query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
+    const { bucketSize } = context.params.query;
     const serviceCount = await getServiceCount({ setup });
-    const transactionCoordinates = await getTransactionDistribution({ setup });
-    const errorCoordinates = await getErrorRate({
+    const transactionCoordinates = await getTransactionDistribution({
       setup,
-      transactionCoordinates,
+      bucketSize,
     });
-    return { serviceCount, transactionCoordinates, errorCoordinates };
+    return { serviceCount, transactionCoordinates };
   },
 }));

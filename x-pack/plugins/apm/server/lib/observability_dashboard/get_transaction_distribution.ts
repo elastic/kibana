@@ -12,13 +12,14 @@ import { Coordinates } from '../../../../observability/public/typings/data_handl
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { rangeFilter } from '../helpers/range_filter';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ProcessorEvent } from '../../../common/processor_event';
 
 export async function getTransactionDistribution({
   setup,
+  bucketSize,
 }: {
   setup: Setup & SetupTimeRange;
+  bucketSize: string;
 }): Promise<Coordinates[]> {
   const { client, indices, start, end } = setup;
 
@@ -36,7 +37,12 @@ export async function getTransactionDistribution({
       },
       aggs: {
         distribution: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: bucketSize,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
         },
       },
     },

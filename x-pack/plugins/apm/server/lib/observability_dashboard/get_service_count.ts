@@ -16,8 +16,11 @@ export async function getServiceCount({
   const { client, indices, start, end } = setup;
 
   const params = {
-    // TODO: should I use only the transaction index here?
-    index: [indices['apm_oss.transactionIndices']],
+    index: [
+      indices['apm_oss.transactionIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.metricsIndices'],
+    ],
     body: {
       size: 0,
       query: { bool: { filter: [{ range: rangeFilter(start, end) }] } },

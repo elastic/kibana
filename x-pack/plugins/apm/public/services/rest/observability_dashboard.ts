@@ -13,35 +13,34 @@ export const fetchData: FetchData = async ({
   endTime,
   bucketSize,
 }) => {
-  const {
-    serviceCount,
-    transactionCoordinates,
-    errorCoordinates,
-  } = await callApmApi({
+  const { serviceCount, transactionCoordinates } = await callApmApi({
     pathname: '/api/apm/observability-dashboard',
     params: { query: { start: startTime, end: endTime, bucketSize } },
   });
 
   return {
-    title: i18n.translate('apm.observabilityDashboard.title', {
+    title: i18n.translate('xpack.apm.observabilityDashboard.title', {
       defaultMessage: 'APM',
     }),
     appLink: '/app/apm',
-    stats: [{ label: 'Services', value: serviceCount }],
+    stats: [
+      {
+        label: i18n.translate(
+          'xpack.apm.observabilityDashboard.stats.services',
+          { defaultMessage: 'Services' }
+        ),
+        value: serviceCount,
+      },
+    ],
     series: [
       {
         key: 'transactions',
-        label: i18n.translate('apm.observabilityDashboard.chart.transactions', {
-          defaultMessage: 'Transactions',
-        }),
+        label: i18n.translate(
+          'xpack.apm.observabilityDashboard.chart.transactions',
+          { defaultMessage: 'Transactions' }
+        ),
+        color: 'euiColorVis1',
         coordinates: transactionCoordinates,
-      },
-      {
-        key: 'errors',
-        label: i18n.translate('apm.observabilityDashboard.chart.errors', {
-          defaultMessage: 'Errors',
-        }),
-        coordinates: errorCoordinates,
       },
     ],
   };
