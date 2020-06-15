@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { eventsIndexPattern } from '../../../common/endpoint/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import {
   AlertResultList,
   AlertDetails,
   AlertListState,
 } from '../../../common/endpoint_alerts/types';
-import { AlertConstants } from '../../../common/endpoint_alerts/alert_constants';
 import { ImmutableMiddlewareFactory } from '../../common/store';
 import { cloneHttpFetchQuery } from '../../common/utils/clone_http_fetch_query';
 import {
@@ -27,14 +27,11 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> 
 ) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
-    const eventsPattern: { indexPattern: string } = await coreStart.http.get(
-      `${AlertConstants.INDEX_PATTERN_ROUTE}/${AlertConstants.EVENT_DATASET}`
-    );
     const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: eventsPattern.indexPattern,
+      pattern: eventsIndexPattern,
     });
     const indexPattern: IIndexPattern = {
-      title: eventsPattern.indexPattern,
+      title: eventsIndexPattern,
       fields,
     };
 
