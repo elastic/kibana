@@ -1810,6 +1810,7 @@ describe('get()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -2164,6 +2165,7 @@ describe('find()', () => {
             params: {
               bar: true,
             },
+            createdAt: new Date().toISOString(),
             actions: [
               {
                 group: 'default',
@@ -2236,6 +2238,7 @@ describe('find()', () => {
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "fields": undefined,
           "type": "alert",
         },
       ]
@@ -2266,6 +2269,58 @@ describe('find()', () => {
       await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"not authorized"`
       );
+    });
+
+    test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
+      const ensureAlertTypeIsAuthorized = jest.fn();
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter: '',
+        ensureAlertTypeIsAuthorized,
+      });
+
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              alertTypeId: 'myType',
+              consumer: 'myApp',
+              tags: ['myTag'],
+            },
+            references: [],
+          },
+        ],
+      });
+
+      const alertsClient = new AlertsClient(alertsClientParams);
+      expect(await alertsClient.find({ options: { fields: ['tags'] } })).toMatchInlineSnapshot(`
+        Object {
+          "data": Array [
+            Object {
+              "actions": Array [],
+              "id": "1",
+              "schedule": undefined,
+              "tags": Array [
+                "myTag",
+              ],
+            },
+          ],
+          "page": 1,
+          "perPage": 10,
+          "total": 1,
+        }
+      `);
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+        fields: ['tags', 'alertTypeId', 'consumer'],
+        type: 'alert',
+      });
+      expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
     });
   });
 });

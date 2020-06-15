@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, pluck } from 'lodash';
+import { omit, isEqual, pluck, unique, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -93,7 +93,7 @@ export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: SanitizedAlert[];
+  data: Array<Partial<SanitizedAlert>>;
 }
 
 export interface CreateOptions {
@@ -250,7 +250,9 @@ export class AlertsClient {
     }
   }
 
-  public async find({ options = {} }: { options?: FindOptions } = {}): Promise<FindResult> {
+  public async find({
+    options: { fields, ...options } = {},
+  }: { options?: FindOptions } = {}): Promise<FindResult> {
     const {
       filter: authorizationFilter,
       ensureAlertTypeIsAuthorized,
@@ -269,18 +271,25 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
+      fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
 
-    return {
+    const x = {
       page,
       perPage,
       total,
       data: data.map(({ id, attributes, updated_at, references }) => {
         ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
-        return this.getAlertFromRaw(id, attributes, updated_at, references);
+        return this.getPartialAlertFromRaw(
+          id,
+          fields ? pick(attributes, ...fields) : attributes,
+          updated_at,
+          references
+        );
       }),
     };
+    return x;
   }
 
   public async delete({ id }: { id: string }) {
@@ -728,8 +737,8 @@ export class AlertsClient {
 
   private getPartialAlertFromRaw(
     id: string,
-    rawAlert: Partial<RawAlert>,
-    updatedAt: SavedObject['updated_at'],
+    { createdAt, ...rawAlert }: Partial<RawAlert>,
+    updatedAt: SavedObject['updated_at'] = createdAt,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
     return {
@@ -738,11 +747,11 @@ export class AlertsClient {
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
-      updatedAt: updatedAt ? new Date(updatedAt) : new Date(rawAlert.createdAt!),
-      createdAt: new Date(rawAlert.createdAt!),
       actions: rawAlert.actions
         ? this.injectReferencesIntoActions(rawAlert.actions, references || [])
         : [],
+      ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
+      ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
     };
   }
 
@@ -798,5 +807,9 @@ export class AlertsClient {
       actions,
       references,
     };
+  }
+
+  private includeFieldsRequiredForAuthentication(fields: string[]): string[] {
+    return unique([...fields, 'alertTypeId', 'consumer']);
   }
 }
