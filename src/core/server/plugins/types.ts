@@ -155,8 +155,10 @@ export interface PluginManifest {
   readonly server: boolean;
 
   /**
-   * Specifies directory names that can be imported by other plugins sharing
-   * the same instance of the @kbn/optimizer.
+   * Specifies directory names that can be imported by other ui-plugins built
+   * using the same instance of the @kbn/optimizer. A temporary measure we plan
+   * to replace with better mechanisms for sharing static code between plugins
+   * @deprecated
    */
   readonly extraPublicDirs?: string[];
 }
