@@ -29,11 +29,7 @@ export const METRICS_FEATURE = {
         read: ['index-pattern'],
       },
       alerting: {
-        all: [
-          METRIC_THRESHOLD_ALERT_TYPE_ID,
-          METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-          LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-        ],
+        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
       ui: [
         'show',
@@ -56,11 +52,7 @@ export const METRICS_FEATURE = {
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
-        all: [
-          METRIC_THRESHOLD_ALERT_TYPE_ID,
-          METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-          LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-        ],
+        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
       ui: [
         'show',
@@ -94,12 +86,18 @@ export const LOGS_FEATURE = {
         all: ['infrastructure-ui-source'],
         read: [],
       },
+      alerting: {
+        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
       app: ['infra', 'kibana'],
       catalogue: ['infralogging'],
       api: ['infra'],
+      alerting: {
+        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
       savedObject: {
         all: [],
         read: ['infrastructure-ui-source'],
