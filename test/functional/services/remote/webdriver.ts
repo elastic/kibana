@@ -125,6 +125,7 @@ async function attemptToCreateCommand(
         });
         chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
+        chromeCapabilities.set('acceptInsecureCerts', true);
 
         const session = await new Builder()
           .forBrowser(browserType)
