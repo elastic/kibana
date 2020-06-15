@@ -61,14 +61,20 @@ const Mac: HostOS[] = [];
 
 const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
-const POLICIES: Array<{ name: string; id: string }> = [
+const APPLIED_POLICIES: Array<{
+  name: string;
+  id: string;
+  status: HostPolicyResponseActionStatus;
+}> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
+    status: HostPolicyResponseActionStatus.success,
   },
   {
     name: 'With Eventing',
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+    status: HostPolicyResponseActionStatus.success,
   },
 ];
 
@@ -177,11 +183,16 @@ interface HostInfo {
   agent: {
     version: string;
     id: string;
+    type: string;
   };
   host: Host;
   endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
 }
@@ -212,6 +223,7 @@ export interface TreeNode {
   id: string;
   lifecycle: Event[];
   relatedEvents: Event[];
+  relatedAlerts: Event[];
 }
 
 /**
@@ -227,7 +239,6 @@ export interface Tree {
    */
   ancestry: Map<string, TreeNode>;
   origin: TreeNode;
-  alertEvent: Event;
   /**
    * All events from children, ancestry, origin, and the alert in a single array
    */
@@ -241,7 +252,8 @@ export interface TreeOptions {
   ancestors?: number;
   generations?: number;
   children?: number;
-  relatedEvents?: RelatedEventInfo[];
+  relatedEvents?: RelatedEventInfo[] | number;
+  relatedAlerts?: number;
   percentWithRelated?: number;
   percentTerminated?: number;
   alwaysGenMaxChildrenPerNode?: boolean;
@@ -271,7 +283,12 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.endpoint.policy.id = this.randomChoice(POLICIES).id;
+    this.commonInfo.endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
+    this.commonInfo.endpoint.policy.applied.status = this.randomChoice([
+      HostPolicyResponseActionStatus.success,
+      HostPolicyResponseActionStatus.failure,
+      HostPolicyResponseActionStatus.warning,
+    ]);
   }
 
   private createHostData(): HostInfo {
@@ -279,6 +296,7 @@ export class EndpointDocGenerator {
       agent: {
         version: this.randomVersion(),
         id: this.seededUUIDv4(),
+        type: 'endpoint',
       },
       elastic: {
         agent: {
@@ -293,7 +311,9 @@ export class EndpointDocGenerator {
         os: this.randomChoice(OS),
       },
       endpoint: {
-        policy: this.randomChoice(POLICIES),
+        policy: {
+          applied: this.randomChoice(APPLIED_POLICIES),
+        },
       },
     };
   }
@@ -326,6 +346,9 @@ export class EndpointDocGenerator {
     return {
       ...this.commonInfo,
       '@timestamp': ts,
+      ecs: {
+        version: '1.4.0',
+      },
       event: {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
@@ -465,30 +488,33 @@ export class EndpointDocGenerator {
       // and add the event to the right array.
       let node = nodeMap.get(nodeId);
       if (!node) {
-        node = { id: nodeId, lifecycle: [], relatedEvents: [] };
+        node = { id: nodeId, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
       }
 
       // place the event in the right array depending on its category
-      if (event.event.category === 'process') {
-        node.lifecycle.push(event);
-      } else {
-        node.relatedEvents.push(event);
+      if (event.event.kind === 'event') {
+        if (event.event.category === 'process') {
+          node.lifecycle.push(event);
+        } else {
+          node.relatedEvents.push(event);
+        }
+      } else if (event.event.kind === 'alert') {
+        node.relatedAlerts.push(event);
       }
+
       return nodeMap.set(nodeId, node);
     };
 
     const ancestry = this.createAlertEventAncestry(
       options.ancestors,
       options.relatedEvents,
+      options.relatedAlerts,
       options.percentWithRelated,
       options.percentTerminated
     );
 
-    // create a mapping of entity_id -> lifecycle and related events
-    // slice gets everything but the last item which is an alert
-    const ancestryNodes: Map<string, TreeNode> = ancestry
-      .slice(0, -1)
-      .reduce(addEventToMap, new Map());
+    // create a mapping of entity_id -> {lifecycle, related events, and related alerts}
+    const ancestryNodes: Map<string, TreeNode> = ancestry.reduce(addEventToMap, new Map());
 
     const alert = ancestry[ancestry.length - 1];
     const origin = ancestryNodes.get(alert.process.entity_id);
@@ -505,6 +531,7 @@ export class EndpointDocGenerator {
         options.generations,
         options.children,
         options.relatedEvents,
+        options.relatedAlerts,
         options.percentWithRelated,
         options.percentTerminated,
         options.alwaysGenMaxChildrenPerNode
@@ -516,7 +543,6 @@ export class EndpointDocGenerator {
     return {
       children: childrenNodes,
       ancestry: ancestryNodes,
-      alertEvent: alert,
       allEvents: [...ancestry, ...children],
       origin,
     };
@@ -530,6 +556,7 @@ export class EndpointDocGenerator {
    * @param childGenerations - number of child generations to create relative to the alert
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
    * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param relatedAlertsPerNode - number of alerts to generate for each node, if this is 0 an alert will still be generated for the origin node
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
@@ -540,6 +567,7 @@ export class EndpointDocGenerator {
     childGenerations?: number,
     maxChildrenPerNode?: number,
     relatedEventsPerNode?: number,
+    relatedAlertsPerNode?: number,
     percentNodesWithRelated?: number,
     percentTerminated?: number,
     alwaysGenMaxChildrenPerNode?: boolean
@@ -550,6 +578,7 @@ export class EndpointDocGenerator {
         childGenerations,
         maxChildrenPerNode,
         relatedEventsPerNode,
+        relatedAlertsPerNode,
         percentNodesWithRelated,
         percentTerminated,
         alwaysGenMaxChildrenPerNode
@@ -566,6 +595,7 @@ export class EndpointDocGenerator {
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
    * @param relatedEventsPerNode - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
    *  or a number which defines the number of related events and will default to random categories
+   * @param relatedAlertsPerNode - number of alerts to generate for each node, if this is 0 an alert will still be generated for the origin node
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
@@ -575,6 +605,7 @@ export class EndpointDocGenerator {
     childGenerations?: number,
     maxChildrenPerNode?: number,
     relatedEventsPerNode?: RelatedEventInfo[] | number,
+    relatedAlertsPerNode?: number,
     percentNodesWithRelated?: number,
     percentTerminated?: number,
     alwaysGenMaxChildrenPerNode?: boolean
@@ -594,6 +625,7 @@ export class EndpointDocGenerator {
       childGenerations,
       maxChildrenPerNode,
       relatedEventsPerNode,
+      relatedAlertsPerNode,
       percentNodesWithRelated,
       percentTerminated,
       alwaysGenMaxChildrenPerNode
@@ -605,12 +637,14 @@ export class EndpointDocGenerator {
    * @param alertAncestors - number of ancestor generations to create
    * @param relatedEventsPerNode - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
    *  or a number which defines the number of related events and will default to random categories
-   * @param pctWithRelated - percent of ancestors that will have related events
+   * @param relatedAlertsPerNode - number of alerts to generate for each node, if this is 0 an alert will still be generated for the origin node
+   * @param pctWithRelated - percent of ancestors that will have related events and alerts
    * @param pctWithTerminated - percent of ancestors that will have termination events
    */
   public createAlertEventAncestry(
     alertAncestors = 3,
     relatedEventsPerNode: RelatedEventInfo[] | number = 5,
+    relatedAlertsPerNode: number = 3,
     pctWithRelated = 30,
     pctWithTerminated = 100
   ): Event[] {
@@ -621,16 +655,32 @@ export class EndpointDocGenerator {
     let ancestor = root;
     let timestamp = root['@timestamp'] + 1000;
 
-    // generate related alerts for root
+    const addRelatedAlerts = (
+      node: Event,
+      alertsPerNode: number,
+      secBeforeAlert: number,
+      eventList: Event[]
+    ) => {
+      for (const relatedAlert of this.relatedAlertsGenerator(node, alertsPerNode, secBeforeAlert)) {
+        eventList.push(relatedAlert);
+      }
+    };
+
+    const addRelatedEvents = (node: Event, secBeforeEvent: number, eventList: Event[]) => {
+      for (const relatedEvent of this.relatedEventsGenerator(
+        node,
+        relatedEventsPerNode,
+        secBeforeEvent
+      )) {
+        eventList.push(relatedEvent);
+      }
+    };
+
+    // generate related alerts for rootW
     const processDuration: number = 6 * 3600;
     if (this.randomN(100) < pctWithRelated) {
-      for (const relatedEvent of this.relatedEventsGenerator(
-        ancestor,
-        relatedEventsPerNode,
-        processDuration
-      )) {
-        events.push(relatedEvent);
-      }
+      addRelatedEvents(ancestor, processDuration, events);
+      addRelatedAlerts(ancestor, relatedAlertsPerNode, processDuration, events);
     }
 
     // generate the termination event for the root
@@ -670,13 +720,15 @@ export class EndpointDocGenerator {
 
       // generate related alerts for ancestor
       if (this.randomN(100) < pctWithRelated) {
-        for (const relatedEvent of this.relatedEventsGenerator(
-          ancestor,
-          relatedEventsPerNode,
-          processDuration
-        )) {
-          events.push(relatedEvent);
+        addRelatedEvents(ancestor, processDuration, events);
+        let numAlertsPerNode = relatedAlertsPerNode;
+        // if this is the last ancestor, create one less related alert so that we have a uniform amount of related alerts
+        // for each node. The last alert at the end of this function should always be created even if the related alerts
+        // amount is 0
+        if (i === alertAncestors - 1) {
+          numAlertsPerNode -= 1;
         }
+        addRelatedAlerts(ancestor, numAlertsPerNode, processDuration, events);
       }
     }
     events.push(
@@ -701,6 +753,7 @@ export class EndpointDocGenerator {
     generations = 2,
     maxChildrenPerNode = 2,
     relatedEventsPerNode: RelatedEventInfo[] | number = 3,
+    relatedAlertsPerNode: number = 3,
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100,
     alwaysGenMaxChildrenPerNode = false
@@ -759,6 +812,7 @@ export class EndpointDocGenerator {
       }
       if (this.randomN(100) < percentNodesWithRelated) {
         yield* this.relatedEventsGenerator(child, relatedEventsPerNode, processDuration);
+        yield* this.relatedAlertsGenerator(child, relatedAlertsPerNode, processDuration);
       }
     }
   }
@@ -800,6 +854,23 @@ export class EndpointDocGenerator {
           eventType: eventInfo.creationType,
         });
       }
+    }
+  }
+
+  /**
+   * Creates related alerts for a process event
+   * @param node - process event to relate alerts to by entityID
+   * @param relatedAlerts - number which defines the number of related alerts to create
+   * @param alertCreationTime - maximum number of seconds after process event that related alert timestamp can be
+   */
+  public *relatedAlertsGenerator(
+    node: Event,
+    relatedAlerts: number = 3,
+    alertCreationTime: number = 6 * 3600
+  ) {
+    for (let i = 0; i < relatedAlerts; i++) {
+      const ts = node['@timestamp'] + this.randomN(alertCreationTime) * 1000;
+      yield this.generateAlert(ts, node.process.entity_id, node.process.parent?.entity_id);
     }
   }
 
@@ -974,7 +1045,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
             ],
-            id: this.commonInfo.endpoint.policy.id,
+            id: this.commonInfo.endpoint.policy.applied.id,
             response: {
               configurations: {
                 events: {
@@ -1015,8 +1086,9 @@ export class EndpointDocGenerator {
                 ],
               },
             },
-            status: this.randomHostPolicyResponseActionStatus(),
+            status: this.commonInfo.endpoint.policy.applied.status,
             version: policyVersion,
+            name: this.commonInfo.endpoint.policy.applied.name,
           },
         },
       },
