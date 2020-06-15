@@ -19,7 +19,7 @@
 
 import { IUiSettingsClient } from 'kibana/public';
 import { defaultSearchStrategy } from './default_search_strategy';
-import { searchStartMock } from '../mocks';
+import { searchServiceMock } from '../mocks';
 import { SearchStrategySearchParams } from './types';
 import { UI_SETTINGS } from '../../../common';
 
@@ -51,7 +51,7 @@ describe('defaultSearchStrategy', function () {
       searchMockResponse.abort.mockClear();
       searchMock.mockClear();
 
-      const searchService = searchStartMock;
+      const searchService = searchServiceMock.createStartContract();
       searchService.aggs.calculateAutoTimeExpression = jest.fn().mockReturnValue('1d');
       searchService.__LEGACY.esClient.search = searchMock;
       searchService.__LEGACY.esClient.msearch = msearchMock;
