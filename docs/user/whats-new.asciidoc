@@ -4,15 +4,17 @@
 <titleabbrev>What's new in {minor-version}</titleabbrev>
 ++++
 
-
-coming[7.8.0]
-
-Each release of Kibana brings new features and product improvements.
-Here are the highlights of the feature and user experience changes in 7.8.
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release, check out the
+and https://www.elastic.co/blog/kibana-7-8-0-released[release blog], {kibana-ref}/release notes.html[release notes],
+and {kibana-ref}/breaking-changes.html[breaking-changes].
 
 Other versions: {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
 {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
 | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+
+coming[7.8.0]
+
 
 
 //NOTE: The notable-highlights tagged regions are re-used in the
@@ -25,15 +27,15 @@ Other versions: {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kiban
 === Side navigation organized by use cases
 
 {kib} has a cleaner, more organized navigation for guiding you
-through the apps and completing your tasks.  The new sidebar groups
+through the apps.  The new sidebar groups
 solutions by category. For example, the *Observability* category
 includes Logs, Metrics, APM, and Uptime. The sidebar also includes
 *Recently viewed* to easily
 access previous projects.
 
 Hidden by default, the sidebar is accessible
-with a single click on the hamburger menu.  The *Dock Navigation* button
-at the bottom of the sidebar will keep things in plain sight, if that is what you prefer.
+with a single click on the hamburger menu.  Use the *Dock Navigation* link
+at the bottom of the sidebar to keep the navigation visible.
 
 [role="screenshot"]
 image:images/whats-new/7-8-navigation.png[Kibana side navigation organized by category]
@@ -44,26 +46,14 @@ image:images/whats-new/7-8-navigation.png[Kibana side navigation organized by ca
 
 In 7.7, {kibana-ref}/dashboard-create-new-dashboard.html[dashboards] became a starting point for
 creating visualizations.
-Building on that experience, the 7.8 release introduces a simplified workflow
+Building on that experience, this release introduces a simplified workflow
 for editing a dashboard.
 You can now open the visualization editor directly from the dashboard, and then
 automatically return to the dashboard when you save the changes.
-This keeps you focused on analyzing the data.
+This workflow keeps you focused on analyzing the data.
 
 [role="screenshot"]
 image:images/whats-new/7-8-dashboard-first.png[Edit visualization from dashboard]
-
-[float]
-[[dashboard-clone-7-8]]
-=== Cloning of dashboard elements
-{kib} now lets you {kibana-ref}/dashboard-create-new-dashboard.html#cloning-a-panel[create an identical copy] of
-any panel on the dashboard.
-You can modify the visualization in the new panel as needed, and then save your changes.
-This enables you to quickly view your data from a
-new angle.
-
-[role="screenshot"]
-image:images/clone_panel.gif[clone panel]
 
 [float]
 [[dashboard-to-dashboard-7-8]]
@@ -73,12 +63,24 @@ With 7.8, {kib} delivers {kibana-ref}/drilldowns.html[drilldowns], which enable 
 custom navigation paths between dashboards. Drilldowns
 work well when you have multiple dashboards that support different audiences
 or provide different levels of analysis. For example, you might
-have a dashboard that shows the overall status of multiple data centers
-and create a drilldown that navigates to a dashboard for a single data center or server.
+have a dashboard that shows the overall status of multiple data centers,
+and then create a drilldown that navigates to a dashboard for a single data center.
 Drilldown paths are available to all users who view the dashboard.
 
 [role="screenshot"]
 image::drilldowns/images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+
+[float]
+[[dashboard-clone-7-8]]
+=== Cloning of dashboard elements
+{kib} now lets you {kibana-ref}/dashboard-create-new-dashboard.html#cloning-a-panel[create an identical copy] of
+any panel on the dashboard.
+You can modify the visualization in the new panel as needed, and then save your changes.
+Cloning enables you to quickly view your data from a
+new perspective.
+
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
 
 
 [float]
@@ -87,8 +89,7 @@ image::drilldowns/images/drilldown_on_piechart.gif[Drilldown on pie chart that n
 
 {kibana-ref}/lens.html[Lens] introduces three new visualization types: pie chart, donut chart, and treemap.  New
 to {kib}, a treemap provides a hierarchical view of your data.
-This visualization type works well
-for showing part-to-whole relationships.
+Treemaps are good for visualizing part-to-whole relationships.
 
 [role="screenshot"]
 image:images/whats-new/7-8-treemap.png[Treemap visualization]
@@ -110,14 +111,12 @@ image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
 [[maps-7-8]]
 === Dedicated solution layer for Maps
 
-Elastic Maps has a new feature that supports Observability
-practitioners who work with real user monitoring (RUM) data.
-If the {ecs-ref}/ecs-reference.html[Elastic Common Schema] includes APM indices,
-you are presented with an
-option to create an Observability layer.
-You can select
-APM RUM Performance or APM RUM Traffic, and Elastic Maps
-overlays it on your geoanalysis.
+Maps has a new Observability layer that supports real user monitoring (RUM) data.
+You're presented with the Observability option if you have APM indices
+in the {ecs-ref}/ecs-reference.html[Elastic Common Schema].
+You can then select either
+APM RUM Performance or APM RUM Traffic, and Maps
+overlays that layer on your geoanalysis.
 
 [role="screenshot"]
 image:images/whats-new/7-8-maps.png[Observability layer for Maps]
@@ -125,12 +124,12 @@ image:images/whats-new/7-8-maps.png[Observability layer for Maps]
 
 [float]
 [[ingest-node-pipeline-7-8]]
-=== Ingest Node pipeline builder
+=== Ingest Node Pipelines builder
 
 Ingesting data into the Elastic Stack
-is easier with the new {kibana-ref}/ingest-node-pipelines.html[Ingest Node Pipeline builder].
+is easier with the new {kibana-ref}/ingest-node-pipelines.html[Ingest Node Pipelines builder].
 This UI shows all your
-data piplelines in a single view and enables you to drill down into detais.
+data piplelines in a single view and enables you to drill down into details.
 You can create a pipeline and define the tasks it performs, such
 as renaming an existing field or setting a new field.
 You can also test how a pipeline and its processors
@@ -143,13 +142,14 @@ image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processo
 [[alerting-7-8]]
 === Preconfigured connectors for alerting
 
-The 7.7 release introduced a new system fo handing alerting.  This release adds support for
-{kibana-ref}/pre-configured-action-types-and-connectors.html[preconfiguring a connector]
-to automatically start up with {kib}.
+In 7.7, {kib} introduced a new system for handing alerts, and this release adds support for
+{kibana-ref}/pre-configured-action-types-and-connectors.html[preconfigured connectors], which
+automatically start up with {kib}.
+This capability enables you to pre-plumb alert connections
+directly into Slack channels and designated email services.
 Preconfigured connectors are available in every {kib} space, and require no additional
 configuration after initialization.
-This capability allows you to pre-plumb alert connections
-directly into Slack channels or designated email services.
+
 
 [role="screenshot"]
 image::user/alerting/images/pre-configured-connectors-managing.png[Connectors managing tab with pre-cofigured]
@@ -159,7 +159,7 @@ image::user/alerting/images/pre-configured-connectors-managing.png[Connectors ma
 === Increased limit for file upload
 
 The upload limit for the File Data Visualizer increased from 100 MB to 1 GB,
-so you can ingest even larger CSV, JSON, and log files.
+so you can now upload larger CSV, JSON, and log files.
 To configure this value, go to
 {kibana-ref}/advanced-options.html[Advanced Settings].
 
@@ -168,13 +168,6 @@ image::images/add-data-fv.png[File Data Visualizer]
 
 
 // end::notable-highlights[]
-
-[float]
-=== Learn more
-Get details on these release highlights and more in the Kibana {minor-version} release blog.
-For a complete list of enhancements and other changes in {minor-version}, check out the <<release-notes>> and
-<<breaking-changes>>.
-
 
 [float]
 === Give {minor-version} a try
