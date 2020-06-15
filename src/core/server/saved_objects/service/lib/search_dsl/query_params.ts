@@ -53,7 +53,13 @@ function getFieldsForTypes(
     };
   }
 
-  let fields: string[] = rawSearchFields;
+  let fields = [...rawSearchFields];
+  fields.forEach((field) => {
+    if (field.indexOf('.') !== -1) {
+      throw new Error(`rawSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+  });
+
   for (const field of searchFields) {
     fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }

@@ -461,6 +461,17 @@ describe('#getImportIdMapForRetries', () => {
     return { type, id, overwrite: true, idToOverwrite, replaceReferences: [] };
   };
 
+  test('throws an error if retry is not found for an object', async () => {
+    const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
+    const obj2 = createObject(MULTI_NS_TYPE, 'id-2');
+    const retries = [createOverwriteRetry(obj1)];
+    const options = setupOptions(retries);
+
+    expect(() =>
+      getImportIdMapForRetries([obj1, obj2], options)
+    ).toThrowErrorMatchingInlineSnapshot(`"Retry was expected for \\"multi:id-2\\" but not found"`);
+  });
+
   test('returns expected results', async () => {
     const obj1 = createObject(OTHER_TYPE, 'id-1');
     const obj2 = createObject(OTHER_TYPE, 'id-2');

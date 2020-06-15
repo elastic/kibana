@@ -70,7 +70,9 @@ describe('#validateRetries', () => {
         validateRetries([]);
       } catch ({ isBoom, message }) {
         expect(isBoom).toBe(true);
-        expect(message).toMatchInlineSnapshot(`"Non-unique retry objects: [type1:id1,type2:id2]"`);
+        expect(message).toMatchInlineSnapshot(
+          `"Non-unique retry objects: [type1:id1,type2:id2]: Bad Request"`
+        );
       }
     });
 
@@ -83,7 +85,7 @@ describe('#validateRetries', () => {
       } catch ({ isBoom, message }) {
         expect(isBoom).toBe(true);
         expect(message).toMatchInlineSnapshot(
-          `"Non-unique retry overwrites: [type1:id1,type2:id2]"`
+          `"Non-unique retry overwrites: [type1:id1,type2:id2]: Bad Request"`
         );
       }
     });

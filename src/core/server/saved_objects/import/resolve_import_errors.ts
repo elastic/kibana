@@ -96,7 +96,7 @@ export async function resolveSavedObjectsImportErrors({
   errorAccumulator = [...errorAccumulator, ...referenceErrors];
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const importIdMap = await getImportIdMapForRetries(filteredObjects, { typeRegistry, retries });
+  const importIdMap = getImportIdMapForRetries(filteredObjects, { typeRegistry, retries });
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: Array<{ type: string; id: string; newId?: string }> = [];

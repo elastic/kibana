@@ -1198,6 +1198,8 @@ export class SavedObjectsRepository {
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
         const response = bulkUpdateResponse.items[esRequestIndex];
+        // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
+        // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
         const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
           response
         )[0] as any;

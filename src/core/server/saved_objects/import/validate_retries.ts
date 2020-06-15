@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import Boom from 'boom';
 import { SavedObjectsImportRetry } from './types';
 import { getNonUniqueEntries } from './utilities';
+import { SavedObjectsErrorHelpers } from '..';
 
 export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
   const nonUniqueRetryObjects = getNonUniqueEntries(retries);
   if (nonUniqueRetryObjects.length > 0) {
-    throw Boom.badRequest(`Non-unique retry objects: [${nonUniqueRetryObjects.join()}]`);
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Non-unique retry objects: [${nonUniqueRetryObjects.join()}]`
+    );
   }
 
   const overwriteEntries = retries
@@ -32,6 +34,8 @@ export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
     .map(({ type, idToOverwrite }) => ({ type, id: idToOverwrite! }));
   const nonUniqueRetryOverwrites = getNonUniqueEntries(overwriteEntries);
   if (nonUniqueRetryOverwrites.length > 0) {
-    throw Boom.badRequest(`Non-unique retry overwrites: [${nonUniqueRetryOverwrites.join()}]`);
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Non-unique retry overwrites: [${nonUniqueRetryOverwrites.join()}]`
+    );
   }
 };

@@ -58,7 +58,7 @@ describe('#importSavedObjectsFromStream', () => {
     getMockFn(createObjectsFilter).mockReturnValue(() => false);
     getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects: [] });
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
-    getMockFn(getImportIdMapForRetries).mockResolvedValue(new Map());
+    getMockFn(getImportIdMapForRetries).mockReturnValue(new Map());
     getMockFn(splitOverwrites).mockReturnValue({
       objectsToOverwrite: [],
       objectsToNotOverwrite: [],
@@ -197,7 +197,7 @@ describe('#importSavedObjectsFromStream', () => {
     test('creates saved objects', async () => {
       const options = setupOptions();
       const importIdMap = new Map();
-      getMockFn(getImportIdMapForRetries).mockResolvedValue(importIdMap);
+      getMockFn(getImportIdMapForRetries).mockReturnValue(importIdMap);
       const objectsToOverwrite = [createObject()];
       const objectsToNotOverwrite = [createObject()];
       getMockFn(splitOverwrites).mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });

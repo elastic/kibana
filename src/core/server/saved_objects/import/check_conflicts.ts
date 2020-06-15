@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -38,25 +36,36 @@ interface GetImportIdMapForRetriesOptions {
   retries: SavedObjectsImportRetry[];
 }
 
-type InexactMatch<T> = {
+interface InexactMatch<T> {
   object: SavedObject<T>;
   destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
-};
-type Left<T> = { tag: 'left'; value: InexactMatch<T> };
-type Right<T> = { tag: 'right'; value: SavedObject<T> };
+}
+interface Left<T> {
+  tag: 'left';
+  value: InexactMatch<T>;
+}
+interface Right<T> {
+  tag: 'right';
+  value: SavedObject<T>;
+}
 type Either<T> = Left<T> | Right<T>;
 const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left';
 
 const createQueryTerm = (input: string) => input.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
 const createQuery = (type: string, id: string, rawIdPrefix: string) =>
   `"${createQueryTerm(`${rawIdPrefix}${type}:${id}`)}" | "${createQueryTerm(id)}"`;
-const getAmbiguousConflicts = (objects: Array<SavedObject<{ title?: string }>>) =>
+const transformObjectsToAmbiguousConflictFields = (
+  objects: Array<SavedObject<{ title?: string }>>
+) =>
   objects
     .map(({ id, attributes, updated_at: updatedAt }) => ({
       id,
       title: attributes?.title,
       updatedAt,
     }))
+    // Sort for two reasons: 1. consumers may want to identify multiple errors that have the same sources (by stringifying the `sources`
+    // array of each object they can be compared), and 2. it will be a less confusing experience for end-users if several ambiguous
+    // conflicts that share the same destinations all show those destinations in the same order.
     .sort((a, b) => (a.id > b.id ? 1 : b.id > a.id ? -1 : 0));
 const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
   `${object.type}:${object.originId || object.id}`;
@@ -99,7 +108,7 @@ const checkConflict = async (
   }
   // This is an "inexact match" so far; filter the conflict destination(s) to exclude any that exactly match other objects we are importing.
   const objects = savedObjects.filter((obj) => !importIds.has(`${obj.type}:${obj.id}`));
-  const destinations = getAmbiguousConflicts(objects);
+  const destinations = transformObjectsToAmbiguousConflictFields(objects);
   if (destinations.length === 0) {
     // No conflict destinations remain after filtering, so this is a "no match" result.
     return { tag: 'right', value: object };
@@ -151,7 +160,9 @@ export async function checkConflicts(
       return;
     }
     const key = getAmbiguousConflictSourceKey(result.value);
-    const sources = getAmbiguousConflicts(ambiguousConflictSourcesMap.get(key)!);
+    const sources = transformObjectsToAmbiguousConflictFields(
+      ambiguousConflictSourcesMap.get(key)!
+    );
     const { object, destinations } = result.value;
     const { type, id, attributes } = object;
     if (sources.length === 1 && destinations.length === 1) {
@@ -186,7 +197,7 @@ export async function checkConflicts(
 /**
  * Assume that all objects exist in the `retries` map (due to filtering at the beginnning of `resolveSavedObjectsImportErrors`).
  */
-export async function getImportIdMapForRetries(
+export function getImportIdMapForRetries(
   objects: Array<SavedObject<{ title?: string }>>,
   options: GetImportIdMapForRetriesOptions
 ) {
@@ -200,16 +211,12 @@ export async function getImportIdMapForRetries(
 
   objects.forEach(({ type, id }) => {
     const retry = retryMap.get(`${type}:${id}`);
-    if (retry) {
-      const { overwrite, idToOverwrite } = retry;
-      if (
-        overwrite &&
-        idToOverwrite &&
-        idToOverwrite !== id &&
-        typeRegistry.isMultiNamespace(type)
-      ) {
-        importIdMap.set(`${type}:${id}`, { id: idToOverwrite });
-      }
+    if (!retry) {
+      throw new Error(`Retry was expected for "${type}:${id}" but not found`);
+    }
+    const { overwrite, idToOverwrite } = retry;
+    if (overwrite && idToOverwrite && idToOverwrite !== id && typeRegistry.isMultiNamespace(type)) {
+      importIdMap.set(`${type}:${id}`, { id: idToOverwrite });
     }
   });
 

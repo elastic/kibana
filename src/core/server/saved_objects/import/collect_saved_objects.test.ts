@@ -121,7 +121,7 @@ describe('collectSavedObjects()', () => {
       } catch ({ isBoom, message }) {
         expect(isBoom).toBe(true);
         expect(message).toMatchInlineSnapshot(
-          `"Non-unique import objects detected: [type1:id1,type2:id2]"`
+          `"Non-unique import objects detected: [type1:id1,type2:id2]: Bad Request"`
         );
       }
     });

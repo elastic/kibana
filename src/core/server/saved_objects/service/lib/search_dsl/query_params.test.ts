@@ -321,6 +321,21 @@ describe('#getQueryParams', () => {
         expectResult(result, expect.objectContaining({ fields }));
       };
 
+      it('throws an error if a raw search field contains a "." character', () => {
+        expect(() =>
+          getQueryParams({
+            mappings,
+            registry,
+            type: undefined,
+            search,
+            searchFields: undefined,
+            rawSearchFields: ['foo', 'bar.baz'],
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"rawSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
+        );
+      });
+
       it('includes lenient flag and all fields when `searchFields` and `rawSearchFields` are not specified', () => {
         const result = getQueryParams({
           mappings,
