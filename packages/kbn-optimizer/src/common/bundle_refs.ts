@@ -115,14 +115,7 @@ export class BundleRefs {
   constructor(private readonly refs: BundleRef[]) {}
 
   public filterByExportIds(exportIds: string[]) {
-    const refs: BundleRef[] = [];
-    for (const exportId of exportIds) {
-      const ref = this.refs.find((r) => r.exportId === exportId);
-      if (ref) {
-        refs.push(ref);
-      }
-    }
-    return refs;
+    return this.refs.filter((r) => exportIds.includes(r.exportId));
   }
 
   public filterByContextPrefix(bundle: Bundle, absolutePath: string) {
