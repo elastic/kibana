@@ -677,7 +677,7 @@ export class EndpointDocGenerator {
   ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
-    const root = this.generateEvent({ timestamp: startDate + 1000, pid: this.randomN(5000) });
+    const root = this.generateEvent({ timestamp: startDate + 1000 });
     events.push(root);
     let ancestor = root;
     let timestamp = root['@timestamp'] + 1000;
