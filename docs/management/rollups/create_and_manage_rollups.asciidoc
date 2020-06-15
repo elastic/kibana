@@ -8,7 +8,7 @@ by an index pattern, and then rolls it into a new index. Rollup indices are a go
 compactly store months or years of historical
 data for use in visualizations and reports.
 
-You’ll find *Rollup Jobs* under *Management > Elasticsearch*. With this UI,
+To get started, open the menu, then go to *Stack Management > {es} > Rollup Jobs*. With this UI,
 you can:
 
 * <<create-and-manage-rollup-job, Create a rollup job>>

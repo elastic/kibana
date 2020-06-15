@@ -147,7 +147,9 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           },
           { isDivider: true },
           {
-            content: agentConfig && <AgentConfigActionMenu configId={configId} fullButton={true} />,
+            content: agentConfig && (
+              <AgentConfigActionMenu config={agentConfig} fullButton={true} />
+            ),
           },
         ].map((item, index) => (
           <EuiFlexItem grow={false} key={index}>
