@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { serviceNowConnector } from '../objects/case';
+import { serviceNowConnector } from '../objects';
 
 import { TOASTER } from '../screens/configure_cases';
 

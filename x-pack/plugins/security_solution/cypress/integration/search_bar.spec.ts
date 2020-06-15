@@ -7,6 +7,7 @@
 import { loginAndWaitForPage } from '../tasks/login';
 import { openAddFilterPopover, fillAddFilterForm } from '../tasks/search_bar';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../screens/search_bar';
+import { SearchBarFilter } from '../objects/filter';
 
 import { HOSTS_PAGE } from '../urls/navigation';
 
@@ -16,11 +17,13 @@ describe('SearchBar', () => {
   });
 
   it('adds correctly a filter to the global search bar', () => {
-    const filterKey = 'host.ip';
-    const filterValue = '1.1.1.1';
+    const filter = new SearchBarFilter({
+      key: 'host.ip',
+      value: '1.1.1.1',
+    });
 
     openAddFilterPopover();
-    fillAddFilterForm(filterKey, filterValue);
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM(filterKey, filterValue)).should('be.visible');
+    fillAddFilterForm(filter);
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM(filter)).should('be.visible');
   });
 });

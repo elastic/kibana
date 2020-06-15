@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchBarFilter } from '../objects/filter';
+
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
 
@@ -23,5 +25,5 @@ export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams
 
 export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 
-export const GLOBAL_SEARCH_BAR_FILTER_ITEM = (filterKey: string, filterValue: string) =>
-  `[data-test-subj="filter filter-enabled filter-key-${filterKey} filter-value-${filterValue} filter-unpinned"]`;
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM = ({ key, value }: SearchBarFilter) =>
+  `[data-test-subj="filter filter-enabled filter-key-${key} filter-value-${value} filter-unpinned"]`;

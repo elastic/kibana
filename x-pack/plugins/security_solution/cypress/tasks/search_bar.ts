@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchBarFilter } from '../objects/filter';
+
 import {
   GLOBAL_SEARCH_BAR_ADD_FILTER,
   ADD_FILTER_FORM_SAVE_BUTTON,
@@ -18,11 +20,11 @@ export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click({ force: true });
 };
 
-export const fillAddFilterForm = (filterKey: string, filterValue: string) => {
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(filterKey);
-  cy.get(ADD_FILTER_FORM_FIELD_OPTION(filterKey)).click({ force: true });
+export const fillAddFilterForm = ({ key, value }: SearchBarFilter) => {
+  cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(key);
+  cy.get(ADD_FILTER_FORM_FIELD_OPTION(key)).click({ force: true });
   cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).click();
   cy.get(ADD_FILTER_FORM_OPERATOR_OPTION_IS).click();
-  cy.get(ADD_FILTER_FORM_FILTER_VALUE_INPUT).type(filterValue);
+  cy.get(ADD_FILTER_FORM_FILTER_VALUE_INPUT).type(value);
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
 };
