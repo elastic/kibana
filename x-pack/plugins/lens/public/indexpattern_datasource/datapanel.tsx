@@ -258,6 +258,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const containsData = (field: IndexPatternField) => {
     const fieldByName = indexBy(allFields, 'name');
     const overallField = fieldByName[field.name];
+
     return (
       overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
     );
@@ -464,7 +465,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <EuiSpacer size="s" />
               <EuiAccordion
                 initialIsOpen={true}
-                id="availableFieldsLabel"
+                data-test-subj="lnsIndexPatternAvailableFields"
+                id="lnsIndexPatternAvailableFields"
                 buttonContent={
                   <EuiText size="xs">
                     <strong>
@@ -526,7 +528,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <EuiSpacer size="m" />
               <EuiAccordion
                 initialIsOpen={false}
-                id="emptyFieldsLabel"
+                data-test-subj="lnsIndexPatternEmptyFields"
+                id="lnsIndexPatternEmptyFields"
                 buttonContent={
                   <EuiText size="xs">
                     <strong>

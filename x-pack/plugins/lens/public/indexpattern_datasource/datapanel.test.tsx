@@ -9,6 +9,7 @@ import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
+import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
@@ -530,18 +531,47 @@ describe('IndexPattern Data Panel', () => {
     });
   });
 
-  describe('while showing empty fields', () => {
-    it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
+  describe('displaying field list', () => {
+    it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
+      const existingFields = {
+        idx1: {
+          bytes: true,
+          memory: true,
+        },
+      };
+      const wrapper = shallowWithIntl(
+        <InnerIndexPatternDataPanel {...defaultProps} existingFields={existingFields} />
+      );
+      expect(wrapper.find(FieldItem).first().prop('field').name).toEqual('Records');
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['bytes', 'memory']);
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['client', 'source', 'timestamp']);
+    });
 
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
-        'bytes',
-        'client',
-        'memory',
-        'source',
-        'timestamp',
-      ]);
+    it('should display NoFieldsCallout when all fields are empty', async () => {
+      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
+      expect(wrapper.find(NoFieldsCallout).first().prop('isAffectedByTimerange')).toEqual(true);
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual([]);
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['bytes', 'client', 'memory', 'source', 'timestamp']);
     });
 
     it('should filter down by name', () => {
@@ -549,12 +579,13 @@ describe('IndexPattern Data Panel', () => {
 
       act(() => {
         wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
-          target: { value: 'mem' },
+          target: { value: 'me' },
         } as ChangeEvent<HTMLInputElement>);
       });
 
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
+        'timestamp',
       ]);
     });
 
@@ -569,6 +600,27 @@ describe('IndexPattern Data Panel', () => {
         'bytes',
         'memory',
       ]);
+    });
+
+    it('should display no fields in groups when filtered by type Record', () => {
+      const existingFields = {
+        idx1: {
+          bytes: true,
+          memory: true,
+        },
+      };
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...defaultProps} existingFields={existingFields} />
+      );
+
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
+
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
+        'Records',
+      ]);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
     it('should toggle type if clicked again', () => {
@@ -594,7 +646,7 @@ describe('IndexPattern Data Panel', () => {
 
       act(() => {
         wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
-          target: { value: 'mem' },
+          target: { value: 'me' },
         } as ChangeEvent<HTMLInputElement>);
       });
 
@@ -625,50 +677,6 @@ describe('IndexPattern Data Panel', () => {
           },
         },
       };
-    });
-
-    it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const props = {
-        ...emptyFieldsTestProps,
-        existingFields: {
-          idx1: {
-            bytes: true,
-            memory: true,
-          },
-        },
-      };
-      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...props} />);
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
-        'bytes',
-        'memory',
-      ]);
-    });
-
-    it('should filter down by name', () => {
-      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
-
-      act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
-          target: { value: 'mem' },
-        } as ChangeEvent<HTMLInputElement>);
-      });
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'memory',
-      ]);
-    });
-
-    it('should allow removing the filter for data', () => {
-      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
-
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
-
-      wrapper.find('[data-test-subj="lnsEmptyFilter"]').first().prop('onChange')!(
-        {} as ChangeEvent
-      );
-      // TO DO
     });
   });
 });
