@@ -24,7 +24,7 @@ import { ConfigSchema, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
-    showNewVisualizeFlow: false,
+    showNewVisualizeFlow: true,
   },
   schema: configSchema,
 };
