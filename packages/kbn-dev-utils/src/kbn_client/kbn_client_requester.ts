@@ -71,14 +71,12 @@ const delay = (ms: number) =>
 
 export interface KibanaConfig {
   url: string;
-  ssl:
-    | undefined
-    | {
-        enabled: boolean;
-        key: string;
-        certificate: string;
-        certificateAuthorities: string;
-      };
+  ssl?: {
+    enabled: boolean;
+    key: string;
+    certificate: string;
+    certificateAuthorities: string;
+  };
 }
 
 export class KbnClientRequester {
