@@ -6,8 +6,8 @@
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release, check out the
-and https://www.elastic.co/blog/kibana-7-8-0-released[release blog], {kibana-ref}/release notes.html[release notes],
-and {kibana-ref}/breaking-changes.html[breaking-changes].
+and https://www.elastic.co/blog/kibana-7-8-0-released[release blog], {kibana-ref}/release-notes.html[release notes],
+and {kibana-ref}/breaking-changes.html[breaking changes].
 
 Other versions: {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
 {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
@@ -153,19 +153,6 @@ configuration after initialization.
 
 [role="screenshot"]
 image::user/alerting/images/pre-configured-connectors-managing.png[Connectors managing tab with pre-cofigured]
-
-[float]
-[[file-upload-7-8]]
-=== Increased limit for file upload
-
-The upload limit for the File Data Visualizer increased from 100 MB to 1 GB,
-so you can now upload larger CSV, JSON, and log files.
-To configure this value, go to
-{kibana-ref}/advanced-options.html[Advanced Settings].
-
-[role="screenshot"]
-image::images/add-data-fv.png[File Data Visualizer]
-
 
 // end::notable-highlights[]
 
