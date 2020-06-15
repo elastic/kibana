@@ -8,7 +8,7 @@ Watches are helpful for analyzing mission-critical and business-critical
 streaming data. For example, you might watch application logs for performance
 outages or audit access logs for security threats.
 
-To get started with the Watcher UI, go to *Management > Elasticsearch > Watcher*.
+To get started with the Watcher UI, open then menu, then go to *Stack Management > {es} > Watcher*.
 With this UI, you can:
 
 * <<watcher-create-threshold-alert, Create a simple threshold watch>>
@@ -40,7 +40,7 @@ and either of these watcher roles:
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
 
-You can manage roles in *Management > Security > Roles*, or use the
+To manage roles, open then menu, then go to *Stack Management > Security > Roles*, or use the
 <<role-management-api, Kibana Role Management API>>. Watches are shared between
 all users with the same role.
 
