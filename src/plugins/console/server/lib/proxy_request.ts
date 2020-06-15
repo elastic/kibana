@@ -38,7 +38,7 @@ interface Args {
  * Node http request library does not expect there to be trailing "[" or "]"
  * characters in ipv6 host names.
  */
-const scrubURLHostname = (hostName: string): string =>
+const sanitizeHostname = (hostName: string): string =>
   hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
 
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
@@ -74,7 +74,7 @@ export const proxyRequest = ({
     method: method.toUpperCase(),
     // We support overriding this on a per request basis to support legacy proxy config. See ./proxy_config.
     rejectUnauthorized: typeof rejectUnauthorized === 'boolean' ? rejectUnauthorized : undefined,
-    host: scrubURLHostname(hostname),
+    host: sanitizeHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
     path: `${pathname}${search || ''}`,
