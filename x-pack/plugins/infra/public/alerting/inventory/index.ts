@@ -11,7 +11,7 @@ import { validateMetricThreshold } from './validation';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 
-export function getInventoryMetricAlertType(): AlertTypeModel {
+export function createInventoryMetricAlertType(): AlertTypeModel {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertName', {
