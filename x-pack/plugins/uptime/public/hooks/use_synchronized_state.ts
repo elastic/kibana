@@ -35,6 +35,10 @@ const resolveUrlUpdates = (
     urlState.autorefreshIsPaused = storeState.autorefreshIsPaused;
   }
 
+  if (params.search !== storeState.searchText) {
+    urlState.search = storeState.searchText;
+  }
+
   return urlState;
 };
 
@@ -53,6 +57,10 @@ const resolveStateChanges = (params: UptimeUrlParams, storeState: UiState): Part
 
   if (params.autorefreshIsPaused !== storeState.autorefreshIsPaused) {
     uiState.autorefreshIsPaused = params.autorefreshIsPaused;
+  }
+
+  if (params.search !== storeState.searchText) {
+    uiState.searchText = params.search;
   }
 
   return uiState;

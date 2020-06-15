@@ -62,7 +62,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
         autocomplete={props.autocomplete}
         defaultKuery={alertParams.search}
-        shouldUpdateUrl={shouldUpdateUrl}
         updateDefaultKuery={(value: string) => setAlertParams('search', value)}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
