@@ -26,6 +26,7 @@ import {
   RefreshInterval,
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
+import { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
@@ -37,7 +38,7 @@ export const getDefaultPanelTitle = (jobIds: JobId[]) =>
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
-  swimlaneType: string;
+  swimlaneType: SwimlaneType;
   viewBy?: string;
   limit?: number;
 
@@ -55,7 +56,7 @@ export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
 
 export interface AnomalySwimlaneEmbeddableCustomOutput {
   jobIds: JobId[];
-  swimlaneType: 'overall' | 'viewBy' | string;
+  swimlaneType: SwimlaneType;
   viewBy?: string;
   limit?: number;
 }

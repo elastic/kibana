@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneEmbeddableInput } from './anomaly_swimlane_embeddable';
 
 export interface AnomalySwimlaneInitializerProps {
@@ -31,7 +31,7 @@ export interface AnomalySwimlaneInitializerProps {
   >;
   onCreate: (swimlaneProps: {
     panelTitle: string;
-    swimlaneType: string;
+    swimlaneType: SwimlaneType;
     viewBy?: string;
     limit?: number;
   }) => void;
@@ -135,7 +135,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               })}
               options={swimlaneTypeOptions}
               idSelected={swimlaneType}
-              onChange={(id) => setSwimlaneType(id)}
+              onChange={(id) => setSwimlaneType(id as SwimlaneType)}
             />
           </EuiFormRow>
 

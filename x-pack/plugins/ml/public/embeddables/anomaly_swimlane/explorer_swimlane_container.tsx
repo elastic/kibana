@@ -28,6 +28,7 @@ import {
 } from './anomaly_swimlane_embeddable';
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -101,7 +102,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
                       chartWidth={chartWidth}
                       timeBuckets={timeBuckets}
                       swimlaneData={swimlaneData}
-                      swimlaneType={swimlaneType}
+                      swimlaneType={swimlaneType as SwimlaneType}
                       tooltipService={tooltipService}
                     />
                   )}
