@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLoadingSpinner,
-  EuiOverlayMask,
-  EuiConfirmModal,
   EuiBasicTableColumn,
+  formatDate,
 } from '@elastic/eui';
 
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -26,19 +21,19 @@ import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { ml } from '../../services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
+import { TIME_FORMAT } from '../../../../common/constants/time_format';
+import { CloseJobConfirm } from './close_job_confirm';
 import {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../common/types/anomaly_detection_jobs';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
   job: CombinedJobWithStats;
   refreshJobList: () => void;
 }
 
-enum COMBINED_JOB_STATE {
+export enum COMBINED_JOB_STATE {
   OPEN_AND_RUNNING,
   OPEN_AND_STOPPED,
   CLOSED,
@@ -60,39 +55,42 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     loadModelSnapshots();
   }, []);
 
-  async function loadModelSnapshots() {
+  const loadModelSnapshots = useCallback(async () => {
     const { model_snapshots: ms } = await ml.getModelSnapshots(job.job_id);
     setSnapshots(ms);
     setSnapshotsLoaded(true);
-  }
+  }, [job]);
 
-  async function checkJobIsClosed(snapshot: ModelSnapshot) {
-    const state = await getCombinedJobState(job.job_id);
-    if (state === COMBINED_JOB_STATE.UNKNOWN) {
-      // this will only happen if the job has been deleted by another user
-      // between the time the row has been expended and now
-      // eslint-disable-next-line no-console
-      console.error(`Error retrieving state for job ${job.job_id}`);
-      return;
-    }
+  const checkJobIsClosed = useCallback(
+    async (snapshot: ModelSnapshot) => {
+      const state = await getCombinedJobState(job.job_id);
+      if (state === COMBINED_JOB_STATE.UNKNOWN) {
+        // this will only happen if the job has been deleted by another user
+        // between the time the row has been expended and now
+        // eslint-disable-next-line no-console
+        console.error(`Error retrieving state for job ${job.job_id}`);
+        return;
+      }
 
-    setCombinedJobState(state);
+      setCombinedJobState(state);
 
-    if (state === COMBINED_JOB_STATE.CLOSED) {
-      // show flyout
-      setRevertSnapshot(snapshot);
-    } else {
-      // show close job modal
-      setCloseJobModalVisible(snapshot);
-    }
-  }
+      if (state === COMBINED_JOB_STATE.CLOSED) {
+        // show flyout
+        setRevertSnapshot(snapshot);
+      } else {
+        // show close job modal
+        setCloseJobModalVisible(snapshot);
+      }
+    },
+    [job]
+  );
 
   function hideCloseJobModalVisible() {
     setCombinedJobState(null);
     setCloseJobModalVisible(null);
   }
 
-  async function forceCloseJob() {
+  const forceCloseJob = useCallback(async () => {
     await ml.jobs.forceStopAndCloseJob(job.job_id);
     if (closeJobModalVisible !== null) {
       const state = await getCombinedJobState(job.job_id);
@@ -101,23 +99,23 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
       }
     }
     hideCloseJobModalVisible();
-  }
+  }, [job, closeJobModalVisible]);
 
-  function closeEditFlyout(reload: boolean) {
+  const closeEditFlyout = useCallback((reload: boolean) => {
     setEditSnapshot(null);
     if (reload) {
       loadModelSnapshots();
     }
-  }
+  }, []);
 
-  function closeRevertFlyout(reload: boolean) {
+  const closeRevertFlyout = useCallback((reload: boolean) => {
     setRevertSnapshot(null);
     if (reload) {
       loadModelSnapshots();
       // wait half a second before refreshing the jobs list
       setTimeout(refreshJobList, 500);
     }
-  }
+  }, []);
 
   const columns: Array<EuiBasicTableColumn<any>> = [
     {
@@ -238,60 +236,11 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
       )}
 
       {closeJobModalVisible !== null && combinedJobState !== null && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={
-              combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
-                ? i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.title', {
-                    defaultMessage: 'Stop datafeed and close job?',
-                  })
-                : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.title', {
-                    defaultMessage: 'Close job?',
-                  })
-            }
-            onCancel={hideCloseJobModalVisible}
-            onConfirm={forceCloseJob}
-            cancelButtonText={i18n.translate(
-              'xpack.ml.modelSnapshotTable.closeJobConfirm.cancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={
-              combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
-                ? i18n.translate(
-                    'xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.button',
-                    {
-                      defaultMessage: 'Force stop and close',
-                    }
-                  )
-                : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.button', {
-                    defaultMessage: 'Force close',
-                  })
-            }
-            defaultFocusedButton="confirm"
-          >
-            <p>
-              {combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING && (
-                <FormattedMessage
-                  id="xpack.ml.modelSnapshotTable.closeJobConfirm.contentOpenAndRunning"
-                  defaultMessage="Job is currently open and running."
-                />
-              )}
-              {combinedJobState === COMBINED_JOB_STATE.OPEN_AND_STOPPED && (
-                <FormattedMessage
-                  id="xpack.ml.modelSnapshotTable.closeJobConfirm.contentOpen"
-                  defaultMessage="Job is currently open."
-                />
-              )}
-              <br />
-              <FormattedMessage
-                id="xpack.ml.modelSnapshotTable.closeJobConfirm.content"
-                defaultMessage="Snapshot revert can only happen on jobs which are closed."
-              />
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <CloseJobConfirm
+          combinedJobState={combinedJobState}
+          hideCloseJobModalVisible={hideCloseJobModalVisible}
+          forceCloseJob={forceCloseJob}
+        />
       )}
     </>
   );

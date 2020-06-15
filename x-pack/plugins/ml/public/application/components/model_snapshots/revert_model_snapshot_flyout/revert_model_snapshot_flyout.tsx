@@ -10,11 +10,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {} from 'lodash';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -35,6 +33,7 @@ import {
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
+  formatDate,
 } from '@elastic/eui';
 
 import {
@@ -43,14 +42,14 @@ import {
 } from '../../../../../common/types/anomaly_detection_jobs';
 import { ml } from '../../../services/ml_api_service';
 import { useNotifications } from '../../../contexts/kibana';
-import { loadEventRateForJob, loadAnomalyDataForJob } from './chart_loader';
+import { chartLoaderProvider } from './chart_loader';
+import { mlResultsService } from '../../../services/results_service';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
+import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { CreateCalendar, CalendarEvent } from './create_calendar';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -61,6 +60,10 @@ interface Props {
 
 export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job, closeFlyout }) => {
   const { toasts } = useNotifications();
+  const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
+    () => chartLoaderProvider(mlResultsService),
+    []
+  );
   const [currentSnapshot, setCurrentSnapshot] = useState(snapshot);
   const [revertModalVisible, setRevertModalVisible] = useState(false);
   const [replay, setReplay] = useState(false);
@@ -98,7 +101,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     }
   }, [calendarEvents]);
 
-  async function createChartData() {
+  const createChartData = useCallback(async () => {
     const bucketSpanMs = parseInterval(job.analysis_config.bucket_span)!.asMilliseconds();
     const eventRate = await loadEventRateForJob(job, bucketSpanMs, 100);
     const anomalyData = await loadAnomalyDataForJob(job, bucketSpanMs, 100);
@@ -107,7 +110,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
       setAnomalies(anomalyData[0]);
     }
     setChartReady(true);
-  }
+  }, [job]);
 
   function closeWithReload() {
     closeFlyout(true);
@@ -128,13 +131,14 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     const end =
       replay && runInRealTime === false ? job.data_counts.latest_record_timestamp : undefined;
     try {
-      const events = replay
-        ? calendarEvents.filter(filterIncompleteEvents).map((c) => ({
-            start: c.start!.valueOf(),
-            end: c.end!.valueOf(),
-            description: c.description,
-          }))
-        : undefined;
+      const events =
+        replay && createCalendar
+          ? calendarEvents.filter(filterIncompleteEvents).map((c) => ({
+              start: c.start!.valueOf(),
+              end: c.end!.valueOf(),
+              description: c.description,
+            }))
+          : undefined;
 
       await ml.jobs.revertModelSnapshot(
         job.job_id,

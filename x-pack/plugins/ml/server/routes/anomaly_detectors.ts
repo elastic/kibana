@@ -634,6 +634,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiDescription Updates the model snapshot for the specified snapshot ID
    *
    * @apiSchema (params) getModelSnapshotsSchema
+   * @apiSchema (body) updateModelSnapshotSchema
    */
   router.post(
     {

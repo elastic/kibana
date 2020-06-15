@@ -10,8 +10,7 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, LineAnnotation, AnnotationDomainTypes } from '@elastic/charts';
 import { LineChartPoint } from '../../../../common/chart_loader';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+import { TIME_FORMAT } from '../../../../../../../../common/constants/time_format';
 
 interface Props {
   overlayKey: number;

@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 import { APICaller } from 'kibana/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider, MlDatafeedsResponse } from './datafeeds';
@@ -75,7 +76,12 @@ export function modelSnapshotProvider(callAsCurrentUser: APICaller) {
         const calendar: FormCalendar = {
           calendarId: String(Date.now()),
           job_ids: [jobId],
-          description: 'auto created',
+          description: i18n.translate(
+            'xpack.ml.models.jobService.revertModelSnapshot.autoCreatedCalendar.description',
+            {
+              defaultMessage: 'Auto created',
+            }
+          ),
           events: calendarEvents.map((s) => ({
             description: s.description,
             start_time: s.start,

@@ -16,12 +16,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, memo } from 'react';
+import React, { FC, Fragment, useCallback, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { XYBrushArea } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -69,65 +67,80 @@ export const CreateCalendar: FC<Props> = ({
 
   const { euiTheme } = useCurrentEuiTheme();
 
-  function onBrushEnd({ x }: XYBrushArea) {
-    if (x && x.length === 2) {
-      const end = x[1] < minSelectableTimeStamp ? null : x[1];
-      if (end !== null) {
-        const start = x[0] < minSelectableTimeStamp ? minSelectableTimeStamp : x[0];
+  const onBrushEnd = useCallback(
+    ({ x }: XYBrushArea) => {
+      if (x && x.length === 2) {
+        const end = x[1] < minSelectableTimeStamp ? null : x[1];
+        if (end !== null) {
+          const start = x[0] < minSelectableTimeStamp ? minSelectableTimeStamp : x[0];
 
+          setCalendarEvents([
+            ...calendarEvents,
+            {
+              start: moment(start),
+              end: moment(end),
+              description: createDefaultEventDescription(calendarEvents.length + 1),
+            },
+          ]);
+        }
+      }
+    },
+    [calendarEvents]
+  );
+
+  const setStartDate = useCallback(
+    (start: moment.Moment | null, index: number) => {
+      const event = calendarEvents[index];
+      if (event === undefined) {
         setCalendarEvents([
           ...calendarEvents,
-          {
-            start: moment(start),
-            end: moment(end),
-            description: createDefaultEventDescription(calendarEvents.length + 1),
-          },
+          { start, end: null, description: createDefaultEventDescription(index) },
         ]);
+      } else {
+        event.start = start;
+        setCalendarEvents([...calendarEvents]);
       }
-    }
-  }
+    },
+    [calendarEvents]
+  );
 
-  function setStartDate(start: moment.Moment | null, index: number) {
-    const event = calendarEvents[index];
-    if (event === undefined) {
-      setCalendarEvents([
-        ...calendarEvents,
-        { start, end: null, description: createDefaultEventDescription(index) },
-      ]);
-    } else {
-      event.start = start;
-      setCalendarEvents([...calendarEvents]);
-    }
-  }
+  const setEndDate = useCallback(
+    (end: moment.Moment | null, index: number) => {
+      const event = calendarEvents[index];
+      if (event === undefined) {
+        setCalendarEvents([
+          ...calendarEvents,
+          { start: null, end, description: createDefaultEventDescription(index) },
+        ]);
+      } else {
+        event.end = end;
+        setCalendarEvents([...calendarEvents]);
+      }
+    },
+    [calendarEvents]
+  );
 
-  function setEndDate(end: moment.Moment | null, index: number) {
-    const event = calendarEvents[index];
-    if (event === undefined) {
-      setCalendarEvents([
-        ...calendarEvents,
-        { start: null, end, description: createDefaultEventDescription(index) },
-      ]);
-    } else {
-      event.end = end;
-      setCalendarEvents([...calendarEvents]);
-    }
-  }
+  const setDescription = useCallback(
+    (description: string, index: number) => {
+      const event = calendarEvents[index];
+      if (event !== undefined) {
+        event.description = description;
+        setCalendarEvents([...calendarEvents]);
+      }
+    },
+    [calendarEvents]
+  );
 
-  const setDescription = (description: string, index: number) => {
-    const event = calendarEvents[index];
-    if (event !== undefined) {
-      event.description = description;
-      setCalendarEvents([...calendarEvents]);
-    }
-  };
-
-  function removeCalendarEvent(index: number) {
-    if (calendarEvents[index] !== undefined) {
-      const ce = [...calendarEvents];
-      ce.splice(index, 1);
-      setCalendarEvents(ce);
-    }
-  }
+  const removeCalendarEvent = useCallback(
+    (index: number) => {
+      if (calendarEvents[index] !== undefined) {
+        const ce = [...calendarEvents];
+        ce.splice(index, 1);
+        setCalendarEvents(ce);
+      }
+    },
+    [calendarEvents]
+  );
 
   return (
     <>
@@ -152,7 +165,7 @@ export const CreateCalendar: FC<Props> = ({
       <EuiSpacer size="s" />
 
       {calendarEvents.map((c, i) => (
-        <div key={i}>
+        <Fragment key={i}>
           <EuiPanel paddingSize="s">
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -207,7 +220,7 @@ export const CreateCalendar: FC<Props> = ({
                       )}
                     >
                       <EuiFieldText
-                        style={{ width: '100%', maxWidth: 'inherit' }}
+                        fullWidth
                         value={c.description}
                         onChange={(e) => setDescription(e.target.value, i)}
                       />
@@ -239,7 +252,7 @@ export const CreateCalendar: FC<Props> = ({
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="m" />
-        </div>
+        </Fragment>
       ))}
     </>
   );
@@ -285,5 +298,11 @@ function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {
 }
 
 function createDefaultEventDescription(index: number) {
-  return `Auto created event ${index}`;
+  return i18n.translate(
+    'xpack.ml.revertModelSnapshotFlyout.createCalendar.defaultEventDescription',
+    {
+      defaultMessage: 'Auto created event {index}',
+      values: { index },
+    }
+  );
 }

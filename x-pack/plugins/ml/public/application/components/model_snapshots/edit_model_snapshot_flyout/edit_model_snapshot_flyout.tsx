@@ -10,7 +10,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -49,9 +49,15 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
   const [description, setDescription] = useState(snapshot.description);
   const [retain, setRetain] = useState(snapshot.retain);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const isCurrentSnapshot = snapshot.snapshot_id === job.model_snapshot_id;
+  const [isCurrentSnapshot, setIsCurrentSnapshot] = useState(
+    snapshot.snapshot_id === job.model_snapshot_id
+  );
 
-  async function updateSnapshot() {
+  useEffect(() => {
+    setIsCurrentSnapshot(snapshot.snapshot_id === job.model_snapshot_id);
+  }, [snapshot]);
+
+  const updateSnapshot = useCallback(async () => {
     try {
       await ml.updateModelSnapshot(snapshot.job_id, snapshot.snapshot_id, {
         description,
@@ -65,9 +71,9 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         }),
       });
     }
-  }
+  }, [retain, description, snapshot]);
 
-  async function deleteSnapshot() {
+  const deleteSnapshot = useCallback(async () => {
     try {
       await ml.deleteModelSnapshot(snapshot.job_id, snapshot.snapshot_id);
       hideDeleteModal();
@@ -79,7 +85,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         }),
       });
     }
-  }
+  }, [snapshot]);
 
   function closeWithReload() {
     closeFlyout(true);
