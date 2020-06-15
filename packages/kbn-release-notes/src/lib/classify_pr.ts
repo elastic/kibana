@@ -46,10 +46,8 @@ export function classifyPr(pr: PullRequest, log: ToolingLog): ClassifiedPr {
   const pickOne = <T extends Area | AsciidocSection>(name: string, options: T[]) => {
     if (options.length > 1) {
       const matches = options.map((o) => o.title).join(', ');
-      log.error(
-        `[${pr.terminalLink}] unable to determine ${name} because mulitple match [${matches}]`
-      );
-      return;
+      log.warning(`[${pr.terminalLink}] ambiguous ${name}, mulitple match [${matches}]`);
+      return options[0];
     }
 
     if (options.length === 0) {
