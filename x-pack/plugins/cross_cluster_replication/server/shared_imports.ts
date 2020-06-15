@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function generateQueryAndLink(data) {
-  let type = 'indices';
-  let ident = data.name;
-  if (data.type === 'node') {
-    type = 'nodes';
-    ident = data.id;
-  }
-  return '/elasticsearch/' + type + '/' + ident;
-}
+export { isEsError } from '../../../../src/plugins/es_ui_shared/server';
