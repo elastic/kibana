@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { case1 } from '../objects';
+import { case1 } from '../objects/case';
 
 import {
   ALL_CASES_CLOSE_ACTION,
