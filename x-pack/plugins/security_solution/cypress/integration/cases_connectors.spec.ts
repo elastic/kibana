@@ -17,8 +17,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { CASES } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/65278
-describe.skip('Cases connectors', () => {
+describe('Cases connectors', () => {
   before(() => {
     cy.server();
     cy.route('POST', '**/api/actions/action').as('createConnector');
@@ -33,6 +32,7 @@ describe.skip('Cases connectors', () => {
 
     cy.wait('@createConnector').its('status').should('eql', 200);
     cy.get(TOASTER).should('have.text', "Created 'New connector'");
+    cy.get(TOASTER).should('not.exist');
 
     selectLastConnectorCreated();
 
