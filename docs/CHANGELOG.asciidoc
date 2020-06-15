@@ -41,7 +41,16 @@ This section summarizes the changes in each release.
 [[release-notes-7.8.0]]
 == {kib} 7.8.0
 
-See <<breaking-changes-7.8.0,breaking changes in 7.8>>.
+[float]
+[[breaking-changes-7.8.0]]
+=== Breaking changes
+
+See also <<breaking-changes-7.8,breaking changes in 7.8>>.
+
+Dashboard::
+* Fixes back button by removing panels from url in dashboard in view mode {pull}62415[#62415]
+Metrics::
+* Refactors action messaging to report on No Data state {pull}64365[#64365]
 
 [float]
 [[enhancement-7.8.0]]
@@ -71,7 +80,6 @@ Canvas::
 Dashboard::
 * Adds duplicate panel feature {pull}61367[#61367]
 * Return to dashboard after editing embeddable {pull}62865[#62865]
-* Deangularizes navbar, attempt nr. 2 {pull}61611[#61611]
 Lens and visualizations::
 * Triggers a filter action on click in datatable visualization {pull}63840[#63840]
 * Enables include/exclude in Terms agg for numeric fields {pull}59425[#59425]
@@ -269,11 +277,9 @@ Metrics::
 * Fixes default metric alert interval for new conditions {pull}66610[#66610]
 Platform::
 * Fixes inconsistent search behaviour in Advanced Settings {pull}64510[#64510]
-* Refactors nav links and header components {pull}66685[#66685]
 * SavedObjects bulkCreate API should return migrationVersion and strip the type &amp; namespace from the id {pull}65150[#65150]
 * Fixes task manager cancel warning {pull}63756[#63756]
 * New Kibana app link order {pull}67991[#67991]
-* Warning and link to support matrix for IE11 {pull}66512[#66512]
 Security::
 * Fix authentication loop when upgrading Kibana from 6.8 to 7.7+ {pull}67687[#67687]
 * Previously, users couldn't log in with SAML Identity Provider Initiated flow (e.g. from Okta Dashboard) if they already had 
@@ -284,8 +290,6 @@ SIEM::
 * Fixes import bug with non existent signals index {pull}65595[#65595]
 * Restricts ML rule modification to ML Admins {pull}65583[#65583]
 * Fixes timeline buildGlobalQuery {pull}68320[#68320]
-Security::
-* Fixes EncryptedSavedObjectsClientWrapper fails on stripEncryptedAttributes for saved object with errors {pull}61385[#61385]
 Uptime::
 * Refreshes index and also show more info to user regarding index/data {pull}62606[#62606]
 * Updates uptime ml job id to limit to 64 char {pull}64394[#64394]
@@ -294,17 +298,11 @@ Uptime::
 
 [float]
 [[deprecation-7.8.0]]
-=== Deprecation
+=== Deprecations
+Platform::
+* Deprecates IE11 support {pull}66512[#66512]
 Security::
 * Deprecates {kib} user in favor of kibana_system user {pull}63186[#63186]
-
-[float]
-[[breaking-changes-7.8.0]]
-=== Breaking Changes
-Alerting::
-* [Fixes #63130] Changed actions API endpoints urls to follow Kibana STYLEGUIDE {pull}65936[#65936]
-Metrics::
-* Refactors action messaging to report on No Data state {pull}64365[#64365]
 
 [[release-notes-7.7.1]]
 == {kib} 7.7.1
