@@ -128,7 +128,7 @@ describe('chartSelectors', () => {
           color: successColor,
           data: [
             { x: 0, y: 5 },
-            { x: 0, y: 2 },
+            { x: 1, y: 2 },
           ],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
