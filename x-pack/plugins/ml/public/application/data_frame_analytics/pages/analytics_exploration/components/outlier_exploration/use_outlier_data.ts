@@ -129,7 +129,7 @@ export const useOutlierData = (
 
       if (backgroundColor !== undefined) {
         setCellProps({
-          style: { backgroundColor },
+          style: { backgroundColor: String(backgroundColor) },
         });
       }
     }
