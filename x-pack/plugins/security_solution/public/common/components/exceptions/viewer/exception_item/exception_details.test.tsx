@@ -11,7 +11,10 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
-import { getCommentsMock, getExceptionListItemSchemaMock } from '../../../../../lists_plugin_deps';
+import {
+  getCommentsMock,
+  getExceptionListItemSchemaMock,
+} from '../../../../../lists_plugin_deps.mock';
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {

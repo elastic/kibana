@@ -25,13 +25,4 @@ export {
   Operator,
   OperatorType,
   OperatorTypeEnum,
-  getEntriesArrayMock,
-  getEntryExistsMock,
-  getEntryListMock,
-  getEntryMatchMock,
-  getEntryNestedMock,
-  getEntryMatchAnyMock,
-  getCommentsMock,
-  getExceptionListItemSchemaMock,
-  getExceptionListSchemaMock,
 } from '../../lists/common/schemas';

@@ -10,7 +10,10 @@ import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
-import { getCommentsMock, getExceptionListItemSchemaMock } from '../../../../../lists_plugin_deps';
+import {
+  getCommentsMock,
+  getExceptionListItemSchemaMock,
+} from '../../../../../lists_plugin_deps.mock';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>

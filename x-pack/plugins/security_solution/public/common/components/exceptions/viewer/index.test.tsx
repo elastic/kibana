@@ -12,11 +12,8 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { ExceptionsViewer } from './';
 import { ExceptionListType } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  useExceptionList,
-  useApi,
-  getExceptionListSchemaMock,
-} from '../../../../../public/lists_plugin_deps';
+import { useExceptionList, useApi } from '../../../../../public/lists_plugin_deps';
+import { getExceptionListSchemaMock } from '../../../../../public/lists_plugin_deps.mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');

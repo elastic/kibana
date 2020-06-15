@@ -10,7 +10,10 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
-import { getCommentsMock, getExceptionListItemSchemaMock } from '../../../../../lists_plugin_deps';
+import {
+  getCommentsMock,
+  getExceptionListItemSchemaMock,
+} from '../../../../../lists_plugin_deps.mock';
 
 describe('ExceptionItem', () => {
   it('it renders ExceptionDetails and ExceptionEntries', () => {

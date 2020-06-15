@@ -29,8 +29,8 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from './operators';
+import { OperatorTypeEnum } from '../../../lists_plugin_deps';
 import {
-  OperatorTypeEnum,
   getEntryExistsMock,
   getEntryListMock,
   getEntryMatchMock,
@@ -39,7 +39,7 @@ import {
   getEntriesArrayMock,
   getCommentsMock,
   getExceptionListItemSchemaMock,
-} from '../../../lists_plugin_deps';
+} from '../../../lists_plugin_deps.mock';
 
 describe('Exception helpers', () => {
   beforeEach(() => {
