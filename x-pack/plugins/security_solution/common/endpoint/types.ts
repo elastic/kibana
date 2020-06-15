@@ -267,7 +267,11 @@ export interface AlertEvent {
   };
   endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
   process: {
@@ -371,7 +375,11 @@ export type HostMetadata = Immutable<{
   };
   endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
   agent: {
@@ -708,6 +716,7 @@ export interface HostPolicyResponse {
       applied: {
         version: string;
         id: string;
+        name: string;
         status: HostPolicyResponseActionStatus;
         actions: HostPolicyResponseAppliedAction[];
         response: {
