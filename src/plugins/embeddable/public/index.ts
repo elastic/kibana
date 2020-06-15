@@ -42,7 +42,6 @@ export {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
-  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
@@ -72,6 +71,8 @@ export {
   EmbeddableStateTransfer,
   EmbeddableOriginatingAppState,
   EmbeddablePackageState,
+  EmbeddableRenderer,
+  EmbeddableRendererProps,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

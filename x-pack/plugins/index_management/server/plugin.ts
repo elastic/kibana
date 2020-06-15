@@ -24,7 +24,7 @@ import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 
 export interface DataManagementContext {
@@ -59,7 +59,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { licensing }: Dependencies
+    { licensing, security }: Dependencies
   ): IndexManagementPluginSetup {
     const router = http.createRouter();
 
@@ -89,6 +89,9 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.apiRoutes.setup({
       router,
       license: this.license,
+      config: {
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+      },
       indexDataEnricher: this.indexDataEnricher,
       lib: {
         isEsError,

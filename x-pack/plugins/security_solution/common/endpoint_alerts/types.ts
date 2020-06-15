@@ -15,7 +15,6 @@ import {
   AlertEvent,
   KbnConfigSchemaInputTypeOf,
   AppLocation,
-  Immutable,
 } from '../endpoint/types';
 
 /**
@@ -119,7 +118,7 @@ export type AlertListData = AlertResultList;
 
 export interface AlertListState {
   /** Array of alert items. */
-  readonly alerts: Immutable<AlertData[]>;
+  readonly alerts: AlertData[];
 
   /** The total number of alerts on the page. */
   readonly total: number;
@@ -131,10 +130,10 @@ export interface AlertListState {
   readonly pageIndex: number;
 
   /** Current location object from React Router history. */
-  readonly location?: Immutable<AppLocation>;
+  readonly location?: AppLocation;
 
   /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertDetails>;
+  readonly alertDetails?: AlertDetails;
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;

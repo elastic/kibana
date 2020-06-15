@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockAgentService,
-  createMockIndexPatternRetriever,
-  createRouteHandlerContext,
-} from '../../mocks';
+import { createMockAgentService, createRouteHandlerContext } from '../../mocks';
 import { getHostPolicyResponseHandler } from './handlers';
 import {
   IScopedClusterClient,
@@ -41,7 +37,6 @@ describe('test policy response handler', () => {
     endpointAppContextService = new EndpointAppContextService();
     mockAgentService = createMockAgentService();
     endpointAppContextService.start({
-      indexPatternRetriever: createMockIndexPatternRetriever('metrics-endpoint-policy-*'),
       agentService: mockAgentService,
     });
   });

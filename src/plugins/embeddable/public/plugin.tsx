@@ -50,10 +50,14 @@ export interface EmbeddableStartDependencies {
 }
 
 export interface EmbeddableSetup {
-  registerEmbeddableFactory: <I extends EmbeddableInput, O extends EmbeddableOutput>(
+  registerEmbeddableFactory: <
+    I extends EmbeddableInput,
+    O extends EmbeddableOutput,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+  >(
     id: string,
-    factory: EmbeddableFactoryDefinition<I, O>
-  ) => void;
+    factory: EmbeddableFactoryDefinition<I, O, E>
+  ) => () => EmbeddableFactory<I, O, E>;
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
@@ -78,6 +82,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
   private outgoingOnlyStateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
+  private isRegistryReady = false;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -111,6 +116,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
 
     this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+    this.isRegistryReady = true;
 
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
@@ -151,16 +157,24 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return this.embeddableFactories.values();
   };
 
-  private registerEmbeddableFactory = (
+  private registerEmbeddableFactory = <
+    I extends EmbeddableInput = EmbeddableInput,
+    O extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+  >(
     embeddableFactoryId: string,
-    factory: EmbeddableFactoryDefinition
-  ) => {
+    factory: EmbeddableFactoryDefinition<I, O, E>
+  ): (() => EmbeddableFactory<I, O, E>) => {
     if (this.embeddableFactoryDefinitions.has(embeddableFactoryId)) {
       throw new Error(
         `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] already registered in Embeddables API.`
       );
     }
     this.embeddableFactoryDefinitions.set(embeddableFactoryId, factory);
+
+    return () => {
+      return this.getEmbeddableFactory(embeddableFactoryId);
+    };
   };
 
   private getEmbeddableFactory = <
@@ -170,6 +184,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   >(
     embeddableFactoryId: string
   ): EmbeddableFactory<I, O, E> => {
+    if (!this.isRegistryReady) {
+      throw new Error('Embeddable factories can only be retrieved after setup lifecycle.');
+    }
     this.ensureFactoryExists(embeddableFactoryId);
     const factory = this.embeddableFactories.get(embeddableFactoryId);
 

@@ -27,7 +27,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('creating and adding children', () => {
     before(async () => {
-      await testSubjects.click('embeddablePanelExamplae');
+      await testSubjects.click('embeddablePanelExample');
     });
 
     it('Can create a new child', async () => {
