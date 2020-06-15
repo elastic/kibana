@@ -31,8 +31,6 @@ import { UseIndexDataReturnType } from './types';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 
-import './data_grid.scss';
-
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
     <span>{title}</span>

@@ -1,13 +1,3 @@
-.mlDataGridChart {
-  border-left: solid 1px $euiColorLightShade;
-  border-right: solid 1px $euiColorLightShade;
-  background-color: $euiColorLightestShade;
-}
-
-.mlDataGridChart + .mlDataGridChart {
-  border-left: none;
-}
-
 .mlDataGridChart__histogram {
   width: 100%;
   height: $euiSizeXL + $euiSizeXXL;
