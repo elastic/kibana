@@ -386,6 +386,7 @@
     "@types/supertest-as-promised": "^2.0.38",
     "@types/testing-library__react": "^9.1.2",
     "@types/testing-library__react-hooks": "^3.1.0",
+    "@types/testing-library__dom": "^6.10.0",
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^3.4.4",
     "@types/vinyl-fs": "^2.4.11",
