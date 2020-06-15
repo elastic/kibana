@@ -21,21 +21,6 @@ import { coreMock, scopedHistoryMock } from '../../../../../core/public/mocks';
 import { EmbeddableStateTransfer } from '.';
 import { ApplicationStart, ScopedHistory } from '../../../../../core/public';
 
-interface SuperCoolCustomState {
-  isCool: boolean;
-  coolValue: number;
-}
-
-function isSuperCoolState(state: unknown): state is SuperCoolCustomState {
-  return (
-    state &&
-    'isCool' in (state as { [key: string]: unknown }) &&
-    typeof (state as { [key: string]: unknown }).isCool === 'boolean' &&
-    'coolValue' in (state as { [key: string]: unknown }) &&
-    typeof (state as { [key: string]: unknown }).coolValue === 'number'
-  );
-}
-
 function mockHistoryState(state: unknown) {
   return scopedHistoryMock.create({ state });
 }
@@ -65,16 +50,6 @@ describe('embeddable state transfer', () => {
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       state: { type: 'coolestType', id: '150' },
-    });
-  });
-
-  it('can send an outgoing custom state', () => {
-    // @ts-ignore
-    stateTransfer.navigateToWithState<SuperCoolCustomState>(destinationApp, {
-      state: { isCool: false, coolValue: 0 },
-    });
-    expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
-      state: { isCool: false, coolValue: 0 },
     });
   });
 
@@ -118,49 +93,40 @@ describe('embeddable state transfer', () => {
     expect(fetchedState).toBeUndefined();
   });
 
-  it('can fetch a custom state', async () => {
-    const historyMock = mockHistoryState({ isCool: true, coolValue: 123 });
+  it('removes keys after fetching if removeAfterFetching is true', async () => {
+    const historyMock = mockHistoryState({
+      type: 'skisEmbeddable',
+      id: '123',
+      test1: 'test1',
+      test2: 'test2',
+    });
     stateTransfer = new EmbeddableStateTransfer(
       application.navigateToApp,
       (historyMock as unknown) as ScopedHistory
     );
-    // @ts-ignore
-    const fetchedState = stateTransfer.getIncomingState<SuperCoolCustomState>(isSuperCoolState);
-    expect(fetchedState).toEqual({ isCool: true, coolValue: 123 });
-  });
-
-  it('incoming embeddable package fetches undefined when not given state in the right shape', async () => {
-    const historyMock = mockHistoryState({ isUncool: false, coolValue: 123 });
-    stateTransfer = new EmbeddableStateTransfer(
-      application.navigateToApp,
-      (historyMock as unknown) as ScopedHistory
+    stateTransfer.getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['type', 'id'] });
+    expect(historyMock.replace).toHaveBeenCalledWith(
+      expect.objectContaining({ state: { test1: 'test1', test2: 'test2' } })
     );
-    // @ts-ignore
-    const fetchedState = stateTransfer.getIncomingState<SuperCoolCustomState>(isSuperCoolState);
-    expect(fetchedState).toBeUndefined();
-  });
-
-  it('removes state after fetching if removeAfterFetching is true', async () => {
-    const historyMock = mockHistoryState({ isCool: false, coolValue: 123 });
-    stateTransfer = new EmbeddableStateTransfer(
-      application.navigateToApp,
-      (historyMock as unknown) as ScopedHistory
-    );
-    // @ts-ignore
-    stateTransfer.getIncomingState<SuperCoolCustomState>(isSuperCoolState, true);
-    expect((historyMock.location.state as { [key: string]: unknown }).isCool).toBeUndefined();
-    expect((historyMock.location.state as { [key: string]: unknown }).coolValue).toBeUndefined();
   });
 
   it('leaves state as is if removeAfterFetching is false', async () => {
-    const historyMock = mockHistoryState({ isCool: false, coolValue: 123 });
+    const historyMock = mockHistoryState({
+      type: 'skisEmbeddable',
+      id: '123',
+      test1: 'test1',
+      test2: 'test2',
+    });
     stateTransfer = new EmbeddableStateTransfer(
       application.navigateToApp,
       (historyMock as unknown) as ScopedHistory
     );
-    // @ts-ignore
-    stateTransfer.getIncomingState<SuperCoolCustomState>(isSuperCoolState);
-    expect((historyMock.location.state as { [key: string]: unknown }).isCool).toBeDefined();
-    expect((historyMock.location.state as { [key: string]: unknown }).coolValue).toBeDefined();
+    stateTransfer.getIncomingEmbeddablePackage();
+    expect(historyMock.location.state).toEqual({
+      type: 'skisEmbeddable',
+      id: '123',
+      test1: 'test1',
+      test2: 'test2',
+    });
   });
 });

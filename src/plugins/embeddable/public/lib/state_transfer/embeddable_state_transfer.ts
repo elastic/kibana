@@ -45,13 +45,12 @@ export class EmbeddableStateTransfer {
    * @param history - the scoped history to fetch from
    * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
    */
-  public getIncomingOriginatingApp(
-    removeAfterFetch: boolean = false
-  ): EmbeddableOriginatingAppState | undefined {
-    return this.getIncomingState<EmbeddableOriginatingAppState>(
-      isEmbeddableOriginatingAppState,
-      removeAfterFetch
-    );
+  public getIncomingOriginatingApp(options?: {
+    keysToRemoveAfterFetch?: string[];
+  }): EmbeddableOriginatingAppState | undefined {
+    return this.getIncomingState<EmbeddableOriginatingAppState>(isEmbeddableOriginatingAppState, {
+      keysToRemoveAfterFetch: options?.keysToRemoveAfterFetch,
+    });
   }
 
   /**
@@ -61,13 +60,12 @@ export class EmbeddableStateTransfer {
    * @param history - the scoped history to fetch from
    * @param removeAfterFetch - determines whether or not the state transfer service removes all keys relating to this object
    */
-  public getIncomingEmbeddablePackage(
-    removeAfterFetch: boolean = false
-  ): EmbeddablePackageState | undefined {
-    return this.getIncomingState<EmbeddablePackageState>(
-      isEmbeddablePackageState,
-      removeAfterFetch
-    );
+  public getIncomingEmbeddablePackage(options?: {
+    keysToRemoveAfterFetch?: string[];
+  }): EmbeddablePackageState | undefined {
+    return this.getIncomingState<EmbeddablePackageState>(isEmbeddablePackageState, {
+      keysToRemoveAfterFetch: options?.keysToRemoveAfterFetch,
+    });
   }
 
   /**
@@ -76,7 +74,7 @@ export class EmbeddableStateTransfer {
    */
   public async navigateToWithOriginatingApp(
     appId: string,
-    options: { path?: string; state: EmbeddableOriginatingAppState }
+    options?: { path?: string; state: EmbeddableOriginatingAppState }
   ): Promise<void> {
     await this.navigateToWithState<EmbeddableOriginatingAppState>(appId, options);
   }
@@ -87,14 +85,16 @@ export class EmbeddableStateTransfer {
    */
   public async navigateToWithEmbeddablePackage(
     appId: string,
-    options: { path?: string; state: EmbeddablePackageState }
+    options?: { path?: string; state: EmbeddablePackageState }
   ): Promise<void> {
     await this.navigateToWithState<EmbeddablePackageState>(appId, options);
   }
 
   private getIncomingState<IncomingStateType>(
     guard: (state: unknown) => state is IncomingStateType,
-    removeAfterFetch: boolean = false
+    options?: {
+      keysToRemoveAfterFetch?: string[];
+    }
   ): IncomingStateType | undefined {
     if (!this.scopedHistory) {
       throw new TypeError('ScopedHistory is required to fetch incoming state');
@@ -102,18 +102,19 @@ export class EmbeddableStateTransfer {
     const incomingState = this.scopedHistory.location?.state;
     const castState =
       !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
-    if (castState && removeAfterFetch) {
-      Object.keys(castState).forEach((key: string) => {
-        delete (this.scopedHistory!.location.state as { [key: string]: unknown })[key];
+    if (castState && options?.keysToRemoveAfterFetch) {
+      const stateReplace = { ...(this.scopedHistory.location.state as { [key: string]: unknown }) };
+      options.keysToRemoveAfterFetch.forEach((key: string) => {
+        delete stateReplace[key];
       });
-      this.scopedHistory.push(this.scopedHistory.location);
+      this.scopedHistory.replace({ ...this.scopedHistory.location, state: stateReplace });
     }
     return castState;
   }
 
   private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
-    options: { path?: string; state?: OutgoingStateType }
+    options?: { path?: string; state?: OutgoingStateType }
   ): Promise<void> {
     await this.navigateToApp(appId, options);
   }
