@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, memo, useContext, useState } from 'react';
+import React, { useMemo, memo, useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
@@ -19,6 +19,7 @@ interface DataPanelWrapperProps {
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
+  showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
@@ -46,6 +47,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     query: props.query,
     dateRange: props.dateRange,
     filters: props.filters,
+    showNoDataPopover: props.showNoDataPopover,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

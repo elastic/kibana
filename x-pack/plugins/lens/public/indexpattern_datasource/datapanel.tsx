@@ -85,6 +85,7 @@ export function IndexPatternDataPanel({
   filters,
   dateRange,
   changeIndexPattern,
+  showNoDataPopover,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
 
@@ -131,6 +132,9 @@ export function IndexPatternDataPanel({
           syncExistingFields({
             dateRange,
             setState,
+            isFirstExistenceFetch: state.isFirstExistenceFetch,
+            currentIndexPatternTitle: indexPatterns[currentIndexPatternId].title,
+            showNoDataPopover,
             indexPatterns: indexPatternList,
             fetchJson: core.http.post,
             dslQuery,
@@ -211,7 +215,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   core,
   data,
   existingFields,
-}: Pick<DatasourceDataPanelProps, Exclude<keyof DatasourceDataPanelProps, 'state' | 'setState'>> & {
+}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];

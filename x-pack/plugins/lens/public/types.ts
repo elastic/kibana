@@ -47,6 +47,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
   }) => void;
+  showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;
@@ -186,6 +187,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
+  showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;

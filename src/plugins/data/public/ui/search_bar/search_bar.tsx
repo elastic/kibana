@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiTourStepProps } from '@elastic/eui';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
@@ -75,6 +76,7 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  datePickerTourComponentProps?: Omit<EuiTourStepProps, 'children'>;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -402,6 +404,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          datePickerTourComponentProps={this.props.datePickerTourComponentProps}
         />
       );
     }

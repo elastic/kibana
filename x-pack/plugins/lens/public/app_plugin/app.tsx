@@ -38,6 +38,7 @@ import {
   SavedQuery,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
+import { useNoDataPopover } from './no_data_popover';
 
 interface State {
   isLoading: boolean;
@@ -90,6 +91,8 @@ export function App({
   const language =
     storage.get('kibana.userQueryLanguage') ||
     core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
+
+  const [noDataPopoverProps, showNoDataPopover] = useNoDataPopover(storage);
 
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -465,6 +468,7 @@ export function App({
               query={state.query}
               dateRangeFrom={state.dateRange.fromDate}
               dateRangeTo={state.dateRange.toDate}
+              datePickerTourComponentProps={noDataPopoverProps}
             />
           </div>
 
@@ -479,6 +483,7 @@ export function App({
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
                 onError,
+                showNoDataPopover,
                 onChange: ({ filterableIndexPatterns, doc }) => {
                   if (!_.isEqual(state.persistedDoc, doc)) {
                     setState((s) => ({ ...s, lastKnownDoc: doc }));
