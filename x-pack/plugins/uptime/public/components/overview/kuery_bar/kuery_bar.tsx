@@ -9,8 +9,9 @@ import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useSelector } from 'react-redux';
 import { Typeahead } from './typeahead';
-import { useSearchText, useUrlParams } from '../../../hooks';
+import { useSearchText } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
@@ -18,6 +19,7 @@ import {
   DataPublicPluginSetup,
 } from '../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from './use_index_pattern';
+import { uiSelector } from '../../../state/selectors';
 
 const Container = styled.div`
   margin-bottom: 4px;
@@ -38,7 +40,6 @@ interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];
   defaultKuery?: string;
   'data-test-subj': string;
-  shouldUpdateUrl?: boolean;
   updateDefaultKuery?: (value: string) => void;
 }
 
@@ -47,11 +48,10 @@ export function KueryBar({
   autocomplete: autocompleteService,
   defaultKuery,
   'data-test-subj': dataTestSubj,
-  shouldUpdateUrl,
   updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
-  const { updateSearchText } = useSearchText();
+  const { searchText: kuery, updateSearchText } = useSearchText();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -61,8 +61,7 @@ export function KueryBar({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { dateRange } = useSelector(uiSelector);
 
   useEffect(() => {
     updateSearchText(kuery);
@@ -104,8 +103,8 @@ export function KueryBar({
             {
               range: {
                 '@timestamp': {
-                  gte: dateRangeStart,
-                  lte: dateRangeEnd,
+                  gte: dateRange.from,
+                  lte: dateRange.to,
                 },
               },
             },
@@ -136,10 +135,7 @@ export function KueryBar({
         return;
       }
 
-      if (shouldUpdateUrl !== false) {
-        updateUrlParams({ search: inputValue.trim() });
-      }
-      updateSearchText(inputValue);
+      updateSearchText(inputValue.trim());
       if (updateDefaultKuery) {
         updateDefaultKuery(inputValue);
       }
