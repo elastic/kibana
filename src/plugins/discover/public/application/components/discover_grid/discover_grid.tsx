@@ -17,34 +17,24 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import './discover_grid.scss';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiDataGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiLink,
-  EuiPortal,
-  EuiTitle,
-  useRenderToText,
-  htmlIdGenerator,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  EuiIcon,
   EuiScreenReaderOnly,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
-import { ElasticSearchHit, DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { shortenDottedString } from '../../helpers';
 import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
+import { CellPopover } from './discover_grid_popover';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
 
 type Direction = 'asc' | 'desc';
 type SortArr = [string, Direction];
@@ -72,59 +62,6 @@ interface Props {
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
   onSetColumns: (columns: string[]) => void;
-}
-
-function CellPopover({
-  value,
-  onPositiveFilterClick,
-  onNegativeFilterClick,
-}: {
-  value: string | ReactNode;
-  onPositiveFilterClick: () => void;
-  onNegativeFilterClick: () => void;
-}) {
-  const node = useMemo(() => <>{value}!</>, [value]);
-  const placeholder = i18n.translate('discover.grid.filterValuePlaceholder', {
-    defaultMessage: 'value',
-  });
-  const text = useRenderToText(node, placeholder);
-  return (
-    <>
-      {value}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="magnifyWithPlus"
-            aria-label={i18n.translate('discover.grid.ariaFilterOn', {
-              defaultMessage: 'Filter on {value}',
-              values: { value: text },
-            })}
-            onClick={onPositiveFilterClick}
-          >
-            {i18n.translate('discover.grid.filterOn', {
-              defaultMessage: 'Filter on value',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="magnifyWithMinus"
-            aria-label={i18n.translate('discover.grid.ariaFilterOut', {
-              defaultMessage: 'Filter without {value}',
-              values: { value: text },
-            })}
-            color="danger"
-            onClick={onNegativeFilterClick}
-          >
-            {i18n.translate('discover.grid.filterOut', {
-              defaultMessage: 'Filter without value',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
 }
 
 export const DiscoverGrid = function DiscoverGridInner({
@@ -440,69 +377,16 @@ export const DiscoverGrid = function DiscoverGridInner({
         </EuiScreenReaderOnly>
       )}
       {typeof flyoutRow !== 'undefined' && (
-        <EuiPortal>
-          <EuiFlyout onClose={() => setFlyoutRow(undefined)} size="m">
-            <EuiFlyoutHeader hasBorder>
-              <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" gutterSize="none">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="folderOpen" size="l" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle className="dscTable__flyoutHeader">
-                        <h2>
-                          {i18n.translate('discover.grid.tableRow.detailHeading', {
-                            defaultMessage: 'Expanded document',
-                          })}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup justifyContent="flexEnd">
-                    {indexPattern.isTimeBased() && (
-                      <EuiFlexItem grow={false}>
-                        <EuiLink
-                          href={getContextAppHref ? getContextAppHref(rows[flyoutRow]._id) : ''}
-                        >
-                          {i18n.translate(
-                            'discover.grid.tableRow.viewSurroundingDocumentsLinkText',
-                            {
-                              defaultMessage: 'View surrounding documents',
-                            }
-                          )}
-                        </EuiLink>
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        href={`#/doc/${indexPattern.id}/${
-                          rows[flyoutRow]._index
-                        }?id=${encodeURIComponent(rows[flyoutRow]._id as string)}`}
-                      >
-                        {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkText', {
-                          defaultMessage: 'View single document',
-                        })}
-                      </EuiLink>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <DocViewer
-                hit={rows[flyoutRow]}
-                columns={columns}
-                indexPattern={indexPattern}
-                filter={onFilter}
-                onRemoveColumn={onRemoveColumn}
-                onAddColumn={onAddColumn}
-              />
-            </EuiFlyoutBody>
-          </EuiFlyout>
-        </EuiPortal>
+        <DiscoverGridFlyout
+          indexPattern={indexPattern}
+          getContextAppHref={getContextAppHref}
+          hit={rows[flyoutRow]}
+          columns={columns}
+          onFilter={onFilter}
+          onClose={() => setFlyoutRow(undefined)}
+          onRemoveColumn={onRemoveColumn}
+          onAddColumn={onAddColumn}
+        />
       )}
     </>
   );
