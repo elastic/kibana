@@ -676,28 +676,30 @@ node scripts/docs.js --open
 
 Part of this process only applies to maintainers, since it requires access to GitHub labels.
 
-Kibana publishes [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html) for major and minor releases. To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
-To include your PRs in the Release Notes:
+Kibana publishes [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html) for major and minor releases. The Release Notes summarize what the PRs accomplish in language that is meaningful to users. To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
 
-1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
-    * When you create a PR for a feature, start with `Adds`.
-    * When you create a PR for an enhancement, start with `Improves`. 
-    * When you create a PR for a bug fix, start with `Fixes`.
-    * When you create a PR for a deprecation, start with `Deprecates`.
-2. Label the PR with the targeted version (ex: `v7.3.0`).
-3. Label the PR with the appropriate GitHub labels:
+#### Create the Release Notes text
+The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description. 
+
+To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this [PR](https://github.com/elastic/kibana/pull/65796) that uses the `## Release note` header.
+
+When you create the Release Notes text, use the following best practices:
+
+    * Use present tense. 
+    * Use sentence case.
+    * When you create a feature PR, start with `Adds`.
+    * When you create an enhancement PR, start with `Improves`. 
+    * When you create a bug fix PR, start with `Fixes`.
+    * When you create a deprecation PR, start with `Deprecates`.
+
+#### Add your labels
+1. Label the PR with the targeted version (ex: `v7.3.0`).
+2. Label the PR with the appropriate GitHub labels:
     * For a new feature or functionality, use `release_note:enhancement`.
     * For an external-facing fix, use `release_note:fix`. We do not include docs, build, and test fixes in the Release Notes, or unreleased issues that are only on `master`.
     * For a deprecated feature, use `release_note:deprecation`.
     * For a breaking change, use `release_note:breaking`.
     * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
-
-**Examples of good Release Notes titles:**
-
-* Adds Monaco to the Canvas expression editor
-* Improves the job ID error messages
-* Fixes the workpad fullscreen view for maximum width limitation
-* Deprecates scale metrics behavior
 
 We also produce a blog post that details more important breaking API changes in every major and minor release. When your PR includes a breaking API change, add the `release_note:dev_docs` label, and add a brief summary of the break at the bottom of the PR using the format below:
 
