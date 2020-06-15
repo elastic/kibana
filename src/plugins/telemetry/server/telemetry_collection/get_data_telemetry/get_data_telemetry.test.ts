@@ -164,7 +164,7 @@ describe('get_data_telemetry', () => {
     test('find an index that does not match any index pattern but has mappings metadata', async () => {
       const callCluster = mockCallCluster(
         ['cannot_match_anything'],
-        { isECS: true, datasetType: 'events', shipper: 'my-beat' },
+        { isECS: true, datasetType: 'traces', shipper: 'my-beat' },
         {
           indices: {
             cannot_match_anything: {
@@ -175,7 +175,7 @@ describe('get_data_telemetry', () => {
       );
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
         {
-          dataset: { name: undefined, type: 'events' },
+          dataset: { name: undefined, type: 'traces' },
           shipper: 'my-beat',
           index_count: 1,
           ecs_index_count: 1,

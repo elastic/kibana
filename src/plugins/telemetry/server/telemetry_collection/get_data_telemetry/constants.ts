@@ -19,7 +19,7 @@
 
 export const DATA_TELEMETRY_ID = 'data';
 
-export const DATA_KNOWN_TYPES = ['logs', 'events', 'metrics'] as const;
+export const DATA_KNOWN_TYPES = ['logs', 'traces', 'metrics'] as const;
 
 export type DataTelemetryType = typeof DATA_KNOWN_TYPES[number];
 
@@ -33,29 +33,39 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'winlogbeat-*', patternName: 'winlogbeat' },
   { pattern: 'packetbeat-*', patternName: 'packetbeat' },
   // Security - 3rd party
-  // TODO: Add/modify/remove entries once the security team confirms them
   { pattern: '*tomcat*', patternName: 'tomcat' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
   { pattern: '*artifactory*', patternName: 'artifactory' },
-  { pattern: '*arubanetworks*', patternName: 'arubanetworks' },
-  { pattern: 'barracuda*', patternName: 'barracuda' },
-  { pattern: 'checkpoint*', patternName: 'checkpoint' },
-  { pattern: 'cisco*', patternName: 'cisco' },
-  { pattern: 'citrix*', patternName: 'citrix' },
-  { pattern: 'cyberark*', patternName: 'cyberark' },
-  { pattern: 'cylance*', patternName: 'cylance' },
-  { pattern: '*dellswitch*', patternName: 'dellswitch' },
-  // { pattern: '*devices/rhlinux*', patternName: 'devices/rhlinux' }, // Pending to confirm
-  { pattern: '*emc*', patternName: 'emc' },
-  { pattern: 'fortinet*', patternName: 'fortinet' },
-  { pattern: 'mcafee*', patternName: 'mcafee' },
-  { pattern: '*microsoft*', patternName: 'microsoft' },
-  { pattern: 'paloaltonetworks*', patternName: 'paloaltonetworks' },
-  { pattern: 'pan*', patternName: 'paloaltonetworks' },
-  { pattern: 'symantec*', patternName: 'symantec' },
-  { pattern: 'trendmicro*', patternName: 'trendmicro' },
-  { pattern: 'tripwire*', patternName: 'tripwire' },
-  { pattern: '*vmware*', patternName: 'vmware' },
+  { pattern: '*aruba*', patternName: 'aruba' },
+  { pattern: '*barracuda*', patternName: 'barracuda' },
+  { pattern: '*cef*', patternName: 'cef' },
+  { pattern: '*checkpoint*', patternName: 'checkpoint' },
+  { pattern: '*cisco*', patternName: 'cisco' },
+  { pattern: '*citrix*', patternName: 'citrix' },
+  { pattern: '*cyberark*', patternName: 'cyberark' },
+  { pattern: '*cylance*', patternName: 'cylance' },
+  { pattern: '*fortinet*', patternName: 'fortinet' },
+  { pattern: '*infoblox*', patternName: 'infoblox' },
+  { pattern: '*kaspersky*', patternName: 'kaspersky' },
+  { pattern: '*mcafee*', patternName: 'mcafee' },
+  { pattern: '*paloaltonetworks*', patternName: 'paloaltonetworks' },
+  { pattern: '*pan*', patternName: 'paloaltonetworks' },
+  { pattern: '*rsa*', patternName: 'rsa' },
+  { pattern: '*snort*', patternName: 'snort' },
+  { pattern: '*sonicwall*', patternName: 'sonicwall' },
+  { pattern: '*sophos*', patternName: 'sophos' },
+  { pattern: '*squid*', patternName: 'squid' },
+  { pattern: '*symantec*', patternName: 'symantec' },
+  { pattern: '*tippingpoint*', patternName: 'tippingpoint' },
+  { pattern: '*trendmicro*', patternName: 'trendmicro' },
+  { pattern: '*tripwire*', patternName: 'tripwire' },
+  { pattern: '*zscaler*', patternName: 'zscaler' },
+  { pattern: '*zeek*', patternName: 'zeek' },
+  { pattern: '*sigma_doc*', patternName: 'sigma_doc' },
+  { pattern: '*bro*', patternName: 'bro' },
+  { pattern: '*suricata*', patternName: 'suricata' },
+  { pattern: '*fsf*', patternName: 'fsf' },
+  { pattern: '*wazuh*', patternName: 'wazuh' },
 
   // Enterprise Search - Elastic
   { pattern: '.ent-search-*', patternName: 'enterprise-search' },
@@ -65,7 +75,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*magento*', patternName: 'magento' },
   { pattern: '*shopify*', patternName: 'shopify' },
   { pattern: '*wordpress*', patternName: 'wordpress' },
-  { pattern: '*wp*', patternName: 'wp' },
+  { pattern: '*wp*', patternName: 'wordpress' },
   { pattern: '*drupal*', patternName: 'drupal' },
   { pattern: '*joomla*', patternName: 'joomla' },
   { pattern: '*search*', patternName: 'search' },
