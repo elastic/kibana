@@ -226,7 +226,7 @@ describe('setPassword', () => {
     });
 
     await expect(
-      nativeRealm.setPassword('kibana_system', 'foo')
+      nativeRealm.setPassword('kibana_system', 'foo', { maxAttempts: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"SomeError"`);
   });
 });
