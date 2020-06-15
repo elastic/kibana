@@ -128,40 +128,6 @@ export const Home = () => {
         </EuiFlexItem>
 
         <EuiHorizontalRule margin="xl" />
-        {/* Apps sections */}
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGrid columns={2}>
-                {appsSection.map((app) => (
-                  <EuiFlexItem key={app.id}>
-                    <EuiCardWithoutPadding
-                      display="plain"
-                      layout="horizontal"
-                      icon={<EuiIcon size="l" type={app.icon} />}
-                      title={
-                        <EuiTitle size="xs" className="title">
-                          <h3>{app.title}</h3>
-                        </EuiTitle>
-                      }
-                      description={app.description}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiImage
-                size="xl"
-                alt="observability overview image"
-                url={core.http.basePath.prepend(
-                  '/plugins/observability/assets/observability_overview.png'
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
 
         {/* Try it out */}
         <EuiFlexItem>

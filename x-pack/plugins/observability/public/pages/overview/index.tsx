@@ -3,46 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  AreaSeries,
-  Axis,
-  BarSeries,
-  Chart,
-  DARK_THEME,
-  LIGHT_THEME,
-  LineSeries,
-  niceTimeFormatter,
-  Position,
-  Settings,
-} from '@elastic/charts';
 import { EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { groupBy } from 'lodash';
 import moment from 'moment';
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
+import { APMChart } from '../../components/chart/apm';
 import { ChartContainer } from '../../components/chart/container';
 import { WithHeaderLayout } from '../../components/layout/with_header';
 import { appsSection } from '../home/section';
 import { ContinueJourney } from './continue_journey';
-import { APMChart } from '../../components/chart/apm';
 
 export const Overview = () => {
   const theme = useContext(ThemeContext);
   const [withAlert, setWithAlert] = useState(false);
 
-  const barSeriesColorAccessor = ({ specId, yAccessor, splitAccessors }: any) => {
-    if (splitAccessors.get('group') === 'error') {
-      return 'lightgray';
-    }
-    return 'red';
-  };
-  const barSeriesColorAccessor2 = ({ specId, yAccessor, splitAccessors }: any) => {
-    if (splitAccessors.get('group') === 'error') {
-      return '#CA8EAE';
-    }
-    return '#9170B8';
-  };
+  // const barSeriesColorAccessor = ({ specId, yAccessor, splitAccessors }: any) => {
+  //   if (splitAccessors.get('group') === 'error') {
+  //     return 'lightgray';
+  //   }
+  //   return 'red';
+  // };
+  // const barSeriesColorAccessor2 = ({ specId, yAccessor, splitAccessors }: any) => {
+  //   if (splitAccessors.get('group') === 'error') {
+  //     return '#CA8EAE';
+  //   }
+  //   return '#9170B8';
+  // };
 
   return (
     <WithHeaderLayout
