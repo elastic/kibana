@@ -9,8 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
-
-  describe('Resolver embeddable test app', function () {
+  // endpoint was not released in 7.8 so disabling all the tests
+  describe.skip('Resolver embeddable test app', function () {
     this.tags('ciGroup7');
 
     beforeEach(async function () {
