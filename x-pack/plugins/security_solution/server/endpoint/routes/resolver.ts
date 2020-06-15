@@ -11,11 +11,13 @@ import {
   validateEvents,
   validateChildren,
   validateAncestry,
+  validateAlerts,
 } from '../../../common/endpoint/schema/resolver';
 import { handleEvents } from './resolver/events';
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
 import { handleTree } from './resolver/tree';
+import { handleAlerts } from './resolver/alerts';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
@@ -27,6 +29,15 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true },
     },
     handleEvents(log, endpointAppContext)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/resolver/{id}/alerts',
+      validate: validateAlerts,
+      options: { authRequired: true },
+    },
+    handleAlerts(log, endpointAppContext)
   );
 
   router.get(
