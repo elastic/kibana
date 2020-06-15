@@ -1,7 +1,18 @@
 
-# Convert Code Coverage Json Summary and Send to ES
+# Massage and Ingest Code Coverage Json Summary and Send to ES 
 
+## Currently, we have 4 indexes 
 
+### 2 for the Code Coverage Job
+https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/
+1. kibana_code_coverage
+2. kibana_total_code_coverage
+
+### 2 for the R & D Job
+https://kibana-ci.elastic.co/job/elastic+kibana+qa-research/
+1. qa_research_code_coverage
+2. qa_research_total_code_coverage
+ 
 ## How it works 
 
 It starts with this jenkins pipeline file:
@@ -19,6 +30,6 @@ From there, an event stream is created, that massages the data to an output form
 ## Configuration
 
 There is really only one config step.  
-The index [mapping](src/dev/code_coverage/ingest_coverage/index_mapping.md) for one of
+The index [mapping](./code_coverage_job/kibana_code_coverage_index_mapping.md) for one of
 of the indexes has to be manually created.  
 Currently, we just add it using Kibana's Dev Tools.
