@@ -88,12 +88,14 @@ describe('get_data_telemetry', () => {
         },
         {
           pattern_name: 'filebeat',
+          shipper: 'filebeat',
           index_count: 1,
           doc_count: 100,
           size_in_bytes: 10,
         },
         {
           pattern_name: 'metricbeat',
+          shipper: 'metricbeat',
           index_count: 1,
           ecs_index_count: 0,
           doc_count: 100,
@@ -134,6 +136,7 @@ describe('get_data_telemetry', () => {
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
         {
           pattern_name: 'filebeat',
+          shipper: 'filebeat',
           index_count: 1,
           ecs_index_count: 0,
         },
@@ -153,6 +156,7 @@ describe('get_data_telemetry', () => {
       await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
         {
           pattern_name: 'filebeat',
+          shipper: 'filebeat',
           index_count: 1,
           ecs_index_count: 1,
           doc_count: 100,

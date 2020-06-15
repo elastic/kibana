@@ -29,9 +29,9 @@ export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patte
 // But it's good to have a minimum list shipped with the build.
 export const DATA_DATASETS_INDEX_PATTERNS = [
   // Security - Elastic
-  { pattern: 'auditbeat-*', patternName: 'auditbeat' },
-  { pattern: 'winlogbeat-*', patternName: 'winlogbeat' },
-  { pattern: 'packetbeat-*', patternName: 'packetbeat' },
+  { pattern: 'auditbeat-*', patternName: 'auditbeat', shipper: 'auditbeat' },
+  { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
+  { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
   // Security - 3rd party
   { pattern: '*tomcat*', patternName: 'tomcat' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
@@ -88,11 +88,12 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*acquia*', patternName: 'acquia' },
 
   // Observability - Elastic
-  { pattern: 'filebeat-*', patternName: 'filebeat' },
-  { pattern: 'metricbeat-*', patternName: 'metricbeat' },
-  { pattern: 'apm-*', patternName: 'apm' },
-  { pattern: 'functionbeat-*', patternName: 'functionbeat' },
-  { pattern: 'heartbeat-*', patternName: 'heartbeat' },
+  { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: 'metricbeat-*', patternName: 'metricbeat', shipper: 'metricbeat' },
+  { pattern: 'apm-*', patternName: 'apm', shipper: 'apm' },
+  { pattern: 'functionbeat-*', patternName: 'functionbeat', shipper: 'functionbeat' },
+  { pattern: 'heartbeat-*', patternName: 'heartbeat', shipper: 'heartbeat' },
+  { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
   // Observability - 3rd party
   { pattern: 'fluentd*', patternName: 'fluentd' },
   { pattern: 'telegraf*', patternName: 'telegraf' },
