@@ -8702,7 +8702,6 @@
     "xpack.lens.indexPattern.groupingSecondDateHistogram": "每个 {target} 的日期",
     "xpack.lens.indexPattern.groupingSecondTerms": "每个 {target} 的排名最前值",
     "xpack.lens.indexPattern.indexPatternLoadError": "加载索引模式时出错",
-    "xpack.lens.indexPattern.individualFieldsLabel": "各个字段",
     "xpack.lens.indexPattern.invalidInterval": "时间间隔值无效",
     "xpack.lens.indexPattern.invalidOperationLabel": "要使用此函数，请选择不同的字段。",
     "xpack.lens.indexPattern.max": "最大值",

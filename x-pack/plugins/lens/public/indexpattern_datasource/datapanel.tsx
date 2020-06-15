@@ -29,6 +29,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
+import { NoFieldsCallout } from './no_fields_callout';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -311,6 +312,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 
   const hilight = localState.nameFilter.toLowerCase();
+  const hasFieldFilter = !!(localState.typeFilter.length || localState.nameFilter.length);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -389,7 +391,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   iconType="arrowDown"
                   isSelected={localState.isTypeFilterOpen}
                   numFilters={localState.typeFilter.length}
-                  hasActiveFilters={localState.typeFilter.length ? true : false}
+                  hasActiveFilters={!!localState.typeFilter.length}
                   numActiveFilters={localState.typeFilter.length}
                   data-test-subj="lnsIndexPatternFiltersToggle"
                   onClick={() => {
@@ -476,9 +478,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   <EuiNotificationBadge
                     size="m"
                     color={
-                      (localState.typeFilter.length || localState.nameFilter.length) &&
                       filteredFieldGroups.availableFields.length !==
-                        fieldGroups.availableFields.length
+                      fieldGroups.availableFields.length
                         ? 'accent'
                         : 'subdued'
                     }
@@ -506,76 +507,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     );
                   })}
                 </div>
-
-                {paginatedAvailableFields.length === 0 && (
-                  <EuiCallOut
-                    size="s"
-                    color="warning"
-                    title={
-                      localState.typeFilter.length || localState.nameFilter.length
-                        ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
-                            defaultMessage: 'No fields match the current filters.',
-                          })
-                        : paginatedEmptyFields
-                        ? i18n.translate('xpack.lens.indexPatterns.noDataLabel', {
-                            defaultMessage: `Looks like you don't have any fields with data`,
-                          })
-                        : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
-                            defaultMessage: 'No fields exist in this index pattern.',
-                          })
-                    }
-                  >
-                    {(localState.typeFilter.length ||
-                      localState.nameFilter.length ||
-                      paginatedEmptyFields.length) && (
-                      <>
-                        <strong>
-                          {i18n.translate('xpack.lens.indexPatterns.noFields.tryText', {
-                            defaultMessage: 'Try:',
-                          })}
-                        </strong>
-                        <ul>
-                          <li>
-                            {i18n.translate('xpack.lens.indexPatterns.noFields.extendTimeBullet', {
-                              defaultMessage: 'Extending the time range',
-                            })}
-                          </li>
-                          {localState.nameFilter.length ? (
-                            <li>
-                              {i18n.translate(
-                                'xpack.lens.indexPatterns.noFields.fieldQueryFilterBullet',
-                                {
-                                  defaultMessage: 'Changing the field query filter',
-                                }
-                              )}
-                            </li>
-                          ) : null}
-                          {localState.typeFilter.length ? (
-                            <li>
-                              {i18n.translate(
-                                'xpack.lens.indexPatterns.noFields.fieldTypeFilterBullet',
-                                {
-                                  defaultMessage: 'Changing the field filters',
-                                }
-                              )}
-                            </li>
-                          ) : null}
-                          {filters.length ? (
-                            <li>
-                              {i18n.translate(
-                                'xpack.lens.indexPatterns.noFields.globalFiltersBullet',
-                                {
-                                  defaultMessage: 'Changing the global filters',
-                                }
-                              )}
-                            </li>
-                          ) : null}
-                        </ul>
-                      </>
-                    )}
-                  </EuiCallOut>
-                )}
               </EuiAccordion>
+              {paginatedAvailableFields.length === 0 && (
+                <NoFieldsCallout
+                  isAffectedByGlobalFilter={!!filters.length}
+                  isAffectedByFieldFilter={hasFieldFilter}
+                  isAffectedByTimerange={true}
+                  existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                />
+              )}
               <EuiSpacer size="m" />
               <EuiAccordion
                 initialIsOpen={false}
@@ -593,7 +533,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   <EuiNotificationBadge
                     size="m"
                     color={
-                      (localState.typeFilter.length || localState.nameFilter.length) &&
                       filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
                         ? 'accent'
                         : 'subdued'
@@ -623,6 +562,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   })}
                 </div>
               </EuiAccordion>
+              {paginatedEmptyFields.length === 0 && (
+                <NoFieldsCallout
+                  isAffectedByFieldFilter={hasFieldFilter}
+                  existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                />
+              )}
               <EuiSpacer size="m" />
             </div>
           </div>

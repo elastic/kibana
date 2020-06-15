@@ -8698,7 +8698,6 @@
     "xpack.lens.indexPattern.groupingSecondDateHistogram": "各 {target} の日付",
     "xpack.lens.indexPattern.groupingSecondTerms": "各 {target} のトップの値",
     "xpack.lens.indexPattern.indexPatternLoadError": "インデックスパターンの読み込み中にエラーが発生",
-    "xpack.lens.indexPattern.individualFieldsLabel": "個々のフィールド",
     "xpack.lens.indexPattern.invalidInterval": "無効な間隔値",
     "xpack.lens.indexPattern.invalidOperationLabel": "この関数を使用するには、別のフィールドを選択してください。",
     "xpack.lens.indexPattern.max": "最高",
