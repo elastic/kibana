@@ -37,6 +37,7 @@ import { ConfigureEndpointDatasource } from './management/pages/policy/view/inge
 
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
+import { manageOldSiemRoutes } from './helpers';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -80,6 +81,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       return { coreStart, startPlugins, services, store: this.store };
     };
 
+    // Waiting for https://github.com/elastic/kibana/issues/69110
     // core.application.register({
     //   id: APP_ID,
     //   title: 'Security',
@@ -291,96 +293,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: 'SIEM',
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
-        const [{ application }] = await core.getStartServices();
-        const hashPath = window.location.hash.split('?');
-        const search = hashPath.length >= 1 ? hashPath[1] : '';
-        const pageRoute = hashPath.length > 0 ? hashPath[0].split('/') : [];
-        const pageName = pageRoute.length >= 1 ? pageRoute[1] : '';
-        const path = `/${pageRoute.slice(2).join('/') ?? ''}?${search}`;
-
-        switch (pageName) {
-          case SecurityPageName.overview:
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
-                  replace: true,
-                  path,
-                }),
-              0
-            );
-          case 'ml-hosts':
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-                  replace: true,
-                  path: `/ml-hosts${path}`,
-                }),
-              0
-            );
-          case SecurityPageName.hosts:
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-                  replace: true,
-                  path,
-                }),
-              0
-            );
-          case 'ml-network':
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
-                  replace: true,
-                  path: `/ml-network${path}`,
-                }),
-              0
-            );
-          case SecurityPageName.network:
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
-                  replace: true,
-                  path,
-                }),
-              0
-            );
-          case SecurityPageName.timelines:
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`, {
-                  replace: true,
-                  path,
-                }),
-              0
-            );
-          case SecurityPageName.case:
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-                  replace: true,
-                  path,
-                }),
-              0
-            );
-          case 'detections':
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
-                  replace: true,
-                  path,
-                }),
-              0
-            );
-          default:
-            window.setTimeout(
-              () =>
-                application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
-                  replace: true,
-                  path: `?${search}`,
-                }),
-              0
-            );
-        }
+        const [coreStart] = await core.getStartServices();
+        manageOldSiemRoutes(coreStart);
         return () => true;
       },
     });
