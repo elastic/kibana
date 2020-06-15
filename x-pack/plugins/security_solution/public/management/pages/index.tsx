@@ -15,7 +15,7 @@ import {
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
-import { getManagementUrl } from '..';
+import { getEndpointListPath } from '../common/routing';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
@@ -27,7 +27,7 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
         render={() => {
-          history.replace(getManagementUrl({ name: 'endpointList', excludePrefix: true }));
+          history.replace(getEndpointListPath({ name: 'endpointList' }));
           return null;
         }}
       />

@@ -38,9 +38,10 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { getManagementUrl } from '../../../common/routing';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 import { SecurityPageName } from '../../../../app/types';
+import { useFormatUrl } from '../../../../common/components/link_to';
+import { getPolicyDetailPath } from '../../../common/routing';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -117,6 +118,7 @@ export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -232,12 +234,8 @@ export const PolicyList = React.memo(() => {
         }),
         // eslint-disable-next-line react/display-name
         render: (name: string, item: Immutable<PolicyData>) => {
-          const routePath = getManagementUrl({
-            name: 'policyDetails',
-            policyId: item.id,
-            excludePrefix: true,
-          });
-          const routeUrl = getManagementUrl({ name: 'policyDetails', policyId: item.id });
+          const routePath = getPolicyDetailPath(item.id, search);
+          const routeUrl = formatUrl(routePath);
           return (
             <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
               <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
@@ -349,7 +347,7 @@ export const PolicyList = React.memo(() => {
         ],
       },
     ],
-    [services.application, handleDeleteOnClick]
+    [services.application, handleDeleteOnClick, formatUrl, search]
   );
 
   return (
@@ -389,7 +387,7 @@ export const PolicyList = React.memo(() => {
           data-test-subj="policyTable"
           hasActions={false}
         />
-        <SpyRoute />
+        <SpyRoute pageName={SecurityPageName.management} />
       </ManagementPageView>
     </>
   );

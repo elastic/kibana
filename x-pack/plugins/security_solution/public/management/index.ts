@@ -14,8 +14,6 @@ import { AppAction } from '../common/store/actions';
 import { managementMiddlewareFactory } from './store/middleware';
 import { ManagementState } from './types';
 
-export { getManagementUrl } from './common/routing';
-
 /**
  * Internally, our state is sometimes immutable, ignore that in our external
  * interface.

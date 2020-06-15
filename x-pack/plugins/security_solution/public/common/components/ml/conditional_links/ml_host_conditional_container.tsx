@@ -11,7 +11,6 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
-import { SecurityPageName } from '../../../../app/types';
 import { HostsTableType } from '../../../../hosts/store/model';
 
 import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';

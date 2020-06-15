@@ -11,7 +11,7 @@ import { PageView, PageViewProps } from '../../common/components/endpoint/page_v
 import { ManagementSubTab } from '../types';
 import { SecurityPageName } from '../../app/types';
 import { useFormatUrl } from '../../common/components/link_to';
-import { getEndpointPath, getPoliciesPath } from '../common/routing';
+import { getEndpointListPath, getPoliciesPath } from '../common/routing';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
   const history = useHistory();
@@ -21,7 +21,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
   const goToEndpoint = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getEndpointPath(search));
+      history.push(getEndpointListPath({ name: 'endpointList' }, search));
     },
     [history, search]
   );
@@ -45,7 +45,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
         }),
         id: ManagementSubTab.endpoints,
         isSelected: tabName === ManagementSubTab.endpoints,
-        href: formatUrl(getEndpointPath()),
+        href: formatUrl(getEndpointListPath({ name: 'endpointList' })),
         onClick: goToEndpoint,
       },
       {

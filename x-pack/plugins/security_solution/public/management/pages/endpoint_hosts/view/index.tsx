@@ -28,8 +28,10 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
-import { getManagementUrl } from '../../..';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { SecurityPageName } from '../../../../app/types';
+import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
+import { useFormatUrl } from '../../../../common/components/link_to';
 
 const HostLink = memo<{
   name: string;
@@ -65,6 +67,7 @@ export const HostList = () => {
     uiQueryParams: queryParams,
     hasSelectedHost,
   } = useHostSelector(selector);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -81,9 +84,8 @@ export const HostList = () => {
       const { index, size } = page;
       // FIXME: PT: if host details is open, table is not displaying correct number of rows
       history.push(
-        getManagementUrl({
+        getEndpointListPath({
           name: 'endpointList',
-          excludePrefix: true,
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -105,17 +107,24 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getManagementUrl({
-            ...queryParams,
-            name: 'endpointDetails',
-            selected_host: id,
-            excludePrefix: true,
-          });
-          const toRouteUrl = getManagementUrl({
-            ...queryParams,
-            name: 'endpointDetails',
-            selected_host: id,
-          });
+          const toRoutePath = getEndpointDetailsPath(
+            {
+              ...queryParams,
+              name: 'endpointDetails',
+              selected_host: id,
+            },
+            search
+          );
+          const toRouteUrl = formatUrl(
+            getEndpointDetailsPath(
+              {
+                ...queryParams,
+                name: 'endpointDetails',
+                selected_host: id,
+              },
+              search
+            )
+          );
           return <HostLink name={hostname} href={toRouteUrl} route={toRoutePath} />;
         },
       },
@@ -224,7 +233,7 @@ export const HostList = () => {
         },
       },
     ];
-  }, [queryParams]);
+  }, [formatUrl, queryParams, search]);
 
   return (
     <ManagementPageView
@@ -252,7 +261,7 @@ export const HostList = () => {
         pagination={paginationSetup}
         onChange={onTableChange}
       />
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.management} />
     </ManagementPageView>
   );
 };

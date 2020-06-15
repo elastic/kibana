@@ -7,7 +7,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
@@ -19,11 +18,14 @@ import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
 import { AllCasesModal } from '../../../../cases/components/all_cases_modal';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
+import { useKibana } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common/constants';
+import { getCaseDetailsUrl } from '../../../../common/components/link_to';
 
 type CreateTimeline = ({
   id,
@@ -91,6 +93,7 @@ export const Properties = React.memo<Props>(
     updateTitle,
     usersViewing,
   }) => {
+    const { navigateToApp } = useKibana().services.application;
     const { ref, width = 0 } = useThrottledResizeObserver(300);
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
@@ -110,7 +113,6 @@ export const Properties = React.memo<Props>(
     const [showCaseModal, setShowCaseModal] = useState(false);
     const onCloseCaseModal = useCallback(() => setShowCaseModal(false), []);
     const onOpenCaseModal = useCallback(() => setShowCaseModal(true), []);
-    const history = useHistory();
     const currentTimeline = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
@@ -118,8 +120,8 @@ export const Properties = React.memo<Props>(
     const onRowClick = useCallback(
       (id: string) => {
         onCloseCaseModal();
-        history.push({
-          pathname: `/${SiemPageName.case}/${id}`,
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCaseDetailsUrl({ id }),
         });
         dispatch(
           setInsertTimeline({
@@ -129,7 +131,7 @@ export const Properties = React.memo<Props>(
           })
         );
       },
-      [onCloseCaseModal, currentTimeline, dispatch, history, timelineId, title]
+      [navigateToApp, onCloseCaseModal, currentTimeline, dispatch, timelineId, title]
     );
 
     const datePickerWidth = useMemo(

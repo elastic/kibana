@@ -16,7 +16,7 @@ import {
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '../../../../../../../test_utils';
 
@@ -337,7 +337,7 @@ describe('Properties', () => {
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
 
-    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SiemPageName.case}/create` });
+    expect(mockHistoryPush).toBeCalledWith({ pathname: `/${SecurityPageName.case}/create` });
     expect(mockDispatch).toBeCalledWith(
       setInsertTimeline({
         timelineId: defaultProps.timelineId,

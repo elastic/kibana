@@ -202,7 +202,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '#/management/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
     it('should update the URL when policy status link is clicked', async () => {
@@ -381,7 +381,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '#/management/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
       it('should update URL when back to details link is clicked', async () => {
