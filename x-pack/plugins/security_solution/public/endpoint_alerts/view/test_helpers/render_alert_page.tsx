@@ -35,6 +35,7 @@ export const alertPageTestRender = () => {
 
   const depsStart = depsStartMock();
   depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
+  const uiSettings = new Map();
 
   return {
     store,
@@ -53,7 +54,7 @@ export const alertPageTestRender = () => {
        */
       return reactTestingLibrary.render(
         <Provider store={store}>
-          <KibanaContextProvider services={{ data: depsStart.data }}>
+          <KibanaContextProvider services={{ data: depsStart.data, uiSettings }}>
             <I18nProvider>
               <Router history={history}>
                 <RouteCapture>
