@@ -7,7 +7,7 @@ import { ScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { License, IndexDataEnricher } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;
