@@ -40,16 +40,15 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
 
   const setNonReloadedFlag = () => {
-    return browser.executeAsync(async (cb: Function) => {
+    return browser.executeAsync(async (cb) => {
       window.__nonReloadedFlag = true;
       cb();
     });
   };
-  const wasReloaded = (): Promise<boolean> => {
+  const wasReloaded = () => {
     return browser.executeAsync<boolean>(async (cb) => {
       const reloaded = window.__nonReloadedFlag !== true;
       cb(reloaded);
-      return reloaded;
     });
   };
 
