@@ -374,7 +374,7 @@ const updateExistingIndex = async ({
   const indexMappings = await getIndexMappings(indexName, callCluster);
   const dataset = indexMappings[indexName].mappings.properties.dataset.properties;
   if (!dataset.type.value || !dataset.name.value || !dataset.namespace.value)
-    throw new Error('dataset values are missing from the index template');
+    throw new Error(`dataset values are missing from the index template ${indexName}`);
   const dataStreamName = `${dataset.type.value}-${dataset.name.value}-${dataset.namespace.value}`;
 
   // try to update the mappings first
@@ -392,7 +392,7 @@ const updateExistingIndex = async ({
         path,
       });
     } catch (error) {
-      throw new Error(`cannot rollover`);
+      throw new Error(`cannot rollover data stream ${dataStreamName}`);
     }
   }
   // update settings after mappings was successful to ensure
@@ -405,7 +405,7 @@ const updateExistingIndex = async ({
       body: { index: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
-    throw new Error('could not update index template settings');
+    throw new Error(`could not update index template settings for ${indexName}`);
   }
 };
 
