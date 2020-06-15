@@ -54,7 +54,7 @@ export const PercPageLoadedLabel = i18n.translate(
 export const PageLoadTimeLabel = i18n.translate(
   'xpack.apm.rum.dashboard.pageLoadTime.label',
   {
-    defaultMessage: 'Page load time',
+    defaultMessage: 'Page load time (seconds)',
   }
 );
 

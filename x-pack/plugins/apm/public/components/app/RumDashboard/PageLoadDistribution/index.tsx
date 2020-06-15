@@ -20,6 +20,8 @@ import {
   CurveType,
   BrushEndListener,
   Settings,
+  TooltipValueFormatter,
+  TooltipValue,
 } from '@elastic/charts';
 import { Position } from '@elastic/charts/dist/utils/commons';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -78,6 +80,18 @@ export const PageLoadDistribution = () => {
     setPercentileRange({ min: String(minX), max: String(maxX) });
   };
 
+  const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
+    return (
+      <div>
+        <p>{tooltip.value} seconds</p>
+      </div>
+    );
+  };
+
+  const tooltipProps = {
+    headerFormatter,
+  };
+
   return (
     <div>
       <EuiSpacer size="m" />
@@ -103,7 +117,7 @@ export const PageLoadDistribution = () => {
       <EuiSpacer size="m" />
       <ChartWrapper loading={status !== 'success'} height="200px">
         <Chart className="story-chart">
-          <Settings onBrushEnd={onBrushEnd} />
+          <Settings onBrushEnd={onBrushEnd} tooltip={tooltipProps} />
           <PercentileAnnotations percentiles={data?.percentiles} />
           <Axis
             id="bottom"
@@ -118,6 +132,7 @@ export const PageLoadDistribution = () => {
           />
           <LineSeries
             id={'PagesPercentage'}
+            name={PercPageLoadedLabel}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
