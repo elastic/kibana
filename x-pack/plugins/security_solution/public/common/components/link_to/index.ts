@@ -27,8 +27,9 @@ export const useFormatUrl = (page: SecurityPageName) => {
   const search = useGetUrlSearch(navTabs[page]);
   const formatUrl = useCallback(
     (path: string) => {
+      const pathArr = path.split('?');
       return history.createHref({
-        pathname: path.includes('?') ? path.substring(0, path.indexOf('?')) : path,
+        pathname: pathArr[0],
         search,
       });
     },

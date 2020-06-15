@@ -12,8 +12,6 @@ import { DragDropContextWrapper } from '../../common/components/drag_and_drop/dr
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
-import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
-import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
 import {
@@ -22,7 +20,6 @@ import {
 } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
-import { SecurityPageName } from '../types';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -85,21 +82,6 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
               )}
 
               {children}
-              {/* <Switch>
-                <Route
-                  path="/ml-hosts"
-                  render={({ location, match }) => (
-                    <MlHostConditionalContainer location={location} url={match.url} />
-                  )}
-                />
-                <Route
-                  path="/ml-network"
-                  render={({ location, match }) => (
-                    <MlNetworkConditionalContainer location={location} url={match.url} />
-                  )}
-                />
-                <Route render={() => <NotFoundPage />} />
-              </Switch> */}
             </DragDropContextWrapper>
           )}
         </WithSource>

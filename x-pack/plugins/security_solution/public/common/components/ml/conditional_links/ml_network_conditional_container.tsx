@@ -43,7 +43,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           encode: false,
         });
 
-        return <Redirect to={`/${SecurityPageName.network}?${reEncoded}`} />;
+        return <Redirect to={`?${reEncoded}`} />;
       }}
     />
     <Route
@@ -68,7 +68,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             encode: false,
           });
 
-          return <Redirect to={`/${SecurityPageName.network}?${reEncoded}`} />;
+          return <Redirect to={`?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
           queryStringDecoded.query = addEntitiesToKql(
@@ -80,13 +80,13 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             sort: false,
             encode: false,
           });
-          return <Redirect to={`/${SecurityPageName.network}?${reEncoded}`} />;
+          return <Redirect to={`?${reEncoded}`} />;
         } else {
           const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
             sort: false,
             encode: false,
           });
-          return <Redirect to={`/${SecurityPageName.network}/ip/${ip}?${reEncoded}`} />;
+          return <Redirect to={`/ip/${ip}?${reEncoded}`} />;
         }
       }}
     />

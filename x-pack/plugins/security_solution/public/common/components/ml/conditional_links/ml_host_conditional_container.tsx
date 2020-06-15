@@ -42,7 +42,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           sort: false,
           encode: false,
         });
-        return <Redirect to={`/${SecurityPageName.hosts}?${reEncoded}`} />;
+        return <Redirect to={`?${reEncoded}`} />;
       }}
     />
     <Route
@@ -66,9 +66,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
             encode: false,
           });
 
-          return (
-            <Redirect to={`/${SecurityPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
-          );
+          return <Redirect to={`/${HostsTableType.anomalies}?${reEncoded}`} />;
         } else if (multipleEntities(hostName)) {
           const hosts: string[] = getMultipleEntities(hostName);
           queryStringDecoded.query = addEntitiesToKql(
@@ -81,20 +79,14 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
             encode: false,
           });
 
-          return (
-            <Redirect to={`/${SecurityPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
-          );
+          return <Redirect to={`/${HostsTableType.anomalies}?${reEncoded}`} />;
         } else {
           const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
             sort: false,
             encode: false,
           });
 
-          return (
-            <Redirect
-              to={`/${SecurityPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
-            />
-          );
+          return <Redirect to={`/${hostName}/${HostsTableType.anomalies}?${reEncoded}`} />;
         }
       }}
     />

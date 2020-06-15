@@ -10,6 +10,7 @@ import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
+import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { GlobalTime } from '../../common/containers/global_time';
 import { Hosts } from './hosts';
 import { hostsPagePath, hostDetailsPagePath } from './types';
@@ -81,6 +82,12 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
               history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
               return null;
             }}
+          />
+          <Route
+            path="/ml-hosts"
+            render={({ location, match }) => (
+              <MlHostConditionalContainer location={location} url={match.url} />
+            )}
           />
           <Route
             exact
