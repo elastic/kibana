@@ -7,12 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
-import { createJobFactory } from '../export_types/csv_from_savedobject/server/create_job';
-import { executeJobFactory } from '../export_types/csv_from_savedobject/server/execute_job';
+import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/server/create_job';
+import { runTaskFnFactory } from '../export_types/csv_from_savedobject/server/execute_job';
 import { getJobParamsFromRequest } from '../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { JobDocPayloadPanelCsv } from '../export_types/csv_from_savedobject/types';
+import { ScheduledTaskParamsPanelCsv } from '../export_types/csv_from_savedobject/types';
 import { LevelLogger as Logger } from '../lib';
-import { JobDocOutput } from '../types';
+import { TaskRunResult } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { HandlerErrorFunction } from './types';
 
@@ -36,8 +36,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
-   *  - re-use the createJob function to build up es query config
-   *  - re-use the executeJob function to run the scan and scroll queries and capture the entire CSV in a result object.
+   *  - re-use the scheduleTask function to build up es query config
+   *  - re-use the runTask function to run the scan and scroll queries and capture the entire CSV in a result object.
    */
   router.post(
     {
@@ -60,11 +60,11 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     userHandler(async (user, context, req, res) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
-      const createJobFn = createJobFactory(reporting, logger);
-      const executeJobFn = await executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
+      const scheduleTaskFn = scheduleTaskFnFactory(reporting, logger);
+      const runTaskFn = runTaskFnFactory(reporting, logger);
 
       try {
-        const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
+        const jobDocPayload: ScheduledTaskParamsPanelCsv = await scheduleTaskFn(
           jobParams,
           req.headers,
           context,
@@ -74,13 +74,13 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           content_type: jobOutputContentType,
           content: jobOutputContent,
           size: jobOutputSize,
-        }: JobDocOutput = await executeJobFn(null, jobDocPayload, context, req);
+        }: TaskRunResult = await runTaskFn(null, jobDocPayload, context, req);
 
         logger.info(`Job output size: ${jobOutputSize} bytes`);
 
         /*
          * ESQueue worker function defaults `content` to null, even if the
-         * executeJob returned undefined.
+         * runTask returned undefined.
          *
          * This converts null to undefined so the value can be sent to h.response()
          */

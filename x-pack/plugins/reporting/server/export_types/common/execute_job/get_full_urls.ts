@@ -13,22 +13,26 @@ import {
 import { ReportingConfig } from '../../..';
 import { getAbsoluteUrlFactory } from '../../../../common/get_absolute_url';
 import { validateUrls } from '../../../../common/validate_urls';
-import { JobDocPayloadPNG } from '../../png/types';
-import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { ScheduledTaskParamsPNG } from '../../png/types';
+import { ScheduledTaskParamsPDF } from '../../printable_pdf/types';
 
-function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPNG {
-  return (job as JobDocPayloadPNG).relativeUrl !== undefined;
+function isPngJob(
+  job: ScheduledTaskParamsPNG | ScheduledTaskParamsPDF
+): job is ScheduledTaskParamsPNG {
+  return (job as ScheduledTaskParamsPNG).relativeUrl !== undefined;
 }
-function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
-  return (job as JobDocPayloadPDF).relativeUrls !== undefined;
+function isPdfJob(
+  job: ScheduledTaskParamsPNG | ScheduledTaskParamsPDF
+): job is ScheduledTaskParamsPDF {
+  return (job as ScheduledTaskParamsPDF).relativeUrls !== undefined;
 }
 
-export function getFullUrls<JobDocPayloadType>({
+export function getFullUrls<ScheduledTaskParamsType>({
   config,
   job,
 }: {
   config: ReportingConfig;
-  job: JobDocPayloadPDF | JobDocPayloadPNG;
+  job: ScheduledTaskParamsPDF | ScheduledTaskParamsPNG;
 }) {
   const [basePath, protocol, hostname, port] = [
     config.kbnConfig.get('server', 'basePath'),

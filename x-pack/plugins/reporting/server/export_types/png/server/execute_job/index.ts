@@ -7,37 +7,35 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../..';
 import { PNG_JOB_TYPE } from '../../../../../common/constants';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../..//types';
-import { LevelLogger } from '../../../../lib';
+import { ESQueueWorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../../..//types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
   getFullUrls,
   omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
-import { JobDocPayloadPNG } from '../../types';
+import { ScheduledTaskParamsPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
 
-type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
+type QueuedPngExecutorFactory = RunTaskFnFactory<ESQueueWorkerExecuteFn<ScheduledTaskParamsPNG>>;
 
-export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingCore,
-  parentLogger: LevelLogger
+export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
+  reporting,
+  parentLogger
 ) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
-  return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+  return async function runTask(jobId, job, cancellationToken) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
 
     const generatePngObservable = await generatePngObservableFactory(reporting);
     const jobLogger = logger.clone([jobId]);
-    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),

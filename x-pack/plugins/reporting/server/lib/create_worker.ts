@@ -27,7 +27,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
       ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
     >) {
-      const jobExecutor = await exportType.executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
+      const jobExecutor = exportType.runTaskFnFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 

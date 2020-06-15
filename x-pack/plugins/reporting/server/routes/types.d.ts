@@ -6,7 +6,7 @@
 
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { JobDocPayload } from '../types';
+import { ScheduledTaskParams } from '../types';
 
 export type HandlerFunction = (
   user: AuthenticatedUser | null,
@@ -23,7 +23,7 @@ export interface QueuedJobPayload<JobParamsType> {
   error?: boolean;
   source: {
     job: {
-      payload: JobDocPayload<JobParamsType>;
+      payload: ScheduledTaskParams<JobParamsType>;
     };
   };
 }

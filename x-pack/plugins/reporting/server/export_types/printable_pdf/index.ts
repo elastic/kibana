@@ -14,22 +14,22 @@ import {
 } from '../../../common/constants';
 import { ESQueueCreateJobFn, ESQueueWorkerExecuteFn, ExportTypeDefinition } from '../../types';
 import { metadata } from './metadata';
-import { createJobFactory } from './server/create_job';
-import { executeJobFactory } from './server/execute_job';
-import { JobDocPayloadPDF, JobParamsPDF } from './types';
+import { scheduleTaskFnFactory } from './server/create_job';
+import { runTaskFnFactory } from './server/execute_job';
+import { JobParamsPDF, ScheduledTaskParamsPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   JobParamsPDF,
   ESQueueCreateJobFn<JobParamsPDF>,
-  JobDocPayloadPDF,
-  ESQueueWorkerExecuteFn<JobDocPayloadPDF>
+  ScheduledTaskParamsPDF,
+  ESQueueWorkerExecuteFn<ScheduledTaskParamsPDF>
 > => ({
   ...metadata,
   jobType,
   jobContentEncoding: 'base64',
   jobContentExtension: 'pdf',
-  createJobFactory,
-  executeJobFactory,
+  scheduleTaskFnFactory,
+  runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_STANDARD,

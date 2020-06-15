@@ -7,13 +7,13 @@
 import { ReportingConfig } from '../../../';
 import { ConditionalHeaders } from '../../../types';
 
-export const getConditionalHeaders = <JobDocPayloadType>({
+export const getConditionalHeaders = <ScheduledTaskParamsType>({
   config,
   job,
   filteredHeaders,
 }: {
   config: ReportingConfig;
-  job: JobDocPayloadType;
+  job: ScheduledTaskParamsType;
   filteredHeaders: Record<string, string>;
 }) => {
   const { kbnConfig } = config;

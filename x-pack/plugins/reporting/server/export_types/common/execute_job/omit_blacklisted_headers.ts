@@ -9,11 +9,11 @@ import {
   KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN,
 } from '../../../../common/constants';
 
-export const omitBlacklistedHeaders = <JobDocPayloadType>({
+export const omitBlacklistedHeaders = <ScheduledTaskParamsType>({
   job,
   decryptedHeaders,
 }: {
-  job: JobDocPayloadType;
+  job: ScheduledTaskParamsType;
   decryptedHeaders: Record<string, string>;
 }) => {
   const filteredHeaders: Record<string, string> = omit(

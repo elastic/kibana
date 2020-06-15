@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, JobDocPayload, TimeRangeParams } from '../../types';
+import { JobParamPostPayload, ScheduledTaskParams, TimeRangeParams } from '../../types';
 
 export interface FakeRequest {
   headers: Record<string, unknown>;
@@ -23,7 +23,7 @@ export interface JobParamsPanelCsv {
   visType?: string;
 }
 
-export interface JobDocPayloadPanelCsv extends JobDocPayload<JobParamsPanelCsv> {
+export interface ScheduledTaskParamsPanelCsv extends ScheduledTaskParams<JobParamsPanelCsv> {
   jobParams: JobParamsPanelCsv;
 }
 

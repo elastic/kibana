@@ -6,39 +6,33 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { ReportingCore } from '../../..';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger } from '../../../lib';
-import { ExecuteJobFactory, JobDocOutput, JobDocPayload } from '../../../types';
+import { cryptoFactory } from '../../../lib';
+import { RunTaskFnFactory, ScheduledTaskParams, TaskRunResult } from '../../../types';
 import { CsvResultFromSearch } from '../../csv/types';
-import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
+import { FakeRequest, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
- * generated in the CreateFn
+ * generated in the ScheduleFn
  */
 export type ImmediateExecuteFn<JobParamsType> = (
   jobId: null,
-  job: JobDocPayload<JobParamsType>,
+  job: ScheduledTaskParams<JobParamsType>,
   context: RequestHandlerContext,
   req: KibanaRequest
-) => Promise<JobDocOutput>;
+) => Promise<TaskRunResult>;
 
-export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+>> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
   const generateCsv = createGenerateCsv(reporting, parentLogger);
 
-  return async function executeJob(
-    jobId: string | null,
-    job: JobDocPayloadPanelCsv,
-    context,
-    req
-  ): Promise<JobDocOutput> {
+  return async function runTask(jobId: string | null, job, context, req) {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"

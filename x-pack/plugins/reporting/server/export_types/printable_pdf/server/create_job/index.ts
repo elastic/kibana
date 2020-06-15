@@ -6,18 +6,18 @@
 
 import { validateUrls } from '../../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../lib';
-import { CreateJobFactory, ESQueueCreateJobFn } from '../../../../types';
+import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../../types';
 import { JobParamsPDF } from '../../types';
 
-export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function createJobFn(
-    { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
+  return async function scheduleTaskFn(
+    { title, relativeUrls, browserTimezone, layout, objectType },
     context,
     req
   ) {
