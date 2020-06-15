@@ -6,5 +6,5 @@
   "ui": true,
   "requiredPlugins": ["embeddable"],
   "optionalPlugins": [],
-  "extraPublicDirs": ["public/todo"]
+  "extraPublicDirs": ["public/todo", "public/hello_world"]
 }
