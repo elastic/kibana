@@ -23,7 +23,7 @@ import { GetFieldsOptions, IIndexPatternsApiClient, IndexPattern } from '.';
 export const createFieldsFetcher = (
   indexPattern: IndexPattern,
   apiClient: IIndexPatternsApiClient,
-  metaFields: string
+  metaFields: string[]
 ) => {
   const fieldFetcher = {
     fetch: (options: GetFieldsOptions) => {

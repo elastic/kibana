@@ -27,7 +27,7 @@ export interface GetFieldsOptions {
   type?: string;
   params?: any;
   lookBack?: boolean;
-  metaFields?: string;
+  metaFields?: string[];
 }
 
 export type IIndexPatternsApiClient = PublicMethodsOf<IndexPatternsApiClient>;
@@ -65,7 +65,7 @@ export class IndexPatternsApiClient {
     return this._request(url, {
       pattern,
       look_back: lookBack,
-      meta_fields: metaFields,
+      meta_fields: metaFields, // might need to be stringified
     }).then((resp: any) => resp.fields);
   }
 
@@ -79,14 +79,14 @@ export class IndexPatternsApiClient {
       url = this._getUrl([type, '_fields_for_wildcard']);
       query = {
         pattern,
-        meta_fields: metaFields,
+        meta_fields: metaFields, // might need to be stringified
         params: JSON.stringify(params),
       };
     } else {
       url = this._getUrl(['_fields_for_wildcard']);
       query = {
         pattern,
-        meta_fields: metaFields,
+        meta_fields: metaFields, // might need to be stringified
       };
     }
 
