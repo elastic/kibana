@@ -85,9 +85,9 @@ export class BundleRefsPlugin {
 
   apply(compiler: webpack.Compiler) {
     hookIntoCompiler(compiler, async (context, request) => {
-      const exportId = await this.resolveExternal(context, request);
-      if (exportId) {
-        return new BundleRefModule(exportId);
+      const ref = await this.resolveRef(context, request);
+      if (ref) {
+        return new BundleRefModule(ref.exportId);
       }
     });
   }
@@ -125,17 +125,12 @@ export class BundleRefsPlugin {
   }
 
   /**
-   * Determine externals statements for require/import statements by looking
-   * for requests resolving to the primary public export of the data, kibanaReact,
-   * amd kibanaUtils plugins. If this module is being imported then rewrite
-   * the import to access the global `__kbnBundles__` variables and access
-   * the relavent properties from that global object.
-   *
-   * @param bundle
-   * @param context the directory containing the module which made `request`
-   * @param request the request for a module from a commonjs require() call or import statement
+   * Determine if an import request resolves to a bundleRef export id. If the
+   * request resolves to a bundle ref context but none of the exported directories
+   * then an error is thrown. If the request does not resolve to a bundleRef then
+   * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
-  async resolveExternal(context: string, request: string) {
+  private async resolveRef(context: string, request: string) {
     // ignore imports that have loaders defined or are not relative seeming
     if (request.includes('!') || !request.startsWith('.')) {
       return;
@@ -174,6 +169,6 @@ export class BundleRefsPlugin {
       );
     }
 
-    return matchingRef.exportId;
+    return matchingRef;
   }
 }
