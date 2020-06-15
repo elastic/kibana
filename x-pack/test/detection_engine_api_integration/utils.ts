@@ -106,6 +106,10 @@ export const getSignalStatus = () => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
+export const getQueryAllSignals = () => ({
+  query: { match_all: {} },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
@@ -457,3 +461,33 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
 });
+
+export const waitUntil = async (
+  functionToTest: () => Promise<boolean>,
+  maxTimeout: number = 5000,
+  timeoutWait: number = 10
+) => {
+  console.log('starting it now');
+  await new Promise(async (resolve, reject) => {
+    let found = false;
+    let numberOfTries = 0;
+    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      const itPasses = await functionToTest();
+      if (itPasses) {
+        console.log('It passes');
+        found = true;
+      } else {
+        console.log('It does not pass yet');
+        numberOfTries++;
+      }
+      // console.log('about to block for', timeoutWait);
+      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
+      // console.log('done blocking for,', timeoutWait);
+    }
+    if (found) {
+      resolve();
+    } else {
+      reject(new Error('timed out waiting for function condition to be true'));
+    }
+  });
+};
