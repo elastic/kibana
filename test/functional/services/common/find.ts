@@ -151,6 +151,17 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async allByLinkText(
+      selector: string,
+      timeout: number = defaultFindTimeout
+    ): Promise<WebElementWrapper[]> {
+      log.debug(`Find.allByLinkText('${selector}') with timeout=${timeout}`);
+      await this._withTimeout(timeout);
+      const elements = await driver.findElements(By.linkText(selector));
+      await this._withTimeout(defaultFindTimeout);
+      return wrapAll(elements);
+    }
+
     public async allByButtonText(
       buttonText: string,
       element: WebDriver | WebElement | WebElementWrapper = driver,
@@ -160,7 +171,9 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(timeout, async () => {
         // tslint:disable-next-line:variable-name
         const _element = element instanceof WebElementWrapper ? element._webElement : element;
+        await this._withTimeout(0);
         const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
+        await this._withTimeout(defaultFindTimeout);
         const buttonTexts = await Promise.all(
           allButtons.map(async (el) => {
             return el.getVisibleText();
