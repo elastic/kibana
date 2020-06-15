@@ -100,17 +100,15 @@ export const previewMetricThresholdAlert: (
         const numberOfExecutionBuckets = Math.floor(
           numberOfResultBuckets / alertResultsPerExecution
         );
-        return [...Array(numberOfExecutionBuckets)].reduce(
-          (totalFired, _, i) =>
-            totalFired +
-            (alertResults.every(
-              (alertResult) =>
-                alertResult[group].shouldFire[Math.floor(i * alertResultsPerExecution)]
-            )
-              ? 1
-              : 0),
-          0
-        );
+        let numberOfTimesFired = 0;
+        for (let i = 0; i < numberOfExecutionBuckets; i++) {
+          const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
+          const allConditionsFiredInMappedBucket = alertResults.every(
+            (alertResult) => alertResult[group].shouldFire[mappedBucketIndex]
+          );
+          if (allConditionsFiredInMappedBucket) numberOfTimesFired++;
+        }
+        return numberOfTimesFired;
       })
     );
     return previewResults;
