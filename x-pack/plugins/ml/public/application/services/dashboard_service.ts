@@ -14,6 +14,7 @@ import {
   SavedObjectDashboard,
 } from '../../../../../../src/plugins/dashboard/public';
 import { useMlKibana } from '../contexts/kibana';
+import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 
@@ -83,7 +84,7 @@ export function dashboardServiceProvider(
       return await dashboardUrlGenerator.createUrl({
         dashboardId,
         useHash: false,
-        viewMode: 'edit',
+        viewMode: ViewMode.EDIT,
       });
     },
   };
