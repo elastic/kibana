@@ -159,6 +159,10 @@ describe('data generator', () => {
       return (inRelated || inRelatedAlerts || inLifecycle) && event.process.entity_id === node.id;
     };
 
+    it('has ancestry array defined', () => {
+      expect(tree.origin.lifecycle[0].process.Ext.ancestry.length).toBe(3);
+    });
+
     it('has the right related events for each node', () => {
       const checkRelatedEvents = (node: TreeNode) => {
         expect(node.relatedEvents.length).toEqual(4);
