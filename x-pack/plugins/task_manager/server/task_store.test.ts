@@ -1024,7 +1024,7 @@ if (doc['task.runAt'].size()!=0) {
       return { taskManagerId, runAt, tasks };
     }
 
-    test('emits an event when a task is succesfully claimed by id', async (done) => {
+    test('emits an event when a task is succesfully claimed by id', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1070,7 +1070,6 @@ if (doc['task.runAt'].size()!=0) {
               )
             );
             sub.unsubscribe();
-            done();
           },
         });
 
@@ -1081,7 +1080,7 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('emits an event when a task is succesfully by scheduling', async (done) => {
+    test('emits an event when a task is succesfully by scheduling', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1127,7 +1126,6 @@ if (doc['task.runAt'].size()!=0) {
               )
             );
             sub.unsubscribe();
-            done();
           },
         });
 
@@ -1138,7 +1136,7 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('emits an event when the store fails to claim a required task by id', async (done) => {
+    test('emits an event when the store fails to claim a required task by id', async () => {
       const { taskManagerId, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1166,7 +1164,6 @@ if (doc['task.runAt'].size()!=0) {
               asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
             );
             sub.unsubscribe();
-            done();
           },
         });
 

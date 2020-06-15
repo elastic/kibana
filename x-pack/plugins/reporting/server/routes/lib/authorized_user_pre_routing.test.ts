@@ -107,7 +107,7 @@ describe('authorized_user_pre_routing', function () {
     ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
   });
 
-  it('should return from handler when security is enabled and user has explicitly allowed role', async function (done) {
+  it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -125,7 +125,6 @@ describe('authorized_user_pre_routing', function () {
 
     authorizedUserPreRouting((user) => {
       expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
-      done();
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
   });

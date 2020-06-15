@@ -13,7 +13,7 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 jest.mock('../../kibana_services', () => {
-  const services = require.requireActual('../../kibana_services');
+  const services = jest.requireActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: jest.fn(() => () => {}),

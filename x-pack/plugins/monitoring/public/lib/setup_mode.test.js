@@ -121,7 +121,7 @@ describe('setup_mode', () => {
       data = {};
     });
 
-    it('should not fetch data if the user does not have sufficient permissions', async (done) => {
+    it('should not fetch data if the user does not have sufficient permissions', async () => {
       const addDanger = jest.fn();
       jest.doMock('../legacy_shims', () => ({
         Legacy: {
@@ -147,11 +147,10 @@ describe('setup_mode', () => {
           title: 'Setup mode is not available',
           text: 'You do not have the necessary permissions to do this.',
         });
-        done();
       });
     });
 
-    it('should set the newly discovered cluster uuid', async (done) => {
+    it('should set the newly discovered cluster uuid', async () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
@@ -170,11 +169,10 @@ describe('setup_mode', () => {
       await toggleSetupMode(true);
       waitForSetupModeData(() => {
         expect(injectorModulesMock.globalState.cluster_uuid).toBe(clusterUuid);
-        done();
       });
     });
 
-    it('should fetch data for a given cluster', async (done) => {
+    it('should fetch data for a given cluster', async () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
@@ -199,7 +197,6 @@ describe('setup_mode', () => {
             ccs: undefined,
           }
         );
-        done();
       });
     });
 

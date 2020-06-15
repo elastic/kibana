@@ -22,8 +22,8 @@ jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: <DefinePivotSummary />', () => {
-  // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async (done) => {
+  // Using the async/await wait() pattern to avoid act() errors.
+  test('Minimal initialization', async () => {
     // Arrange
     const searchItems = {
       indexPattern: {
@@ -64,6 +64,5 @@ describe('Transform: <DefinePivotSummary />', () => {
     expect(getByText('Group by')).toBeInTheDocument();
     expect(getByText('Aggregations')).toBeInTheDocument();
     await wait();
-    done();
   });
 });

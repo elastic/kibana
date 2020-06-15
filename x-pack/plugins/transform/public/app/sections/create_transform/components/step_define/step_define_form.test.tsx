@@ -47,8 +47,8 @@ const createMockStorage = () => ({
 });
 
 describe('Transform: <DefinePivotForm />', () => {
-  // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async (done) => {
+  // Using the async/await wait() pattern to avoid act() errors.
+  test('Minimal initialization', async () => {
     // Arrange
     const searchItems = {
       indexPattern: {
@@ -77,7 +77,6 @@ describe('Transform: <DefinePivotForm />', () => {
     // Assert
     expect(getByLabelText('Index pattern')).toBeInTheDocument();
     await wait();
-    done();
   });
 });
 

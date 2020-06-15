@@ -2774,14 +2774,13 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
+    test('updating the alert should not wait for the rerun the task to complete', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
       const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
-      resolveAfterAlertUpdatedCompletes.then(() => done());
 
       taskManager.runNow.mockReset();
       taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);

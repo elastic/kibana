@@ -35,7 +35,7 @@ describe('annotation_service', () => {
   });
 
   describe('deleteAnnotation()', () => {
-    it('should delete annotation', async (done) => {
+    it('should delete annotation', async () => {
       const { deleteAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -51,12 +51,11 @@ describe('annotation_service', () => {
       expect(mockFunct.mock.calls[0][0]).toBe('delete');
       expect(mockFunct.mock.calls[0][1]).toEqual(deleteParamsMock);
       expect(response).toBe(acknowledgedResponseMock);
-      done();
     });
   });
 
   describe('getAnnotation()', () => {
-    it('should get annotations for specific job', async (done) => {
+    it('should get annotations for specific job', async () => {
       const { getAnnotations } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -74,7 +73,6 @@ describe('annotation_service', () => {
       expect(Object.keys(response.annotations)).toHaveLength(1);
       expect(response.annotations[jobIdMock]).toHaveLength(2);
       expect(isAnnotations(response.annotations[jobIdMock])).toBeTruthy();
-      done();
     });
 
     it('should throw and catch an error', async () => {
@@ -104,7 +102,7 @@ describe('annotation_service', () => {
   });
 
   describe('indexAnnotation()', () => {
-    it('should index annotation', async (done) => {
+    it('should index annotation', async () => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -129,10 +127,9 @@ describe('annotation_service', () => {
       expect(typeof annotation.modified_time).toBe('number');
 
       expect(response).toBe(acknowledgedResponseMock);
-      done();
     });
 
-    it('should remove ._id and .key before updating annotation', async (done) => {
+    it('should remove ._id and .key before updating annotation', async () => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -161,10 +158,9 @@ describe('annotation_service', () => {
       expect(typeof annotation.key).toBe('undefined');
 
       expect(response).toBe(acknowledgedResponseMock);
-      done();
     });
 
-    it('should update annotation text and the username for modified_username', async (done) => {
+    it('should update annotation text and the username for modified_username', async () => {
       const { getAnnotations, indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -199,7 +195,6 @@ describe('annotation_service', () => {
       expect(modifiedAnnotation.modified_username).toBe(modifiedUsernameMock);
       expect(typeof modifiedAnnotation.create_time).toBe('number');
       expect(typeof modifiedAnnotation.modified_time).toBe('number');
-      done();
     });
   });
 });

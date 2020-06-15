@@ -30,7 +30,7 @@ const query: SimpleQuery = {
 };
 
 describe('Transform: useIndexData()', () => {
-  test('indexPattern set triggers loading', async (done) => {
+  test('indexPattern set triggers loading', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useIndexData(
         ({
@@ -48,13 +48,12 @@ describe('Transform: useIndexData()', () => {
     expect(IndexObj.errorMessage).toBe('');
     expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
     expect(IndexObj.tableItems).toEqual([]);
-    done();
   });
 });
 
 describe('Transform: <DataGrid /> with useIndexData()', () => {
-  // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async (done) => {
+  // Using the async/await wait() pattern to avoid act() errors.
+  test('Minimal initialization', async () => {
     // Arrange
     const indexPattern = {
       title: 'the-index-pattern-title',
@@ -79,6 +78,5 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     // Assert
     expect(getByText('the-index-preview-title')).toBeInTheDocument();
     await wait();
-    done();
   });
 });

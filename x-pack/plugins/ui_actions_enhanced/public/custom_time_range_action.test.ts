@@ -32,7 +32,7 @@ const createOpenModalMock = () => {
   return mock;
 };
 
-test('Custom time range action prevents embeddable from using container time', async (done) => {
+test('Custom time range action prevents embeddable from using container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -90,13 +90,12 @@ test('Custom time range action prevents embeddable from using container time', a
       expect(child1.getInput().timeRange).toEqual({ from: 'now-30days', to: 'now-29days' });
       expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
       subscription.unsubscribe();
-      done();
     });
 
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
 });
 
-test('Removing custom time range action resets embeddable back to container time', async (done) => {
+test('Removing custom time range action resets embeddable back to container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -164,13 +163,12 @@ test('Removing custom time range action resets embeddable back to container time
       expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
       expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
       subscription.unsubscribe();
-      done();
     });
 
   container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
 });
 
-test('Cancelling custom time range action leaves state alone', async (done) => {
+test('Cancelling custom time range action leaves state alone', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -223,7 +221,6 @@ test('Cancelling custom time range action leaves state alone', async (done) => {
       expect(child1.getInput().timeRange).toEqual({ from: '1', to: '2' });
       expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
       subscription.unsubscribe();
-      done();
     });
 
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });

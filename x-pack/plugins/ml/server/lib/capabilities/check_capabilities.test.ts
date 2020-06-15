@@ -27,7 +27,7 @@ const callWithRequestUpgrade = async () => ({ upgrade_mode: true });
 
 describe('check_capabilities', () => {
   describe('getCapabilities() - right number of capabilities', () => {
-    test('kibana capabilities count', async (done) => {
+    test('kibana capabilities count', async () => {
       const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getAdminCapabilities(),
@@ -37,12 +37,11 @@ describe('check_capabilities', () => {
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
       expect(count).toBe(28);
-      done();
     });
   });
 
   describe('getCapabilities() with security', () => {
-    test('ml_user capabilities only', async (done) => {
+    test('ml_user capabilities only', async () => {
       const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getUserCapabilities(),
@@ -88,10 +87,9 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
-      done();
     });
 
-    test('full capabilities', async (done) => {
+    test('full capabilities', async () => {
       const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getAdminCapabilities(),
@@ -137,10 +135,9 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(true);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(true);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(true);
-      done();
     });
 
-    test('upgrade in progress with full capabilities', async (done) => {
+    test('upgrade in progress with full capabilities', async () => {
       const { getCapabilities } = capabilitiesProvider(
         callWithRequestUpgrade,
         getAdminCapabilities(),
@@ -186,10 +183,9 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
-      done();
     });
 
-    test('upgrade in progress with partial capabilities', async (done) => {
+    test('upgrade in progress with partial capabilities', async () => {
       const { getCapabilities } = capabilitiesProvider(
         callWithRequestUpgrade,
         getUserCapabilities(),
@@ -235,10 +231,9 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
-      done();
     });
 
-    test('full capabilities, ml disabled in space', async (done) => {
+    test('full capabilities, ml disabled in space', async () => {
       const { getCapabilities } = capabilitiesProvider(
         callWithRequestNonUpgrade,
         getDefaultCapabilities(),
@@ -284,11 +279,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
-      done();
     });
   });
 
-  test('full capabilities, basic license, ml disabled in space', async (done) => {
+  test('full capabilities, basic license, ml disabled in space', async () => {
     const { getCapabilities } = capabilitiesProvider(
       callWithRequestNonUpgrade,
       getDefaultCapabilities(),
@@ -335,6 +329,5 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
     expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
     expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
-    done();
   });
 });

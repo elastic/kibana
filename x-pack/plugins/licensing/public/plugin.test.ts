@@ -92,7 +92,7 @@ describe('licensing plugin', () => {
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
-      it('observable receives updated licenses', async (done) => {
+      it('observable receives updated licenses', async () => {
         const types: LicenseType[] = ['gold', 'platinum'];
 
         const sessionStorage = coreMock.createStorage();
@@ -118,7 +118,6 @@ describe('licensing plugin', () => {
             refresh();
           } else if (i === 3) {
             expect(value.type).toBe('platinum');
-            done();
           } else {
             throw new Error('unreachable');
           }
