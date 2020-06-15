@@ -238,6 +238,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             },
             type: 'icon',
             icon: 'pencil',
+            enabled: (item) => !addedDashboards[item.id],
           },
         ],
       },
