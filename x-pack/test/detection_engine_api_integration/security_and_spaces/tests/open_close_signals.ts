@@ -6,7 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
+import { SearchResponse } from 'elasticsearch';
+import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_RULES_URL,
@@ -19,9 +20,10 @@ import {
   setSignalStatus,
   getSignalStatusEmptyResponse,
   getSimpleRule,
-  waitUntil,
-  getSignalStatus,
+  waitFor,
   getQueryAllSignals,
+  getQuerySignalIds,
+  deleteAllAlerts,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -62,69 +64,206 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('tests with auditbeat data', () => {
-        before(() => esArchiver.load('auditbeat/hosts'));
-        after(() => esArchiver.unload('auditbeat/hosts'));
-
-        it('should be able to query the status immediately afterwards consistency using wait_for', async () => {
+        beforeEach(async () => {
+          await deleteAllAlerts(es);
           await createSignalsIndex(supertest);
-          console.log('starting the test now');
-          const output = await es.search({
-            index: 'auditbeat-*',
-          });
-          console.log('---> OUTPUT IS:', JSON.stringify(output.body, null, 2));
-          const rule = getSimpleRule();
-          rule.index = ['auditbeat-*'];
-          rule.query = '*:*';
+          await esArchiver.load('auditbeat/hosts');
+        });
+        afterEach(async () => {
+          await deleteSignalsIndex(supertest);
+          await deleteAllAlerts(es);
+          await esArchiver.unload('auditbeat/hosts');
+        });
+
+        it('should be able to execute and get 10 signals', async () => {
+          const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
+
           // create a simple rule
-          const { body: bodyOnCreate }: { body: RulesSchema } = await supertest
+          await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
             .send(rule)
             .expect(200);
 
-          // wait until the rule has executed
-          await waitUntil(async () => {
-            const { body: findStatus } = await supertest
-              .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+          // wait until all the rules show up and are present
+          await waitFor(async () => {
+            const {
+              body: signalsOpen,
+            }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
-              .send({ ids: [bodyOnCreate.id] });
-            return (
-              findStatus[bodyOnCreate.id]?.current_status?.status != null &&
-              findStatus[bodyOnCreate.id].current_status.status !== 'going to run'
-            );
+              .send(getQueryAllSignals())
+              .expect(200);
+            return signalsOpen.hits.hits.length === 10;
           });
 
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          // search through all the signals
-          const { body: signals } = await supertest
+          // Get the collection of signals
+          const {
+            body: signalsOpen,
+          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
             .send(getQueryAllSignals())
             .expect(200);
 
-          console.log(JSON.stringify(signals, null, 2));
+          // expect there to be 10
+          expect(signalsOpen.hits.hits.length).equal(10);
+        });
 
-          expect(signals).to.eql({});
+        it('should be have set the signals in an open state initially', async () => {
+          const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
 
-          const { body: boydOnSetSignalStatus } = await supertest
-            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+          // create a simple rule
+          await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(setSignalStatus({ signalIds: [bodyOnCreate.id], status: 'open' }))
+            .send(rule)
             .expect(200);
 
-          // remove any server generated items that are indeterministic
-          delete boydOnSetSignalStatus.took;
-          expect(boydOnSetSignalStatus).to.eql({});
+          // wait until all the rules show up and are present
+          await waitFor(async () => {
+            const {
+              body: signalsOpen,
+            }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQueryAllSignals())
+              .expect(200);
+            return signalsOpen.hits.hits.length === 10;
+          });
 
-          /*
-          const { body } = await supertest
+          // Get the collection of signals
+          const {
+            body: signalsOpen,
+          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getSignalStatus())
+            .send(getQueryAllSignals())
             .expect(200);
 
-          await deleteSignalsIndex(supertest);
-          */
+          const everySignalOpen = signalsOpen.hits.hits.every(
+            ({
+              _source: {
+                signal: { status },
+              },
+            }) => status === 'open'
+          );
+
+          // expect their initial state to all be open
+          expect(everySignalOpen).to.eql(true);
+        });
+
+        it('should be able to get a count of 10 closed signals when closing 10', async () => {
+          const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
+
+          // create a simple rule
+          await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(200);
+
+          // wait until all the rules show up and are present
+          await waitFor(async () => {
+            const {
+              body: signalsOpen,
+            }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQueryAllSignals())
+              .expect(200);
+            return signalsOpen.hits.hits.length === 10;
+          });
+
+          // Get a collection of signals to get the id to set open/closed on them
+          const {
+            body: signalsOpen,
+          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQueryAllSignals())
+            .expect(200);
+
+          const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
+
+          // set all of the signals to the state of closed. There is no reason to use a waitUntil here
+          // as this route intentionally has a waitFor within it and should only return when the query has
+          // the data.
+          await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ signalIds, status: 'closed' }))
+            .expect(200);
+
+          const {
+            body: signalsClosed,
+          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
+
+          expect(signalsClosed.hits.hits.length).to.equal(10);
+        });
+
+        it('should be able close 10 signals immediately and they all should be closed', async () => {
+          const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
+
+          // create a simple rule
+          await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(200);
+
+          // wait until all the rules show up and are present
+          await waitFor(async () => {
+            const {
+              body: signalsOpen,
+            }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+              .set('kbn-xsrf', 'true')
+              .send(getQueryAllSignals())
+              .expect(200);
+            return signalsOpen.hits.hits.length === 10;
+          });
+
+          // Get a collection of signals to get the id to set open/closed on them
+          const {
+            body: signalsOpen,
+          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQueryAllSignals())
+            .expect(200);
+
+          const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
+
+          // set all of the signals to the state of closed. There is no reason to use a waitUntil here
+          // as this route intentionally has a waitFor within it and should only return when the query has
+          // the data.
+          await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ signalIds, status: 'closed' }))
+            .expect(200);
+
+          const {
+            body: signalsClosed,
+          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
+
+          const everySignalClosed = signalsClosed.hits.hits.every(
+            ({
+              _source: {
+                signal: { status },
+              },
+            }) => status === 'closed'
+          );
+          expect(everySignalClosed).to.eql(true);
         });
       });
     });

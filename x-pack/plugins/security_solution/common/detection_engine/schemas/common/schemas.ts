@@ -235,6 +235,7 @@ export const pageOrUndefined = t.union([page, t.undefined]);
 export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
 
 export const signal_ids = t.array(t.string);
+export type SignalIds = t.TypeOf<typeof signal_ids>;
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;

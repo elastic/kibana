@@ -7,6 +7,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import {
+  Status,
+  SignalIds,
+} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
@@ -110,12 +114,20 @@ export const getQueryAllSignals = () => ({
   query: { match_all: {} },
 });
 
+export const getQuerySignalIds = (signalIds: SignalIds) => ({
+  query: {
+    terms: {
+      _id: signalIds,
+    },
+  },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
 }: {
-  signalIds: string[];
-  status: 'open' | 'closed';
+  signalIds: SignalIds;
+  status: Status;
 }) => ({
   signal_ids: signalIds,
   status,
@@ -462,27 +474,23 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   exceptions_list: [],
 });
 
-export const waitUntil = async (
+// Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
+export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   maxTimeout: number = 5000,
   timeoutWait: number = 10
 ) => {
-  console.log('starting it now');
   await new Promise(async (resolve, reject) => {
     let found = false;
     let numberOfTries = 0;
     while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
       const itPasses = await functionToTest();
       if (itPasses) {
-        console.log('It passes');
         found = true;
       } else {
-        console.log('It does not pass yet');
         numberOfTries++;
       }
-      // console.log('about to block for', timeoutWait);
       await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
-      // console.log('done blocking for,', timeoutWait);
     }
     if (found) {
       resolve();
