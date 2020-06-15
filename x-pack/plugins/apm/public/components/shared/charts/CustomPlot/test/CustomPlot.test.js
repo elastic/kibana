@@ -254,12 +254,28 @@ describe('when response has no data', () => {
   const onHover = jest.fn();
   const onMouseLeave = jest.fn();
   const onSelectionEnd = jest.fn();
+  const annotations = [
+    {
+      type: 'version',
+      id: '2020-06-10 04:36:31',
+      '@timestamp': 1591763925012,
+      text: '2020-06-10 04:36:31',
+    },
+    {
+      type: 'version',
+      id: '2020-06-10 15:23:01',
+      '@timestamp': 1591802689233,
+      text: '2020-06-10 15:23:01',
+    },
+  ];
+
   let wrapper;
   beforeEach(() => {
     const series = getEmptySeries(1451606400000, 1451610000000);
 
     wrapper = mountWithTheme(
       <InnerCustomPlot
+        annotations={annotations}
         series={series}
         onHover={onHover}
         onMouseLeave={onMouseLeave}
@@ -291,6 +307,10 @@ describe('when response has no data', () => {
 
     it('should not display tooltip', () => {
       expect(wrapper.find('Tooltip').length).toEqual(0);
+    });
+
+    it('should not show annotations', () => {
+      expect(wrapper.find('AnnotationsPlot')).toHaveLength(0);
     });
 
     it('should have correct markup', () => {

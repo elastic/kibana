@@ -80,6 +80,7 @@ function getLayoutOptions(
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
+    // @ts-ignore DefinitelyTyped is incorrect here. Roots can be an Array
     roots: selectedRoots.length ? selectedRoots : undefined,
     fit: true,
     padding: nodeHeight,

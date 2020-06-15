@@ -191,11 +191,10 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => [
         : parseInt(theme.eui.paddingSizes.xs, 10),
     },
   },
-  // @ts-ignore DefinitelyTyped says visibility is "none" but it's
-  // actually "hidden"
   {
     selector: 'edge[isInverseEdge]',
-    // @ts-ignore
+    // @ts-ignore DefinitelyTyped says visibility is "none" but it's
+    // actually "hidden"
     style: { visibility: 'hidden' },
   },
   {

@@ -15,7 +15,7 @@ import {
 } from '../../../../../utils/testHelpers';
 
 describe('ErrorMarker', () => {
-  const mark = {
+  const mark = ({
     id: 'agent',
     offset: 10000,
     type: 'errorMark',
@@ -23,18 +23,24 @@ describe('ErrorMarker', () => {
     error: {
       trace: { id: '123' },
       transaction: { id: '456' },
-      error: { grouping_key: '123' },
+      error: {
+        grouping_key: '123',
+        log: {
+          message:
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+        },
+      },
       service: { name: 'bar' },
     },
     serviceColor: '#fff',
-  } as ErrorMark;
+  } as unknown) as ErrorMark;
 
   function openPopover(errorMark: ErrorMark) {
     const component = renderWithTheme(<ErrorMarker mark={errorMark} />);
     act(() => {
       fireEvent.click(component.getByTestId('popover'));
     });
-    expectTextsInDocument(component, ['10,000 μs']);
+    expectTextsInDocument(component, ['10.0 ms']);
     return component;
   }
   function getKueryDecoded(url: string) {
@@ -78,5 +84,35 @@ describe('ErrorMarker', () => {
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
     expect(getKueryDecoded(errorLink.hash)).toEqual('kuery=');
+  });
+  it('truncates the error message text', () => {
+    const { trace, transaction, ...withoutTraceAndTransaction } = mark.error;
+    const newMark = {
+      ...mark,
+      error: withoutTraceAndTransaction,
+    } as ErrorMark;
+    const component = openPopover(newMark);
+    const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
+    expect(errorLink.innerHTML).toHaveLength(241);
+  });
+
+  describe('when the error message is not longer than 240 characters', () => {
+    it('truncates the error message text', () => {
+      const newMark = ({
+        ...mark,
+        error: {
+          ...mark.error,
+          error: {
+            grouping_key: '123',
+            log: {
+              message: 'Blah.',
+            },
+          },
+        },
+      } as unknown) as ErrorMark;
+      const component = openPopover(newMark);
+      const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
+      expect(errorLink.innerHTML).toHaveLength(5);
+    });
   });
 });
