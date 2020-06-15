@@ -36,10 +36,7 @@ interface Args {
 
 /**
  * Node http request library does not expect there to be trailing "[" or "]"
- * characters in ipv6 host names but the Node URL class with helpers (from the "url" module)
- * does not scrub these from the "hostname" value.
- *
- * We do this just before sending the request.
+ * characters in ipv6 host names.
  */
 const scrubURLHostname = (hostName: string): string =>
   hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
