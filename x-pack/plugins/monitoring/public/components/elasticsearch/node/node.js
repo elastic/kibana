@@ -33,7 +33,6 @@ export const Node = ({
   nodeId,
   clusterUuid,
   scope,
-  kbnUrl,
   ...props
 }) => {
   let warningCallout = null;
@@ -133,7 +132,7 @@ export const Node = ({
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <ShardAllocation scope={scope} kbnUrl={kbnUrl} />
+          <ShardAllocation scope={scope} />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

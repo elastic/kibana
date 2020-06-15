@@ -59,6 +59,9 @@ function getMockRequest() {
         },
       },
     },
+    plugins: {
+      ml: undefined,
+    },
   } as unknown) as APMRequestHandlerContext & {
     core: {
       elasticsearch: {

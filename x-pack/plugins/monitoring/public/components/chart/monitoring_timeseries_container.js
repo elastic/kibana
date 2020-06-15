@@ -10,6 +10,7 @@ import { getTitle } from './get_title';
 import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
+import './monitoring_timeseries_container.scss';
 
 import {
   EuiIconTip,
