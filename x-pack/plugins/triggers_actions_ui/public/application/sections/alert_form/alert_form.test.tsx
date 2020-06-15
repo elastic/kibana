@@ -302,7 +302,7 @@ describe('alert_form', () => {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
-        consumer: 'alerts',
+        consumer: 'alerting',
         schedule: {
           interval: '1m',
         },

@@ -93,7 +93,7 @@ export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: Array<Partial<SanitizedAlert>>;
+  data: SanitizedAlert[];
 }
 
 export interface CreateOptions {
@@ -275,13 +275,13 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    const x = {
+    return {
       page,
       perPage,
       total,
       data: data.map(({ id, attributes, updated_at, references }) => {
         ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
-        return this.getPartialAlertFromRaw(
+        return this.getAlertFromRaw(
           id,
           fields ? pick(attributes, ...fields) : attributes,
           updated_at,
@@ -289,7 +289,6 @@ export class AlertsClient {
         );
       }),
     };
-    return x;
   }
 
   public async delete({ id }: { id: string }) {
