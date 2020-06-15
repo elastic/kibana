@@ -6,10 +6,11 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../../triggers_actions_ui/public/types';
-import { validateMetricThreshold } from './validation';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../server/lib/alerting/inventory_metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import { validateMetricThreshold } from './components/validation';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 export function createInventoryMetricAlertType(): AlertTypeModel {
   return {
@@ -18,7 +19,7 @@ export function createInventoryMetricAlertType(): AlertTypeModel {
       defaultMessage: 'Inventory',
     }),
     iconClass: 'bell',
-    alertParamsExpression: React.lazy(() => import('./expression')),
+    alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
