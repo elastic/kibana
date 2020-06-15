@@ -51,8 +51,8 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
   initialInput,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(
-    (initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL) as SWIMLANE_TYPE
+  const [swimlaneType, setSwimlaneType] = useState(
+    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
   );
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
   const [limit, setLimit] = useState(initialInput?.limit ?? 5);
@@ -135,7 +135,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               })}
               options={swimlaneTypeOptions}
               idSelected={swimlaneType}
-              onChange={(id) => setSwimlaneType(id as SWIMLANE_TYPE)}
+              onChange={(id) => setSwimlaneType(id)}
             />
           </EuiFormRow>
 

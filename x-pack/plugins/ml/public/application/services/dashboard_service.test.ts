@@ -42,7 +42,7 @@ describe('DashboardService', () => {
 
   test('should attach panel to the dashboard', () => {
     // act
-    dashboardService.attachPanel(
+    dashboardService.attachPanels(
       'test-dashboard',
       ({
         title: 'ML Test',
@@ -57,7 +57,7 @@ describe('DashboardService', () => {
           searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
         },
       } as unknown) as SavedObjectDashboard,
-      { title: 'Test title', type: 'test-panel', embeddableConfig: { testConfig: '' } }
+      [{ title: 'Test title', type: 'test-panel', embeddableConfig: { testConfig: '' } }]
     );
     // assert
     expect(mockSavedObjectClient.update).toHaveBeenCalledWith('dashboard', 'test-dashboard', {

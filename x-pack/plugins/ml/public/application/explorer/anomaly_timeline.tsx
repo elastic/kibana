@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiTitle,
   EuiSpacer,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -58,6 +59,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     } = useMlKibana();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
     const isSwimlaneSelectActive = useRef(false);
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -120,12 +122,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       maskAll,
       overallSwimlaneData,
       selectedCells,
-      selectedJobs,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneData,
       viewBySwimlaneDataLoading,
       viewBySwimlaneFieldName,
       viewBySwimlaneOptions,
+      swimlaneLimit,
+      selectedJobs,
     } = explorerState;
 
     const setSwimlaneSelectActive = useCallback((active: boolean) => {
@@ -171,181 +174,204 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewBySwimlaneData.laneLabels &&
       viewBySwimlaneData.laneLabels.length > 0;
 
-    const jobIds = selectedJobs ? selectedJobs.map((job) => job.id) : null;
-
     return (
-      <EuiPanel paddingSize="s">
-        <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle className="panel-title">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.explorer.anomalyTimelineTitle"
-                  defaultMessage="Anomaly timeline"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {viewBySwimlaneOptions.length > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={
-                    <span className="eui-textNoWrap">
-                      <FormattedMessage
-                        id="xpack.ml.explorer.viewByLabel"
-                        defaultMessage="View by"
-                      />
-                    </span>
-                  }
-                  display={'columnCompressed'}
-                >
-                  <EuiSelect
-                    compressed
-                    id="selectViewBy"
-                    options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
-                    value={viewBySwimlaneFieldName}
-                    onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
+      <>
+        <EuiPanel paddingSize="s">
+          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle className="panel-title">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.explorer.anomalyTimelineTitle"
+                    defaultMessage="Anomaly timeline"
                   />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={
-                    <span className="eui-textNoWrap">
-                      <FormattedMessage id="xpack.ml.explorer.limitLabel" defaultMessage="Limit" />
-                    </span>
-                  }
-                  display={'columnCompressed'}
-                >
-                  <SelectLimit />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                <EuiFormRow label="&#8203;">
-                  <div className="panel-sub-title">
-                    {viewByLoadedForTimeFormatted && (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
-                        defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
-                        values={{ viewByLoadedForTimeFormatted }}
-                      />
-                    )}
-                    {viewByLoadedForTimeFormatted === undefined && (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
-                        defaultMessage="(Sorted by max anomaly score)"
-                      />
-                    )}
-                    {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
-                      <FormattedMessage
-                        id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
-                        defaultMessage="(Job score across all influencers)"
-                      />
-                    )}
-                  </div>
-                </EuiFormRow>
-              </EuiFlexItem>
-            </>
-          )}
-
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-            <EuiPopover
-              button={
-                <EuiButtonIcon
-                  size="s"
-                  aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
-                    defaultMessage: 'Actions',
-                  })}
-                  color="subdued"
-                  iconType="boxesHorizontal"
-                  onClick={() => {
-                    setIsMenuOpen(!isMenuOpen);
-                  }}
-                />
-              }
-              isOpen={isMenuOpen}
-              closePopover={() => {
-                setIsMenuOpen(false);
-              }}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel>
-                <AddToDashboardControl jobIds={jobIds!} swimlaneType={'overall'} />
-              </EuiContextMenuPanel>
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        <div
-          className="ml-explorer-swimlane euiText"
-          onMouseEnter={onSwimlaneEnterHandler}
-          onMouseLeave={onSwimlaneLeaveHandler}
-          data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-        >
-          {showOverallSwimlane && (
-            <SwimlaneContainer
-              filterActive={filterActive}
-              maskAll={maskAll}
-              timeBuckets={timeBuckets}
-              swimlaneCellClick={swimlaneCellClick}
-              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-              swimlaneType={'overall'}
-              selection={selectedCells}
-              swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-              onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-            />
-          )}
-        </div>
-
-        {viewBySwimlaneOptions.length > 0 && (
-          <>
-            {showViewBySwimlane && (
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {viewBySwimlaneOptions.length > 0 && (
               <>
-                <EuiSpacer size="m" />
-                <div
-                  className="ml-explorer-swimlane euiText"
-                  onMouseEnter={onSwimlaneEnterHandler}
-                  onMouseLeave={onSwimlaneLeaveHandler}
-                  data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                >
-                  <SwimlaneContainer
-                    filterActive={filterActive}
-                    maskAll={
-                      maskAll &&
-                      !hasMatchingPoints({
-                        filteredFields,
-                        swimlaneData: viewBySwimlaneData,
-                      })
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    label={
+                      <span className="eui-textNoWrap">
+                        <FormattedMessage
+                          id="xpack.ml.explorer.viewByLabel"
+                          defaultMessage="View by"
+                        />
+                      </span>
                     }
-                    timeBuckets={timeBuckets}
-                    swimlaneCellClick={swimlaneCellClick}
-                    swimlaneData={viewBySwimlaneData as OverallSwimlaneData}
-                    swimlaneType={'viewBy'}
-                    selection={selectedCells}
-                    swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-                    onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-                  />
-                </div>
+                    display={'columnCompressed'}
+                  >
+                    <EuiSelect
+                      compressed
+                      id="selectViewBy"
+                      options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
+                      value={viewBySwimlaneFieldName}
+                      onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    label={
+                      <span className="eui-textNoWrap">
+                        <FormattedMessage
+                          id="xpack.ml.explorer.limitLabel"
+                          defaultMessage="Limit"
+                        />
+                      </span>
+                    }
+                    display={'columnCompressed'}
+                  >
+                    <SelectLimit />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                  <EuiFormRow label="&#8203;">
+                    <div className="panel-sub-title">
+                      {viewByLoadedForTimeFormatted && (
+                        <FormattedMessage
+                          id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
+                          defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
+                          values={{ viewByLoadedForTimeFormatted }}
+                        />
+                      )}
+                      {viewByLoadedForTimeFormatted === undefined && (
+                        <FormattedMessage
+                          id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
+                          defaultMessage="(Sorted by max anomaly score)"
+                        />
+                      )}
+                      {filterActive === true && viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL && (
+                        <FormattedMessage
+                          id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
+                          defaultMessage="(Job score across all influencers)"
+                        />
+                      )}
+                    </div>
+                  </EuiFormRow>
+                </EuiFlexItem>
               </>
             )}
 
-            {viewBySwimlaneDataLoading && <LoadingIndicator />}
-
-            {!showViewBySwimlane &&
-              !viewBySwimlaneDataLoading &&
-              typeof viewBySwimlaneFieldName === 'string' && (
-                <ExplorerNoInfluencersFound
-                  viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                  showFilterMessage={filterActive === true}
+            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+              <EuiPopover
+                button={
+                  <EuiButtonIcon
+                    size="s"
+                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                      defaultMessage: 'Actions',
+                    })}
+                    color="subdued"
+                    iconType="boxesHorizontal"
+                    onClick={() => {
+                      setIsMenuOpen(!isMenuOpen);
+                    }}
+                  />
+                }
+                isOpen={isMenuOpen}
+                closePopover={() => {
+                  setIsMenuOpen(false);
+                }}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenuPanel
+                  items={[
+                    <EuiContextMenuItem
+                      key="addToDashboard"
+                      onClick={() => {
+                        setIsAddDashboardActive(true);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.explorer.addToDashboardLabel"
+                        defaultMessage="Add to dashboard"
+                      />
+                    </EuiContextMenuItem>,
+                  ]}
                 />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          <div
+            className="ml-explorer-swimlane euiText"
+            onMouseEnter={onSwimlaneEnterHandler}
+            onMouseLeave={onSwimlaneLeaveHandler}
+            data-test-subj="mlAnomalyExplorerSwimlaneOverall"
+          >
+            {showOverallSwimlane && (
+              <SwimlaneContainer
+                filterActive={filterActive}
+                maskAll={maskAll}
+                timeBuckets={timeBuckets}
+                swimlaneCellClick={swimlaneCellClick}
+                swimlaneData={overallSwimlaneData as OverallSwimlaneData}
+                swimlaneType={'overall'}
+                selection={selectedCells}
+                swimlaneRenderDoneListener={swimlaneRenderDoneListener}
+                onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+              />
+            )}
+          </div>
+
+          {viewBySwimlaneOptions.length > 0 && (
+            <>
+              {showViewBySwimlane && (
+                <>
+                  <EuiSpacer size="m" />
+                  <div
+                    className="ml-explorer-swimlane euiText"
+                    onMouseEnter={onSwimlaneEnterHandler}
+                    onMouseLeave={onSwimlaneLeaveHandler}
+                    data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+                  >
+                    <SwimlaneContainer
+                      filterActive={filterActive}
+                      maskAll={
+                        maskAll &&
+                        !hasMatchingPoints({
+                          filteredFields,
+                          swimlaneData: viewBySwimlaneData,
+                        })
+                      }
+                      timeBuckets={timeBuckets}
+                      swimlaneCellClick={swimlaneCellClick}
+                      swimlaneData={viewBySwimlaneData as OverallSwimlaneData}
+                      swimlaneType={'viewBy'}
+                      selection={selectedCells}
+                      swimlaneRenderDoneListener={swimlaneRenderDoneListener}
+                      onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+                    />
+                  </div>
+                </>
               )}
-          </>
+
+              {viewBySwimlaneDataLoading && <LoadingIndicator />}
+
+              {!showViewBySwimlane &&
+                !viewBySwimlaneDataLoading &&
+                typeof viewBySwimlaneFieldName === 'string' && (
+                  <ExplorerNoInfluencersFound
+                    viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                    showFilterMessage={filterActive === true}
+                  />
+                )}
+            </>
+          )}
+        </EuiPanel>
+        {isAddDashboardsActive && selectedJobs && (
+          <AddToDashboardControl
+            onClose={setIsAddDashboardActive.bind(null, false)}
+            jobIds={selectedJobs.map(({ id }) => id)}
+            viewBy={viewBySwimlaneFieldName!}
+            limit={swimlaneLimit}
+          />
         )}
-      </EuiPanel>
+      </>
     );
   },
   (prevProps, nextProps) => {

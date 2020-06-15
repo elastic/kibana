@@ -37,37 +37,39 @@ export function dashboardServiceProvider(
       });
     },
     /**
-     * Attaches embeddable panel to the dashboard
+     * Attaches embeddable panels to the dashboard
      */
-    async attachPanel(
+    async attachPanels(
       dashboardId: string,
       dashboardAttributes: SavedObjectDashboard,
-      panelData: Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>
+      panelsData: Array<Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>>
     ) {
       const panels = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];
-      const panelIndex = generateId();
-      const maxPanel =
-        panels.length > 0
-          ? panels.reduce((prev, current) =>
-              prev.gridData.y > current.gridData.y ? prev : current
-            )
-          : null;
       const version = kibanaVersion;
 
-      panels.push({
-        panelIndex,
-        embeddableConfig: panelData.embeddableConfig as { [key: string]: any },
-        title: panelData.title,
-        type: panelData.type,
-        version,
-        gridData: {
-          h: 15,
-          i: panelIndex,
-          w: 24,
-          x: 0,
-          y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h : 0,
-        },
-      });
+      for (const panelData of panelsData) {
+        const panelIndex = generateId();
+        const maxPanel =
+          panels.length > 0
+            ? panels.reduce((prev, current) =>
+                prev.gridData.y > current.gridData.y ? prev : current
+              )
+            : null;
+        panels.push({
+          panelIndex,
+          embeddableConfig: panelData.embeddableConfig as { [key: string]: any },
+          title: panelData.title,
+          type: panelData.type,
+          version,
+          gridData: {
+            h: 15,
+            i: panelIndex,
+            w: 24,
+            x: 0,
+            y: maxPanel ? maxPanel.gridData.y + maxPanel.gridData.h : 0,
+          },
+        });
+      }
 
       await savedObjectClient.update('dashboard', dashboardId, {
         ...dashboardAttributes,
