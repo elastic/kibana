@@ -31,9 +31,9 @@ export async function createTestUserService(
   const config = getService('config');
   // @ts-ignore browser service is not normally available in common.
   const browser: Browser | void = hasService('browser') && getService('browser');
-  const testSubjects: TestSubjects | void =
-    // @ts-ignore testSubject service is not normally available in common.
-    hasService('testSubjects') && getService('testSubjects');
+  const testSubjects: TestSubjects | undefined =
+    // testSubject service is not normally available in common.
+    hasService('testSubjects') ? (getService('testSubjects' as any) as TestSubjects) : undefined;
   const kibanaServer = getService('kibanaServer');
 
   const enabledPlugins = config.get('security.disableTestUser')
