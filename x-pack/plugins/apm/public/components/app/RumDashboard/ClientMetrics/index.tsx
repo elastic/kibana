@@ -54,7 +54,7 @@ export const ClientMetrics = () => {
       <EuiFlexItem grow={false}>
         <EuiStat
           titleSize="s"
-          title={(data?.backEnd?.value?.toFixed(2) ?? '---') + ' sec'}
+          title={(data?.backEnd?.value?.toFixed(2) ?? '-') + ' sec'}
           description={BackEndLabel}
           isLoading={status !== 'success'}
         />
