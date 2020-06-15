@@ -5,6 +5,8 @@
  */
 
 import hapiAuthCookie from 'hapi-auth-cookie';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Statehood from 'statehood';
 
 const HAPI_STRATEGY_NAME = 'security-cookie';
 // Forbid applying of Hapi authentication strategies to routes automatically.
@@ -121,6 +123,11 @@ export class Session {
     const password = config.get('xpack.security.encryptionKey');
     const path = `${config.get('server.basePath')}/`;
     const secure = config.get('xpack.security.secureCookies');
+    const sameSiteCookies = config.get('xpack.security.sameSiteCookies');
+
+    if (sameSiteCookies === 'None' && secure !== true) {
+      throw new Error('"SameSite: None" requires Secure connection');
+    }
 
     server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', {
       cookie: name,
@@ -129,9 +136,22 @@ export class Session {
       validateFunc: Session._validateCookie,
       isHttpOnly: httpOnly,
       isSecure: secure,
-      isSameSite: false,
+      isSameSite: sameSiteCookies === 'None' ? false : sameSiteCookies || false,
       path: path,
     });
+
+    // A hack to support SameSite: 'None'.
+    // Remove it after update Hapi to v19 that supports SameSite: 'None' out of the box.
+    if (sameSiteCookies === 'None') {
+      server.log(['debug', 'security', 'auth', 'session'], 'Patching Statehood.prepareValue');
+      const originalPrepareValue = Statehood.prepareValue;
+      Statehood.prepareValue = function kibanaStatehoodPrepareValueWrapper(key, value, options) {
+        if (key === name) {
+          options.isSameSite = 'None';
+        }
+        return originalPrepareValue(key, value, options);
+      };
+    }
 
     if (HAPI_STRATEGY_MODE) {
       server.auth.default({
