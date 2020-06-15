@@ -123,7 +123,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.10.1",
     "@babel/register": "^7.10.1",
     "@elastic/apm-rum": "^5.1.1",
-    "@elastic/charts": "19.2.0",
+    "@elastic/charts": "19.5.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/ems-client": "7.9.3",
     "@elastic/eui": "24.1.0",

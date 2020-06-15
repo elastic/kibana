@@ -2100,11 +2100,13 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.2.0"
 
-"@elastic/charts@19.2.0":
-  version "19.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.2.0.tgz#45db8c80e4699e5088a1771f190171c1144c5242"
-  integrity sha512-uhk73OQPaxg7l54gfr+kv+c6jiEngewwH408OySzJbnH23z/5sIpLSziZhV33I6bs/LKDXQSqamC9Jh6Xcwk1A==
+"@elastic/charts@19.5.0":
+  version "19.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.5.0.tgz#e790ce7e6f645f6a460aaf9ce6d6f22bb634bd0b"
+  integrity sha512-tUpbP2IaAyMUuZYQY91mKw7sowI8BdNV73ZNgx+/JlE2xNzzdkLnZriireK8fMaK5dqh3Xc4U5faWTYLYr9oLg==
   dependencies:
+    "@popperjs/core" "^2.4.0"
+    chroma-js "^2.1.0"
     classnames "^2.2.6"
     d3-array "^1.2.4"
     d3-collection "^1.0.7"
@@ -3347,6 +3349,11 @@
     retry-axios "^1.0.1"
     which "^2.0.1"
     winston "^3.0.0"
+
+"@popperjs/core@^2.4.0":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.4.2.tgz#7c6dc4ecef16149fd7a736710baa1b811017fdca"
+  integrity sha512-JlGTGRYHC2QK+DDbePyXdBdooxFq2+noLfWpRqJtkxcb/oYWzOF0kcbfvvbWrwevCC1l6hLUg1wHYT+ona5BWQ==
 
 "@reach/router@^1.2.1":
   version "1.2.1"
@@ -9758,7 +9765,7 @@ chroma-js@^1.4.1:
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-1.4.1.tgz#eb2d9c4d1ff24616be84b35119f4d26f8205f134"
   integrity sha512-jTwQiT859RTFN/vIf7s+Vl/Z2LcMrvMv3WUFmd/4u76AdlFC0NTNgqEEFPcRiHmAswPsMiQEDZLM8vX8qXpZNQ==
 
-chroma-js@^2.0.4:
+chroma-js@^2.0.4, chroma-js@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.1.0.tgz#c0be48a21fe797ef8965608c1c4f911ef2da49d5"
   integrity sha512-uiRdh4ZZy+UTPSrAdp8hqEdVb1EllLtTHOt5TMaOjJUvi+O54/83Fc5K2ld1P+TJX+dw5B+8/sCgzI6eaur/lg==
