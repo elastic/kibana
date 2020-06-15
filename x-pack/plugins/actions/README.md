@@ -71,6 +71,7 @@ Table of Contents
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
 - [Command Line Utility](#command-line-utility)
+- [Developing New Action Types](#developing-new-action-types)
 
 ## Terminology
 
@@ -606,3 +607,43 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "version": "WzMsMV0="
 }
 ```
+
+# Developing New Action Types
+
+When creating a new action type, your plugin will eventually call `server.plugins.actions.setup.registerType()` to register the type with the actions plugin, but there are some additional things to think about about and implement.
+
+## licensing
+
+Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions.  Other actions are at least "gold" level.  
+
+# location
+
+Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin.
+
+Actions that take URLs or hostnames should check that those values are whitelisted.  The whitelisting utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin.
+
+## documentation
+
+You should also create some asciidoc for the new action type.  An entry should be made in the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc) which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
+
+## tests
+
+The action type should have both jest tests and functional tests.  For functional tests, if your action interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service, to test with.  See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server`](../../test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server)
+
+## action type config and secrets
+
+Action types must define `config` and `secrets` which are used to create connectors.  This data should be described with `@kbn/config-schema` object schemas, and you **MUST NOT** use `schema.maybe()` to define properties.
+
+This is due to the fact that the structures are persisted in saved objects, which performs partial updates on the persisted data.  If a property value is already persisted, but an update either doesn't include the property, or sets it to `undefined`, the persisted value will not be changed.  Beyond this being a semantic error in general, it also ends up invalidating the encryption used to save secrets, and will render the secrets will not be able to be unencrypted later.
+
+Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `schema.maybe()` except that when passed an `undefined` value, the object returned from the validation will be set to `null`.  The resulting type will be `property-type | null`, whereas with `schema.maybe()` it would be `property-type | undefined`.
+
+## user interface
+
+In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action.  The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types).
+
+TBD: integrations with connectors list
+
+## usability by a generic alert
+
+TBD
