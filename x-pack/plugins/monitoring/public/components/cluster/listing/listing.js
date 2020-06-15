@@ -231,12 +231,12 @@ const getColumns = (
   ];
 };
 
-const changeCluster = (scope, globalState, kbnUrl, clusterUuid, ccs) => {
+const changeCluster = (scope, globalState, clusterUuid, ccs) => {
   scope.$evalAsync(() => {
     globalState.cluster_uuid = clusterUuid;
     globalState.ccs = ccs;
     globalState.save();
-    kbnUrl.redirect('/overview');
+    window.history.replaceState(null, null, '#/overview');
   });
 };
 
@@ -399,12 +399,7 @@ export class Listing extends Component {
   render() {
     const { angular, clusters, sorting, pagination, onTableChange } = this.props;
 
-    const _changeCluster = partial(
-      changeCluster,
-      angular.scope,
-      angular.globalState,
-      angular.kbnUrl
-    );
+    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState);
     const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
     const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
     const hasStandaloneCluster = !!clusters.find(

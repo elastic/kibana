@@ -33,6 +33,16 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       });
     },
 
+    async waitForTableToNotHaveData(dataTestSubj: string) {
+      await retry.waitForWithTimeout('table to not have data', 2000, async () => {
+        const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
+        if (tableData[1][0] === 'No items found') {
+          return true;
+        }
+        return false;
+      });
+    },
+
     async waitForVisibleTextToChange(dataTestSubj: string, currentText: string) {
       await retry.waitForWithTimeout('visible text to change', 2000, async () => {
         const detailFlyoutTitle = await testSubjects.getVisibleText(dataTestSubj);
