@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import Url from 'url';
-
+import Https from 'https';
 import Axios from 'axios';
 
 import { isAxiosRequestError, isAxiosResponseError } from '../axios';
@@ -70,13 +69,33 @@ const delay = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+export interface KibanaConfig {
+  url: string;
+  ssl:
+    | undefined
+    | {
+        enabled: boolean;
+        key: string;
+        certificate: string;
+        certificateAuthorities: string;
+      };
+}
+
 export class KbnClientRequester {
-  constructor(private readonly log: ToolingLog, private readonly kibanaUrls: string[]) {}
+  private readonly httpsAgent: Https.Agent | null;
+  constructor(private readonly log: ToolingLog, private readonly kibanaConfig: KibanaConfig) {
+    this.httpsAgent =
+      kibanaConfig.ssl && kibanaConfig.ssl.enabled
+        ? new Https.Agent({
+            cert: kibanaConfig.ssl.certificate,
+            key: kibanaConfig.ssl.key,
+            ca: kibanaConfig.ssl.certificateAuthorities,
+          })
+        : null;
+  }
 
   private pickUrl() {
-    const url = this.kibanaUrls.shift()!;
-    this.kibanaUrls.push(url);
-    return url;
+    return this.kibanaConfig.url;
   }
 
   public resolveUrl(relativeUrl: string = '/') {
@@ -101,6 +120,7 @@ export class KbnClientRequester {
           headers: {
             'kbn-xsrf': 'kbn-client',
           },
+          httpsAgent: this.httpsAgent,
         });
 
         return response.data;
