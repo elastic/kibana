@@ -17,10 +17,10 @@ describe('SearchBar', () => {
   });
 
   it('adds correctly a filter to the global search bar', () => {
-    const filter = new SearchBarFilter({
+    const filter: SearchBarFilter = {
       key: 'host.ip',
       value: '1.1.1.1',
-    });
+    };
 
     openAddFilterPopover();
     fillAddFilterForm(filter);
