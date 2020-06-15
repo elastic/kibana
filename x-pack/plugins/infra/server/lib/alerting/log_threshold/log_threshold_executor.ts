@@ -46,18 +46,26 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
 
     try {
       const validatedParams = decodeOrThrow(LogDocumentCountAlertParamsRT)(params);
-      const query = getESQuery(validatedParams, sourceConfiguration.configuration, indexPattern);
+
+      const query =
+        groupBy && groupBy.length > 0
+          ? getGroupedESQuery(validatedParams, sourceConfiguration.configuration, indexPattern)
+          : getUngroupedESQuery(validatedParams, sourceConfiguration.configuration, indexPattern);
+
+      if (!query) {
+        throw new Error('ES query could not be built from the provided alert params');
+      }
 
       if (groupBy && groupBy.length > 0) {
         processGroupByResults(
-          await getGroupedResults(query, indexPattern, callCluster),
+          await getGroupedResults(query, callCluster),
           validatedParams,
           alertInstanceFactory,
           alertId
         );
       } else {
         processUngroupedResults(
-          await getUngroupedResults(query, indexPattern, callCluster),
+          await getUngroupedResults(query, callCluster),
           validatedParams,
           alertInstanceFactory,
           alertId
@@ -141,12 +149,8 @@ const processGroupByResults = (
   });
 };
 
-const getESQuery = (
-  params: LogDocumentCountAlertParams,
-  sourceConfiguration: InfraSource['configuration'],
-  index: string
-): object => {
-  const { timeSize, timeUnit, criteria, groupBy } = params;
+const buildFiltersFromCriteria = (params: LogDocumentCountAlertParams, timestampField: string) => {
+  const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const to = Date.now();
@@ -168,7 +172,7 @@ const getESQuery = (
   const rangeFilters = [
     {
       range: {
-        [sourceConfiguration.fields.timestamp]: {
+        [timestampField]: {
           gte: from,
           lte: to,
           format: 'epoch_millis',
@@ -177,32 +181,76 @@ const getESQuery = (
     },
   ];
 
-  const aggregations =
-    groupBy && groupBy.length > 0
-      ? {
-          groups: {
-            composite: {
-              size: COMPOSITE_GROUP_SIZE,
-              sources: groupBy.map((field, groupIndex) => ({
-                [`group-${groupIndex}-${field}`]: {
-                  terms: { field },
-                },
-              })),
-            },
+  return { rangeFilters, mustFilters, mustNotFilters };
+};
+
+const getGroupedESQuery = (
+  params: LogDocumentCountAlertParams,
+  sourceConfiguration: InfraSource['configuration'],
+  index: string
+): object | undefined => {
+  const { groupBy } = params;
+
+  if (!groupBy || !groupBy.length) {
+    return;
+  }
+
+  const { rangeFilters, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+    params,
+    sourceConfiguration.fields.timestamp
+  );
+
+  const aggregations = {
+    groups: {
+      composite: {
+        size: COMPOSITE_GROUP_SIZE,
+        sources: groupBy.map((field, groupIndex) => ({
+          [`group-${groupIndex}-${field}`]: {
+            terms: { field },
           },
-        }
-      : null;
+        })),
+      },
+    },
+  };
 
   const body = {
-    // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
-    ...(!groupBy && { track_total_hits: true }),
     query: {
       bool: {
         filter: [...rangeFilters, ...mustFilters],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
-    ...(aggregations && { aggregations }),
+    aggregations,
+    size: 0,
+  };
+
+  return {
+    index,
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+    body,
+  };
+};
+
+const getUngroupedESQuery = (
+  params: LogDocumentCountAlertParams,
+  sourceConfiguration: InfraSource['configuration'],
+  index: string
+): object => {
+  const { rangeFilters, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+    params,
+    sourceConfiguration.fields.timestamp
+  );
+
+  const body = {
+    // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [...rangeFilters, ...mustFilters],
+        ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
+      },
+    },
     size: 0,
   };
 
@@ -321,19 +369,11 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
   return queryMappings[comparator];
 };
 
-const getUngroupedResults = async (
-  query: object,
-  index: string,
-  callCluster: AlertServices['callCluster']
-) => {
+const getUngroupedResults = async (query: object, callCluster: AlertServices['callCluster']) => {
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(await callCluster('search', query));
 };
 
-const getGroupedResults = async (
-  query: any,
-  index: string,
-  callCluster: AlertServices['callCluster']
-) => {
+const getGroupedResults = async (query: any, callCluster: AlertServices['callCluster']) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
 
