@@ -32,9 +32,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   const { initialize } = useLogSourceContext();
 
-  const ADD_DATA_LABEL = i18n.translate('xpack.logs.addDataButtonLabel', {
-    defaultMessage: 'Add data',
-  });
+  const kibana = useKibana();
 
   useMount(() => {
     initialize();
@@ -94,7 +92,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href="/app/home#/tutorial_directory/logging"
+              href={kibana.services?.application?.getUrlForApp(
+                '/app/home#/tutorial_directory/logging'
+              )}
               size="s"
               color="primary"
               iconType="plusInCircle"
@@ -137,3 +137,7 @@ const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
+
+const ADD_DATA_LABEL = i18n.translate('xpack.logs.addDataButtonLabel', {
+  defaultMessage: 'Add data',
+});

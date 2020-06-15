@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -51,6 +52,8 @@ export const PageHeader = React.memo(
         </StyledPicker>
       ) : null;
 
+    const kibana = useKibana();
+
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -65,7 +68,7 @@ export const PageHeader = React.memo(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            href="app/home#/tutorial/uptimeMonitors"
+            href={kibana.services?.application?.getUrlForApp('/app/home#/tutorial/uptimeMonitors')}
             color="primary"
             iconType="plusInCircle"
           >

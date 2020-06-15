@@ -39,6 +39,8 @@ const ADD_DATA_LABEL = i18n.translate('xpack.metrics.addDataButtonLabel', {
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
 
+  const kibana = useKibana();
+
   return (
     <EuiErrorBoundary>
       <Source.Provider sourceId="default">
@@ -108,7 +110,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        href="/app/home#/tutorial_directory/metrics"
+                        href={kibana.services?.application?.getUrlForApp(
+                          '/app/home#/tutorial_directory/metrics'
+                        )}
                         size="s"
                         color="primary"
                         iconType="plusInCircle"
