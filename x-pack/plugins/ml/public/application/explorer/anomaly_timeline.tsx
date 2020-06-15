@@ -55,7 +55,10 @@ interface AnomalyTimelineProps {
 export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
   ({ explorerState, setSelectedCells }) => {
     const {
-      services: { uiSettings },
+      services: {
+        uiSettings,
+        application: { capabilities },
+      },
     } = useMlKibana();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -64,6 +67,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const isSwimlaneSelectActive = useRef(false);
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     const disableDragSelectOnMouseLeave = useRef(true);
+
+    const canEditDashboards = capabilities.dashboard.createNew;
 
     const timeBuckets = useMemo(() => {
       return new TimeBuckets({
@@ -174,6 +179,26 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewBySwimlaneData.laneLabels &&
       viewBySwimlaneData.laneLabels.length > 0;
 
+    const menuItems = useMemo(() => {
+      const items = [];
+      if (canEditDashboards) {
+        items.push(
+          <EuiContextMenuItem
+            key="addToDashboard"
+            onClick={() => {
+              setIsAddDashboardActive(true);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.ml.explorer.addToDashboardLabel"
+              defaultMessage="Add to dashboard"
+            />
+          </EuiContextMenuItem>
+        );
+      }
+      return items;
+    }, [canEditDashboards]);
+
     return (
       <>
         <EuiPanel paddingSize="s">
@@ -254,45 +279,33 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    size="s"
-                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
-                      defaultMessage: 'Actions',
-                    })}
-                    color="subdued"
-                    iconType="boxesHorizontal"
-                    onClick={() => {
-                      setIsMenuOpen(!isMenuOpen);
-                    }}
-                  />
-                }
-                isOpen={isMenuOpen}
-                closePopover={() => {
-                  setIsMenuOpen(false);
-                }}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenuPanel
-                  items={[
-                    <EuiContextMenuItem
-                      key="addToDashboard"
+            {menuItems.length > 0 && (
+              <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      size="s"
+                      aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                        defaultMessage: 'Actions',
+                      })}
+                      color="subdued"
+                      iconType="boxesHorizontal"
                       onClick={() => {
-                        setIsAddDashboardActive(true);
+                        setIsMenuOpen(!isMenuOpen);
                       }}
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.explorer.addToDashboardLabel"
-                        defaultMessage="Add to dashboard"
-                      />
-                    </EuiContextMenuItem>,
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
+                    />
+                  }
+                  isOpen={isMenuOpen}
+                  closePopover={() => {
+                    setIsMenuOpen(false);
+                  }}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenuPanel items={menuItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
