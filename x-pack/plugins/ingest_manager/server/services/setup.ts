@@ -111,8 +111,8 @@ export async function setupFleet(
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: ['logs-*', 'metrics-*', 'events-*'],
-          privileges: ['write', 'create_index'],
+          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
     },
@@ -134,6 +134,8 @@ export async function setupFleet(
       },
     },
   });
+
+  await outputService.invalidateCache();
 
   // save fleet admin user
   const defaultOutputId = await outputService.getDefaultOutputId(soClient);

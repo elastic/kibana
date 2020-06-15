@@ -1,5 +1,6 @@
 {
   "id": "esUiShared",
   "version": "kibana",
-  "ui": true
+  "ui": true,
+  "server": true
 }

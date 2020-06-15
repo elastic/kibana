@@ -46,6 +46,16 @@ import { IndexPatternSpec } from './types';
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
+interface IndexPatternDeps {
+  getConfig: any;
+  savedObjectsClient: SavedObjectsClientContract;
+  apiClient: IIndexPatternsApiClient;
+  patternCache: PatternCache;
+  fieldFormats: FieldFormatsStartCommon;
+  onNotification: OnNotification;
+  onError: OnError;
+}
+
 export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
@@ -98,13 +108,15 @@ export class IndexPattern implements IIndexPattern {
 
   constructor(
     id: string | undefined,
-    getConfig: any,
-    savedObjectsClient: SavedObjectsClientContract,
-    apiClient: IIndexPatternsApiClient,
-    patternCache: PatternCache,
-    fieldFormats: FieldFormatsStartCommon,
-    onNotification: OnNotification,
-    onError: OnError
+    {
+      getConfig,
+      savedObjectsClient,
+      apiClient,
+      patternCache,
+      fieldFormats,
+      onNotification,
+      onError,
+    }: IndexPatternDeps
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -420,16 +432,15 @@ export class IndexPattern implements IIndexPattern {
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {
-        const duplicatePattern = new IndexPattern(
-          duplicateId,
-          this.getConfig,
-          this.savedObjectsClient,
-          this.apiClient,
-          this.patternCache,
-          this.fieldFormats,
-          this.onNotification,
-          this.onError
-        );
+        const duplicatePattern = new IndexPattern(duplicateId, {
+          getConfig: this.getConfig,
+          savedObjectsClient: this.savedObjectsClient,
+          apiClient: this.apiClient,
+          patternCache: this.patternCache,
+          fieldFormats: this.fieldFormats,
+          onNotification: this.onNotification,
+          onError: this.onError,
+        });
 
         await duplicatePattern.destroy();
       }
@@ -473,16 +484,15 @@ export class IndexPattern implements IIndexPattern {
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
-          const samePattern = new IndexPattern(
-            this.id,
-            this.getConfig,
-            this.savedObjectsClient,
-            this.apiClient,
-            this.patternCache,
-            this.fieldFormats,
-            this.onNotification,
-            this.onError
-          );
+          const samePattern = new IndexPattern(this.id, {
+            getConfig: this.getConfig,
+            savedObjectsClient: this.savedObjectsClient,
+            apiClient: this.apiClient,
+            patternCache: this.patternCache,
+            fieldFormats: this.fieldFormats,
+            onNotification: this.onNotification,
+            onError: this.onError,
+          });
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
             const updatedBody = samePattern.prepBody();
