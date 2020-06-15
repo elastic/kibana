@@ -37,9 +37,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
       // this seem like an overkill, but clicking this button which opens context menu was flaky
       await testSubjects.waitForEnabled('createNew');
-      await retry.try(async () => {
+      await retry.waitFor('createNew popover opened', async () => {
         await testSubjects.click('createNew');
-        await testSubjects.exists('createNew-TODO_EMBEDDABLE');
+        return await testSubjects.exists('createNew-TODO_EMBEDDABLE');
       });
       await testSubjects.click('createNew-TODO_EMBEDDABLE');
 
