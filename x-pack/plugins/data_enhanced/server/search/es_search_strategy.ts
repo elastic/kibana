@@ -65,8 +65,7 @@ async function getBackgroundSession(
   context?: IEnhancedSearchContext
 ) {
   if (
-    context &&
-    context.backgroundSearchService &&
+    context?.backgroundSearchService &&
     options?.rawRequest &&
     !!request.sessionId &&
     !request.id
