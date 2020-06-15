@@ -5,9 +5,11 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('job validation', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('job validation', function () {
     loadTestFile(require.resolve('./bucket_span_estimator'));
     loadTestFile(require.resolve('./calculate_model_memory_limit'));
+    loadTestFile(require.resolve('./cardinality'));
+    loadTestFile(require.resolve('./validate'));
   });
 }

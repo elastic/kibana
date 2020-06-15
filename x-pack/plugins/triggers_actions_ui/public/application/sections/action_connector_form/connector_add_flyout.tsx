@@ -32,7 +32,6 @@ import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { PLUGIN } from '../../constants/plugin';
-import { BASE_PATH as LICENSE_MANAGEMENT_BASE_PATH } from '../../../../../license_management/common/constants';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -52,6 +51,7 @@ export const ConnectorAddFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
@@ -106,7 +106,7 @@ export const ConnectorAddFlyout = ({
       ...actionTypeModel?.validateConnector(connector).errors,
       ...validateBaseProperties(connector).errors,
     } as IErrorObject;
-    hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+    hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
     currentForm = (
       <ActionConnectorForm
@@ -114,13 +114,16 @@ export const ConnectorAddFlyout = ({
         connector={connector}
         dispatch={dispatch}
         errors={errors}
+        actionTypeRegistry={actionTypeRegistry}
+        http={http}
+        docLinks={docLinks}
       />
     );
   }
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -136,7 +139,7 @@ export const ConnectorAddFlyout = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
           errorRes.body?.message ??
             i18n.translate(
@@ -289,7 +292,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href={`${http.basePath.get()}/app/kibana#${LICENSE_MANAGEMENT_BASE_PATH}`}
+          href={`${http.basePath.get()}/app/management/stack/license_management`}
           iconType="gear"
           target="_blank"
         >
@@ -315,3 +318,6 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     </EuiFlexGroup>
   </EuiCallOut>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddFlyout as default };

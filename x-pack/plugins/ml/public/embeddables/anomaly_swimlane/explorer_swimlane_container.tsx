@@ -79,11 +79,11 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
 
   return (
     <EuiResizeObserver onResize={onResize}>
-      {resizeRef => (
+      {(resizeRef) => (
         <div
           style={{ width: '100%', height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
           data-test-subj={`mlMaxAnomalyScoreEmbeddable_${id}`}
-          ref={el => {
+          ref={(el) => {
             resizeRef(el);
           }}
         >
@@ -93,7 +93,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             {chartWidth > 0 && swimlaneData && swimlaneType ? (
               <EuiText color="subdued" size="s">
                 <MlTooltipComponent>
-                  {tooltipService => (
+                  {(tooltipService) => (
                     <ExplorerSwimlane
                       chartWidth={chartWidth}
                       timeBuckets={timeBuckets}

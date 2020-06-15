@@ -30,7 +30,9 @@ export function registerClusterCheckupRoutes({
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client },
+            },
           },
         },
         request,
@@ -40,9 +42,9 @@ export function registerClusterCheckupRoutes({
           const apmConfig = await apmOSS.config$.pipe(first()).toPromise();
           const indexPatterns = extractIndexPatterns(apmConfig);
 
-          const status = await getUpgradeAssistantStatus(dataClient, isCloudEnabled, indexPatterns);
+          const status = await getUpgradeAssistantStatus(client, isCloudEnabled, indexPatterns);
 
-          const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+          const callAsCurrentUser = client.callAsCurrentUser.bind(client);
           const reindexActions = reindexActionsFactory(savedObjectsClient, callAsCurrentUser);
           const reindexService = reindexServiceFactory(
             callAsCurrentUser,

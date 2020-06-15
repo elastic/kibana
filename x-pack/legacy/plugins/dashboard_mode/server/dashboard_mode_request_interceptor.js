@@ -16,11 +16,7 @@ const superuserRole = 'superuser';
  *
  *  @type {Hapi.RequestExtension}
  */
-export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
-  if (!dashboardViewerApp) {
-    throw new TypeError('Expected to receive a `dashboardViewerApp` argument');
-  }
-
+export function createDashboardModeRequestInterceptor() {
   return {
     type: 'onPostAuth',
     async method(request, h) {
@@ -44,19 +40,28 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
         return h.continue;
       }
 
-      const isDashboardOnlyModeUser = user.roles.find(role =>
+      const isDashboardOnlyModeUser = user.roles.find((role) =>
         dashboardOnlyModeRoles.includes(role)
       );
-      const isSuperUser = user.roles.find(role => role === superuserRole);
+      const isSuperUser = user.roles.find((role) => role === superuserRole);
 
       const enforceDashboardOnlyMode = isDashboardOnlyModeUser && !isSuperUser;
       if (enforceDashboardOnlyMode) {
-        if (url.path.startsWith('/app/kibana')) {
+        if (
+          url.path.startsWith('/app/home') ||
+          url.path.startsWith('/app/kibana') ||
+          url.path.startsWith('/app/dashboards')
+        ) {
+          const basePath = request.server.newPlatform.setup.core.http.basePath.get(request);
+          const url = `${basePath}/app/dashboard_mode`;
           // If the user is in "Dashboard only mode" they should only be allowed to see
-          // that app and none others.  Here we are intercepting all other routing and ensuring the viewer
-          // app is the only one ever rendered.
-          const response = await h.renderApp(dashboardViewerApp);
-          return response.takeover();
+          // the dashboard app and none others. If the kibana app is requested, this might be a old
+          // url we will migrate on the fly.
+          return h.redirect(url).permanent().takeover();
+        }
+        if (url.path.startsWith('/app/dashboard_mode')) {
+          // let through requests to the dashboard_mode app
+          return h.continue;
         }
 
         throw Boom.notFound();

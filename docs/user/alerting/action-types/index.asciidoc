@@ -16,6 +16,38 @@ Refresh::   Setting for the {ref}/docs-refresh.html[refresh] policy for the writ
 Execution time field::  This field will be automatically set to the time the alert condition was detected.
 
 [float]
+[[Preconfigured-index-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-index:
+   name: action-type-index
+   actionTypeId: .index
+   config:
+     index: .kibana
+     refresh: true
+     executionTimeField: somedate
+--
+
+`config` defines the action type specific to the configuration and contains the following properties:
+
+[cols="2*<"]
+|===
+
+|`index`
+| A string that corresponds to *Index*.
+
+|`refresh`
+| A boolean that corresponds to *Refresh*.
+
+|`executionTimeField`
+| A string that corresponds to *Execution time field*.
+
+|===
+
+
+[float]
 [[index-action-configuration]]
 ==== Action configuration
 

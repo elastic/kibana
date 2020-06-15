@@ -13,7 +13,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
-    UserAtSpaceScenarios.forEach(scenario => {
+    UserAtSpaceScenarios.forEach((scenario) => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 

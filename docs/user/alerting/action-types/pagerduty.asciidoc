@@ -136,6 +136,30 @@ API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerdu
 Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
+[[Preconfigured-pagerduty-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-pagerduty:
+   name: preconfigured-pagerduty-action-type
+   actionTypeId: .pagerduty
+   config:
+     apiUrl: https://test.host
+   secrets:
+     routingKey: testroutingkey
+--
+
+`config` defines the action type specific to the configuration.
+`config` contains
+`apiURL`, a string that corresponds to *API URL*.
+
+`secrets` defines sensitive information for the action type.
+`secrets` contains
+`routingKey`, a string that corresponds to *Integration Key*.
+
+
+[float]
 [[pagerduty-action-configuration]]
 ==== Action configuration
 

@@ -93,12 +93,12 @@ export function esdocs(): ExpressionFunctionDefinition<
       }
 
       if (fields) {
-        const allFields = fields.split(',').map(field => field.trim());
-        allFields.forEach(field => (query = query.field(field)));
+        const allFields = fields.split(',').map((field) => field.trim());
+        allFields.forEach((field) => (query = query.field(field)));
       }
 
       if (sort) {
-        const [sortField, sortOrder] = sort.split(',').map(str => str.trim());
+        const [sortField, sortOrder] = sort.split(',').map((str) => str.trim());
         if (sortField) {
           query.order(`"${sortField}"`, sortOrder === 'asc');
         }

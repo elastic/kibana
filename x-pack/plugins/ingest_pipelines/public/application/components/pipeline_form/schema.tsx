@@ -34,17 +34,8 @@ export const pipelineFormSchema: FormSchema = {
   description: {
     type: FIELD_TYPES.TEXTAREA,
     label: i18n.translate('xpack.ingestPipelines.form.descriptionFieldLabel', {
-      defaultMessage: 'Description',
+      defaultMessage: 'Description (optional)',
     }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.form.pipelineDescriptionRequiredError', {
-            defaultMessage: 'A description is required.',
-          })
-        ),
-      },
-    ],
   },
   processors: {
     label: i18n.translate('xpack.ingestPipelines.form.processorsFieldLabel', {
@@ -113,7 +104,7 @@ export const pipelineFormSchema: FormSchema = {
         }}
       />
     ),
-    serializer: value => {
+    serializer: (value) => {
       const result = parseJson(value);
       // If an empty array was passed, strip out this value entirely.
       if (!result.length) {
@@ -124,7 +115,7 @@ export const pipelineFormSchema: FormSchema = {
     deserializer: stringifyJson,
     validations: [
       {
-        validator: validationArg => {
+        validator: (validationArg) => {
           if (!validationArg.value) {
             return;
           }

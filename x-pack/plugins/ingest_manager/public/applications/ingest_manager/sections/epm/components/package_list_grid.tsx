@@ -13,6 +13,7 @@ import {
   // @ts-ignore
   EuiSearchBar,
   EuiText,
+  Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,8 +36,27 @@ export function PackageListGrid({
   list,
   showInstalledBadge,
 }: ListProps) {
+  const initialQuery = EuiSearchBar.Query.MATCH_ALL;
+
+  const [query, setQuery] = useState<Query | null>(initialQuery);
   const [searchTerm, setSearchTerm] = useState('');
   const localSearchRef = useLocalSearch(list);
+
+  const onQueryChange = ({
+    // eslint-disable-next-line no-shadow
+    query,
+    queryText: userInput,
+    error,
+  }: {
+    query: Query | null;
+    queryText: string;
+    error: { message: string } | null;
+  }) => {
+    if (!error) {
+      setQuery(query);
+      setSearchTerm(userInput);
+    }
+  };
 
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
   let gridContent: JSX.Element;
@@ -45,9 +65,9 @@ export function PackageListGrid({
     gridContent = <Loading />;
   } else {
     const filteredList = searchTerm
-      ? list.filter(item =>
+      ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as PackageList)
-            .map(match => match[searchIdField])
+            .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
       : list;
@@ -59,16 +79,14 @@ export function PackageListGrid({
       <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiSearchBar
-          query={searchTerm}
+          query={query || undefined}
           box={{
             placeholder: i18n.translate('xpack.ingestManager.epmList.searchPackagesPlaceholder', {
               defaultMessage: 'Search for integrations',
             }),
             incremental: true,
           }}
-          onChange={({ queryText: userInput }: { queryText: string }) => {
-            setSearchTerm(userInput);
-          }}
+          onChange={onQueryChange}
         />
         <EuiSpacer />
         {gridContent}
@@ -105,7 +123,7 @@ function GridColumn({ list }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
-        list.map(item => (
+        list.map((item) => (
           <EuiFlexItem key={`${item.name}-${item.version}`}>
             <PackageCard {...item} />
           </EuiFlexItem>

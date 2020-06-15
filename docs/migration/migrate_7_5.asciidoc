@@ -7,7 +7,7 @@
 This page discusses the breaking changes that you need to be aware of when migrating
 your application to Kibana 7.5.
 
-//See also <<release-highlights-7.4.0, release highlights>> and <<release-notes-7.4.0, release notes>>.
+//See also {kibana-ref-all}/7.5/release-highlights-7.5.0.html[release highlights] and <<release-notes-7.4.0, release notes>>.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
@@ -45,3 +45,4 @@ Any installs that previously enabled the Code app will now log a warning when
 Kibana starts up. It's safe to remove all configurations starting with
 `xpack.code.`. Starting in 8.0, these warnings will become errors that prevent
 Kibana from starting up.
+// end::notable-breaking-changes[]

@@ -32,11 +32,11 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
       describe(scenario.id, () => {
         it('should handle mute alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getMuteAllRequest(createdAlert.id);
 
@@ -56,7 +56,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);

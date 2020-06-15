@@ -88,6 +88,8 @@ import { ibmmqMetricsSpecProvider } from './ibmmq_metrics';
 import { statsdMetricsSpecProvider } from './statsd_metrics';
 import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { openmetricsMetricsSpecProvider } from './openmetrics_metrics';
+import { iisMetricsSpecProvider } from './iis_metrics';
+import { azureLogsSpecProvider } from './azure_logs';
 
 export const builtInTutorials = [
   systemLogsSpecProvider,
@@ -162,4 +164,6 @@ export const builtInTutorials = [
   statsdMetricsSpecProvider,
   redisenterpriseMetricsSpecProvider,
   openmetricsMetricsSpecProvider,
+  iisMetricsSpecProvider,
+  azureLogsSpecProvider,
 ];

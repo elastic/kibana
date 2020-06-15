@@ -12,7 +12,7 @@ import { FetcherResult } from '../../../../../hooks/useFetcher';
 import { history } from '../../../../../utils/history';
 import {
   AgentConfigurationIntake,
-  AgentConfiguration
+  AgentConfiguration,
 } from '../../../../../../common/agent_configuration/configuration_types';
 import { ServicePage } from './ServicePage/ServicePage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
@@ -26,7 +26,7 @@ function getInitialNewConfig(
   return {
     agent_name: existingConfig?.agent_name,
     service: existingConfig?.service || {},
-    settings: existingConfig?.settings || {}
+    settings: existingConfig?.settings || {},
   };
 }
 
@@ -35,14 +35,14 @@ function setPage(pageStep: PageStep) {
     ...history.location,
     search: fromQuery({
       ...toQuery(history.location.search),
-      pageStep
-    })
+      pageStep,
+    }),
   });
 }
 
 function getUnsavedChanges({
   newConfig,
-  existingConfig
+  existingConfig,
 }: {
   newConfig: AgentConfigurationIntake;
   existingConfig?: AgentConfigurationIntake;
@@ -63,7 +63,7 @@ function getUnsavedChanges({
 
 export function AgentConfigurationCreateEdit({
   pageStep,
-  existingConfigResult
+  existingConfigResult,
 }: {
   pageStep: PageStep;
   existingConfigResult?: FetcherResult<AgentConfiguration>;
@@ -75,10 +75,11 @@ export function AgentConfigurationCreateEdit({
   );
 
   const resetSettings = useCallback(() => {
-    setNewConfig(_newConfig => ({
+    setNewConfig((_newConfig) => ({
       ..._newConfig,
-      settings: existingConfig?.settings || {}
+      settings: existingConfig?.settings || {},
     }));
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [existingConfig]);
 
   // update newConfig when existingConfig has loaded
@@ -110,10 +111,10 @@ export function AgentConfigurationCreateEdit({
         <h2>
           {isEditMode
             ? i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
-                defaultMessage: 'Edit configuration'
+                defaultMessage: 'Edit configuration',
               })
             : i18n.translate('xpack.apm.agentConfig.createConfigTitle', {
-                defaultMessage: 'Create configuration'
+                defaultMessage: 'Create configuration',
               })}
         </h2>
       </EuiTitle>
@@ -122,7 +123,7 @@ export function AgentConfigurationCreateEdit({
         {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
           defaultMessage: `This allows you to fine-tune your agent configuration directly in
         Kibana. Best of all, changes are automatically propagated to your APM
-        agents so there’s no need to redeploy.`
+        agents so there’s no need to redeploy.`,
         })}
       </EuiText>
 
@@ -132,7 +133,10 @@ export function AgentConfigurationCreateEdit({
         <ServicePage
           newConfig={newConfig}
           setNewConfig={setNewConfig}
-          onClickNext={() => setPage('choose-settings-step')}
+          onClickNext={() => {
+            resetSettings();
+            setPage('choose-settings-step');
+          }}
         />
       )}
 

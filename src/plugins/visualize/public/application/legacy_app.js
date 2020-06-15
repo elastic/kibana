@@ -38,31 +38,42 @@ import {
   getEditBreadcrumbs,
 } from './breadcrumbs';
 
-const getResolvedResults = deps => {
+const getResolvedResults = (deps) => {
   const { core, data, visualizations, createVisEmbeddableFromObject } = deps;
 
   const results = {};
 
-  return savedVis => {
+  return (savedVis) => {
     results.savedVis = savedVis;
+    const serializedVis = visualizations.convertToSerializedVis(savedVis);
     return visualizations
-      .convertToSerializedVis(savedVis)
-      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
-      .then(vis => {
+      .createVis(serializedVis.type, serializedVis)
+      .then((vis) => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
         }
         return vis;
       })
-      .then(vis => {
+      .then((vis) => {
         results.vis = vis;
         return createVisEmbeddableFromObject(vis, {
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
         });
       })
-      .then(embeddableHandler => {
+      .then((embeddableHandler) => {
         results.embeddableHandler = embeddableHandler;
+
+        embeddableHandler.getOutput$().subscribe((output) => {
+          if (output.error) {
+            core.notifications.toasts.addError(output.error, {
+              title: i18n.translate('visualize.error.title', {
+                defaultMessage: 'Visualization error',
+              }),
+            });
+          }
+        });
+
         if (results.vis.data.savedSearchId) {
           return createSavedSearchesLoader({
             savedObjectsClient: core.savedObjects.client,
@@ -73,7 +84,7 @@ const getResolvedResults = deps => {
           }).get(results.vis.data.savedSearchId);
         }
       })
-      .then(savedSearch => {
+      .then((savedSearch) => {
         if (savedSearch) {
           results.savedSearch = savedSearch;
         }
@@ -86,14 +97,14 @@ export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
   app.factory('history', () => createHashHistory());
-  app.factory('kbnUrlStateStorage', history =>
+  app.factory('kbnUrlStateStorage', (history) =>
     createKbnUrlStateStorage({
       history,
       useHash: deps.core.uiSettings.get('state:storeInSessionStorage'),
     })
   );
 
-  app.config(function($routeProvider) {
+  app.config(function ($routeProvider) {
     const defaults = {
       reloadOnSearch: false,
       requireUICapability: 'visualize.show',
@@ -123,7 +134,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: history => deps.data.indexPatterns.ensureDefaultIndexPattern(history),
+          hasDefaultIndex: (history) => deps.data.indexPatterns.ensureDefaultIndexPattern(history),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -134,7 +145,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: history => deps.data.indexPatterns.ensureDefaultIndexPattern(history),
+          hasDefaultIndex: (history) => deps.data.indexPatterns.ensureDefaultIndexPattern(history),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
@@ -142,7 +153,7 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          resolved: function($route, history) {
+          resolved: function ($route, history) {
             const { data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
@@ -162,8 +173,8 @@ export function initVisualizeApp(app, deps) {
 
             // This delay is needed to prevent some navigation issues in Firefox/Safari.
             // see https://github.com/elastic/kibana/issues/65161
-            const delay = res => {
-              return new Promise(resolve => {
+            const delay = (res) => {
+              return new Promise((resolve) => {
                 setTimeout(() => resolve(res), 0);
               });
             };
@@ -171,6 +182,10 @@ export function initVisualizeApp(app, deps) {
             return data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params))
+              .then((savedVis) => {
+                savedVis.searchSourceFields = { index: $route.current.params.indexPattern };
+                return savedVis;
+              })
               .then(getResolvedResults(deps))
               .then(delay)
               .catch(
@@ -188,13 +203,13 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          resolved: function($route, history) {
+          resolved: function ($route, history) {
             const { chrome, data, savedVisualizations, toastNotifications } = deps;
 
             return data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params.id))
-              .then(savedVis => {
+              .then((savedVis) => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
                 return savedVis;
               })
@@ -202,14 +217,22 @@ export function initVisualizeApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
+                  basePath: deps.core.http.basePath,
                   mapping: {
                     visualization: VisualizeConstants.LANDING_PAGE_PATH,
-                    search:
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                    'index-pattern':
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                    'index-pattern-field':
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    search: {
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    },
+                    'index-pattern': {
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    },
+                    'index-pattern-field': {
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    },
                   },
                   toastNotifications,
                   onBeforeRedirect() {
@@ -220,8 +243,11 @@ export function initVisualizeApp(app, deps) {
           },
         },
       })
-      .when(`visualize/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function () {
+          deps.kibanaLegacy.navigateToDefaultApp();
+        },
       });
   });
 }

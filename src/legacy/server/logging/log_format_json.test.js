@@ -27,7 +27,7 @@ import KbnLoggerJsonFormat from './log_format_json';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 
-const makeEvent = eventType => ({
+const makeEvent = (eventType) => ({
   event: eventType,
   timestamp: time,
 });

@@ -117,7 +117,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     fieldsByTypeMap.forEach((fieldsList, fieldType) => {
       fields.push({
         label: fieldType,
-        options: fieldsList.sort().map(fieldName => {
+        options: fieldsList.sort().map((fieldName) => {
           return { value: fieldName, label: fieldName };
         }),
       });

@@ -18,7 +18,7 @@ interface PercentOfParentProps {
 export function PercentOfParent({
   duration,
   totalDuration,
-  parentType
+  parentType,
 }: PercentOfParentProps) {
   totalDuration = totalDuration || duration;
   const isOver100 = duration > totalDuration;
@@ -29,7 +29,7 @@ export function PercentOfParent({
   const percentOfParentText = i18n.translate('xpack.apm.percentOfParent', {
     defaultMessage:
       '({value} of {parentType, select, transaction { transaction } trace {trace} })',
-    values: { value: percentOfParent, parentType }
+    values: { value: percentOfParent, parentType },
   });
 
   const childType = parentType === 'trace' ? 'transaction' : 'span';
@@ -45,8 +45,8 @@ export function PercentOfParent({
                 'The % of {parentType, select, transaction {transaction} trace {trace} } exceeds 100% because this {childType, select, span {span} transaction {transaction} } takes longer than the root transaction.',
               values: {
                 parentType,
-                childType
-              }
+                childType,
+              },
             }
           )}
         >

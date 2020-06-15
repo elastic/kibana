@@ -21,13 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ReactElement } from 'react';
 import { CoreSetup } from 'src/core/public';
 
-import {
-  EuiContextMenuItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
@@ -101,7 +95,8 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
   public onAddPanel = async (savedObjectId: string, savedObjectType: string, name: string) => {
     const factoryForSavedObjectType = [...this.props.getAllFactories()].find(
-      factory => factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
+      (factory) =>
+        factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
     );
     if (!factoryForSavedObjectType) {
       throw new EmbeddableFactoryNotFoundError(savedObjectType);
@@ -117,8 +112,10 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
-      .filter(factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew())
-      .map(factory => (
+      .filter(
+        (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
+      )
+      .map((factory) => (
         <EuiContextMenuItem
           key={factory.type}
           data-test-subj={`createNew-${factory.type}`}
@@ -134,7 +131,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     const SavedObjectFinder = this.props.SavedObjectFinder;
     const metaData = [...this.props.getAllFactories()]
       .filter(
-        embeddableFactory =>
+        (embeddableFactory) =>
           Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
       )
       .map(({ savedObjectMetaData }) => savedObjectMetaData as any);
@@ -152,7 +149,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     );
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
+      <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -161,7 +158,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-      </EuiFlyout>
+      </>
     );
   }
 }

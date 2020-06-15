@@ -52,12 +52,16 @@ export const metricsExplorerRequestBodyRequiredFieldsRT = rt.type({
   metrics: rt.array(metricsExplorerMetricRT),
 });
 
+const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
+export const afterKeyObjectRT = rt.record(rt.string, rt.union([rt.string, rt.null]));
+
 export const metricsExplorerRequestBodyOptionalFieldsRT = rt.partial({
-  groupBy: rt.union([rt.string, rt.null, rt.undefined]),
-  afterKey: rt.union([rt.string, rt.null, rt.undefined]),
+  groupBy: rt.union([groupByRT, rt.array(groupByRT)]),
+  afterKey: rt.union([rt.string, rt.null, rt.undefined, afterKeyObjectRT]),
   limit: rt.union([rt.number, rt.null, rt.undefined]),
   filterQuery: rt.union([rt.string, rt.null, rt.undefined]),
   forceInterval: rt.boolean,
+  dropLastBucket: rt.boolean,
 });
 
 export const metricsExplorerRequestBodyRT = rt.intersection([
@@ -67,7 +71,7 @@ export const metricsExplorerRequestBodyRT = rt.intersection([
 
 export const metricsExplorerPageInfoRT = rt.type({
   total: rt.number,
-  afterKey: rt.union([rt.string, rt.null]),
+  afterKey: rt.union([rt.string, rt.null, afterKeyObjectRT]),
 });
 
 export const metricsExplorerColumnTypeRT = rt.keyof({
@@ -88,11 +92,16 @@ export const metricsExplorerRowRT = rt.intersection([
   rt.record(rt.string, rt.union([rt.string, rt.number, rt.null, rt.undefined])),
 ]);
 
-export const metricsExplorerSeriesRT = rt.type({
-  id: rt.string,
-  columns: rt.array(metricsExplorerColumnRT),
-  rows: rt.array(metricsExplorerRowRT),
-});
+export const metricsExplorerSeriesRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    columns: rt.array(metricsExplorerColumnRT),
+    rows: rt.array(metricsExplorerRowRT),
+  }),
+  rt.partial({
+    keys: rt.array(rt.string),
+  }),
+]);
 
 export const metricsExplorerResponseRT = rt.type({
   series: rt.array(metricsExplorerSeriesRT),

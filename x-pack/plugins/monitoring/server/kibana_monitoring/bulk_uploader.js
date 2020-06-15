@@ -50,15 +50,15 @@ export class BulkUploader {
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
     this._log = log;
 
-    this._cluster = elasticsearch.createClient('admin', {
+    this._cluster = elasticsearch.legacy.createClient('admin', {
       plugins: [monitoringBulk],
     });
 
     if (hasMonitoringCluster(config.elasticsearch)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
-      this._cluster = elasticsearch.createClient('monitoring-direct', config.elasticsearch);
-      elasticsearch.adminClient.callAsInternalUser('info').then(data => {
+      this._cluster = elasticsearch.legacy.createClient('monitoring-direct', config.elasticsearch);
+      elasticsearch.legacy.client.callAsInternalUser('info').then((data) => {
         this._productionClusterUuid = get(data, 'cluster_uuid');
       });
     }
@@ -75,7 +75,7 @@ export class BulkUploader {
     const successfulUploadInLastDay =
       this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
 
-    return usageCollection.getFilteredCollectorSet(c => {
+    return usageCollection.getFilteredCollectorSet((c) => {
       // this is internal bulk upload, so filter out API-only collectors
       if (c.ignoreForInternalUploader) {
         return false;
@@ -140,7 +140,7 @@ export class BulkUploader {
   async _fetchAndUpload(usageCollection) {
     const collectorsReady = await usageCollection.areAllCollectorsReady();
     const hasUsageCollectors = usageCollection.some(usageCollection.isUsageCollector);
-    if (!collectorsReady) {
+    if (!collectorsReady || typeof this.kibanaStatusGetter !== 'function') {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
       if (hasUsageCollectors) {
         this._lastFetchUsageTime = null;
@@ -151,7 +151,7 @@ export class BulkUploader {
 
     const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
-    if (payload) {
+    if (payload && payload.length > 0) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
         const result = await this._onPayload(payload);
@@ -244,7 +244,7 @@ export class BulkUploader {
    */
   toBulkUploadFormat(rawData, usageCollection) {
     if (rawData.length === 0) {
-      return;
+      return [];
     }
 
     // convert the raw data to a nested object by taking each payload through
@@ -272,7 +272,7 @@ export class BulkUploader {
   }
 
   static checkPayloadTypesUnique(payload) {
-    const ids = payload.map(item => item[0].index._type);
+    const ids = payload.map((item) => item[0].index._type);
     const uniques = uniq(ids);
     if (ids.length !== uniques.length) {
       throw new Error('Duplicate collector type identifiers found in payload! ' + ids.join(','));

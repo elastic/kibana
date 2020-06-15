@@ -62,7 +62,7 @@ describe('SpacesPopoverList', () => {
   });
 
   it('renders a search box when there are 8 or more spaces', () => {
-    const lotsOfSpaces = [1, 2, 3, 4, 5, 6, 7, 8].map(num => ({
+    const lotsOfSpaces = [1, 2, 3, 4, 5, 6, 7, 8].map((num) => ({
       id: `space-${num}`,
       name: `Space ${num}`,
       disabledFeatures: [],
@@ -100,10 +100,7 @@ describe('SpacesPopoverList', () => {
 
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);
 
-    wrapper
-      .find(EuiPopover)
-      .props()
-      .closePopover();
+    wrapper.find(EuiPopover).props().closePopover();
 
     wrapper.update();
 

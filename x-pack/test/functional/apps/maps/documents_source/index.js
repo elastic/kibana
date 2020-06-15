@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('documents source', function() {
+export default function ({ loadTestFile }) {
+  describe('documents source', function () {
     loadTestFile(require.resolve('./docvalue_fields'));
     loadTestFile(require.resolve('./search_hits'));
     loadTestFile(require.resolve('./top_hits'));

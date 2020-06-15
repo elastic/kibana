@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
 
-  describe('Endpoint landing page', function() {
+  describe('Endpoint landing page', function () {
     this.tags('ciGroup7');
     before(async () => {
       await pageObjects.common.navigateToApp('endpoint');

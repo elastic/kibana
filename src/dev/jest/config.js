@@ -62,7 +62,8 @@ export default {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
-    '\\.ace\\.worker.js$': '<rootDir>/src/dev/jest/mocks/ace_worker_module_mock.js',
+    '\\.ace\\.worker.js$': '<rootDir>/src/dev/jest/mocks/worker_module_mock.js',
+    '\\.editor\\.worker.js$': '<rootDir>/src/dev/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/src/dev/jest/mocks/file_mock.js',
   },
   setupFiles: [
@@ -76,7 +77,7 @@ export default {
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: ['html', 'text'],
-  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [

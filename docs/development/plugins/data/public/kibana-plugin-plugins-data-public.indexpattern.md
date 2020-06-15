@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, getConfig, savedObjectsClient, apiClient, patternCache)](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -29,7 +29,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined &#124; null</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
-|  [routes](./kibana-plugin-plugins-data-public.indexpattern.routes.md) |  | <code>{</code><br/><code>        edit: string;</code><br/><code>        addField: string;</code><br/><code>        indexedFields: string;</code><br/><code>        scriptedFields: string;</code><br/><code>        sourceFilters: string;</code><br/><code>    }</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string</code> |  |

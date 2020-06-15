@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -24,6 +26,7 @@ import {
   Plugin,
   PackageInfo,
 } from 'src/core/public';
+import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
@@ -37,7 +40,11 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
+import {
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  onUnsupportedTimePattern,
+} from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -83,17 +90,18 @@ declare module '../../ui_actions/public' {
 }
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteService();
+  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private readonly packageInfo: PackageInfo;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService();
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.packageInfo = initializerContext.env.packageInfo;
   }
@@ -150,7 +158,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
@@ -160,7 +168,25 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http, fieldFormats);
+    const indexPatterns = new IndexPatternsService({
+      uiSettings,
+      savedObjectsClient: savedObjects.client,
+      http,
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError,
+      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+      onUnsupportedTimePattern: onUnsupportedTimePattern(
+        notifications.toasts,
+        application.navigateToApp
+      ),
+    });
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);

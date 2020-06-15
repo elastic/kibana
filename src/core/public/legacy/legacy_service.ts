@@ -46,7 +46,10 @@ interface StartDeps {
 }
 
 interface BootstrapModule {
-  bootstrap: MountPoint;
+  bootstrap?: MountPoint;
+  default?: {
+    bootstrap: MountPoint;
+  };
 }
 
 /**
@@ -115,8 +118,8 @@ export class LegacyPlatformService {
     // Initialize legacy sub urls
     core.chrome.navLinks
       .getAll()
-      .filter(link => link.legacy)
-      .forEach(navLink => {
+      .filter((link) => link.legacy)
+      .forEach((navLink) => {
         const lastSubUrl = lastSubUrlStorage.getItem(`lastSubUrl:${navLink.baseUrl}`);
         core.chrome.navLinks.update(navLink.id, {
           url: lastSubUrl || navLink.url || navLink.baseUrl,
@@ -131,10 +134,12 @@ export class LegacyPlatformService {
     const legacyCore: LegacyCoreStart = {
       ...core,
       application: {
+        applications$: core.application.applications$,
         currentAppId$: core.application.currentAppId$,
         capabilities: core.application.capabilities,
         getUrlForApp: core.application.getUrlForApp,
         navigateToApp: core.application.navigateToApp,
+        navigateToUrl: core.application.navigateToUrl,
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },
     };
@@ -169,10 +174,16 @@ export class LegacyPlatformService {
       throw new Error('Bootstrap module must be loaded before `start`');
     }
 
-    this.targetDomElement = targetDomElement;
-
     // `targetDomElement` is always defined when in legacy mode
-    this.bootstrapModule.bootstrap(this.targetDomElement!);
+    this.targetDomElement = targetDomElement!;
+
+    if (this.bootstrapModule.default) {
+      this.bootstrapModule.default.bootstrap(this.targetDomElement);
+    } else if (this.bootstrapModule.bootstrap) {
+      this.bootstrapModule.bootstrap(this.targetDomElement);
+    } else {
+      throw new Error('legacy bootstrap module does not export a bootstrap() function');
+    }
   }
 
   public stop() {

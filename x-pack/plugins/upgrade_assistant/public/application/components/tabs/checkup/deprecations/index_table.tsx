@@ -143,8 +143,8 @@ export class IndexDeprecationTableUI extends React.Component<
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    const showReindexButton = indices.find(i => i.reindex === true);
-    const showNeedsDefaultFieldsButton = indices.find(i => i.needsDefaultFields === true);
+    const showReindexButton = indices.find((i) => i.reindex === true);
+    const showNeedsDefaultFieldsButton = indices.find((i) => i.needsDefaultFields === true);
     if (!showReindexButton && !showNeedsDefaultFieldsButton) {
       return null;
     }

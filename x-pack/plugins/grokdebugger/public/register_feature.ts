@@ -20,7 +20,7 @@ export const registerFeature = (homePlugin: HomePublicPluginSetup) => {
       defaultMessage: 'Simulate and debug grok patterns for data transformation on ingestion.',
     }),
     icon: 'grokApp',
-    path: '/app/kibana#/dev_tools/grokdebugger',
+    path: '/app/dev_tools#/grokdebugger',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN,
   });

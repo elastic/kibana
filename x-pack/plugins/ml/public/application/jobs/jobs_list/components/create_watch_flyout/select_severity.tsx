@@ -68,7 +68,7 @@ export const SEVERITY_OPTIONS: TableSeverity[] = [
 
 function optionValueToThreshold(value: number) {
   // Get corresponding threshold object with required display and val properties from the specified value.
-  let threshold = SEVERITY_OPTIONS.find(opt => opt.val === value);
+  let threshold = SEVERITY_OPTIONS.find((opt) => opt.val === value);
 
   // Default to warning if supplied value doesn't map to one of the options.
   if (threshold === undefined) {

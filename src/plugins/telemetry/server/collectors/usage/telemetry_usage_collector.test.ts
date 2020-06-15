@@ -69,7 +69,7 @@ describe('telemetry_usage_collector', () => {
 
   // delete temp files
   afterAll(() => {
-    allFiles.forEach(path => {
+    allFiles.forEach((path) => {
       try {
         unlinkSync(path);
       } catch (err) {
@@ -81,7 +81,7 @@ describe('telemetry_usage_collector', () => {
   describe('isFileReadable', () => {
     test('returns `undefined` no file is readable', async () => {
       expect(isFileReadable('')).toBe(false);
-      invalidFiles.forEach(path => {
+      invalidFiles.forEach((path) => {
         expect(isFileReadable(path)).toBe(false);
       });
     });

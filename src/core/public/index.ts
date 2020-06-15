@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -65,7 +67,7 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
+import { DocLinksSetup, DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
@@ -105,6 +107,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
+  PublicAppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -121,6 +124,9 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
+  LegacyApp,
+  PublicLegacyAppInfo,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -187,6 +193,8 @@ export {
 
 export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
+export { URL_MAX_LENGTH } from './core_app';
+
 /**
  * Core services exposed to the `Plugin` setup lifecycle
  *
@@ -209,6 +217,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link DocLinksSetup} */
+  docLinks: DocLinksSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -339,6 +349,7 @@ export {
   HandlerParameters,
   IContextProvider,
   ContextSetup,
+  DocLinksSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
@@ -358,3 +369,5 @@ export {
   UiSettingsState,
   NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

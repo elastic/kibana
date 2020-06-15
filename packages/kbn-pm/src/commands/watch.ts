@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { ProjectMap, topologicallyBatchProjects } from '../utils/projects';
@@ -58,20 +58,13 @@ export const WatchCommand: ICommand = {
     }
 
     if (projectsToWatch.size === 0) {
-      log.write(
-        chalk.red(
-          `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
-        )
+      throw new CliError(
+        `There are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.`
       );
-      return;
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
-    log.write(
-      chalk.bold(
-        chalk.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)
-      )
-    );
+    log.info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`);
 
     // Kibana should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
@@ -83,14 +76,14 @@ export const WatchCommand: ICommand = {
       batchedProjects.push([projects.get(kibanaProjectName)!]);
     }
 
-    await parallelizeBatches(batchedProjects, async pkg => {
+    await parallelizeBatches(batchedProjects, async (pkg) => {
       const completionHint = await waitUntilWatchIsReady(
-        pkg.runScriptStreaming(watchScriptName).stdout
+        pkg.runScriptStreaming(watchScriptName, {
+          debug: false,
+        }).stdout
       );
 
-      log.write(
-        chalk.bold(`[${chalk.green(pkg.name)}] Initial build completed (${completionHint}).`)
-      );
+      log.success(`[${pkg.name}] Initial build completed (${completionHint}).`);
     });
   },
 };

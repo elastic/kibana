@@ -31,7 +31,7 @@ export function getIndexPatternFieldList(
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
 
-  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(unknownFieldName => {
+  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
     fieldSpecs.push({
       name: String(unknownFieldName),
       type: 'unknown',

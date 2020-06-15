@@ -52,7 +52,7 @@ export const isLegacyApmIndex = (
     return false;
   }
 
-  const find = apmIndexPatterns.find(pattern => {
+  const find = apmIndexPatterns.find((pattern) => {
     return minimatch(indexName, pattern);
   });
 

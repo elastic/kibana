@@ -17,14 +17,16 @@
  * under the License.
  */
 
-require('angular-sortable-view');
-require('plugins/timelion/directives/chart/chart');
-require('plugins/timelion/directives/timelion_grid');
+import { uiModules } from 'ui/modules';
 
-const app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);
+import 'angular-sortable-view';
+import 'plugins/timelion/directives/chart/chart';
+import 'plugins/timelion/directives/timelion_grid';
+
+const app = uiModules.get('apps/timelion', ['angular-sortable-view']);
 import html from './fullscreen.html';
 
-app.directive('timelionFullscreen', function() {
+app.directive('timelionFullscreen', function () {
   return {
     restrict: 'E',
     scope: {

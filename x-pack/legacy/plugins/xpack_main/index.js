@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
-export const xpackMain = kibana => {
+export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',
     configPrefix: 'xpack.xpack_main',
@@ -85,10 +85,7 @@ export const xpackMain = kibana => {
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
-      featuresPlugin.registerLegacyAPI({
-        xpackInfo: setupXPackMain(server),
-        savedObjectTypes: server.savedObjects.types,
-      });
+      setupXPackMain(server);
 
       // register routes
       xpackInfoRoute(server);

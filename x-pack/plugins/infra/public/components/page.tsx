@@ -19,7 +19,7 @@ export const PageContent = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
   flex-direction: row;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 export const FlexPage = euiStyled(EuiPage)`

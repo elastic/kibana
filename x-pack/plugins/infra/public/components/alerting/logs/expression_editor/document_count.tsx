@@ -56,6 +56,11 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
     values: { value },
   });
 
+  const documentCountSuffix = i18n.translate('xpack.infra.logs.alertFlyout.documentCountSuffix', {
+    defaultMessage: '{value, plural, one {occurs} other {occur}}',
+    values: { value },
+  });
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -81,7 +86,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
             <EuiSelect
               compressed
               value={comparator}
-              onChange={e => updateCount({ comparator: e.target.value as Comparator })}
+              onChange={(e) => updateCount({ comparator: e.target.value as Comparator })}
               options={getComparatorOptions()}
             />
           </div>
@@ -113,7 +118,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
               <EuiFieldNumber
                 compressed
                 value={value}
-                onChange={e => {
+                onChange={(e) => {
                   const number = parseInt(e.target.value, 10);
                   updateCount({ value: number ? number : undefined });
                 }}
@@ -121,6 +126,10 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
             </EuiFormRow>
           </div>
         </EuiPopover>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiExpression description={documentCountSuffix} value="" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

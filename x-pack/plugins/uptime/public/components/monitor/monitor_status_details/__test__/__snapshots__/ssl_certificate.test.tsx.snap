@@ -5,13 +5,13 @@ Array [
   <div
     class="euiText euiText--medium"
   >
-    Certificate
+    Certificate:
   </div>,
   <div
     class="euiSpacer euiSpacer--s"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -46,6 +46,7 @@ Array [
       >
         <div
           class="euiText euiText--medium"
+          style="white-space:nowrap"
         >
           Certificate overview
         </div>

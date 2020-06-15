@@ -10,13 +10,14 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { setupIngest } from './agents/services';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
 
-  describe('fleet_unenroll_agent', () => {
+  // SKIPPED as it is failing on ES PROMOTION: https://github.com/elastic/kibana/issues/68587
+  describe.skip('fleet_unenroll_agent', () => {
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
     before(async () => {

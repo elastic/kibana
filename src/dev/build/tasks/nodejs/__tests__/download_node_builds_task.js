@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 
 import * as NodeShasumsNS from '../node_shasums';
 import * as NodeDownloadInfoNS from '../node_download_info';
-import * as DownloadNS from '../download';
+import * as DownloadNS from '../../../lib/download'; // sinon can't stub '../../../lib' properly
 import { DownloadNodeBuildsTask } from '../download_node_builds_task';
 
 describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
@@ -91,9 +91,7 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
       await DownloadNodeBuildsTask.run(config, log);
       throw new Error('Expected DownloadNodeBuildsTask to reject');
     } catch (error) {
-      expect(error)
-        .to.have.property('message')
-        .be('Download failed for reasons');
+      expect(error).to.have.property('message').be('Download failed for reasons');
     }
   });
 });

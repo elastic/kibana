@@ -42,9 +42,7 @@ function isMap<K, V>(o: any): o is Map<K, V> {
 const anyCustomRule: Rules = {
   name: 'custom',
   params: {
-    validator: Joi.func()
-      .maxArity(1)
-      .required(),
+    validator: Joi.func().maxArity(1).required(),
   },
   validate(params, value, state, options) {
     let validationResultMessage;

@@ -6,9 +6,14 @@
 
 import { combineReducers, applyMiddleware, createStore, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { ui } from './ui';
-import { map } from './map';
+import { ui, DEFAULT_MAP_UI_STATE } from './ui';
+import { map, DEFAULT_MAP_STATE } from './map'; // eslint-disable-line import/named
 import { nonSerializableInstances } from './non_serializable_instances';
+
+export const DEFAULT_MAP_STORE_STATE = {
+  ui: { ...DEFAULT_MAP_UI_STATE },
+  map: { ...DEFAULT_MAP_STATE },
+};
 
 export function createMapStore() {
   const enhancers = [applyMiddleware(thunk)];

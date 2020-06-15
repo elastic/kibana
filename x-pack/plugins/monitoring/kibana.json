@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["monitoring"],
   "requiredPlugins": ["licensing", "features", "data", "navigation", "kibanaLegacy"],
-  "optionalPlugins": ["alerting", "actions", "infra", "telemetryCollectionManager", "usageCollection", "home"],
+  "optionalPlugins": ["alerts", "actions", "infra", "telemetryCollectionManager", "usageCollection", "home", "cloud"],
   "server": true,
   "ui": true
 }

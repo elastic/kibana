@@ -17,7 +17,7 @@ const getCoreMock = () => {
   const createRouter = jest.fn().mockReturnValue({
     get,
     post,
-    put
+    put,
   });
 
   const mock = {} as CoreSetup;
@@ -27,8 +27,8 @@ const getCoreMock = () => {
       ...mock,
       http: {
         ...mock.http,
-        createRouter
-      }
+        createRouter,
+      },
     },
     get,
     post,
@@ -38,10 +38,10 @@ const getCoreMock = () => {
       measure: () => undefined,
       config$: new BehaviorSubject({} as APMConfig),
       logger: ({
-        error: jest.fn()
+        error: jest.fn(),
       } as unknown) as Logger,
-      plugins: {}
-    }
+      plugins: {},
+    },
   };
 };
 
@@ -52,23 +52,23 @@ describe('createApi', () => {
     createApi()
       .add(() => ({
         path: '/foo',
-        handler: async () => null
+        handler: async () => null,
       }))
       .add(() => ({
         path: '/bar',
         method: 'POST',
         params: {
-          body: t.string
+          body: t.string,
         },
-        handler: async () => null
+        handler: async () => null,
       }))
       .add(() => ({
         path: '/baz',
         method: 'PUT',
         options: {
-          tags: ['access:apm', 'access:apm_write']
+          tags: ['access:apm', 'access:apm_write'],
         },
-        handler: async () => null
+        handler: async () => null,
       }))
       .init(mock, context);
 
@@ -80,26 +80,26 @@ describe('createApi', () => {
 
     expect(get.mock.calls[0][0]).toEqual({
       options: {
-        tags: ['access:apm']
+        tags: ['access:apm'],
       },
       path: '/foo',
-      validate: expect.anything()
+      validate: expect.anything(),
     });
 
     expect(post.mock.calls[0][0]).toEqual({
       options: {
-        tags: ['access:apm']
+        tags: ['access:apm'],
       },
       path: '/bar',
-      validate: expect.anything()
+      validate: expect.anything(),
     });
 
     expect(put.mock.calls[0][0]).toEqual({
       options: {
-        tags: ['access:apm', 'access:apm_write']
+        tags: ['access:apm', 'access:apm_write'],
       },
       path: '/baz',
-      validate: expect.anything()
+      validate: expect.anything(),
     });
   });
 
@@ -111,7 +111,7 @@ describe('createApi', () => {
         .add(() => ({
           path: '/foo',
           params,
-          handler: handlerMock
+          handler: handlerMock,
         }))
         .init(mock, context);
 
@@ -121,7 +121,7 @@ describe('createApi', () => {
         internalError: jest.fn(),
         notFound: jest.fn(),
         forbidden: jest.fn(),
-        badRequest: jest.fn()
+        badRequest: jest.fn(),
       };
 
       const simulate = (requestMock: any) => {
@@ -132,7 +132,7 @@ describe('createApi', () => {
             params: {},
             query: {},
             body: null,
-            ...requestMock
+            ...requestMock,
           },
           responseMock
         );
@@ -156,14 +156,14 @@ describe('createApi', () => {
 
       expect(params).toEqual({
         query: {
-          _debug: true
-        }
+          _debug: true,
+        },
       });
 
       await simulate({
         query: {
-          _debug: 1
-        }
+          _debug: 1,
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalled();
@@ -175,22 +175,22 @@ describe('createApi', () => {
       await simulate({
         query: {
           _debug: true,
-          extra: ''
-        }
+          extra: '',
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
 
       await simulate({
-        body: { foo: 'bar' }
+        body: { foo: 'bar' },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(2);
 
       await simulate({
         params: {
-          foo: 'bar'
-        }
+          foo: 'bar',
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(3);
@@ -199,14 +199,14 @@ describe('createApi', () => {
     it('validates path parameters', async () => {
       const { simulate, handlerMock, responseMock } = initApi({
         path: t.type({
-          foo: t.string
-        })
+          foo: t.string,
+        }),
       });
 
       await simulate({
         params: {
-          foo: 'bar'
-        }
+          foo: 'bar',
+        },
       });
 
       expect(handlerMock).toHaveBeenCalledTimes(1);
@@ -218,25 +218,25 @@ describe('createApi', () => {
 
       expect(params).toEqual({
         path: {
-          foo: 'bar'
+          foo: 'bar',
         },
         query: {
-          _debug: false
-        }
+          _debug: false,
+        },
       });
 
       await simulate({
         params: {
-          bar: 'foo'
-        }
+          bar: 'foo',
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
 
       await simulate({
         params: {
-          foo: 9
-        }
+          foo: 9,
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(2);
@@ -244,8 +244,8 @@ describe('createApi', () => {
       await simulate({
         params: {
           foo: 'bar',
-          extra: ''
-        }
+          extra: '',
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(3);
@@ -253,11 +253,11 @@ describe('createApi', () => {
 
     it('validates body parameters', async () => {
       const { simulate, handlerMock, responseMock } = initApi({
-        body: t.string
+        body: t.string,
       });
 
       await simulate({
-        body: ''
+        body: '',
       });
 
       expect(handlerMock).toHaveBeenCalledTimes(1);
@@ -269,12 +269,12 @@ describe('createApi', () => {
       expect(params).toEqual({
         body: '',
         query: {
-          _debug: false
-        }
+          _debug: false,
+        },
       });
 
       await simulate({
-        body: null
+        body: null,
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
@@ -282,14 +282,14 @@ describe('createApi', () => {
 
     it('validates query parameters', async () => {
       const { simulate, handlerMock, responseMock } = initApi({
-        query: t.type({ bar: t.string })
+        query: t.type({ bar: t.string }),
       });
 
       await simulate({
         query: {
           bar: '',
-          _debug: 'true'
-        }
+          _debug: 'true',
+        },
       });
 
       expect(handlerMock).toHaveBeenCalledTimes(1);
@@ -301,15 +301,15 @@ describe('createApi', () => {
       expect(params).toEqual({
         query: {
           bar: '',
-          _debug: true
-        }
+          _debug: true,
+        },
       });
 
       await simulate({
         query: {
           bar: '',
-          foo: ''
-        }
+          foo: '',
+        },
       });
 
       expect(responseMock.badRequest).toHaveBeenCalledTimes(1);

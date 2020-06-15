@@ -24,13 +24,22 @@ import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
+import { useMount } from 'react-use';
+
+const RedirectToDefaultApp = () => {
+  useMount(() => {
+    const { kibanaLegacy } = getServices();
+    kibanaLegacy.navigateToDefaultApp();
+  });
+  return null;
+};
+
 export function HomeApp({ directories }) {
   const {
-    config,
     savedObjectsClient,
     getBasePath,
     addBasePath,
@@ -42,9 +51,7 @@ export function HomeApp({ directories }) {
   const mlEnabled = environment.ml;
   const apmUiEnabled = environment.apmUi;
 
-  const defaultAppId = config.defaultAppId || 'discover';
-
-  const renderTutorialDirectory = props => {
+  const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
@@ -54,7 +61,7 @@ export function HomeApp({ directories }) {
     );
   };
 
-  const renderTutorial = props => {
+  const renderTutorial = (props) => {
     return (
       <Tutorial
         addBasePath={addBasePath}
@@ -71,12 +78,12 @@ export function HomeApp({ directories }) {
     <I18nProvider>
       <Router>
         <Switch>
-          <Route path="/home/tutorial/:id" render={renderTutorial} />
-          <Route path="/home/tutorial_directory/:tab?" render={renderTutorialDirectory} />
-          <Route exact path="/home/feature_directory">
+          <Route path="/tutorial/:id" render={renderTutorial} />
+          <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+          <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path="/home">
+          <Route exact path="/">
             <Home
               addBasePath={addBasePath}
               directories={directories}
@@ -88,9 +95,7 @@ export function HomeApp({ directories }) {
               telemetry={telemetry}
             />
           </Route>
-          <Route path="/home">
-            <Redirect to={`/${defaultAppId}`} />
-          </Route>
+          <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>
       </Router>
     </I18nProvider>

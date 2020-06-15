@@ -7,14 +7,10 @@
 This page discusses the breaking changes that you need to be aware of when migrating
 your application to Kibana 7.7.
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
+// The following section is re-used in the Installation and Upgrade Guide
+// tag::notable-breaking-changes[]
 
-////
-The following section is re-used in the Installation and Upgrade Guide
-[[breaking_70_notable]]
-=== Notable breaking changes
-////
+// end::notable-breaking-changes[]
 
 [float]
 === Breaking changes for users

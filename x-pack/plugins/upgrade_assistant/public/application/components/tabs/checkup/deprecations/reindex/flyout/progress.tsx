@@ -116,7 +116,7 @@ const orderedSteps = Object.values(ReindexStep).sort() as number[];
 export const ReindexProgress: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
-}> = props => {
+}> = (props) => {
   const { errorMessage, indexGroup, lastCompletedStep = -1, status } = props.reindexState;
   const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];

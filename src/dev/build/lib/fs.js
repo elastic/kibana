@@ -82,7 +82,7 @@ export async function read(path) {
 export async function getChildPaths(path) {
   assertAbsolute(path);
   const childNames = await readdirAsync(path);
-  return childNames.map(name => resolve(path, name));
+  return childNames.map((name) => resolve(path, name));
 }
 
 export async function deleteAll(patterns, log) {
@@ -122,8 +122,8 @@ export async function deleteEmptyFolders(log, rootFolderPath, foldersToKeep) {
   // Delete empty is used to gather all the empty folders and
   // then we use del to actually delete them
   const emptyFoldersList = await deleteEmpty(rootFolderPath, { dryRun: true });
-  const foldersToDelete = emptyFoldersList.filter(folderToDelete => {
-    return !foldersToKeep.some(folderToKeep => folderToDelete.includes(folderToKeep));
+  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
+    return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
   });
   const deletedEmptyFolders = await del(foldersToDelete, {
     concurrency: 4,
@@ -159,7 +159,7 @@ export async function copyAll(sourceDir, destination, options = {}) {
         base: destination,
         dot,
       }),
-      createMapStream(file => utimesAsync(file.path, time, time)),
+      createMapStream((file) => utimesAsync(file.path, time, time)),
     ]);
   }
 }
@@ -171,7 +171,7 @@ export async function getFileHash(path, algo) {
   const readStream = fs.createReadStream(path);
   await new Promise((resolve, reject) => {
     readStream
-      .on('data', chunk => hash.update(chunk))
+      .on('data', (chunk) => hash.update(chunk))
       .on('error', reject)
       .on('end', resolve);
   });
@@ -192,6 +192,19 @@ export async function untar(source, destination, extractOptions = {}) {
       ...extractOptions,
       cwd: destination,
     }),
+  ]);
+}
+
+export async function gunzip(source, destination) {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  await mkdirAsync(dirname(destination), { recursive: true });
+
+  await createPromiseFromStreams([
+    fs.createReadStream(source),
+    createGunzip(),
+    fs.createWriteStream(destination),
   ]);
 }
 

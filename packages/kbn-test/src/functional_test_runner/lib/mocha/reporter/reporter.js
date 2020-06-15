@@ -55,7 +55,7 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
-          getTestMetadata: t => failureMetadata.get(t),
+          getTestMetadata: (t) => failureMetadata.get(t),
         });
       }
     }
@@ -77,7 +77,7 @@ export function MochaReporterProvider({ getService }) {
           new ToolingLogTextWriter({
             level: 'debug',
             writeTo: {
-              write: line => {
+              write: (line) => {
                 // if the current runnable is a beforeEach hook then
                 // `runner.suite` is set to the suite that defined the
                 // hook, rather than the suite executing, so instead we
@@ -105,7 +105,7 @@ export function MochaReporterProvider({ getService }) {
       log.write('');
     };
 
-    onHookStart = hook => {
+    onHookStart = (hook) => {
       log.write(`-> ${colors.suite(hook.title)}`);
       log.indent(2);
     };
@@ -114,7 +114,7 @@ export function MochaReporterProvider({ getService }) {
       log.indent(-2);
     };
 
-    onSuiteStart = suite => {
+    onSuiteStart = (suite) => {
       if (!suite.root) {
         log.write('-: ' + colors.suite(suite.title));
       }
@@ -128,28 +128,28 @@ export function MochaReporterProvider({ getService }) {
       }
     };
 
-    onTestStart = test => {
+    onTestStart = (test) => {
       log.write(`-> ${test.title}`);
       log.indent(2);
     };
 
-    onTestEnd = test => {
+    onTestEnd = (test) => {
       snapshotLogsForRunnable(test);
       log.indent(-2);
     };
 
-    onPending = test => {
+    onPending = (test) => {
       log.write('-> ' + colors.pending(test.title));
       log.indent(2);
     };
 
-    onPass = test => {
+    onPass = (test) => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
       log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
     };
 
-    onFail = runnable => {
+    onFail = (runnable) => {
       // NOTE: this is super gross
       //
       //  - I started by trying to extract the Base.list() logic from mocha
@@ -174,8 +174,8 @@ export function MochaReporterProvider({ getService }) {
             // drop the first two lines, (empty + test title)
             .slice(2)
             // move leading colors behind leading spaces
-            .map(line => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
-            .map(line => ` ${line}`)
+            .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
+            .map((line) => ` ${line}`)
             .join('\n')
       );
 

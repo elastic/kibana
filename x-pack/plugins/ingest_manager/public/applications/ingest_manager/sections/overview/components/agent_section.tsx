@@ -16,10 +16,10 @@ import {
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetAgentStatus } from '../../../hooks';
-import { FLEET_PATH } from '../../../constants';
 import { Loading } from '../../fleet/components';
 
 export const OverviewAgentSection = () => {
+  const { getHref } = useLink();
   const agentStatusRequest = useGetAgentStatus({});
 
   return (
@@ -34,7 +34,7 @@ export const OverviewAgentSection = () => {
               />
             </h2>
           </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={useLink(FLEET_PATH)}>
+          <EuiButtonEmpty size="xs" flush="right" href={getHref('fleet_agent_list')}>
             <FormattedMessage
               id="xpack.ingestManager.overviewPageFleetPanelAction"
               defaultMessage="View agents"

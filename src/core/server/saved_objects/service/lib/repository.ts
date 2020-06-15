@@ -18,6 +18,7 @@
  */
 
 import { omit } from 'lodash';
+import uuid from 'uuid';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { APICaller } from '../../../elasticsearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
@@ -130,22 +131,22 @@ export class SavedObjectsRepository {
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
     callCluster: APICaller,
-    extraTypes: string[] = [],
+    includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
-    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
     const serializer = new SavedObjectsSerializer(typeRegistry);
-    const visibleTypes = allTypes.filter(type => !typeRegistry.isHidden(type));
+    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
 
-    const missingTypeMappings = extraTypes.filter(type => !allTypes.includes(type));
+    const missingTypeMappings = includedHiddenTypes.filter((type) => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
         `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`
       );
     }
 
-    const allowedTypes = [...new Set(visibleTypes.concat(extraTypes))];
+    const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
 
     return new injectedConstructor({
       index: indexName,
@@ -282,7 +283,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedResults: Either[] = objects.map(object => {
+    const expectedResults: Either[] = objects.map((object) => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -297,6 +298,8 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck =
         method === 'index' && this._registry.isMultiNamespace(object.type);
+
+      if (object.id == null) object.id = uuid.v1();
 
       return {
         tag: 'Right' as 'Right',
@@ -327,7 +330,7 @@ export class SavedObjectsRepository {
 
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Either[] = expectedResults.map(expectedBulkGetResult => {
+    const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
       }
@@ -397,41 +400,31 @@ export class SavedObjectsRepository {
       : undefined;
 
     return {
-      saved_objects: expectedBulkResults.map(expectedResult => {
+      saved_objects: expectedBulkResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error as any;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const response = bulkResponse.items[esRequestIndex];
-        const {
-          error,
-          _id: responseId,
-          _seq_no: seqNo,
-          _primary_term: primaryTerm,
-        } = Object.values(response)[0] as any;
+        const { error, ...rawResponse } = Object.values(
+          bulkResponse.items[esRequestIndex]
+        )[0] as any;
 
-        const {
-          _source: { type, [type]: attributes, references = [], namespaces },
-        } = rawMigratedDoc;
-
-        const id = requestedId || responseId;
         if (error) {
           return {
-            id,
-            type,
-            error: getBulkOperationError(error, type, id),
+            id: requestedId,
+            type: rawMigratedDoc._source.type,
+            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
           };
         }
-        return {
-          id,
-          type,
-          ...(namespaces && { namespaces }),
-          updated_at: time,
-          version: encodeVersion(seqNo, primaryTerm),
-          attributes,
-          references,
-        };
+
+        // When method == 'index' the bulkResponse doesn't include the indexed
+        // _source so we return rawMigratedDoc but have to spread the latest
+        // _seq_no and _primary_term values from the rawResponse.
+        return this._serializer.rawToSavedObject({
+          ...rawMigratedDoc,
+          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+        });
       }),
     };
   }
@@ -459,7 +452,7 @@ export class SavedObjectsRepository {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
       const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
       const remainingNamespaces = existingNamespaces?.filter(
-        x => x !== getNamespaceString(namespace)
+        (x) => x !== getNamespaceString(namespace)
       );
 
       if (remainingNamespaces?.length) {
@@ -536,7 +529,7 @@ export class SavedObjectsRepository {
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
-    const typesToUpdate = allTypes.filter(type => !this._registry.isNamespaceAgnostic(type));
+    const typesToUpdate = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
 
     const updateOptions = {
       index: this.getIndicesForTypes(typesToUpdate),
@@ -582,6 +575,7 @@ export class SavedObjectsRepository {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find<T = unknown>({
@@ -597,6 +591,7 @@ export class SavedObjectsRepository {
     namespace,
     type,
     filter,
+    preference,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -605,7 +600,7 @@ export class SavedObjectsRepository {
     }
 
     const types = Array.isArray(type) ? type : [type];
-    const allowedTypes = types.filter(t => this._allowedTypes.includes(t));
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return {
         page,
@@ -644,6 +639,7 @@ export class SavedObjectsRepository {
       _source: includedFields(type, fields),
       ignore: [404],
       rest_total_hits_as_int: true,
+      preference,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {
@@ -708,7 +704,7 @@ export class SavedObjectsRepository {
     }
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map(object => {
+    const expectedBulkGetResults: Either[] = objects.map((object) => {
       const { type, id, fields } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -750,7 +746,7 @@ export class SavedObjectsRepository {
       : undefined;
 
     return {
-      saved_objects: expectedBulkGetResults.map(expectedResult => {
+      saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error as any;
         }
@@ -987,7 +983,7 @@ export class SavedObjectsRepository {
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
     // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
-    const remainingNamespaces = existingNamespaces?.filter(x => !namespaces.includes(x));
+    const remainingNamespaces = existingNamespaces?.filter((x) => !namespaces.includes(x));
 
     if (remainingNamespaces?.length) {
       // if there is 1 or more namespace remaining, update the saved object
@@ -1063,7 +1059,7 @@ export class SavedObjectsRepository {
     const { namespace } = options;
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map(object => {
+    const expectedBulkGetResults: Either[] = objects.map((object) => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -1119,7 +1115,7 @@ export class SavedObjectsRepository {
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
     const expectedBulkUpdateResults: Either[] = expectedBulkGetResults.map(
-      expectedBulkGetResult => {
+      (expectedBulkGetResult) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
@@ -1179,7 +1175,7 @@ export class SavedObjectsRepository {
       : {};
 
     return {
-      saved_objects: expectedBulkUpdateResults.map(expectedResult => {
+      saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error as any;
         }
@@ -1332,7 +1328,7 @@ export class SavedObjectsRepository {
    * @param types The types whose indices should be retrieved
    */
   private getIndicesForTypes(types: string[]) {
-    return unique(types.map(t => this.getIndexForType(t)));
+    return unique(types.map((t) => this.getIndexForType(t)));
   }
 
   private _getCurrentTime() {

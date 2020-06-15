@@ -23,12 +23,7 @@ import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import {
-  InternalElasticsearchServiceSetup,
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-} from './types';
+import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
@@ -51,32 +46,26 @@ function createClusterClientMock() {
   return client;
 }
 
-type MockedElasticSearchServiceSetup = jest.Mocked<
-  ElasticsearchServiceSetup & {
-    adminClient: jest.Mocked<IClusterClient>;
-    dataClient: jest.Mocked<IClusterClient>;
-  }
->;
+interface MockedElasticSearchServiceSetup {
+  legacy: {
+    createClient: jest.Mock<ICustomClusterClient, any>;
+    client: jest.Mocked<IClusterClient>;
+  };
+}
 
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
-    createClient: jest.fn(),
-    adminClient: createClusterClientMock(),
-    dataClient: createClusterClientMock(),
+    legacy: {
+      createClient: jest.fn(),
+      client: createClusterClientMock(),
+    },
   };
-  setupContract.createClient.mockReturnValue(createCustomClusterClientMock());
-  setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
-  setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  setupContract.legacy.createClient.mockReturnValue(createCustomClusterClientMock());
+  setupContract.legacy.client.asScoped.mockReturnValue(createScopedClusterClientMock());
   return setupContract;
 };
 
-type MockedElasticSearchServiceStart = {
-  legacy: jest.Mocked<ElasticsearchServiceStart['legacy']>;
-} & {
-  legacy: {
-    client: jest.Mocked<IClusterClient>;
-  };
-};
+type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup;
 
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
@@ -92,13 +81,11 @@ const createStartContractMock = () => {
 
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
-    adminClient: jest.Mocked<IClusterClient>;
-    dataClient: jest.Mocked<IClusterClient>;
+    legacy: { client: jest.Mocked<IClusterClient> };
   }
 >;
 const createInternalSetupContractMock = () => {
   const setupContract: MockedInternalElasticSearchServiceSetup = {
-    ...createSetupContractMock(),
     esNodesCompatibility$: new BehaviorSubject<NodesVersionCompatibility>({
       isCompatible: true,
       incompatibleNodes: [],
@@ -111,10 +98,10 @@ const createInternalSetupContractMock = () => {
     }),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
+      ...createSetupContractMock().legacy,
     },
   };
-  setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
-  setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  setupContract.legacy.client.asScoped.mockReturnValue(createScopedClusterClientMock());
   return setupContract;
 };
 

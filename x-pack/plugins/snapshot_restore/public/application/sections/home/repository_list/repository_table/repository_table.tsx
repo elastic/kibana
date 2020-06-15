@@ -24,6 +24,8 @@ import { useServices } from '../../../../app_context';
 import { textService } from '../../../../services/text';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
@@ -39,7 +41,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [
@@ -55,8 +57,9 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           <Fragment>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
-              onClick={() => uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
-              href={openRepositoryDetailsUrl(name)}
+              {...reactRouterNavigate(history, openRepositoryDetailsUrl(name), () =>
+                uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)
+              )}
               data-test-subj="repositoryLink"
             >
               {name}
@@ -116,7 +119,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   )}
                   iconType="pencil"
                   color="primary"
-                  href={linkToEditRepository(name)}
+                  {...reactRouterNavigate(history, linkToEditRepository(name))}
                   data-test-subj="editRepositoryButton"
                 />
               </EuiToolTip>
@@ -127,7 +130,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           render: ({ name }: Repository) => {
             return (
               <RepositoryDeleteProvider>
-                {deleteRepositoryPrompt => {
+                {(deleteRepositoryPrompt) => {
                   const label =
                     name !== managedRepository
                       ? i18n.translate(
@@ -209,7 +212,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             <EuiButton
               onClick={() =>
                 deleteRepositoryPrompt(
-                  selectedItems.map(repository => repository.name),
+                  selectedItems.map((repository) => repository.name),
                   onRepositoryDeleted
                 )
               }
@@ -231,9 +234,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           );
         }}
       </RepositoryDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: [
       <EuiButton
         key="reloadButton"
@@ -249,7 +250,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         key="registerRepo"
-        href={linkToAddRepository()}
+        {...reactRouterNavigate(history, linkToAddRepository(name))}
         fill
         iconType="plusInCircle"
         data-test-subj="registerRepositoryButton"
@@ -277,7 +278,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             typeMap[repository.type] = true;
             return typeMap;
           }, {})
-        ).map(type => {
+        ).map((type) => {
           return {
             value: type,
             view: textService.getRepositoryTypeName(type),

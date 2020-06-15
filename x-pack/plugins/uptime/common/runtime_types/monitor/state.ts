@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 export const CheckMonitorType = t.intersection([
   t.partial({
     name: t.string,
-    ip: t.union([t.array(t.string), t.string]),
+    ip: t.union([t.array(t.union([t.string, t.null])), t.string, t.null]),
   }),
   t.type({
     status: t.string,
@@ -81,14 +81,13 @@ export const StateType = t.intersection([
 
 export const HistogramPointType = t.type({
   timestamp: t.number,
-  up: t.number,
-  down: t.number,
+  up: t.union([t.number, t.undefined]),
+  down: t.union([t.number, t.undefined]),
 });
 
 export type HistogramPoint = t.TypeOf<typeof HistogramPointType>;
 
 export const HistogramType = t.type({
-  count: t.number,
   points: t.array(HistogramPointType),
 });
 

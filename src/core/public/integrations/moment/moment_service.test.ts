@@ -32,7 +32,7 @@ describe('MomentService', () => {
   });
   afterEach(() => service.stop());
 
-  const flushPromises = () => new Promise(resolve => setTimeout(resolve, 100));
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));
 
   test('sets initial moment config', async () => {
     const tz$ = new BehaviorSubject('tz1');

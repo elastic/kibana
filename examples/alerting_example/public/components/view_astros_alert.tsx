@@ -38,7 +38,7 @@ import {
   Alert,
   AlertTaskState,
   BASE_ALERT_API_PATH,
-} from '../../../../x-pack/plugins/alerting/common';
+} from '../../../../x-pack/plugins/alerts/common';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 type Props = RouteComponentProps & {

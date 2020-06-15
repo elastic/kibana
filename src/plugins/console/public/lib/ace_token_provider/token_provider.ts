@@ -36,7 +36,7 @@ const toToken = (lineNumber: number, column: number, token: TokenInfo): Token =>
 
 const toTokens = (lineNumber: number, tokens: TokenInfo[]): Token[] => {
   let acc = '';
-  return tokens.map(token => {
+  return tokens.map((token) => {
     const column = acc.length + 1;
     acc += token.value;
     return toToken(lineNumber, column, token);

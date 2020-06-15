@@ -9,6 +9,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiIconTip } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
@@ -17,7 +18,7 @@ import {
   fontSizes,
   px,
   truncate,
-  unit
+  unit,
 } from '../../../../style/variables';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
@@ -52,7 +53,7 @@ interface Props {
   items: ErrorGroupListAPIResponse;
 }
 
-const ErrorGroupList: React.FC<Props> = props => {
+const ErrorGroupList: React.FC<Props> = (props) => {
   const { items } = props;
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
@@ -60,13 +61,31 @@ const ErrorGroupList: React.FC<Props> = props => {
   if (!serviceName) {
     throw new Error('Service name is required');
   }
-
   const columns = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
-          defaultMessage: 'Group ID'
-        }),
+        name: (
+          <>
+            {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+              defaultMessage: 'Group ID',
+            })}{' '}
+            <EuiIconTip
+              size="s"
+              type="questionInCircle"
+              color="subdued"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              content={i18n.translate(
+                'xpack.apm.errorsTable.groupIdColumnDescription',
+                {
+                  defaultMessage:
+                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+                }
+              )}
+            />
+          </>
+        ),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),
@@ -76,15 +95,15 @@ const ErrorGroupList: React.FC<Props> = props => {
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
-        }
+        },
       },
       {
         name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
-          defaultMessage: 'Type'
+          defaultMessage: 'Type',
         }),
         field: 'type',
         sortable: false,
-        render: (type: string, item: ErrorGroupListAPIResponse[0]) => {
+        render: (type: string) => {
           return (
             <ErrorLink
               title={type}
@@ -92,20 +111,20 @@ const ErrorGroupList: React.FC<Props> = props => {
               query={
                 {
                   ...urlParams,
-                  kuery: `error.exception.type:${type}`
+                  kuery: `error.exception.type:${type}`,
                 } as APMQueryParams
               }
             >
               {type}
             </ErrorLink>
           );
-        }
+        },
       },
       {
         name: i18n.translate(
           'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
           {
-            defaultMessage: 'Error message and culprit'
+            defaultMessage: 'Error message and culprit',
           }
         ),
         field: 'message',
@@ -134,7 +153,7 @@ const ErrorGroupList: React.FC<Props> = props => {
               </EuiToolTip>
             </MessageAndCulpritCell>
           );
-        }
+        },
       },
       {
         name: '',
@@ -145,20 +164,20 @@ const ErrorGroupList: React.FC<Props> = props => {
           isUnhandled === false && (
             <EuiBadge color="warning">
               {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
-                defaultMessage: 'Unhandled'
+                defaultMessage: 'Unhandled',
               })}
             </EuiBadge>
-          )
+          ),
       },
       {
         name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
-          defaultMessage: 'Occurrences'
+          defaultMessage: 'Occurrences',
         }),
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
         render: (value?: number) =>
-          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
+          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'latestOccurrenceAt',
@@ -166,7 +185,7 @@ const ErrorGroupList: React.FC<Props> = props => {
         name: i18n.translate(
           'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
           {
-            defaultMessage: 'Latest occurrence'
+            defaultMessage: 'Latest occurrence',
           }
         ),
         align: 'right',
@@ -175,8 +194,8 @@ const ErrorGroupList: React.FC<Props> = props => {
             <TimestampTooltip time={value} timeUnit="minutes" />
           ) : (
             NOT_AVAILABLE_LABEL
-          )
-      }
+          ),
+      },
     ],
     [serviceName, urlParams]
   );
@@ -184,7 +203,7 @@ const ErrorGroupList: React.FC<Props> = props => {
   return (
     <ManagedTable
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-        defaultMessage: 'No errors were found'
+        defaultMessage: 'No errors were found',
       })}
       items={items}
       columns={columns}

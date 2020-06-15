@@ -94,7 +94,7 @@ export class RenderWithFn extends React.Component {
     }
   };
 
-  _resetRenderTarget = domNode => {
+  _resetRenderTarget = (domNode) => {
     const { handlers } = this.props;
 
     if (!domNode) {
@@ -122,7 +122,7 @@ export class RenderWithFn extends React.Component {
     return div;
   };
 
-  _shouldFullRerender = prevProps => {
+  _shouldFullRerender = (prevProps) => {
     // required to stop re-renders on element move, anything that should
     // cause a re-render needs to be checked here
     // TODO: fix props passed in to remove this check
@@ -146,7 +146,7 @@ export class RenderWithFn extends React.Component {
       >
         <RenderToDom
           style={{ height: '100%', width: '100%' }}
-          render={domNode => {
+          render={(domNode) => {
             this._domNode = domNode;
             this._callRenderFn();
           }}

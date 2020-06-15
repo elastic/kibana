@@ -30,12 +30,12 @@
       {
         "url_name": "Process explorer",
         "time_range": "1h",
-        "url_value": "kibana#/dashboard/ml_auditbeat_docker_process_explorer_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:INDEX_PATTERN_ID,key:event.module,negate:!f,params:(query:auditd),type:phrase,value:auditd),query:(match:(event.module:(query:auditd,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:INDEX_PATTERN_ID,key:container.runtime,negate:!f,params:(query:docker),type:phrase,value:docker),query:(match:(container.runtime:(query:docker,type:phrase)))),('$state':(store:appState),exists:(field:auditd.data.syscall),meta:(alias:!n,disabled:!f,index:INDEX_PATTERN_ID,key:auditd.data.syscall,negate:!f,type:exists,value:exists))),query:(language:kuery,query:\u0027container.name:\u0022$container.name$\u0022\u0027))"
+        "url_value": "dashboards#/view/ml_auditbeat_docker_process_explorer_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:event.module,negate:!f,params:(query:auditd),type:phrase,value:auditd),query:(match:(event.module:(query:auditd,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:container.runtime,negate:!f,params:(query:docker),type:phrase,value:docker),query:(match:(container.runtime:(query:docker,type:phrase)))),('$state':(store:appState),exists:(field:auditd.data.syscall),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:auditd.data.syscall,negate:!f,type:exists,value:exists))),query:(language:kuery,query:\u0027container.name:\u0022$container.name$\u0022\u0027))"
       },
       {
         "url_name": "Raw data",
         "time_range": "1h",
-        "url_value": "kibana#/discover/ml_auditbeat_docker_process_events_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u0027INDEX_PATTERN_ID\u0027,query:(language:kuery,query:\u0027container.name:\u0022$container.name$\u0022 AND process.executable:\u0022$process.executable$\u0022\u0027))"
+        "url_value": "discover#/ml_auditbeat_docker_process_events_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u0027INDEX_PATTERN_ID\u0027,query:(language:kuery,query:\u0027container.name:\u0022$container.name$\u0022 AND process.executable:\u0022$process.executable$\u0022\u0027))"
       }
     ]
   }

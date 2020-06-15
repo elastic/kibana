@@ -10,7 +10,7 @@ import { Assigned } from './assigned';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const ShardRow = props => {
+const ShardRow = (props) => {
   let unassigned;
   if (props.data.unassigned && props.data.unassigned.length) {
     unassigned = <Unassigned shards={props.data.unassigned} />;
@@ -22,11 +22,7 @@ const ShardRow = props => {
   return (
     <tr>
       {unassigned}
-      <Assigned
-        shardStats={props.shardStats}
-        data={props.data.children}
-        changeUrl={props.changeUrl}
-      />
+      <Assigned shardStats={props.shardStats} data={props.data.children} />
     </tr>
   );
 };
@@ -40,14 +36,7 @@ export class TableBody extends React.Component {
   );
 
   createRow = (data, index) => {
-    return (
-      <ShardRow
-        key={`shardRow-${index}`}
-        data={data}
-        {...this.props}
-        changeUrl={this.props.changeUrl}
-      />
-    );
+    return <ShardRow key={`shardRow-${index}`} data={data} {...this.props} />;
   };
 
   render() {

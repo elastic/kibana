@@ -10,7 +10,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton
+  EuiButton,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,
-  getOptionLabel
+  getOptionLabel,
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/useFetcher';
 import { FormRowSelect } from './FormRowSelect';
@@ -33,10 +33,10 @@ interface Props {
 
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       return callApmApi({
         pathname: '/api/apm/settings/agent-configuration/services',
-        isCachable: true
+        isCachable: true,
       });
     },
     [],
@@ -44,13 +44,13 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   const { data: environments = [], status: environmentStatus } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi({
           pathname: '/api/apm/settings/agent-configuration/environments',
           params: {
-            query: { serviceName: omitAllOption(newConfig.service.name) }
-          }
+            query: { serviceName: omitAllOption(newConfig.service.name) },
+          },
         });
       }
     },
@@ -59,7 +59,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   const { status: agentNameStatus } = useFetcher(
-    async callApmApi => {
+    async (callApmApi) => {
       const serviceName = newConfig.service.name;
 
       if (!isString(serviceName) || serviceName.length === 0) {
@@ -68,10 +68,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
       const { agentName } = await callApmApi({
         pathname: '/api/apm/settings/agent-configuration/agent_name',
-        params: { query: { serviceName } }
+        params: { query: { serviceName } },
       });
 
-      setNewConfig(prev => ({ ...prev, agent_name: agentName }));
+      setNewConfig((prev) => ({ ...prev, agent_name: agentName }));
     },
     [newConfig.service.name, setNewConfig]
   );
@@ -81,9 +81,9 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     { defaultMessage: 'already configured' }
   );
 
-  const serviceNameOptions = serviceNames.map(name => ({
+  const serviceNameOptions = serviceNames.map((name) => ({
     text: getOptionLabel(name),
-    value: name
+    value: name,
   }));
   const environmentOptions = environments.map(
     ({ name, alreadyConfigured }) => ({
@@ -91,7 +91,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       text: `${getOptionLabel(name)} ${
         alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
       }`,
-      value: name
+      value: name,
     })
   );
 
@@ -100,7 +100,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.apm.agentConfig.servicePage.title', {
-            defaultMessage: 'Choose service'
+            defaultMessage: 'Choose service',
           })}
         </h3>
       </EuiTitle>
@@ -125,12 +125,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         options={serviceNameOptions}
         value={newConfig.service.name}
         disabled={serviceNamesStatus === FETCH_STATUS.LOADING}
-        onChange={e => {
+        onChange={(e) => {
           e.preventDefault();
           const name = e.target.value;
-          setNewConfig(prev => ({
+          setNewConfig((prev) => ({
             ...prev,
-            service: { name, environment: '' }
+            service: { name, environment: '' },
           }));
         }}
       />
@@ -145,7 +145,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.environment.description',
           {
             defaultMessage:
-              'Only a single environment per configuration is supported.'
+              'Only a single environment per configuration is supported.',
           }
         )}
         fieldLabel={i18n.translate(
@@ -158,12 +158,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         disabled={
           !newConfig.service.name || environmentStatus === FETCH_STATUS.LOADING
         }
-        onChange={e => {
+        onChange={(e) => {
           e.preventDefault();
           const environment = e.target.value;
-          setNewConfig(prev => ({
+          setNewConfig((prev) => ({
             ...prev,
-            service: { name: prev.service.name, environment }
+            service: { name: prev.service.name, environment },
           }));
         }}
       />

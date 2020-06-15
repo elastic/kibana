@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
@@ -26,11 +27,13 @@ import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
+import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import {
   IIndexPatternFieldList,
   IndexPatternField,
   IndexPattern,
+  UI_SETTINGS,
 } from '../../../../../data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
@@ -111,10 +114,12 @@ export function DiscoverSidebar({
         setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
       } else {
         setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        selectedIndexPattern.popularizeField(field.name, 1);
+        if (services.capabilities.discover.save) {
+          selectedIndexPattern.popularizeField(field.name, 1);
+        }
       }
     },
-    [openFieldMap, selectedIndexPattern]
+    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
   );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -130,8 +135,8 @@ export function DiscoverSidebar({
     [selectedIndexPattern, state, columns, hits, services]
   );
 
-  const popularLimit = services.uiSettings.get('fields:popularLimit');
-  const useShortDots = services.uiSettings.get('shortDots:enable');
+  const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
+  const useShortDots = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
   const {
     selected: selectedFields,
@@ -172,7 +177,7 @@ export function DiscoverSidebar({
         <DiscoverIndexPattern
           selectedIndexPattern={selectedIndexPattern}
           setIndexPattern={setIndexPattern}
-          indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
+          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
         />
         <div className="dscSidebar__item">
           <form>

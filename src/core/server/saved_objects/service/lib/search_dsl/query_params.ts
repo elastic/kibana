@@ -51,7 +51,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
 
   let fields: string[] = [];
   for (const field of searchFields) {
-    fields = fields.concat(types.map(prefix => `${prefix}.${field}`));
+    fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
 
   return { fields };
@@ -152,7 +152,7 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(registry, namespace, shouldType)),
+          should: types.map((shouldType) => getClauseForType(registry, namespace, shouldType)),
           minimum_should_match: 1,
         },
       },

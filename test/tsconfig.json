@@ -19,6 +19,7 @@
     "typings/**/*"
   ],
   "exclude": [
-    "plugin_functional/plugins/**/*"
+    "plugin_functional/plugins/**/*",
+    "interpreter_functional/plugins/**/*"
   ]
 }

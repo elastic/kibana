@@ -19,7 +19,7 @@ import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 uiRoutes.when('/beats/beats', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
@@ -47,7 +47,6 @@ uiRoutes.when('/beats/beats', {
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
-      this.kbnUrl = $injector.get('kbnUrl');
 
       //Bypassing super.updateData, since this controller loads its own data
       this._isDataInitialized = true;
@@ -75,10 +74,6 @@ uiRoutes.when('/beats/beats', {
                 sorting={this.sorting || sorting}
                 pagination={this.pagination || pagination}
                 onTableChange={this.onTableChange || onTableChange}
-                angular={{
-                  kbnUrl: this.kbnUrl,
-                  scope: this.scope,
-                }}
               />
               {bottomBarComponent}
             </Fragment>

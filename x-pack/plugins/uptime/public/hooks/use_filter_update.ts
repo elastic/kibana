@@ -12,15 +12,26 @@ import { useUrlParams } from './use_url_params';
  * @param fieldName the name of the field to filter against
  * @param values the list of values to use when filter a field
  */
+interface SelectedFilters {
+  selectedTags: string[];
+  selectedPorts: string[];
+  selectedSchemes: string[];
+  selectedLocations: string[];
+  selectedFilters: Map<string, string[]>;
+}
 
-export const useFilterUpdate = (fieldName?: string, values?: string[]) => {
+export const useFilterUpdate = (
+  fieldName?: string,
+  values?: string[],
+  shouldUpdateUrl: boolean = true
+): SelectedFilters => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
   const { filters: currentFilters } = getUrlParams();
 
   // update filters in the URL from filter group
   const onFilterUpdate = (filtersKuery: string) => {
-    if (currentFilters !== filtersKuery) {
+    if (currentFilters !== filtersKuery && shouldUpdateUrl) {
       updateUrl({ filters: filtersKuery, pagination: '' });
     }
   };
@@ -37,7 +48,7 @@ export const useFilterUpdate = (fieldName?: string, values?: string[]) => {
       // add new term to filter map, toggle it off if already present
       const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
       updatedFilterMap.set(fieldName, values);
-      Array.from(updatedFilterMap.keys()).forEach(key => {
+      Array.from(updatedFilterMap.keys()).forEach((key) => {
         const value = updatedFilterMap.get(key);
         if (value && value.length === 0) {
           updatedFilterMap.delete(key);
@@ -52,5 +63,11 @@ export const useFilterUpdate = (fieldName?: string, values?: string[]) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldName, values]);
 
-  return filterKueries;
+  return {
+    selectedTags: filterKueries.get('tags') || [],
+    selectedPorts: filterKueries.get('url.port') || [],
+    selectedSchemes: filterKueries.get('monitor.type') || [],
+    selectedLocations: filterKueries.get('observer.geo.name') || [],
+    selectedFilters: filterKueries,
+  };
 };

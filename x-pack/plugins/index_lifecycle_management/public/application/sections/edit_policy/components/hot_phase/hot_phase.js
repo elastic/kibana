@@ -100,7 +100,7 @@ export class HotPhase extends PureComponent {
             <EuiSwitch
               data-test-subj="rolloverSwitch"
               checked={phaseData[PHASE_ROLLOVER_ENABLED]}
-              onChange={async e => {
+              onChange={async (e) => {
                 const { checked } = e.target;
                 setPhaseData(PHASE_ROLLOVER_ENABLED, checked);
                 setWarmPhaseOnRollover(checked);
@@ -130,7 +130,7 @@ export class HotPhase extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_SIZE_STORED, e.target.value);
                       }}
                       min={1}
@@ -153,7 +153,7 @@ export class HotPhase extends PureComponent {
                         }
                       )}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS, e.target.value);
                       }}
                       options={[
@@ -216,7 +216,7 @@ export class HotPhase extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_DOCUMENTS]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_DOCUMENTS, e.target.value);
                       }}
                       min={1}
@@ -239,7 +239,7 @@ export class HotPhase extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
                       }}
                       min={1}
@@ -262,7 +262,7 @@ export class HotPhase extends PureComponent {
                         }
                       )}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_AGE_UNITS, e.target.value);
                       }}
                       options={[

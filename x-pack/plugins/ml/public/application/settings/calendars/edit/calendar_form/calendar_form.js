@@ -146,6 +146,7 @@ export const CalendarForm = ({
         }
         checked={isGlobalCalendar}
         onChange={onGlobalCalendarChange}
+        disabled={saving === true || canCreateCalendar === false}
       />
 
       {isGlobalCalendar === false && (
@@ -220,7 +221,7 @@ export const CalendarForm = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            data-test-subj="ml_save_calendar_button"
+            data-test-subj="mlSaveCalendarButton"
             fill
             onClick={isEdit ? onEdit : onCreate}
             isDisabled={saveButtonDisabled}

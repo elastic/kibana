@@ -7,7 +7,15 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.2.
 
-See also <<release-highlights-7.2.0, release highlights>> and <<release-notes-7.2.0, release notes>>.
+See also {kibana-ref-all}/7.2/release-highlights-7.2.0.html[release highlights]
+and <<release-notes-7.2.0, release notes>>.
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+//tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
 
 [float]
 [[breaking_72_index_pattern_changes]]

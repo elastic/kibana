@@ -473,7 +473,7 @@ describe('SAMLAuthenticationProvider', () => {
           const authorization = `Bearer ${state.accessToken}`;
 
           const newUser = { username: 'new-user', authentication_realm: { name: 'saml1' } };
-          mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+          mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
             if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
               const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockImplementation(() => response);
@@ -542,7 +542,7 @@ describe('SAMLAuthenticationProvider', () => {
 
           const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
           const newUser = { username: 'user', authentication_realm: { name: 'saml2' } };
-          mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+          mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
             if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
               const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
               mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(existingUser);
@@ -1061,7 +1061,7 @@ describe('SAMLAuthenticationProvider', () => {
         realm: 'test-realm',
       };
 
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(

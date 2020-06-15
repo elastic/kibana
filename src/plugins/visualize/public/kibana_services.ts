@@ -24,6 +24,7 @@ import {
   ToastsStart,
   PluginInitializerContext,
   I18nStart,
+  ScopedHistory,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
@@ -33,7 +34,8 @@ import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedVisualizations } from './application/types';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { DefaultEditorController } from '../../vis_default_editor/public';
+import { DashboardStart } from '../../dashboard/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -47,13 +49,15 @@ export interface VisualizeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   savedVisualizations: SavedVisualizations;
   share?: SharePluginStart;
-  config: KibanaLegacyStart['config'];
+  kibanaLegacy: KibanaLegacyStart;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
+  dashboard: DashboardStart;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
-  DefaultVisualizationEditor: typeof DefaultEditorController;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
+  scopedHistory: () => ScopedHistory;
+  savedObjects: SavedObjectsStart;
 }
 
 let services: VisualizeKibanaServices | null = null;

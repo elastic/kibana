@@ -20,7 +20,7 @@ export const DatasetsSelector: React.FunctionComponent<{
 }> = ({ availableDatasets, isLoading = false, onChangeDatasetSelection, selectedDatasets }) => {
   const options = useMemo<DatasetOptionProps[]>(
     () =>
-      availableDatasets.map(dataset => ({
+      availableDatasets.map((dataset) => ({
         value: dataset,
         label: getFriendlyNameForPartitionId(dataset),
       })),

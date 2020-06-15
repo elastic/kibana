@@ -58,7 +58,7 @@ export const CheckupControls: FunctionComponent<CheckupControlsProps> = ({
                   defaultMessage: 'Filter',
                 }
               )}
-              onChange={e => {
+              onChange={(e) => {
                 const string = e.target.value;
                 const errorMessage = validateRegExpString(string);
                 if (errorMessage) {
