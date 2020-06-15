@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @flow
+
 import * as React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
@@ -22,16 +22,12 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ChartWrapper } from '../ChartWrapper';
-import {
-  DateTimeLabel,
-  ImpressionsTrendsLabel,
-  NoOfImpressionsLabels,
-} from '../translations';
+import { DateTimeLabel, PageViewsLabel } from '../translations';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { formatBigValue } from '../ClientMetrics';
 
-export const ImpressionTrend = () => {
+export const PageViewsTrend = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;
@@ -40,7 +36,7 @@ export const ImpressionTrend = () => {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/impression-trend',
+          pathname: '/api/apm/rum-client/page-view-trends',
           params: {
             query: {
               start,
@@ -78,7 +74,7 @@ export const ImpressionTrend = () => {
     <div>
       <EuiSpacer size="l" />
       <EuiTitle size="s">
-        <h3>{ImpressionsTrendsLabel}</h3>
+        <h3>{PageViewsLabel}</h3>
       </EuiTitle>
       <ChartWrapper loading={status !== 'success'} height="200px">
         <Chart>
@@ -95,13 +91,13 @@ export const ImpressionTrend = () => {
             tickFormat={formatter}
           />
           <Axis
-            id="number_of_impressions"
-            title={NoOfImpressionsLabels}
+            id="page_views"
+            title={PageViewsLabel}
             position={Position.Left}
             tickFormat={(d) => formatBigValue(Number(d))}
           />
           <BarSeries
-            id={NoOfImpressionsLabels}
+            id={PageViewsLabel}
             color={[euiLightVars.euiColorLightShade]}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}

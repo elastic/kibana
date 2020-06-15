@@ -12,7 +12,7 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 
-export async function getImpressionTrends({
+export async function getPageViewTrends({
   setup,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
@@ -28,7 +28,7 @@ export async function getImpressionTrends({
         bool: projection.body.query.bool,
       },
       aggs: {
-        impressions: {
+        pageViews: {
           auto_date_histogram: {
             field: '@timestamp',
             buckets: 50,
@@ -49,7 +49,7 @@ export async function getImpressionTrends({
 
   const response = await client.search(params);
 
-  const result = response.aggregations?.impressions.buckets ?? [];
+  const result = response.aggregations?.pageViews.buckets ?? [];
   return result.map(({ key, trans_count }) => ({
     x: key,
     y: trans_count.value,

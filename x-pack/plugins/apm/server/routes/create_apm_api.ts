@@ -72,7 +72,7 @@ import {
 } from './settings/custom_link';
 import {
   rumClientMetricsRoute,
-  rumImpressionTrendRoute,
+  rumPageViewsTrendRoute,
   rumPageLoadDistributionRoute,
 } from './rum_client';
 
@@ -156,7 +156,7 @@ const createApmApi = () => {
 
     // Rum Overview
     .add(rumOverviewLocalFiltersRoute)
-    .add(rumImpressionTrendRoute)
+    .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
     .add(rumClientMetricsRoute);
 

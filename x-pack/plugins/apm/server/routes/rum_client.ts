@@ -9,7 +9,7 @@ import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { rangeRt, uiFiltersRt } from './default_api_types';
-import { getImpressionTrends } from '../lib/rum_client/get_impression_trends';
+import { getPageViewTrends } from '../lib/rum_client/get_page_view_trends';
 import { getPageLoadDistribution } from '../lib/rum_client/get_page_load_distribution';
 
 export const percentileRangeRt = t.partial({
@@ -45,13 +45,13 @@ export const rumPageLoadDistributionRoute = createRoute(() => ({
   },
 }));
 
-export const rumImpressionTrendRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/impression-trend',
+export const rumPageViewsTrendRoute = createRoute(() => ({
+  path: '/api/apm/rum-client/page-view-trends',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return getImpressionTrends({ setup });
+    return getPageViewTrends({ setup });
   },
 }));

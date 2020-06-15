@@ -44,13 +44,6 @@ export const DateTimeLabel = i18n.translate(
   }
 );
 
-export const NoOfImpressionsLabels = i18n.translate(
-  'xpack.apm.rum.dashboard.noOfImpressions.label',
-  {
-    defaultMessage: 'Number of impressions',
-  }
-);
-
 export const PercPageLoadedLabel = i18n.translate(
   'xpack.apm.rum.dashboard.pagesLoaded.label',
   {
@@ -69,13 +62,6 @@ export const PageLoadDistLabel = i18n.translate(
   'xpack.apm.rum.dashboard.pageLoadDistribution.label',
   {
     defaultMessage: 'Page load distribution',
-  }
-);
-
-export const ImpressionsTrendsLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.impressionsTrends.label',
-  {
-    defaultMessage: 'Impressions trends',
   }
 );
 
