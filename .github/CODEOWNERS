@@ -66,11 +66,10 @@
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
-/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
-/src/apm.js @watson
+/src/apm.js @watson @vigneshshanmugam
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats

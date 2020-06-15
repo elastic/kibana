@@ -66,12 +66,14 @@ export function __kbnBootstrap__() {
         setup.fatalErrors.add(i18nError);
       }
 
-      /**
-       * Register listeners for navigation changes and capture them as
-       * route-change transactions after Kibana app is bootstrapped
-       */
-      if (APM_ENABLED) {
-        coreSystem.application.currentAppId$.subscribe((appId) => {
+      const start = await coreSystem.start();
+
+      if (APM_ENABLED && start) {
+        /**
+         * Register listeners for navigation changes and capture them as
+         * route-change transactions after Kibana app is bootstrapped
+         */
+        start.application.currentAppId$.subscribe((appId) => {
           const apmInstance = window.elasticApm;
           if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
             apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
@@ -81,7 +83,5 @@ export function __kbnBootstrap__() {
           }
         });
       }
-
-      await coreSystem.start();
     });
 }
