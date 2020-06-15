@@ -88,7 +88,7 @@ image:images/clone_panel.gif[clone panel]
 === New visualizations for Lens
 
 {kibana-ref}/lens.html[Lens] introduces three new visualization types: pie chart, donut chart, and treemap.  New
-to {kib}, a treemap provides a hierarchical view of your data.
+to {kib}, treemaps provide a hierarchical view of your data and are good for visualizing part-to-whole relationships.
 Treemaps are good for visualizing part-to-whole relationships.
 
 [role="screenshot"]
