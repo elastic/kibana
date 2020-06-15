@@ -23,3 +23,11 @@ export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
   warning: 'warning',
   failure: 'danger',
 });
+
+export const POLICY_STATUS_TO_TEXT = Object.freeze<
+  { [key in keyof typeof HostPolicyResponseActionStatus]: string }
+>({
+  success: 'Success',
+  warning: 'Warning',
+  failure: 'Failure',
+});
