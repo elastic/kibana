@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
 import { coreMock } from 'src/core/public/mocks';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+
 const mockes = coreMock.createSetup();
 
 jest.mock('../../../app_context', () => ({
@@ -89,7 +91,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     expect(
@@ -127,7 +129,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     expect(
@@ -156,7 +158,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
       };
 
       const actionTypes: ActionType[] = [
@@ -209,7 +211,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
       };
       const actionTypes: ActionType[] = [
         {
@@ -267,7 +269,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
       };
 
       expect(
@@ -286,7 +288,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
       };
 
       expect(
@@ -314,7 +316,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const enableButton = shallow(
@@ -341,7 +343,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const enableButton = shallow(
@@ -368,7 +370,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const disableAlert = jest.fn();
@@ -404,7 +406,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const enableAlert = jest.fn();
@@ -443,7 +445,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const enableButton = shallow(
@@ -471,7 +473,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const enableButton = shallow(
@@ -499,7 +501,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const muteAlert = jest.fn();
@@ -536,7 +538,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const unmuteAlert = jest.fn();
@@ -573,7 +575,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: ALERTS_FEATURE_ID,
     };
 
     const enableButton = shallow(

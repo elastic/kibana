@@ -18,6 +18,8 @@ import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { AppContextProvider } from '../../app_context';
+import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -120,7 +122,11 @@ describe('alert_add', () => {
             },
           }}
         >
-          <AlertAdd consumer={'alerts'} addFlyoutVisible={true} setAddFlyoutVisibility={() => {}} />
+          <AlertAdd
+            consumer={ALERTS_FEATURE_ID}
+            addFlyoutVisible={true}
+            setAddFlyoutVisibility={() => {}}
+          />
         </AlertsContextProvider>
       </AppContextProvider>
     );

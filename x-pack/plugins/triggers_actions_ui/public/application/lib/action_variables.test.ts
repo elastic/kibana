@@ -6,6 +6,7 @@
 
 import { AlertType, ActionVariables } from '../../types';
 import { actionVariablesFromAlertType } from './action_variables';
+import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -183,6 +184,6 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
-    producer: 'alerting',
+    producer: ALERTS_FEATURE_ID,
   };
 }
