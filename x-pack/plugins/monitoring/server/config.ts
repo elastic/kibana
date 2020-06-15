@@ -5,14 +5,14 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  configSchema as elasticsearchConfigSchema,
+  config as ElasticsearchBaseConfig,
   ElasticsearchConfig,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../src/core/server/elasticsearch';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchConfigType } from '../../../../src/core/server/elasticsearch/elasticsearch_config';
+} from '../../../../src/core/server/';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
+
+const elasticsearchConfigSchema = ElasticsearchBaseConfig.elasticsearch.schema;
+type ElasticsearchConfigType = TypeOf<typeof elasticsearchConfigSchema>;
 
 export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.extends({
   logFetchCount: schema.number({ defaultValue: 10 }),
