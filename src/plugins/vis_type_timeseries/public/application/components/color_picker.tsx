@@ -54,6 +54,7 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
   };
 
   const handleClear = () => {
+    setColor('');
     const part: ColorProps = {};
     part[name] = null;
     onChange(part);
