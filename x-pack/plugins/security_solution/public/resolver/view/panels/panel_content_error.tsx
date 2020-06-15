@@ -13,13 +13,13 @@ import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
  * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.
  *
  * @param {function} pushToQueryparams A function to update the hash value in the URL to control panel state
- * @param {string} errorMessage The message to display in the panel when something goes wrong
+ * @param {string} translatedErrorMessage The message to display in the panel when something goes wrong
  */
 export const PanelContentError = memo(function ({
-  errorMessage,
+  translatedErrorMessage,
   pushToQueryParams,
 }: {
-  errorMessage: string;
+  translatedErrorMessage: string;
   pushToQueryParams: (arg0: CrumbInfo) => unknown;
 }) {
   const crumbs = useMemo(() => {
@@ -44,7 +44,7 @@ export const PanelContentError = memo(function ({
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
-      <EuiText textAlign="center">{errorMessage}</EuiText>
+      <EuiText textAlign="center">{translatedErrorMessage}</EuiText>
       <EuiSpacer size="l" />
       <EuiButtonEmpty
         onClick={() => {

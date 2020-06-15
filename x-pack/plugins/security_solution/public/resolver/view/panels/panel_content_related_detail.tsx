@@ -294,7 +294,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         defaultMessage: 'Related event not found.',
       }
     );
-    return <PanelContentError errorMessage={errString} pushToQueryParams={pushToQueryParams} />;
+    return (
+      <PanelContentError translatedErrorMessage={errString} pushToQueryParams={pushToQueryParams} />
+    );
   }
 
   return (
