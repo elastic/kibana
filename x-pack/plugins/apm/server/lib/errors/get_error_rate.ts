@@ -100,13 +100,11 @@ export async function getErrorRate({
     const { key, doc_count: errorCount } = bucket;
     const transactionCount = transactionCountByTimestamp[key] || 1;
     const relativeRate = errorCount / transactionCount;
-
-    return {
-      x: key,
-      // If the transaction count doesn't have any hits, it means that there's no result
-      y: transactions?.totalHits === 0 ? undefined : relativeRate,
-    };
+    return { x: key, y: relativeRate };
   });
 
-  return errorRates || [];
+  return {
+    noHits: transactions?.totalHits === 0,
+    errorRates,
+  };
 }

@@ -144,7 +144,7 @@ export class InnerCustomPlot extends PureComponent {
     const hasValidCoordinates = flatten(series.map((s) => s.data)).some((p) =>
       isValidCoordinateValue(p.y)
     );
-    const noHits = !hasValidCoordinates;
+    const noHits = this.props.noHits || !hasValidCoordinates;
 
     const plotValues = this.getPlotValues({
       visibleSeries,
@@ -234,6 +234,7 @@ InnerCustomPlot.propTypes = {
       firstSeen: PropTypes.number,
     })
   ),
+  noHits: PropTypes.bool,
 };
 
 InnerCustomPlot.defaultProps = {
@@ -242,6 +243,7 @@ InnerCustomPlot.defaultProps = {
   tickFormatY: (y) => y,
   truncateLegends: false,
   xAxisTickSizeOuter: 0,
+  noHits: false,
 };
 
 export default makeWidthFlexible(InnerCustomPlot);

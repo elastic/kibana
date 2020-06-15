@@ -7,7 +7,7 @@ import { EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import mean from 'lodash.mean';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -26,7 +26,7 @@ export const ErrorRateChart = () => {
   const syncedChartsProps = useChartsSync();
 
   const { serviceName, start, end, errorGroupId } = urlParams;
-  const { data: errorRateData = [] } = useFetcher(() => {
+  const { data: errorRateData } = useFetcher(() => {
     if (serviceName && start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/rate',
@@ -45,16 +45,14 @@ export const ErrorRateChart = () => {
     }
   }, [serviceName, start, end, uiFilters, errorGroupId]);
 
-  const average = useMemo(() => {
-    return tickFormatY(mean(errorRateData.map((rate) => rate.y)));
-  }, [errorRateData]);
-
   const combinedOnHover = useCallback(
     (hoverX: number) => {
       return syncedChartsProps.onHover(hoverX);
     },
     [syncedChartsProps]
   );
+
+  const errorRates = errorRateData?.errorRates || [];
 
   return (
     <>
@@ -67,33 +65,32 @@ export const ErrorRateChart = () => {
       </EuiTitle>
       <CustomPlot
         {...syncedChartsProps}
+        noHits={errorRateData?.noHits}
         series={[
           {
             color: theme.euiColorVis7,
             data: [],
-            legendValue: average,
+            legendValue: tickFormatY(mean(errorRates.map((rate) => rate.y))),
             legendClickDisabled: true,
-            title: i18n.translate('xpack.apm.errorRateCharrt.avgLabel', {
+            title: i18n.translate('xpack.apm.errorRateChart.avgLabel', {
               defaultMessage: 'Avg.',
             }),
             type: 'linemark',
             hideTooltipValue: true,
           },
           {
-            data: errorRateData,
+            data: errorRates,
             type: 'line',
             color: theme.euiColorVis7,
             hideLegend: true,
-            title: i18n.translate('xpack.apm.errorRateCharrt.rateLabel', {
+            title: i18n.translate('xpack.apm.errorRateChart.rateLabel', {
               defaultMessage: 'Rate',
             }),
           },
         ]}
         onHover={combinedOnHover}
         tickFormatY={tickFormatY}
-        formatTooltipValue={({ y }: { y: number }) => {
-          return asPercent(y, 1);
-        }}
+        formatTooltipValue={({ y }: { y: number }) => tickFormatY(y)}
         height={unit * 10}
       />
     </>

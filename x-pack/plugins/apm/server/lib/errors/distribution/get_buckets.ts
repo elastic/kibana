@@ -67,12 +67,10 @@ export async function getBuckets({
 
   const resp = await client.search(params);
 
-  const totalHits = resp.hits.total.value;
-
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
     (bucket) => ({
       key: bucket.key,
-      count: totalHits === 0 ? undefined : bucket.doc_count,
+      count: bucket.doc_count,
     })
   );
 

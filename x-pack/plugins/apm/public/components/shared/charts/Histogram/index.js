@@ -147,7 +147,7 @@ export class HistogramInner extends PureComponent {
     const hasValidCoordinates = buckets.some((bucket) =>
       isValidCoordinateValue(bucket.y)
     );
-    const noHits = !hasValidCoordinates;
+    const noHits = this.props.noHits || !hasValidCoordinates;
 
     const xyPlotProps = {
       dontCheckIfEmpty: true,
@@ -243,7 +243,7 @@ export class HistogramInner extends PureComponent {
                   }}
                 />
 
-                {showVerticalLineHover && (
+                {showVerticalLineHover && hoveredBucket?.x && (
                   <VerticalGridLines tickValues={[hoveredBucket.x]} />
                 )}
 
@@ -273,7 +273,7 @@ export class HistogramInner extends PureComponent {
                   hiddenSeriesCount={0}
                   clickLegend={() => {}}
                   truncateLegends={false}
-                  noHits={false}
+                  noHits={noHits}
                 />
               )}
             </>
@@ -299,6 +299,7 @@ HistogramInner.propTypes = {
   width: PropTypes.number.isRequired,
   xType: PropTypes.string,
   legends: PropTypes.array,
+  noHits: PropTypes.bool,
 };
 
 HistogramInner.defaultProps = {
@@ -309,6 +310,7 @@ HistogramInner.defaultProps = {
   tooltipHeader: () => null,
   verticalLineHover: () => null,
   xType: 'linear',
+  noHits: false,
 };
 
 export default makeWidthFlexible(HistogramInner);
