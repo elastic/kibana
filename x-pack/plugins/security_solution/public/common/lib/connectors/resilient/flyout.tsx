@@ -49,7 +49,7 @@ const resilientConnectorForm: React.FC<ConnectorFlyoutFormProps<ResilientActionC
               name="connector-resilient-project-key"
               value={orgId || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-resilient-project-key-form-input"
-              onChange={evt => onChangeConfig('orgId', evt.target.value)}
+              onChange={(evt) => onChangeConfig('orgId', evt.target.value)}
               onBlur={() => onBlurConfig('orgId')}
             />
           </EuiFormRow>
@@ -71,7 +71,7 @@ const resilientConnectorForm: React.FC<ConnectorFlyoutFormProps<ResilientActionC
               name="connector-resilient-apiKeyId"
               value={apiKeyId || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-resilient-apiKeyId-form-input"
-              onChange={evt => onChangeSecret('apiKeyId', evt.target.value)}
+              onChange={(evt) => onChangeSecret('apiKeyId', evt.target.value)}
               onBlur={() => onBlurSecret('apiKeyId')}
             />
           </EuiFormRow>
@@ -93,7 +93,7 @@ const resilientConnectorForm: React.FC<ConnectorFlyoutFormProps<ResilientActionC
               name="connector-resilient-apiKeySecret"
               value={apiKeySecret || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-resilient-apiKeySecret-form-input"
-              onChange={evt => onChangeSecret('apiKeySecret', evt.target.value)}
+              onChange={(evt) => onChangeSecret('apiKeySecret', evt.target.value)}
               onBlur={() => onBlurSecret('apiKeySecret')}
             />
           </EuiFormRow>
