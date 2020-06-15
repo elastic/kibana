@@ -9,10 +9,26 @@ import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_component
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { Home } from '../pages/home';
 import { PluginContext } from '../context/plugin_context';
+import { getDataHandler } from '../data_handler';
 
 export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
+  const apmDataHandler = getDataHandler('apm');
+  if (apmDataHandler) {
+    apmDataHandler
+      .fetchData({
+        startTime: '2020-06-11T11:34:09.925Z',
+        endTime: '2020-06-12T11:34:09.926Z',
+        bucketSize: '1',
+      })
+      .then((value) => {
+        console.log('#####', value);
+      });
+    apmDataHandler.hasData().then((value) => {
+      console.log('#####', value);
+    });
+  }
   ReactDOM.render(
     <PluginContext.Provider value={{ core }}>
       <EuiThemeProvider darkMode={isDarkMode}>

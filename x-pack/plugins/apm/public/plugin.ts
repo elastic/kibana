@@ -38,6 +38,7 @@ import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
+import { fetchData, hasData } from './services/rest/observability_dashboard';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -72,6 +73,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     pluginSetupDeps.home.environment.update({ apmUi: true });
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+
+    if (plugins.observability) {
+      plugins.observability.dashboard.register({
+        appName: 'apm',
+        fetchData,
+        hasData,
+      });
+    }
 
     core.application.register({
       id: 'apm',
