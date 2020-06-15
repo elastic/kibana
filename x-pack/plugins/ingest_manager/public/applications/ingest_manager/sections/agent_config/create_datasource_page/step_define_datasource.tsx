@@ -88,6 +88,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
                   name: e.target.value,
                 })
               }
+              data-test-subj="datasourceNameInput"
             />
           </EuiFormRow>
         </EuiFlexItem>

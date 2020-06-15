@@ -48,11 +48,13 @@ export function IngestManagerCreateDatasource({ getService }: FtrProviderContext
     async selectAgentConfig(name?: string) {
       // if we have a name, then find the button with that `title` set.
       if (name) {
-        // FIXME implement
+        await (
+          await find.byCssSelector(`[data-test-subj="agentConfigItem"][title="${name}"]`)
+        ).click();
       }
       // Else, just select the first agent configuration that is present
       else {
-        await (await find.byCssSelector('button[]')).click();
+        await (await testSubjects.find('agentConfigItem')).click();
       }
     },
 
@@ -60,6 +62,8 @@ export function IngestManagerCreateDatasource({ getService }: FtrProviderContext
      * Set the name of the datasource on the input field
      * @param name
      */
-    async setDatasourceName(name: string) {},
+    async setDatasourceName(name: string) {
+      await testSubjects.setValue('datasourceNameInput', name);
+    },
   };
 }

@@ -121,26 +121,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should redirect to ingest management integrations add datasource', async () => {
         await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
       });
+
       it('should redirect user back to Policy List if Cancel button is clicked', async () => {
         await (await pageObjects.ingestManagerCreateDatasource.findCancelButton()).click();
-
-        // FIXME: need method to chec that is on policy list page.
+        await pageObjects.policy.ensureIsOnPolicyPage();
       });
+
       it('should redirect user back to Policy List if Back link is clicked', async () => {
         await (await pageObjects.ingestManagerCreateDatasource.findBackLink()).click();
-
-        // FIXME: need method to chec that is on policy list page.
-        // TODO test case
-        expect(true).to.be(false);
+        await pageObjects.policy.ensureIsOnPolicyPage();
       });
+
       it('should display custom endpoint configuration message', async () => {
         await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
         const endpointConfig = await pageObjects.policy.findDatasourceEndpointCustomConfiguration();
         expect(endpointConfig).not.to.be(undefined);
       });
+
       it('should redirect user back to Policy List after a successful save', async () => {
-        // TODO test case
-        expect(true).to.be(false);
+        await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
+        await pageObjects.ingestManagerCreateDatasource.setDatasourceName('endpoint policy 1');
+        await (await pageObjects.ingestManagerCreateDatasource.findDSaveButton()).click();
+        await pageObjects.policy.ensureIsOnPolicyPage();
       });
     });
   });
