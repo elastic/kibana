@@ -5,17 +5,30 @@
  */
 // @flow
 import * as React from 'react';
-import { EuiSpacer, EuiStat } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { BackEndLabel, FrontEndLabel, PageViewsLabel } from '../translations';
 
-export const formatBigValue = (val?: number | null): string => {
+export const formatBigValue = (val?: number | null, fixed?: number): string => {
   if (val && val >= 1000) {
-    return val / 1000 + 'k';
+    const result = val / 1000;
+    if (fixed) {
+      return result.toFixed(fixed) + 'k';
+    }
+    return result + 'k';
   }
   return val + '';
 };
+
+const ClFlexGroup = styled(EuiFlexGroup)`
+  flex-direction: column;
+  @media only screen and (max-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+`;
 
 export const ClientMetrics = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -37,28 +50,31 @@ export const ClientMetrics = () => {
   );
 
   return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiStat
-        titleSize="m"
-        title={(data?.backEnd?.value?.toFixed(2) ?? '0.00') + ' seconds'}
-        description={BackEndLabel}
-        isLoading={status !== 'success'}
-      />
-      <EuiSpacer size="l" />
-      <EuiStat
-        titleSize="m"
-        title={formatBigValue(data?.pageViews?.value) ?? '--'}
-        description={PageViewsLabel}
-        isLoading={status !== 'success'}
-      />
-      <EuiSpacer size="l" />
-      <EuiStat
-        titleSize="m"
-        title={(data?.frontEnd?.value?.toFixed(2) ?? '--') + ' seconds'}
-        description={FrontEndLabel}
-        isLoading={status !== 'success'}
-      />
-    </>
+    <ClFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          titleSize="s"
+          title={(data?.backEnd?.value?.toFixed(2) ?? '---') + ' sec'}
+          description={BackEndLabel}
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          titleSize="s"
+          title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' sec'}
+          description={FrontEndLabel}
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          titleSize="s"
+          title={formatBigValue(data?.pageViews?.value, 2) ?? '-'}
+          description={PageViewsLabel}
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+    </ClFlexGroup>
   );
 };

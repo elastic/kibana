@@ -80,7 +80,7 @@ export const ImpressionTrend = () => {
       <EuiTitle size="s">
         <h3>{ImpressionsTrendsLabel}</h3>
       </EuiTitle>
-      <ChartWrapper loading={status !== 'success'} height="300px">
+      <ChartWrapper loading={status !== 'success'} height="200px">
         <Chart>
           <Settings
             showLegend={false}

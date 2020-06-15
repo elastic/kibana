@@ -80,8 +80,8 @@ export const PageLoadDistribution = () => {
 
   return (
     <div>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>{PageLoadDistLabel}</h3>
@@ -100,8 +100,8 @@ export const PageLoadDistribution = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <ChartWrapper loading={status !== 'success'} height="300px">
+      <EuiSpacer size="m" />
+      <ChartWrapper loading={status !== 'success'} height="200px">
         <Chart className="story-chart">
           <Settings onBrushEnd={onBrushEnd} />
           <PercentileAnnotations percentiles={data?.percentiles} />

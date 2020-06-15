@@ -52,9 +52,9 @@ export const NoOfImpressionsLabels = i18n.translate(
 );
 
 export const PercPageLoadedLabel = i18n.translate(
-  'xpack.apm.rum.dashboard.percentagePageLoaded.label',
+  'xpack.apm.rum.dashboard.pagesLoaded.label',
   {
-    defaultMessage: 'Percentages of page loaded',
+    defaultMessage: 'Pages loaded',
   }
 );
 

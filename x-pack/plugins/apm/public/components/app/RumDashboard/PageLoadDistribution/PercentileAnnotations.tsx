@@ -11,6 +11,7 @@ import {
   LineAnnotationDatum,
 } from '@elastic/charts';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import styled from 'styled-components';
 
 interface Props {
   percentiles?: Record<string, number>;
@@ -25,13 +26,18 @@ function generateAnnotationData(
   }));
 }
 
+const PercentileMarker = styled.span`
+  position: relative;
+  bottom: 140px;
+`;
+
 export const PercentileAnnotations = ({ percentiles }: Props) => {
   const dataValues = generateAnnotationData(percentiles) ?? [];
 
   const style = {
     line: {
-      strokeWidth: 3,
-      stroke: euiLightVars.euiColorLightShade,
+      strokeWidth: 1,
+      stroke: euiLightVars.euiColorSecondary,
       opacity: 1,
     },
     details: {
@@ -52,7 +58,7 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={[annotation]}
           style={style}
-          marker={<span>{annotation.details}th</span>}
+          marker={<PercentileMarker>{annotation.details}th</PercentileMarker>}
         />
       ))}
     </>
