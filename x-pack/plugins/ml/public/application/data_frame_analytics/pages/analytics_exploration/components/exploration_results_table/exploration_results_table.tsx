@@ -70,14 +70,13 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     const classificationData = useExplorationResults(indexPattern, jobConfig, searchQuery);
     const docFieldsCount = classificationData.columns.length;
     const { columns, errorMessage, status, tableItems, visibleColumns } = classificationData;
-    const isQueryError = errorMessage.includes('failed to create query');
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
 
     // if it's a searchBar syntax error leave the table visible so they can try again
-    if (status === INDEX_STATUS.ERROR && !isQueryError) {
+    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
       return (
         <EuiPanel grow={false}>
           <EuiFlexGroup gutterSize="s">
