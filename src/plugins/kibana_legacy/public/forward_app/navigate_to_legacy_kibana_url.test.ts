@@ -59,6 +59,7 @@ describe('migrate legacy kibana urls', () => {
 
     expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('updatedApp', {
       path: '/new/path',
+      replace: true,
     });
     expect(forwardDefinitions[0].rewritePath).toHaveBeenCalledWith('/myApp/deep/path');
     expect(result).toEqual({ navigated: true });
