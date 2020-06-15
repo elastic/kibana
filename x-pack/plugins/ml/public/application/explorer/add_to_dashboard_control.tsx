@@ -284,7 +284,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               size="s"
               title={
                 <FormattedMessage
-                  id="xpack.ml.explorer.dashboardsTitle"
+                  id="xpack.ml.explorer.dashboardRedirectMessage"
                   defaultMessage="Redirecting to the dashboard {dashboardTitle}"
                   values={{
                     dashboardTitle: dashboardItems.find(
