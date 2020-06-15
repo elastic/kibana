@@ -659,24 +659,4 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
   });
-
-  describe('filtering out empty fields', () => {
-    let emptyFieldsTestProps: typeof defaultProps;
-
-    beforeEach(() => {
-      emptyFieldsTestProps = {
-        ...defaultProps,
-        indexPatterns: {
-          ...defaultProps.indexPatterns,
-          '1': {
-            ...defaultProps.indexPatterns['1'],
-            fields: defaultProps.indexPatterns['1'].fields.map((field) => ({
-              ...field,
-              exists: field.type === 'number',
-            })),
-          },
-        },
-      };
-    });
-  });
 });
