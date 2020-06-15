@@ -5,10 +5,16 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
+import { IUiSettingsClient, ElasticsearchServiceSetup } from 'kibana/server';
 // @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
+import { ReportingConfig, ReportingCore } from '../../../';
 import { fieldFormats, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import {
+  CSV_QUOTE_VALUES_SETTING,
+  CSV_SEPARATOR_SETTING,
+} from '../../../../../../../src/plugins/share/server';
 import { CancellationToken } from '../../../../common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { LevelLogger } from '../../../lib';
@@ -16,10 +22,6 @@ import { setFieldFormats } from '../../../services';
 import { createMockReportingCore } from '../../../test_helpers';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { executeJobFactory } from './execute_job';
-import {
-  CSV_SEPARATOR_SETTING,
-  CSV_QUOTE_VALUES_SETTING,
-} from '../../../../../../../src/plugins/share/server';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
@@ -48,8 +50,8 @@ describe('CSV Execute Job', function () {
 
   let clusterStub: any;
   let configGetStub: any;
-  let mockReportingConfig: any;
-  let mockReportingCore: any;
+  let mockReportingConfig: ReportingConfig;
+  let mockReportingCore: ReportingCore;
   let callAsCurrentUserStub: any;
   let cancellationToken: any;
 
@@ -78,9 +80,11 @@ describe('CSV Execute Job', function () {
     mockReportingConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
 
     mockReportingCore = await createMockReportingCore(mockReportingConfig);
-    mockReportingCore.getUiSettingsServiceFactory = () => Promise.resolve(mockUiSettingsClient);
-    mockReportingCore.getElasticsearchService = () => Promise.resolve(mockElasticsearch);
-    mockReportingCore.config = mockReportingConfig;
+    mockReportingCore.getUiSettingsServiceFactory = () =>
+      Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
+    mockReportingCore.getElasticsearchService = () =>
+      mockElasticsearch as ElasticsearchServiceSetup;
+    mockReportingCore.setConfig(mockReportingConfig);
 
     cancellationToken = new CancellationToken();
 
@@ -996,7 +1000,8 @@ describe('CSV Execute Job', function () {
       let maxSizeReached: boolean;
 
       beforeEach(async function () {
-        mockReportingCore.getUiSettingsServiceFactory = () => mockUiSettingsClient;
+        mockReportingCore.getUiSettingsServiceFactory = () =>
+          Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(18);
 
         callAsCurrentUserStub.onFirstCall().returns({
