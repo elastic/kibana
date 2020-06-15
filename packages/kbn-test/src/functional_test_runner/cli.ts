@@ -69,10 +69,6 @@ export function runFtrCli() {
         process.env.TEST_BROWSER_HEADLESS = '1';
       }
 
-      if (flags['ignore-tls-errors']) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-      }
-
       let teardownRun = false;
       const teardown = async (err?: Error) => {
         if (teardownRun) return;
@@ -125,19 +121,10 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
         ],
-        boolean: [
-          'bail',
-          'invert',
-          'test-stats',
-          'updateBaselines',
-          'throttle',
-          'headless',
-          'ignore-tls-errors',
-        ],
+        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'throttle', 'headless'],
         default: {
           config: 'test/functional/config.js',
           debug: true,
-          ['ignore-tls-errors']: true,
         },
         help: `
         --config=path      path to a config file
