@@ -37,7 +37,7 @@ export async function makeSampleDataUsageCollector(
     type: 'sample-data',
     fetch: fetchProvider(index),
     isReady: () => true,
-    mapping: {
+    schema: {
       installed: { type: 'keyword' },
       last_install_date: { type: 'date' },
       last_install_set: { type: 'keyword' },

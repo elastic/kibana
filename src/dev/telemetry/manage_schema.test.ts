@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
-import { TaskContext } from './task_context';
-import { generateMapping } from '../manage_mapping';
+import { generateMapping } from './manage_schema';
+import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
+import mockSchema from './__fixture__/mock_schema.json';
 
-export function generateMappingsTask({ roots }: TaskContext) {
-  return roots.map((root) => ({
-    task: () => {
-      if (!root.parsedCollections || !root.parsedCollections.length) {
-        return;
-      }
-      const mapping = generateMapping(root.parsedCollections);
-      root.mapping = mapping;
-    },
-    title: `Generating mapping for ${root.config.root}`,
-  }));
-}
+describe('generateMapping', () => {
+  it('generates a mapping file', () => {
+    const result = generateMapping([parsedWorkingCollector]);
+    expect(result).toEqual(mockSchema);
+  });
+});

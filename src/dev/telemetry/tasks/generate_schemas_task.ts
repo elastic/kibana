@@ -17,12 +17,19 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
-export {
-  Collector,
-  AllowedSchemaTypes,
-  SchemaField,
-  MakeSchemaFrom,
-  CollectorOptions,
-} from './collector';
-export { UsageCollector } from './usage_collector';
+import * as _ from 'lodash';
+import { TaskContext } from './task_context';
+import { generateMapping } from '../manage_schema';
+
+export function generateSchemasTask({ roots }: TaskContext) {
+  return roots.map((root) => ({
+    task: () => {
+      if (!root.parsedCollections || !root.parsedCollections.length) {
+        return;
+      }
+      const mapping = generateMapping(root.parsedCollections);
+      root.mapping = mapping;
+    },
+    title: `Generating mapping for ${root.config.root}`,
+  }));
+}

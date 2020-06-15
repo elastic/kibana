@@ -23,7 +23,7 @@ function registerMlUsageCollector(usageCollection: UsageCollectionSetup): void {
   const mlUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
     type: 'mlTelemetry',
     isReady: () => true,
-    mapping: {
+    schema: {
       file_data_visualizer: {
         index_creation_count: { type: 'long' },
       },

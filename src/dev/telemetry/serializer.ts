@@ -19,9 +19,24 @@
 
 import * as ts from 'typescript';
 import { uniq } from 'lodash';
+import {
+  getResolvedModuleSourceFile,
+  getIdentifierDeclarationFromSource,
+  getModuleSpecifier,
+} from './utils';
+
+export enum TelemetryKinds {
+  MomentDate = 1000,
+  Date = 10001,
+}
+
+interface DescriptorValue {
+  kind: ts.SyntaxKind | TelemetryKinds;
+  type: keyof typeof ts.SyntaxKind | keyof typeof TelemetryKinds;
+}
 
 export interface Descriptor {
-  [name: string]: Descriptor | { kind: number };
+  [name: string]: Descriptor | DescriptorValue;
 }
 
 export function isObjectDescriptor(value: any) {
@@ -38,20 +53,18 @@ export function isObjectDescriptor(value: any) {
   return false;
 }
 
-export enum TelemetryKinds {
-  MomentDate = 1000,
-}
-
 export function kindToDescriptorName(kind: number) {
   switch (kind) {
     case ts.SyntaxKind.StringKeyword:
     case ts.SyntaxKind.StringLiteral:
+    case ts.SyntaxKind.SetKeyword:
       return 'string';
     case ts.SyntaxKind.BooleanKeyword:
       return 'boolean';
     case ts.SyntaxKind.NumberKeyword:
     case ts.SyntaxKind.NumericLiteral:
       return 'number';
+    case TelemetryKinds.Date:
     case TelemetryKinds.MomentDate:
       return 'date';
     default:
@@ -59,7 +72,7 @@ export function kindToDescriptorName(kind: number) {
   }
 }
 
-export function getDescriptor(node: ts.Node, program: ts.Program): any {
+export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | DescriptorValue {
   if (ts.isMethodSignature(node) || ts.isPropertySignature(node)) {
     if (node.type) {
       return getDescriptor(node.type, program);
@@ -78,8 +91,11 @@ export function getDescriptor(node: ts.Node, program: ts.Program): any {
 
   if (ts.isIdentifier(node)) {
     const identifierName = node.getText();
+    if (identifierName === 'Date') {
+      return { kind: TelemetryKinds.Date, type: 'Date' };
+    }
     if (identifierName === 'Moment') {
-      return { kind: TelemetryKinds.MomentDate };
+      return { kind: TelemetryKinds.MomentDate, type: 'MomentDate' };
     }
     throw new Error(`Unsupported Identifier ${identifierName}.`);
   }
@@ -89,7 +105,10 @@ export function getDescriptor(node: ts.Node, program: ts.Program): any {
     const symbol = typeChecker.getSymbolAtLocation(node.typeName);
     const symbolName = symbol?.getName();
     if (symbolName === 'Moment') {
-      return { kind: TelemetryKinds.MomentDate };
+      return { kind: TelemetryKinds.MomentDate, type: 'MomentDate' };
+    }
+    if (symbolName === 'Date') {
+      return { kind: TelemetryKinds.Date, type: 'Date' };
     }
     const declaration = (symbol?.getDeclarations() || [])[0];
     if (declaration) {
@@ -99,24 +118,23 @@ export function getDescriptor(node: ts.Node, program: ts.Program): any {
   }
 
   if (ts.isImportSpecifier(node)) {
-    const importedNodeName = node.getText();
-    const importedModuleName = node.parent.parent.parent.moduleSpecifier.text;
-    const resolvedModule = (node.getSourceFile() as any).resolvedModules.get(importedModuleName);
-    const resolvedModuleSourceFile = program.getSourceFile(resolvedModule.resolvedFileName);
-    if (resolvedModuleSourceFile) {
-      const sourceNode = (resolvedModuleSourceFile as any).locals.get(importedNodeName);
-      const declaration = ((sourceNode && sourceNode.declarations) || [])[0];
-      return getDescriptor(declaration, program);
-    }
-    throw new Error(`Unable to resolve imported module ${importedModuleName}`);
+    const source = node.getSourceFile();
+    const importedModuleName = getModuleSpecifier(node);
+
+    const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
+    const declarationNode = getIdentifierDeclarationFromSource(node.name, declarationSource);
+    return getDescriptor(declarationNode, program);
   }
 
   if (ts.isArrayTypeNode(node)) {
-    return { kind: node.elementType.kind };
+    return getDescriptor(node.elementType, program);
   }
 
   if (ts.isLiteralTypeNode(node)) {
-    return { kind: node.literal.kind };
+    return {
+      kind: node.literal.kind,
+      type: ts.SyntaxKind[node.literal.kind] as keyof typeof ts.SyntaxKind,
+    };
   }
 
   if (ts.isUnionTypeNode(node)) {
@@ -142,10 +160,11 @@ export function getDescriptor(node: ts.Node, program: ts.Program): any {
     case ts.SyntaxKind.NumberKeyword:
     case ts.SyntaxKind.BooleanKeyword:
     case ts.SyntaxKind.StringKeyword:
-      return { kind: node.kind };
+    case ts.SyntaxKind.SetKeyword:
+      return { kind: node.kind, type: ts.SyntaxKind[node.kind] as keyof typeof ts.SyntaxKind };
     case ts.SyntaxKind.UnionType:
     case ts.SyntaxKind.AnyKeyword:
     default:
-      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}`);
+      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}; ${node.getText()}`);
   }
 }

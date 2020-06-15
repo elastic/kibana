@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedWorkingCollector: ParsedUsageCollection = [
   'src/dev/telemetry/__fixture__/working_collector.ts',
   {
     collectorName: 'my_working_collector',
-    mapping: {
+    schema: {
       value: {
         flat: {
           type: 'keyword',
@@ -35,6 +36,9 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           total: {
             type: 'number',
           },
+          type: {
+            type: 'boolean',
+          },
         },
       },
     },
@@ -42,18 +46,24 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
       typeName: 'Usage',
       typeDescriptor: {
         flat: {
-          kind: 142,
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
         },
         my_str: {
-          kind: 142,
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
         },
         my_objects: {
           total: {
-            kind: 139,
+            kind: SyntaxKind.NumberKeyword,
+            type: 'NumberKeyword',
+          },
+          type: {
+            kind: SyntaxKind.BooleanKeyword,
+            type: 'BooleanKeyword',
           },
         },
       },
-      signature: '549a0f91fd6372dee97ae2436ad23ca3',
     },
   },
 ];

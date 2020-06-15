@@ -37,7 +37,7 @@ export interface TelemetryResponse {
   last_install_date: moment.Moment | null;
   last_install_set: string | null;
   last_uninstall_date: moment.Moment | null;
-  last_uninstall_set: string | null;
+  last_uninstall_set: moment.Moment | null;
 }
 
 export function fetchProvider(index: string) {

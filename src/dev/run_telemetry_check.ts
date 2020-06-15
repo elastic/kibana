@@ -26,7 +26,7 @@ import {
   ErrorReporter,
   parseConfigsTask,
   extractCollectorsTask,
-  checkMatchingMappingTask,
+  checkMatchingSchemasTask,
   generateMappingsTask,
   checkCompatibleTypesTask,
   writeToFileTask,
@@ -34,9 +34,19 @@ import {
 } from './telemetry/tasks';
 
 run(
-  async ({ flags: { fix = false }, log }) => {
+  async ({ flags: { fix = false, path }, log }) => {
     if (typeof fix !== 'boolean') {
       throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --fix can't have a value`);
+    }
+
+    if (typeof path === 'boolean') {
+      throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --path require a value`);
+    }
+
+    if (fix && typeof path !== 'undefined') {
+      throw createFailError(
+        `${chalk.white.bgRed(' TELEMETRY ERROR ')} --fix is incompatible with --path flag.`
+      );
     }
 
     const list = new Listr([
@@ -46,25 +56,27 @@ run(
       },
       {
         title: 'Extracting Collectors',
-        task: (context) => new Listr(extractCollectorsTask(context), { exitOnError: true }),
+        task: (context) => new Listr(extractCollectorsTask(context, path), { exitOnError: true }),
       },
       {
-        title: 'Checking Compatible collector.mapping with collector.fetch type',
+        title: 'Checking Compatible collector.schema with collector.fetch type',
         task: (context) => new Listr(checkCompatibleTypesTask(context), { exitOnError: true }),
       },
       {
-        title: 'Checking Matching collector.mapping with mapped json file',
-        task: (context) => new Listr(checkMatchingMappingTask(context), { exitOnError: true }),
+        title: 'Checking Matching collector.schema against stored json files',
+        task: (context) => new Listr(checkMatchingSchemasTask(context), { exitOnError: true }),
       },
       {
+        enabled: (_) => fix,
         skip: ({ roots }: TaskContext) =>
-          !fix && roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
+          roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
         title: 'Generating new telemetry mappings',
         task: (context) => new Listr(generateMappingsTask(context), { exitOnError: true }),
       },
       {
+        enabled: (_) => fix,
         skip: ({ roots }: TaskContext) =>
-          !fix && roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
+          roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
         title: 'Updating telemetry mapping files',
         task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
       },

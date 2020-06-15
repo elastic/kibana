@@ -39,7 +39,7 @@ export class NestedInside {
           locale: 'en',
         };
       },
-      mapping: {
+      schema: {
         locale: {
           type: 'keyword',
         },

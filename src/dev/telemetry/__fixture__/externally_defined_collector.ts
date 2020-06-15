@@ -37,7 +37,7 @@ function createCollector(): CollectorOptions<Usage> {
         locale: 'en',
       };
     },
-    mapping: {
+    schema: {
       locale: {
         type: 'keyword',
       },
@@ -54,7 +54,7 @@ export function defineCollectorFromVariable() {
         locale: 'en',
       };
     },
-    mapping: {
+    schema: {
       locale: {
         type: 'keyword',
       },

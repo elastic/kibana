@@ -24,6 +24,7 @@ import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { parsedNestedCollector } from './__fixture__/parsed_nested_collector';
 import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externally_defined_collector';
 import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usage_interface';
+import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
 
 export function loadFixtureProgram(fixtureName: string) {
   const fixturePath = path.resolve(__dirname, '__fixture__', `${fixtureName}.ts`);
@@ -59,6 +60,12 @@ describe('parseUsageCollection', () => {
     const { program, sourceFile } = loadFixtureProgram('nested_collector');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([parsedNestedCollector]);
+  });
+
+  it('parses imported schema property', () => {
+    const { program, sourceFile } = loadFixtureProgram('imported_schema');
+    const result = [...parseUsageCollection(sourceFile, program)];
+    expect(result).toEqual(parsedImportedSchemaCollector);
   });
 
   it('parses externally defined collectors', () => {

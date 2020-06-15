@@ -125,7 +125,7 @@ export function registerUpgradeAssistantUsageCollector({
   >({
     type: 'upgrade-assistant-telemetry',
     isReady: () => true,
-    mapping: {
+    schema: {
       features: {
         deprecation_logging: {
           enabled: { type: 'boolean' },

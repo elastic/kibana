@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const reportingUsageMapping = {
+export const reportingUsageSchema = {
   PNG: {
     available: {
       type: 'boolean',

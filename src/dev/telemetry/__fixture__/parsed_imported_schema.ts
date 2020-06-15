@@ -17,13 +17,30 @@
  * under the License.
  */
 
-import { generateMapping } from './manage_mapping';
-import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
-import esMapping from './__fixture__/mock_mapping.json';
+import { SyntaxKind } from 'typescript';
+import { ParsedUsageCollection } from '../ts_parser';
 
-describe('generateMapping', () => {
-  it('generates a mapping file', () => {
-    const result = generateMapping([parsedWorkingCollector]);
-    expect(result).toEqual(esMapping);
-  });
-});
+export const parsedImportedSchemaCollector: ParsedUsageCollection[] = [
+  [
+    'src/dev/telemetry/__fixture__/imported_schema.ts',
+    {
+      collectorName: 'with_imported_schema',
+      schema: {
+        value: {
+          locale: {
+            type: 'keyword',
+          },
+        },
+      },
+      fetch: {
+        typeName: 'Usage',
+        typeDescriptor: {
+          locale: {
+            kind: SyntaxKind.StringKeyword,
+            type: 'StringKeyword',
+          },
+        },
+      },
+    },
+  ],
+];

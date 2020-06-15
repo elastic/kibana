@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedImportedUsageInterface: ParsedUsageCollection[] = [
@@ -24,7 +25,7 @@ export const parsedImportedUsageInterface: ParsedUsageCollection[] = [
     'src/dev/telemetry/__fixture__/imported_usage_interface.ts',
     {
       collectorName: 'imported_usage_interface_collector',
-      mapping: {
+      schema: {
         value: {
           locale: {
             type: 'keyword',
@@ -35,10 +36,10 @@ export const parsedImportedUsageInterface: ParsedUsageCollection[] = [
         typeName: 'Usage',
         typeDescriptor: {
           locale: {
-            kind: 142,
+            kind: SyntaxKind.StringKeyword,
+            type: 'StringKeyword',
           },
         },
-        signature: '5c889378c954e9ef600d9623b0ce8e7f',
       },
     },
   ],

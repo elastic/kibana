@@ -19,7 +19,7 @@
 
 import * as ts from 'typescript';
 import * as path from 'path';
-import { getDescriptor } from './serializer';
+import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
 
 export function loadFixtureProgram(fixtureName: string) {
@@ -39,7 +39,7 @@ export function loadFixtureProgram(fixtureName: string) {
 
 describe('getDescriptor', () => {
   const usageInterfaces = new Map<string, ts.InterfaceDeclaration>();
-  let tsProgram;
+  let tsProgram: ts.Program;
   beforeAll(() => {
     const { program, sourceFile } = loadFixtureProgram('constants');
     tsProgram = program;
@@ -53,35 +53,47 @@ describe('getDescriptor', () => {
 
   it('serializes flat types', () => {
     const usageInterface = usageInterfaces.get('Usage');
-    const descriptor = getDescriptor(usageInterface, tsProgram);
+    const descriptor = getDescriptor(usageInterface!, tsProgram);
     expect(descriptor).toEqual({
-      locale: { kind: 142 },
+      locale: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
     });
   });
 
   it('serializes union types', () => {
     const usageInterface = usageInterfaces.get('WithUnion');
-    const descriptor = getDescriptor(usageInterface, tsProgram);
+    const descriptor = getDescriptor(usageInterface!, tsProgram);
 
     expect(descriptor).toEqual({
-      prop1: { kind: 142 },
-      prop2: { kind: 142 },
-      prop3: { kind: 142 },
-      prop4: { kind: 10 },
-      prop5: { kind: 8 },
+      prop1: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop2: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop3: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop4: { kind: ts.SyntaxKind.StringLiteral, type: 'StringLiteral' },
+      prop5: { kind: ts.SyntaxKind.FirstLiteralToken, type: 'FirstLiteralToken' },
     });
   });
 
   it('serializes Moment Dates', () => {
     const usageInterface = usageInterfaces.get('WithMoment');
-    const descriptor = getDescriptor(usageInterface, tsProgram);
-
+    const descriptor = getDescriptor(usageInterface!, tsProgram);
     expect(descriptor).toEqual({
-      prop1: { kind: 1000 },
-      prop2: { kind: 1000 },
+      prop1: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' },
+      prop2: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' },
+      prop3: { kind: TelemetryKinds.MomentDate, type: 'MomentDate' },
+      prop4: { kind: TelemetryKinds.Date, type: 'Date' },
     });
   });
 
-  it.todo('throws error on conflicting union types');
-  it.todo('throws error on unsupported union types');
+  it('throws error on conflicting union types', () => {
+    const usageInterface = usageInterfaces.get('WithConflictingUnion');
+    expect(() => getDescriptor(usageInterface!, tsProgram)).toThrowError(
+      'Mapping does not support conflicting union types.'
+    );
+  });
+
+  it('throws error on unsupported union types', () => {
+    const usageInterface = usageInterfaces.get('WithUnsupportedUnion');
+    expect(() => getDescriptor(usageInterface!, tsProgram)).toThrowError(
+      'Mapping does not support conflicting union types.'
+    );
+  });
 });

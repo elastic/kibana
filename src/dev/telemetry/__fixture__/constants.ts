@@ -33,6 +33,8 @@ export interface WithUnion {
 export interface WithMoment {
   prop1: Moment;
   prop2: moment.Moment;
+  prop3: Moment[];
+  prop4: Date[];
 }
 
 export interface WithConflictingUnion {
@@ -42,3 +44,9 @@ export interface WithConflictingUnion {
 export interface WithUnsupportedUnion {
   prop1: 123 | Moment;
 }
+
+export const externallyDefinedSchema = {
+  locale: {
+    type: 'keyword',
+  },
+};

@@ -28,7 +28,7 @@ export async function makeKQLUsageCollector(
     type: 'kql',
     fetch: fetchProvider(kibanaIndex),
     isReady: () => true,
-    mapping: {
+    schema: {
       optInCount: { type: 'long' },
       optOutCount: { type: 'long' },
       defaultQueryLanguage: { type: 'keyword' },

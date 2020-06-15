@@ -19,28 +19,41 @@
 
 import * as ts from 'typescript';
 import { ParsedUsageCollection } from './ts_parser';
+import { AllowedSchemaTypes } from '../../plugins/usage_collection/server';
+import { TelemetryKinds } from './serializer';
 
-export function getMappingTypeToKind(type: string) {
+export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
   switch (type) {
     case 'keyword':
     case 'text':
-      return ts.SyntaxKind.StringKeyword;
+      return 'string';
     case 'boolean':
-      return ts.SyntaxKind.BooleanKeyword;
+      return 'boolean';
     case 'number':
-      return ts.SyntaxKind.NumberKeyword;
+    case 'float':
+    case 'long':
+      return 'number';
+    case 'date':
+      return 'date';
     default:
-      throw new Error(`Unknown type ${type}`);
+      throw new Error(`Unknown schema type ${type}`);
   }
 }
 
-export function isObjectMapping(value: any) {
-  if (typeof value === 'object') {
-    if (typeof value.type === 'string' && value.type === 'object') {
+export function isObjectMapping(entity: any) {
+  if (typeof entity === 'object') {
+    // 'type' is explicitly specified to be an object.
+    if (typeof entity.type === 'string' && entity.type === 'object') {
       return true;
     }
 
-    if (typeof value.type === 'undefined') {
+    // 'type' is not set; ES defaults to object mapping for when type is unspecified.
+    if (typeof entity.type === 'undefined') {
+      return true;
+    }
+
+    // 'type' is a field in the mapping and is not the type of the mapping.
+    if (typeof entity.type === 'object') {
       return true;
     }
   }
@@ -60,7 +73,7 @@ export function generateMapping(usageCollections: ParsedUsageCollection[]) {
   const esMapping: any = { properties: {} };
   for (const [, collecionDetails] of usageCollections) {
     esMapping.properties[collecionDetails.collectorName] = transformToEsMapping(
-      collecionDetails.mapping.value
+      collecionDetails.schema.value
     );
   }
 

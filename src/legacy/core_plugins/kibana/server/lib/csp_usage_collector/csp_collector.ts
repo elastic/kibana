@@ -46,7 +46,7 @@ export function createCspCollector(server: Server): CollectorOptions<Usage> {
         rulesChangedFromDefault: header !== CspConfig.DEFAULT.header,
       };
     },
-    mapping: {
+    schema: {
       strict: {
         type: 'boolean',
       },

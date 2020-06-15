@@ -19,7 +19,7 @@ export function createCloudUsageCollector(usageCollection: UsageCollectionSetup,
   return usageCollection.makeUsageCollector<CloudUsage>({
     type: 'cloud',
     isReady: () => true,
-    mapping: {
+    schema: {
       isCloudEnabled: { type: 'boolean' },
     },
     fetch: () => {

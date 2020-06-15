@@ -21,22 +21,32 @@ import { Logger, APICaller } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
-type AllowedMappingTypes = 'keyword' | 'text' | 'number' | 'boolean' | 'long' | 'date' | 'float';
+export type AllowedSchemaTypes =
+  | 'keyword'
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'long'
+  | 'date'
+  | 'float';
+export interface SchemaField {
+  type: string;
+}
 
 type Purify<T extends string> = { [P in T]: T }[T];
 
-type MakeMappingFrom<Base> = {
+export type MakeSchemaFrom<Base> = {
   [Key in Purify<Extract<keyof Base, string>>]: Base[Key] extends Array<infer U>
-    ? { type: AllowedMappingTypes }
+    ? { type: AllowedSchemaTypes }
     : Base[Key] extends object
-    ? MakeMappingFrom<Base[Key]>
-    : { type: AllowedMappingTypes };
+    ? MakeSchemaFrom<Base[Key]>
+    : { type: AllowedSchemaTypes };
 };
 
-export interface CollectorOptions<T = unknown, U = T, Mapping = MakeMappingFrom<T>> {
+export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
-  mapping?: Mapping;
+  schema?: MakeSchemaFrom<T>;
   fetch: (callCluster: APICaller) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed

@@ -84,7 +84,7 @@ export function registerTelemetryPluginUsageCollector(
     type: 'telemetry',
     isReady: () => typeof options.getSavedObjectsClient() !== 'undefined',
     fetch: createCollectorFetch(options),
-    mapping: {
+    schema: {
       opt_in_status: { type: 'boolean' },
       usage_fetcher: { type: 'keyword' },
       last_reported: { type: 'long' },

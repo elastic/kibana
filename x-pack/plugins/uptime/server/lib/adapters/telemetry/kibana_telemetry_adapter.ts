@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PageViewParams, UptimeTelemetry } from './types';
+import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { APICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
 
@@ -19,12 +19,6 @@ interface UptimeTelemetryCollector {
 const BUCKET_SIZE = 3600;
 // take buckets in the last day
 const BUCKET_NUMBER = 24;
-
-interface Usage {
-  last_24_hours: {
-    hits: UptimeTelemetry;
-  };
-}
 
 export class KibanaTelemetryAdapter {
   public static registerUsageCollector = (
@@ -45,9 +39,9 @@ export class KibanaTelemetryAdapter {
     usageCollector: UsageCollectionSetup,
     getSavedObjectsClient: () => ISavedObjectsRepository | undefined
   ) {
-    return usageCollector.makeUsageCollector<Usage, Usage>({
+    return usageCollector.makeUsageCollector<Usage>({
       type: 'uptime',
-      mapping: {
+      schema: {
         last_24_hours: {
           hits: {
             autoRefreshEnabled: {

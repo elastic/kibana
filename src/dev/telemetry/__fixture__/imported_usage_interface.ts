@@ -33,7 +33,7 @@ export const myCollector = makeUsageCollector<Usage>({
       locale: 'en',
     };
   },
-  mapping: {
+  schema: {
     locale: {
       type: 'keyword',
     },

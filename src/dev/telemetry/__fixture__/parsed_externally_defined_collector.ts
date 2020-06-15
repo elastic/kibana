@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
@@ -24,7 +25,7 @@ export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
     'src/dev/telemetry/__fixture__/externally_defined_collector.ts',
     {
       collectorName: 'from_variable_collector',
-      mapping: {
+      schema: {
         value: {
           locale: {
             type: 'keyword',
@@ -35,10 +36,10 @@ export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
         typeName: 'Usage',
         typeDescriptor: {
           locale: {
-            kind: 142,
+            kind: SyntaxKind.StringKeyword,
+            type: 'StringKeyword',
           },
         },
-        signature: '510470106ef93372bf754d2d2075c250',
       },
     },
   ],
@@ -46,7 +47,7 @@ export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
     'src/dev/telemetry/__fixture__/externally_defined_collector.ts',
     {
       collectorName: 'from_fn_collector',
-      mapping: {
+      schema: {
         value: {
           locale: {
             type: 'keyword',
@@ -57,10 +58,10 @@ export const parsedExternallyDefinedCollector: ParsedUsageCollection[] = [
         typeName: 'Usage',
         typeDescriptor: {
           locale: {
-            kind: 142,
+            kind: SyntaxKind.StringKeyword,
+            type: 'StringKeyword',
           },
         },
-        signature: '510470106ef93372bf754d2d2075c250',
       },
     },
   ],

@@ -19,13 +19,13 @@
 
 import * as _ from 'lodash';
 import * as ts from 'typescript';
-import esMapping from './__fixture__/mock_mapping.json';
+import mockSchema from './__fixture__/mock_schema.json';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
 
 describe('checkMatchingMapping', () => {
   it('returns no diff on matching parsedCollections and stored mapping', () => {
-    const diffs = checkMatchingMapping([parsedWorkingCollector], esMapping);
+    const diffs = checkMatchingMapping([parsedWorkingCollector], mockSchema);
     expect(diffs).toEqual({});
   });
 
@@ -33,9 +33,9 @@ describe('checkMatchingMapping', () => {
     it('returns diff on mismatching parsedCollections and stored mapping', () => {
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
       const fieldMapping = { type: 'number' };
-      malformedParsedCollector[1].mapping.value.flat = fieldMapping;
+      malformedParsedCollector[1].schema.value.flat = fieldMapping;
 
-      const diffs = checkMatchingMapping([malformedParsedCollector], esMapping);
+      const diffs = checkMatchingMapping([malformedParsedCollector], mockSchema);
       expect(diffs).toEqual({
         properties: {
           my_working_collector: {
@@ -50,9 +50,9 @@ describe('checkMatchingMapping', () => {
       const collectorName = 'New Collector in town!';
       const collectorMapping = { some_usage: { type: 'number' } };
       malformedParsedCollector[1].collectorName = collectorName;
-      malformedParsedCollector[1].mapping.value = { some_usage: { type: 'number' } };
+      malformedParsedCollector[1].schema.value = { some_usage: { type: 'number' } };
 
-      const diffs = checkMatchingMapping([malformedParsedCollector], esMapping);
+      const diffs = checkMatchingMapping([malformedParsedCollector], mockSchema);
       expect(diffs).toEqual({
         properties: {
           [collectorName]: {
@@ -67,10 +67,7 @@ describe('checkMatchingMapping', () => {
 describe('checkCompatibleTypeDescriptor', () => {
   it('returns no diff on compatible type descriptor with mapping', () => {
     const incompatibles = checkCompatibleTypeDescriptor([parsedWorkingCollector]);
-    expect(incompatibles).toHaveLength(1);
-    const { diff, message } = incompatibles[0];
-    expect(diff).toEqual({});
-    expect(message).toHaveLength(0);
+    expect(incompatibles).toHaveLength(0);
   });
 
   describe('Interface Change', () => {
@@ -80,10 +77,10 @@ describe('checkCompatibleTypeDescriptor', () => {
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(1);
       const { diff, message } = incompatibles[0];
-      expect(diff).toEqual({ 'flat.kind': ts.SyntaxKind.BooleanKeyword });
+      expect(diff).toEqual({ 'flat.kind': 'boolean' });
       expect(message).toHaveLength(1);
       expect(message).toEqual([
-        'incompatible Type key (Usage.flat): expected (string) got (boolean).',
+        'incompatible Type key (Usage.flat): expected ("string") got ("boolean").',
       ]);
     });
 
@@ -93,24 +90,21 @@ describe('checkCompatibleTypeDescriptor', () => {
   describe('Mapping change', () => {
     it('returns no diff when mapping change between text and keyword', () => {
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
-      malformedParsedCollector[1].mapping.value.flat.type = 'text';
+      malformedParsedCollector[1].schema.value.flat.type = 'text';
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
-      expect(incompatibles).toHaveLength(1);
-      const { diff, message } = incompatibles[0];
-      expect(diff).toEqual({});
-      expect(message).toHaveLength(0);
+      expect(incompatibles).toHaveLength(0);
     });
 
     it('returns diff on incompatible type descriptor with mapping', () => {
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
-      malformedParsedCollector[1].mapping.value.flat.type = 'boolean';
+      malformedParsedCollector[1].schema.value.flat.type = 'boolean';
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(1);
       const { diff, message } = incompatibles[0];
-      expect(diff).toEqual({ 'flat.kind': ts.SyntaxKind.StringKeyword });
+      expect(diff).toEqual({ 'flat.kind': 'string' });
       expect(message).toHaveLength(1);
       expect(message).toEqual([
-        'incompatible Type key (Usage.flat): expected (boolean) got (string).',
+        'incompatible Type key (Usage.flat): expected ("boolean") got ("string").',
       ]);
     });
 

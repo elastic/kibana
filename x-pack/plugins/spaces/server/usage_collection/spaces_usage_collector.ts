@@ -161,7 +161,7 @@ export function getSpacesUsageCollector(
   return usageCollection.makeUsageCollector<UsageStats, BulkUpload>({
     type: 'spaces',
     isReady: () => true,
-    mapping: {
+    schema: {
       usesFeatureControls: { type: 'boolean' },
       disabledFeatures: {
         indexPatterns: { type: 'long' },

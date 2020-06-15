@@ -64,7 +64,7 @@ export const myCollector = makeUsageCollector<Usage>({
       };
     }
   },
-  mapping: {
+  schema: {
     flat: {
       type: 'keyword',
     },

@@ -33,7 +33,7 @@ describe('parseTelemetryRC', () => {
       {
         root: fixtureDir,
         output: fixtureDir,
-        exclude: ['./unmapped_collector.ts'],
+        exclude: [path.resolve(fixtureDir, './unmapped_collector.ts')],
       },
     ]);
   });

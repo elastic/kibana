@@ -1,6 +1,6 @@
 [
   {
-    "output": "src/plugins/telemetry/mappings/legacy_oss_plugins.json",
+    "output": "src/plugins/telemetry/schema/legacy_oss_plugins.json",
     "root": "src/legacy/core_plugins/",
     "exclude": [
       "src/legacy/core_plugins/testbed",
@@ -9,7 +9,7 @@
     ]
   },
   {
-    "output": "src/plugins/telemetry/mappings/oss_plugins.json",
+    "output": "src/plugins/telemetry/schema/oss_plugins.json",
     "root": "src/plugins/",
     "exclude": [
       "src/plugins/kibana_react/",

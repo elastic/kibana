@@ -25,7 +25,7 @@ import {
   ErrorReporter,
   parseConfigsTask,
   extractCollectorsTask,
-  generateMappingsTask,
+  generateSchemasTask,
   writeToFileTask,
 } from './telemetry/tasks';
 
@@ -41,8 +41,8 @@ run(
         task: (context) => new Listr(extractCollectorsTask(context), { exitOnError: true }),
       },
       {
-        title: 'Generating Mapping files',
-        task: (context) => new Listr(generateMappingsTask(context), { exitOnError: true }),
+        title: 'Generating Schema files',
+        task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
       },
       {
         title: 'Writing to file',

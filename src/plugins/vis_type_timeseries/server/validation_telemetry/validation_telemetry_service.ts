@@ -66,7 +66,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
               };
             }
           },
-          mapping: {
+          schema: {
             failed_validations: { type: 'long' },
           },
         })

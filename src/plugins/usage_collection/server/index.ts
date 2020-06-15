@@ -20,7 +20,13 @@
 import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionPlugin } from './plugin';
 
-export { AllowedMappingTypes, CollectorOptions, Collector } from './collector';
+export {
+  AllowedSchemaTypes,
+  MakeSchemaFrom,
+  SchemaField,
+  CollectorOptions,
+  Collector,
+} from './collector';
 export { UsageCollectionSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>

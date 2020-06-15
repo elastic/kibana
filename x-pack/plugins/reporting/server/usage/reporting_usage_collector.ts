@@ -13,12 +13,19 @@ import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
-import { RangeStats } from './types';
-import { reportingUsageMapping } from './reporting_usage_mapping';
+import { ReportingUsageType } from './types';
+import { reportingUsageSchema } from './reporting_usage_schema';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
 
+interface XpackBulkUpload {
+  usage: {
+    xpack: {
+      reporting: ReportingUsageType;
+    };
+  };
+}
 /*
  * @return {Object} kibana usage stats type collection object
  */
@@ -29,9 +36,9 @@ export function getReportingUsageCollector(
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
-  return usageCollection.makeUsageCollector({
+  return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
     type: 'reporting',
-    mapping: reportingUsageMapping,
+    schema: reportingUsageSchema as any,
     fetch: (callCluster: CallCluster) =>
       getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
     isReady,
@@ -40,7 +47,7 @@ export function getReportingUsageCollector(
      * 1. Make this data part of the "kibana_stats" type
      * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
      */
-    formatForBulkUpload: (result: RangeStats) => {
+    formatForBulkUpload: (result: ReportingUsageType) => {
       return {
         type: METATYPE,
         payload: {

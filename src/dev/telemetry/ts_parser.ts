@@ -19,7 +19,6 @@
 
 import * as ts from 'typescript';
 import { createFailError } from '@kbn/dev-utils';
-import * as crypto from 'crypto';
 import * as path from 'path';
 import { getProperty, getPropertyValue } from './utils';
 import { getDescriptor, Descriptor } from './serializer';
@@ -55,8 +54,8 @@ export function isMakeUsageCollectorFunction(
 
 export interface CollectorDetails {
   collectorName: string;
-  fetch: { typeName: string; typeDescriptor: Descriptor; signature: string };
-  mapping: { value: any };
+  fetch: { typeName: string; typeDescriptor: Descriptor };
+  schema: { value: any };
 }
 
 function getCollectionConfigNode(
@@ -133,7 +132,7 @@ function extractCollectorDetails(
   if (!typeProperty) {
     throw Error(`usageCollector.type must be defined.`);
   }
-  const typePropertyValue = getPropertyValue(typeProperty);
+  const typePropertyValue = getPropertyValue(typeProperty, program);
   if (!typePropertyValue || typeof typePropertyValue !== 'string') {
     throw Error(`usageCollector.type must be be a non-empty string literal.`);
   }
@@ -142,14 +141,14 @@ function extractCollectorDetails(
   if (!fetchProperty) {
     throw Error(`usageCollector.fetch must be defined.`);
   }
-  const mappingProperty = getProperty(collectorConfig, 'mapping');
-  if (!mappingProperty) {
-    throw Error(`usageCollector.mapping must be defined.`);
+  const schemaProperty = getProperty(collectorConfig, 'schema');
+  if (!schemaProperty) {
+    throw Error(`usageCollector.schema must be defined.`);
   }
 
-  const mappingPropertyValue = getPropertyValue(mappingProperty);
-  if (!mappingPropertyValue || typeof mappingPropertyValue !== 'object') {
-    throw Error(`usageCollector.mapping must be be an object.`);
+  const schemaPropertyValue = getPropertyValue(schemaProperty, program, { chaseImport: true });
+  if (!schemaPropertyValue || typeof schemaPropertyValue !== 'object') {
+    throw Error(`usageCollector.schema must be be an object.`);
   }
 
   const collectorNodeType = collectorNode.typeArguments;
@@ -159,19 +158,16 @@ function extractCollectorDetails(
 
   const usageTypeNode = collectorNodeType[0];
   const usageTypeName = usageTypeNode.getText();
-  const usageType: Descriptor = getDescriptor(usageTypeNode, program);
-  const snapshot = fetchProperty.getFullText();
-  const fnHash = crypto.createHash('md5').update(snapshot).digest('hex');
+  const usageType = getDescriptor(usageTypeNode, program) as Descriptor;
 
   return {
     collectorName: typePropertyValue,
-    mapping: {
-      value: mappingPropertyValue,
+    schema: {
+      value: schemaPropertyValue,
     },
     fetch: {
       typeName: usageTypeName,
       typeDescriptor: usageType,
-      signature: fnHash,
     },
   };
 }

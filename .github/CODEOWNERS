@@ -177,6 +177,11 @@
 /src/plugins/telemetry_management_section/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
+.telemetryrc.json @elastic/pulse
+/src/dev/telemetry/ @elastic/pulse
+src/plugins/telemetry/schema/legacy_oss_plugins.json @elastic/pulse
+src/plugins/telemetry/schema/oss_plugins.json @elastic/pulse
+x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/pulse
 
 # Kibana Alerting Services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services

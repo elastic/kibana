@@ -18,10 +18,11 @@
  */
 
 import * as ts from 'typescript';
+import * as path from 'path';
 import { TaskContext } from './task_context';
 import { extractCollectors, getProgramPaths } from '../extract_collectors';
 
-export function extractCollectorsTask({ roots }: TaskContext) {
+export function extractCollectorsTask({ roots }: TaskContext, restrictProgramToPath?: string) {
   return roots.map((root) => ({
     task: async () => {
       const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
@@ -30,8 +31,18 @@ export function extractCollectorsTask({ roots }: TaskContext) {
       }
       const programPaths = await getProgramPaths(root.config);
 
-      const results = [...extractCollectors(programPaths, tsConfig)];
-      root.parsedCollections = results;
+      if (typeof restrictProgramToPath !== 'undefined') {
+        const fullRestrictedPath = path.resolve(process.cwd(), restrictProgramToPath);
+        const restrictedProgramPaths = programPaths.filter(
+          (programPath) => programPath === fullRestrictedPath
+        );
+        if (restrictedProgramPaths.length) {
+          root.parsedCollections = [...extractCollectors(restrictedProgramPaths, tsConfig)];
+        }
+        return;
+      }
+
+      root.parsedCollections = [...extractCollectors(programPaths, tsConfig)];
     },
     title: `Extracting collectors in ${root.config.root}`,
   }));

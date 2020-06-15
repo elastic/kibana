@@ -16,24 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../core/server/mocks';
+import { externallyDefinedSchema } from './constants';
 
-import * as path from 'path';
-import { TaskContext } from './task_context';
-import { checkMatchingMapping } from '../check_collector_integrity';
-import { readFileAsync } from '../utils';
+const { makeUsageCollector } = new CollectorSet({
+  logger: loggingServiceMock.createLogger(),
+  maximumWaitTimeForAllCollectorsInS: 0,
+});
 
-export function checkMatchingMappingTask({ roots }: TaskContext) {
-  return roots.map((root) => ({
-    task: async () => {
-      const fullPath = path.resolve(process.cwd(), root.config.output);
-      const esMappingString = await readFileAsync(fullPath, 'utf-8');
-      const esMapping = JSON.parse(esMappingString);
-
-      if (root.parsedCollections) {
-        const differences = checkMatchingMapping(root.parsedCollections, esMapping);
-        root.esMappingDiffs = differences;
-      }
-    },
-    title: `Checking in ${root.config.root}`,
-  }));
+interface Usage {
+  locale?: string;
 }
+
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'with_imported_schema',
+  isReady: () => true,
+  schema: externallyDefinedSchema,
+  fetch(): Usage {
+    return {
+      locale: 'en',
+    };
+  },
+});

@@ -12,6 +12,9 @@
           "properties": {
             "total": {
               "type": "number"
+            },
+            "type": {
+              "type": "boolean"
             }
           }
         }

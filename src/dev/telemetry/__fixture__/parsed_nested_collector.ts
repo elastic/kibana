@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedNestedCollector: ParsedUsageCollection = [
   'src/dev/telemetry/__fixture__/nested_collector.ts',
   {
     collectorName: 'my_nested_collector',
-    mapping: {
+    schema: {
       value: {
         locale: {
           type: 'keyword',
@@ -34,10 +35,10 @@ export const parsedNestedCollector: ParsedUsageCollection = [
       typeName: 'Usage',
       typeDescriptor: {
         locale: {
-          kind: 142,
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
         },
       },
-      signature: 'c213711f0b278700c8220552bc38d1f6',
     },
   },
 ];

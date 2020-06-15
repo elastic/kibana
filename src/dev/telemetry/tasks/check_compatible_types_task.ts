@@ -27,7 +27,13 @@ export function checkCompatibleTypesTask({ reporter, roots }: TaskContext) {
         const differences = checkCompatibleTypeDescriptor(root.parsedCollections);
         const reporterWithContext = reporter.withContext({ name: root.config.root });
         if (differences.length) {
-          reporterWithContext.report(differences);
+          reporterWithContext.report(
+            `${JSON.stringify(
+              differences,
+              null,
+              2
+            )}. \nPlease fix the collectors and run the check again.`
+          );
           throw reporter;
         }
       }

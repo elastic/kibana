@@ -19,7 +19,7 @@ export function registerFileUploadUsageCollector(usageCollection: UsageCollectio
 
       return fileUploadUsage;
     },
-    mapping: {
+    schema: {
       filesUploadedTotalCount: { type: 'long' },
     },
   });

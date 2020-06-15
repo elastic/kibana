@@ -194,7 +194,7 @@ export function registerRollupUsageCollector(
   const collector = usageCollection.makeUsageCollector<Usage>({
     type: 'rollups',
     isReady: () => true,
-    mapping: {
+    schema: {
       index_patterns: {
         total: { type: 'long' },
       },
