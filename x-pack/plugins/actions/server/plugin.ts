@@ -35,7 +35,7 @@ import { Services, ActionType, PreConfiguredAction } from './types';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createExecuteFunction } from './create_execute_function';
+import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 
@@ -288,7 +288,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           preconfiguredActions,
           request,
           actionExecutor: actionExecutor!,
-          executionEnqueuer: createExecuteFunction({
+          executionEnqueuer: createExecutionEnqueuerFunction({
             taskManager: plugins.taskManager,
             actionTypeRegistry: actionTypeRegistry!,
             isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
@@ -341,7 +341,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             preconfiguredActions,
             request,
             actionExecutor: actionExecutor!,
-            executionEnqueuer: createExecuteFunction({
+            executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,

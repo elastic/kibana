@@ -5,7 +5,7 @@
  */
 
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
-import { createExecuteFunction } from './create_execute_function';
+import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 
@@ -16,7 +16,7 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
-    const executeFn = createExecuteFunction({
+    const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOUsingEphemeralEncryptionKey: false,
@@ -67,7 +67,7 @@ describe('execute()', () => {
   });
 
   test('schedules the action with all given parameters with a preconfigured action', async () => {
-    const executeFn = createExecuteFunction({
+    const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOUsingEphemeralEncryptionKey: false,
@@ -127,7 +127,7 @@ describe('execute()', () => {
   });
 
   test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
-    const executeFn = createExecuteFunction({
+    const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOUsingEphemeralEncryptionKey: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
@@ -147,7 +147,7 @@ describe('execute()', () => {
 
   test('should ensure action type is enabled', async () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
-    const executeFn = createExecuteFunction({
+    const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOUsingEphemeralEncryptionKey: false,
       actionTypeRegistry: mockedActionTypeRegistry,
@@ -177,7 +177,7 @@ describe('execute()', () => {
 
   test('should skip ensure action type if action type is preconfigured and license is valid', async () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
-    const executeFn = createExecuteFunction({
+    const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOUsingEphemeralEncryptionKey: false,
       actionTypeRegistry: mockedActionTypeRegistry,

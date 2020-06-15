@@ -27,7 +27,7 @@ export type ExecutionEnqueuer = (
   options: ExecuteOptions
 ) => Promise<void>;
 
-export function createExecuteFunction({
+export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   isESOUsingEphemeralEncryptionKey,

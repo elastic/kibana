@@ -226,76 +226,67 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
-    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "event": Object {
-              "action": "execute",
-              "outcome": "success",
-            },
-            "kibana": Object {
-              "saved_objects": Array [
-                Object {
-                  "id": "1",
-                  "namespace": undefined,
-                  "rel": "primary",
-                  "type": "alert",
-                },
-              ],
-            },
-            "message": "alert executed: test:1: 'alert-name'",
+    expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      event: {
+        action: 'execute',
+        outcome: 'success',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
           },
         ],
-        Array [
-          Object {
-            "event": Object {
-              "action": "new-instance",
-            },
-            "kibana": Object {
-              "alerting": Object {
-                "instance_id": "1",
-              },
-              "saved_objects": Array [
-                Object {
-                  "id": "1",
-                  "namespace": undefined,
-                  "rel": "primary",
-                  "type": "alert",
-                },
-              ],
-            },
-            "message": "test:1: 'alert-name' created new instance: '1'",
+      },
+      message: "alert executed: test:1: 'alert-name'",
+    });
+    expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      event: {
+        action: 'new-instance',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
           },
         ],
-        Array [
-          Object {
-            "event": Object {
-              "action": "execute-action",
-            },
-            "kibana": Object {
-              "alerting": Object {
-                "instance_id": "1",
-              },
-              "saved_objects": Array [
-                Object {
-                  "id": "1",
-                  "namespace": undefined,
-                  "rel": "primary",
-                  "type": "alert",
-                },
-                Object {
-                  "id": "1",
-                  "namespace": undefined,
-                  "type": "action",
-                },
-              ],
-            },
-            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
+      },
+      message: "test:1: 'alert-name' created new instance: '1'",
+    });
+    expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      event: {
+        action: 'execute-action',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+          {
+            id: '1',
+            namespace: undefined,
+            type: 'action',
           },
         ],
-      ]
-    `);
+      },
+      message:
+        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
+    });
   });
 
   test('includes the apiKey in the request used to initialize the actionsClient', async () => {
