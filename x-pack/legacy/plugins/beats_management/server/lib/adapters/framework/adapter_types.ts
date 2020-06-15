@@ -34,7 +34,6 @@ export interface BackendFrameworkAdapter {
   log(text: string): void;
   on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void): void;
   getSetting(settingPath: string): any;
-  exposeStaticDir(urlPath: string, dir: string): void;
   registerRoute<RouteRequest extends FrameworkRequest, RouteResponse extends FrameworkResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;

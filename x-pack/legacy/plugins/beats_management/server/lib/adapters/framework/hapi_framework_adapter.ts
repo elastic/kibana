@@ -76,21 +76,6 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
   }
 
-  public exposeStaticDir(urlPath: string, dir: string): void {
-    if (!this.server) {
-      throw new Error('Must pass a hapi server into the adapter to use exposeStaticDir');
-    }
-    this.server.route({
-      handler: {
-        directory: {
-          path: dir,
-        },
-      },
-      method: 'GET',
-      path: urlPath,
-    });
-  }
-
   public registerRoute<
     RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
