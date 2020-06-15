@@ -19,3 +19,7 @@
 
 export const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 export const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
+export const RESEARCH_COVERAGE_INDEX =
+  process.env.RESEARCH_COVERAGE_INDEX || 'qa_research_code_coverage';
+export const RESEARCH_TOTALS_INDEX =
+  process.env.RESEARCH_TOTALS_INDEX || `qa_research_total_code_coverage`;
