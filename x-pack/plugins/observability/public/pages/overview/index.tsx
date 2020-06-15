@@ -12,6 +12,7 @@ import { ChartContainer } from '../../components/chart/container';
 import { WithHeaderLayout } from '../../components/layout/with_header';
 import { appsSection } from '../home/section';
 import { ContinueJourney } from './continue_journey';
+import { MetricsChart } from '../../components/chart/metrics';
 
 export const Overview = () => {
   const theme = useContext(ThemeContext);
@@ -90,43 +91,7 @@ export const Overview = () => {
               </ChartContainer> */}
             </EuiFlexItem>
             <EuiFlexItem>
-              {/* <ChartContainer title="Metrics">
-                <Chart>
-                  <Settings
-                    onBrushEnd={({ x }) => {
-                      console.log('#### Metrics', x);
-                    }}
-                    theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-                    showLegend
-                    legendPosition="bottom"
-                    xDomain={{ min: startAPM, max: endAPM }}
-                  />
-                  <Axis
-                    id="bottom"
-                    position={Position.Bottom}
-                    showOverlappingTicks={false}
-                    showOverlappingLabels={false}
-                    tickFormat={formatterAPM}
-                  />
-                  <Axis
-                    showGridLines
-                    id="left2"
-                    position={Position.Left}
-                    tickFormat={(d: any) => numeral(d).format('0a')}
-                  />
-                  <AreaSeries
-                    id="averageValues"
-                    xScaleType="time"
-                    yScaleType="linear"
-                    xAccessor={'time'}
-                    yAccessors={['value']}
-                    splitSeriesAccessors={['group']}
-                    stackAccessors={['time']}
-                    data={apmData}
-                    color={barSeriesColorAccessor2}
-                  />
-                </Chart>
-              </ChartContainer> */}
+              <MetricsChart />
             </EuiFlexItem>
             <EuiFlexItem>
               <APMChart />

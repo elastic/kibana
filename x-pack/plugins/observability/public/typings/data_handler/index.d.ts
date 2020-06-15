@@ -22,7 +22,7 @@ interface Series {
   key?: string;
 }
 
-interface FetchDataResponse {
+export interface FetchDataResponse {
   title: string;
   appLink: string;
   stats: Stat[];

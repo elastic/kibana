@@ -3,40 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiButtonEmpty, EuiPanel, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
 
 interface Props {
   title: string;
+  appLink?: string;
   children: React.ReactNode;
 }
 
-const Container = styled.div`
-  .accordion-button {
-    width: 100%;
-  }
-`;
-
-export const ChartContainer = ({ title, children }: Props) => {
+export const ChartContainer = ({ title, appLink, children }: Props) => {
   return (
-    <Container>
-      <EuiAccordion
-        initialIsOpen
-        id={title}
-        buttonContentClassName="accordion-button"
-        buttonContent={
-          <>
-            <EuiTitle size="xs">
-              <h5>{title}</h5>
-            </EuiTitle>
-            <EuiHorizontalRule margin="xs" />
-          </>
-        }
-      >
-        <EuiSpacer size="s" />
-        <EuiPanel style={{ height: '296px' }}>{children}</EuiPanel>
-      </EuiAccordion>
-    </Container>
+    <EuiAccordion
+      initialIsOpen
+      id={title}
+      buttonContentClassName="accordion-button"
+      buttonContent={
+        <EuiTitle size="xs">
+          <h5>{title}</h5>
+        </EuiTitle>
+      }
+      extraAction={
+        <EuiButtonEmpty href={appLink}>
+          {i18n.translate('xpack.observability.chart.viewInAppLabel', {
+            defaultMessage: 'View in app',
+          })}
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiPanel>{children}</EuiPanel>
+    </EuiAccordion>
   );
 };
