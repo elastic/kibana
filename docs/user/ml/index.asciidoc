@@ -87,6 +87,8 @@ and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
 
+experimental[]
+
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 {classification}, {oldetection}, and {regression} algorithms and generate new
 indices that contain the results alongside your source data. 
