@@ -2,6 +2,7 @@
   "id": "esUiShared",
   "version": "kibana",
   "ui": true,
+  "server": true,
   "extraPublicDirs": [
     "static/ace_x_json/hooks",
     "static/validators/string",

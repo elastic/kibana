@@ -34,7 +34,7 @@ describe('Children helper', () => {
   const root = generator.generateEvent();
 
   it('builds the children response structure', () => {
-    const children = Array.from(generator.descendantsTreeGenerator(root, 3, 3, 0, 0, 100, true));
+    const children = Array.from(generator.descendantsTreeGenerator(root, 3, 3, 0, 0, 0, 100, true));
 
     // because we requested the generator to always return the max children, there will always be at least 2 parents
     const parents = findParents(children);
