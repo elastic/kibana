@@ -24,7 +24,7 @@ export interface TelemetryRoot {
   config: TelemetryRC;
   parsedCollections?: ParsedUsageCollection[];
   mapping?: any;
-  esMappingDiffs?: any[];
+  esMappingDiffs?: string[];
 }
 
 export interface TaskContext {

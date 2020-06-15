@@ -31,7 +31,8 @@ export function checkMatchingSchemasTask({ roots }: TaskContext) {
 
       if (root.parsedCollections) {
         const differences = checkMatchingMapping(root.parsedCollections, esMapping);
-        root.esMappingDiffs = differences;
+
+        root.esMappingDiffs = Object.keys(differences);
       }
     },
     title: `Checking in ${root.config.root}`,

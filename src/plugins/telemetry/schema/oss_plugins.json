@@ -28,7 +28,7 @@
           "type": "date"
         },
         "last_uninstall_set": {
-          "type": "date"
+          "type": "keyword"
         },
         "uninstalled": {
           "type": "keyword"

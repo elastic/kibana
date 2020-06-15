@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import * as ts from 'typescript';
 import { ParsedUsageCollection } from './ts_parser';
 import { AllowedSchemaTypes } from '../../plugins/usage_collection/server';
-import { TelemetryKinds } from './serializer';
 
 export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
   switch (type) {

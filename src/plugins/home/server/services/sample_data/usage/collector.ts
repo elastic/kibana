@@ -42,7 +42,7 @@ export async function makeSampleDataUsageCollector(
       last_install_date: { type: 'date' },
       last_install_set: { type: 'keyword' },
       last_uninstall_date: { type: 'date' },
-      last_uninstall_set: { type: 'date' },
+      last_uninstall_set: { type: 'keyword' },
       uninstalled: { type: 'keyword' },
     },
   });

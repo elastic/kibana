@@ -40,7 +40,7 @@ const SOME_NUMBER: number = 123;
 export const myCollector = makeUsageCollector<Usage>({
   type: 'my_working_collector',
   isReady: () => true,
-  fetch(): Usage {
+  fetch() {
     const testString = '123';
     // query ES and get some data
 

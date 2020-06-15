@@ -27,7 +27,7 @@ import {
   parseConfigsTask,
   extractCollectorsTask,
   checkMatchingSchemasTask,
-  generateMappingsTask,
+  generateSchemasTask,
   checkCompatibleTypesTask,
   writeToFileTask,
   TaskContext,
@@ -68,15 +68,17 @@ run(
       },
       {
         enabled: (_) => fix,
-        skip: ({ roots }: TaskContext) =>
-          roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
+        skip: ({ roots }: TaskContext) => {
+          return roots.every(({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length);
+        },
         title: 'Generating new telemetry mappings',
-        task: (context) => new Listr(generateMappingsTask(context), { exitOnError: true }),
+        task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
       },
       {
         enabled: (_) => fix,
-        skip: ({ roots }: TaskContext) =>
-          roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
+        skip: ({ roots }: TaskContext) => {
+          return roots.every(({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length);
+        },
         title: 'Updating telemetry mapping files',
         task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
       },

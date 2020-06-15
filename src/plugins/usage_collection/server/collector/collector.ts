@@ -29,6 +29,7 @@ export type AllowedSchemaTypes =
   | 'long'
   | 'date'
   | 'float';
+
 export interface SchemaField {
   type: string;
 }

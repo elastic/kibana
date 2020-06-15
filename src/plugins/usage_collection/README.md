@@ -8,7 +8,7 @@ To integrate with the telemetry services for usage collection of your feature, t
 
 ## Creating and Registering Usage Collector
 
-All you need to provide is a `type` for organizing your fields, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
+All you need to provide is a `type` for organizing your fields, `schema` field to define the expected types of usage fields reported, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
 
 ### New Platform
 
@@ -45,6 +45,12 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
     import { APICluster } from 'kibana/server';
 
+    interface Usage {
+      my_objects: {
+        total: number,
+      },
+    }
+
     export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
       // usageCollection is an optional dependency, so make sure to return if it is not registered.
       if (!usageCollection) {
@@ -52,8 +58,13 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
       }
 
       // create usage collector
-      const myCollector = usageCollection.makeUsageCollector({
+      const myCollector = usageCollection.makeUsageCollector<Usage>({
         type: MY_USAGE_TYPE,
+        schema: {
+          my_objects: {
+            total: 'long',
+          },
+        },
         fetch: async (callCluster: APICluster) => {
 
         // query ES and get some data
@@ -98,10 +109,8 @@ class Plugin {
 ```ts
 // server/collectors/register.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ISavedObjectsRepository } from 'kibana/server';
 
 export function registerMyPluginUsageCollector(
-  getSavedObjectsRepository: () => ISavedObjectsRepository | undefined,
   usageCollection?: UsageCollectionSetup
   ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -110,20 +119,50 @@ export function registerMyPluginUsageCollector(
   }
 
   // create usage collector
-  const myCollector = usageCollection.makeUsageCollector({
-    type: MY_USAGE_TYPE,
-    isReady: () => typeof getSavedObjectsRepository() !== 'undefined',
-    fetch: async () => {
-      const savedObjectsRepository = getSavedObjectsRepository()!;
-      // get something from the savedObjects
-
-      return { my_objects };
-    },
-  });
+  const myCollector = usageCollection.makeUsageCollector<Usage>(...)
 
   // register usage collector
   usageCollection.registerCollector(myCollector);
 }
+```
+
+## Schema Field
+
+The `schema` field is a proscribed data model that eliminates maintenance of mappings in the telemetry cluster. Simply define a schema field that specifies every possible field reported by the collector. Whenever the `schema` field is set or changed. Please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
+
+### Allowed Schema Types
+
+The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
+
+```
+'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
+```
+
+### Example
+
+```ts
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'my_working_collector',
+  isReady: () => true,
+  fetch() {
+    return {
+      my_greeting: 'hello',
+      some_obj: {
+        total: 123,
+      },
+    };
+  },
+  schema: {
+    my_greeting: {
+      type: 'keyword',
+    },
+    some_obj: {
+      total: {
+        type: 'number',
+      },
+    },
+  },
+});
 ```
 
 ## Update the telemetry payload and telemetry cluster field mappings

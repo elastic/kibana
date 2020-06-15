@@ -26,7 +26,7 @@ import { kindToDescriptorName } from './serializer';
 export function checkMatchingMapping(
   UsageCollections: ParsedUsageCollection[],
   esMapping: any
-): any[] {
+): any {
   const generatedMapping = generateMapping(UsageCollections);
   return difference(generatedMapping, esMapping);
 }
