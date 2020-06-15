@@ -450,7 +450,7 @@ export interface EndpointEvent {
     };
   };
   user: {
-    domain: string;
+    domain?: string;
     name: string;
   };
 }
