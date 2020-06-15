@@ -30,6 +30,16 @@ Bundles built by the the optimizer include a cache file which describes the info
 
 When a bundle is determined to be up-to-date a worker is not started for the bundle. If running the optimizer with the `--dev/--watch` flag, then all the files referenced by cached bundles are watched for changes. Once a change is detected in any of the files referenced by the built bundle a worker is started. If a file is changed that is referenced by several bundles then workers will be started for each bundle, combining workers together to respect the worker limit.
 
+## Bundle Refs
+
+In order to dramatically reduce the size of our bundles, and the time it takes to build them, this PR makes the relationships between plugins/bundles explicit using "bundle refs". When the optimizer starts a list of "refs" that could be had is compiled from the list of bundles being built and sent to each worker. That list is used to determine which import statements in a bundle should be replaced with a runtime reference to the output of another bundle.
+
+At runtime the bundles now share a set of entry points. By default a plugin shares `public` so that other code can use relative imports to access that directory. To expose additional directories they must be listed in the plugin's kibana.json "extraPublicDirs" field. The directories listed there will **also** be exported from the plugins bundle so that any other plugin can import that directory. "common" is commonly in the list of "extraPublicDirs". 
+
+When a directory is listed in the "extraPublicDirs" it will always be included in the bundle so that other plugins have access to it. The worker building the bundle has no way of knowing whether another plugin is using the directory, so be careful of adding test code or unnecessary directories to that list.
+
+Any import in a bundle which resolves into another bundles "context" directory, ie `src/plugins/*`, must map explicitly to a "public dir" exported by that plugin. If the resolved import is not in the list of public dirs an error will be thrown and the optimizer will fail to build the bundles until the error is fixed.
+
 ## API
 
 To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of update objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
