@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ClusterView } from './components/cluster_view';
 import './shard_allocation.scss';
 
-export const ShardAllocation = ({ scope, kbnUrl, type, shardStats }) => {
+export const ShardAllocation = ({ scope, type, shardStats }) => {
   const types = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.primaryLabel', {
@@ -79,7 +79,6 @@ export const ShardAllocation = ({ scope, kbnUrl, type, shardStats }) => {
       <ClusterView
         scope={scope}
         shardStats={shardStats}
-        kbnUrl={kbnUrl}
         showSystemIndices={scope.showSystemIndices}
         toggleShowSystemIndices={scope.toggleShowSystemIndices}
         type={type}

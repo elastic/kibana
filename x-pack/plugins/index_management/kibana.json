@@ -9,6 +9,7 @@
     "management"
   ],
   "optionalPlugins": [
+    "security",
     "usageCollection"
   ],
   "configPath": ["xpack", "index_management"]
