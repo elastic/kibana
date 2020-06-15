@@ -38,7 +38,7 @@ export const ContextMenu: FunctionComponent<Props> = ({
     >
       {editorItemMessages.duplicateButtonLabel}
     </EuiContextMenuItem>,
-    showAddOnFailure ? undefined : (
+    showAddOnFailure ? (
       <EuiContextMenuItem
         key="addOnFailure"
         icon="indexClose"
@@ -49,7 +49,7 @@ export const ContextMenu: FunctionComponent<Props> = ({
       >
         {editorItemMessages.addOnFailureButtonLabel}
       </EuiContextMenuItem>
-    ),
+    ) : undefined,
     <EuiContextMenuItem
       key="delete"
       icon="trash"
@@ -78,7 +78,7 @@ export const ContextMenu: FunctionComponent<Props> = ({
         />
       }
     >
-      <EuiContextMenuPanel items={contextMenuItems} />;
+      <EuiContextMenuPanel items={contextMenuItems} />
     </EuiPopover>
   );
 };
