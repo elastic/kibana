@@ -243,7 +243,7 @@ By providing the user's Request you'll receive an instance of the ActionsClient 
 const actionsClient = server.plugins.actions.getActionsClientWithRequest(request);
 ```
 
-Once you have a scoped ActionsClient you can execute an action by caling either the `enqueueExecution` or the `execute` apis which schedule the action to run later or run it and return the result respectively.
+Once you have a scoped ActionsClient you can execute an action by caling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
 
 ### actionsClient.enqueueExecution(options)
 
