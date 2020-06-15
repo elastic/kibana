@@ -22,6 +22,7 @@ describe('EmailActionConnectorFields renders', () => {
       config: {
         from: 'test@test.com',
       },
+      consumer: 'alerts',
     } as EmailActionConnector;
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields

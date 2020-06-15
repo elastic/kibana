@@ -67,6 +67,7 @@ describe('connector_add_flyout', () => {
             return new Promise<void>(() => {});
           },
           docLinks: deps!.docLinks,
+          consumer: 'alerts',
         }}
       >
         <ActionTypeMenu
@@ -117,6 +118,7 @@ describe('connector_add_flyout', () => {
             return new Promise<void>(() => {});
           },
           docLinks: deps!.docLinks,
+          consumer: 'alerts',
         }}
       >
         <ActionTypeMenu
@@ -167,6 +169,7 @@ describe('connector_add_flyout', () => {
             return new Promise<void>(() => {});
           },
           docLinks: deps!.docLinks,
+          consumer: 'alerts',
         }}
       >
         <ActionTypeMenu

@@ -43,6 +43,7 @@ describe('webhook connector validation', () => {
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
       },
+      consumer: 'alerts',
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -66,6 +67,7 @@ describe('webhook connector validation', () => {
       config: {
         method: 'PUT',
       },
+      consumer: 'alerts',
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

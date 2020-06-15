@@ -37,6 +37,7 @@ describe('slack connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
+      consumer: 'alerts',
     } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -53,6 +54,7 @@ describe('slack connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
+      consumer: 'alerts',
     } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

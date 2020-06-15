@@ -20,6 +20,7 @@ describe('SlackActionFields renders', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {},
+      consumer: 'alerts',
     } as SlackActionConnector;
     const deps = {
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,

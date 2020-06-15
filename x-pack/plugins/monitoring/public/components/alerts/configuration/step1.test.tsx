@@ -28,6 +28,7 @@ describe('Step1', () => {
       name: 'Testing',
       config: {},
       isPreconfigured: false,
+      consumer: 'alerts',
     },
   ];
   const selectedEmailActionId = emailActions[0].id;
@@ -89,6 +90,7 @@ describe('Step1', () => {
             name: '',
             config: {},
             isPreconfigured: false,
+            consumer: 'alerts',
           },
         ],
         selectedEmailActionId: NEW_ACTION_ID,

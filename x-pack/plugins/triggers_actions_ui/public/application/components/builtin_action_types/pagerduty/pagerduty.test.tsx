@@ -39,6 +39,7 @@ describe('pagerduty connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
       },
+      consumer: 'alerts',
     } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -65,6 +66,7 @@ describe('pagerduty connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
       },
+      consumer: 'alerts',
     } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

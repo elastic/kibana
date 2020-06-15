@@ -17,6 +17,7 @@ describe('connector reducer', () => {
       referencedByCount: 0,
       isPreconfigured: false,
       config: {},
+      consumer: 'alerts',
     };
   });
 

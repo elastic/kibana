@@ -32,6 +32,6 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServerLogActionType({ logger }));
   actionTypeRegistry.register(getSlackActionType({ configurationUtilities }));
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
-  actionTypeRegistry.register(getServiceNowActionType({ configurationUtilities }));
+  actionTypeRegistry.register(getServiceNowActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ configurationUtilities }));
 }

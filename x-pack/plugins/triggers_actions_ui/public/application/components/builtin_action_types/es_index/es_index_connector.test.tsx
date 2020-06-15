@@ -79,6 +79,7 @@ describe('IndexActionConnectorFields renders', () => {
         refresh: false,
         executionTimeField: 'test1',
       },
+      consumer: 'alerts',
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
       <IndexActionConnectorFields

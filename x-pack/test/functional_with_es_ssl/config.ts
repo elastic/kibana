@@ -72,10 +72,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             secrets: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
+            consumer: 'alerts',
           },
           'my-server-log': {
             actionTypeId: '.server-log',
             name: 'Serverlog#xyz',
+            consumer: 'alerts',
           },
         })}`,
       ],

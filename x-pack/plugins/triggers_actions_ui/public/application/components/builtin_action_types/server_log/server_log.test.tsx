@@ -34,6 +34,7 @@ describe('server-log connector validation', () => {
       actionTypeId: '.server-log',
       name: 'server-log',
       config: {},
+      consumer: 'alerts',
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

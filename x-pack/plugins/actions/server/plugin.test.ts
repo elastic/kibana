@@ -188,6 +188,7 @@ describe('Actions Plugin', () => {
             name: 'preconfigured-server-log',
             config: {},
             secrets: {},
+            consumer: 'alerts',
           },
         },
       });

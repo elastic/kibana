@@ -25,6 +25,7 @@ export const getActions = (): FindActionResult[] => [
     },
     isPreconfigured: false,
     referencedByCount: 0,
+    consumer: 'alerts',
   },
   {
     id: '123',
@@ -54,6 +55,7 @@ export const getActions = (): FindActionResult[] => [
     },
     isPreconfigured: false,
     referencedByCount: 0,
+    consumer: 'alerts',
   },
 ];
 

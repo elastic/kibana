@@ -81,6 +81,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: '.slack',
           name: 'Slack#xyz',
+          consumer: 'alerts',
         });
     });
   });

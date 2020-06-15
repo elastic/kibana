@@ -20,9 +20,11 @@ import { createExternalService } from './service';
 import { api } from './api';
 import { ExecutorParams, ExecutorSubActionPushParams } from './types';
 import * as i18n from './translations';
+import { Logger } from '../../../../../../src/core/server';
 
 // TODO: to remove, need to support Case
 import { buildMap, mapParams } from '../case/utils';
+import { PushToServiceResponse } from './case_types';
 
 interface GetActionTypeParams {
   logger: Logger;
@@ -57,7 +59,7 @@ async function executor(
 ): Promise<ActionTypeExecutorResult> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
-  let data = {};
+  let data: PushToServiceResponse | null = null;
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
     Pick<ActionTypeExecutorResult, 'actionId'> = {
@@ -71,11 +73,15 @@ async function executor(
   });
 
   if (!api[subAction]) {
-    throw new Error('[Action][ExternalService] Unsupported subAction type.');
+    const errorMessage = '[Action][ExternalService] Unsupported subAction type.';
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   if (subAction !== 'pushToService') {
-    throw new Error('[Action][ExternalService] subAction not implemented.');
+    const errorMessage = '[Action][ExternalService] subAction not implemented.';
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   if (subAction === 'pushToService') {
@@ -94,10 +100,12 @@ async function executor(
       params: { ...pushToServiceParams, externalObject },
       secrets,
     });
+
+    logger.debug(`response push to service for incident id: ${data.id}`);
   }
 
   return {
     ...res,
-    data,
+    data: data ?? {},
   };
 }

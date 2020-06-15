@@ -141,6 +141,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 actionTypeId: '.slack',
                 name: 'Slack#xyz',
                 isPreconfigured: true,
+                consumer: 'alerts',
               });
               break;
             default:
