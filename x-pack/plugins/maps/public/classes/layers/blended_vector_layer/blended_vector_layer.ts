@@ -109,8 +109,8 @@ function getClusterStyleDescriptor(
 
     if (styleName === VECTOR_STYLES.SYMBOLIZE_AS || styleName === VECTOR_STYLES.LABEL_BORDER_SIZE) {
       // copy none static/dynamic styles to cluster style
-      // @ts-ignore
       clusterStyleDescriptor.properties[styleName] = {
+        // @ts-expect-error
         options: { ...styleProperty.getOptions() },
       };
     } else if (styleProperty.isDynamic()) {

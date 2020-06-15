@@ -4,32 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  LanguageOrUndefined,
+  QueryOrUndefined,
+  Type,
+  SavedIdOrUndefined,
+  IndexOrUndefined,
+  ListAndOrUndefined,
+  Language,
+  Index,
+  Query,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
   Filter,
-  Query,
+  Query as DataQuery,
   esQuery,
   esFilters,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/server';
-import { PartialFilter, RuleAlertParams, Language } from '../types';
+import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
 import { buildQueryExceptions } from './build_exceptions_query';
 
 export const getQueryFilter = (
-  query: string,
+  query: Query,
   language: Language,
   filters: PartialFilter[],
-  index: string[],
-  lists: RuleAlertParams['exceptions_list']
+  index: Index,
+  lists: ListAndOrUndefined
 ) => {
   const indexPattern = {
     fields: [],
     title: index.join(),
   } as IIndexPattern;
 
-  const queries: Query[] = buildQueryExceptions({ query, language, lists });
+  const queries: DataQuery[] = buildQueryExceptions({ query, language, lists });
 
   const config = {
     allowLeadingWildcards: true,
@@ -46,14 +57,14 @@ export const getQueryFilter = (
 };
 
 interface GetFilterArgs {
-  type: RuleAlertParams['type'];
-  filters: PartialFilter[] | undefined | null;
-  language: Language | undefined | null;
-  query: string | undefined | null;
-  savedId: string | undefined | null;
+  type: Type;
+  filters: PartialFilter[] | undefined;
+  language: LanguageOrUndefined;
+  query: QueryOrUndefined;
+  savedId: SavedIdOrUndefined;
   services: AlertServices;
-  index: string[] | undefined | null;
-  lists: RuleAlertParams['exceptions_list'];
+  index: IndexOrUndefined;
+  lists: ListAndOrUndefined;
 }
 
 interface QueryAttributes {
