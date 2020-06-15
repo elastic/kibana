@@ -62,7 +62,7 @@ describe('chartSelectors', () => {
             { x: 0, y: 100 },
             { x: 1000, y: 200 },
           ],
-          legendValue: '0 ms',
+          legendValue: '200 μs',
           title: 'Avg.',
           type: 'linemark',
         },
