@@ -5,81 +5,40 @@
  */
 
 import React, { memo } from 'react';
-import { saturate } from 'polished';
-
-import {
-  htmlIdGenerator,
-  euiPaletteForTemperature,
-  euiPaletteForStatus,
-  colorPalette,
-} from '@elastic/eui';
+import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
+import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
+import { htmlIdGenerator, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '../../common/lib/kibana';
+import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
-/**
- * Generating from `colorPalette` function: This could potentially
- * pick up a palette shift and decouple from raw hex
- */
-const [euiColorEmptyShade, , , , , euiColor85Shade, euiColorFullShade] = colorPalette(
-  ['#ffffff', '#000000'],
-  7
-);
-
-/**
- * Base Colors - sourced from EUI
- */
-const resolverPalette: Record<string, string | string[]> = {
-  temperatures: euiPaletteForTemperature(7),
-  statii: euiPaletteForStatus(7),
-  fullShade: euiColorFullShade,
-  emptyShade: euiColorEmptyShade,
-};
-
-/**
- * Defines colors by semantics like so:
- * `danger`, `attention`, `enabled`, `disabled`
- * Or by function like:
- * `colorBlindBackground`, `subMenuForeground`
- */
 type ResolverColorNames =
-  | 'ok'
-  | 'empty'
+  | 'descriptionText'
   | 'full'
-  | 'warning'
-  | 'strokeBehindEmpty'
+  | 'graphControls'
+  | 'graphControlsBackground'
   | 'resolverBackground'
-  | 'runningProcessStart'
-  | 'runningProcessEnd'
-  | 'runningTriggerStart'
-  | 'runningTriggerEnd'
-  | 'activeNoWarning'
-  | 'activeWarning'
-  | 'fullLabelBackground'
-  | 'inertDescription'
-  | 'labelBackgroundTerminatedProcess'
-  | 'labelBackgroundTerminatedTrigger'
-  | 'labelBackgroundRunningProcess'
-  | 'labelBackgroundRunningTrigger';
+  | 'resolverEdge'
+  | 'resolverEdgeText';
 
-export const NamedColors: Record<ResolverColorNames, string> = {
-  ok: saturate(0.5, resolverPalette.temperatures[0]),
-  empty: euiColorEmptyShade,
-  full: euiColorFullShade,
-  strokeBehindEmpty: euiColor85Shade,
-  warning: resolverPalette.statii[3],
-  resolverBackground: euiColorFullShade,
-  runningProcessStart: '#006BB4',
-  runningProcessEnd: '#017D73',
-  runningTriggerStart: '#BD281E',
-  runningTriggerEnd: '#DD0A73',
-  activeNoWarning: '#0078FF',
-  activeWarning: '#C61F38',
-  fullLabelBackground: '#3B3C41',
-  labelBackgroundTerminatedProcess: '#8A96A8',
-  labelBackgroundTerminatedTrigger: '#8A96A8',
-  labelBackgroundRunningProcess: '#8A96A8',
-  labelBackgroundRunningTrigger: '#8A96A8',
-  inertDescription: '#747474',
-};
+type ColorMap = Record<ResolverColorNames, string>;
+interface NodeStyleConfig {
+  backingFill: string;
+  cubeSymbol: string;
+  descriptionFill: string;
+  descriptionText: string;
+  isLabelFilled: boolean;
+  labelButtonFill: ButtonColor;
+  strokeColor: string;
+}
+
+export interface NodeStyleMap {
+  runningProcessCube: NodeStyleConfig;
+  runningTriggerCube: NodeStyleConfig;
+  terminatedProcessCube: NodeStyleConfig;
+  terminatedTriggerCube: NodeStyleConfig;
+}
 
 const idGenerator = htmlIdGenerator();
 
@@ -97,32 +56,9 @@ export const PaintServerIds = {
  * PaintServers: Where color palettes, grandients, patterns and other similar concerns
  * are exposed to the component
  */
-const PaintServers = memo(() => (
+
+const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
   <>
-    <linearGradient
-      id={PaintServerIds.terminatedProcessCube}
-      x1="-381.23752"
-      y1="264.24026"
-      x2="-380.48514"
-      y2="263.3816"
-      gradientTransform="matrix(70.05178, 0, 0, -79.94771, 26724.01313, 21140.72096)"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0" stopColor="#4c82c3" />
-      <stop offset="1" stopColor="#8bd1c7" />
-    </linearGradient>
-    <linearGradient
-      id={PaintServerIds.runningTriggerCube}
-      x1="-381.18643"
-      y1="264.68195"
-      x2="-380.48514"
-      y2="263.8816"
-      gradientTransform="matrix(70.05179, 0, 0, -79.94774, 26724.01618, 21181.09848)"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0" stopColor="#dd0a73" />
-      <stop offset="1" stopColor="#f66" />
-    </linearGradient>
     <linearGradient
       id={PaintServerIds.runningProcessCube}
       x1="-381.23556"
@@ -136,17 +72,70 @@ const PaintServers = memo(() => (
       <stop offset="1" stopColor="#54b399" />
     </linearGradient>
     <linearGradient
-      id={PaintServerIds.terminatedTriggerCube}
-      x1="-381.18658"
-      y1="264.68187"
-      x2="-380.48546"
-      y2="263.8817"
+      id={PaintServerIds.runningTriggerCube}
+      x1="-381.18643"
+      y1="264.68195"
+      x2="-380.48514"
+      y2="263.8816"
       gradientTransform="matrix(70.05179, 0, 0, -79.94774, 26724.01618, 21181.09848)"
       gradientUnits="userSpaceOnUse"
     >
       <stop offset="0" stopColor="#dd0a73" />
       <stop offset="1" stopColor="#f66" />
     </linearGradient>
+    {isDarkMode ? (
+      <>
+        <linearGradient
+          id={PaintServerIds.terminatedProcessCube}
+          x1="-381.23752"
+          y1="264.24026"
+          x2="-380.48514"
+          y2="263.3816"
+          gradientTransform="matrix(70.05178, 0, 0, -79.94771, 26724.01313, 21140.72096)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#4c82c3" />
+          <stop offset="1" stopColor="#8bd1c7" />
+        </linearGradient>
+        <linearGradient
+          id={PaintServerIds.terminatedTriggerCube}
+          x1="-381.18658"
+          y1="264.68187"
+          x2="-380.48546"
+          y2="263.8817"
+          gradientTransform="matrix(70.05179, 0, 0, -79.94774, 26724.01618, 21181.09848)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#dd0a73" />
+          <stop offset="1" stopColor="#f66" />
+        </linearGradient>
+      </>
+    ) : (
+      <>
+        <linearGradient
+          id={PaintServerIds.terminatedProcessCube}
+          x1="10.5206"
+          y1="9.49068"
+          x2="46.8141"
+          y2="45.7844"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stopColor="#2F6EB6" />
+          <stop offset="1" stopColor="#00B4AC" />
+        </linearGradient>
+        <linearGradient
+          id={PaintServerIds.terminatedTriggerCube}
+          x1="15.4848"
+          y1="12.0468"
+          x2="43.1049"
+          y2="47.2331"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#DD0A73" />
+          <stop offset="1" stopColor="#FF6666" />
+        </linearGradient>
+      </>
+    )}
   </>
 ));
 
@@ -167,7 +156,7 @@ export const SymbolIds = {
 /**
  * Defs entries that define shapes, masks and other spatial elements
  */
-const SymbolsAndShapes = memo(() => (
+const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
   <>
     <symbol
       id={SymbolIds.processNodeLabel}
@@ -309,39 +298,52 @@ const SymbolsAndShapes = memo(() => (
       <path
         d="M87.52113,24.73352a3.7956,3.7956,0,0,0-1.43182-1.47166L45.91012.17918a3.8365,3.8365,0,0,0-3.82049,0L1.91029,23.26186A3.86312,3.86312,0,0,0-.00009,26.55445V72.7199a3.79834,3.79834,0,0,0,1.91041,3.29249L42.08963,99.09514a3.83689,3.83689,0,0,0,3.82049,0L86.08931,76.01239a3.79852,3.79852,0,0,0,1.91056-3.29249V26.55445A3.77643,3.77643,0,0,0,87.52113,24.73352Z"
         transform="translate(0.00013 0.39551)"
-        fill="#010101"
+        fill={isDarkMode ? '#010101' : '#fff'}
       />
       <g opacity="0.7">
         <path
+          opacity={isDarkMode ? 1 : 0.6}
           d="M87.52113,24.73352a3.7956,3.7956,0,0,0-1.43182-1.47166L45.91012.17918a3.8365,3.8365,0,0,0-3.82049,0L1.91029,23.26186A3.86312,3.86312,0,0,0-.00009,26.55445V72.7199a3.79834,3.79834,0,0,0,1.91041,3.29249L42.08963,99.09514a3.83689,3.83689,0,0,0,3.82049,0L86.08931,76.01239a3.79852,3.79852,0,0,0,1.91056-3.29249V26.55445A3.77643,3.77643,0,0,0,87.52113,24.73352Z"
           transform="translate(0.00013 0.39551)"
           fill={`url(#${PaintServerIds.terminatedProcessCube})`}
         />
         <path
+          opacity={isDarkMode ? 0.3 : 0.4}
           d="M.57134,24.52282a3.79906,3.79906,0,0,1,1.34824-1.32625L42.09878.11387a3.83708,3.83708,0,0,1,3.8208,0L86.09877,23.19655a3.79771,3.79771,0,0,1,1.43182,1.47165L44.00909,49.57182Z"
           transform="translate(0.00013 0.39551)"
           fill="#fff"
-          opacity="0.3"
           style={{ isolation: 'isolate' }}
         />
         <path
+          opacity={isDarkMode ? 0.2 : 0.4}
           d="M43.99972,49.63713V99.60449a3.83406,3.83406,0,0,1-1.91025-.50932L1.91029,76.01239A3.79835,3.79835,0,0,1-.00013,72.7199V26.55445A3.77431,3.77431,0,0,1,.562,24.5882Z"
           transform="translate(0.00013 0.39551)"
           fill="#353944"
-          opacity="0.2"
           style={{ isolation: 'isolate' }}
         />
       </g>
     </symbol>
     <symbol id={SymbolIds.terminatedTriggerCube} viewBox="0 0 88 100">
       <title>{'Terminated Trigger Process'}</title>
-      <path
-        d="M87.52143,25.06372a3.795,3.795,0,0,0-1.43129-1.47166L45.92578.50939a3.83384,3.83384,0,0,0-3.81907,0L1.94219,23.59206A3.8634,3.8634,0,0,0,.03252,26.88465V73.05008a3.7986,3.7986,0,0,0,1.90971,3.2925L42.10671,99.42532a3.83423,3.83423,0,0,0,3.81907,0L86.09014,76.34258A3.79881,3.79881,0,0,0,88,73.05008V26.88465A3.77748,3.77748,0,0,0,87.52143,25.06372Z"
-        transform="translate(0)"
-        fill="#010101"
-      />
-      <g opacity="0.6">
+      {isDarkMode && (
         <path
+          opacity="1"
+          d="M87.52143,25.06372a3.795,3.795,0,0,0-1.43129-1.47166L45.92578.50939a3.83384,3.83384,0,0,0-3.81907,0L1.94219,23.59206A3.8634,3.8634,0,0,0,.03252,26.88465V73.05008a3.7986,3.7986,0,0,0,1.90971,3.2925L42.10671,99.42532a3.83423,3.83423,0,0,0,3.81907,0L86.09014,76.34258A3.79881,3.79881,0,0,0,88,73.05008V26.88465A3.77748,3.77748,0,0,0,87.52143,25.06372Z"
+          transform="translate(0)"
+          fill="#010101"
+        />
+      )}
+      <g opacity="0.6">
+        {!isDarkMode && (
+          <path
+            opacity="0.6"
+            d="M87.52143,25.06372a3.795,3.795,0,0,0-1.43129-1.47166L45.92578.50939a3.83384,3.83384,0,0,0-3.81907,0L1.94219,23.59206A3.8634,3.8634,0,0,0,.03252,26.88465V73.05008a3.7986,3.7986,0,0,0,1.90971,3.2925L42.10671,99.42532a3.83423,3.83423,0,0,0,3.81907,0L86.09014,76.34258A3.79881,3.79881,0,0,0,88,73.05008V26.88465A3.77748,3.77748,0,0,0,87.52143,25.06372Z"
+            transform="translate(0)"
+            fill="#010101"
+          />
+        )}
+        <path
+          opacity={isDarkMode ? 1 : 0.604}
           d="M87.48893,25.129a3.79468,3.79468,0,0,0-1.4313-1.47165L45.89329.57472a3.83381,3.83381,0,0,0-3.81908,0L1.90969,23.65739A3.86331,3.86331,0,0,0,0,26.95V73.11541a3.79859,3.79859,0,0,0,1.90969,3.2925L42.07421,99.49067a3.83425,3.83425,0,0,0,3.81908,0L86.05763,76.40791a3.79876,3.79876,0,0,0,1.90985-3.2925V26.95A3.77746,3.77746,0,0,0,87.48893,25.129Z"
           transform="translate(0)"
           fill={`url(#${PaintServerIds.terminatedTriggerCube})`}
@@ -366,9 +368,7 @@ const SymbolsAndShapes = memo(() => (
       <title>{'resolver active backing'}</title>
       <path
         d="m87.521 25.064a3.795 3.795 0 0 0-1.4313-1.4717l-40.164-23.083a3.8338 3.8338 0 0 0-3.8191 0l-40.165 23.083a3.8634 3.8634 0 0 0-1.9097 3.2926v46.165a3.7986 3.7986 0 0 0 1.9097 3.2925l40.164 23.083a3.8342 3.8342 0 0 0 3.8191 0l40.164-23.083a3.7988 3.7988 0 0 0 1.9099-3.2925v-46.165a3.7775 3.7775 0 0 0-0.47857-1.8209z"
-        fill="transparent"
         strokeWidth="2"
-        stroke="#7E839C"
       />
     </symbol>
   </>
@@ -383,14 +383,17 @@ SymbolsAndShapes.displayName = 'SymbolsAndShapes';
  *  2. Separation of concerns between creative assets and more functional areas of the app
  *  3. `<use>` elements can be handled by compositor (faster)
  */
-const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) => (
-  <svg className={className}>
-    <defs>
-      <PaintServers />
-      <SymbolsAndShapes />
-    </defs>
-  </svg>
-));
+const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) => {
+  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  return (
+    <svg className={className}>
+      <defs>
+        <PaintServers isDarkMode={isDarkMode} />
+        <SymbolsAndShapes isDarkMode={isDarkMode} />
+      </defs>
+    </svg>
+  );
+});
 
 SymbolDefinitionsComponent.displayName = 'SymbolDefinitions';
 
@@ -401,3 +404,88 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   width: 0;
   height: 0;
 `;
+
+export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap } => {
+  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
+
+  const getThemedOption = (lightOption: string, darkOption: string): string => {
+    return isDarkMode ? darkOption : lightOption;
+  };
+
+  const colorMap = {
+    descriptionText: theme.euiColorDarkestShade,
+    full: theme.euiColorFullShade,
+    graphControls: theme.euiColorDarkestShade,
+    graphControlsBackground: theme.euiColorEmptyShade,
+    processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
+    resolverBackground: theme.euiColorEmptyShade,
+    resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
+    resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
+    triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
+  };
+
+  const nodeAssets: NodeStyleMap = {
+    runningProcessCube: {
+      backingFill: colorMap.processBackingFill,
+      cubeSymbol: `#${SymbolIds.runningProcessCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.runningProcess', {
+        defaultMessage: 'Running Process',
+      }),
+      isLabelFilled: true,
+      labelButtonFill: 'primary',
+      strokeColor: theme.euiColorPrimary,
+    },
+    runningTriggerCube: {
+      backingFill: colorMap.triggerBackingFill,
+      cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.runningTrigger', {
+        defaultMessage: 'Running Trigger',
+      }),
+      isLabelFilled: true,
+      labelButtonFill: 'danger',
+      strokeColor: theme.euiColorDanger,
+    },
+    terminatedProcessCube: {
+      backingFill: colorMap.processBackingFill,
+      cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.terminatedProcess',
+        {
+          defaultMessage: 'Terminated Process',
+        }
+      ),
+      isLabelFilled: false,
+      labelButtonFill: 'primary',
+      strokeColor: `${theme.euiColorPrimary}33`, // 33 = 20% opacity
+    },
+    terminatedTriggerCube: {
+      backingFill: colorMap.triggerBackingFill,
+      cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.terminatedTrigger',
+        {
+          defaultMessage: 'Terminated Trigger',
+        }
+      ),
+      isLabelFilled: false,
+      labelButtonFill: 'danger',
+      strokeColor: `${theme.euiColorDanger}33`,
+    },
+  };
+
+  return { colorMap, nodeAssets };
+};
+
+export const calculateResolverFontSize = (
+  magFactorX: number,
+  minFontSize: number,
+  slopeOfFontScale: number
+): number => {
+  const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
+  return minFontSize + fontSizeAdjustmentForScale;
+};
