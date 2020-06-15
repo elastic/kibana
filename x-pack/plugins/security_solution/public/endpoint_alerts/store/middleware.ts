@@ -31,10 +31,11 @@ let lastSelectedAlert: string | null = null;
  */
 const selectedAlertHasChanged = (params: ReturnType<typeof uiQueryParams>): boolean => {
   const { selected_alert: selectedAlert } = params;
-  if (typeof selectedAlert !== 'string') {
+  const shouldNotChange = selectedAlert === lastSelectedAlert;
+  if (shouldNotChange) {
     return false;
   }
-  if (selectedAlert === lastSelectedAlert) {
+  if (typeof selectedAlert !== 'string') {
     return false;
   }
   lastSelectedAlert = selectedAlert;
