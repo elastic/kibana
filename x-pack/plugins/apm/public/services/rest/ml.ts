@@ -11,6 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import {
+  APM_ML_JOB_GROUP_NAME,
   getMlJobId,
   getMlPrefix,
   encodeForMlApi,
@@ -55,7 +56,7 @@ export async function startMLJob({
 }) {
   const transactionIndices = await getTransactionIndices(http);
   const groups = [
-    'apm',
+    APM_ML_JOB_GROUP_NAME,
     encodeForMlApi(serviceName),
     encodeForMlApi(transactionType),
   ];
