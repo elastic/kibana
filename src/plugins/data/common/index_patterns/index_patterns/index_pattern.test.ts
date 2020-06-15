@@ -28,7 +28,7 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { fieldFormatsMock } from '../../field_formats/mocks';
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');
@@ -97,17 +97,16 @@ const apiClient = {
 
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
-  const indexPattern = new IndexPattern(
-    id,
-    (cfg: any) => config.get(cfg),
-    savedObjectsClient as any,
+  const indexPattern = new IndexPattern(id, {
+    getConfig: (cfg: any) => config.get(cfg),
+    savedObjectsClient: savedObjectsClient as any,
     apiClient,
     patternCache,
-    ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
-    () => {},
-    () => {},
-    () => {}
-  );
+    fieldFormats: fieldFormatsMock,
+    onNotification: () => {},
+    onError: () => {},
+    onUnsupportedTimePattern: () => {},
+  });
 
   setDocsourcePayload(id, payload);
 
@@ -364,33 +363,31 @@ describe('IndexPattern', () => {
       },
     });
     // Create a normal index pattern
-    const pattern = new IndexPattern(
-      'foo',
-      (cfg: any) => config.get(cfg),
-      savedObjectsClient as any,
+    const pattern = new IndexPattern('foo', {
+      getConfig: (cfg: any) => config.get(cfg),
+      savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
-      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
-      () => {},
-      () => {},
-      () => {}
-    );
+      fieldFormats: fieldFormatsMock,
+      onNotification: () => {},
+      onError: () => {},
+      onUnsupportedTimePattern: () => {},
+    });
     await pattern.init();
 
     expect(get(pattern, 'version')).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern(
-      'foo',
-      (cfg: any) => config.get(cfg),
-      savedObjectsClient as any,
+    const samePattern = new IndexPattern('foo', {
+      getConfig: (cfg: any) => config.get(cfg),
+      savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
-      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
-      () => {},
-      () => {},
-      () => {}
-    );
+      fieldFormats: fieldFormatsMock,
+      onNotification: () => {},
+      onError: () => {},
+      onUnsupportedTimePattern: () => {},
+    });
     await samePattern.init();
 
     expect(get(samePattern, 'version')).toBe('fooaa');

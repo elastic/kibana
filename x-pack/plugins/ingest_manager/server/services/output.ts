@@ -11,6 +11,8 @@ import { decodeCloudId } from '../../common';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
+let cachedAdminUser: null | { username: string; password: string } = null;
+
 class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find<Output>({
@@ -61,6 +63,10 @@ class OutputService {
   }
 
   public async getAdminUser(soClient: SavedObjectsClientContract) {
+    if (cachedAdminUser) {
+      return cachedAdminUser;
+    }
+
     const defaultOutputId = await this.getDefaultOutputId(soClient);
     if (!defaultOutputId) {
       return null;
@@ -73,10 +79,12 @@ class OutputService {
       return null;
     }
 
-    return {
+    cachedAdminUser = {
       username: so!.attributes.fleet_enroll_username,
       password: so!.attributes.fleet_enroll_password,
     };
+
+    return cachedAdminUser;
   }
 
   public async create(
@@ -135,6 +143,12 @@ class OutputService {
       page: 1,
       perPage: 1000,
     };
+  }
+
+  // Warning! This method is not going to working in a scenario with multiple Kibana instances,
+  // in this case Kibana should be restarted if the Admin User change
+  public invalidateCache() {
+    cachedAdminUser = null;
   }
 }
 
