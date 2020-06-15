@@ -4,7 +4,6 @@
   "kibana": {
     "version": "kibana"
   },
-  "main": "target/test/plugin_api_integration/plugins/event_log",
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && tsc"
