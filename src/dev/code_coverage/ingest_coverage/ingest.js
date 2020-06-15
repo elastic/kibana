@@ -53,6 +53,7 @@ async function send(idx, redacted, requestBody) {
 }
 
 export function maybeTeamAssign(index, body) {
-  const payload = index === TOTALS_INDEX ? body : { ...body, pipeline };
+  const withTeam = { body, pipeline };
+  const payload = index === TOTALS_INDEX ? body : withTeam;
   return payload;
 }
