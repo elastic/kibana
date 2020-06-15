@@ -29,7 +29,7 @@ export default {
   ],
   coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
   coverageReporters: ['html'],
-  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,ts,tsx}'],

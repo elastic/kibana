@@ -78,9 +78,25 @@ describe(`VegaParser._setDefaultColors`, () => {
 });
 
 describe('VegaParser._resolveEsQueries', () => {
+  let searchApiStub;
+  const data = [
+    {
+      id: 0,
+      rawResponse: [42],
+    },
+  ];
+
+  beforeEach(() => {
+    searchApiStub = {
+      search: jest.fn(() => ({
+        toPromise: jest.fn(() => Promise.resolve(data)),
+      })),
+    };
+  });
+
   function check(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, { search: async () => [[42]] }, 0, 0, {
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
         getUrlForRegionLayer: async (layer) => {
           return layer.url;

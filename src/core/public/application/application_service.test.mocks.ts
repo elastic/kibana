@@ -29,6 +29,7 @@ jest.doMock('./capabilities', () => ({
 
 export const MockHistory = {
   push: jest.fn(),
+  replace: jest.fn(),
 };
 export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
 jest.doMock('history', () => ({

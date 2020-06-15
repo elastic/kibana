@@ -77,7 +77,6 @@ describe.skip('Mappings editor: text datatype', () => {
 
     // It should have the default parameters values added
     updatedMappings.properties.myField = {
-      type: 'text',
       ...defaultTextParameters,
     };
 
