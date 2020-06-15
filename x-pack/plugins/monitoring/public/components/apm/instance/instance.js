@@ -27,6 +27,10 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
 
+    metrics.apm_acm_response,
+    metrics.apm_acm_response_errors,
+    metrics.apm_acm_request_count,
+
     metrics.apm_requests,
     metrics.apm_transformations,
 

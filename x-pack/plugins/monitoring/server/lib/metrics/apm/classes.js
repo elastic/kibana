@@ -77,8 +77,8 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: i18n.translate('xpack.monitoring.metrics.apm.perMinuteUnitLabel', {
-        defaultMessage: '/m',
+      units: i18n.translate('xpack.monitoring.metrics.apm.perSecondUnitLabel', {
+        defaultMessage: '/s',
       }),
     });
 
