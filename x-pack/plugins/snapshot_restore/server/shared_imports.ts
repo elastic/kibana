@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as legacyElasticsearch from 'elasticsearch';
-
-const esErrorsParent = legacyElasticsearch.errors._Abstract;
-
-export function isEsError(err: Error) {
-  return err instanceof esErrorsParent;
-}
+export { isEsError } from '../../../../src/plugins/es_ui_shared/server';
