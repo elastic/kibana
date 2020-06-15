@@ -7,7 +7,7 @@ remote clusters on a local cluster. {ref}/xpack-ccr.html[Cross-cluster replicati
 is commonly used to provide remote backups for disaster recovery and for
 geo-proximite copies of data.
 
-To get started, go to *Management > Cross-Cluster Replication*.
+To get started, open the menu, then go to *Stack Management > Elasticsearch > Cross-Cluster Replication*.
 
 [role="screenshot"]
 image::images/cross-cluster-replication-list-view.png[][Cross-cluster replication list view]
