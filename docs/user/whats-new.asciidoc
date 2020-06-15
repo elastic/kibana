@@ -26,12 +26,13 @@ coming[7.8.0]
 [[navigation-7-8]]
 === Side navigation organized by use cases
 
-{kib} has a cleaner, more organized navigation for guiding you
-through the apps.  The new sidebar groups
-solutions by category. For example, the *Observability* category
-includes Logs, Metrics, APM, and Uptime. The sidebar also includes
+{kib} has a cleaner, more organized side navigation
+for getting you where you need to go. For example, when you
+are ready to work with your logs, metrics, APM, or Uptime data,
+you'll find the apps you need under *Observability*.
+The side navigation also includes
 *Recently viewed* to easily
-access previous projects.
+access previously opened apps.
 
 Hidden by default, the sidebar is accessible
 with a single click on the hamburger menu.  Use the *Dock Navigation* link
@@ -42,7 +43,7 @@ image:images/whats-new/7-8-navigation.png[Kibana side navigation organized by ca
 
 [float]
 [[dashboard-first-7-8]]
-=== Dashboard first experience
+=== Dashboard-first experience
 
 In 7.7, {kibana-ref}/dashboard-create-new-dashboard.html[dashboards] became a starting point for
 creating visualizations.
@@ -98,7 +99,8 @@ image:images/whats-new/7-8-treemap.png[Treemap visualization]
 [[canvas-7-8]]
 === Menu updates for Canvas
 
-{kibana-ref}/lens.html[Canvas] has a new top-level menu that makes it easier for you to find the options to create, customize, and share your workpads.
+{kibana-ref}/lens.html[Canvas] has a new top-level menu that makes it easier for
+you to find the options to create, customize, and share your workpads.
 
 [role="screenshot"]
 image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
@@ -173,6 +175,20 @@ To configure this value, go to
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
+
+[float]
+[[logon-7-8]]
+Kibana now offers two customization options for the log-in experience.
+Before starting {kib}, you can show users a screen specific to your requirements,
+for example, if you need them to agree to
+certain terms and conditions.
+In addition, you can configure the login screen experience to
+control the text for password hints, customize the icons for SSO options,
+and add messages and prompts.
+
+[role="screenshot"]
+image::images/whats-new/7-8-login.png[Customized login screen]
+
 
 // end::notable-highlights[]
 
