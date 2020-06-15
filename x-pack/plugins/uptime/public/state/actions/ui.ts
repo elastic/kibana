@@ -32,3 +32,7 @@ export const setDateRange = createAction<{ from: string; to: string }>('SET DATE
 export const setAutorefreshIsPaused = createAction<boolean>('SET AUTOREFRESH PAUSED');
 
 export const setUiState = createAction<Partial<UiState>>('SET UI STATE');
+
+export const setStatusFilter = createAction<string>('SET STATUS FILTER');
+
+export const setCurrentPagination = createAction<string>('SET CURRENT PAGINATION');
