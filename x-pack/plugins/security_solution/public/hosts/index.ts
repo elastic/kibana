@@ -5,14 +5,16 @@
  */
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { TimelineId } from '../timelines/containers/local_storage/types';
 import { getHostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
-import { EVENTS_TIMELINE_ID, EXTERNAL_ALERTS_TIMELINE_ID } from './constants';
 
-const HOST_TIMELINE_IDS: TimelineId[] = [EVENTS_TIMELINE_ID, EXTERNAL_ALERTS_TIMELINE_ID];
+const HOST_TIMELINE_IDS: TimelineIdLiteral[] = [
+  TimelineId.hostsPageEvents,
+  TimelineId.hostsPageExternalAlerts,
+];
 
 export class Hosts {
   public setup() {}

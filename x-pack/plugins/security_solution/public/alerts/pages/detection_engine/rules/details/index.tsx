@@ -24,6 +24,7 @@ import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -74,7 +75,6 @@ import { useMlCapabilities } from '../../../../../common/components/ml_popover/h
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import { ExceptionListType } from '../../../../../common/components/exceptions/types';
-import { ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID } from '../../../../constants';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -387,7 +387,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <EuiSpacer />
                         {ruleId != null && (
                           <AlertsTable
-                            timelineId={ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID}
+                            timelineId={TimelineId.alertsRulesDetailsPage}
                             canUserCRUD={canUserCRUD ?? false}
                             defaultFilters={alertDefaultFilters}
                             hasIndexWrite={hasIndexWrite ?? false}

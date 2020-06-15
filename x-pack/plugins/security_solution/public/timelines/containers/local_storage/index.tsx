@@ -5,16 +5,17 @@
  */
 
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { TimelinesStorage, TimelineId } from './types';
+import { TimelinesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
 import { TimelineModel } from '../../store/timeline/model';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 const EMPTY_TIMELINE = {} as {
-  [K in TimelineId]: TimelineModel;
+  [K in TimelineIdLiteral]: TimelineModel;
 };
 
-export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: TimelineId[]) => {
+export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: TimelineIdLiteral[]) => {
   const allTimelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
 
   if (!allTimelines) {
@@ -33,13 +34,17 @@ export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: Timeli
       ...acc,
       [timelineId]: timelineModel,
     };
-  }, {} as { [K in TimelineId]: TimelineModel });
+  }, {} as { [K in TimelineIdLiteral]: TimelineModel });
 };
 
 export const getAllTimelinesInStorage = (storage: Storage) =>
   storage.get(LOCAL_STORAGE_TIMELINE_KEY) ?? {};
 
-export const addTimelineInStorage = (storage: Storage, id: TimelineId, timeline: TimelineModel) => {
+export const addTimelineInStorage = (
+  storage: Storage,
+  id: TimelineIdLiteral,
+  timeline: TimelineModel
+) => {
   const timelines = getAllTimelinesInStorage(storage);
   storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
     ...timelines,
@@ -53,7 +58,7 @@ export const useTimelinesStorage = (): TimelinesStorage => {
   const getAllTimelines: TimelinesStorage['getAllTimelines'] = () =>
     getAllTimelinesInStorage(storage);
 
-  const getTimelineById: TimelinesStorage['getTimelineById'] = (id: TimelineId) =>
+  const getTimelineById: TimelinesStorage['getTimelineById'] = (id: TimelineIdLiteral) =>
     getTimelinesInStorageByIds(storage, [id])[id] ?? null;
 
   const addTimeline: TimelinesStorage['addTimeline'] = (id, timeline) =>

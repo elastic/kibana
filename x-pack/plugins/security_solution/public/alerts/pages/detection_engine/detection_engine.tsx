@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../../common/types/timeline';
 import { GlobalTime } from '../../../common/containers/global_time';
 import {
   indicesExistOrDataTemporarilyUnavailable,
@@ -36,7 +37,6 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { ALERTS_TIMELINE_ID } from '../../constants';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
@@ -139,7 +139,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                         />
                         <EuiSpacer size="l" />
                         <AlertsTable
-                          timelineId={ALERTS_TIMELINE_ID}
+                          timelineId={TimelineId.alertsPage}
                           loading={loading}
                           hasIndexWrite={hasIndexWrite ?? false}
                           canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}

@@ -9,8 +9,8 @@ import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/op
 import { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { addTimelineInStorage } from '../../containers/local_storage';
-import { TimelineId } from '../../containers/local_storage/types';
 
 import {
   removeColumn,
@@ -50,7 +50,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     tap(([action, timelineById]) => {
       if (timelineActionTypes.includes(action.type)) {
         if (storage) {
-          const timelineId: TimelineId = get('payload.id', action);
+          const timelineId: TimelineIdLiteral = get('payload.id', action);
           addTimelineInStorage(storage, timelineId, timelineById[timelineId]);
         }
       }

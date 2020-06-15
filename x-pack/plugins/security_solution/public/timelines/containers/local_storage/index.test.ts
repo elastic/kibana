@@ -11,6 +11,8 @@ import {
   getAllTimelinesInStorage,
   addTimelineInStorage,
 } from '.';
+
+import { TimelineId } from '../../../../common/types/timeline';
 import { mockTimelineModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { createUseKibanaMock } from '../../../common/mock/kibana_react';
@@ -36,19 +38,19 @@ describe('SiemLocalStorage', () => {
   describe('addTimeline', () => {
     it('adds a timeline when storage is empty', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        'hosts-page-events': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
-      timelineStorage.addTimeline('hosts-page-external-alerts', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        'hosts-page-events': mockTimelineModel,
-        'hosts-page-external-alerts': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
       });
     });
   });
@@ -56,12 +58,12 @@ describe('SiemLocalStorage', () => {
   describe('getAllTimelines', () => {
     it('gets all timelines correctly', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
-      timelineStorage.addTimeline('hosts-page-external-alerts', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       const timelines = timelineStorage.getAllTimelines();
       expect(timelines).toEqual({
-        'hosts-page-events': mockTimelineModel,
-        'hosts-page-external-alerts': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
       });
     });
 
@@ -75,8 +77,8 @@ describe('SiemLocalStorage', () => {
   describe('getTimelineById', () => {
     it('gets a timeline by id', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
-      const timeline = timelineStorage.getTimelineById('hosts-page-events');
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
+      const timeline = timelineStorage.getTimelineById(TimelineId.hostsPageEvents);
       expect(timeline).toEqual(mockTimelineModel);
     });
   });
@@ -84,46 +86,46 @@ describe('SiemLocalStorage', () => {
   describe('getTimelinesInStorageByIds', () => {
     it('gets timelines correctly', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
-      timelineStorage.addTimeline('hosts-page-external-alerts', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       const timelines = getTimelinesInStorageByIds(storage, [
-        'hosts-page-events',
-        'hosts-page-external-alerts',
+        TimelineId.hostsPageEvents,
+        TimelineId.hostsPageExternalAlerts,
       ]);
       expect(timelines).toEqual({
-        'hosts-page-events': mockTimelineModel,
-        'hosts-page-external-alerts': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
       });
     });
 
     it('gets an empty timelime when there is no timelines', () => {
-      const timelines = getTimelinesInStorageByIds(storage, ['hosts-page-events']);
+      const timelines = getTimelinesInStorageByIds(storage, [TimelineId.hostsPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when there is no ids', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
       const timelines = getTimelinesInStorageByIds(storage, []);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when a specific timeline does not exists', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, ['hosts-page-external-alerts']);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
+      const timelines = getTimelinesInStorageByIds(storage, [TimelineId.hostsPageExternalAlerts]);
       expect(timelines).toEqual({});
     });
 
     it('returns timelines correctly when one exist and another not', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
       const timelines = getTimelinesInStorageByIds(storage, [
-        'hosts-page-events',
-        'hosts-page-external-alerts',
+        TimelineId.hostsPageEvents,
+        TimelineId.hostsPageExternalAlerts,
       ]);
       expect(timelines).toEqual({
-        'hosts-page-events': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
       });
     });
   });
@@ -131,12 +133,12 @@ describe('SiemLocalStorage', () => {
   describe('getAllTimelinesInStorage', () => {
     it('gets timelines correctly', () => {
       const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline('hosts-page-events', mockTimelineModel);
-      timelineStorage.addTimeline('hosts-page-external-alerts', mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
+      timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       const timelines = getAllTimelinesInStorage(storage);
       expect(timelines).toEqual({
-        'hosts-page-events': mockTimelineModel,
-        'hosts-page-external-alerts': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
       });
     });
 
@@ -148,18 +150,18 @@ describe('SiemLocalStorage', () => {
 
   describe('addTimelineInStorage', () => {
     it('adds a timeline when storage is empty', () => {
-      addTimelineInStorage(storage, 'hosts-page-events', mockTimelineModel);
+      addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        'hosts-page-events': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      addTimelineInStorage(storage, 'hosts-page-events', mockTimelineModel);
-      addTimelineInStorage(storage, 'hosts-page-external-alerts', mockTimelineModel);
+      addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
+      addTimelineInStorage(storage, TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        'hosts-page-events': mockTimelineModel,
-        'hosts-page-external-alerts': mockTimelineModel,
+        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
       });
     });
   });

@@ -11,6 +11,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -47,7 +48,6 @@ import {
   UpdateAlertsStatusProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
-import { TimelineId } from '../../../timelines/containers/local_storage/types';
 import {
   useStateToaster,
   displaySuccessToast,
@@ -55,7 +55,7 @@ import {
 } from '../../../common/components/toasters';
 
 interface OwnProps {
-  timelineId: TimelineId;
+  timelineId: TimelineIdLiteral;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;

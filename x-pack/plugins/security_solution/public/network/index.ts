@@ -8,8 +8,8 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { getNetworkRoutes } from './routes';
 import { initialNetworkState, networkReducer, NetworkState } from './store';
+import { TimelineId } from '../../common/types/timeline';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { NETWORK_PAGE_EXTERNAL_EVENTS_TIMELINE_ID } from './constants';
 
 export class Network {
   public setup() {}
@@ -18,9 +18,7 @@ export class Network {
     return {
       routes: getNetworkRoutes(),
       storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, [
-          NETWORK_PAGE_EXTERNAL_EVENTS_TIMELINE_ID,
-        ]),
+        timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageExternalAlerts]),
       },
       store: {
         initialState: { network: initialNetworkState },

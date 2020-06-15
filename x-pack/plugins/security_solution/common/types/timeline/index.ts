@@ -197,6 +197,32 @@ export interface SavedTimeline extends runtimeTypes.TypeOf<typeof SavedTimelineR
 
 export interface SavedTimelineNote extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
 
+/*
+ *  Timeline IDs
+ */
+
+export enum TimelineId {
+  hostsPageEvents = 'hosts-page-events',
+  hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  alertsRulesDetailsPage = 'alerts-rules-details-page',
+  alertsPage = 'alerts-page',
+  networkPageExternalAlerts = 'network-page-external-alerts',
+  active = 'timeline-1',
+  test = 'test', // Reserved for testing purposes
+}
+
+export const TimelineIdLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineId.hostsPageEvents),
+  runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.alertsRulesDetailsPage),
+  runtimeTypes.literal(TimelineId.alertsPage),
+  runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.active),
+  runtimeTypes.literal(TimelineId.test),
+]);
+
+export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
+
 /**
  * Timeline Saved object type with metadata
  */

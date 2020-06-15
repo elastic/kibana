@@ -6,14 +6,13 @@
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { TimelineId } from '../timelines/containers/local_storage/types';
+import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
 import { getAlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
-import { ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID, ALERTS_TIMELINE_ID } from './constants';
 
-const ALERTS_TIMELINE_IDS: TimelineId[] = [
-  ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID,
-  ALERTS_TIMELINE_ID,
+const ALERTS_TIMELINE_IDS: TimelineIdLiteral[] = [
+  TimelineId.alertsRulesDetailsPage,
+  TimelineId.alertsPage,
 ];
 
 export class Alerts {
