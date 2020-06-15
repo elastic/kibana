@@ -169,9 +169,7 @@ describe('get_all_stats', () => {
         .onCall(3)
         .returns(Promise.resolve({})) // Beats stats
         .onCall(4)
-        .returns(Promise.resolve({})) // Beats state
-        .onCall(5)
-        .returns(Promise.resolve({})); // get_ingest_solutions
+        .returns(Promise.resolve({})); // Beats state
 
       expect(
         await getAllStats(
