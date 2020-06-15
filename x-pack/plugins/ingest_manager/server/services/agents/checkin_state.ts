@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timer, from, Observable } from 'rxjs';
-import { shareReplay, distinctUntilKeyChanged, switchMap, tap, merge } from 'rxjs/operators';
+import { timer, from, Observable, TimeoutError, Subscription } from 'rxjs';
+import {
+  shareReplay,
+  distinctUntilKeyChanged,
+  switchMap,
+  mergeMap,
+  tap,
+  merge,
+  filter,
+  timeout,
+  take,
+} from 'rxjs/operators';
 import {
   SavedObjectsClientContract,
   KibanaRequest,
@@ -19,23 +29,27 @@ import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAgentAction, getNewActionsSince } from './actions';
 import { appContextService } from '../app_context';
 
-const fakeRequest = ({
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
+function getInternalUserSOClient() {
+  const fakeRequest = ({
+    headers: {},
+    getBasePath: () => '',
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
     },
-  },
-} as unknown) as KibanaRequest;
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  } as unknown) as KibanaRequest;
+
+  return appContextService.getInternalUserSOClient(fakeRequest);
+}
 
 function createAgentConfigObservable(configId: string) {
-  const internalSOClient = appContextService.getInternalUserSOClient(fakeRequest);
+  const internalSOClient = getInternalUserSOClient();
   return timer(0, 3000).pipe(
     switchMap(() =>
       from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>).pipe(
@@ -48,17 +62,14 @@ function createAgentConfigObservable(configId: string) {
   );
 }
 
-function createNewActionsObservable() {
+function createNewActionsObservable(): Observable<AgentAction[]> {
   return timer(0, 3000).pipe(
     switchMap(() => {
-      const internalSOClient = appContextService.getInternalUserSOClient(fakeRequest);
+      const internalSOClient = getInternalUserSOClient();
 
       return from(getNewActionsSince(internalSOClient, new Date().toISOString())).pipe(
         tap(() => appContextService.getLogger().info(`Fetch new actions`))
       );
-    }),
-    switchMap((data) => {
-      return data;
     }),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
@@ -87,6 +98,36 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
+async function createAgentActionFromConfigIfOutdated(
+  soClient: SavedObjectsClientContract,
+  agent: Agent,
+  config: FullAgentConfig | null
+) {
+  if (!config || !config.revision) {
+    return;
+  }
+  const isAgentConfigOutdated = !agent.config_revision || agent.config_revision < config.revision;
+  if (!isAgentConfigOutdated) {
+    return;
+  }
+
+  // Deep clone !not supporting Date, and undefined value.
+  const newConfig = JSON.parse(JSON.stringify(config));
+
+  // Mutate the config to set the api token for this agent
+  newConfig.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+
+  const configChangeAction = await createAgentAction(soClient, {
+    agent_id: agent.id,
+    type: 'CONFIG_CHANGE',
+    data: { config: newConfig } as any,
+    created_at: new Date().toISOString(),
+    sent_at: undefined,
+  });
+
+  return [configChangeAction];
+}
+
 function agentCheckinStateFactory() {
   const connectedAgentsIds = new Set<string>();
 
@@ -94,7 +135,7 @@ function agentCheckinStateFactory() {
     if (connectedAgentsIds.size === 0) {
       return;
     }
-    const internalSOClient = appContextService.getInternalUserSOClient(fakeRequest);
+    const internalSOClient = getInternalUserSOClient();
     const now = new Date().toISOString();
     const updates: Array<SavedObjectsBulkUpdateObject<AgentSOAttributes>> = [
       ...connectedAgentsIds.values(),
@@ -125,75 +166,42 @@ function agentCheckinStateFactory() {
     if (!agentConfigs$.has(configId)) {
       agentConfigs$.set(configId, createAgentConfigObservable(configId));
     }
+    const agentConfig$ = agentConfigs$.get(configId);
+    if (!agentConfig$) {
+      throw new Error(`Invalid state no observable for config ${configId}`);
+    }
 
     connectedAgentsIds.add(agent.id);
+    const stream$ = agentConfig$.pipe(
+      // TODO make this configurable
+      timeout(30 * 1000),
+      mergeMap((config) => createAgentActionFromConfigIfOutdated(soClient, agent, config)),
+      merge(newActions$),
+      mergeMap(async (data) => {
+        if (!data) {
+          return;
+        }
+        const newActions = data.filter((action) => action.agent_id);
+        if (newActions.length === 0) {
+          return;
+        }
+
+        return newActions;
+      }),
+      filter((data) => data !== undefined),
+      take(1)
+    );
     try {
-      const actions: AgentAction[] = await new Promise((resolve, reject) => {
-        const agentConfig$ = agentConfigs$.get(configId);
-        if (!agentConfig$) {
-          throw new Error(`Invalid state no observable for config ${configId}`);
-        }
-        const stream$ = agentConfig$.pipe(merge(newActions$));
-
-        const subscription = stream$.subscribe(
-          async (data) => {
-            if (Array.isArray(data)) {
-              const newActions = (data as AgentAction[]).filter((action) => action.agent_id);
-              if (newActions.length === 0) {
-                return;
-              }
-              subscription.unsubscribe();
-              resolve(newActions);
-            }
-
-            if (!data || !(data as AgentConfig).revision) {
-              return;
-            }
-
-            const config = (data as unknown) as AgentConfig;
-
-            const isAgentConfigOutdated =
-              !agent.config_revision || agent.config_revision < config.revision;
-            if (!isAgentConfigOutdated) {
-              return;
-            }
-
-            // Deep clone !not supporting Date, and undefined value.
-            const newConfig = JSON.parse(JSON.stringify(config));
-
-            // Mutate the config to set the api token for this agent
-            newConfig.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
-              soClient,
-              agent
-            );
-
-            const configChangeAction = await createAgentAction(soClient, {
-              agent_id: agent.id,
-              type: 'CONFIG_CHANGE',
-              data: { config: newConfig } as any,
-              created_at: new Date().toISOString(),
-              sent_at: undefined,
-            });
-            subscription.unsubscribe();
-            resolve([configChangeAction]);
-          },
-          (err) => {
-            subscription.unsubscribe();
-            reject(err);
-          }
-        );
-        if (options?.signal) {
-          options.signal.addEventListener('abort', () => {
-            subscription.unsubscribe();
-            reject(new Error('Request aborted'));
-          });
-        }
-      });
+      const data = await toPromiseAbortable(stream$, options?.signal);
       connectedAgentsIds.delete(agent.id);
 
-      return actions;
+      return data || [];
     } catch (err) {
       connectedAgentsIds.delete(agent.id);
+      if (err instanceof TimeoutError || err instanceof AbortError) {
+        return [];
+      }
+
       throw err;
     }
   }
@@ -215,5 +223,38 @@ function agentCheckinStateFactory() {
 }
 
 export const agentCheckinState = agentCheckinStateFactory();
-
 agentCheckinState.start();
+
+class AbortError extends Error {}
+
+const toPromiseAbortable = <T>(observable: Observable<T>, signal?: AbortSignal): Promise<T> =>
+  new Promise((resolve, reject) => {
+    if (signal && signal.aborted) {
+      reject(new AbortError('Aborted'));
+      return;
+    }
+
+    const listener = () => {
+      subscription.unsubscribe();
+      reject(new AbortError('Aborted'));
+    };
+    const cleanup = () => {
+      if (signal) {
+        signal.removeEventListener('abort', listener);
+      }
+    };
+    const subscription = observable.subscribe(
+      (data) => {
+        cleanup();
+        resolve(data);
+      },
+      (err) => {
+        cleanup();
+        reject(err);
+      }
+    );
+
+    if (signal) {
+      signal.addEventListener('abort', listener, { once: true });
+    }
+  });

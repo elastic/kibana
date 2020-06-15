@@ -11,6 +11,7 @@ import {
   AgentEvent,
   AgentSOAttributes,
   AgentEventSOAttributes,
+  AgentMetadata,
 } from '../../types';
 
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -24,11 +25,19 @@ export async function agentCheckin(
   localMetadata?: any,
   options?: { signal: AbortSignal }
 ) {
+  const updateData: {
+    local_metadata?: AgentMetadata;
+    current_error_events?: string;
+  } = {};
   const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, events);
   if (updatedErrorEvents) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
-      current_error_events: JSON.stringify(updatedErrorEvents),
-    });
+    updateData.current_error_events = JSON.stringify(updatedErrorEvents);
+  }
+  if (localMetadata) {
+    updateData.local_metadata = localMetadata;
+  }
+  if (Object.keys(updateData).length > 0) {
+    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);
   }
 
   // Check if some actions are not acknowledged
