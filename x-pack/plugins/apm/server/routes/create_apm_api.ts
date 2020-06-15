@@ -71,6 +71,7 @@ import {
   customLinkTransactionRoute,
 } from './settings/custom_link';
 import {
+  breakdownFiltersRoute,
   rumClientMetricsRoute,
   rumImpressionTrendRoute,
   rumPageLoadDistributionRoute,
@@ -158,6 +159,7 @@ const createApmApi = () => {
     .add(rumOverviewLocalFiltersRoute)
     .add(rumImpressionTrendRoute)
     .add(rumPageLoadDistributionRoute)
+    .add(breakdownFiltersRoute)
     .add(rumClientMetricsRoute);
 
   return api;

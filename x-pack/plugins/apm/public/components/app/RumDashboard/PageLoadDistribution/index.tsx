@@ -32,6 +32,7 @@ import {
   PercPageLoadedLabel,
   ResetZoomLabel,
 } from '../translations';
+import { BreakdownFilter } from '../BreakdownFilter';
 
 export const PageLoadDistribution = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -98,6 +99,9 @@ export const PageLoadDistribution = () => {
           >
             {ResetZoomLabel}
           </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BreakdownFilter fieldName="pageLoadBreakdown" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

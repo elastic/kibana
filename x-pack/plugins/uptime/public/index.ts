@@ -9,3 +9,5 @@ import { UptimePlugin } from './apps';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UptimePlugin(initializerContext);
+
+export { FilterPopover } from './components/overview/filter_group/filter_popover';
