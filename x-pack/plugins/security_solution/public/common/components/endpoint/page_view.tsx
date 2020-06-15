@@ -21,13 +21,14 @@ import {
 import React, { memo, MouseEventHandler, ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { gutterTimeline } from '../../lib/helpers';
 
 const StyledEuiPage = styled(EuiPage)`
   &.endpoint--isListView {
-    padding: 0;
+    padding: 0 ${gutterTimeline} 0 ${(props) => props.theme.eui.euiSizeL};
 
     .endpoint-header {
-      padding: ${(props) => props.theme.eui.euiSizeL};
+      padding: ${(props) => props.theme.eui.euiSizeL} 0;
       margin-bottom: 0;
     }
     .endpoint-page-content {
@@ -149,7 +150,9 @@ export const PageView = memo<PageViewProps>(
               )}
             </EuiPageHeader>
           )}
-          {tabs && <EuiTabs className="endpoint-navTabs">{tabComponents}</EuiTabs>}
+          {tabComponents.length > 0 && (
+            <EuiTabs className="endpoint-navTabs">{tabComponents}</EuiTabs>
+          )}
           <EuiPageContent className="endpoint-page-content">
             {bodyHeader && (
               <EuiPageContentHeader>

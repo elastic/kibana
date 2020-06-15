@@ -150,7 +150,7 @@ import { Url } from 'url';
 // Warning: (ae-missing-release-tag) "castEsToKbnFieldTypeName" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export const castEsToKbnFieldTypeName: (esType: string) => KBN_FIELD_TYPES;
+export const castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_FIELD_TYPES;
 
 // Warning: (ae-forgotten-export) The symbol "PluginConfigDescriptor" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ConfigSchema" needs to be exported by the entry point index.d.ts
@@ -720,6 +720,39 @@ export interface TimeRange {
 // @public
 export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearchContext, caller: APICaller_2, search: ISearchGeneric) => ISearchStrategy<T>;
 
+// Warning: (ae-missing-release-tag) "UI_SETTINGS" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const UI_SETTINGS: {
+    META_FIELDS: string;
+    DOC_HIGHLIGHT: string;
+    QUERY_STRING_OPTIONS: string;
+    QUERY_ALLOW_LEADING_WILDCARDS: string;
+    SEARCH_QUERY_LANGUAGE: string;
+    SORT_OPTIONS: string;
+    COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: string;
+    COURIER_SET_REQUEST_PREFERENCE: string;
+    COURIER_CUSTOM_REQUEST_PREFERENCE: string;
+    COURIER_MAX_CONCURRENT_SHARD_REQUESTS: string;
+    COURIER_BATCH_SEARCHES: string;
+    SEARCH_INCLUDE_FROZEN: string;
+    HISTOGRAM_BAR_TARGET: string;
+    HISTOGRAM_MAX_BARS: string;
+    HISTORY_LIMIT: string;
+    SHORT_DOTS_ENABLE: string;
+    FORMAT_DEFAULT_TYPE_MAP: string;
+    FORMAT_NUMBER_DEFAULT_PATTERN: string;
+    FORMAT_PERCENT_DEFAULT_PATTERN: string;
+    FORMAT_BYTES_DEFAULT_PATTERN: string;
+    FORMAT_CURRENCY_DEFAULT_PATTERN: string;
+    FORMAT_NUMBER_DEFAULT_LOCALE: string;
+    TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: string;
+    TIMEPICKER_QUICK_RANGES: string;
+    INDEXPATTERN_PLACEHOLDER: string;
+    FILTERS_PINNED_BY_DEFAULT: string;
+    FILTERS_EDITOR_SUGGEST_VALUES: string;
+};
+
 
 // Warnings were encountered during analysis:
 //
@@ -745,12 +778,12 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/server/index.ts:103:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:131:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:131:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:183:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:186:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:187:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:190:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:186:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:187:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:188:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:191:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:66:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

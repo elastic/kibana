@@ -13,7 +13,12 @@ import {
   getDescriptionItem,
 } from '.';
 
-import { esFilters, Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  Filter,
+  FilterManager,
+  UI_SETTINGS,
+} from '../../../../../../../../src/plugins/data/public';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -33,7 +38,7 @@ describe('description_step', () => {
   const setupMock = coreMock.createSetup();
   const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
     switch (key) {
-      case 'filters:pinnedByDefault':
+      case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
         return pinnedByDefault;
       default:
         throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);
@@ -49,27 +54,24 @@ describe('description_step', () => {
   });
 
   describe('StepRuleDescriptionComponent', () => {
-    test('renders correctly against snapshot when columns is "multi"', () => {
+    test('renders tow columns when "columns" is "multi"', () => {
       const wrapper = shallow(
         <StepRuleDescriptionComponent columns="multi" data={mockAboutStep} schema={schema} />
       );
-      expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
     });
 
-    test('renders correctly against snapshot when columns is "single"', () => {
+    test('renders single column when "columns" is "single"', () => {
       const wrapper = shallow(
         <StepRuleDescriptionComponent columns="single" data={mockAboutStep} schema={schema} />
       );
-      expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
     });
 
-    test('renders correctly against snapshot when columns is "singleSplit', () => {
+    test('renders one column with title and description split when "columns" is "singleSplit', () => {
       const wrapper = shallow(
         <StepRuleDescriptionComponent columns="singleSplit" data={mockAboutStep} schema={schema} />
       );
-      expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
       expect(
         wrapper.find('[data-test-subj="singleSplitStepRuleDescriptionList"]').at(0).prop('type')

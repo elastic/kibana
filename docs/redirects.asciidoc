@@ -28,12 +28,12 @@ This page has moved. Please see the new section in the {heartbeat-ref}/securing-
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see <<infra-configure-source>>.
+This page has moved. Please see the new section in the {metrics-guide}/configure-metrics-source.html[Metrics Monitoring Guide].
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see <<xpack-logs-configuring>>.
+This page has moved. Please see {logs-guide}/configure-logs-source.html[logs configuration].
 
 [role="exclude",id="extend"]
 == Extend your use case
