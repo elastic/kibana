@@ -27,7 +27,7 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -43,7 +43,7 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -59,7 +59,7 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
@@ -75,7 +75,7 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
+        await browser.executeAsync(async (cb) => {
           const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
