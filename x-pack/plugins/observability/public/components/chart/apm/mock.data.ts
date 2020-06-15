@@ -12,7 +12,7 @@ export const apmData: FetchDataResponse = {
     defaultMessage: 'APM',
   }),
   appLink: '/app/apm',
-  stats: [{ label: 'Services', value: '11' }],
+  stats: [{ label: 'Services', value: 11 }],
   series: [
     {
       key: 'transactions',

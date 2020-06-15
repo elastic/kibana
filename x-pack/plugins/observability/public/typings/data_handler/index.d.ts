@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Stat {
+export interface Stat {
   label: string;
-  value: string;
+  value: number;
   color?: string;
 }
 

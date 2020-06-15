@@ -13,10 +13,10 @@ export const data: FetchDataResponse = {
   }),
   appLink: '/app/apm',
   stats: [
-    { label: 'Hosts', value: '11' },
-    { label: 'CPU usage', value: '80' },
-    { label: 'Memory Usage', value: '36.2' },
-    { label: 'Disk Usage', value: '32.4' },
+    { label: 'Hosts', value: 11 },
+    { label: 'CPU usage', value: 80 },
+    { label: 'Memory Usage', value: 36.2 },
+    { label: 'Disk Usage', value: 32.4 },
   ],
   series: [
     {

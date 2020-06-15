@@ -5,7 +5,7 @@
  */
 
 import { AreaSeries, Chart, DARK_THEME, LIGHT_THEME, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiProgress } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { ChartContainer } from '../container';
@@ -19,7 +19,9 @@ export const MetricsChart = () => {
         {data.stats.map((stat) => {
           return (
             <EuiFlexItem key={stat.label}>
-              <EuiStat description={stat.label} title={stat.value} />
+              <EuiStat description={stat.label} title={stat.value}>
+                <EuiProgress value={stat.value} max={100} />
+              </EuiStat>
             </EuiFlexItem>
           );
         })}

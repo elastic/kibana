@@ -13,23 +13,13 @@ import { WithHeaderLayout } from '../../components/layout/with_header';
 import { appsSection } from '../home/section';
 import { ContinueJourney } from './continue_journey';
 import { MetricsChart } from '../../components/chart/metrics';
+import { StackedBarChart } from '../../components/chart/stacked_bar';
+import { logsData } from './logs.mock';
+import { uptimeData } from './uptime.mock';
 
 export const Overview = () => {
   const theme = useContext(ThemeContext);
   const [withAlert, setWithAlert] = useState(false);
-
-  // const barSeriesColorAccessor = ({ specId, yAccessor, splitAccessors }: any) => {
-  //   if (splitAccessors.get('group') === 'error') {
-  //     return 'lightgray';
-  //   }
-  //   return 'red';
-  // };
-  // const barSeriesColorAccessor2 = ({ specId, yAccessor, splitAccessors }: any) => {
-  //   if (splitAccessors.get('group') === 'error') {
-  //     return '#CA8EAE';
-  //   }
-  //   return '#9170B8';
-  // };
 
   return (
     <WithHeaderLayout
@@ -52,43 +42,7 @@ export const Overview = () => {
         <EuiFlexItem grow={6}>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              {/* <ChartContainer title="Logs">
-                <Chart>
-                  <Settings
-                    onBrushEnd={({ x }) => {
-                      console.log('#### Logs', x);
-                    }}
-                    theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-                    showLegend
-                    legendPosition="bottom"
-                    xDomain={{ min: startAPM, max: endAPM }}
-                  />
-                  <Axis
-                    id="bottom"
-                    position={Position.Bottom}
-                    showOverlappingTicks={false}
-                    showOverlappingLabels={false}
-                    tickFormat={formatterAPM}
-                  />
-                  <Axis
-                    showGridLines
-                    id="left2"
-                    position={Position.Left}
-                    tickFormat={(d: any) => numeral(d).format('0a')}
-                  />
-
-                  <BarSeries
-                    id="averageValues"
-                    xScaleType="time"
-                    yScaleType="linear"
-                    xAccessor={'time'}
-                    yAccessors={['value']}
-                    splitSeriesAccessors={['group']}
-                    stackAccessors={['time']}
-                    data={apmData}
-                  />
-                </Chart>
-              </ChartContainer> */}
+              <StackedBarChart data={logsData} />
             </EuiFlexItem>
             <EuiFlexItem>
               <MetricsChart />
@@ -97,44 +51,7 @@ export const Overview = () => {
               <APMChart />
             </EuiFlexItem>
             <EuiFlexItem>
-              {/* <ChartContainer title="Uptime">
-                <Chart>
-                  <Settings
-                    onBrushEnd={({ x }) => {
-                      console.log('#### Uptime', x);
-                    }}
-                    theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-                    showLegend
-                    legendPosition="bottom"
-                    xDomain={{ min: startAPM, max: endAPM }}
-                  />
-                  <Axis
-                    id="bottom"
-                    position={Position.Bottom}
-                    showOverlappingTicks={false}
-                    showOverlappingLabels={false}
-                    tickFormat={formatterAPM}
-                  />
-                  <Axis
-                    showGridLines
-                    id="left2"
-                    position={Position.Left}
-                    tickFormat={(d: any) => numeral(d).format('0a')}
-                  />
-
-                  <BarSeries
-                    id="averageValues"
-                    xScaleType="time"
-                    yScaleType="linear"
-                    xAccessor={'time'}
-                    yAccessors={['value']}
-                    splitSeriesAccessors={['group']}
-                    stackAccessors={['time']}
-                    data={apmData}
-                    color={barSeriesColorAccessor}
-                  />
-                </Chart>
-              </ChartContainer> */}
+              <StackedBarChart data={uptimeData} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
