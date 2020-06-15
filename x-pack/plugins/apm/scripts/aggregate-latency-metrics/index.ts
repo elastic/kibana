@@ -54,6 +54,12 @@ stampLogger();
 export async function aggregateLatencyMetrics() {
   const interval = parseInt(String(argv.interval), 10) || 1;
   const concurrency = parseInt(String(argv.concurrency), 10) || 3;
+  const numSigFigures = (parseInt(String(argv.sigfig), 10) || 2) as
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5;
 
   const from = new Date(String(argv.from)).getTime();
   const to = new Date(String(argv.to)).getTime();
@@ -137,6 +143,7 @@ export async function aggregateLatencyMetrics() {
     ssl: {
       rejectUnauthorized: false,
     },
+    requestTimeout: 120000,
   });
 
   let destClient: Client | undefined;
@@ -236,14 +243,14 @@ export async function aggregateLatencyMetrics() {
             buckets: Array<{
               doc_count: number;
               key: any;
-              recorded_values?: { value: number[] };
+              recorded_values?: { value: unknown };
             }>,
             after?: any
           ): Promise<
             Array<{
               doc_count: number;
               key: any;
-              recorded_values?: { value: number[] };
+              recorded_values?: { value: unknown };
             }>
           > {
             const params = {
@@ -356,7 +363,7 @@ export async function aggregateLatencyMetrics() {
             buckets.forEach((bucket) => {
               const values = (bucket.recorded_values?.value ?? []) as number[];
               const h = histogram.build({
-                numberOfSignificantValueDigits: 2,
+                numberOfSignificantValueDigits: numSigFigures,
               });
               values.forEach((value) => {
                 h.recordValue(value);

@@ -79,10 +79,7 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return client.search({
-          ...body,
-          requestTimeout: 120000,
-        }) as any;
+        return client.search(body as any).then((res) => res.body);
       },
       indicesStats: (body) => {
         return client.indices.stats(body as any);

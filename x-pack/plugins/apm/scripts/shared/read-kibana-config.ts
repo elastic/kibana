@@ -30,9 +30,9 @@ export const readKibanaConfig = () => {
     },
     identity
   ) as {
-    'elasticsearch.username': string;
-    'elasticsearch.password': string;
-    'elasticsearch.hosts': string;
+    'elasticsearch.username'?: string;
+    'elasticsearch.password'?: string;
+    'elasticsearch.hosts'?: string;
   };
 
   return {
