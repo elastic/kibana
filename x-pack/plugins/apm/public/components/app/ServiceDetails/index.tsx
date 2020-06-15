@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
@@ -40,6 +41,10 @@ export function ServiceDetails({ tab }: Props) {
 
   const { core } = useApmPluginContext();
 
+  const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
+    defaultMessage: 'Add data',
+  });
+
   return (
     <div>
       <ApmHeader>
@@ -67,7 +72,7 @@ export function ServiceDetails({ tab }: Props) {
               color="primary"
               iconType="plusInCircle"
             >
-              Add data
+              {ADD_DATA_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

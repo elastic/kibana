@@ -22,6 +22,10 @@ const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink
   defaultMessage: 'Settings',
 });
 
+const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
+  defaultMessage: 'Add data',
+});
+
 const StyledPicker = styled(EuiFlexItem)`
   &&& {
     @media only screen and (max-width: 1024px) and (min-width: 868px) {
@@ -60,8 +64,12 @@ export const PageHeader = React.memo(
           </Link>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="primary" iconType="plusInCircle">
-            Add data
+          <EuiButtonEmpty
+            href="app/home#/tutorial/uptimeMonitors"
+            color="primary"
+            iconType="plusInCircle"
+          >
+            {ADD_DATA_LABEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

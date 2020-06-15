@@ -32,6 +32,10 @@ import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters
 import { InventoryAlertDropdown } from '../../components/alerting/inventory/alert_dropdown';
 import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
 
+const ADD_DATA_LABEL = i18n.translate('xpack.metrics.addDataButtonLabel', {
+  defaultMessage: 'Add data',
+});
+
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
 
@@ -103,8 +107,13 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       <Route path={'/inventory'} component={InventoryAlertDropdown} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty size="s" color="primary" iconType="plusInCircle">
-                        Add data
+                      <EuiButtonEmpty
+                        href="/app/home#/tutorial_directory/metrics"
+                        size="s"
+                        color="primary"
+                        iconType="plusInCircle"
+                      >
+                        {ADD_DATA_LABEL}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   </EuiFlexGroup>

@@ -32,6 +32,10 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   const { initialize } = useLogSourceContext();
 
+  const ADD_DATA_LABEL = i18n.translate('xpack.logs.addDataButtonLabel', {
+    defaultMessage: 'Add data',
+  });
+
   useMount(() => {
     initialize();
   });
@@ -89,8 +93,13 @@ export const LogsPageContent: React.FunctionComponent = () => {
             <AlertDropdown />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="primary" iconType="plusInCircle">
-              Add data
+            <EuiButtonEmpty
+              href="/app/home#/tutorial_directory/logging"
+              size="s"
+              color="primary"
+              iconType="plusInCircle"
+            >
+              {ADD_DATA_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
