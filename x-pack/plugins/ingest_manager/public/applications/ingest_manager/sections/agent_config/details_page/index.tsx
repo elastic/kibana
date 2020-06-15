@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
+import { Redirect, useRouteMatch, Switch, Route, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -40,7 +40,8 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
-  const { getHref } = useLink();
+  const history = useHistory();
+  const { getHref, getPath } = useLink();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -147,7 +148,15 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           },
           { isDivider: true },
           {
-            content: agentConfig && <AgentConfigActionMenu configId={configId} fullButton={true} />,
+            content: agentConfig && (
+              <AgentConfigActionMenu
+                config={agentConfig}
+                fullButton={true}
+                onCopySuccess={(newAgentConfig: AgentConfig) => {
+                  history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
+                }}
+              />
+            ),
           },
         ].map((item, index) => (
           <EuiFlexItem grow={false} key={index}>
