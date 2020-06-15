@@ -10,8 +10,10 @@ import {
   CreateAgentConfigResponse,
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  DATASOURCE_SAVED_OBJECT_TYPE,
   DeleteAgentConfigRequest,
   DeleteDatasourcesRequest,
+  GetDatasourcesResponse,
   GetFullAgentConfigResponse,
   GetPackagesResponse,
 } from '../../../plugins/ingest_manager/common';
@@ -222,6 +224,49 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           }
         },
       };
+    },
+
+    /**
+     * Deletes a policy (Datasource) by using the policy name
+     * @param name
+     */
+    async deletePolicyByName(name: string) {
+      let datasourceList: GetDatasourcesResponse['items'];
+      try {
+        const { body: datasourcesResponse }: { body: GetDatasourcesResponse } = await supertest
+          .get(INGEST_API_DATASOURCES)
+          .set('kbn-xsrf', 'xxx')
+          .query({ kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.name: ${name}` })
+          .send()
+          .expect(200);
+        datasourceList = datasourcesResponse.items;
+      } catch (error) {
+        return logSupertestApiErrorAndThrow(
+          `Unable to get list of datasources with name=${name}`,
+          error
+        );
+      }
+
+      if (datasourceList.length === 0) {
+        throw new Error(`Policy named '${name}' was not found!`);
+      }
+
+      if (datasourceList.length > 1) {
+        throw new Error(`Found ${datasourceList.length} Policies - was expecting only one!`);
+      }
+
+      try {
+        const deleteDatasourceData: DeleteDatasourcesRequest['body'] = {
+          datasourceIds: [datasourceList[0].id],
+        };
+        await supertest
+          .post(INGEST_API_DATASOURCES_DELETE)
+          .set('kbn-xsrf', 'xxx')
+          .send(deleteDatasourceData)
+          .expect(200);
+      } catch (error) {
+        logSupertestApiErrorAndThrow('Unable to delete Datasource via Ingest!', error);
+      }
     },
   };
 }

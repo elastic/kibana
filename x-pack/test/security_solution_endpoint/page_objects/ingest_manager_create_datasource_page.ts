@@ -63,7 +63,17 @@ export function IngestManagerCreateDatasource({ getService }: FtrProviderContext
      * @param name
      */
     async setDatasourceName(name: string) {
+      // Because of the bottom sticky bar, we need to scroll section 2 into view
+      // so that `setValue()` enters the data on the input field.
+      await testSubjects.scrollIntoView('dataCollectionSetupStep');
       await testSubjects.setValue('datasourceNameInput', name);
+    },
+
+    /**
+     * Waits for the save Notification toast to be visible
+     */
+    async waitForSaveSuccessNotification() {
+      await testSubjects.existOrFail('datasourceCreateSuccessToast');
     },
   };
 }

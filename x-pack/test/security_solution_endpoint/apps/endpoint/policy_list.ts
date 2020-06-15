@@ -139,10 +139,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should redirect user back to Policy List after a successful save', async () => {
+        const newPolicyName = `endpoint policy ${Date.now()}`;
         await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
-        await pageObjects.ingestManagerCreateDatasource.setDatasourceName('endpoint policy 1');
+        await pageObjects.ingestManagerCreateDatasource.setDatasourceName(newPolicyName);
         await (await pageObjects.ingestManagerCreateDatasource.findDSaveButton()).click();
+        await pageObjects.ingestManagerCreateDatasource.waitForSaveSuccessNotification();
         await pageObjects.policy.ensureIsOnPolicyPage();
+        await policyTestResources.deletePolicyByName(newPolicyName);
       });
     });
   });

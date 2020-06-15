@@ -42,7 +42,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * ensures that the Policy Page is the currently display view
      */
     async ensureIsOnPolicyPage() {
-      await testSubjects.existOrFail('policyTable');
+      await testSubjects.existOrFail('policyListPage');
     },
 
     /**

@@ -243,6 +243,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
                 },
               })
             : undefined,
+        'data-test-subj': 'datasourceCreateSuccessToast',
       });
     } else {
       notifications.toasts.addError(error, {
@@ -319,6 +320,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         defaultMessage: 'Select the data you want to collect',
       }),
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      'data-test-subj': 'dataCollectionSetupStep',
       children:
         agentConfig && packageInfo ? (
           <StepConfigureDatasource
