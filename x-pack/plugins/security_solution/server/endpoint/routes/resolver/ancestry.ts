@@ -6,7 +6,7 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { IndexPattern } from '../../../../common/endpoint/constants';
+import { eventsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateAncestry } from '../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
@@ -23,7 +23,7 @@ export function handleAncestry(
     try {
       const client = context.core.elasticsearch.legacy.client;
 
-      const fetcher = new Fetcher(client, id, IndexPattern.Events, endpointID);
+      const fetcher = new Fetcher(client, id, eventsIndexPattern, endpointID);
       const ancestorInfo = await fetcher.ancestors(ancestors);
 
       return res.ok({

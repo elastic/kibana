@@ -6,7 +6,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { IndexPattern } from '../../../../common/endpoint/constants';
+import { eventsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
@@ -23,7 +23,7 @@ export function handleEvents(
     try {
       const client = context.core.elasticsearch.legacy.client;
 
-      const fetcher = new Fetcher(client, id, IndexPattern.Events, endpointID);
+      const fetcher = new Fetcher(client, id, eventsIndexPattern, endpointID);
 
       return res.ok({
         body: await fetcher.events(events, afterEvent),
