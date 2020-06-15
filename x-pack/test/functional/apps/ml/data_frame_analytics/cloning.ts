@@ -156,25 +156,45 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
         });
 
-        it('should open the flyout with a proper header', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.be(
-            `Clone job from ${testData.job.id}`
+        it('should open the wizard with a proper header', async () => {
+          expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.match(
+            /Clone analytics job/
           );
         });
 
-        it('should have correct init form values', async () => {
-          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobForm(
+        it('should have correct init form values for config step', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobConfigStep(
             testData.job as DataFrameAnalyticsConfig
           );
         });
 
-        it('should have disabled Create button on open', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(true);
+        it('continues to the additional options step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
-        it('should enable Create button on a valid form input', async () => {
+        it('should have correct init form values for additional options step', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
+            testData.job as DataFrameAnalyticsConfig
+          );
+        });
+
+        it('continues to the details step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
+        });
+
+        it('should have correct init form values for details step', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobDetailsStep(
+            testData.job as DataFrameAnalyticsConfig
+          );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
+        });
+
+        it('continues to the create step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+        });
+
+        it('should have enabled Create button on a valid form input', async () => {
           expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(false);
         });
 
@@ -187,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('displays the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
