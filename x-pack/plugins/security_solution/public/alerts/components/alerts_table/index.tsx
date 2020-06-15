@@ -31,7 +31,7 @@ import {
   alertsDefaultModel,
   buildAlertStatusFilter,
 } from './default_config';
-import { FILTER_OPEN, AlertFilterOption, AlertsTableFilterGroup } from './alerts_filter_group';
+import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18n from './translations';
 import {
@@ -87,7 +87,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const apolloClient = useApolloClient();
 
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-  const [filterGroup, setFilterGroup] = useState<AlertFilterOption>(FILTER_OPEN);
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : []
   );
@@ -201,7 +201,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: AlertFilterOption) => {
+    (newFilterGroup: Status) => {
       clearEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID });
       clearEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID });
       clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });

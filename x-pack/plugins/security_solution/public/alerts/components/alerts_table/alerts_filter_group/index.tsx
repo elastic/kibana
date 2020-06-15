@@ -6,22 +6,19 @@
 
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from '../translations';
 
-export const FILTER_OPEN = 'open';
-export const FILTER_CLOSED = 'closed';
-export const FILTER_IN_PROGRESS = 'in-progress';
-export type AlertFilterOption =
-  | typeof FILTER_OPEN
-  | typeof FILTER_CLOSED
-  | typeof FILTER_IN_PROGRESS;
+export const FILTER_OPEN: Status = 'open';
+export const FILTER_CLOSED: Status = 'closed';
+export const FILTER_IN_PROGRESS: Status = 'in-progress';
 
 interface Props {
-  onFilterGroupChanged: (filterGroup: AlertFilterOption) => void;
+  onFilterGroupChanged: (filterGroup: Status) => void;
 }
 
 const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged }) => {
-  const [filterGroup, setFilterGroup] = useState(FILTER_OPEN);
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const onClickOpenFilterCallback = useCallback(() => {
     setFilterGroup(FILTER_OPEN);
