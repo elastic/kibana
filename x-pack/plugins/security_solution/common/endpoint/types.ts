@@ -107,6 +107,7 @@ export interface ResolverTree {
   entityID: string;
   children: ResolverChildren;
   relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
+  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: ResolverAncestry;
   lifecycle: ResolverEvent[];
   stats: ResolverNodeStats;
@@ -146,6 +147,15 @@ export interface ResolverRelatedEvents {
   entityID: string;
   events: ResolverEvent[];
   nextEvent: string | null;
+}
+
+/**
+ * Response structure for the alerts route.
+ */
+export interface ResolverRelatedAlerts {
+  entityID: string;
+  alerts: ResolverEvent[];
+  nextAlert: string | null;
 }
 
 /**
@@ -236,10 +246,14 @@ interface DllFields {
 /**
  * Describes an Alert Event.
  */
-export type AlertEvent = Immutable<{
+export interface AlertEvent {
   '@timestamp': number;
   agent: {
     id: string;
+    version: string;
+    type: string;
+  };
+  ecs: {
     version: string;
   };
   event: {
@@ -253,7 +267,11 @@ export type AlertEvent = Immutable<{
   };
   endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
   process: {
@@ -317,7 +335,7 @@ export type AlertEvent = Immutable<{
   };
   host: Host;
   dll?: DllFields[];
-}>;
+}
 
 /**
  * The status of the host
@@ -357,7 +375,11 @@ export type HostMetadata = Immutable<{
   };
   endpoint: {
     policy: {
-      id: string;
+      applied: {
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        name: string;
+      };
     };
   };
   agent: {
@@ -415,13 +437,7 @@ export interface EndpointEvent {
     id: string;
     kind: string;
   };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: HostOS;
-  };
+  host: Host;
   process: {
     entity_id: string;
     name: string;
@@ -700,6 +716,7 @@ export interface HostPolicyResponse {
       applied: {
         version: string;
         id: string;
+        name: string;
         status: HostPolicyResponseActionStatus;
         actions: HostPolicyResponseAppliedAction[];
         response: {
