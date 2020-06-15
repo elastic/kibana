@@ -6,7 +6,7 @@
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse } from '../../../common';
+import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
 import { IngestManagerError, getHTTPResponseCode } from '../../errors';
@@ -77,9 +77,10 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const logger = appContextService.getLogger();
   try {
+    const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, callCluster);
     return response.ok({
-      body: { isInitialized: true },
+      body,
     });
   } catch (e) {
     if (e instanceof IngestManagerError) {

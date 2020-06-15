@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
@@ -75,17 +75,19 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    const permissionsResponse = await core.http.get(appRoutesService.getCheckPermissionsPath());
+    const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
+      appRoutesService.getCheckPermissionsPath()
+    );
     if (permissionsResponse.success) {
       const successPromise = core.http
-        .post(setupRouteService.getSetupPath())
+        .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
         .then(({ isInitialized }: { isInitialized: boolean }) => Promise.resolve(isInitialized))
         .catch(Promise.reject);
 
       return { success: successPromise, registerDatasource };
     } else {
       return {
-        success: Promise.reject(permissionsResponse.error),
+        success: Promise.reject(new Error(permissionsResponse.error)),
         registerDatasource,
       };
     }
