@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Moment } from 'moment';
 
 export interface PageViewParams {
   page: string;
@@ -36,8 +35,8 @@ export interface UptimeTelemetry {
   monitor_name_stats: Stats;
   observer_location_name_stats: Stats;
 
-  dateRangeStart: Moment[];
-  dateRangeEnd: Moment[];
+  dateRangeStart: string[];
+  dateRangeEnd: string[];
   autorefreshInterval: number[];
   autoRefreshEnabled: boolean;
 }

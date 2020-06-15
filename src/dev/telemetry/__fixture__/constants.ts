@@ -17,6 +17,7 @@
  * under the License.
  */
 import moment, { Moment } from 'moment';
+import { MakeSchemaFrom } from '../../../plugins/usage_collection/server';
 
 export interface Usage {
   locale: string;
@@ -45,7 +46,7 @@ export interface WithUnsupportedUnion {
   prop1: 123 | Moment;
 }
 
-export const externallyDefinedSchema = {
+export const externallyDefinedSchema: MakeSchemaFrom<{ locale: string }> = {
   locale: {
     type: 'keyword',
   },

@@ -58,15 +58,14 @@ export function kindToDescriptorName(kind: number) {
     case ts.SyntaxKind.StringKeyword:
     case ts.SyntaxKind.StringLiteral:
     case ts.SyntaxKind.SetKeyword:
+    case TelemetryKinds.Date:
+    case TelemetryKinds.MomentDate:
       return 'string';
     case ts.SyntaxKind.BooleanKeyword:
       return 'boolean';
     case ts.SyntaxKind.NumberKeyword:
     case ts.SyntaxKind.NumericLiteral:
       return 'number';
-    case TelemetryKinds.Date:
-    case TelemetryKinds.MomentDate:
-      return 'date';
     default:
       throw new Error(`Unknown kind ${kind}`);
   }

@@ -24,6 +24,7 @@ export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
   switch (type) {
     case 'keyword':
     case 'text':
+    case 'date':
       return 'string';
     case 'boolean':
       return 'boolean';
@@ -31,8 +32,6 @@ export function compatibleSchemaTypes(type: AllowedSchemaTypes) {
     case 'float':
     case 'long':
       return 'number';
-    case 'date':
-      return 'date';
     default:
       throw new Error(`Unknown schema type ${type}`);
   }

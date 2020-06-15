@@ -117,7 +117,7 @@ export interface UsageStats {
   enabled: boolean;
   count?: number;
   usesFeatureControls?: boolean;
-  disabledFeatures?: {
+  disabledFeatures: {
     indexPatterns?: number;
     discover?: number;
     canvas?: number;

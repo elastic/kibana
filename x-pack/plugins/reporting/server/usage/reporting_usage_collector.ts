@@ -14,7 +14,6 @@ import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
-import { reportingUsageSchema } from './reporting_usage_schema';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
@@ -38,7 +37,6 @@ export function getReportingUsageCollector(
 ) {
   return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
     type: 'reporting',
-    schema: reportingUsageSchema as any,
     fetch: (callCluster: CallCluster) =>
       getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
     isReady,
