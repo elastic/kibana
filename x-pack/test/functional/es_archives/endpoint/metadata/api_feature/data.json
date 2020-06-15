@@ -17,7 +17,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -66,7 +70,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -114,7 +122,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "Default",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -160,7 +172,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -209,7 +225,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -256,7 +276,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -303,7 +327,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
@@ -351,7 +379,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
@@ -398,7 +430,11 @@
       },
       "endpoint": {
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "success"
+          }
         }
       },
       "event": {

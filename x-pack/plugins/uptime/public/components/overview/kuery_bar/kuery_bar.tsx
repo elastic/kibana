@@ -57,15 +57,26 @@ export function KueryBar({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
+  const [suggestionLimit, setSuggestionLimit] = useState(15);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery } = getUrlParams();
+  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
 
   useEffect(() => {
     updateSearchText(kuery);
   }, [kuery, updateSearchText]);
+
+  useEffect(() => {
+    if (updateDefaultKuery && kuery) {
+      updateDefaultKuery(kuery);
+    } else if (defaultKuery && updateDefaultKuery) {
+      updateDefaultKuery(defaultKuery);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const indexPatternMissing = loading && !indexPattern;
 
@@ -76,6 +87,7 @@ export function KueryBar({
 
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
+    setSuggestionLimit(15);
 
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
@@ -88,10 +100,18 @@ export function KueryBar({
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          boolFilter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                },
+              },
+            },
+          ],
         })) || []
-      )
-        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
-        .slice(0, 15);
+      ).filter((suggestion) => !startsWith(suggestion.text, 'span.'));
 
       if (currentRequest !== currentRequestCheck) {
         return;
@@ -128,6 +148,10 @@ export function KueryBar({
     }
   }
 
+  const increaseLimit = () => {
+    setSuggestionLimit(suggestionLimit + 15);
+  };
+
   return (
     <Container>
       <Typeahead
@@ -138,7 +162,8 @@ export function KueryBar({
         initialValue={defaultKuery || kuery}
         onChange={onChange}
         onSubmit={onSubmit}
-        suggestions={state.suggestions}
+        suggestions={state.suggestions.slice(0, suggestionLimit)}
+        loadMore={increaseLimit}
         queryExample=""
       />
 
