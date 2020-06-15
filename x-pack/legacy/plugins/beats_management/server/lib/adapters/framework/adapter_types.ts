@@ -8,6 +8,7 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
+import { CoreSetup, CoreStart } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 import { LicenseType } from '../../../../common/constants/security';
 
@@ -42,7 +43,11 @@ export interface BackendFrameworkAdapter {
 export interface KibanaLegacyServer {
   newPlatform: {
     setup: {
+      core: CoreSetup;
       plugins: { security: SecurityPluginSetup };
+    };
+    start: {
+      core: CoreStart;
     };
   };
   plugins: {

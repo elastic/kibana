@@ -10,13 +10,13 @@ import { createLegacyEsTestCluster } from '@kbn/test';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Root } from 'src/core/server/root';
 // @ts-ignore
+import KbnServer from '../../../../../../../../../src/legacy/server/kbn_server';
 import * as kbnTestServer from '../../../../../../../../../src/test_utils/kbn_server';
-import { DatabaseKbnESPlugin } from '../adapter_types';
 import { KibanaDatabaseAdapter } from '../kibana_database_adapter';
 import { contractTests } from './test_contract';
 const es = createLegacyEsTestCluster({});
 
-let legacyServer: any;
+let legacyServer: KbnServer;
 let rootServer: Root;
 contractTests('Kibana Database Adapter', {
   before: async () => {
@@ -32,9 +32,9 @@ contractTests('Kibana Database Adapter', {
   },
   after: async () => {
     await rootServer.shutdown();
-    return await es.cleanup();
+    await es.cleanup();
   },
   adapterSetup: () => {
-    return new KibanaDatabaseAdapter(legacyServer.plugins.elasticsearch as DatabaseKbnESPlugin);
+    return new KibanaDatabaseAdapter(legacyServer.newPlatform.start.core.elasticsearch);
   },
 });
