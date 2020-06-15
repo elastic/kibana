@@ -67,6 +67,9 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
 }) => {
   const {
     notifications: { toasts },
+    services: {
+      application: { navigateToUrl },
+    },
   } = useMlKibana();
 
   useEffect(() => {
@@ -234,7 +237,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             onClick: async (item) => {
               await addSwimlaneToDashboardCallback(item);
               setAddedDashboards({ ...addedDashboards, [item.id]: 'redirecting' });
-              window.location.href = await dashboardService.getDashboardEditUrl(item.id);
+              await navigateToUrl(await dashboardService.getDashboardEditUrl(item.id));
             },
             type: 'icon',
             icon: 'pencil',
