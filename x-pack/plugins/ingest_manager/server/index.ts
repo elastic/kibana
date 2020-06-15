@@ -27,6 +27,7 @@ export const config = {
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
+      pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),

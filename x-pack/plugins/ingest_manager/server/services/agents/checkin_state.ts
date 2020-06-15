@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timer, from, Observable, TimeoutError, Subscription } from 'rxjs';
+import { timer, from, Observable, TimeoutError } from 'rxjs';
 import {
   shareReplay,
   distinctUntilKeyChanged,
   switchMap,
   mergeMap,
-  tap,
   merge,
   filter,
   timeout,
@@ -22,12 +21,15 @@ import {
   SavedObjectsBulkUpdateObject,
 } from 'src/core/server';
 import { Agent, AgentAction, AgentSOAttributes, AgentConfig, FullAgentConfig } from '../../types';
-
 import { agentConfigService } from '../agent_config';
 import * as APIKeysService from '../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAgentAction, getNewActionsSince } from './actions';
 import { appContextService } from '../app_context';
+import { toPromiseAbortable, AbortError } from './rxjs_utils';
+
+const UPDATE_ACTIONS_INTERVAL_MS = 10000;
+const UPDATE_LAST_CHECKIN_INTERVAL_MS = 15000;
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -48,13 +50,11 @@ function getInternalUserSOClient() {
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
 
-function createAgentConfigObservable(configId: string) {
+function createAgentConfigSharedObservable(configId: string) {
   const internalSOClient = getInternalUserSOClient();
-  return timer(0, 3000).pipe(
+  return timer(0, UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() =>
-      from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>).pipe(
-        tap(() => appContextService.getLogger().info(`Fetch agent config ${configId}`))
-      )
+      from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>)
     ),
     distinctUntilKeyChanged('revision'),
     switchMap((data) => from(agentConfigService.getFullConfig(internalSOClient, configId))),
@@ -62,14 +62,12 @@ function createAgentConfigObservable(configId: string) {
   );
 }
 
-function createNewActionsObservable(): Observable<AgentAction[]> {
-  return timer(0, 3000).pipe(
+function createNewActionsSharedObservable(): Observable<AgentAction[]> {
+  return timer(0, UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() => {
       const internalSOClient = getInternalUserSOClient();
 
-      return from(getNewActionsSince(internalSOClient, new Date().toISOString())).pipe(
-        tap(() => appContextService.getLogger().info(`Fetch new actions`))
-      );
+      return from(getNewActionsSince(internalSOClient, new Date().toISOString()));
     }),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
@@ -128,11 +126,33 @@ async function createAgentActionFromConfigIfOutdated(
   return [configChangeAction];
 }
 
-function agentCheckinStateFactory() {
+function agentConnectedStateFactory() {
   const connectedAgentsIds = new Set<string>();
+  let agentToUpdate = new Set<string>();
+
+  function addAgent(agentId: string) {
+    connectedAgentsIds.add(agentId);
+    agentToUpdate.add(agentId);
+  }
+
+  function removeAgent(agentId: string) {
+    connectedAgentsIds.delete(agentId);
+  }
+
+  async function wrapPromise<T>(agentId: string, p: Promise<T>): Promise<T> {
+    try {
+      addAgent(agentId);
+      const res = await p;
+      removeAgent(agentId);
+      return res;
+    } catch (err) {
+      removeAgent(agentId);
+      throw err;
+    }
+  }
 
   async function updateLastCheckinAt() {
-    if (connectedAgentsIds.size === 0) {
+    if (agentToUpdate.size === 0) {
       return;
     }
     const internalSOClient = getInternalUserSOClient();
@@ -147,12 +167,22 @@ function agentCheckinStateFactory() {
       },
     }));
 
+    agentToUpdate = new Set<string>([...connectedAgentsIds.values()]);
     await internalSOClient.bulkUpdate<AgentSOAttributes>(updates, { refresh: false });
   }
 
-  // Observables
+  return {
+    wrapPromise,
+    updateLastCheckinAt,
+  };
+}
+
+function agentCheckinStateFactory() {
+  const agentConnectedState = agentConnectedStateFactory();
+
+  // Shared Observables
   const agentConfigs$ = new Map<string, Observable<FullAgentConfig | null>>();
-  const newActions$ = createNewActionsObservable();
+  const newActions$ = createNewActionsSharedObservable();
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
@@ -164,17 +194,14 @@ function agentCheckinStateFactory() {
     }
     const configId = agent.config_id;
     if (!agentConfigs$.has(configId)) {
-      agentConfigs$.set(configId, createAgentConfigObservable(configId));
+      agentConfigs$.set(configId, createAgentConfigSharedObservable(configId));
     }
     const agentConfig$ = agentConfigs$.get(configId);
     if (!agentConfig$) {
       throw new Error(`Invalid state no observable for config ${configId}`);
     }
-
-    connectedAgentsIds.add(agent.id);
     const stream$ = agentConfig$.pipe(
-      // TODO make this configurable
-      timeout(30 * 1000),
+      timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
       mergeMap((config) => createAgentActionFromConfigIfOutdated(soClient, agent, config)),
       merge(newActions$),
       mergeMap(async (data) => {
@@ -193,11 +220,9 @@ function agentCheckinStateFactory() {
     );
     try {
       const data = await toPromiseAbortable(stream$, options?.signal);
-      connectedAgentsIds.delete(agent.id);
 
       return data || [];
     } catch (err) {
-      connectedAgentsIds.delete(agent.id);
       if (err instanceof TimeoutError || err instanceof AbortError) {
         return [];
       }
@@ -209,52 +234,23 @@ function agentCheckinStateFactory() {
   function start() {
     setInterval(async () => {
       try {
-        await updateLastCheckinAt();
+        await agentConnectedState.updateLastCheckinAt();
       } catch (err) {
         appContextService.getLogger().error(err);
       }
-    }, 30 * 1000);
+    }, UPDATE_LAST_CHECKIN_INTERVAL_MS);
   }
 
   return {
-    subscribeToNewActions,
+    subscribeToNewActions: (
+      soClient: SavedObjectsClientContract,
+      agent: Agent,
+      options?: { signal: AbortSignal }
+    ) => agentConnectedState.wrapPromise(agent.id, subscribeToNewActions(soClient, agent, options)),
     start,
   };
 }
 
 export const agentCheckinState = agentCheckinStateFactory();
+
 agentCheckinState.start();
-
-class AbortError extends Error {}
-
-const toPromiseAbortable = <T>(observable: Observable<T>, signal?: AbortSignal): Promise<T> =>
-  new Promise((resolve, reject) => {
-    if (signal && signal.aborted) {
-      reject(new AbortError('Aborted'));
-      return;
-    }
-
-    const listener = () => {
-      subscription.unsubscribe();
-      reject(new AbortError('Aborted'));
-    };
-    const cleanup = () => {
-      if (signal) {
-        signal.removeEventListener('abort', listener);
-      }
-    };
-    const subscription = observable.subscribe(
-      (data) => {
-        cleanup();
-        resolve(data);
-      },
-      (err) => {
-        cleanup();
-        reject(err);
-      }
-    );
-
-    if (signal) {
-      signal.addEventListener('abort', listener, { once: true });
-    }
-  });
