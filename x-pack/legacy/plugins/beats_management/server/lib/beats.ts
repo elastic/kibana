@@ -251,7 +251,7 @@ function addToResultsToResponse(key: string, response: any, assignmentResults: a
 
 export function findNonExistentItems(items: Array<{ id: string }>, requestedItems: string[]) {
   return requestedItems.reduce((nonExistentItems: string[], requestedItem: string, idx: number) => {
-    if (items.findIndex((item: RandomItem) => item && item.id === requestedItem) === -1) {
+    if (items.findIndex((item) => item && item.id === requestedItem) === -1) {
       nonExistentItems.push(requestedItems[idx]);
     }
     return nonExistentItems;
