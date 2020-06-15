@@ -45,6 +45,9 @@ jest.mock('../../../kibana_services', () => ({
       visualize: {
         show: true,
       },
+      discover: {
+        save: false,
+      },
     },
     uiSettings: {
       get: (key: string) => {
