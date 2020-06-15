@@ -197,16 +197,15 @@ export class IndexPatternsService {
   };
 
   specToIndexPattern(spec: IndexPatternSpec) {
-    const indexPattern = new IndexPattern(
-      spec.id,
-      (cfg: any) => this.config.get(cfg),
-      this.savedObjectsClient,
-      this.apiClient,
-      indexPatternCache,
-      this.fieldFormats,
-      this.onNotification,
-      this.onError
-    );
+    const indexPattern = new IndexPattern(spec.id, {
+      getConfig: (cfg: any) => this.config.get(cfg),
+      savedObjectsClient: this.savedObjectsClient,
+      apiClient: this.apiClient,
+      patternCache: indexPatternCache,
+      fieldFormats: this.fieldFormats,
+      onNotification: this.onNotification,
+      onError: this.onError,
+    });
 
     indexPattern.initFromSpec(spec);
     return indexPattern;
