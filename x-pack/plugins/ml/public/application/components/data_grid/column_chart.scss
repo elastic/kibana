@@ -4,16 +4,15 @@
 }
 
 .mlDataGridChart__legend {
+  @include euiTextTruncate;
+  @include euiFontSizeXS;
+
   color: $euiColorMediumShade;
   display: block;
   overflow-x: hidden;
   margin: $euiSizeXS 0px 0px 0px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.75rem;
   font-style: italic;
   font-weight: normal;
-  line-height: 1.4;
   text-align: left;
 }
 
