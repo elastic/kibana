@@ -37,6 +37,8 @@ export const PHASE_PRIMARY_SHARD_COUNT: string = 'selectedPrimaryShardCount';
 export const PHASE_REPLICA_COUNT: string = 'selectedReplicaCount';
 export const PHASE_INDEX_PRIORITY: string = 'phaseIndexPriority';
 
+export const PHASE_WAIT_FOR_SNAPSHOT_POLICY = 'waitForSnapshotPolicy';
+
 export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE: string[] = [
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_FORCE_MERGE_SEGMENTS,
