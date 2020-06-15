@@ -11760,7 +11760,6 @@
     "xpack.monitoring.metrics.apm.outputFailedEventsRate.failedDescription": "输出处理的事件（包括重试）",
     "xpack.monitoring.metrics.apm.outputFailedEventsRate.failedLabel": "失败",
     "xpack.monitoring.metrics.apm.outputFailedEventsRateTitle": "输出失败事件速率",
-    "xpack.monitoring.metrics.apm.perMinuteUnitLabel": "/分钟",
     "xpack.monitoring.metrics.apm.processedEvents.transactionDescription": "已处理事务事件",
     "xpack.monitoring.metrics.apm.processedEvents.transactionLabel": "事务",
     "xpack.monitoring.metrics.apm.processedEventsTitle": "已处理事件",

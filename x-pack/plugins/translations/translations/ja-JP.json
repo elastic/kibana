@@ -11755,7 +11755,6 @@
     "xpack.monitoring.metrics.apm.outputFailedEventsRate.failedDescription": "アウトプットにより処理されたイベントです (再試行を含む)",
     "xpack.monitoring.metrics.apm.outputFailedEventsRate.failedLabel": "失敗",
     "xpack.monitoring.metrics.apm.outputFailedEventsRateTitle": "アウトプットイベント失敗率",
-    "xpack.monitoring.metrics.apm.perMinuteUnitLabel": "/m",
     "xpack.monitoring.metrics.apm.processedEvents.transactionDescription": "処理されたトランザクションイベントです",
     "xpack.monitoring.metrics.apm.processedEvents.transactionLabel": "トランザクション",
     "xpack.monitoring.metrics.apm.processedEventsTitle": "処理済みのイベント",
