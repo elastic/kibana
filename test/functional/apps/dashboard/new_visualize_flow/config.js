@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../../../config.js'));
 
   return {
-    testFiles: [require.resolve('./add_to_dashboard')],
+    testFiles: [require.resolve('./dashboard_embedding')],
     pageObjects,
     services,
     servers: commonConfig.get('servers'),
