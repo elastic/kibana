@@ -23,7 +23,7 @@ import { DashboardPlugin } from './plugin';
 export {
   DashboardContainer,
   DashboardContainerInput,
-  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
   DASHBOARD_CONTAINER_TYPE,
   // Types below here can likely be made private when dashboard app moved into this NP plugin.
   DEFAULT_PANEL_WIDTH,

@@ -189,7 +189,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         }),
         actions: [
           {
-            render: (config: AgentConfig) => <AgentConfigActionMenu configId={config.id} />,
+            render: (config: AgentConfig) => <AgentConfigActionMenu config={config} />,
           },
         ],
       },
