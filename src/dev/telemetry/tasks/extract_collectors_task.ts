@@ -26,9 +26,6 @@ export function extractCollectorsTask(
   { roots }: TaskContext,
   restrictProgramToPath?: string | string[]
 ) {
-  const restrictProgramToPaths = Array.isArray(restrictProgramToPath)
-    ? restrictProgramToPath
-    : [restrictProgramToPath];
   return roots.map((root) => ({
     task: async () => {
       const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
@@ -38,6 +35,10 @@ export function extractCollectorsTask(
       const programPaths = await getProgramPaths(root.config);
 
       if (typeof restrictProgramToPath !== 'undefined') {
+        const restrictProgramToPaths = Array.isArray(restrictProgramToPath)
+          ? restrictProgramToPath
+          : [restrictProgramToPath];
+
         const fullRestrictedPaths = restrictProgramToPaths.map((collectorPath) =>
           path.resolve(process.cwd(), collectorPath)
         );
