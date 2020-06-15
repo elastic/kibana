@@ -684,13 +684,12 @@ The text that appears in the Release Notes is pulled directly from your PR title
 To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this [PR](https://github.com/elastic/kibana/pull/65796) that uses the `## Release note` header.
 
 When you create the Release Notes text, use the following best practices:
-
-    * Use present tense. 
-    * Use sentence case.
-    * When you create a feature PR, start with `Adds`.
-    * When you create an enhancement PR, start with `Improves`. 
-    * When you create a bug fix PR, start with `Fixes`.
-    * When you create a deprecation PR, start with `Deprecates`.
+* Use present tense. 
+* Use sentence case.
+* When you create a feature PR, start with `Adds`.
+* When you create an enhancement PR, start with `Improves`. 
+* When you create a bug fix PR, start with `Fixes`.
+* When you create a deprecation PR, start with `Deprecates`.
 
 #### Add your labels
 1. Label the PR with the targeted version (ex: `v7.3.0`).
