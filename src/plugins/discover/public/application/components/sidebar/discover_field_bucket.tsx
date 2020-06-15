@@ -48,9 +48,14 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
   return (
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate">
           <EuiText size="xs" className="eui-textTruncate">
             {bucket.display === '' ? emptyTxt : bucket.display}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} className="eui-textTruncate">
+          <EuiText color="secondary" size="xs" className="eui-textTruncate">
+            {bucket.percent}%
           </EuiText>
         </EuiFlexItem>
         {field.filterable && (
