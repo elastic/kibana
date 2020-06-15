@@ -33,9 +33,9 @@ jest.mock('../../../../common/lib/kibana', () => {
           },
         },
       },
-      useUiSetting$: jest.fn().mockReturnValue([]),
-      useGetUserSavedObjectPermissions: jest.fn(),
     }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
 
