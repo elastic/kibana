@@ -34,7 +34,7 @@ export const SiemNavigationComponent: React.FC<
   const { chrome } = useKibana().services;
 
   useEffect(() => {
-    if (pathName) {
+    if (pathName || pageName) {
       setBreadcrumbs(
         {
           query: urlState.query,
@@ -55,7 +55,7 @@ export const SiemNavigationComponent: React.FC<
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chrome, pathName, search, navTabs, urlState, state]);
+  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
   return (
     <TabNavigation
