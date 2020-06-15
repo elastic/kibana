@@ -44,7 +44,7 @@ In this tutorial, you'll learn to:
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open *Elastic Maps*.
+. If you haven't already, open the menu, then click *{kib} > Maps*.
 . On the maps list page, click *Create map*.
 . Set the time range to *Last 7 days*.
 +
@@ -205,8 +205,8 @@ You have completed the steps for re-creating the sample data map.
 === Adding the map to a dashboard
 You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
-. In the side navigation, click *Dashboard*.
-. Click *Create new dashboard*.
+. Open the menu, then go to *Dashboard*.
+. Click *Create dashboard*.
 . Set the time range to *Last 7 days*.
 . Click *Add*.
 +
