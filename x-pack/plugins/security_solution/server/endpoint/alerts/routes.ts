@@ -10,8 +10,6 @@ import { alertListHandlerWrapper } from './handlers/list';
 import { alertDetailsHandlerWrapper } from './handlers/details';
 import { alertDetailsReqSchema } from './handlers/details/schemas';
 import { alertingIndexGetQuerySchema } from '../../../common/endpoint_alerts/schema/alert_index';
-import { indexPatternGetParamsSchema } from '../../../common/endpoint_alerts/schema/index_pattern';
-import { handleIndexPattern } from './handlers/index_pattern';
 
 export const BASE_ALERTS_ROUTE = `${AlertConstants.BASE_API_URL}/alerts`;
 
@@ -36,16 +34,5 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       options: { authRequired: true },
     },
     alertDetailsHandlerWrapper(endpointAppContext)
-  );
-
-  const log = endpointAppContext.logFactory.get('index_pattern');
-
-  router.get(
-    {
-      path: `${AlertConstants.INDEX_PATTERN_ROUTE}/{datasetPath}`,
-      validate: { params: indexPatternGetParamsSchema },
-      options: { authRequired: true },
-    },
-    handleIndexPattern(log, endpointAppContext)
   );
 }
