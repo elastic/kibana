@@ -47,6 +47,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
+  '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/plugins/canvas/.storybook/*',
