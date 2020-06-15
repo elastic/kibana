@@ -36,7 +36,8 @@ but their action messages might no longer provide useful information and
 must be reconfigured. The new default action message will show an example
 of how to use `context.reason`.
 
-*via {pull}64365[#64365]*
+*via https://github.com/elastic/kibana/pull/64365[#64365]*
+
 
 [float]
 [[breaking_fixes_back_button]]
@@ -49,7 +50,7 @@ In dashboard in view mode, `.panels` are no longer synced with the URL.
 *Impact* +
 This fixes the Back button when navigating between dashboards using drilldowns.
 
-*via {pull}62415[#62415]*
+*via https://github.com/elastic/kibana/pull/62415[#62415]*
 ====
 
 
@@ -76,7 +77,7 @@ The following action plugin REST APIs changed so that they are consistent with t
 * `DELETE /api/action/{id}` -> `DELETE /api/actions/action/{id}`
 * `POST /api/action/{id}/_execute` -> `POST /api/actions/action/{id}/_execute`
 
-*via {pull}65936[#65936]*
+*via https://github.com/elastic/kibana/pull/65936[#65936]*
 
 ====
 
@@ -89,7 +90,8 @@ The following action plugin REST APIs changed so that they are consistent with t
 Any existing user-created plugins that extend
 Canvas functionality must also move to the Kibana Platform to continue extending Canvas.
 
-*via {pull}64831[#64831]*
+*via https://github.com/elastic/kibana/pull/64831[#64831]*
+
 ====
 
 [[breaking-78-filter-expression-function]]
@@ -117,7 +119,8 @@ discriminate between the different values it passes between functions.
 The `filter` function was the only function that exposed this field to users.
 After this change, all expression values will consistently use `type` to determine a type of expression value.
 
-*via {pull}64215[#64215]*
+*via https://github.com/elastic/kibana/pull/64215[#64215]*
+
 ====
 
 [[breaking_78_redirect-to-full-path]]
@@ -127,7 +130,8 @@ After this change, all expression values will consistently use `type` to determi
 Calling `core.application.navigateToApp` to a legacy
 application now retains the `path` specified.
 
-*via {pull}65112[#65112]*
+*via https://github.com/elastic/kibana/pull/65112[#65112]*
+
 ====
 
 [[breaking_78_remove_aggs]]
@@ -164,7 +168,8 @@ search.aggs.convertDateRangeToString,
 search.aggs.convertIPRangeToString,
 ```
 
-*via {pull}64719[#64719]*
+*via https://github.com/elastic/kibana/pull/64719[#64719]*
+
 ====
 
 [[breaking_78_update_default_path]]
@@ -196,7 +201,8 @@ core.application.register({
 appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
 ```
 
-*via {pull}64498[#64498]*
+*via https://github.com/elastic/kibana/pull/64498[#64498]*
+
 ====
 
 [[breaking_78_cache_busting]]
@@ -215,7 +221,8 @@ After:
 
 http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
 
-*via {pull}64414[#64414]*
+*via https://github.com/elastic/kibana/pull/64414[#64414]*
+
 ====
 
 [[breaking_78_add_example_plugins]]
@@ -230,7 +237,8 @@ X-Pack&mdash;create your plugin in `/x-pack/examples` folder and start {kib} wit
 yarn start --run-examples
 ```
 
-*via {pull}63823[#63823]*
+*via https://github.com/elastic/kibana/pull/63823[#63823]*
+
 ====
 
 [[breaking_78_improves_drilldows]]
@@ -242,7 +250,8 @@ yarn start --run-examples
 `getHref` is now used only to support right click behavior.
 `execute()` takes control on regular click.
 
-*via {pull}63228[#63228]*
+*via https://github.com/elastic/kibana/pull/63228[#63228]*
+
 ====
 
 [[breaking_78_scopedhistory]]
@@ -252,7 +261,7 @@ yarn start --run-examples
 
 State syncing utils now seamlessly support the platform's `ScopedHistory`.
 
-*via {pull}62761[#62761]*
+*via https://github.com/elastic/kibana/pull/62761[#62761]*
 
 ====
 
@@ -268,7 +277,7 @@ an implementation has not been added.
 The `chartResolution` and `minimumBucketSize` are now marked as deprecated configuration
 properties for TSVB.
 
-*via {pull}62543[#62543]*
+*via https://github.com/elastic/kibana/pull/62543[#62543]*
 
 ====
 
@@ -295,7 +304,7 @@ httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, r
 );
 ```
 
-*via {pull}61797[#61797]*
+*via https://github.com/elastic/kibana/pull/61797[#61797]*
 
 ====
 
@@ -360,7 +369,8 @@ either a required or optional dependency in your `kibana.json`:
 }
 ```
 
-*via {pull}61767[#61767]*
+*via https://github.com/elastic/kibana/pull/61767[#61767]*
+
 ====
 
 [[breaking_move_to_data_plugin]]
@@ -376,7 +386,8 @@ refer to the
 https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
-*via {pull}61618[#61618]*
+*via https://github.com/elastic/kibana/pull/61618[#61618]*
+
 ====
 
 [[breaking_78_static_assets]]
@@ -387,7 +398,8 @@ in `src/core/MIGRATION.md`.
 The {kib} Platform serves plugin static assets from the
 `my_plugin/public/assets` folder. No additional configuration is required.
 
-*via {pull}60490[#60490]*
+*via https://github.com/elastic/kibana/pull/60490[#60490]*
+
 ====
 
 [[breaking_78_refactor_connectors]]
@@ -507,5 +519,5 @@ Response
 }
 ```
 
-*via {pull}63450[#63450]*
+*via https://github.com/elastic/kibana/pull/63450[#63450]*
 ====
