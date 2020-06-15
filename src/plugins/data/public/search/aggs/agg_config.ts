@@ -324,7 +324,7 @@ export class AggConfig {
    * @public
    */
   toSerializedFieldFormat(): AggConfigSerialized['format'] {
-    return this.type.getSerializedFormat(this);
+    return this.type ? this.type.getSerializedFormat(this) : {};
   }
 
   /**
