@@ -103,10 +103,7 @@ export const useDataGrid = (
         ...c,
         display:
           chartData !== undefined && chartsVisible === true ? (
-            <>
-              <ColumnChart chartData={chartData} columnType={c} />
-              {c.id}
-            </>
+            <ColumnChart chartData={chartData} columnType={c} />
           ) : undefined,
       };
     }),

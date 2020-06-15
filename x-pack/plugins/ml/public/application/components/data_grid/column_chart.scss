@@ -25,3 +25,8 @@
   width: 100%;
   td { text-align: center }
 }
+
+/* Override to align column header to bottom of cell when no chart is available */
+.mlDataGrid .euiDataGridHeaderCell__content {
+  margin-top: auto;
+}

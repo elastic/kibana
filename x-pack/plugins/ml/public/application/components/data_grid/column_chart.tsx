@@ -20,8 +20,6 @@ import {
   ChartData,
 } from './use_column_chart';
 
-export const mlDataGridChartClassName = 'mlDataGridChart';
-
 const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string | JSX.Element => {
   if (chartData.type === 'boolean') {
     return (
@@ -79,7 +77,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
   const { coloredData, xScaleType, MAX_CHART_COLUMNS } = useColumnChart(chartData, columnType);
 
   if (coloredData.length === 0) {
-    return null;
+    return columnType.id;
   }
 
   return (
@@ -122,6 +120,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
       >
         {getLegendText(chartData, MAX_CHART_COLUMNS)}
       </div>
+      {columnType.id}
     </>
   );
 };
