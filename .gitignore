@@ -4,6 +4,7 @@
 /.es
 .DS_Store
 .node_binaries
+.native_modules
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
@@ -45,6 +46,8 @@ package-lock.json
 npm-debug.log*
 .tern-project
 .nyc_output
+.ci/pipeline-library/build/
+.gradle
 
 # apm plugin
 /x-pack/plugins/apm/tsconfig.json

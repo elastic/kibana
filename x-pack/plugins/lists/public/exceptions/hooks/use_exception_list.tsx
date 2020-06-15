@@ -23,9 +23,9 @@ export type ReturnExceptionListAndItems = [
  * Hook for using to get an ExceptionList and it's ExceptionListItems
  *
  * @param http Kibana http service
- * @param id desired ExceptionList ID (not list_id)
- * @param namespaceType list namespaceType determines list space
+ * @param lists array of ExceptionIdentifiers for all lists to fetch
  * @param onError error callback
+ * @param onSuccess callback when all lists fetched successfully
  * @param filterOptions optional - filter by fields or tags
  * @param pagination optional
  *
@@ -43,7 +43,7 @@ export const useExceptionList = ({
     tags: [],
   },
   onError,
-  dispatchListsInReducer,
+  onSuccess,
 }: UseExceptionListProps): ReturnExceptionListAndItems => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionList[]>([]);
   const [exceptionItems, setExceptionListItems] = useState<ExceptionListItemSchema[]>([]);
@@ -116,8 +116,8 @@ export const useExceptionList = ({
               exceptions = [...exceptions, ...fetchListItemsResult.data];
               setExceptionListItems(exceptions);
 
-              if (dispatchListsInReducer != null) {
-                dispatchListsInReducer({
+              if (onSuccess != null) {
+                onSuccess({
                   exceptions,
                   lists: exceptionListsReturned,
                   pagination: {

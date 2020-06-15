@@ -86,7 +86,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
           defaultMessage: 'Policy',
         }),
-        description: details.endpoint.policy.id,
+        description: details.endpoint.policy.applied.id,
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
@@ -137,15 +137,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.agent.version,
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     details.agent.version,
-    details.endpoint.policy.id,
+    details.endpoint.policy.applied.id,
     details.host.hostname,
     details.host.ip,
-    policyResponseUri.search,
-    policyStatusClickHandler,
     policyStatus,
+    policyResponseUri,
+    policyStatusClickHandler,
   ]);
 
   return (
