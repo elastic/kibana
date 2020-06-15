@@ -9,6 +9,7 @@ import {
   AnnotationDomainTypes,
   LineAnnotation,
   LineAnnotationDatum,
+  LineAnnotationStyle,
 } from '@elastic/charts';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
@@ -34,18 +35,11 @@ const PercentileMarker = styled.span`
 export const PercentileAnnotations = ({ percentiles }: Props) => {
   const dataValues = generateAnnotationData(percentiles) ?? [];
 
-  const style = {
+  const style: Partial<LineAnnotationStyle> = {
     line: {
       strokeWidth: 1,
       stroke: euiLightVars.euiColorSecondary,
       opacity: 1,
-    },
-    details: {
-      fontSize: 12,
-      fontFamily: 'Arial',
-      fontStyle: 'bold',
-      fill: 'gray',
-      padding: 0,
     },
   };
 
