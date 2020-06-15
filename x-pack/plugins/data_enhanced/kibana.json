@@ -7,7 +7,8 @@
   ],
   "requiredPlugins": [
     "security",
-    "data"
+    "data",
+    "taskManager"
   ],
   "server": true,
   "ui": true

@@ -19,12 +19,20 @@ import {
   backgroundSession,
   registerBackgroundSessionGetRoute,
   registerBackgroundSessionSaveRoute,
+  registerBackgroundSessionsTask,
+  scheduleBackgroundSessionsTasks,
 } from './background_session';
 import { SecurityPluginSetup } from '../../security/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 
 interface SetupDependencies {
   data: DataPluginSetup;
   security: SecurityPluginSetup;
+  taskManager: TaskManagerSetupContract;
+}
+
+interface StartDependencies {
+  taskManager: TaskManagerStartContract;
 }
 
 export interface DataEnhancedStart {
@@ -62,9 +70,11 @@ export class EnhancedDataServerPlugin
     const router = core.http.createRouter();
     registerBackgroundSessionGetRoute(router);
     registerBackgroundSessionSaveRoute(router);
+
+    registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { taskManager }: StartDependencies) {
     const internalApiCaller = core.elasticsearch.legacy.client.callAsInternalUser;
     const updateExpirationHandler = updateExpirationProvider(internalApiCaller);
     this.backgroundSessionService = new BackgroundSessionService(
@@ -73,6 +83,8 @@ export class EnhancedDataServerPlugin
       updateExpirationHandler,
       this.logger
     );
+
+    scheduleBackgroundSessionsTasks(taskManager, this.logger);
 
     return {
       backgroundSession: this.backgroundSessionService,
