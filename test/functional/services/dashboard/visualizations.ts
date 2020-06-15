@@ -141,7 +141,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
     }
 
     async createAndEmbedMetric(name: string) {
-      log.debug(`createAndEmbedMarkdown(${name})`);
+      log.debug(`createAndEmbedMetric(${name})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
