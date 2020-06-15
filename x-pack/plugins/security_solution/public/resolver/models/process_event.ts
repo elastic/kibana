@@ -81,7 +81,7 @@ export function uniquePidForProcess(passedEvent: ResolverEvent): string {
 /**
  * Returns the pid for the process on the host
  */
-export function hostPidForProcess(passedEvent: ResolverEvent): string {
+export function processPid(passedEvent: ResolverEvent): string {
   if (event.isLegacyEvent(passedEvent)) {
     return String(passedEvent.endgame.unique_pid);
   } else {
@@ -103,7 +103,7 @@ export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | 
 /**
  * Returns the process event's parent pid
  */
-export function hostParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
+export function processParentPid(passedEvent: ResolverEvent): string | undefined {
   if (event.isLegacyEvent(passedEvent)) {
     return String(passedEvent.endgame.unique_ppid);
   } else {
@@ -115,7 +115,7 @@ export function hostParentPidForProcess(passedEvent: ResolverEvent): string | un
 /**
  * Returns the process event's path on its host
  */
-export function hostPathForProcess(passedEvent: ResolverEvent): string | undefined {
+export function processPath(passedEvent: ResolverEvent): string | undefined {
   if (event.isLegacyEvent(passedEvent)) {
     return passedEvent.endgame.process_path;
   } else {

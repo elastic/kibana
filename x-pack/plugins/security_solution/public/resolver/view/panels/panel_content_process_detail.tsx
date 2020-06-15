@@ -17,10 +17,10 @@ import styled from 'styled-components';
 import * as event from '../../../../common/endpoint/models/event';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
-  hostPathForProcess,
-  hostPidForProcess,
+  processPath,
+  processPid,
   userInfoForProcess,
-  hostParentPidForProcess,
+  processParentPid,
   md5HashForProcess,
   argsForProcess,
 } from '../../models/process_event';
@@ -60,10 +60,10 @@ export const ProcessDetails = memo(function ProcessDetails({
           })]: dateTime,
           [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.path', {
             defaultMessage: 'Path',
-          })]: hostPathForProcess(processEvent),
+          })]: processPath(processEvent),
           [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.pid', {
             defaultMessage: 'PID',
-          })]: hostPidForProcess(processEvent),
+          })]: processPid(processEvent),
           [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.user', {
             defaultMessage: 'User',
           })]: (userInfoForProcess(processEvent) as { name: string; domain: string }).name,
@@ -74,7 +74,7 @@ export const ProcessDetails = memo(function ProcessDetails({
               {
                 defaultMessage: 'Parent PID',
               }
-            )]: hostParentPidForProcess(processEvent),
+            )]: processParentPid(processEvent),
           })]: (userInfoForProcess(processEvent) as { name: string; domain: string }).domain,
           [i18n.translate('xpack.securitySolution.enpoint.resolver.panel.processDescList.md5hash', {
             defaultMessage: 'MD5',
