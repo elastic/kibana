@@ -99,7 +99,6 @@ image:images/whats-new/7-8-treemap.png[Treemap visualization]
 === Menu updates for Canvas
 
 {kibana-ref}/lens.html[Canvas] has a new top-level menu that makes it easier for you to find the options to create, customize, and share your workpads.
-The menu also includes actions for viewing, editing, and sharing your data.
 
 [role="screenshot"]
 image:images/whats-new/7-8-canvas.png[Top-level menu in Canvas]
