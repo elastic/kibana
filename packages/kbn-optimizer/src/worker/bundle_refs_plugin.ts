@@ -162,6 +162,7 @@ export class BundleRefsPlugin {
       const resolvedEntry = await this.cachedResolveRequest(ref.contextDir, ref.entry);
       if (resolved === resolvedEntry) {
         matchingRef = ref;
+        break;
       }
     }
 
