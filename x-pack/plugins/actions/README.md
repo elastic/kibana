@@ -293,7 +293,7 @@ The following table describes the properties of the `options` object.
 
 ## Example
 
-As wit hthe previous example, we'll use the action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` to send an email. 
+As with the previous example, we'll use the action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` to send an email. 
 
 ```typescript
 const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
