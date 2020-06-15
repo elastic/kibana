@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chroma from 'chroma-js';
 import tinycolor from 'tinycolor2';
 import {
+  // @ts-ignore
   euiPaletteForStatus,
+  // @ts-ignore
   euiPaletteForTemperature,
+  // @ts-ignore
   euiPaletteCool,
+  // @ts-ignore
   euiPaletteWarm,
+  // @ts-ignore
   euiPaletteNegative,
+  // @ts-ignore
   euiPalettePositive,
+  // @ts-ignore
   euiPaletteGray,
+  // @ts-ignore
   euiPaletteColorBlind,
 } from '@elastic/eui/lib/services';
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
@@ -108,7 +115,7 @@ export function getColorPalette(colorPaletteId: string): string[] {
   const colorPalette = COLOR_PALETTES.find(({ value }: EuiColorPalettePickerPaletteProps) => {
     return value === colorPaletteId;
   });
-  return colorPalette ? colorPalette.palette : [];
+  return colorPalette ? (colorPalette.palette as string[]) : [];
 }
 
 export function getColorRampCenterColor(colorPaletteId: string): string | null {
