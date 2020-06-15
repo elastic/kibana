@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   getNavigation,
@@ -39,7 +39,6 @@ export function MapsTopNavMenu({
   setRefreshConfig,
   setRefreshStoreConfig,
   initialLayerListConfig,
-  isVisible,
   indexPatterns,
   updateFiltersAndDispatch,
   isSaveDisabled,
@@ -50,6 +49,7 @@ export function MapsTopNavMenu({
   inspectorAdapters,
   syncAppAndGlobalState,
   currentPath,
+  isOpenSettingsDisabled,
 }) {
   const { TopNavMenu } = getNavigation().ui;
   const { filterManager } = getData().query;
@@ -66,12 +66,10 @@ export function MapsTopNavMenu({
   };
 
   // Nav settings
-  const [isOpenSettingsDisabled, setIsOpenSettingsDisabled] = useState(false);
   const config = getTopNavConfig(
     savedMap,
     initialLayerListConfig,
     isOpenSettingsDisabled,
-    setIsOpenSettingsDisabled,
     isSaveDisabled,
     closeFlyout,
     enableFullScreen,
@@ -100,7 +98,7 @@ export function MapsTopNavMenu({
     });
   };
 
-  return isVisible ? (
+  return (
     <TopNavMenu
       appName="maps"
       config={config}
@@ -123,14 +121,13 @@ export function MapsTopNavMenu({
       onSavedQueryUpdated={onSavedQueryUpdated}
       onClearSavedQuery={onClearSavedQuery}
     />
-  ) : null;
+  );
 }
 
 function getTopNavConfig(
   savedMap,
   initialLayerListConfig,
   isOpenSettingsDisabled,
-  setIsOpenSettingsDisabled,
   isSaveDisabled,
   closeFlyout,
   enableFullScreen,

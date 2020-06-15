@@ -12,7 +12,7 @@ import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_util
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
-import { LoadMapAndRender } from './routes/create_edit/load_map_and_render';
+import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
 
 export let goToSpecifiedPath;
 export let kbnUrlStateStorage;

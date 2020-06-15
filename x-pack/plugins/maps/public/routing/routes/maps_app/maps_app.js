@@ -37,7 +37,7 @@ import { MapsRoot } from '../../page_elements/maps_root';
 import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
-export const MapsCreateEditView = class extends React.Component {
+export const MapsAppView = class extends React.Component {
   visibleSubscription = null;
   storeSyncUnsubscribe = null;
   globalSyncUnsubscribe = null;
@@ -452,7 +452,7 @@ export const MapsCreateEditView = class extends React.Component {
       currentPath,
     } = this.state;
 
-    return (
+    return isVisible ? (
       <MapsTopNavMenu
         savedMap={savedMap}
         query={query}
@@ -468,7 +468,6 @@ export const MapsCreateEditView = class extends React.Component {
           );
         }}
         initialLayerListConfig={initialLayerListConfig}
-        isVisible={isVisible}
         indexPatterns={indexPatterns}
         updateFiltersAndDispatch={this.updateFiltersAndDispatch}
         onQuerySaved={(query) => {
@@ -485,7 +484,7 @@ export const MapsCreateEditView = class extends React.Component {
         syncAppAndGlobalState={this.syncAppAndGlobalState}
         currentPath={currentPath}
       />
-    );
+    ) : null;
   }
 
   render() {

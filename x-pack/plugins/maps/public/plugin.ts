@@ -154,6 +154,7 @@ export class MapsPlugin
       icon: 'plugins/maps/icon.svg',
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      // @ts-ignore
       async mount(context, params) {
         const [coreStart, startPlugins] = await core.getStartServices();
         bindStartCoreAndPlugins(coreStart, startPlugins);

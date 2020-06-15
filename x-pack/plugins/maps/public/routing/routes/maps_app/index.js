@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { MapsCreateEditView } from './create_edit';
+import { MapsAppView } from './maps_app';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../../../selectors/map_selectors';
 import {
@@ -59,7 +59,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedMapsCreateEditView = withRouter(
-  connect(mapStateToProps, mapDispatchToProps)(MapsCreateEditView)
-);
-export { connectedMapsCreateEditView as MapsCreateEditView };
+const connectedMapsAppView = withRouter(connect(mapStateToProps, mapDispatchToProps)(MapsAppView));
+export { connectedMapsAppView as MapsAppView };

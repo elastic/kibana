@@ -17,9 +17,11 @@ import {
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getStore } from '../../store_operations';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { getFlyoutDisplay } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state = {}) {
   return {
+    isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     inspectorAdapters: getInspectorAdapters(state),
   };
 }

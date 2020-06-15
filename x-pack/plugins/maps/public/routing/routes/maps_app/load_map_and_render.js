@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { MapsCreateEditView } from '.';
+import { MapsAppView } from '.';
 import { getMapsSavedObjectLoader } from '../../../bootstrap/services/gis_map_saved_object_loader';
 
 export const LoadMapAndRender = class extends React.Component {
@@ -27,6 +27,6 @@ export const LoadMapAndRender = class extends React.Component {
     const { savedMap } = this.state;
     const currentPath = this.props.match.url;
 
-    return savedMap ? <MapsCreateEditView savedMap={savedMap} currentPath={currentPath} /> : null;
+    return savedMap ? <MapsAppView savedMap={savedMap} currentPath={currentPath} /> : null;
   }
 };
