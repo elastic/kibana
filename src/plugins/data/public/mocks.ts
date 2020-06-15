@@ -19,7 +19,7 @@
 
 import { Plugin, IndexPatternsContract } from '.';
 import { fieldFormatsServiceMock } from './field_formats/mocks';
-import { searchSetupMock, searchStartMock } from './search/mocks';
+import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 
@@ -41,7 +41,7 @@ const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
     autocomplete: automcompleteSetupMock,
-    search: searchSetupMock,
+    search: searchServiceMock.createSetupContract(),
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
@@ -55,7 +55,7 @@ const createStartContract = (): Start => {
       createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteStartMock,
-    search: searchStartMock,
+    search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: {
