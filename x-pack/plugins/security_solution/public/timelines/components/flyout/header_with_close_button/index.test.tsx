@@ -27,7 +27,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       services: {
         application: {
           capabilities: {
-            securitySolution: {
+            siem: {
               crud: true,
             },
           },
