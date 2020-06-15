@@ -253,6 +253,33 @@ export const Expressions: React.FC<Props> = (props) => {
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
 
+  const onSelectPreviewLookbackInterval = useCallback((e) => {
+    setPreviewLookbackInterval(e.target.value);
+    setPreviewResult(null);
+  }, []);
+
+  const onClickPreview = useCallback(async () => {
+    setIsPreviewLoading(true);
+    setPreviewResult(null);
+    setPreviewError(false);
+    try {
+      const result = await getAlertPreview({
+        fetch: alertsContext.http.fetch,
+        params: {
+          ...pick(alertParams, 'criteria', 'nodeType'),
+          sourceId: alertParams.sourceId,
+          lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
+          alertInterval,
+        },
+      });
+      setPreviewResult(result);
+    } catch (e) {
+      setPreviewError(true);
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  }, [alertParams, alertInterval, alertsContext, previewLookbackInterval]);
+
   useEffect(() => {
     const md = alertsContext.metadata;
     if (!alertParams.nodeType) {
@@ -382,10 +409,7 @@ export const Expressions: React.FC<Props> = (props) => {
               <EuiSelect
                 id="selectPreviewLookbackInterval"
                 value={previewLookbackInterval}
-                onChange={(e) => {
-                  setPreviewLookbackInterval(e.target.value);
-                  setPreviewResult(null);
-                }}
+                onChange={onSelectPreviewLookbackInterval}
                 options={previewOptions}
               />
             </EuiFlexItem>
@@ -393,27 +417,7 @@ export const Expressions: React.FC<Props> = (props) => {
               <EuiButton
                 isLoading={isPreviewLoading}
                 isDisabled={isPreviewDisabled}
-                onClick={async () => {
-                  setIsPreviewLoading(true);
-                  setPreviewResult(null);
-                  setPreviewError(false);
-                  try {
-                    const result = await getAlertPreview({
-                      fetch: alertsContext.http.fetch,
-                      params: {
-                        ...pick(alertParams, 'criteria', 'nodeType'),
-                        sourceId: alertParams.sourceId,
-                        lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
-                        alertInterval,
-                      },
-                    });
-                    setPreviewResult(result);
-                  } catch (e) {
-                    setPreviewError(true);
-                  } finally {
-                    setIsPreviewLoading(false);
-                  }
-                }}
+                onClick={onClickPreview}
               >
                 {i18n.translate('xpack.infra.metrics.alertFlyout.testAlertTrigger', {
                   defaultMessage: 'Test alert trigger',
