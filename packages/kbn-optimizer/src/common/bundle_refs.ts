@@ -23,7 +23,7 @@ import { Bundle } from './bundle';
 import { UnknownVals } from './ts_helpers';
 
 export interface BundleRef {
-  id: string;
+  bundleId: string;
   contextDir: string;
   contextPrefix: string;
   entry: string;
@@ -38,7 +38,7 @@ export class BundleRefs {
           ...acc,
           ...b.publicDirNames.map(
             (name): BundleRef => ({
-              id: b.id,
+              bundleId: b.id,
               contextDir: b.contextDir,
               // Path.resolve converts separators and strips the final separator
               contextPrefix: Path.resolve(b.contextDir) + Path.sep,
@@ -75,9 +75,9 @@ export class BundleRefs {
             throw new Error('`bundleRefs[]` must be an object');
           }
 
-          const { id } = refSpec;
-          if (typeof id !== 'string') {
-            throw new Error('`bundleRefs[].id` must be a string');
+          const { bundleId } = refSpec;
+          if (typeof bundleId !== 'string') {
+            throw new Error('`bundleRefs[].bundleId` must be a string');
           }
 
           const { contextDir } = refSpec;
@@ -101,11 +101,11 @@ export class BundleRefs {
           }
 
           return {
+            bundleId,
             contextDir,
             contextPrefix,
             entry,
             exportId,
-            id,
           };
         }
       )
@@ -127,7 +127,7 @@ export class BundleRefs {
 
   public filterByContextPrefix(bundle: Bundle, absolutePath: string) {
     return this.refs.filter(
-      (ref) => ref.id !== bundle.id && absolutePath.startsWith(ref.contextPrefix)
+      (ref) => ref.bundleId !== bundle.id && absolutePath.startsWith(ref.contextPrefix)
     );
   }
 

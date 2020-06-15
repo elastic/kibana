@@ -166,7 +166,7 @@ export class BundleRefsPlugin {
     }
 
     if (!matchingRef) {
-      const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.id))).join(', ');
+      const bundleId = Array.from(new Set(eligibleRefs.map((r) => r.bundleId))).join(', ');
       const publicDir = eligibleRefs.map((r) => r.entry).join(', ');
       throw new Error(
         `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
