@@ -24,7 +24,7 @@ describe('config schema', () => {
           "enabled": true,
         },
         "elasticsearch": Object {
-          "apiVersion": "master",
+          "apiVersion": "7.x",
           "customHeaders": Object {},
           "healthCheck": Object {
             "delay": "PT2.5S",
@@ -78,7 +78,7 @@ describe('config schema', () => {
             },
           },
           "elasticsearch": Object {
-            "apiVersion": "master",
+            "apiVersion": "7.x",
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",
