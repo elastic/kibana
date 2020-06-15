@@ -135,37 +135,41 @@ export function descriptiveName(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return eventName(event);
   }
-  // For the purposes of providing a descriptive name, we're taking the first entry in the `event.type`
-  const ecsCategory = eventCategory(event);
 
   /**
    * This list of attempts can be expanded/adjusted as the underlying model changes over time:
    */
 
   // Stable, per ECS 1.5: https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html
-  if (ecsCategory === 'network' && isRecordNamable(event, ecsCategory)) {
-    if (event?.network?.forwarded_ip) {
-      return `${event?.network?.direction ? `${event?.network?.direction} ` : ''}${
-        event.network.forwarded_ip
-      }`;
+  const namableNetworkEvent = isRecordNamable(event, 'network') && event;
+  const namableFileEvent = isRecordNamable(event, 'file') && event;
+  const namableRegistryEvent = isRecordNamable(event, 'registry') && event;
+  const namableDNSEvent = isRecordNamable(event, 'dns') && event;
+
+  if (namableNetworkEvent) {
+    if (namableNetworkEvent.network.forwarded_ip) {
+      return `${
+        namableNetworkEvent.network.direction ? `${namableNetworkEvent.network.direction} ` : ''
+      }${namableNetworkEvent.network.forwarded_ip}`;
     }
   }
-  if (ecsCategory === 'file' && isRecordNamable(event, ecsCategory)) {
-    if (event?.file?.path) {
-      return `${event.file.path}`;
+
+  if (namableFileEvent) {
+    if (namableFileEvent.file.path) {
+      return `${namableFileEvent.file.path}`;
     }
   }
 
   // Extended categories (per ECS 1.5):
-  if (ecsCategory === 'registry' && isRecordNamable(event, ecsCategory)) {
-    const pathOrKey = event?.registry?.path || event?.registry?.key;
+  if (namableRegistryEvent) {
+    const pathOrKey = namableRegistryEvent.registry.path || namableRegistryEvent.registry.key;
     if (pathOrKey) {
       return `${pathOrKey}`;
     }
   }
-  if (ecsCategory === 'dns' && isRecordNamable(event, ecsCategory)) {
-    if (event?.dns?.question?.name) {
-      return `${event.dns.question.name}`;
+  if (namableDNSEvent) {
+    if (namableDNSEvent.dns.question.name) {
+      return `${namableDNSEvent.dns.question.name}`;
     }
   }
 
