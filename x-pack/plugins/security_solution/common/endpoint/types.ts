@@ -313,6 +313,9 @@ export interface AlertEvent {
     thread?: ThreadFields[];
     uptime: number;
     user: string;
+    Ext: {
+      ancestry: string[];
+    };
   };
   file: {
     owner: string;
@@ -444,6 +447,9 @@ export interface EndpointEvent {
     parent?: {
       entity_id: string;
       name?: string;
+    };
+    Ext: {
+      ancestry: string[];
     };
   };
 }

@@ -26,6 +26,7 @@ interface EventOptions {
   eventType?: string;
   eventCategory?: string | string[];
   processName?: string;
+  ancestry?: string[];
 }
 
 const Windows: HostOS[] = [
@@ -341,7 +342,8 @@ export class EndpointDocGenerator {
   public generateAlert(
     ts = new Date().getTime(),
     entityID = this.randomString(10),
-    parentEntityID?: string
+    parentEntityID?: string,
+    ancestryArray: string[] = []
   ): AlertEvent {
     return {
       ...this.commonInfo,
@@ -416,6 +418,7 @@ export class EndpointDocGenerator {
           sha1: 'fake sha1',
           sha256: 'fake sha256',
         },
+        Ext: { ancestry: ancestryArray },
       },
       dll: [
         {
@@ -469,6 +472,7 @@ export class EndpointDocGenerator {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
         name: options.processName ? options.processName : randomProcessName(),
+        Ext: { ancestry: options.ancestry?.slice() || [] },
       },
     };
   }
@@ -676,7 +680,7 @@ export class EndpointDocGenerator {
       }
     };
 
-    // generate related alerts for rootW
+    // generate related alerts for root
     const processDuration: number = 6 * 3600;
     if (this.randomN(100) < pctWithRelated) {
       addRelatedEvents(ancestor, processDuration, events);
@@ -701,6 +705,8 @@ export class EndpointDocGenerator {
       ancestor = this.generateEvent({
         timestamp,
         parentEntityID: ancestor.process.entity_id,
+        // add the parent to the ancestry array
+        ancestry: [ancestor.process.entity_id, ...ancestor.process.Ext.ancestry],
       });
       events.push(ancestor);
       timestamp = timestamp + 1000;
@@ -714,6 +720,7 @@ export class EndpointDocGenerator {
             parentEntityID: ancestor.process.parent?.entity_id,
             eventCategory: 'process',
             eventType: 'end',
+            ancestry: ancestor.process.Ext.ancestry,
           })
         );
       }
@@ -732,7 +739,12 @@ export class EndpointDocGenerator {
       }
     }
     events.push(
-      this.generateAlert(timestamp, ancestor.process.entity_id, ancestor.process.parent?.entity_id)
+      this.generateAlert(
+        timestamp,
+        ancestor.process.entity_id,
+        ancestor.process.parent?.entity_id,
+        ancestor.process.Ext.ancestry
+      )
     );
     return events;
   }
@@ -787,6 +799,10 @@ export class EndpointDocGenerator {
       const child = this.generateEvent({
         timestamp,
         parentEntityID: currentState.event.process.entity_id,
+        ancestry: [
+          currentState.event.process.entity_id,
+          ...currentState.event.process.Ext.ancestry,
+        ],
       });
 
       maxChildren = this.randomN(maxChildrenPerNode + 1);
@@ -808,6 +824,7 @@ export class EndpointDocGenerator {
           parentEntityID: child.process.parent?.entity_id,
           eventCategory: 'process',
           eventType: 'end',
+          ancestry: child.process.Ext.ancestry,
         });
       }
       if (this.randomN(100) < percentNodesWithRelated) {
@@ -852,6 +869,7 @@ export class EndpointDocGenerator {
           parentEntityID: node.process.parent?.entity_id,
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
+          ancestry: node.process.Ext.ancestry,
         });
       }
     }
@@ -870,7 +888,12 @@ export class EndpointDocGenerator {
   ) {
     for (let i = 0; i < relatedAlerts; i++) {
       const ts = node['@timestamp'] + this.randomN(alertCreationTime) * 1000;
-      yield this.generateAlert(ts, node.process.entity_id, node.process.parent?.entity_id);
+      yield this.generateAlert(
+        ts,
+        node.process.entity_id,
+        node.process.parent?.entity_id,
+        node.process.Ext.ancestry
+      );
     }
   }
 
