@@ -5,6 +5,7 @@
  */
 
 /* eslint-disable react-hooks/rules-of-hooks, complexity */
+// TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
   EuiButton,

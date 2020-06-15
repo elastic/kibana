@@ -10,8 +10,9 @@ import React from 'react';
 import { formatTimestampToDuration } from '../../../common/format_timestamp_to_duration';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { EuiLink } from '@elastic/eui';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
-export function FormattedAlert({ prefix, suffix, message, metadata, changeUrl }) {
+export function FormattedAlert({ prefix, suffix, message, metadata }) {
   const formattedAlert = (() => {
     if (metadata && metadata.link) {
       if (metadata.link.startsWith('https')) {
@@ -22,10 +23,8 @@ export function FormattedAlert({ prefix, suffix, message, metadata, changeUrl })
         );
       }
 
-      const goToLink = () => changeUrl(`/${metadata.link}`);
-
       return (
-        <EuiLink onClick={goToLink} data-test-subj="alertAction">
+        <EuiLink href={getSafeForExternalLink(`#/${metadata.link}`)} data-test-subj="alertAction">
           {message}
         </EuiLink>
       );

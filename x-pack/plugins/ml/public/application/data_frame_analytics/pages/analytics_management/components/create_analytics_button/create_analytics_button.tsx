@@ -35,7 +35,7 @@ export const CreateAnalyticsButton: FC<Props> = ({
       data-test-subj="mlAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create analytics job',
+        defaultMessage: 'Create job',
       })}
     </EuiButton>
   );
