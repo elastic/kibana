@@ -7,7 +7,11 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../plugins/maps/public';
+import {
+  MapEmbeddable,
+  MapEmbeddableInput,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/maps/public/embeddable';
 import * as i18n from './translations';
 import { Location } from '../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
