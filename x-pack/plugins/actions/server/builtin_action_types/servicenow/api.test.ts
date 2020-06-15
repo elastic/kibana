@@ -62,7 +62,7 @@ describe('api', () => {
       });
 
       test('it calls createIncident correctly', async () => {
-        const params = { ...apiParams, externalId: null };
+        const params = { ...apiParams, externalId: null, comments: undefined };
         await api.pushToService({ externalService, mapping, params, secrets: {} });
 
         expect(externalService.createIncident).toHaveBeenCalledWith({
@@ -81,41 +81,25 @@ describe('api', () => {
         await api.pushToService({ externalService, mapping, params, secrets: {} });
         expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
-          incidentId: 'incident-1',
-          comment: {
-            commentId: 'case-comment-1',
-            comment: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
-            updatedAt: '2020-03-13T08:34:53.450Z',
-            updatedBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
+          incident: {
+            comments: 'A comment',
+            description:
+              'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+            short_description:
+              'Incident title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          field: 'comments',
+          incidentId: null,
         });
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
-          incidentId: 'incident-1',
-          comment: {
-            commentId: 'case-comment-2',
-            comment: 'Another comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
-            updatedAt: '2020-03-13T08:34:53.450Z',
-            updatedBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
+          incident: {
+            comments: 'Another comment',
+            description:
+              'Incident description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+            short_description:
+              'Incident title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          field: 'comments',
+          incidentId: null,
         });
       });
     });
@@ -180,46 +164,29 @@ describe('api', () => {
         expect(externalService.createIncident).not.toHaveBeenCalled();
       });
 
-      test('it calls createComment correctly', async () => {
+      test('it calls updateIncident to create a comments correctly', async () => {
         const params = { ...apiParams };
         await api.pushToService({ externalService, mapping, params, secrets: {} });
-        expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
+        expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
-          incidentId: 'incident-2',
-          comment: {
-            commentId: 'case-comment-1',
-            comment: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
-            updatedAt: '2020-03-13T08:34:53.450Z',
-            updatedBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
+          incidentId: 'incident-3',
+          incident: {
+            description:
+              'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+            short_description:
+              'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          field: 'comments',
         });
 
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
-          incidentId: 'incident-2',
-          comment: {
-            commentId: 'case-comment-2',
-            comment: 'Another comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
-            updatedAt: '2020-03-13T08:34:53.450Z',
-            updatedBy: {
-              fullName: 'Elastic User',
-              username: 'elastic',
-            },
+          incident: {
+            comments: 'A comment',
+            description:
+              'Incident description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+            short_description:
+              'Incident title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
           },
-          field: 'comments',
+          incidentId: 'incident-3',
         });
       });
     });
@@ -531,7 +498,7 @@ describe('api', () => {
         });
 
         await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
-        expect(externalService.updateIncident).not.toHaveBeenCalled();
+        expect(externalService.updateIncident).toHaveBeenCalledTimes(1);
       });
     });
   });

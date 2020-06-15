@@ -63,25 +63,30 @@ const pushToServiceHandler = async ({
   }
 
   // TODO: should temporary keep it for a Case usage
+  if (updateIncident) {
+    res = await externalService.updateIncident({
+      incidentId: externalId,
+      incident,
+    });
+  } else {
+    res = await externalService.createIncident({
+      incident: {
+        ...incident,
+        caller_id: secrets.username,
+      },
+    });
+  }
   if (
-    updateIncident &&
     comments &&
     Array.isArray(comments) &&
     comments.length > 0 &&
     mapping &&
     mapping.get('comments')?.actionType !== 'nothing'
   ) {
-    const resComments = [];
+    res.comments = [];
+
     const fieldsKey = mapping.get('comments')?.target ?? 'comments';
-    res = await externalService.updateIncident({
-      incidentId: externalId,
-      incident: {
-        ...incident,
-        [fieldsKey]: comments[0].comment,
-      },
-    });
-    for (let i = 1; i < comments.length; i++) {
-      const currentComment = comments[i];
+    for (const currentComment of comments) {
       await externalService.updateIncident({
         incidentId: externalId,
         incident: {
@@ -89,25 +94,16 @@ const pushToServiceHandler = async ({
           [fieldsKey]: currentComment.comment,
         },
       });
-      resComments.push(...(res.comments ?? []), {
-        commentId: currentComment.commentId,
-        pushedDate: res.pushedDate,
-      });
+      res.comments = [
+        ...(res.comments ?? []),
+        {
+          commentId: currentComment.commentId,
+          pushedDate: res.pushedDate,
+        },
+      ];
     }
-    res.comments = resComments;
-    return res;
-  } else if (updateIncident) {
-    return await externalService.updateIncident({
-      incidentId: externalId,
-      incident,
-    });
   }
-  return await externalService.createIncident({
-    incident: {
-      ...incident,
-      caller_id: secrets.username,
-    },
-  });
+  return res;
 };
 
 export const transformFields = ({
