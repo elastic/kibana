@@ -54,9 +54,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--server.ssl.enabled=true',
         `--server.ssl.key=${KBN_KEY_PATH}`,
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
-        `--server.ssl.certificateAuthorities=${JSON.stringify([CA_CERT_PATH])}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
-        // '--xpack.security.sameSiteCookies=None',
+        '--xpack.security.sameSiteCookies=None',
         '--xpack.security.secureCookies=true',
       ],
     },
