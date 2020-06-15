@@ -13,7 +13,7 @@ Example command sequence to get ES and kibana running with sample data after ins
 
 `yarn es snapshot` -> starts ES
 
-`npx yarn start --xpack.securitySolution.endpoint.enabled=true --no-base-path` -> starts kibana
+`npx yarn start --xpack.securitySolution.enabled=true --no-base-path` -> starts kibana
 
 `cd ~/path/to/kibana/x-pack/plugins/endpoint`
 
@@ -27,17 +27,15 @@ Options:
   --seed, -s                     random seed to use for document generator
                                                                         [string]
   --node, -n                     elasticsearch node url
-                                     [string] [default: "http://localhost:9200"]
-  --alertIndex, --ai             index to store alerts in
-                                         [string] [default: "events-endpoint-1"]
+                    [string] [default: "http://elastic:changeme@localhost:9200"]
+  --kibana, -k                   kibana url
+                    [string] [default: "http://elastic:changeme@localhost:5601"]
   --eventIndex, --ei             index to store events in
                                          [string] [default: "events-endpoint-1"]
   --metadataIndex, --mi          index to store host metadata in
-                                [string] [default: "metrics-endpoint-default-1"]
+                       [string] [default: "metrics-endpoint.metadata-default-1"]
   --policyIndex, --pi            index to store host policy in
                          [string] [default: "metrics-endpoint.policy-default-1"]
-  --auth                         elasticsearch username and password, separated
-                                 by a colon                             [string]
   --ancestors, --anc             number of ancestors of origin to create
                                                            [number] [default: 3]
   --generations, --gen           number of child generations to create
@@ -61,8 +59,4 @@ Options:
                                                            [number] [default: 1]
   --delete, -d                   delete indices and remake them
                                                       [boolean] [default: false]
-  --setupOnly, --so              Run only the index and pipeline creation then
-                                 exit. This is intended to be used to set up the
-                                 Endpoint App for use with the real Elastic
-                                 Endpoint.            [boolean] [default: false]
 ```

@@ -528,7 +528,7 @@ export type ExistsFilter = Filter & {
 // Warning: (ae-forgotten-export) The symbol "ShorthandFieldMapObject" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => Record<string, FieldMappingSpec>;
+export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => MappingObject;
 
 // Warning: (ae-forgotten-export) The symbol "SavedObjectReference" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "extractReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -980,13 +980,8 @@ export type IMetricAggType = MetricAggType;
 //
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
-    // Warning: (ae-forgotten-export) The symbol "IIndexPatternsApiClient" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "PatternCache" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "FieldFormatsStartCommon" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnError" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "OnUnsupportedTimePattern" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: PatternCache, fieldFormats: FieldFormatsStartCommon, onNotification: OnNotification, onError: OnError, onUnsupportedTimePattern: OnUnsupportedTimePattern);
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, onUnsupportedTimePattern, }: IndexPatternDeps);
     // (undocumented)
     [key: string]: any;
     // (undocumented)

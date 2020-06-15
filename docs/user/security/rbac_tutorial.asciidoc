@@ -1,5 +1,5 @@
 [[space-rbac-tutorial]]
-=== Tutorial:  Use role-based access control to customize Kibana spaces
+=== Tutorial: Use role-based access control to customize Kibana spaces
 
 With role-based access control (RBAC), you can provide users access to data, tools,
 and Kibana spaces.  In this tutorial, you will learn how to configure roles
@@ -45,7 +45,7 @@ through in this tutorial:
 [float]
 ==== Create a role
 
-Go to **Management > Roles**
+Open the menu, then go to *Stack Management > Security > Roles*
 for an overview of your roles.  This view provides actions
 for you to create, edit, and delete roles.
 
@@ -88,11 +88,11 @@ to create saved searches while designing visualizations.
 image::security/images/role-space-visualization.png["Associate space"]
 
 [float]
-==== Create the developer's user account with the proper roles
+==== Create the developer user account with the proper roles
 
-Go to **Management > Users** and click on **Create user** to create a
-user.  Give the user the `dev-mortgage` role
-and the `monitoring-user` role, which is required for users of **Stack Monitoring**.
+. Open the menu, then go to *Stack Management > Users*.
+. Click **Create user**, then give the user the `dev-mortgage`
+and `monitoring-user` roles, which are required for *Stack Monitoring* users.
 
 [role="screenshot"]
 image::security/images/role-new-user.png["Developer user"]

@@ -26,7 +26,6 @@ import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
 
 export interface ReportingInternalSetup {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
   basePath: BasePath['get'];
@@ -44,6 +43,7 @@ interface ReportingInternalStart {
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
+  private browserDriverFactory?: HeadlessChromiumDriverFactory;
   private readonly pluginSetup$ = new Rx.ReplaySubject<ReportingInternalSetup>();
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
   private exportTypesRegistry = getExportTypesRegistry();
@@ -61,6 +61,10 @@ export class ReportingCore {
 
   public pluginHasStarted(): Promise<boolean> {
     return this.pluginStart$.pipe(first(), mapTo(true)).toPromise();
+  }
+
+  public setBrowserDriverFactory(browserDriverFactory: HeadlessChromiumDriverFactory) {
+    this.browserDriverFactory = browserDriverFactory;
   }
 
   /*
@@ -93,7 +97,10 @@ export class ReportingCore {
   }
 
   public getScreenshotsObservable(): ScreenshotsObservableFn {
-    const { browserDriverFactory } = this.getPluginSetupDeps();
+    const { browserDriverFactory } = this;
+    if (!browserDriverFactory) {
+      throw new Error(`"browserDriverFactory" dependency hasn't initialized yet`);
+    }
     return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
   }
 
