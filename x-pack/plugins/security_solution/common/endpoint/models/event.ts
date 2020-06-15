@@ -53,7 +53,10 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   return event.process.parent?.entity_id;
 }
 
-export function eventType(event: ResolverEvent): string {
+/**
+ * @param event The event to get the category for
+ */
+export function eventCategory(event: ResolverEvent): string {
   // Returning "Process" as a catch-all here because it seems pretty general
   let eventCategoryToReturn: string = 'Process';
   if (isLegacyEvent(event)) {
@@ -63,11 +66,11 @@ export function eventType(event: ResolverEvent): string {
     }
   } else {
     const eventCategories = event.event.category;
-    const eventCategory =
+    const category =
       typeof eventCategories === 'string' ? eventCategories : eventCategories[0] || '';
 
-    if (eventCategory) {
-      eventCategoryToReturn = eventCategory;
+    if (category) {
+      eventCategoryToReturn = category;
     }
   }
   return eventCategoryToReturn;
@@ -133,7 +136,7 @@ export function descriptiveName(event: ResolverEvent): string {
     return eventName(event);
   }
   // For the purposes of providing a descriptive name, we're taking the first entry in the `event.type`
-  const ecsCategory = eventType(event);
+  const ecsCategory = eventCategory(event);
 
   /**
    * This list of attempts can be expanded/adjusted as the underlying model changes over time:

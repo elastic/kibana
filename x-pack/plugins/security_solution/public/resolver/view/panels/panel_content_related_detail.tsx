@@ -154,9 +154,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       (evt) => event.eventId(evt) === relatedEventId
     );
     // For breadcrumbs:
-    const specificCategory = specificEvent && event.eventType(specificEvent);
+    const specificCategory = specificEvent && event.eventCategory(specificEvent);
     const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
-      return event.eventType(evt) === specificCategory ? sumtotal + 1 : sumtotal;
+      return event.eventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
     }, 0);
     return [specificEvent, countOfCategory, specificCategory || naString];
   }, [relatedEventsForThisProcess, naString, relatedEventId]);
