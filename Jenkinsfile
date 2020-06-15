@@ -3,9 +3,6 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-node('linux && immutable') {
-  checkout scm
-  dir('kibana') {
-    sh '.ci/packer_cache.sh'
-  }
+workers.base(bootstrapped: false, ramdisk: false, size: 's') {
+  sh '.ci/packer_cache.sh'
 }
