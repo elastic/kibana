@@ -17,10 +17,6 @@ const BadgeItem = styled.div`
   }
 `;
 
-const TextStyle = styled.div`
-  font-weight: 600;
-`;
-
 interface Props {
   color: string;
   label: string;
@@ -31,7 +27,7 @@ export const TagLabel: React.FC<Props> = ({ color, label }) => {
     <BadgeItem>
       <EuiBadge color={color}>
         <EuiText size="s">
-          <TextStyle>{label}</TextStyle>
+          <h4>{label}</h4>
         </EuiText>
       </EuiBadge>
     </BadgeItem>

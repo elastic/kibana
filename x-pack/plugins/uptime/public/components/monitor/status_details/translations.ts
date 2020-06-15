@@ -84,14 +84,14 @@ export const ChangeToListView = i18n.translate(
 export const LocationLabel = i18n.translate(
   'xpack.uptime.monitorStatusBar.monitor.availabilityReport.location',
   {
-    defaultMessage: 'Location.',
+    defaultMessage: 'Location',
   }
 );
 
 export const AvailabilityLabel = i18n.translate(
   'xpack.uptime.monitorStatusBar.monitor.availabilityReport.availability',
   {
-    defaultMessage: 'availability',
+    defaultMessage: 'Availability',
   }
 );
 

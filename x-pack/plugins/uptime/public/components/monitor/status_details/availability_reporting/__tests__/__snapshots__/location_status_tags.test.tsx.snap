@@ -37,10 +37,6 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
   display: inline-block;
 }
 
-.c2 {
-  font-weight: 600;
-}
-
 .c0 {
   max-height: 246px;
   overflow: hidden;
@@ -83,7 +79,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Location.
+                  Location
                 </span>
               </div>
             </th>
@@ -99,7 +95,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class="euiTableCellContent__text"
                 >
-                  availability
+                  Availability
                 </span>
               </div>
             </th>
@@ -131,7 +127,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -152,11 +148,9 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Berlin
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -170,7 +164,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -210,7 +204,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -231,11 +225,9 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Islamabad
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -249,7 +241,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -293,10 +285,6 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
   display: inline-block;
 }
 
-.c2 {
-  font-weight: 600;
-}
-
 .c0 {
   max-height: 246px;
   overflow: hidden;
@@ -339,7 +327,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Location.
+                  Location
                 </span>
               </div>
             </th>
@@ -355,7 +343,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class="euiTableCellContent__text"
                 >
-                  availability
+                  Availability
                 </span>
               </div>
             </th>
@@ -387,7 +375,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -408,11 +396,9 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Berlin
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -426,7 +412,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -466,7 +452,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -487,11 +473,9 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Islamabad
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -505,7 +489,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -549,10 +533,6 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
   display: inline-block;
 }
 
-.c2 {
-  font-weight: 600;
-}
-
 .c0 {
   max-height: 246px;
   overflow: hidden;
@@ -595,7 +575,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Location.
+                  Location
                 </span>
               </div>
             </th>
@@ -611,7 +591,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  availability
+                  Availability
                 </span>
               </div>
             </th>
@@ -643,7 +623,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -664,11 +644,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Berlin
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -682,7 +660,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -722,7 +700,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -743,11 +721,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Islamabad
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -761,7 +737,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -801,7 +777,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -822,11 +798,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             New York
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -840,7 +814,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -880,7 +854,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -901,11 +875,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Paris
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -919,7 +891,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -959,7 +931,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -980,11 +952,9 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c2"
-                          >
+                          <h4>
                             Sydney
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -998,7 +968,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"

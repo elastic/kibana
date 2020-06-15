@@ -14,10 +14,6 @@ Array [
   display: inline-block;
 }
 
-.c1 {
-  font-weight: 600;
-}
-
 @media (max-width:1042px) {
   .c0 {
     display: inline-block;
@@ -49,7 +45,7 @@ Array [
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Location.
+                  Location
                 </span>
               </div>
             </th>
@@ -65,7 +61,7 @@ Array [
                 <span
                   class="euiTableCellContent__text"
                 >
-                  availability
+                  Availability
                 </span>
               </div>
             </th>
@@ -97,7 +93,7 @@ Array [
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -118,11 +114,9 @@ Array [
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c1"
-                          >
+                          <h4>
                             au-heartbeat
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -136,7 +130,7 @@ Array [
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -176,7 +170,7 @@ Array [
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -197,11 +191,9 @@ Array [
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c1"
-                          >
+                          <h4>
                             nyc-heartbeat
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -215,7 +207,7 @@ Array [
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -255,7 +247,7 @@ Array [
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Location.
+                Location
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -276,11 +268,9 @@ Array [
                         <div
                           class="euiText euiText--small"
                         >
-                          <div
-                            class="c1"
-                          >
+                          <h4>
                             spa-heartbeat
-                          </div>
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -294,7 +284,7 @@ Array [
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                availability
+                Availability
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -342,14 +332,14 @@ exports[`AvailabilityReporting component shallow renders correctly against snaps
       Array [
         Object {
           "field": "label",
-          "name": "Location.",
+          "name": "Location",
           "render": [Function],
           "truncateText": true,
         },
         Object {
           "align": "right",
           "field": "availability",
-          "name": "availability",
+          "name": "Availability",
           "render": [Function],
         },
         Object {

@@ -6,10 +6,6 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
   display: inline-block;
 }
 
-.c1 {
-  font-weight: 600;
-}
-
 @media (max-width:1042px) {
   .c0 {
     display: inline-block;
@@ -33,11 +29,9 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
         <div
           class="euiText euiText--small"
         >
-          <div
-            class="c1"
-          >
+          <h4>
             US-East
-          </div>
+          </h4>
         </div>
       </span>
     </span>
@@ -53,9 +47,9 @@ exports[`TagLabel component shallow render correctly against snapshot 1`] = `
     <EuiText
       size="s"
     >
-      <styled.div>
+      <h4>
         US-East
-      </styled.div>
+      </h4>
     </EuiText>
   </EuiBadge>
 </styled.div>
