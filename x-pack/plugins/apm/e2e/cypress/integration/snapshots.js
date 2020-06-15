@@ -1,5 +1,5 @@
 module.exports = {
-  "__version": "4.5.0",
+  __version: "4.5.0",
   "RUM Dashboard": {
     "Client metrics": {
       "1": "77.52 seconds",

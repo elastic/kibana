@@ -12,7 +12,7 @@ import { IndexManagementPluginSetup } from '../../index_management/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { License } from './services';
 import { IndexPatternsFetcher } from './shared_imports';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
