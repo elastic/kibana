@@ -12,6 +12,7 @@ export * from './fleet_setup';
 export * from './epm';
 export * from './enrollment_api_key';
 export * from './install_script';
+export * from './ingest_setup';
 export * from './output';
 export * from './settings';
 export * from './app';
