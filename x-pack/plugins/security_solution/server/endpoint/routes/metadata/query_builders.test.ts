@@ -5,9 +5,9 @@
  */
 import { httpServerMock, loggingServiceMock } from '../../../../../../../src/core/server/mocks';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
-import { MetadataIndexPattern } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -22,7 +22,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        MetadataIndexPattern
+        metadataIndexPattern
       );
       expect(query).toEqual({
         body: {
@@ -54,7 +54,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: MetadataIndexPattern,
+        index: metadataIndexPattern,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as Record<string, any>);
     });
@@ -74,7 +74,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        MetadataIndexPattern
+        metadataIndexPattern
       );
       expect(query).toEqual({
         body: {
@@ -119,7 +119,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: MetadataIndexPattern,
+        index: metadataIndexPattern,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as Record<string, any>);
     });
@@ -128,7 +128,7 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, MetadataIndexPattern);
+      const query = getESQueryHostMetadataByID(mockID, metadataIndexPattern);
 
       expect(query).toEqual({
         body: {
@@ -136,7 +136,7 @@ describe('query builder', () => {
           sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },
-        index: MetadataIndexPattern,
+        index: metadataIndexPattern,
       });
     });
   });
