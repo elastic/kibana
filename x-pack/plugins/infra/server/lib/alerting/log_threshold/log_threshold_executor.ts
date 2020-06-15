@@ -123,7 +123,7 @@ const processGroupByResults = (
 
   const groupResults = results.reduce<ReducedGroupByResults[]>((acc, groupBucket) => {
     const groupName = Object.values(groupBucket.key).join(', ');
-    const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
+    const groupResult = { name: groupName, documentCount: groupBucket.filtered_results.doc_count };
     return [...acc, groupResult];
   }, []);
 
@@ -169,19 +169,17 @@ const buildFiltersFromCriteria = (params: LogDocumentCountAlertParams, timestamp
   // Negative assertions (things that "must not" match)
   const mustNotFilters = buildFiltersForCriteria(negativeCriteria);
 
-  const rangeFilters = [
-    {
-      range: {
-        [timestampField]: {
-          gte: from,
-          lte: to,
-          format: 'epoch_millis',
-        },
+  const rangeFilter = {
+    range: {
+      [timestampField]: {
+        gte: from,
+        lte: to,
+        format: 'epoch_millis',
       },
     },
-  ];
+  };
 
-  return { rangeFilters, mustFilters, mustNotFilters };
+  return { rangeFilter, mustFilters, mustNotFilters };
 };
 
 const getGroupedESQuery = (
@@ -195,10 +193,29 @@ const getGroupedESQuery = (
     return;
   }
 
-  const { rangeFilters, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+  const timestampField = sourceConfiguration.fields.timestamp;
+
+  const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
-    sourceConfiguration.fields.timestamp
+    timestampField
   );
+
+  // For group by scenarios we'll pad the interval by 20% on the left (lte) and right (gte), this is so
+  // a wider net is cast to "capture" the groups. This is to account for scenarios where we want ascertain if
+  // there were "no documents" (less than 1 for example). In these cases we may be missing documents to build the groups
+  // and match (or not match) the criteria.
+  const interval = rangeFilter.range[timestampField].lte - rangeFilter.range[timestampField].gte;
+  const twentyPercentOfInterval = (20 / 100) * interval;
+
+  const paddedRangeFilter = {
+    range: {
+      [timestampField]: {
+        gte: rangeFilter.range[timestampField].gte - twentyPercentOfInterval,
+        lte: rangeFilter.range[timestampField].lte + twentyPercentOfInterval,
+        format: 'epoch_millis',
+      },
+    },
+  };
 
   const aggregations = {
     groups: {
@@ -210,13 +227,22 @@ const getGroupedESQuery = (
           },
         })),
       },
+      aggregations: {
+        filtered_results: {
+          filter: {
+            bool: {
+              must: mustFilters,
+            },
+          },
+        },
+      },
     },
   };
 
   const body = {
     query: {
       bool: {
-        filter: [...rangeFilters, ...mustFilters],
+        filter: [paddedRangeFilter],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
@@ -237,7 +263,7 @@ const getUngroupedESQuery = (
   sourceConfiguration: InfraSource['configuration'],
   index: string
 ): object => {
-  const { rangeFilters, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+  const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     sourceConfiguration.fields.timestamp
   );
@@ -247,7 +273,7 @@ const getUngroupedESQuery = (
     track_total_hits: true,
     query: {
       bool: {
-        filter: [...rangeFilters, ...mustFilters],
+        filter: [rangeFilter, ...mustFilters],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },

@@ -144,6 +144,9 @@ export const GroupedSearchQueryResponseRT = rt.intersection([
             rt.type({
               key: rt.record(rt.string, rt.string),
               doc_count: rt.number,
+              filtered_results: rt.type({
+                doc_count: rt.number,
+              }),
             })
           ),
         }),
