@@ -53,6 +53,13 @@ Metrics::
 * Refactors action messaging to report on No Data state {pull}64365[#64365]
 
 [float]
+[[known-issues-7.8.0]]
+=== Known issue
+
+SIEM::
+* When you duplicate a rule with a deleted action connector, the duplication fails {issue}69142[#69142]
+
+[float]
 [[enhancement-7.8.0]]
 === Enhancements
 Alerting::
