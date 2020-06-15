@@ -51,21 +51,21 @@ const DisplayList = memo(function DisplayList({
           return (
             <Fragment key={index}>
               <EuiText>
-              <BoldCode>
+                <BoldCode>
+                  <FormattedMessage
+                    id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
+                    values={{
+                      category: eventView.eventCategory,
+                      eventType: eventView.eventType,
+                    }}
+                    defaultMessage="{category} {eventType}"
+                  />
+                </BoldCode>
                 <FormattedMessage
-                  id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
-                  values={{
-                    category: eventView.eventCategory,
-                    eventType: eventView.eventType,
-                  }}
-                  defaultMessage="{category} {eventType}"
+                  id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.atTime"
+                  values={{ date: eventView.formattedDate }}
+                  defaultMessage="@ {date}"
                 />
-              </BoldCode>
-              <FormattedMessage
-                id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.atTime"
-                values={{ date: eventView.formattedDate }}
-                defaultMessage="@ {date}"
-              />
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
