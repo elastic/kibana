@@ -126,7 +126,7 @@ export function processPath(passedEvent: ResolverEvent): string | undefined {
 /**
  * Returns the username for the account that ran the process
  */
-export function userInfoForProcess(passedEvent: ResolverEvent): object | undefined {
+export function userInfoForProcess(passedEvent: ResolverEvent): {user?: string, domain?: string} | undefined {
   return passedEvent.user;
 }
 
