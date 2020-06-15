@@ -235,6 +235,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               defaultMessage: 'Edit in dashboard',
             }),
             onClick: async (item) => {
+              // TODO generate an edit URL with predefined state instead (https://github.com/elastic/kibana/issues/69152)
               await addSwimlaneToDashboardCallback(item);
               setAddedDashboards({ ...addedDashboards, [item.id]: 'redirecting' });
               await navigateToUrl(await dashboardService.getDashboardEditUrl(item.id));
