@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export class Listing extends PureComponent {
   getColumns() {
-    const { kbnUrl, scope } = this.props.angular;
     const setupMode = this.props.setupMode;
 
     return [
@@ -54,13 +54,7 @@ export class Listing extends PureComponent {
           return (
             <div>
               <div>
-                <EuiLink
-                  onClick={() => {
-                    scope.$evalAsync(() => {
-                      kbnUrl.changePath(`/logstash/node/${node.logstash.uuid}`);
-                    });
-                  }}
-                >
+                <EuiLink href={getSafeForExternalLink(`/logstash/node/${node.logstash.uuid}`)}>
                   {name}
                 </EuiLink>
               </div>
