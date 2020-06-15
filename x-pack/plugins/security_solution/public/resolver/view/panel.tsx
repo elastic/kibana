@@ -24,7 +24,7 @@ import { RelatedEventDetail } from './panels/panel_content_related_detail';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
 /**
- * The team decided to use this determinant to express how we comport state in the UI with the values of the two query params:
+ * The team decided to use this table to determine which breadcrumbs/view to display:
  *
  * | Crumb/Table            | &crumbId                   | &crumbEvent              |
  * | :--------------------- | :------------------------- | :----------------------  |
