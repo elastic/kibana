@@ -23,25 +23,27 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '../../../core/server/mocks';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import {
+  CollectorOptions,
+  createUsageCollectionSetupMock,
+} from '../../usage_collection/server/usage_collection.mock';
+
 import { plugin } from './';
 
 describe('kibana_usage_collection', () => {
   const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));
 
-  const usageCollectors: Array<{ isReady: () => boolean }> = [];
+  const usageCollectors: CollectorOptions[] = [];
 
-  const usageCollection: jest.Mocked<UsageCollectionSetup> = {
-    makeStatsCollector: jest.fn().mockImplementation((opts) => {
-      usageCollectors.push(opts);
-      return opts;
-    }),
-    makeUsageCollector: jest.fn().mockImplementation((opts) => {
-      usageCollectors.push(opts);
-      return opts;
-    }),
-    registerCollector: jest.fn(),
-  } as any;
+  const usageCollection = createUsageCollectionSetupMock();
+  usageCollection.makeUsageCollector.mockImplementation((opts) => {
+    usageCollectors.push(opts);
+    return createUsageCollectionSetupMock().makeUsageCollector(opts);
+  });
+  usageCollection.makeStatsCollector.mockImplementation((opts) => {
+    usageCollectors.push(opts);
+    return createUsageCollectionSetupMock().makeStatsCollector(opts);
+  });
 
   test('Runs the setup method without issues', () => {
     const coreSetup = coreMock.createSetup();

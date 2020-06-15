@@ -63,10 +63,10 @@ export const getExceptionItemMock = (): ExceptionListItemSchema => ({
   namespace_type: 'single',
   name: '',
   description: 'This is a description',
-  comment: [
+  comments: [
     {
-      user: 'user_name',
-      timestamp: '2020-04-23T00:19:13.289Z',
+      created_by: 'user_name',
+      created_at: '2020-04-23T00:19:13.289Z',
       comment: 'Comment goes here',
     },
   ],
