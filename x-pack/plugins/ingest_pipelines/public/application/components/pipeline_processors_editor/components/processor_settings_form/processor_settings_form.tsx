@@ -8,10 +8,11 @@ import React, { FunctionComponent, memo } from 'react';
 import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
 
 import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
-
+import { usePipelineProcessorsContext } from '../../context';
 import { ProcessorInternal } from '../../types';
 
-import { getProcessorForm } from './map_processor_type_to_form';
+import { LearnMoreFormLabel } from './learn_more_form_label';
+import { getProcessorFormOrDocPath } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 import { Custom } from './processors/custom';
 
@@ -22,6 +23,9 @@ export interface Props {
 
 export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
   ({ processor, form }) => {
+    const {
+      links: { esDocsBasePath },
+    } = usePipelineProcessorsContext();
     return (
       <Form form={form}>
         <ProcessorTypeField initialType={processor?.type} />
@@ -34,17 +38,29 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
             let formContent: React.ReactNode | undefined;
 
             if (type?.length) {
-              const ProcessorFormFields = getProcessorForm(type as any);
+              const ProcessorFormOrDocPath = getProcessorFormOrDocPath(type as any);
 
-              if (ProcessorFormFields) {
+              if (typeof ProcessorFormOrDocPath === 'function') {
                 formContent = (
                   <>
-                    <ProcessorFormFields />
+                    <ProcessorFormOrDocPath />
                     <CommonProcessorFields />
                   </>
                 );
               } else {
-                formContent = <Custom defaultOptions={processor?.options} />;
+                formContent = (
+                  <Custom
+                    defaultOptions={processor?.options}
+                    helpText={
+                      typeof ProcessorFormOrDocPath === 'string' ? (
+                        <LearnMoreFormLabel
+                          processorType={type}
+                          docLink={esDocsBasePath + ProcessorFormOrDocPath}
+                        />
+                      ) : undefined
+                    }
+                  />
+                );
               }
 
               return (

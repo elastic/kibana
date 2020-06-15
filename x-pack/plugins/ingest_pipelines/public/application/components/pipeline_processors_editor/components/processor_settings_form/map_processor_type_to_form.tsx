@@ -5,52 +5,64 @@
  */
 
 import { FunctionComponent } from 'react';
+import { SetProcessor } from './processors/set';
+import { Gsub } from './processors/gsub';
 
-// import { SetProcessor } from './processors/set';
-// import { Gsub } from './processors/gsub';
+/**
+ * Map that accepts an ES processor type name and returns either the component
+ * for rendering the associated fields for configuring the processor or the path
+ * link that will be used in help text.
+ *
+ * In Chrome, and possibly other browsers, the order of the keys determines the order
+ * in the rendered list.
+ */
+const mapProcessorTypeToFormOrDocPath: Record<string, FunctionComponent | string> = {
+  append: '/append-processor.html', // TODO: Implement
+  bytes: '/bytes-processor.html', // TODO: Implement
+  circle: '/ingest-circle-processor.html', // TODO: Implement
+  convert: '/convert-processor.html', // TODO: Implement
+  csv: '/csv-processor.html', // TODO: Implement
+  date: '/date-processor.html', // TODO: Implement
+  date_index_name: '/date-index-name-processor.html', // TODO: Implement
+  dissect: '/dissect-processor.html', // TODO: Implement
+  dot_expander: '/dot-expand-processor.html', // TODO: Implement
+  drop: '/drop-processor.html', // TODO: Implement
+  enrich: '/enrich-processor.html', // TODO: Implement
+  fail: '/fail-processor.html', // TODO: Implement
+  foreach: '/foreach-processor.html', // TODO: Implement
+  geoip: '/geoip-processor.html', // TODO: Implement
+  grok: '/grok-processor.html', // TODO: Implement
 
-const mapProcessorTypeToForm = {
-  append: undefined, // TODO: Implement
-  bytes: undefined, // TODO: Implement
-  circle: undefined, // TODO: Implement
-  convert: undefined, // TODO: Implement
-  csv: undefined, // TODO: Implement
-  date: undefined, // TODO: Implement
-  date_index_name: undefined, // TODO: Implement
-  dissect: undefined, // TODO: Implement
-  dot_expander: undefined, // TODO: Implement
-  drop: undefined, // TODO: Implement
-  enrich: undefined, // TODO: Implement
-  fail: undefined, // TODO: Implement
-  foreach: undefined, // TODO: Implement
-  geoip: undefined, // TODO: Implement
-  grok: undefined, // TODO: Implement
-  html_strip: undefined, // TODO: Implement
-  inference: undefined, // TODO: Implement
-  join: undefined, // TODO: Implement
-  json: undefined, // TODO: Implement
-  kv: undefined, // TODO: Implement
-  lowercase: undefined, // TODO: Implement
-  pipeline: undefined, // TODO: Implement
-  remove: undefined, // TODO: Implement
-  rename: undefined, // TODO: Implement
-  script: undefined, // TODO: Implement
-  set_security_user: undefined, // TODO: Implement
-  split: undefined, // TODO: Implement
-  sort: undefined, // TODO: Implement
-  trim: undefined, // TODO: Implement
-  uppercase: undefined, // TODO: Implement
-  urldecode: undefined, // TODO: Implement
-  user_agent: undefined, // TODO: Implement
+  gsub: '/gsub-processor.html',
 
-  gsub: undefined,
-  set: undefined,
+  html_strip: '/htmlstrip-processor.html', // TODO: Implement
+  inference: '/inference-processor.html', // TODO: Implement
+  join: '/join-processor.html', // TODO: Implement
+  json: '/json-processor.html', // TODO: Implement
+  kv: '/kv-processor.html', // TODO: Implement
+  lowercase: '/lowercase-processor.html', // TODO: Implement
+  pipeline: '/pipeline-processor.html', // TODO: Implement
+  remove: '/remove-processor.html', // TODO: Implement
+  rename: '/rename-processor.html', // TODO: Implement
+  script: '/script-processor.html', // TODO: Implement
+
+  set: '/set-processor.html',
+
+  set_security_user: '/ingest-node-set-security-user-processor.html', // TODO: Implement
+  split: '/split-processor.html', // TODO: Implement
+  sort: '/sort-processor.html', // TODO: Implement
+  trim: '/trim-processor.html', // TODO: Implement
+  uppercase: '/uppercase-processor.html', // TODO: Implement
+  urldecode: '/urldecode-processor.html', // TODO: Implement
+  user_agent: '/user-agent-processor.html', // TODO: Implement
 };
 
-export const types = Object.keys(mapProcessorTypeToForm);
+export const types = Object.keys(mapProcessorTypeToFormOrDocPath);
 
-export type ProcessorType = keyof typeof mapProcessorTypeToForm;
+export type ProcessorType = keyof typeof mapProcessorTypeToFormOrDocPath;
 
-export const getProcessorForm = (type: ProcessorType | string): FunctionComponent | undefined => {
-  return mapProcessorTypeToForm[type as ProcessorType];
+export const getProcessorFormOrDocPath = (
+  type: ProcessorType | string
+): FunctionComponent | string | undefined => {
+  return mapProcessorTypeToFormOrDocPath[type as ProcessorType];
 };
