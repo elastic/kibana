@@ -24,10 +24,7 @@ describe('Async search strategy', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockDataStart = dataPluginMock.createStartContract();
-
-    const getStrategy = mockDataStart.search.getSearchStrategy as jest.Mock;
-    getStrategy.mockReset();
-    getStrategy.mockReturnValue({ search: mockSearch });
+    (mockDataStart.search.getSearchStrategy as jest.Mock).mockReturnValue({ search: mockSearch });
 
     mockCoreSetup.getStartServices.mockResolvedValue([
       undefined as any,
