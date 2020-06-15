@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
-
 import { Role } from './role';
 import { User } from './user';
 import { RoleMappings } from './role_mappings';
@@ -28,14 +26,14 @@ import { createTestUserService } from './test_user';
 export async function SecurityServiceProvider(context: FtrProviderContext) {
   const { getService } = context;
   const log = getService('log');
-  const config = getService('config');
-  const url = formatUrl(config.get('servers.kibana'));
-  const role = new Role(url, log);
-  const user = new User(url, log);
+  const kibanaServer = getService('kibanaServer');
+
+  const role = new Role(log, kibanaServer);
+  const user = new User(log, kibanaServer);
   const testUser = await createTestUserService(role, user, context);
 
   return new (class SecurityService {
-    roleMappings = new RoleMappings(url, log);
+    roleMappings = new RoleMappings(log, kibanaServer);
     testUser = testUser;
     role = role;
     user = user;

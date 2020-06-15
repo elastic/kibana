@@ -18,7 +18,7 @@
  */
 import Url from 'url';
 import Https from 'https';
-import Axios from 'axios';
+import Axios, { AxiosResponse } from 'axios';
 
 import { isAxiosRequestError, isAxiosResponseError } from '../axios';
 import { ToolingLog } from '../tooling_log';
@@ -102,7 +102,7 @@ export class KbnClientRequester {
     return Url.resolve(this.pickUrl(), relativeUrl);
   }
 
-  async request<T>(options: ReqOptions): Promise<T> {
+  async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
     let attempt = 0;
@@ -112,7 +112,7 @@ export class KbnClientRequester {
       attempt += 1;
 
       try {
-        const response = await Axios.request<T>({
+        const response = await Axios.request({
           method: options.method,
           url,
           data: options.body,
@@ -123,7 +123,7 @@ export class KbnClientRequester {
           httpsAgent: this.httpsAgent,
         });
 
-        return response.data;
+        return response;
       } catch (error) {
         const conflictOnGet = isConcliftOnGetError(error);
         const requestedRetries = options.retries !== undefined;
