@@ -21,11 +21,13 @@
 // The color picker is not yet accessible.
 
 import React, { useState } from 'react';
-import { EuiIconTip, EuiColorPicker, EuiColorPickerSwatch } from '@elastic/eui';
-// @ts-ignore
-import { useColorPickerState, EuiColorPickerOutput } from '@elastic/eui/lib/services';
+import {
+  EuiIconTip,
+  EuiColorPicker,
+  EuiColorPickerProps,
+  EuiColorPickerSwatch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { COLOR_SWATCHES } from './custom_color_swatches';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
 
@@ -42,12 +44,10 @@ export interface ColorPickerProps {
 
 export function ColorPicker({ name, value, disableTrash = false, onChange }: ColorPickerProps) {
   const initialColorValue = value ? value.replace(COMMAS_NUMS_ONLY_RE, '') : '';
-  const [color, setColor] = useColorPickerState(initialColorValue);
-  const [selectedColor, setSelectedColor] = useState(color);
+  const [color, setColor] = useState(initialColorValue);
 
-  const handleColorChange = (text: string, { rgba, hex, isValid }: EuiColorPickerOutput) => {
-    setColor(text, { hex, isValid });
-    setSelectedColor(hex);
+  const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
+    setColor(text);
     const part: ColorProps = {};
     part[name] = hex ? `rgba(${rgba.join(',')})` : '';
     onChange(part);
@@ -57,7 +57,6 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
     const part: ColorProps = {};
     part[name] = null;
     onChange(part);
-    setSelectedColor('');
   };
 
   const label = value
@@ -76,8 +75,7 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
         color={color}
         secondaryInputDisplay="top"
         showAlpha
-        swatches={COLOR_SWATCHES}
-        button={<EuiColorPickerSwatch color={selectedColor} aria-label={label} />}
+        button={<EuiColorPickerSwatch color={color} aria-label={label} />}
       />
       {!disableTrash && (
         <div className="tvbColorPicker__clear" onClick={handleClear}>
