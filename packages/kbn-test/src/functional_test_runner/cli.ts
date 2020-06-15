@@ -140,7 +140,6 @@ export function runFtrCli() {
         --kibana-install-dir  directory where the Kibana install being tested resides
         --throttle         enable network throttling in Chrome browser
         --headless         run browser in headless mode
-        --ignore-tls-errors ignore self-signed cert errors
       `,
       },
     }
