@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../lib/is_es_error';
+import { isEsError } from '../../../shared_imports';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
