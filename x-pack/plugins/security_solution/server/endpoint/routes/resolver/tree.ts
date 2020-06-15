@@ -23,6 +23,8 @@ export function handleTree(
         generations,
         ancestors,
         events,
+        alerts,
+        afterAlert,
         afterEvent,
         afterChild,
         legacyEndpointID: endpointID,
@@ -35,13 +37,19 @@ export function handleTree(
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
 
-      const [childrenNodes, ancestry, relatedEvents] = await Promise.all([
+      const [childrenNodes, ancestry, relatedEvents, relatedAlerts] = await Promise.all([
         fetcher.children(children, generations, afterChild),
         fetcher.ancestors(ancestors),
         fetcher.events(events, afterEvent),
+        fetcher.alerts(alerts, afterAlert),
       ]);
 
-      const tree = new Tree(id, { ancestry, children: childrenNodes, relatedEvents });
+      const tree = new Tree(id, {
+        ancestry,
+        children: childrenNodes,
+        relatedEvents,
+        relatedAlerts,
+      });
 
       const enrichedTree = await fetcher.stats(tree);
 

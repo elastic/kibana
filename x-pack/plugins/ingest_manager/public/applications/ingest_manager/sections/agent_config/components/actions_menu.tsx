@@ -7,8 +7,9 @@ import React, { memo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { AgentConfig } from '../../../types';
-import { useCapabilities, useLink } from '../../../hooks';
+import { useCapabilities } from '../../../hooks';
 import { ContextMenuActions } from '../../../components';
+import { AgentEnrollmentFlyout } from '../../fleet/components';
 import { ConfigYamlFlyout } from './config_yaml_flyout';
 import { AgentConfigCopyProvider } from './config_copy_provider';
 
@@ -17,9 +18,10 @@ export const AgentConfigActionMenu = memo<{
   onCopySuccess?: (newAgentConfig: AgentConfig) => void;
   fullButton?: boolean;
 }>(({ config, onCopySuccess, fullButton = false }) => {
-  const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
+
   return (
     <AgentConfigCopyProvider>
       {(copyAgentConfigPrompt) => {
@@ -30,6 +32,14 @@ export const AgentConfigActionMenu = memo<{
                 <ConfigYamlFlyout configId={config.id} onClose={() => setIsYamlFlyoutOpen(false)} />
               </EuiPortal>
             ) : null}
+            {isEnrollmentFlyoutOpen && (
+              <EuiPortal>
+                <AgentEnrollmentFlyout
+                  agentConfigs={[config]}
+                  onClose={() => setIsEnrollmentFlyoutOpen(false)}
+                />
+              </EuiPortal>
+            )}
             <ContextMenuActions
               button={
                 fullButton
@@ -49,6 +59,17 @@ export const AgentConfigActionMenu = memo<{
               }
               items={[
                 <EuiContextMenuItem
+                  disabled={!hasWriteCapabilities}
+                  icon="plusInCircle"
+                  onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                  key="enrollAgents"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigActionMenu.enrollAgentActionText"
+                    defaultMessage="Enroll agent"
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
                   icon="inspect"
                   onClick={() => setIsYamlFlyoutOpen(!isYamlFlyoutOpen)}
                   key="viewConfig"
@@ -56,17 +77,6 @@ export const AgentConfigActionMenu = memo<{
                   <FormattedMessage
                     id="xpack.ingestManager.agentConfigActionMenu.viewConfigText"
                     defaultMessage="View config"
-                  />
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
-                  icon="plusInCircle"
-                  href={getHref('add_datasource_from_configuration', { configId: config.id })}
-                  key="createDatasource"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentConfigActionMenu.createDatasourceActionText"
-                    defaultMessage="Add data source"
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
