@@ -14,7 +14,7 @@ export const EndUserExperienceLabel = i18n.translate(
 );
 
 export const getWhatIsGoingOnLabel = (environmentVal: string) =>
-  i18n.translate('xpack.apm.rum.dashboard.title', {
+  i18n.translate('xpack.apm.rum.dashboard.environment.title', {
     defaultMessage: `What's going on in {environmentVal}?`,
     values: { environmentVal },
   });
