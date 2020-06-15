@@ -17,7 +17,8 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui/lib/services';
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './heatmap/components/heatmap_constants';
+
+export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 
 export const DEFAULT_FILL_COLORS: string[] = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS: string[] = [
@@ -151,4 +152,14 @@ export function getOrdinalMbColorRampStops(
     },
     []
   );
+}
+
+export function getLinearGradient(colorStrings: string[]): string {
+  const intervals = colorStrings.length;
+  let linearGradient = `linear-gradient(to right, ${colorStrings[0]} 0%,`;
+  for (let i = 1; i < intervals - 1; i++) {
+    linearGradient = `${linearGradient} ${colorStrings[i]} \
+      ${Math.floor((100 * i) / (intervals - 1))}%,`;
+  }
+  return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
 }
