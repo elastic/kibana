@@ -13,7 +13,7 @@ import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../add_filter_to_global_search_bar';
-import { StatefulTopN } from '../top_n';
+import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '../top_n';
 
 import { allowTopN } from './helpers';
 import * as i18n from './translations';
@@ -34,7 +34,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   field,
   onFilterAdded,
   showTopN,
-  timelineId,
+  timelineId = ACTIVE_TIMELINE_REDUX_ID,
   toggleTopN,
   value,
 }) => {
@@ -44,13 +44,11 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     kibana.services.data.query.filterManager,
   ]);
   const { getTimelineFilterManager } = useManageTimeline();
-  const filterManager = useMemo(
-    () =>
-      timelineId
-        ? getTimelineFilterManager(timelineId) ?? filterManagerBackup
-        : filterManagerBackup,
-    [timelineId, getTimelineFilterManager, filterManagerBackup]
-  );
+  const filterManager = useMemo(() => getTimelineFilterManager(timelineId) ?? filterManagerBackup, [
+    timelineId,
+    getTimelineFilterManager,
+    filterManagerBackup,
+  ]);
   const filterForValue = useCallback(() => {
     const filter =
       value?.length === 0 ? createFilter(field, undefined) : createFilter(field, value);
@@ -63,6 +61,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field, value, filterManager, onFilterAdded]);
 
   const filterOutValue = useCallback(() => {
@@ -77,6 +76,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field, value, filterManager, onFilterAdded]);
 
   return (

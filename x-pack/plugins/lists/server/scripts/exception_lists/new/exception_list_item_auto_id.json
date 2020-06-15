@@ -5,6 +5,7 @@
   "type": "simple",
   "description": "This is a sample endpoint type exception that has no item_id so it creates a new id each time",
   "name": "Sample Endpoint Exception List",
+  "comments": [],
   "entries": [
     {
       "field": "actingProcess.file.signer",

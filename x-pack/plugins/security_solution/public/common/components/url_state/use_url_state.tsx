@@ -46,7 +46,6 @@ export const useUrlStateHooks = ({
   pathName,
   search,
   setInitialStateFromUrl,
-  tabName,
   updateTimeline,
   updateTimelineIsLoading,
   urlState,
@@ -206,10 +205,12 @@ export const useUrlStateHooks = ({
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(type, pageName === SiemPageName.detections);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageName]);
 
   return null;

@@ -8,8 +8,7 @@ import { Store } from 'redux';
 
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
-import { ResolverEvent } from '../../common/endpoint/types';
-import { eventType } from '../../common/endpoint/models/event';
+import { ResolverEvent, ResolverNodeStats } from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -132,59 +131,13 @@ export type CameraState = {
 );
 
 /**
- * This represents all the raw data (sans statistics, metadata, etc.)
- * about a particular subject's related events
- */
-export interface RelatedEventDataEntry {
-  relatedEvents: Array<{
-    relatedEvent: ResolverEvent;
-    relatedEventType: ReturnType<typeof eventType>;
-  }>;
-}
-
-/**
- * Represents the status of the request for related event data, which will be either the data,
- * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
- */
-export type RelatedEventDataResults =
-  | RelatedEventDataEntry
-  | 'waitingForRelatedEventData'
-  | 'error';
-
-/**
- * This represents the raw related events data enhanced with statistics
- * (e.g. counts of items grouped by their related event types)
- */
-export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
-  stats: Record<string, number>;
-};
-
-/**
- * The status or value of any particular event's related events w.r.t. their valence to the current view.
- * One of:
- * `RelatedEventDataEntryWithStats` when results have been received and processed and are ready to display
- * `waitingForRelatedEventData` when related events have been requested but have not yet matriculated
- * `Error` when the request for any event encounters an error during service
- */
-export type RelatedEventEntryWithStatsOrWaiting =
-  | RelatedEventDataEntryWithStats
-  | `waitingForRelatedEventData`
-  | 'error';
-
-/**
- * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
- * or a `waitingForRelatedEventData` symbol when referenced with a unique event.
- */
-export type RelatedEventData = Map<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
-
-/**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
   readonly results: readonly ResolverEvent[];
+  readonly relatedEventsStats: Map<string, ResolverNodeStats>;
   isLoading: boolean;
   hasError: boolean;
-  resultsEnrichedWithRelatedEventInfo: Map<ResolverEvent, RelatedEventDataResults>;
 }
 
 export type Vector2 = readonly [number, number];
@@ -288,10 +241,50 @@ export type ProcessWidths = Map<ResolverEvent, number>;
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
 export type ProcessPositions = Map<ResolverEvent, Vector2>;
+
+export type DurationTypes =
+  | 'millisecond'
+  | 'milliseconds'
+  | 'second'
+  | 'seconds'
+  | 'minute'
+  | 'minutes'
+  | 'hour'
+  | 'hours'
+  | 'day'
+  | 'days'
+  | 'week'
+  | 'weeks'
+  | 'month'
+  | 'months'
+  | 'year'
+  | 'years';
+
 /**
- * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
+ * duration value and description string
  */
-export type EdgeLineSegment = Vector2[];
+export interface DurationDetails {
+  duration: number;
+  durationType: DurationTypes;
+}
+/**
+ * Values shared between two vertices joined by an edge line.
+ */
+export interface EdgeLineMetadata {
+  elapsedTime?: DurationDetails;
+}
+/**
+ * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
+ */
+export type EdgeLinePoints = Vector2[];
+
+/**
+ * Edge line components including the points joining the edgeline and any optional associated metadata
+ */
+export interface EdgeLineSegment {
+  points: EdgeLinePoints;
+  metadata?: EdgeLineMetadata;
+}
 
 /**
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
