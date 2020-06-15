@@ -30,7 +30,6 @@ import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
-import { useColumnCharts } from './use_column_charts';
 
 import './data_grid.scss';
 
@@ -61,8 +60,7 @@ export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
       chartsVisible,
-      columnCharts,
-      columns,
+      columnsWithCharts,
       dataTestSubj,
       errorMessage,
       invalidSortingColumnns,
@@ -81,12 +79,6 @@ export const DataGrid: FC<Props> = memo(
       toggleChartVisibility,
       visibleColumns,
     } = props;
-
-    const { columnResizeHandler, refFn } = useColumnCharts(
-      columns.filter((c) => visibleColumns.includes(c.id)),
-      columnCharts,
-      chartsVisible
-    );
 
     // TODO Fix row hovering + bar highlighting
     // const getRowProps = (item: any) => {
@@ -185,10 +177,10 @@ export const DataGrid: FC<Props> = memo(
             <EuiSpacer size="m" />
           </div>
         )}
-        <div ref={refFn} className="mlDataGrid">
+        <div className="mlDataGrid">
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columns.map((c) => {
+            columns={columnsWithCharts.map((c) => {
               c.initialWidth = 150;
               return c;
             })}
@@ -221,7 +213,6 @@ export const DataGrid: FC<Props> = memo(
               onChangeItemsPerPage,
               onChangePage,
             }}
-            onColumnResize={columnResizeHandler}
           />
         </div>
       </div>
@@ -232,7 +223,7 @@ export const DataGrid: FC<Props> = memo(
 
 function pickProps(props: Props) {
   return [
-    props.columns,
+    props.columnsWithCharts,
     props.dataTestSubj,
     props.errorMessage,
     props.invalidSortingColumnns,

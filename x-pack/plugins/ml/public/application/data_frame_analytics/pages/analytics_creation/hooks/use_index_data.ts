@@ -122,7 +122,6 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

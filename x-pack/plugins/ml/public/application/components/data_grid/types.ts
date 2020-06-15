@@ -57,7 +57,7 @@ export interface UseIndexDataReturnType
   extends Pick<
     UseDataGridReturnType,
     | 'chartsVisible'
-    | 'columnCharts'
+    | 'columnsWithCharts'
     | 'errorMessage'
     | 'invalidSortingColumnns'
     | 'noDataMessage'
@@ -74,13 +74,12 @@ export interface UseIndexDataReturnType
     | 'toggleChartVisibility'
     | 'visibleColumns'
   > {
-  columns: EuiDataGridColumn[];
   renderCellValue: RenderCellValue;
 }
 
 export interface UseDataGridReturnType {
   chartsVisible: boolean;
-  columnCharts: ChartData[];
+  columnsWithCharts: EuiDataGridColumn[];
   errorMessage: string;
   invalidSortingColumnns: ColumnId[];
   noDataMessage: string;

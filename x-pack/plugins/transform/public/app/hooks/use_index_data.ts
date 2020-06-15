@@ -15,7 +15,6 @@ import {
   getErrorMessage,
   useDataGrid,
   useRenderCellValue,
-  ChartData,
   EsSorting,
   SearchResponse7,
   UseIndexDataReturnType,
@@ -131,7 +130,6 @@ export const useIndexData = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

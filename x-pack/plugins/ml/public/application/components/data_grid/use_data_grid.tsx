@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
+import { ColumnChart } from './column_chart';
 import { INIT_MAX_COLUMNS } from './common';
 import {
   ColumnId,
@@ -95,7 +96,20 @@ export const useDataGrid = (
 
   return {
     chartsVisible,
-    columnCharts,
+    columnsWithCharts: columns.map((c) => {
+      const chartData = columnCharts.find((cd) => cd.id === c.id);
+
+      return {
+        ...c,
+        display:
+          chartData !== undefined && chartsVisible === true ? (
+            <>
+              <ColumnChart chartData={chartData} columnType={c} />
+              {c.id}
+            </>
+          ) : undefined,
+      };
+    }),
     errorMessage,
     invalidSortingColumnns,
     noDataMessage,
