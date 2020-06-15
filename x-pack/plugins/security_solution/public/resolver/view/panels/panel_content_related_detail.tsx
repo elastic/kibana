@@ -7,7 +7,6 @@
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiI18nNumber,
   EuiSpacer,
   EuiText,
   EuiDescriptionList,
@@ -17,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
@@ -222,8 +222,11 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       {
         text: (
           <>
-            <EuiI18nNumber value={totalCount} />
-            {/* Non-breaking space->*/ ` ${eventsString}`}
+            <FormattedMessage
+              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              values={{ totalCount }}
+              defaultMessage="{totalCount} Events"
+            />
           </>
         ),
         onClick: () => {
@@ -233,8 +236,11 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       {
         text: (
           <>
-            <EuiI18nNumber value={countBySameCategory} />
-            {/* Non-breaking space->*/ ` ${relatedEventCategory}`}
+            <FormattedMessage
+              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.countByCategory"
+              values={{ count: countBySameCategory, category: relatedEventCategory }}
+              defaultMessage="{count} {category}"
+            />
           </>
         ),
         onClick: () => {
@@ -304,11 +310,21 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText size="s">
-        <BoldCode>{`${relatedEventCategory} ${event.ecsEventType(
-          relatedEventToShowDetailsFor
-        )}`}</BoldCode>
-        {' @ '}
-        {formattedDate}
+        <BoldCode>
+          <FormattedMessage
+            id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
+            values={{
+              category: relatedEventCategory,
+              eventType: event.ecsEventType(relatedEventToShowDetailsFor),
+            }}
+            defaultMessage="{category} {eventType}"
+          />
+        </BoldCode>
+        <FormattedMessage
+          id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.atTime"
+          values={{ date: formattedDate }}
+          defaultMessage="@ {date}"
+        />
       </EuiText>
       <EuiSpacer size="m" />
       <EuiText>{event.descriptiveName(relatedEventToShowDetailsFor)}</EuiText>

@@ -6,15 +6,9 @@
 
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiI18nNumber,
-  EuiSpacer,
-  EuiText,
-  EuiButtonEmpty,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from 'react-intl';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { BoldCode } from './panel_content_related_detail';
@@ -35,6 +29,7 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 interface MatchingEventEntry {
   formattedDate: string;
   eventType: string;
+  eventCategory: string;
   name: string;
   entityId: string;
   setQueryParams: () => void;
@@ -56,9 +51,21 @@ const DisplayList = memo(function DisplayList({
           return (
             <Fragment key={index}>
               <EuiText>
-                <BoldCode>{eventView.eventType}</BoldCode>
-                {' @ '}
-                {eventView.formattedDate}
+              <BoldCode>
+                <FormattedMessage
+                  id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.categoryAndType"
+                  values={{
+                    category: eventView.eventCategory,
+                    eventType: eventView.eventType,
+                  }}
+                  defaultMessage="{category} {eventType}"
+                />
+              </BoldCode>
+              <FormattedMessage
+                id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.atTime"
+                values={{ date: eventView.formattedDate }}
+                defaultMessage="@ {date}"
+              />
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
@@ -150,7 +157,8 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
         const entityId = event.eventId(resolverEvent);
         return {
           formattedDate,
-          eventType: `${eventType} ${event.ecsEventType(resolverEvent)}`,
+          eventCategory: `${eventType}`,
+          eventType: `${event.ecsEventType(resolverEvent)}`,
           name: event.descriptiveName(resolverEvent),
           entityId,
           setQueryParams: () => {
@@ -178,8 +186,11 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
       {
         text: (
           <>
-            <EuiI18nNumber value={totalCount} />
-            {/* Non-breaking space->*/ ` ${eventsString}`}
+            <FormattedMessage
+              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventList.numberOfEvents"
+              values={{ totalCount }}
+              defaultMessage="{totalCount} Events"
+            />
           </>
         ),
         onClick: () => {
@@ -189,8 +200,11 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
       {
         text: (
           <>
-            <EuiI18nNumber value={matchingEventEntries.length} />
-            {/* Non-breaking space->*/ ` ${eventType}`}
+            <FormattedMessage
+              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventList.countByCategory"
+              values={{ count: matchingEventEntries.length, category: eventType }}
+              defaultMessage="{count} {category}"
+            />
           </>
         ),
         onClick: () => {},

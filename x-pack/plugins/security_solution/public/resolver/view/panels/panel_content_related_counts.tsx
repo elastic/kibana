@@ -6,13 +6,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiI18nNumber,
-  EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { FormattedMessage } from 'react-intl';
 import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
 
 import * as event from '../../../../common/endpoint/models/event';
@@ -73,8 +68,11 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
       {
         text: (
           <>
-            <EuiI18nNumber value={totalCount} />
-            {/* Non-breaking space->*/ ` ${eventsString}`}
+            <FormattedMessage
+              id="xpack.securitySolution.enpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              values={{ totalCount }}
+              defaultMessage="{totalCount} Events"
+            />
           </>
         ),
         onClick: () => {
