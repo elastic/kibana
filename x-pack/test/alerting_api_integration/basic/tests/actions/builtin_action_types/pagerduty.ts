@@ -24,6 +24,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           secrets: {
             routingKey: 'pager-duty-routing-key',
           },
+          consumer: 'alerts',
         })
         .expect(403, {
           statusCode: 403,

@@ -26,6 +26,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             user: 'bob',
             password: 'supersecret',
           },
+          consumer: 'alerts',
         })
         .expect(403, {
           statusCode: 403,

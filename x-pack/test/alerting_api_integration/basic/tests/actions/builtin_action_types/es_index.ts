@@ -23,6 +23,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             index: 'foo',
           },
           secrets: {},
+          consumer: 'alerts',
         })
         .expect(200);
     });

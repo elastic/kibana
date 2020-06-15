@@ -36,6 +36,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           secrets: {
             webhookUrl: slackSimulatorURL,
           },
+          consumer: 'alerts',
         })
         .expect(403, {
           statusCode: 403,

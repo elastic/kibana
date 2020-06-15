@@ -26,7 +26,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     {
       value: '1',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
+        'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectHighOptionLabel',
         {
           defaultMessage: 'High',
         }
@@ -35,7 +35,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     {
       value: '2',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectMediumOptionLabel',
         {
           defaultMessage: 'Medium',
         }
@@ -44,7 +44,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     {
       value: '3',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectWarningOptionLabel',
+        'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectLawOptionLabel',
         {
           defaultMessage: 'Low',
         }

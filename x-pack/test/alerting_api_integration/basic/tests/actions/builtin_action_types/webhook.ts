@@ -39,6 +39,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           config: {
             url: webhookSimulatorURL,
           },
+          consumer: 'alerts',
         })
         .expect(403, {
           statusCode: 403,

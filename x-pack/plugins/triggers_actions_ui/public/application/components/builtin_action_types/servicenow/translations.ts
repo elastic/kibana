@@ -21,95 +21,98 @@ export const SERVICENOW_TITLE = i18n.translate(
 );
 
 export const API_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.apiUrlTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
   {
     defaultMessage: 'URL',
   }
 );
 
 export const API_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredApiUrlTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField',
   {
     defaultMessage: 'URL is required',
   }
 );
 
 export const API_URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.invalidApiUrlTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.invalidApiUrlTextField',
   {
     defaultMessage: 'URL is invalid',
   }
 );
 
 export const USERNAME_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.usernameTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.usernameTextFieldLabel',
   {
     defaultMessage: 'Username',
   }
 );
 
 export const USERNAME_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredUsernameTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUsernameTextField',
   {
     defaultMessage: 'Username is required',
   }
 );
 
 export const PASSWORD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.passwordTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel',
   {
     defaultMessage: 'Password',
   }
 );
 
 export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredPasswordTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPasswordTextField',
   {
     defaultMessage: 'Password is required',
   }
 );
 
 export const API_TOKEN_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.apiTokenTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiTokenTextFieldLabel',
   {
     defaultMessage: 'Api token',
   }
 );
 
 export const API_TOKEN_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredApiTokenTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiTokenTextField',
   {
     defaultMessage: 'Api token is required',
   }
 );
 
-export const EMAIL_LABEL = i18n.translate('xpack.siem.case.connectors.common.emailTextFieldLabel', {
-  defaultMessage: 'Email',
-});
+export const EMAIL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.emailTextFieldLabel',
+  {
+    defaultMessage: 'Email',
+  }
+);
 
 export const EMAIL_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.common.requiredEmailTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredEmailTextField',
   {
     defaultMessage: 'Email is required',
   }
 );
 
 export const MAPPING_FIELD_SHORT_DESC = i18n.translate(
-  'xpack.siem.case.configureCases.mappingFieldShortDescription',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.mappingFieldShortDescription',
   {
     defaultMessage: 'Short Description',
   }
 );
 
 export const MAPPING_FIELD_DESC = i18n.translate(
-  'xpack.siem.case.configureCases.mappingFieldDescription',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.mappingFieldDescription',
   {
     defaultMessage: 'Description',
   }
 );
 
 export const MAPPING_FIELD_COMMENTS = i18n.translate(
-  'xpack.siem.case.configureCases.mappingFieldComments',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.mappingFieldComments',
   {
     defaultMessage: 'Comments',
   }
