@@ -11,7 +11,6 @@ import { PatchRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
-import { Meta } from '../types';
 
 export const patchRules = async ({
   alertsClient,
@@ -60,7 +59,7 @@ export const patchRules = async ({
     savedId,
     timelineId,
     timelineTitle,
-    meta: meta as Meta | undefined, // TODO: Remove this cast once we fix the types for calculate version and patch,
+    meta,
     filters,
     from,
     index,
