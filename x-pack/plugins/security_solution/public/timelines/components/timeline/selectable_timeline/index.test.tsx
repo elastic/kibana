@@ -93,6 +93,7 @@ describe('SelectableTimeline', () => {
       status: null,
       onlyUserFavorite: false,
       timelineType: TimelineType.default,
+      templateTimelineType: null,
     };
     beforeAll(() => {
       mount(<SelectableTimeline {...props} />);

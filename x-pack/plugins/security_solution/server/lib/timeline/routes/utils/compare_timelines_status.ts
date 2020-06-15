@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { isEmpty } from 'lodash/fp';
 import {
   TimelineTypeLiteralWithNull,
   TimelineType,
@@ -72,7 +72,7 @@ export class CompareTimelinesStatus {
 
   public get isCreatable() {
     return (
-      this.isTitleExists &&
+      this.isTitleValid &&
       !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isCreatable &&
@@ -82,6 +82,7 @@ export class CompareTimelinesStatus {
   }
 
   public get isCreatableViaImport() {
+    console.log('=======1=====');
     return (
       this.isCreatedStatusValid &&
       ((this.isCreatable && !this.isHandlingTemplateTimeline) ||
@@ -91,6 +92,8 @@ export class CompareTimelinesStatus {
 
   private get isCreatedStatusValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+    console.log('======2======', this.status, obj.isExists);
+
     return obj.isExists
       ? this.status === obj.getData?.status && this.status !== TimelineStatus.draft
       : this.status !== TimelineStatus.draft;
@@ -98,6 +101,7 @@ export class CompareTimelinesStatus {
 
   public get isUpdatable() {
     return (
+      this.isTitleValid &&
       !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isUpdatable && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isUpdatable && this.isHandlingTemplateTimeline))
@@ -107,13 +111,15 @@ export class CompareTimelinesStatus {
   private get isTimelineTypeValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
     const existintTimelineType = obj.getData?.timelineType ?? TimelineType.default;
+    console.log('isTimelineTypeValid', this.timelineType, existintTimelineType);
     return obj.isExists ? this.timelineType === existintTimelineType : true;
   }
 
   public get isUpdatableViaImport() {
+    console.log('isUpdatableViaImport', this.isTimelineTypeValid);
     return (
       this.isTimelineTypeValid &&
-      !this.isSavedObjectVersionConflict &&
+      this.isTitleValid &&
       this.isUpdatedTimelineStatusValid &&
       (this.timelineObject.isUpdatableViaImport ||
         (this.templateTimelineObject.isUpdatableViaImport &&
@@ -122,8 +128,12 @@ export class CompareTimelinesStatus {
     );
   }
 
-  public get isTitleExists() {
-    return this.title != null;
+  public get isTitleValid() {
+    console.log('title', this.title, this.status);
+    return (
+      (this.status !== TimelineStatus.draft && !isEmpty(this.title)) ||
+      this.status === TimelineStatus.draft
+    );
   }
 
   public getFailureChecker(action?: TimelineStatusAction) {
@@ -141,13 +151,14 @@ export class CompareTimelinesStatus {
   public checkIsFailureCases(action?: TimelineStatusAction) {
     const failureChecker = this.getFailureChecker(action);
     const version = this.templateTimelineObject.getVersion;
-    const commonError = commonFailureChecker(this.title);
+    const commonError = commonFailureChecker(this.status, this.title);
     if (commonError != null) {
       return commonError;
     }
     const msg = failureChecker(
       this.isHandlingTemplateTimeline,
       this.status,
+      this.timelineType,
       this.timelineObject.getVersion?.toString() ?? null,
       version != null && typeof version === 'string' ? parseInt(version, 10) : version,
       this.templateTimelineObject.getId,
@@ -213,6 +224,7 @@ export class CompareTimelinesStatus {
     const existingStatus = this.isHandlingTemplateTimeline
       ? this.templateTimelineInput.data?.status
       : this.timelineInput.data?.status;
+    console.log('isUpdatedTimelineStatusValid', status, existingStatus);
     return (
       ((existingStatus == null || existingStatus === TimelineStatus.active) &&
         (status == null || status === TimelineStatus.active)) ||

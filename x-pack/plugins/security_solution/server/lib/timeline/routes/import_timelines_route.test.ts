@@ -12,7 +12,7 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
@@ -29,6 +29,14 @@ import {
   mockGetTemplateTimelineValue,
   mockCreatedTimeline,
 } from './__mocks__/import_timelines';
+import {
+  CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
+  NO_MATCH_VERSION_ERROR_MESSAGE,
+  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+  EMPTY_TITLE_ERROR_MESSAGE,
+  NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
+  NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
+} from './utils/failure_cases';
 
 describe('import timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -147,16 +155,30 @@ describe('import timelines', () => {
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTimelineObject);
     });
 
-    test('should Create a new timeline savedObject with given draft timeline', async () => {
+    test('should throw error if given an untitle timeline', async () => {
       mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
         mockDuplicateIdErrors,
-        [{ ...mockUniqueParsedObjects[0], status: TimelineStatus.draft }],
+        [
+          {
+            ...mockUniqueParsedObjects[0],
+            title: '',
+          },
+        ],
       ]);
       const mockRequest = getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
-      expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
-        ...mockParsedTimelineObject,
-        status: TimelineStatus.active,
+      const response = await server.inject(mockRequest, context);
+      expect(response.body).toEqual({
+        success: false,
+        success_count: 0,
+        errors: [
+          {
+            id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+            error: {
+              status_code: 409,
+              message: EMPTY_TITLE_ERROR_MESSAGE,
+            },
+          },
+        ],
       });
     });
 
@@ -281,6 +303,60 @@ describe('import timelines', () => {
         ],
       });
     });
+
+    test('should throw error if given an untitle timeline', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [
+          {
+            ...mockUniqueParsedObjects[0],
+            title: '',
+          },
+        ],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      const response = await server.inject(mockRequest, context);
+      expect(response.body).toEqual({
+        success: false,
+        success_count: 0,
+        errors: [
+          {
+            id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+            error: {
+              status_code: 409,
+              message: EMPTY_TITLE_ERROR_MESSAGE,
+            },
+          },
+        ],
+      });
+    });
+
+    test('should throw error if timelineType updated', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [
+          {
+            ...mockUniqueParsedObjects[0],
+            timelineType: TimelineType.template,
+          },
+        ],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      const response = await server.inject(mockRequest, context);
+      expect(response.body).toEqual({
+        success: false,
+        success_count: 0,
+        errors: [
+          {
+            id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+            error: {
+              status_code: 409,
+              message: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
+            },
+          },
+        ],
+      });
+    });
   });
 
   describe('request validation', () => {
@@ -340,6 +416,7 @@ describe('import template timelines', () => {
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
+  let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
@@ -361,6 +438,7 @@ describe('import template timelines', () => {
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
+    mockGetTupleDuplicateErrorsAndUniqueTimeline = jest.fn();
 
     jest.doMock('../create_timelines_stream_from_ndjson', () => {
       return {
@@ -380,9 +458,9 @@ describe('import template timelines', () => {
       const originalModule = jest.requireActual('./utils/import_timelines');
       return {
         ...originalModule,
-        getTupleDuplicateErrorsAndUniqueTimeline: jest
-          .fn()
-          .mockReturnValue([mockDuplicateIdErrors, mockUniqueParsedTemplateTimelineObjects]),
+        getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
+          [mockDuplicateIdErrors, mockUniqueParsedTemplateTimelineObjects]
+        ),
       };
     });
   });
@@ -596,6 +674,60 @@ describe('import template timelines', () => {
     test('returns 200 when import timeline successfully', async () => {
       const response = await server.inject(getImportTimelinesRequest(), context);
       expect(response.status).toEqual(200);
+    });
+
+    test('should throw error if with given template timeline version conflict', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [
+          {
+            ...mockUniqueParsedTemplateTimelineObjects[0],
+            templateTimelineVersion: 1,
+          },
+        ],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      const response = await server.inject(mockRequest, context);
+      expect(response.body).toEqual({
+        success: false,
+        success_count: 0,
+        errors: [
+          {
+            id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+            error: {
+              status_code: 409,
+              message: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+            },
+          },
+        ],
+      });
+    });
+
+    test('should throw error if status updated', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [
+          {
+            ...mockUniqueParsedTemplateTimelineObjects[0],
+            status: TimelineStatus.immutable,
+          },
+        ],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      const response = await server.inject(mockRequest, context);
+      expect(response.body).toEqual({
+        success: false,
+        success_count: 0,
+        errors: [
+          {
+            id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+            error: {
+              status_code: 409,
+              message: NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
+            },
+          },
+        ],
+      });
     });
   });
 

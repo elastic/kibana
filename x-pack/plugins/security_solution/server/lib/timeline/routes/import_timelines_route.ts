@@ -97,6 +97,7 @@ export const importTimelinesRoute = (
           parsedObjects,
           false
         );
+        console.log('uniqueParsedObjects', uniqueParsedObjects);
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
 
@@ -110,6 +111,8 @@ export const importTimelinesRoute = (
                 const importsWorkerPromise = new Promise<ImportTimelineResponse>(
                   async (resolve, reject) => {
                     if (parsedTimeline instanceof Error) {
+                      console.log('parsedTimeline', parsedTimeline);
+
                       // If the JSON object had a validation or parse error then we return
                       // early with the error and an (unknown) for the ruleId
                       resolve(
@@ -121,6 +124,7 @@ export const importTimelinesRoute = (
 
                       return null;
                     }
+
                     const {
                       savedObjectId,
                       pinnedEventIds,
@@ -137,6 +141,7 @@ export const importTimelinesRoute = (
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
+                    console.log('title0000', title);
                     // console.log('parsedTimeline', JSON.stringify(parsedTimeline));
                     let newTimeline = null;
                     try {
@@ -184,6 +189,7 @@ export const importTimelinesRoute = (
                         const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                           TimelineStatusActions.createViaImport
                         );
+                        console.log('errorMessage one', errorMessage);
                         const message =
                           errorMessage?.body != null
                             ? errorMessage.body
@@ -196,38 +202,44 @@ export const importTimelinesRoute = (
                             message,
                           })
                         );
-                      }
-                      if (compareTimelinesStatus.isUpdatableViaImport) {
-                        // update template timeline
-                        newTimeline = await createTimelines({
-                          frameworkRequest,
-                          timeline: parsedTimelineObject,
-                          timelineSavedObjectId: compareTimelinesStatus.timelineId,
-                          timelineVersion: compareTimelinesStatus.timelineVersion,
-                          notes: globalNotes,
-                          existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
-                        });
-
-                        resolve({
-                          timeline_id: newTimeline.timeline.savedObjectId,
-                          status_code: 200,
-                        });
                       } else {
-                        const errorMessage = compareTimelinesStatus.checkIsFailureCases(
-                          TimelineStatusActions.updateViaImport
-                        );
+                        if (compareTimelinesStatus.isUpdatableViaImport) {
+                          // update template timeline
+                          newTimeline = await createTimelines({
+                            frameworkRequest,
+                            timeline: parsedTimelineObject,
+                            timelineSavedObjectId: compareTimelinesStatus.timelineId,
+                            timelineVersion: compareTimelinesStatus.timelineVersion,
+                            notes: globalNotes,
+                            existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
+                          });
 
-                        const message =
-                          errorMessage?.body ??
-                          `${timelineType} timeline ${TimelineStatusActions.updateViaImport} error`;
+                          resolve({
+                            timeline_id: newTimeline.timeline.savedObjectId,
+                            status_code: 200,
+                          });
+                        } else {
+                          const errorMessage = compareTimelinesStatus.checkIsFailureCases(
+                            TimelineStatusActions.updateViaImport
+                          );
+                          console.log(
+                            'compareTimelinesStatus.isUpdatableViaImport',
+                            compareTimelinesStatus.isUpdatableViaImport,
+                            errorMessage
+                          );
 
-                        resolve(
-                          createBulkErrorObject({
-                            id: savedObjectId ?? 'unknown',
-                            statusCode: 409,
-                            message,
-                          })
-                        );
+                          const message =
+                            errorMessage?.body ??
+                            `${timelineType} timeline ${TimelineStatusActions.updateViaImport} error`;
+
+                          resolve(
+                            createBulkErrorObject({
+                              id: savedObjectId ?? 'unknown',
+                              statusCode: 409,
+                              message,
+                            })
+                          );
+                        }
                       }
                     } catch (err) {
                       resolve(

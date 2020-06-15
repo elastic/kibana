@@ -11,7 +11,6 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
     <FlyoutHeaderWithCloseButton
       onClose={[MockFunction]}
       timelineId="foo"
-      timelineType="default"
       usersViewing={
         Array [
           "elastic",
@@ -750,6 +749,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         onToggleDataProviderExcluded={[MockFunction]}
         show={true}
         showCallOutUnauthorizedMsg={false}
+        timelineStatus="active"
       />
     </TimelineHeaderContainer>
   </Styled(EuiFlyoutHeader)>

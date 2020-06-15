@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
-import { TimelineSavedObject, TimelineStatus } from '../../../../../common/types/timeline';
+import {
+  TimelineSavedObject,
+  TimelineStatus,
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';
@@ -27,6 +31,7 @@ export const CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE =
   'Create template timeline without a valid templateTimelineVersion is not allowed. Please start from 1 to create a new template timeline';
 export const CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE = 'Cannot create a draft timeline';
 export const NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE = 'Update status is not allowed';
+export const NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE = 'Update timelineType is not allowed';
 
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,
@@ -38,15 +43,17 @@ const isUpdatingStatus = (
   return obj?.status === TimelineStatus.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
 };
 
-const isGivenTitleExists = (title: string | null | undefined) => {
-  return title == null ? EMPTY_TITLE_ERROR_MESSAGE : null;
+const isGivenTitleValid = (status: TimelineStatus, title: string | null | undefined) => {
+  return (status !== TimelineStatus.draft && !isEmpty(title)) || status === TimelineStatus.draft
+    ? null
+    : EMPTY_TITLE_ERROR_MESSAGE;
 };
 
 export const getImportExistingTimelineError = (id: string) =>
   `savedObjectId: "${id}" already exists`;
 
-export const commonFailureChecker = (title: string | null | undefined) => {
-  const error = [isGivenTitleExists(title)].filter((msg) => msg != null).join(',');
+export const commonFailureChecker = (status: TimelineStatus, title: string | null | undefined) => {
+  const error = [isGivenTitleValid(status, title)].filter((msg) => msg != null).join(',');
   return !isEmpty(error)
     ? {
         body: error,
@@ -58,12 +65,20 @@ export const commonFailureChecker = (title: string | null | undefined) => {
 const commonUpdateCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
+  timelineType: TimelineTypeLiteral,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
+  if (timelineType !== existTimeline?.timelineType) {
+    return {
+      body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
+      statusCode: 403,
+    };
+  }
+
   if (isHandlingTemplateTimeline) {
     if (templateTimelineId == null) {
       return {
@@ -103,31 +118,35 @@ const commonUpdateCases = (
         statusCode: 409,
       };
     }
-
-    return null;
   } else {
+    console.log('------a--------');
+
     if (existTimeline == null) {
       // timeline !exists
+      console.log('xxx');
       return {
         body: UPDATE_TIMELINE_ERROR_MESSAGE,
         statusCode: 405,
       };
     }
+
     if (existTimeline?.version !== version) {
       // throw error 409 conflict timeline
+      console.log('------b--------');
       return {
         body: NO_MATCH_VERSION_ERROR_MESSAGE,
         statusCode: 409,
       };
     }
-
-    return null;
   }
+
+  return null;
 };
 
 export const checkIsUpdateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
+  timelineType: TimelineTypeLiteral,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -141,9 +160,25 @@ export const checkIsUpdateViaImportFailureCases = (
     };
   }
 
+  console.log('-------1111', existTimeline.status, status);
+
+  if (
+    !(
+      (existTimeline?.status == null || existTimeline?.status === TimelineStatus.active) &&
+      (status == null || status === TimelineStatus.active)
+    ) &&
+    !(existTimeline?.status != null && status === existTimeline?.status)
+  ) {
+    return {
+      body: NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  }
+
   const error = commonUpdateCases(
     isHandlingTemplateTimeline,
     status,
+    timelineType,
     version,
     templateTimelineVersion,
     templateTimelineId,
@@ -170,6 +205,7 @@ export const checkIsUpdateViaImportFailureCases = (
 export const checkIsUpdateFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
+  timelineType: TimelineTypeLiteral,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -191,6 +227,7 @@ export const checkIsUpdateFailureCases = (
   return commonUpdateCases(
     isHandlingTemplateTimeline,
     status,
+    timelineType,
     version,
     templateTimelineVersion,
     templateTimelineId,
@@ -201,7 +238,8 @@ export const checkIsUpdateFailureCases = (
 
 export const checkIsCreateFailureCases = (
   isHandlingTemplateTimeline: boolean,
-  status: TimelineStatus | null | undefined,
+  status: TimelineStatus,
+  timelineType: TimelineTypeLiteral,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -237,13 +275,20 @@ export const checkIsCreateFailureCases = (
 export const checkIsCreateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
+  timelineType: TimelineTypeLiteral,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
-  if (!isHandlingTemplateTimeline && existTimeline != null) {
+  console.log('checkIsCreateViaImportFailureCases', status);
+  if (status === TimelineStatus.draft) {
+    return {
+      body: CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  } else if (!isHandlingTemplateTimeline && existTimeline != null) {
     return {
       body: getImportExistingTimelineError(existTimeline.savedObjectId),
       statusCode: 405,
@@ -257,11 +302,6 @@ export const checkIsCreateViaImportFailureCases = (
   } else if (isHandlingTemplateTimeline && templateTimelineId == null) {
     return {
       body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
-      statusCode: 405,
-    };
-  } else if (existTimeline == null && status === TimelineStatus.draft) {
-    return {
-      body: CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
       statusCode: 405,
     };
   } else {

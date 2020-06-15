@@ -12,6 +12,7 @@ import {
   omit,
   isObject,
   toString as fpToString,
+  isEmpty,
 } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
@@ -153,6 +154,12 @@ export const createTimelineEpic = <State>(): Epic<
       filter(([action, timeline]) => {
         const timelineId: string = get('payload.id', action);
         const timelineObj: TimelineModel = timeline[timelineId];
+        console.log(
+          '-------',
+          action.type === startTimelineSaving.type &&
+            timelineObj != null &&
+            timelineObj.status != null
+        );
         if (action.type === addError.type) {
           return true;
         }
@@ -171,10 +178,17 @@ export const createTimelineEpic = <State>(): Epic<
         ) {
           return true;
         } else if (
-          isItAtimelineAction(timelineId) &&
+          action.type === startTimelineSaving.type &&
           timelineObj != null &&
           timelineObj.status != null &&
           TimelineStatus.immutable === timelineObj.status
+        ) {
+          return true;
+        } else if (
+          action.type === startTimelineSaving.type &&
+          timelineObj != null &&
+          timelineObj.status != null &&
+          isEmpty(timelineObj.title)
         ) {
           return true;
         }
@@ -224,6 +238,7 @@ export const createTimelineEpic = <State>(): Epic<
             allTimelineQuery$
           );
         } else if (timelineActionsType.includes(action.type)) {
+          console.log('persistTimeline', timeline[action.payload.id]);
           return from(
             persistTimeline({
               timelineId,
@@ -240,7 +255,7 @@ export const createTimelineEpic = <State>(): Epic<
               if (allTimelineQuery.refetch != null) {
                 (allTimelineQuery.refetch as inputsModel.Refetch)();
               }
-
+              console.log('savedTimeline', savedTimeline);
               return [
                 response.code === 409
                   ? updateAutoSaveMsg({
@@ -255,8 +270,6 @@ export const createTimelineEpic = <State>(): Epic<
                         version: response.timeline.version,
                         status: response.timeline.status ?? TimelineStatus.active,
                         timelineType: response.timeline.timelineType ?? TimelineType.default,
-                        templateTimelineId: response.timeline.templateTimelineId ?? null,
-                        templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
                         isSaving: false,
                       },
                     }),
