@@ -21,13 +21,13 @@ describe('AlertsUtilityBar', () => {
         clearSelection={jest.fn()}
         totalCount={100}
         selectedEventIds={{}}
-        isFilteredToOpen={false}
+        currentFilter="closed"
         selectAll={jest.fn()}
         showClearSelection={true}
         updateAlertsStatus={jest.fn()}
       />
     );
 
-    expect(wrapper.find('[dataTestSubj="openCloseAlert"]')).toBeTruthy();
+    expect(wrapper.find('[dataTestSubj="alertActionPopover"]')).toBeTruthy();
   });
 });

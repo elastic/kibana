@@ -10,14 +10,6 @@ export class AlertConstants {
    */
   static BASE_API_URL = '/api/endpoint';
   /**
-   * The path for the Alert's Index Pattern API.
-   */
-  static INDEX_PATTERN_ROUTE = `${AlertConstants.BASE_API_URL}/index_pattern`;
-  /**
-   * A paramter passed to Alert's Index Pattern.
-   */
-  static EVENT_DATASET = 'events';
-  /**
    * Alert's Search API default page size
    */
   static DEFAULT_TOTAL_HITS = 10000;
