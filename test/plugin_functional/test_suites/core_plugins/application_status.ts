@@ -44,17 +44,17 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
-    return browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
+    return browser.executeAsync(async (status, cb) => {
       window.__coreAppStatus.setAppStatus(status);
       cb();
     }, s);
   };
 
   const navigateToApp = async (i: string) => {
-    return (await browser.executeAsync(async (appId, cb: Function) => {
+    return await browser.executeAsync(async (appId, cb) => {
       await window.__coreAppStatus.navigateToApp(appId);
       cb();
-    }, i)) as any;
+    }, i);
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/65423
