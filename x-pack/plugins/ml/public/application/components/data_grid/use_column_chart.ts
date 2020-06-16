@@ -130,7 +130,7 @@ export const fetchChartsData = async (
         aggs[`${id}_histogram`] = {
           histogram: {
             field: c.id,
-            interval: aggIntervals[id],
+            interval: aggIntervals[id] !== 0 ? aggIntervals[id] : 1,
           },
         };
       }

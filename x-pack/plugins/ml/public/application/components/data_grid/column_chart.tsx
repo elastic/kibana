@@ -50,9 +50,10 @@ const getLegendText = (chartData: ChartData, MAX_CHART_COLUMNS: number): string 
   }
 
   if (isNumericChartData(chartData)) {
-    return `${Math.round(chartData.stats[0] * 100) / 100} - ${
-      Math.round(chartData.stats[1] * 100) / 100
-    }`;
+    const fromValue = Math.round(chartData.stats[0] * 100) / 100;
+    const toValue = Math.round(chartData.stats[1] * 100) / 100;
+
+    return fromValue !== toValue ? `${fromValue} - ${toValue}` : '' + fromValue;
   }
 
   throw new Error('Invalid chart data.');

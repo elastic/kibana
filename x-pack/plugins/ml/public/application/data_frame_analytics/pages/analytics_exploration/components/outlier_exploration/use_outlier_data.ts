@@ -95,7 +95,11 @@ export const useOutlierData = (
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataGrid.chartsVisible, jobConfig?.dest.index, JSON.stringify([dataGrid.visibleColumns])]);
+  }, [
+    dataGrid.chartsVisible,
+    jobConfig?.dest.index,
+    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+  ]);
 
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
