@@ -52,10 +52,13 @@ export interface CanvasWorkpad {
   width: number;
 }
 
-export type CanvasTemplate = CanvasWorkpad & {
+export interface CanvasTemplate {
+  id: string;
+  name: string;
   help: string;
   tags: string[];
-};
+  template_key: string;
+}
 
 export interface CanvasWorkpadBoundingBox {
   left: number;

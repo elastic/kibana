@@ -8,6 +8,7 @@ import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static
 
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';
+export const TEMPLATE_TYPE = `${CANVAS_TYPE}-template`;
 export const CANVAS_APP = 'canvas';
 export const APP_ROUTE = '/app/canvas';
 export const APP_ROUTE_WORKPAD = `${APP_ROUTE}#/workpad`;
@@ -16,6 +17,7 @@ export const API_ROUTE_WORKPAD = `${API_ROUTE}/workpad`;
 export const API_ROUTE_WORKPAD_ASSETS = `${API_ROUTE}/workpad-assets`;
 export const API_ROUTE_WORKPAD_STRUCTURES = `${API_ROUTE}/workpad-structures`;
 export const API_ROUTE_CUSTOM_ELEMENT = `${API_ROUTE}/custom-element`;
+export const API_ROUTE_TEMPLATES = `${API_ROUTE}/templates`;
 export const LOCALSTORAGE_PREFIX = `kibana.canvas`;
 export const LOCALSTORAGE_CLIPBOARD = `${LOCALSTORAGE_PREFIX}.clipboard`;
 export const SESSIONSTORAGE_LASTPATH = 'lastPath:canvas';

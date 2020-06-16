@@ -25,7 +25,6 @@ import { initializeViews } from './uis/views';
 // @ts-ignore Untyped Local
 import { initializeArgs } from './uis/arguments';
 import { tagSpecs } from './uis/tags';
-import { templateSpecs } from './templates';
 
 interface SetupDeps {
   canvas: CanvasSetup;
@@ -60,7 +59,6 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addViewUIs(initializeViews(core, plugins));
     plugins.canvas.addArgumentUIs(initializeArgs(core, plugins));
     plugins.canvas.addTagUIs(tagSpecs);
-    plugins.canvas.addTemplates(templateSpecs);
     plugins.canvas.addTransformUIs(transformSpecs);
   }
 
