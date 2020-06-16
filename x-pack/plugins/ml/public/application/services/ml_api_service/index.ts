@@ -23,6 +23,7 @@ import {
   CombinedJob,
   Detector,
   AnalysisConfig,
+  ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
@@ -77,6 +78,11 @@ export interface CardinalityModelPlotHigh {
 export type CardinalityValidationResult = SuccessCardinality | CardinalityModelPlotHigh;
 export type CardinalityValidationResults = CardinalityValidationResult[];
 
+export interface GetModelSnapshotsResponse {
+  count: number;
+  model_snapshots: ModelSnapshot[];
+}
+
 export function basePath() {
   return '/api/ml';
 }
@@ -115,6 +121,13 @@ export const ml = {
   closeJob({ jobId }: { jobId: string }) {
     return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}/_close`,
+      method: 'POST',
+    });
+  },
+
+  forceCloseJob({ jobId }: { jobId: string }) {
+    return http<any>({
+      path: `${basePath()}/anomaly_detectors/${jobId}/_close?force=true`,
       method: 'POST',
     });
   },
@@ -238,6 +251,13 @@ export const ml = {
   stopDatafeed({ datafeedId }: { datafeedId: string }) {
     return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}/_stop`,
+      method: 'POST',
+    });
+  },
+
+  forceStopDatafeed({ datafeedId }: { datafeedId: string }) {
+    return http<any>({
+      path: `${basePath()}/datafeeds/${datafeedId}/_stop?force=true`,
       method: 'POST',
     });
   },
@@ -637,6 +657,33 @@ export const ml = {
     return http<Array<{ name: string }>>({
       path: `${tempBasePath}/index_management/indices`,
       method: 'GET',
+    });
+  },
+
+  getModelSnapshots(jobId: string, snapshotId?: string) {
+    return http<GetModelSnapshotsResponse>({
+      path: `${basePath()}/anomaly_detectors/${jobId}/model_snapshots${
+        snapshotId !== undefined ? `/${snapshotId}` : ''
+      }`,
+    });
+  },
+
+  updateModelSnapshot(
+    jobId: string,
+    snapshotId: string,
+    body: { description?: string; retain?: boolean }
+  ) {
+    return http<any>({
+      path: `${basePath()}/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_update`,
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+
+  deleteModelSnapshot(jobId: string, snapshotId: string) {
+    return http<any>({
+      path: `${basePath()}/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}`,
+      method: 'DELETE',
     });
   },
 

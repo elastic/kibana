@@ -10463,7 +10463,6 @@
     "xpack.ml.navMenu.dataVisualizerTabLinkText": "データビジュアライザー",
     "xpack.ml.navMenu.overviewTabLinkText": "概要",
     "xpack.ml.navMenu.settingsTabLinkText": "設定",
-    "xpack.ml.newJi18n(ob.recognize.jobsCreationFailed.resetButtonAriaLabel": "リセット",
     "xpack.ml.newJob.page.createJob": "ジョブを作成",
     "xpack.ml.newJob.recognize.advancedLabel": "高度な設定",
     "xpack.ml.newJob.recognize.advancedSettingsAriaLabel": "高度な設定",
