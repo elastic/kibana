@@ -62,7 +62,6 @@ const pushToServiceHandler = async ({
     incident = { ...params, short_description: params.title, comments: params.comment };
   }
 
-  // TODO: should temporary keep it for a Case usage
   if (updateIncident) {
     res = await externalService.updateIncident({
       incidentId: externalId,
@@ -76,6 +75,8 @@ const pushToServiceHandler = async ({
       },
     });
   }
+
+  // TODO: should temporary keep comments for a Case usage
   if (
     comments &&
     Array.isArray(comments) &&
@@ -88,7 +89,7 @@ const pushToServiceHandler = async ({
     const fieldsKey = mapping.get('comments')?.target ?? 'comments';
     for (const currentComment of comments) {
       await externalService.updateIncident({
-        incidentId: externalId,
+        incidentId: res.id,
         incident: {
           ...incident,
           [fieldsKey]: currentComment.comment,

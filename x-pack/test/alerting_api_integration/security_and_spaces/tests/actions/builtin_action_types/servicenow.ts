@@ -74,7 +74,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         ],
       },
     },
-    consumer: 'alerts',
+    consumer: 'case',
   };
 
   let servicenowSimulatorURL: string = '<could not determine kibana url>';
@@ -347,12 +347,12 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
               });
             });
         });
 
-        it('should handle failing with a simulated success without caseId', async () => {
+        it('should handle failing with a simulated success without savedObjectId', async () => {
           await supertest
             .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
@@ -365,7 +365,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -378,7 +378,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  caseId: 'success',
+                  savedObjectId: 'success',
                 },
               },
             })
@@ -401,7 +401,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                 },
               },
@@ -426,7 +426,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 ...mockServiceNow.params,
                 subActionParams: {
                   ...mockServiceNow.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -454,7 +454,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 ...mockServiceNow.params,
                 subActionParams: {
                   ...mockServiceNow.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
@@ -482,7 +482,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 ...mockServiceNow.params,
                 subActionParams: {
                   ...mockServiceNow.params.subActionParams,
-                  caseId: 'success',
+                  savedObjectId: 'success',
                   title: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },

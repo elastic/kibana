@@ -72,6 +72,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
           },
           secrets: mockServiceNow.secrets,
+          consumer: 'alerts',
         })
         .expect(403, {
           statusCode: 403,
