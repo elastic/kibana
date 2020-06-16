@@ -13,8 +13,9 @@ import { ExpandedRow } from './expanded_row';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('../../../../../shared_imports');
-
+jest.mock('../../../../../shared_imports', () => ({
+  formatHumanReadableDateTimeSeconds: jest.fn(),
+}));
 describe('Transform: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {

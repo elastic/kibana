@@ -12,7 +12,7 @@ describe('Transform: Job List Columns', () => {
   test('getColumns()', () => {
     const columns = getColumns([], () => {}, []);
 
-    expect(columns).toHaveLength(9);
+    expect(columns).toHaveLength(7);
     expect(columns[0].isExpander).toBeTruthy();
     expect(columns[1].name).toBe('ID');
     expect(columns[2].name).toBe('Description');
