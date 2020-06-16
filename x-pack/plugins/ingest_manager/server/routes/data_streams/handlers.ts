@@ -180,5 +180,5 @@ const getEnhancedDashboards = async (
       title: dbSavedObject.attributes?.title || db.id,
     };
   });
-  return await Promise.all(dashboardsPromises);
+  return Promise.all(dashboardsPromises);
 };

@@ -15,7 +15,7 @@ let cachedAdminUser: null | { username: string; password: string } = null;
 
 class OutputService {
   public async getDefaultOutput(soClient: SavedObjectsClientContract) {
-    return await soClient.find<Output>({
+    return soClient.find<Output>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
@@ -38,7 +38,7 @@ class OutputService {
         ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
       } as NewOutput;
 
-      return await this.create(soClient, newDefaultOutput);
+      return this.create(soClient, newDefaultOutput);
     }
 
     return {

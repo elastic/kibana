@@ -130,7 +130,7 @@ export async function saveAgentEvents(
     }
   );
 
-  return await soClient.bulkCreate(objects);
+  return soClient.bulkCreate(objects);
 }
 
 export interface AcksService {

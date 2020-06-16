@@ -242,7 +242,7 @@ class AgentConfigService {
       throw new Error('Agent config not found');
     }
 
-    return await this._update(
+    return this._update(
       soClient,
       id,
       {
@@ -266,7 +266,7 @@ class AgentConfigService {
       throw new Error('Agent config not found');
     }
 
-    return await this._update(
+    return this._update(
       soClient,
       id,
       {

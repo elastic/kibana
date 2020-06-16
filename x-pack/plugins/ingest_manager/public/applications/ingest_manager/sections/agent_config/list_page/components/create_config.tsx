@@ -48,7 +48,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   };
 
   const createAgentConfig = async () => {
-    return await sendCreateAgentConfig(agentConfig, { withSysMonitoring });
+    return sendCreateAgentConfig(agentConfig, { withSysMonitoring });
   };
 
   const header = (
