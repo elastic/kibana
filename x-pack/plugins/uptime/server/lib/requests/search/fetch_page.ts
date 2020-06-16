@@ -9,6 +9,7 @@ import { QueryContext } from './query_context';
 import { QUERY } from '../../../../common/constants';
 import { CursorDirection, MonitorSummary, SortOrder, Ping } from '../../../../common/runtime_types';
 import { MonitorSummaryIterator } from './monitor_summary_iterator';
+import { getHistogramForMonitors as getHistogramsForMonitors } from './get_monitor_histograms';
 
 /**
  *
@@ -63,6 +64,12 @@ const fetchPageMonitorSummaries: MonitorSummariesFetcher = async (
     monitorSummaries.reverse();
   }
 
+  const histograms = await getHistogramsForMonitors(queryContext, monitorSummaries.map(s => s.monitor_id))
+  
+  monitorSummaries.forEach(s => {
+    s.histogram = histograms[s.monitor_id];
+  });
+
   return {
     monitorSummaries: monitorSummaries,
     nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
@@ -92,7 +99,6 @@ export interface MonitorLocCheckGroup {
   monitorId: string;
   location: string | null;
   checkGroup: string;
-  summaryPings: {[key: string]: Ping};
   status: 'up' | 'down';
   summaryTimestamp: Date;
 }

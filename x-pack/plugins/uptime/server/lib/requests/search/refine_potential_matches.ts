@@ -40,8 +40,13 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
       checks: [],
       observer: {geo: {name: []}},
       summary: {
+        status: 'up',
         up: 0,
         down: 0,
+      },
+      tls: {
+        not_after: null,
+        not_before: null,
       },
       url: {}
     };
@@ -71,15 +76,24 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
 
       monitorSummaryState.url = latestSource.url;
       monitorSummaryState.observer?.geo?.name?.push(location)
+      if (latestSource["@timestamp"] > monitorSummaryState.timestamp) {
+        monitorSummaryState.timestamp = latestSource["@timestamp"];
+      }
+      monitorSummaryState.tls.not_after = latestSource.tls?.certificate_not_valid_after;
+      monitorSummaryState.tls.not_before = latestSource.tls?.certificate_not_valid_before;
       if (monitorSummaryState.summary) { // unnecessary if, for type checker
         monitorSummaryState.summary.up += latestSource.summary.up;
         monitorSummaryState.summary.down += latestSource.summary.down;
+        if (latestSource.summary.down > 0) {
+          monitorSummaryState.summary.status = 'down';
+        }
       }
     }
+
     if (matched) {
       summaries.push({
         monitor_id: monitorId,
-        state: monitorSummaryState
+        state: monitorSummaryState,
       });
     }
   }

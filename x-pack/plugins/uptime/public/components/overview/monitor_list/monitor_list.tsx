@@ -78,7 +78,7 @@ export const MonitorListComponent: React.FC<Props> = ({
   const columns = [
     {
       align: 'left' as const,
-      field: 'state.monitor.status',
+      field: 'state.summary.status',
       name: labels.STATUS_COLUMN_LABEL,
       mobileOptions: {
         fullWidth: true,
@@ -117,7 +117,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       align: 'left' as const,
       field: 'state.tls',
       name: labels.TLS_COLUMN_LABEL,
-      render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,
+      render: (tls: any) => <CertStatusColumn cert={tls} />,
     },
     {
       align: 'center' as const,
