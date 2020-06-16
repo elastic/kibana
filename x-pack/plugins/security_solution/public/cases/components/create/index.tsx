@@ -63,7 +63,6 @@ const initialCaseValue: CasePostRequest = {
 export const Create = React.memo(() => {
   const history = useHistory();
   const { caseData, isLoading, postCase } = usePostCase();
-  const [isCancel, setIsCancel] = useState(false);
   const { form } = useForm<CasePostRequest>({
     defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
@@ -99,16 +98,11 @@ export const Create = React.memo(() => {
   }, [form]);
 
   const handleSetIsCancel = useCallback(() => {
-    setIsCancel(true);
-  }, []);
+    history.push('/');
+  }, [history]);
 
   if (caseData != null && caseData.id) {
     history.push(getCaseDetailsUrl({ id: caseData.id }));
-    return null;
-  }
-
-  if (isCancel) {
-    history.push('/');
     return null;
   }
 

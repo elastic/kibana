@@ -22,6 +22,8 @@ import {
   timelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 
+jest.mock('../link_to');
+
 jest.mock('../../lib/kibana');
 
 jest.mock('uuid', () => {

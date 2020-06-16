@@ -7,9 +7,9 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
 import React, { useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
-import { useLocation } from 'react-router-dom';
 import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';

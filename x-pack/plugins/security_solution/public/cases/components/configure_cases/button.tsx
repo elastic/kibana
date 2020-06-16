@@ -51,7 +51,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
         {label}
       </LinkButton>
     ),
-    [label, isDisabled, urlSearch]
+    [label, isDisabled, formatUrl, goToCaseConfigure]
   );
   return showToolTip ? (
     <EuiToolTip

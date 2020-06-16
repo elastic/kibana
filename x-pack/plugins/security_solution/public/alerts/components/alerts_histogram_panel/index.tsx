@@ -7,11 +7,11 @@ import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { useHistory } from 'react-router-dom';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { LegendItem } from '../../../common/components/charts/draggable_legend_item';

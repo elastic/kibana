@@ -16,6 +16,16 @@ import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from './';
 import { TabNavigationProps } from './types';
 
+jest.mock('../../../lib/kibana');
+jest.mock('../../link_to');
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 describe('Tab Navigation', () => {
   const pageName = SecurityPageName.hosts;
   const hostName = 'siem-window';
@@ -75,13 +85,6 @@ describe('Tab Navigation', () => {
       });
       wrapper.update();
       expect(networkTab().prop('isSelected')).toBeTruthy();
-    });
-    test('it carries the url state in the link', () => {
-      const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-      const firstTab = wrapper.find('EuiTab[data-test-subj="navigation-network"]');
-      expect(firstTab.props().href).toBe(
-        "#/link-to/network?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
-      );
     });
   });
 
@@ -149,9 +152,7 @@ describe('Tab Navigation', () => {
       const firstTab = wrapper.find(
         `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
       );
-      expect(firstTab.props().href).toBe(
-        `#/${pageName}/${hostName}/${HostsTableType.authentications}?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`
-      );
+      expect(firstTab.props().href).toBe('/siem-window/authentications');
     });
   });
 });

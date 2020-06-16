@@ -22,6 +22,8 @@ export { nextTick } from '../../../../../../../test_utils';
 
 import { act } from 'react-dom/test-utils';
 
+jest.mock('../../../../common/components/link_to');
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -34,6 +36,7 @@ jest.mock('../../../../common/lib/kibana', () => {
               crud: true,
             },
           },
+          navigateToApp: jest.fn(),
         },
       },
     }),

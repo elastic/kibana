@@ -18,6 +18,8 @@ import { mockData } from './mock';
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 
+jest.mock('../../../common/components/link_to');
+
 describe('Uncommon Process Table Component', () => {
   const loadPage = jest.fn();
   const mount = useMountAppended();

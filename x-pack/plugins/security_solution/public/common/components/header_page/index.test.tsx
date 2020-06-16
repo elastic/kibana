@@ -13,6 +13,15 @@ import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    useHistory: jest.fn(),
+  }),
+}));
+
+jest.mock('../link_to');
+
 describe('HeaderPage', () => {
   const mount = useMountAppended();
 

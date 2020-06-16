@@ -6,9 +6,9 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
-import { useHistory } from 'react-router-dom';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';

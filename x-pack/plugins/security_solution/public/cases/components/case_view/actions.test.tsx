@@ -15,6 +15,13 @@ import * as i18n from './translations';
 jest.mock('../../containers/use_delete_cases');
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    useHistory: jest.fn(),
+  }),
+}));
+
 describe('CaseView actions', () => {
   const handleOnDeleteConfirm = jest.fn();
   const handleToggleModal = jest.fn();

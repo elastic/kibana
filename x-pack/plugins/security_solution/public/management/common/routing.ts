@@ -46,7 +46,7 @@ export const getEndpointListPath = (
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
   if (name === 'endpointList') {
-    return `/${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+    return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
       tabName: ManagementSubTab.endpoints,
     })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
   }
@@ -72,12 +72,12 @@ export const getEndpointDetailsPath = (
 };
 
 export const getPoliciesPath = (search?: string) =>
-  `/${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
+  `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
     tabName: ManagementSubTab.policies,
   })}${appendSearch(search ?? undefined)}`;
 
 export const getPolicyDetailPath = (policyId: string, search?: string) =>
-  `/${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+  `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
     tabName: ManagementSubTab.policies,
     policyId,
   })}${appendSearch(search ?? undefined)}`;
