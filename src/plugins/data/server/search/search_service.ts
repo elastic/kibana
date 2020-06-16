@@ -54,8 +54,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public stop() {}
 
-  private registerSearchStrategy: TRegisterSearchStrategy = async (name, strategy) => {
-    this.searchStrategies[name] = await strategy;
+  private registerSearchStrategy: TRegisterSearchStrategy = (name, strategy) => {
+    this.searchStrategies[name] = strategy;
   };
 
   private getSearchStrategy: TGetSearchStrategy = (name) => {

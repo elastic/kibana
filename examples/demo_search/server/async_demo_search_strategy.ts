@@ -20,8 +20,8 @@
 import { ISearchStrategy } from '../../../src/plugins/data/server';
 import { ASYNC_DEMO_SEARCH_STRATEGY, IAsyncDemoRequest } from '../common';
 
-export const asyncDemoSearchStrategyProvider = async (): Promise<
-  ISearchStrategy<typeof ASYNC_DEMO_SEARCH_STRATEGY>
+export const asyncDemoSearchStrategyProvider = (): ISearchStrategy<
+  typeof ASYNC_DEMO_SEARCH_STRATEGY
 > => {
   function getFibonacciSequence(n = 0) {
     const beginning = [0, 1].slice(0, n);

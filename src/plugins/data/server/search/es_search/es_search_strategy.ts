@@ -23,12 +23,12 @@ import { Observable } from 'rxjs';
 import { ES_SEARCH_STRATEGY } from '../../../common/search';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
-export const esSearchStrategyProvider = async (
+export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>
-): Promise<ISearchStrategy<typeof ES_SEARCH_STRATEGY>> => {
-  const config = await config$.pipe(first()).toPromise();
+): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
     search: async (context: RequestHandlerContext, request, options) => {
+      const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 
       // Only default index pattern type is supported here.

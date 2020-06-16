@@ -28,16 +28,15 @@ export interface AsyncSearchResponse<T> {
   response: SearchResponse<T>;
 }
 
-export const enhancedEsSearchStrategyProvider = async (
+export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>
-): Promise<ISearchStrategy<typeof ES_SEARCH_STRATEGY>> => {
-  const config = await config$.pipe(first()).toPromise();
-
+): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
     context,
     request: IEnhancedEsSearchRequest,
     options
   ) => {
+    const config = await config$.pipe(first()).toPromise();
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };

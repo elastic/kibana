@@ -101,7 +101,7 @@ export interface ISearchStrategy<T extends TStrategyTypes> {
 
 export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
   name: T,
-  searchStrategy: Promise<ISearchStrategy<T>>
+  searchStrategy: ISearchStrategy<T>
 ) => void;
 
 export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
