@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { ScopedHistory } from 'kibana/public';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionsConnectorsList } from './actions_connectors_list';
 import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
@@ -27,7 +27,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('actions_connectors_list component empty', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -75,25 +75,29 @@ describe('actions_connectors_list component empty', () => {
     };
     actionTypeRegistry.has.mockReturnValue(true);
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsList />
+      </AppContextProvider>
+    );
+
+    // Wait for active space to resolve before requesting the component to update
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
+  }
 
-    await waitForRender(wrapper);
-  });
-
-  it('renders empty prompt', () => {
+  it('renders empty prompt', async () => {
+    await setup();
     expect(wrapper.find('EuiEmptyPrompt')).toHaveLength(1);
     expect(
       wrapper.find('[data-test-subj="createFirstActionButton"]').find('EuiButton')
     ).toHaveLength(1);
   });
 
-  test('if click create button should render ConnectorAddFlyout', () => {
+  test('if click create button should render ConnectorAddFlyout', async () => {
+    await setup();
     wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
     expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
   });
@@ -102,7 +106,7 @@ describe('actions_connectors_list component empty', () => {
 describe('actions_connectors_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -114,6 +118,7 @@ describe('actions_connectors_list component with items', () => {
         isPreconfigured: false,
         referencedByCount: 1,
         config: {},
+        consumer: 'alerts',
       },
       {
         id: '2',
@@ -122,6 +127,7 @@ describe('actions_connectors_list component with items', () => {
         referencedByCount: 1,
         isPreconfigured: false,
         config: {},
+        consumer: 'alerts',
       },
       {
         id: '3',
@@ -130,6 +136,7 @@ describe('actions_connectors_list component with items', () => {
         referencedByCount: 1,
         isPreconfigured: true,
         config: {},
+        consumer: 'alerts',
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([
@@ -181,29 +188,34 @@ describe('actions_connectors_list component with items', () => {
       alertTypeRegistry: {} as any,
     };
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsList />
+      </AppContextProvider>
+    );
+
+    // Wait for active space to resolve before requesting the component to update
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
 
-    await waitForRender(wrapper);
-
     expect(loadAllActions).toHaveBeenCalled();
-  });
+  }
 
-  it('renders table of connectors', () => {
+  it('renders table of connectors', async () => {
+    await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(3);
   });
 
-  it('renders table with preconfigured connectors', () => {
+  it('renders table with preconfigured connectors', async () => {
+    await setup();
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
   });
 
   test('if select item for edit should render ConnectorEditFlyout', async () => {
+    await setup();
     await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
 
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
@@ -213,7 +225,7 @@ describe('actions_connectors_list component with items', () => {
 describe('actions_connectors_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -264,18 +276,21 @@ describe('actions_connectors_list component empty with show only capability', ()
       alertTypeRegistry: {} as any,
     };
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsList />
+      </AppContextProvider>
+    );
+
+    // Wait for active space to resolve before requesting the component to update
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
+  }
 
-    await waitForRender(wrapper);
-  });
-
-  it('renders no permissions to create connector', () => {
+  it('renders no permissions to create connector', async () => {
+    await setup();
     expect(wrapper.find('[defaultMessage="No permissions to create connector"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="createActionButton"]')).toHaveLength(0);
   });
@@ -284,7 +299,7 @@ describe('actions_connectors_list component empty with show only capability', ()
 describe('actions_connectors_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -295,6 +310,7 @@ describe('actions_connectors_list with show only capability', () => {
         description: 'My test',
         referencedByCount: 1,
         config: {},
+        consumer: 'alerts',
       },
       {
         id: '2',
@@ -302,6 +318,7 @@ describe('actions_connectors_list with show only capability', () => {
         description: 'My test 2',
         referencedByCount: 1,
         config: {},
+        consumer: 'alerts',
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([
@@ -350,18 +367,21 @@ describe('actions_connectors_list with show only capability', () => {
       alertTypeRegistry: {} as any,
     };
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsList />
+      </AppContextProvider>
+    );
+
+    // Wait for active space to resolve before requesting the component to update
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
+  }
 
-    await waitForRender(wrapper);
-  });
-
-  it('renders table of connectors with delete button disabled', () => {
+  it('renders table of connectors with delete button disabled', async () => {
+    await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     wrapper.find('EuiTableRow').forEach((elem) => {
@@ -375,7 +395,7 @@ describe('actions_connectors_list with show only capability', () => {
 describe('actions_connectors_list component with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeAll(async () => {
+  async function setup() {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -386,6 +406,7 @@ describe('actions_connectors_list component with disabled items', () => {
         description: 'My test',
         referencedByCount: 1,
         config: {},
+        consumer: 'alerts',
       },
       {
         id: '2',
@@ -393,6 +414,7 @@ describe('actions_connectors_list component with disabled items', () => {
         description: 'My test 2',
         referencedByCount: 1,
         config: {},
+        consumer: 'alerts',
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([
@@ -448,20 +470,23 @@ describe('actions_connectors_list component with disabled items', () => {
       alertTypeRegistry: {} as any,
     };
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsList />
+      </AppContextProvider>
+    );
+
+    // Wait for active space to resolve before requesting the component to update
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
 
-    await waitForRender(wrapper);
-
     expect(loadAllActions).toHaveBeenCalled();
-  });
+  }
 
-  it('renders table of connectors', () => {
+  it('renders table of connectors', async () => {
+    await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual(
@@ -472,9 +497,3 @@ describe('actions_connectors_list component with disabled items', () => {
     );
   });
 });
-
-async function waitForRender(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
-  wrapper.update();
-}

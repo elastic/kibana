@@ -75,7 +75,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/actions/action",
         Object {
-          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"consumer\\":\\"alerts\\"}",
         },
       ]
     `);
