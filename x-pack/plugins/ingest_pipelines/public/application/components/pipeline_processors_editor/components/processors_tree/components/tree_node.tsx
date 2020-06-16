@@ -106,8 +106,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         selector={processorInfo.selector}
         processor={processor}
         handlers={handlers}
-        // TODO: Replace with processor.options.description when it is available
-        description={processor.options.tag}
+        description={processor.options.description}
         selected={Boolean(movingProcessor?.id === processor.id)}
       />
       {renderOnFailureHandlersTree()}

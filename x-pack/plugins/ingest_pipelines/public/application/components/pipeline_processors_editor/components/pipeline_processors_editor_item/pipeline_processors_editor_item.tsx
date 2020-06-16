@@ -59,12 +59,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 onChange={(nextDescription) => {
                   let nextOptions: Record<string, any>;
                   if (!nextDescription) {
-                    const { tag, ...restOptions } = processor.options;
+                    const { description: __, ...restOptions } = processor.options;
                     nextOptions = restOptions;
                   } else {
                     nextOptions = {
                       ...processor.options,
-                      tag: nextDescription,
+                      description: nextDescription,
                     };
                   }
                   processorsDispatch({
