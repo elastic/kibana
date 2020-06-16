@@ -50,7 +50,6 @@ export default function ({ getService, loadTestFile }) {
 
       loadTestFile(require.resolve('./empty_dashboard'));
       loadTestFile(require.resolve('./embeddable_rendering'));
-      loadTestFile(require.resolve('./new_visualize_flow/dashboard_embedding'));
       loadTestFile(require.resolve('./create_and_add_embeddables'));
       loadTestFile(require.resolve('./edit_embeddable_redirects'));
       loadTestFile(require.resolve('./time_zones'));
