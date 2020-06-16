@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import {
@@ -40,7 +40,7 @@ const PAGE_SIZE = 3;
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
     const onOpenTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: TimelineIdLiteral }) => {
         queryTimelineById({
           apolloClient,
           duplicate,
@@ -106,7 +106,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 StatefulRecentTimelinesComponent.displayName = 'StatefulRecentTimelinesComponent';
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+  updateIsLoading: ({ id, isLoading }: { id: TimelineIdLiteral; isLoading: boolean }) =>
     dispatch(dispatchUpdateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });

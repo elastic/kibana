@@ -17,6 +17,7 @@ import React, { useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -48,7 +49,7 @@ interface Range {
 interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
   kql?: inputsModel.GlobalKqlQuery | undefined;
-  timelineId?: string;
+  timelineId?: TimelineIdLiteral;
 }
 
 interface ReturnUpdateReduxTime {
@@ -67,7 +68,7 @@ export type DispatchUpdateReduxTime = ({
 interface OwnProps {
   disabled?: boolean;
   id: InputsModelId;
-  timelineId?: string;
+  timelineId?: TimelineIdLiteral;
 }
 
 export type SuperDatePickerProps = OwnProps & PropsFromRedux;

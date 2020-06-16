@@ -9,6 +9,7 @@ import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
@@ -29,7 +30,7 @@ export const UrlStateContainer: React.FC<UrlStateContainerPropTypes> = (
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),
   updateTimeline: dispatchUpdateTimeline(dispatch),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+  updateTimelineIsLoading: ({ id, isLoading }: { id: TimelineIdLiteral; isLoading: boolean }) =>
     dispatch(timelineActions.updateIsLoading({ id, isLoading })),
 });
 

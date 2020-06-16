@@ -9,6 +9,7 @@ import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
+import { TimelineIdLiteral, TimelineId } from '../../../../common/types/timeline';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../../graphql/types';
 import {
@@ -190,14 +191,14 @@ export const formatTimelineResultToModel = (
 export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
     id,
     isLoading,
   }: {
-    id: string;
+    id: TimelineIdLiteral;
     isLoading: boolean;
   }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
@@ -212,7 +213,7 @@ export const queryTimelineById = <TCache>({
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
-  updateIsLoading({ id: 'timeline-1', isLoading: true });
+  updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (apolloClient) {
     apolloClient
       .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
@@ -234,7 +235,7 @@ export const queryTimelineById = <TCache>({
           updateTimeline({
             duplicate,
             from: getOr(from, 'dateRange.start', timeline),
-            id: 'timeline-1',
+            id: TimelineId.active,
             notes,
             timeline: {
               ...timeline,
@@ -245,7 +246,7 @@ export const queryTimelineById = <TCache>({
         }
       })
       .finally(() => {
-        updateIsLoading({ id: 'timeline-1', isLoading: false });
+        updateIsLoading({ id: TimelineId.active, isLoading: false });
       });
   }
 };

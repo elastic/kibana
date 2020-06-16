@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { TimelineIdLiteral } from '../../../../../common/types/timeline';
 import { FlyoutHeader } from '../header';
 import * as i18n from './translations';
 
@@ -26,7 +27,7 @@ const WrappedCloseButton = styled.div`
 
 const FlyoutHeaderWithCloseButtonComponent: React.FC<{
   onClose: () => void;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
   usersViewing: string[];
 }> = ({ onClose, timelineId, usersViewing }) => (
   <FlyoutHeaderContainer>

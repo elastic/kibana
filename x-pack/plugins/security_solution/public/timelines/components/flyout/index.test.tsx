@@ -9,6 +9,7 @@ import { set } from 'lodash/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -157,7 +158,10 @@ describe('Flyout', () => {
     });
 
     test('should call the onOpen when the mouse is clicked for rendering', () => {
-      const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
+      const showTimeline = (jest.fn() as unknown) as ActionCreator<{
+        id: TimelineIdLiteral;
+        show: boolean;
+      }>;
       const wrapper = mount(
         <TestProviders>
           <FlyoutComponent

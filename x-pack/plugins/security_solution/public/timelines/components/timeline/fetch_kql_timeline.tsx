@@ -9,13 +9,14 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from 'src/plugins/data/public';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { State } from '../../../common/store';
 import { inputsActions } from '../../../common/store/actions';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useUpdateKql } from '../../../common/utils/kql/use_update_kql';
 import { timelineSelectors } from '../../store/timeline';
 export interface TimelineKqlFetchProps {
-  id: string;
+  id: TimelineIdLiteral;
   indexPattern: IIndexPattern;
   inputId: InputsModelId;
 }

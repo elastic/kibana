@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { State } from '../../../common/store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
@@ -17,6 +18,9 @@ import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
 import { StatefulTimeline } from '../timeline';
 import { TimelineById } from '../../store/timeline/types';
+
+const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
+const DEFAULT_TIMELINE_BY_ID = {};
 
 export const Badge = (styled(EuiBadge)`
   position: absolute;
@@ -37,7 +41,7 @@ Visible.displayName = 'Visible';
 
 interface OwnProps {
   flyoutHeight: number;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
   usersViewing: string[];
 }
 
@@ -67,7 +71,7 @@ export const FlyoutComponent = React.memo<Props>(
           </Pane>
         </Visible>
         <FlyoutButton
-          dataProviders={dataProviders}
+          dataProviders={dataProviders ?? DEFAULT_DATA_PROVIDERS}
           show={!show}
           timelineId={timelineId}
           onOpen={handleOpen}
@@ -78,9 +82,6 @@ export const FlyoutComponent = React.memo<Props>(
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';
-
-const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
-const DEFAULT_TIMELINE_BY_ID = {};
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById: TimelineById =

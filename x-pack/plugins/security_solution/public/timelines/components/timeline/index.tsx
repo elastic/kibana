@@ -8,6 +8,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { WithSource } from '../../../common/containers/source';
 import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
@@ -26,7 +27,7 @@ import {
 import { Timeline } from './timeline';
 
 export interface OwnProps {
-  id: string;
+  id: TimelineIdLiteral;
   onClose: () => void;
   usersViewing: string[];
 }

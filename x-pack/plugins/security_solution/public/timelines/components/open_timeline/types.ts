@@ -8,7 +8,7 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineIdLiteral } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -78,7 +78,7 @@ export type OnOpenTimeline = ({
   timelineId,
 }: {
   duplicate: boolean;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -172,7 +172,7 @@ export interface OpenTimelineProps {
 
 export interface UpdateTimeline {
   duplicate: boolean;
-  id: string;
+  id: TimelineIdLiteral;
   from: number;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;

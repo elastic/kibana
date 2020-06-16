@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
+import { TimelineIdLiteral, TimelineId } from '../../../../common/types/timeline';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/delete/persist.gql_query';
 import { useGetAllTimeline } from '../../containers/all';
@@ -155,7 +156,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
         if (timelineIds.includes(timeline.savedObjectId || '')) {
-          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
+          createNewTimeline({ id: TimelineId.active, columns: defaultHeaders, show: false });
         }
 
         await apolloClient.mutate<
@@ -229,7 +230,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     const openTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: TimelineIdLiteral }) => {
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
@@ -319,7 +320,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
+    const timeline = getTimeline(state, TimelineId.active) ?? timelineDefaults;
     return {
       timeline,
     };
@@ -333,11 +334,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     columns,
     show,
   }: {
-    id: string;
+    id: TimelineIdLiteral;
     columns: ColumnHeaderOptions[];
     show?: boolean;
   }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
-  updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+  updateIsLoading: ({ id, isLoading }: { id: TimelineIdLiteral; isLoading: boolean }) =>
     dispatch(dispatchUpdateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });

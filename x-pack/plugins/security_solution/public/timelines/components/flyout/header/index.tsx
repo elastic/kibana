@@ -7,8 +7,9 @@
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-
 import { isEmpty, get } from 'lodash/fp';
+
+import { TimelineIdLiteral } from '../../../../../common/types/timeline';
 import { History } from '../../../../common/lib/history';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, inputsModel, inputsSelectors, State } from '../../../../common/store';
@@ -22,7 +23,7 @@ import { timelineDefaults } from '../../../../timelines/store/timeline/defaults'
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 
 interface OwnProps {
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
   usersViewing: string[];
 }
 
@@ -119,7 +120,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  createTimeline: ({ id, show }: { id: string; show?: boolean }) =>
+  createTimeline: ({ id, show }: { id: TimelineIdLiteral; show?: boolean }) =>
     dispatch(
       timelineActions.createTimeline({
         id,
@@ -127,14 +128,14 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
         show,
       })
     ),
-  updateDescription: ({ id, description }: { id: string; description: string }) =>
+  updateDescription: ({ id, description }: { id: TimelineIdLiteral; description: string }) =>
     dispatch(timelineActions.updateDescription({ id, description })),
-  updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
+  updateIsFavorite: ({ id, isFavorite }: { id: TimelineIdLiteral; isFavorite: boolean }) =>
     dispatch(timelineActions.updateIsFavorite({ id, isFavorite })),
-  updateIsLive: ({ id, isLive }: { id: string; isLive: boolean }) =>
+  updateIsLive: ({ id, isLive }: { id: TimelineIdLiteral; isLive: boolean }) =>
     dispatch(timelineActions.updateIsLive({ id, isLive })),
   updateNote: (note: Note) => dispatch(appActions.updateNote({ note })),
-  updateTitle: ({ id, title }: { id: string; title: string }) =>
+  updateTitle: ({ id, title }: { id: TimelineIdLiteral; title: string }) =>
     dispatch(timelineActions.updateTitle({ id, title })),
   toggleLock: ({ linkToId }: { linkToId: InputsModelId }) =>
     dispatch(inputsActions.toggleTimelineLinkTo({ linkToId })),

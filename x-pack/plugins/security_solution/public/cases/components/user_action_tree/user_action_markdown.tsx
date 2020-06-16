@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import { useDispatch } from 'react-redux';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../common/components/markdown';
 import { Form, useForm, UseField } from '../../../shared_imports';
@@ -60,7 +61,7 @@ export const UserActionMarkdown = ({
   }, [id, onChangeEditable]);
 
   const handleTimelineClick = useCallback(
-    (timelineId: string) => {
+    (timelineId: TimelineIdLiteral) => {
       queryTimelineById({
         apolloClient,
         timelineId,
@@ -68,7 +69,7 @@ export const UserActionMarkdown = ({
           id: currentTimelineId,
           isLoading,
         }: {
-          id: string;
+          id: TimelineIdLiteral;
           isLoading: boolean;
         }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
         updateTimeline: dispatchUpdateTimeline(dispatch),

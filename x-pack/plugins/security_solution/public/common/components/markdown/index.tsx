@@ -10,6 +10,7 @@ import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@ela
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled, { css } from 'styled-components';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import * as i18n from './translations';
 
 const TableHeader = styled.thead`
@@ -38,7 +39,7 @@ const REL_NOREFERRER = 'noreferrer';
 export const Markdown = React.memo<{
   disableLinks?: boolean;
   raw?: string;
-  onClickTimeline?: (timelineId: string) => void;
+  onClickTimeline?: (timelineId: TimelineIdLiteral) => void;
   size?: 'xs' | 's' | 'm';
 }>(({ disableLinks = false, onClickTimeline, raw, size = 's' }) => {
   const markdownRenderers = {
@@ -63,7 +64,8 @@ export const Markdown = React.memo<{
     ),
     link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => {
       if (onClickTimeline != null && href != null && href.indexOf(`timelines?timeline=(id:`) > -1) {
-        const timelineId = href.split('timelines?timeline=(id:')[1].split("'")[1] ?? '';
+        const timelineId = (href.split('timelines?timeline=(id:')[1].split("'")[1] ??
+          '') as TimelineIdLiteral;
         return (
           <EuiToolTip content={i18n.TIMELINE_ID(timelineId)}>
             <EuiLink

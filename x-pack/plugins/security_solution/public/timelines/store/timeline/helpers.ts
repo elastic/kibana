@@ -19,7 +19,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineIdLiteral } from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -27,8 +27,13 @@ import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
+export const getTimeline = (
+  timelineById: TimelineById,
+  timelineId: TimelineIdLiteral
+): TimelineModel => timelineById[timelineId] ?? { ...timelineDefaults, id: timelineId };
+
 interface AddTimelineHistoryParams {
-  id: string;
+  id: TimelineIdLiteral;
   historyId: string;
   timelineById: TimelineById;
 }
@@ -38,7 +43,7 @@ export const addTimelineHistory = ({
   historyId,
   timelineById,
 }: AddTimelineHistoryParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   return {
     ...timelineById,
@@ -50,7 +55,7 @@ export const addTimelineHistory = ({
 };
 
 interface AddTimelineNoteParams {
-  id: string;
+  id: TimelineIdLiteral;
   noteId: string;
   timelineById: TimelineById;
 }
@@ -60,7 +65,7 @@ export const addTimelineNote = ({
   noteId,
   timelineById,
 }: AddTimelineNoteParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   return {
     ...timelineById,
@@ -72,7 +77,7 @@ export const addTimelineNote = ({
 };
 
 interface AddTimelineNoteToEventParams {
-  id: string;
+  id: TimelineIdLiteral;
   noteId: string;
   eventId: string;
   timelineById: TimelineById;
@@ -84,7 +89,7 @@ export const addTimelineNoteToEvent = ({
   eventId,
   timelineById,
 }: AddTimelineNoteToEventParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   const existingNoteIds = getOr([], `eventIdToNoteIds.${eventId}`, timeline);
 
   return {
@@ -100,7 +105,7 @@ export const addTimelineNoteToEvent = ({
 };
 
 interface AddTimelineParams {
-  id: string;
+  id: TimelineIdLiteral;
   timeline: TimelineModel;
   timelineById: TimelineById;
 }
@@ -117,7 +122,7 @@ export const addTimelineToStore = ({
   ...timelineById,
   [id]: {
     ...timeline,
-    isLoading: timelineById[id].isLoading,
+    isLoading: getTimeline(timelineById, id).isLoading,
   },
 });
 
@@ -129,7 +134,7 @@ interface AddNewTimelineParams {
     end: number;
   };
   filters?: Filter[];
-  id: string;
+  id: TimelineIdLiteral;
   itemsPerPage?: number;
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
@@ -182,7 +187,7 @@ export const addNewTimeline = ({
 });
 
 interface PinTimelineEventParams {
-  id: string;
+  id: TimelineIdLiteral;
   eventId: string;
   timelineById: TimelineById;
 }
@@ -192,7 +197,7 @@ export const pinTimelineEvent = ({
   eventId,
   timelineById,
 }: PinTimelineEventParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   return {
     ...timelineById,
@@ -207,7 +212,7 @@ export const pinTimelineEvent = ({
 };
 
 interface UpdateShowTimelineProps {
-  id: string;
+  id: TimelineIdLiteral;
   show: boolean;
   timelineById: TimelineById;
 }
@@ -229,7 +234,7 @@ export const updateTimelineShowTimeline = ({
 };
 
 interface ApplyDeltaToCurrentWidthParams {
-  id: string;
+  id: TimelineIdLiteral;
   delta: number;
   bodyClientWidthPixels: number;
   minWidthPixels: number;
@@ -245,7 +250,7 @@ export const applyDeltaToCurrentWidth = ({
   maxWidthPercent,
   timelineById,
 }: ApplyDeltaToCurrentWidthParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   const requestedWidth = timeline.width + delta * -1; // raw change in width
   const maxWidthPixels = (maxWidthPercent / 100) * bodyClientWidthPixels;
@@ -350,7 +355,7 @@ const addProviderToTimeline = (
 
 interface AddTimelineColumnParams {
   column: ColumnHeaderOptions;
-  id: string;
+  id: TimelineIdLiteral;
   index: number;
   timelineById: TimelineById;
 }
@@ -365,7 +370,7 @@ export const upsertTimelineColumn = ({
   index,
   timelineById,
 }: AddTimelineColumnParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
 
   if (alreadyExistsAtIndex !== -1) {
@@ -396,7 +401,7 @@ export const upsertTimelineColumn = ({
 };
 
 interface RemoveTimelineColumnParams {
-  id: string;
+  id: TimelineIdLiteral;
   columnId: string;
   timelineById: TimelineById;
 }
@@ -406,7 +411,7 @@ export const removeTimelineColumn = ({
   columnId,
   timelineById,
 }: RemoveTimelineColumnParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   const columns = timeline.columns.filter((c) => c.id !== columnId);
 
@@ -420,7 +425,7 @@ export const removeTimelineColumn = ({
 };
 
 interface ApplyDeltaToTimelineColumnWidth {
-  id: string;
+  id: TimelineIdLiteral;
   columnId: string;
   delta: number;
   timelineById: TimelineById;
@@ -432,7 +437,7 @@ export const applyDeltaToTimelineColumnWidth = ({
   delta,
   timelineById,
 }: ApplyDeltaToTimelineColumnWidth): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
   if (columnIndex === -1) {
@@ -469,7 +474,7 @@ export const applyDeltaToTimelineColumnWidth = ({
 };
 
 interface AddTimelineProviderParams {
-  id: string;
+  id: TimelineIdLiteral;
   provider: DataProvider;
   timelineById: TimelineById;
 }
@@ -479,7 +484,7 @@ export const addTimelineProvider = ({
   provider,
   timelineById,
 }: AddTimelineProviderParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   if (timeline.highlightedDropAndProviderId !== '') {
     return addAndToProviderInTimeline(id, provider, timeline, timelineById);
@@ -489,7 +494,7 @@ export const addTimelineProvider = ({
 };
 
 interface ApplyKqlFilterQueryDraftParams {
-  id: string;
+  id: TimelineIdLiteral;
   filterQuery: SerializedFilterQuery;
   timelineById: TimelineById;
 }
@@ -499,7 +504,7 @@ export const applyKqlFilterQueryDraft = ({
   filterQuery,
   timelineById,
 }: ApplyKqlFilterQueryDraftParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   return {
     ...timelineById,
@@ -514,7 +519,7 @@ export const applyKqlFilterQueryDraft = ({
 };
 
 interface UpdateTimelineKqlModeParams {
-  id: string;
+  id: TimelineIdLiteral;
   kqlMode: KqlMode;
   timelineById: TimelineById;
 }
@@ -536,7 +541,7 @@ export const updateTimelineKqlMode = ({
 };
 
 interface UpdateKqlFilterQueryDraftParams {
-  id: string;
+  id: TimelineIdLiteral;
   filterQueryDraft: KueryFilterQuery;
   timelineById: TimelineById;
 }
@@ -546,7 +551,7 @@ export const updateKqlFilterQueryDraft = ({
   filterQueryDraft,
   timelineById,
 }: UpdateKqlFilterQueryDraftParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   return {
     ...timelineById,
@@ -561,7 +566,7 @@ export const updateKqlFilterQueryDraft = ({
 };
 
 interface UpdateTimelineColumnsParams {
-  id: string;
+  id: TimelineIdLiteral;
   columns: ColumnHeaderOptions[];
   timelineById: TimelineById;
 }
@@ -583,7 +588,7 @@ export const updateTimelineColumns = ({
 };
 
 interface UpdateTimelineDescriptionParams {
-  id: string;
+  id: TimelineIdLiteral;
   description: string;
   timelineById: TimelineById;
 }
@@ -605,7 +610,7 @@ export const updateTimelineDescription = ({
 };
 
 interface UpdateTimelineTitleParams {
-  id: string;
+  id: TimelineIdLiteral;
   title: string;
   timelineById: TimelineById;
 }
@@ -627,7 +632,7 @@ export const updateTimelineTitle = ({
 };
 
 interface UpdateTimelineEventTypeParams {
-  id: string;
+  id: TimelineIdLiteral;
   eventType: EventType;
   timelineById: TimelineById;
 }
@@ -649,7 +654,7 @@ export const updateTimelineEventType = ({
 };
 
 interface UpdateTimelineIsFavoriteParams {
-  id: string;
+  id: TimelineIdLiteral;
   isFavorite: boolean;
   timelineById: TimelineById;
 }
@@ -671,7 +676,7 @@ export const updateTimelineIsFavorite = ({
 };
 
 interface UpdateTimelineIsLiveParams {
-  id: string;
+  id: TimelineIdLiteral;
   isLive: boolean;
   timelineById: TimelineById;
 }
@@ -693,7 +698,7 @@ export const updateTimelineIsLive = ({
 };
 
 interface UpdateTimelineProvidersParams {
-  id: string;
+  id: TimelineIdLiteral;
   providers: DataProvider[];
   timelineById: TimelineById;
 }
@@ -715,7 +720,7 @@ export const updateTimelineProviders = ({
 };
 
 interface UpdateTimelineRangeParams {
-  id: string;
+  id: TimelineIdLiteral;
   start: number;
   end: number;
   timelineById: TimelineById;
@@ -741,7 +746,7 @@ export const updateTimelineRange = ({
 };
 
 interface UpdateTimelineSortParams {
-  id: string;
+  id: TimelineIdLiteral;
   sort: Sort;
   timelineById: TimelineById;
 }
@@ -789,7 +794,7 @@ const updateEnabledProvider = (enabled: boolean, providerId: string, timeline: T
   );
 
 interface UpdateTimelineProviderEnabledParams {
-  id: string;
+  id: TimelineIdLiteral;
   providerId: string;
   enabled: boolean;
   timelineById: TimelineById;
@@ -803,7 +808,7 @@ export const updateTimelineProviderEnabled = ({
   timelineById,
   andProviderId,
 }: UpdateTimelineProviderEnabledParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   return {
     ...timelineById,
     [id]: {
@@ -843,7 +848,7 @@ const updateExcludedProvider = (excluded: boolean, providerId: string, timeline:
   );
 
 interface UpdateTimelineProviderExcludedParams {
-  id: string;
+  id: TimelineIdLiteral;
   providerId: string;
   excluded: boolean;
   timelineById: TimelineById;
@@ -857,7 +862,7 @@ export const updateTimelineProviderExcluded = ({
   timelineById,
   andProviderId,
 }: UpdateTimelineProviderExcludedParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   return {
     ...timelineById,
     [id]: {
@@ -946,7 +951,7 @@ interface UpdateTimelineProviderEditPropertiesParams {
   andProviderId?: string;
   excluded: boolean;
   field: string;
-  id: string;
+  id: TimelineIdLiteral;
   operator: QueryOperator;
   providerId: string;
   timelineById: TimelineById;
@@ -963,7 +968,7 @@ export const updateTimelineProviderProperties = ({
   timelineById,
   value,
 }: UpdateTimelineProviderEditPropertiesParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   return {
     ...timelineById,
     [id]: {
@@ -991,7 +996,7 @@ export const updateTimelineProviderProperties = ({
 };
 
 interface UpdateTimelineProviderKqlQueryParams {
-  id: string;
+  id: TimelineIdLiteral;
   providerId: string;
   kqlQuery: string;
   timelineById: TimelineById;
@@ -1003,7 +1008,7 @@ export const updateTimelineProviderKqlQuery = ({
   kqlQuery,
   timelineById,
 }: UpdateTimelineProviderKqlQueryParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   return {
     ...timelineById,
     [id]: {
@@ -1016,7 +1021,7 @@ export const updateTimelineProviderKqlQuery = ({
 };
 
 interface UpdateTimelineItemsPerPageParams {
-  id: string;
+  id: TimelineIdLiteral;
   itemsPerPage: number;
   timelineById: TimelineById;
 }
@@ -1037,7 +1042,7 @@ export const updateTimelineItemsPerPage = ({
 };
 
 interface UpdateTimelinePageIndexParams {
-  id: string;
+  id: TimelineIdLiteral;
   activePage: number;
   timelineById: TimelineById;
 }
@@ -1058,7 +1063,7 @@ export const updateTimelinePageIndex = ({
 };
 
 interface UpdateTimelinePerPageOptionsParams {
-  id: string;
+  id: TimelineIdLiteral;
   itemsPerPageOptions: number[];
   timelineById: TimelineById;
 }
@@ -1113,7 +1118,7 @@ const removeProvider = (providerId: string, timeline: TimelineModel) => {
 };
 
 interface RemoveTimelineProviderParams {
-  id: string;
+  id: TimelineIdLiteral;
   providerId: string;
   timelineById: TimelineById;
   andProviderId?: string;
@@ -1125,7 +1130,7 @@ export const removeTimelineProvider = ({
   timelineById,
   andProviderId,
 }: RemoveTimelineProviderParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   return {
     ...timelineById,
@@ -1139,7 +1144,7 @@ export const removeTimelineProvider = ({
 };
 
 interface SetDeletedTimelineEventsParams {
-  id: string;
+  id: TimelineIdLiteral;
   eventIds: string[];
   isDeleted: boolean;
   timelineById: TimelineById;
@@ -1151,7 +1156,7 @@ export const setDeletedTimelineEvents = ({
   isDeleted,
   timelineById,
 }: SetDeletedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   const deletedEventIds = isDeleted
     ? union(timeline.deletedEventIds, eventIds)
@@ -1178,7 +1183,7 @@ export const setDeletedTimelineEvents = ({
 };
 
 interface SetLoadingTimelineEventsParams {
-  id: string;
+  id: TimelineIdLiteral;
   eventIds: string[];
   isLoading: boolean;
   timelineById: TimelineById;
@@ -1190,7 +1195,7 @@ export const setLoadingTimelineEvents = ({
   isLoading,
   timelineById,
 }: SetLoadingTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   const loadingEventIds = isLoading
     ? union(timeline.loadingEventIds, eventIds)
@@ -1206,7 +1211,7 @@ export const setLoadingTimelineEvents = ({
 };
 
 interface SetSelectedTimelineEventsParams {
-  id: string;
+  id: TimelineIdLiteral;
   eventIds: Record<string, TimelineNonEcsData[]>;
   isSelectAllChecked: boolean;
   isSelected: boolean;
@@ -1220,7 +1225,7 @@ export const setSelectedTimelineEvents = ({
   isSelected,
   timelineById,
 }: SetSelectedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
 
   const selectedEventIds = isSelected
     ? { ...timeline.selectedEventIds, ...eventIds }
@@ -1237,7 +1242,7 @@ export const setSelectedTimelineEvents = ({
 };
 
 interface UnPinTimelineEventParams {
-  id: string;
+  id: TimelineIdLiteral;
   eventId: string;
   timelineById: TimelineById;
 }
@@ -1247,7 +1252,7 @@ export const unPinTimelineEvent = ({
   eventId,
   timelineById,
 }: UnPinTimelineEventParams): TimelineById => {
-  const timeline = timelineById[id];
+  const timeline = getTimeline(timelineById, id);
   return {
     ...timelineById,
     [id]: {
@@ -1258,7 +1263,7 @@ export const unPinTimelineEvent = ({
 };
 
 interface UpdateHighlightedDropAndProviderIdParams {
-  id: string;
+  id: TimelineIdLiteral;
   providerId: string;
   timelineById: TimelineById;
 }
@@ -1280,7 +1285,7 @@ export const updateHighlightedDropAndProvider = ({
 };
 
 interface UpdateSavedQueryParams {
-  id: string;
+  id: TimelineIdLiteral;
   savedQueryId: string | null;
   timelineById: TimelineById;
 }
@@ -1302,7 +1307,7 @@ export const updateSavedQuery = ({
 };
 
 interface UpdateFiltersParams {
-  id: string;
+  id: TimelineIdLiteral;
   filters: Filter[];
   timelineById: TimelineById;
 }

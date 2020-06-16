@@ -10,9 +10,10 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { Resizable, ResizeCallback } from 're-resizable';
 
-import { TimelineResizeHandle } from './timeline_resize_handle';
+import { TimelineIdLiteral } from '../../../../../common/types/timeline';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 
+import { TimelineResizeHandle } from './timeline_resize_handle';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
 
@@ -22,7 +23,7 @@ interface FlyoutPaneComponentProps {
   children: React.ReactNode;
   flyoutHeight: number;
   onClose: () => void;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
   width: number;
 }
 

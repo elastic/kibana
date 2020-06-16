@@ -122,8 +122,8 @@ export const makeMapStateToProps = () => {
 
     const timeline = Object.entries(getTimelines(state)).reduce(
       (obj, [timelineId, timelineObj]) => ({
-        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
-        isOpen: timelineObj.show,
+        id: timelineObj?.savedObjectId != null ? timelineObj.savedObjectId : '',
+        isOpen: timelineObj?.show ?? false,
       }),
       { id: '', isOpen: false }
     );

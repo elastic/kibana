@@ -12,6 +12,7 @@ import { Epic } from 'redux-observable';
 import { from, Observable, empty } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { persistTimelinePinnedEventMutation } from '../../../timelines/containers/pinned_event/persist.gql_query';
 import { PersistTimelinePinnedEventMutation, PinnedEvent } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
@@ -40,8 +41,9 @@ export const epicPersistPinnedEvent = (
   timeline$: Observable<TimelineById>,
   allTimelineQuery$: Observable<inputsModel.GlobalQuery>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Observable<any> =>
-  from(
+): Observable<any> => {
+  const timelineId = get('payload.id', action) as TimelineIdLiteral;
+  return from(
     apolloClient.mutate<
       PersistTimelinePinnedEventMutation.Mutation,
       PersistTimelinePinnedEventMutation.Variables
@@ -50,9 +52,8 @@ export const epicPersistPinnedEvent = (
       fetchPolicy: 'no-cache',
       variables: {
         pinnedEventId:
-          timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId] != null
-            ? timeline[action.payload.id].pinnedEventsSaveObject[action.payload.eventId]
-                .pinnedEventId
+          timeline[timelineId].pinnedEventsSaveObject[action.payload.eventId] != null
+            ? timeline[timelineId].pinnedEventsSaveObject[action.payload.eventId].pinnedEventId
             : null,
         eventId: action.payload.eventId,
         timelineId: myEpicTimelineId.getTimelineId(),
@@ -62,7 +63,7 @@ export const epicPersistPinnedEvent = (
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$),
     mergeMap(([result, recentTimeline, allTimelineQuery]) => {
-      const savedTimeline = recentTimeline[action.payload.id];
+      const savedTimeline = recentTimeline[timelineId];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
       const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
@@ -73,7 +74,7 @@ export const epicPersistPinnedEvent = (
       return [
         response != null
           ? updateTimeline({
-              id: action.payload.id,
+              id: timelineId,
               timeline: {
                 ...savedTimeline,
                 savedObjectId:
@@ -95,7 +96,7 @@ export const epicPersistPinnedEvent = (
               },
             })
           : updateTimeline({
-              id: action.payload.id,
+              id: timelineId,
               timeline: {
                 ...savedTimeline,
                 pinnedEventIds: omit(action.payload.eventId, savedTimeline.pinnedEventIds),
@@ -107,11 +108,11 @@ export const epicPersistPinnedEvent = (
             }),
         ...callOutMsg,
         endTimelineSaving({
-          id: action.payload.id,
+          id: timelineId,
         }),
       ];
     }),
-    startWith(startTimelineSaving({ id: action.payload.id })),
+    startWith(startTimelineSaving({ id: timelineId })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),
@@ -121,13 +122,15 @@ export const epicPersistPinnedEvent = (
           }
           if (
             checkAction.type === endTimelineSaving.type &&
-            updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
+            updatedTimeline[get('payload.id', checkAction) as TimelineIdLiteral]?.savedObjectId !=
+              null
           ) {
             myEpicTimelineId.setTimelineId(
-              updatedTimeline[get('payload.id', checkAction)].savedObjectId
+              updatedTimeline[get('payload.id', checkAction) as TimelineIdLiteral]?.savedObjectId ??
+                null
             );
             myEpicTimelineId.setTimelineVersion(
-              updatedTimeline[get('payload.id', checkAction)].version
+              updatedTimeline[get('payload.id', checkAction) as TimelineIdLiteral]?.version ?? null
             );
             return true;
           }
@@ -136,6 +139,7 @@ export const epicPersistPinnedEvent = (
       )
     )
   );
+};
 
 export const createTimelinePinnedEventEpic = <State>(): Epic<Action, Action, State> => (action$) =>
   action$.pipe(

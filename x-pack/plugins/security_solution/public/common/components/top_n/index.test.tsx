@@ -82,7 +82,7 @@ const state: State = {
     ...mockGlobalState.timeline,
     timelineById: {
       [ACTIVE_TIMELINE_REDUX_ID]: {
-        ...mockGlobalState.timeline.timelineById.test,
+        ...mockGlobalState.timeline.timelineById.test!,
         id: ACTIVE_TIMELINE_REDUX_ID,
         dataProviders: [
           {

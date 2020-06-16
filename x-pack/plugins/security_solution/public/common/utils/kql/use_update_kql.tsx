@@ -8,6 +8,7 @@ import { Dispatch } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { KueryFilterQuery } from '../../store';
 import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../../timelines/store/timeline/actions';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
@@ -18,7 +19,7 @@ interface UseUpdateKqlProps {
   kueryFilterQuery: KueryFilterQuery | null;
   kueryFilterQueryDraft: KueryFilterQuery | null;
   storeType: 'timelineType';
-  timelineId?: string;
+  timelineId?: TimelineIdLiteral;
 }
 
 export const useUpdateKql = ({

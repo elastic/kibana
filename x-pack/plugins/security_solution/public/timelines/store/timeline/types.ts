@@ -7,23 +7,24 @@ import { Action } from 'redux';
 import { Observable } from 'rxjs';
 
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { AppApolloClient } from '../../../common/lib/lib';
 import { inputsModel } from '../../../common/store/inputs';
 import { NotesById } from '../../../common/store/app/model';
 import { TimelineModel } from './model';
 
 export interface AutoSavedWarningMsg {
-  timelineId: string | null;
+  timelineId: TimelineIdLiteral | null;
   newTimelineModel: TimelineModel | null;
 }
 
 /** A map of id to timeline  */
-export interface TimelineById {
-  [id: string]: TimelineModel;
-}
+export type TimelineById = {
+  [id in TimelineIdLiteral]?: TimelineModel;
+};
 
 export interface InsertTimeline {
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
   timelineSavedObjectId: string | null;
   timelineTitle: string;
 }

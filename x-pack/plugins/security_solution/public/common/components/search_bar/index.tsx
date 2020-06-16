@@ -22,6 +22,7 @@ import {
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -309,7 +310,7 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   query?: Query;
   savedQuery?: SavedQuery;
   resetSavedQuery?: boolean;
-  timelineId?: string;
+  timelineId?: TimelineIdLiteral;
   updateTime: boolean;
 }
 

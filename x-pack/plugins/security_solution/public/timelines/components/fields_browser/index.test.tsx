@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
@@ -30,13 +31,13 @@ afterAll(() => {
 });
 
 const removeColumnMock = (jest.fn() as unknown) as ActionCreator<{
-  id: string;
+  id: TimelineIdLiteral;
   columnId: string;
 }>;
 
 const upsertColumnMock = (jest.fn() as unknown) as ActionCreator<{
   column: ColumnHeaderOptions;
-  id: string;
+  id: TimelineIdLiteral;
   index: number;
 }>;
 

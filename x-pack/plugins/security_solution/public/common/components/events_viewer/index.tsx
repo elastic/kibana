@@ -8,6 +8,7 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -28,7 +29,7 @@ export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
   end: number;
-  id: string;
+  id: TimelineIdLiteral;
   start: number;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];

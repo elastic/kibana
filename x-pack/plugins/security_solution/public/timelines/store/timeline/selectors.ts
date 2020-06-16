@@ -6,10 +6,12 @@
 
 import { createSelector } from 'reselect';
 
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { isFromKueryExpressionValid } from '../../../common/lib/keury';
 import { State } from '../../../common/store/types';
 
 import { TimelineModel } from './model';
+import { timelineDefaults } from './defaults';
 import { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
@@ -19,8 +21,8 @@ const selectAutoSaveMsg = (state: State): AutoSavedWarningMsg => state.timeline.
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>
   state.timeline.showCallOutUnauthorizedMsg;
 
-export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
-  state.timeline.timelineById[timelineId];
+export const selectTimeline = (state: State, timelineId: TimelineIdLiteral): TimelineModel =>
+  state.timeline.timelineById[timelineId] ?? { ...timelineDefaults, id: timelineId };
 
 export const selectInsertTimeline = (state: State): InsertTimeline | null =>
   state.timeline.insertTimeline;

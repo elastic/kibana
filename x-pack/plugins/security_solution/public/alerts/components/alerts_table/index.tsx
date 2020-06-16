@@ -21,7 +21,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { useApolloClient } from '../../../common/utils/apollo_context';
 
@@ -376,7 +375,7 @@ const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
     const { timelineId } = ownProps;
-    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
+    const timeline: TimelineModel = getTimeline(state, timelineId);
     const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
@@ -394,30 +393,31 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
+  clearSelected: ({ id }: { id: TimelineIdLiteral }) =>
+    dispatch(timelineActions.clearSelected({ id })),
   setEventsLoading: ({
     id,
     eventIds,
     isLoading,
   }: {
-    id: string;
+    id: TimelineIdLiteral;
     eventIds: string[];
     isLoading: boolean;
   }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
-  clearEventsLoading: ({ id }: { id: string }) =>
+  clearEventsLoading: ({ id }: { id: TimelineIdLiteral }) =>
     dispatch(timelineActions.clearEventsLoading({ id })),
   setEventsDeleted: ({
     id,
     eventIds,
     isDeleted,
   }: {
-    id: string;
+    id: TimelineIdLiteral;
     eventIds: string[];
     isDeleted: boolean;
   }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
-  clearEventsDeleted: ({ id }: { id: string }) =>
+  clearEventsDeleted: ({ id }: { id: TimelineIdLiteral }) =>
     dispatch(timelineActions.clearEventsDeleted({ id })),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+  updateTimelineIsLoading: ({ id, isLoading }: { id: TimelineIdLiteral; isLoading: boolean }) =>
     dispatch(timelineActions.updateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });

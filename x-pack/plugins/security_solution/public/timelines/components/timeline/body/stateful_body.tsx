@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { TimelineIdLiteral } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
@@ -41,7 +42,7 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   height?: number;
-  id: string;
+  id: TimelineIdLiteral;
   isEventViewer?: boolean;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;

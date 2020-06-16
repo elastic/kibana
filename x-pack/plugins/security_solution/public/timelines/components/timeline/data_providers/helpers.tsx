@@ -8,6 +8,7 @@ import { omit } from 'lodash/fp';
 import { DraggableLocation } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 
+import { TimelineIdLiteral } from '../../../../../common/types/timeline';
 import { updateProviders } from '../../../store/timeline/actions';
 
 import { DataProvider, DataProvidersAnd } from './data_provider';
@@ -89,7 +90,7 @@ export const reArrangeProvidersInSameGroup = ({
   destination: DraggableLocation;
   dispatch: Dispatch;
   source: DraggableLocation;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => {
   const groupIndex = getGroupIndexFromDroppableId(source.droppableId);
 
@@ -149,7 +150,7 @@ export const moveProvidersBetweenGroups = ({
   destination: DraggableLocation;
   dispatch: Dispatch;
   source: DraggableLocation;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => {
   const sourceGroupIndex = getGroupIndexFromDroppableId(source.droppableId);
   const destinationGroupIndex = getGroupIndexFromDroppableId(destination.droppableId);
@@ -206,7 +207,7 @@ export const addProviderToEmptyTimeline = ({
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => {
   dispatch(
     updateProviders({
@@ -232,7 +233,7 @@ export const reArrangeProviders = ({
   destination: DraggableLocation | undefined;
   dispatch: Dispatch;
   source: DraggableLocation;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => {
   if (!isValidDestination(destination)) {
     return;
@@ -272,7 +273,7 @@ export const addProviderToGroup = ({
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => {
   const dataProviderGroups = [...flattenIntoAndGroups(dataProviders), ...EMPTY_GROUP];
 
@@ -325,7 +326,7 @@ export const addContentToTimeline = ({
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
-  timelineId: string;
+  timelineId: TimelineIdLiteral;
 }) => {
   if (dataProviders.length === 0) {
     addProviderToEmptyTimeline({ dispatch, onAddedToTimeline, providerToAdd, timelineId });

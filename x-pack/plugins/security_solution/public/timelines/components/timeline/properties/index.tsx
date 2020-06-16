@@ -8,7 +8,11 @@ import React, { useState, useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import {
+  TimelineStatus,
+  TimelineTypeLiteral,
+  TimelineIdLiteral,
+} from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -30,13 +34,29 @@ type CreateTimeline = ({
   show,
   timelineType,
 }: {
-  id: string;
+  id: TimelineIdLiteral;
   show?: boolean;
   timelineType?: TimelineTypeLiteral;
 }) => void;
-type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
-type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+
+type UpdateIsFavorite = ({
+  id,
+  isFavorite,
+}: {
+  id: TimelineIdLiteral;
+  isFavorite: boolean;
+}) => void;
+
+type UpdateTitle = ({ id, title }: { id: TimelineIdLiteral; title: string }) => void;
+
+type UpdateDescription = ({
+  id,
+  description,
+}: {
+  id: TimelineIdLiteral;
+  description: string;
+}) => void;
+
 type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 interface Props {

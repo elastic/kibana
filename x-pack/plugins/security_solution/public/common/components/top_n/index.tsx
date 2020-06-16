@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../../common/types/timeline';
 import { GlobalTime } from '../../containers/global_time';
 import { BrowserFields, WithSource } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
@@ -23,7 +24,7 @@ import { TopN } from './top_n';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 /** The currently active timeline always has this Redux ID */
-export const ACTIVE_TIMELINE_REDUX_ID = 'timeline-1';
+export const ACTIVE_TIMELINE_REDUX_ID = TimelineId.active;
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };

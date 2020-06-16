@@ -9,11 +9,10 @@ import { TimelinesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
 import { TimelineModel } from '../../store/timeline/model';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import { TimelineById } from '../../store/timeline/types';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
-const EMPTY_TIMELINE = {} as {
-  [K in TimelineIdLiteral]: TimelineModel;
-};
+const EMPTY_TIMELINE = {} as TimelineById;
 
 export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: TimelineIdLiteral[]) => {
   const allTimelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
@@ -34,7 +33,7 @@ export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: Timeli
       ...acc,
       [timelineId]: timelineModel,
     };
-  }, {} as { [K in TimelineIdLiteral]: TimelineModel });
+  }, {} as TimelineById);
 };
 
 export const getAllTimelinesInStorage = (storage: Storage) =>
