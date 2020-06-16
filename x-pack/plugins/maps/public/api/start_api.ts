@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ObservabilityLayerWizardConfig } from './observability_layer_wizard';
-export { APM_INDEX_PATTERN_TITLE } from './create_layer_descriptor';
+import { LayerDescriptor } from '../../common/descriptor_types';
+
+export interface MapsStartApi {
+  createSecurityLayerDescriptors: (
+    indexPatternId: string,
+    indexPatternTitle: string
+  ) => Promise<LayerDescriptor[]>;
+}
