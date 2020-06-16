@@ -562,7 +562,9 @@ export class CoreSystem {
         fatalErrors: FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
-    start(): Promise<void>;
+    start(): Promise<{
+        application: InternalApplicationStart;
+    } | undefined>;
     // (undocumented)
     stop(): void;
     }
@@ -947,6 +949,15 @@ export interface ImageValidation {
         length: number;
         description: string;
     };
+}
+
+// @internal (undocumented)
+export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
+    // (undocumented)
+    getComponent(): JSX.Element | null;
+    history: History<unknown> | undefined;
+    // @deprecated
+    registerMountContext<T extends keyof AppMountContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public

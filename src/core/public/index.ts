@@ -66,7 +66,12 @@ import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import {
+  ApplicationSetup,
+  Capabilities,
+  ApplicationStart,
+  InternalApplicationStart,
+} from './application';
 import { DocLinksSetup, DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -356,6 +361,7 @@ export {
   HttpSetup,
   HttpStart,
   I18nStart,
+  InternalApplicationStart,
   LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
