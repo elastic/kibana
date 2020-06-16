@@ -24,11 +24,11 @@ export const LoadMapAndRender = class extends React.Component {
       this.setState({ savedMap });
     } catch (err) {
       this.setState({ failedToLoad: true });
-      getToasts().addDanger({
+      getToasts().addWarning({
         title: i18n.translate('xpack.maps.loadMap.errorAttemptingToLoadSavedMap', {
           defaultMessage: `Unable to load map: ${savedMapId}`,
         }),
-        text: `${err}`,
+        text: `${err.message}`,
       });
     }
   }
