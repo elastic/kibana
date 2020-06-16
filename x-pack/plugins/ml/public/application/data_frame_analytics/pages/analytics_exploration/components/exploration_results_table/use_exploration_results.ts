@@ -73,7 +73,7 @@ export const useExplorationResults = (
       const columnChartsData = await fetchChartsData(
         jobConfig.dest.index,
         ml,
-        { match_all: {} },
+        searchQuery,
         columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
       );
       dataGrid.setColumnCharts(columnChartsData);
@@ -86,7 +86,11 @@ export const useExplorationResults = (
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataGrid.chartsVisible, jobConfig?.dest.index, JSON.stringify([dataGrid.visibleColumns])]);
+  }, [
+    dataGrid.chartsVisible,
+    jobConfig?.dest.index,
+    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+  ]);
 
   const renderCellValue = useRenderCellValue(
     indexPattern,
@@ -97,7 +101,6 @@ export const useExplorationResults = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

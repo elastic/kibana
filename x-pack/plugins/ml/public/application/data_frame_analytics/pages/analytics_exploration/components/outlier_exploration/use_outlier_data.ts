@@ -137,7 +137,6 @@ export const useOutlierData = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

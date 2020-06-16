@@ -20,11 +20,11 @@ import { NON_AGGREGATABLE } from './common';
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
 
 const BAR_COLOR = euiPaletteColorBlind()[0];
-const BAR_COLOR_BLUR = euiPaletteColorBlind(2)[10];
+const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];
 const MAX_CHART_COLUMNS = 20;
 
 const getXScaleType = (
-  kbnFieldType: KBN_FIELD_TYPES
+  kbnFieldType: KBN_FIELD_TYPES | undefined
 ): 'ordinal' | 'time' | 'linear' | undefined => {
   switch (kbnFieldType) {
     case KBN_FIELD_TYPES.BOOLEAN:

@@ -67,7 +67,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType }) => {
   const { coloredData, xScaleType, MAX_CHART_COLUMNS } = useColumnChart(chartData, columnType);
 
   if (coloredData.length === 0) {
-    return columnType.id;
+    return <>{columnType.id}</>;
   }
 
   return (

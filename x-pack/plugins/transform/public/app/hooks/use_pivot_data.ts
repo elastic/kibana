@@ -7,6 +7,8 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
@@ -85,7 +87,7 @@ export const usePivotData = (
   columnKeys.sort(sortColumns(groupByArr));
 
   // EuiDataGrid State
-  const columns = columnKeys.map((id) => {
+  const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
     const field = previewMappings.properties[id];
 
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
@@ -251,7 +253,6 @@ export const usePivotData = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };
