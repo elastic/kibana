@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Aggregators } from './types';
+import { Aggregators } from '../types';
 export const createPercentileAggregation = (
   type: Aggregators.P95 | Aggregators.P99,
   field: string
