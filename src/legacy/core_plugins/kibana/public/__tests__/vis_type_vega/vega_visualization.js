@@ -333,7 +333,7 @@ describe('VegaVisualizations', () => {
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(
           `{
-            "$schema": "https://vega.github.io/schema/vega/v3.json",
+            "$schema": "https://vega.github.io/schema/vega/v5.json",
             "marks": [
               {
                 "type": "text",
@@ -366,11 +366,6 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser, vis.params, { data: true });
         const vegaView = vegaVis._vegaView._view;
         expect(vegaView.height()).to.be(250.00000001);
-
-        vegaView.height(250);
-        await vegaView.runAsync();
-        // as soon as this test fails, the workaround with the subpixel value can be removed.
-        expect(vegaView.height()).to.be(0);
       } finally {
         vegaVis.destroy();
       }
